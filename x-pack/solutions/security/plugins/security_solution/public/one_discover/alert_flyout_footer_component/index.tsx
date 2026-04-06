@@ -25,12 +25,17 @@ export interface AlertFlyoutFooterProps {
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
 }
 
 export const AlertFlyoutFooter = ({
   hit,
   servicesPromise,
   storePromise,
+  onAlertUpdated,
 }: AlertFlyoutFooterProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -66,6 +71,6 @@ export const AlertFlyoutFooter = ({
   return flyoutProviders({
     services,
     store,
-    children: <Footer hit={hit} />,
+    children: <Footer hit={hit} onAlertUpdated={onAlertUpdated} />,
   });
 };

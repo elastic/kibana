@@ -35,7 +35,7 @@ jest.mock('../../../hooks/use_conversation_list', () => ({
 }));
 
 jest.mock('../../../hooks/use_feature_flags', () => ({
-  useFeatureFlags: () => ({ experimental: false, connectors: false }),
+  useFeatureFlags: () => ({ experimental: false }),
 }));
 
 jest.mock('./shared/sidebar_header', () => ({

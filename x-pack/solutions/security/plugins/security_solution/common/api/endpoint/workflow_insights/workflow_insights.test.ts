@@ -126,6 +126,48 @@ describe('Workflow Insights', () => {
       expect(() => validateQuery(validQuery)).not.toThrow();
     });
 
+    describe('maxSize bounds', () => {
+      it('should not accept more than 50 ids', () => {
+        expect(() => validateQuery({ query: { ids: Array(51).fill('valid-id') } })).toThrow();
+      });
+
+      it('should not accept more than 50 sourceIds', () => {
+        expect(() =>
+          validateQuery({ query: { sourceIds: Array(51).fill('source-id') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 targetIds', () => {
+        expect(() =>
+          validateQuery({ query: { targetIds: Array(51).fill('target-id') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 categories', () => {
+        expect(() =>
+          validateQuery({ query: { categories: Array(21).fill('endpoint') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 types', () => {
+        expect(() =>
+          validateQuery({ query: { types: Array(21).fill('incompatible_antivirus') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 sourceTypes', () => {
+        expect(() =>
+          validateQuery({ query: { sourceTypes: Array(21).fill('llm-connector') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 actionTypes', () => {
+        expect(() =>
+          validateQuery({ query: { actionTypes: Array(21).fill('refreshed') } })
+        ).toThrow();
+      });
+    });
+
     it('should throw an error for unsupported categories or types', () => {
       const invalidQuery = {
         query: {
@@ -380,6 +422,84 @@ describe('Workflow Insights', () => {
         };
 
         expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+    });
+
+    describe('maxSize bounds', () => {
+      const baseRequest = {
+        params: { insightId: 'valid-insight-id' },
+        body: {},
+      };
+
+      it('should not accept more than 50 target ids', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { target: { ids: Array(51).fill('target-id') } },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 100 exception_list_items', () => {
+        const item = {
+          list_id: 'list-id',
+          name: 'Exception',
+          entries: [],
+        };
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { remediation: { exception_list_items: Array(101).fill(item) } },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 250 entries in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', entries: Array(251).fill({}) }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 tags in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', tags: Array(51).fill('tag') }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 os_types in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', os_types: Array(21).fill('windows') }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 message_variables', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { metadata: { message_variables: Array(51).fill('var') } },
+          })
+        ).toThrow();
       });
     });
 

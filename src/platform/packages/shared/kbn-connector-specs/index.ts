@@ -14,4 +14,5 @@ export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_PROVIDERS } from './src/auth_types/ears';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export { isToolAction } from './src/connector_spec';
 export { getWorkflowTemplatesForConnector } from './src/get_workflow_templates';

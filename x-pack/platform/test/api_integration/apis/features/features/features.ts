@@ -130,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
             'maps_v2',
             'osquery',
             'rulesSettings',
+            'queryActivity',
             'uptime',
             'searchInferenceEndpoints',
             'searchSynonyms',

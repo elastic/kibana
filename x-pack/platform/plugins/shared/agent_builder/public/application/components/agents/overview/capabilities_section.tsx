@@ -21,7 +21,6 @@ export interface CapabilitiesSectionProps {
   connectorsCount: number;
   enableElasticCapabilities: boolean;
   isExperimentalFeaturesEnabled: boolean;
-  isConnectorsEnabled: boolean;
   hasConnectorsPrivileges: boolean;
   skillsHref: string;
   pluginsHref: string;
@@ -36,7 +35,6 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   pluginsCount,
   connectorsCount,
   isExperimentalFeaturesEnabled,
-  isConnectorsEnabled,
   hasConnectorsPrivileges,
   skillsHref,
   pluginsHref,
@@ -76,7 +74,7 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
         </EuiFlexItem>
       )}
 
-      {isConnectorsEnabled && (
+      {isExperimentalFeaturesEnabled && (
         <EuiFlexItem grow={1}>
           <CapabilityCard
             count={connectorsCount}
