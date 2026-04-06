@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { Criteria } from '@elastic/eui';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useBulkSelect } from '../../hooks/use_bulk_select';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
@@ -16,7 +16,7 @@ import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_en
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { paths } from '../../constants';
-import { RulesListTable } from './rules_list_table';
+import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
 export interface RulesListTableContainerProps {
   items: RuleApiResponse[];
@@ -24,8 +24,11 @@ export interface RulesListTableContainerProps {
   page: number;
   perPage: number;
   search: string;
+  hasActiveFilters: boolean;
+  sortField?: RulesListTableSortField;
+  sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
-  onTableChange: (criteria: CriteriaWithPagination<RuleApiResponse>) => void;
+  onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
 }
 
 export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = ({
@@ -34,6 +37,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   page,
   perPage,
   search,
+  hasActiveFilters,
+  sortField,
+  sortDirection,
   isLoading,
   onTableChange,
 }) => {
@@ -102,6 +108,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         page={page}
         perPage={perPage}
         search={search}
+        hasActiveFilters={hasActiveFilters}
+        sortField={sortField}
+        sortDirection={sortDirection}
         isLoading={isLoading}
         selectedCount={selectedCount}
         isAllSelected={isAllSelected}
