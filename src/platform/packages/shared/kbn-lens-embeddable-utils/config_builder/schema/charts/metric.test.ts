@@ -66,7 +66,7 @@ describe('Metric Schema', () => {
         styling: {
           primary: {
             icon: {
-              name: 'visMetric',
+              name: 'starEmpty',
               alignment: 'left',
             },
             labels: { alignment: 'left' },
@@ -532,7 +532,7 @@ describe('Metric Schema', () => {
           primary: {
             labels: { alignment: 'left' },
             value: { fit: false, alignment: 'right' },
-            icon: { name: 'visMetric', alignment: 'right' },
+            icon: { name: 'starEmpty', alignment: 'right' },
           },
           secondary: {
             label: { visible: true, placement: 'before' },

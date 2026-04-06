@@ -197,7 +197,28 @@ const metricStylingSchema = schema.object(
               /**
                * Icon name
                */
-              name: schema.string({ meta: { description: 'Icon name' } }),
+              name: schema.oneOf(
+                [
+                  schema.literal('alert'),
+                  schema.literal('asterisk'),
+                  schema.literal('bell'),
+                  schema.literal('bolt'),
+                  schema.literal('bug'),
+                  schema.literal('compute'),
+                  schema.literal('editorComment'),
+                  schema.literal('flag'),
+                  schema.literal('globe'),
+                  schema.literal('heart'),
+                  schema.literal('mapMarker'),
+                  schema.literal('pin'),
+                  schema.literal('sortDown'),
+                  schema.literal('sortUp'),
+                  schema.literal('starEmpty'),
+                  schema.literal('tag'),
+                  schema.literal('temperature'),
+                ],
+                { meta: { description: 'Icon name' } }
+              ),
               /**
                * Icon alignment. Possible values:
                * - 'right': Icon is aligned to the right
