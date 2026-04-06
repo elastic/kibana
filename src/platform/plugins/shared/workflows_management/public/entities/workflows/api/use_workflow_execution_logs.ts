@@ -8,25 +8,12 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import {
+  WorkflowApi,
+  type WorkflowExecutionLogEntry,
+  type WorkflowExecutionLogsResponse,
+} from '@kbn/workflows-ui';
 import { useKibana } from '../../../hooks/use_kibana';
-interface WorkflowExecutionLogEntry {
-  id: string;
-  timestamp: string;
-  level: 'info' | 'debug' | 'warn' | 'error';
-  message: string;
-  stepId?: string;
-  stepName?: string;
-  connectorType?: string;
-  duration?: number;
-  additionalData?: Record<string, unknown>;
-}
-
-interface WorkflowExecutionLogsResponse {
-  logs: WorkflowExecutionLogEntry[];
-  total: number;
-  size: number;
-  page: number;
-}
 
 interface UseWorkflowExecutionLogsParams {
   executionId: string;
@@ -60,23 +47,18 @@ export function useWorkflowExecutionLogs({
       sortOrder,
     ],
     queryFn: async () => {
-      const response = await http.get<WorkflowExecutionLogsResponse>(
-        `/api/workflowExecutions/${executionId}/logs`,
-        {
-          query: {
-            stepExecutionId,
-            size,
-            page,
-            sortField,
-            sortOrder,
-          },
-        }
-      );
-      return response;
+      const api = new WorkflowApi(http);
+      return api.getExecutionLogs(executionId, {
+        stepExecutionId,
+        size,
+        page,
+        sortField,
+        sortOrder,
+      });
     },
     enabled: enabled && !!executionId,
-    staleTime: 5000, // Refresh every 5 seconds for real-time logs
-    refetchInterval: 5000, // Auto-refresh logs
+    staleTime: 5000,
+    refetchInterval: 5000,
   });
 }
 

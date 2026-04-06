@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import * as reactRedux from 'react-redux';
-import { LocationHealthStatusValue } from '../../../../../../common/runtime_types';
+import { PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
 
 jest.mock('react-redux', () => ({
@@ -31,13 +31,13 @@ const mockedResetMonitorBulkAPI = resetMonitorBulkAPI as jest.MockedFunction<
 const healthyMonitor = {
   configId: 'mon-1',
   monitorName: 'Monitor 1',
-  isUnhealthy: false,
-  locations: [
+  isHealthy: true,
+  privateLocations: [
     {
       locationId: 'loc-1',
       locationLabel: 'Location 1',
-      status: LocationHealthStatusValue.Healthy,
-      policyId: 'mon-1-loc-1',
+      status: PrivateLocationHealthStatusValue.Healthy,
+      packagePolicyId: 'mon-1-loc-1',
     },
   ],
 };
@@ -45,20 +45,20 @@ const healthyMonitor = {
 const unhealthyMonitor = {
   configId: 'mon-2',
   monitorName: 'Monitor 2',
-  isUnhealthy: true,
-  locations: [
+  isHealthy: false,
+  privateLocations: [
     {
       locationId: 'loc-1',
       locationLabel: 'Location 1',
-      status: LocationHealthStatusValue.MissingPackagePolicy,
-      policyId: 'mon-2-loc-1',
+      status: PrivateLocationHealthStatusValue.MissingPackagePolicy,
+      packagePolicyId: 'mon-2-loc-1',
       reason: 'Missing',
     },
     {
       locationId: 'loc-2',
       locationLabel: 'Location 2',
-      status: LocationHealthStatusValue.Healthy,
-      policyId: 'mon-2-loc-2',
+      status: PrivateLocationHealthStatusValue.Healthy,
+      packagePolicyId: 'mon-2-loc-2',
     },
   ],
 };
@@ -112,7 +112,7 @@ describe('useMonitorIntegrationHealth', () => {
       const statuses = result.current.getUnhealthyLocationStatuses('mon-2');
       expect(statuses).toHaveLength(1);
       expect(statuses[0].locationId).toBe('loc-1');
-      expect(statuses[0].status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
+      expect(statuses[0].status).toBe(PrivateLocationHealthStatusValue.MissingPackagePolicy);
     });
 
     it('getUnhealthyMonitorCountForLocation counts monitors with unhealthy status at that location', () => {
@@ -136,32 +136,6 @@ describe('useMonitorIntegrationHealth', () => {
       expect(result.current.getUnhealthyConfigIdsForLocation('loc-1')).toEqual(['mon-2']);
     });
   });
-
-  describe('isAgentLevelIssue', () => {
-    it('returns true for missing_agents and unhealthy_agent statuses', () => {
-      setupSelectors({ monitors: [], errors: [] });
-
-      const { result } = renderHook(() => useMonitorIntegrationHealth());
-
-      expect(result.current.isAgentLevelIssue(LocationHealthStatusValue.MissingAgents)).toBe(true);
-      expect(result.current.isAgentLevelIssue(LocationHealthStatusValue.UnhealthyAgent)).toBe(true);
-    });
-
-    it('returns false for non-agent-level statuses', () => {
-      setupSelectors({ monitors: [], errors: [] });
-
-      const { result } = renderHook(() => useMonitorIntegrationHealth());
-
-      expect(
-        result.current.isAgentLevelIssue(LocationHealthStatusValue.MissingPackagePolicy)
-      ).toBe(false);
-      expect(
-        result.current.isAgentLevelIssue(LocationHealthStatusValue.MissingAgentPolicy)
-      ).toBe(false);
-      expect(result.current.isAgentLevelIssue(LocationHealthStatusValue.Healthy)).toBe(false);
-    });
-  });
-
   describe('resetMonitor', () => {
     it('calls resetMonitorAPI and re-fetches health', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
@@ -169,10 +143,12 @@ describe('useMonitorIntegrationHealth', () => {
 
       const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
+      let resetResult: { error?: Error } | undefined;
       await act(async () => {
-        await result.current.resetMonitor('mon-2');
+        resetResult = await result.current.resetMonitor('mon-2');
       });
 
+      expect(resetResult).toEqual({});
       expect(mockedResetMonitorAPI).toHaveBeenCalledWith({ id: 'mon-2' });
       expect(result.current.isResetting).toBe(false);
       const healthDispatches = dispatchSpy.mock.calls.filter(
@@ -181,21 +157,63 @@ describe('useMonitorIntegrationHealth', () => {
       expect(healthDispatches.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('sets isResetting to false even on API failure', async () => {
+    it('returns error and sets isResetting to false on API failure', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorAPI.mockRejectedValue(new Error('Server error'));
 
       const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
+      let resetResult: { error?: Error } | undefined;
       await act(async () => {
-        await result.current.resetMonitor('mon-2').catch(() => {});
+        resetResult = await result.current.resetMonitor('mon-2');
       });
 
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(resetResult?.error?.message).toBe('Server error');
       expect(result.current.isResetting).toBe(false);
     });
   });
 
   describe('resetMonitors (bulk)', () => {
+    it('returns error and does not refetch when a result item has reset: false', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetMonitorBulkAPI.mockResolvedValue({
+        result: [{ id: 'mon-2', reset: false, error: 'fleet error' }],
+      });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
+
+      let resetResult: { error?: Error } | undefined;
+      await act(async () => {
+        resetResult = await result.current.resetMonitors(['mon-2']);
+      });
+
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(result.current.isResetting).toBe(false);
+      const healthDispatches = dispatchSpy.mock.calls.filter(
+        ([action]: any) => action.type === '[MONITOR HEALTH] GET'
+      );
+      expect(healthDispatches.length).toBe(1); // only initial fetch, no refetch
+    });
+
+    it('returns error and does not refetch when top-level errors are present', async () => {
+      setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+      mockedResetMonitorBulkAPI.mockResolvedValue({
+        result: [{ id: 'mon-2', reset: true }],
+        errors: [{ message: 'partial failure' }],
+      });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
+
+      let resetResult: { error?: Error } | undefined;
+      await act(async () => {
+        resetResult = await result.current.resetMonitors(['mon-2']);
+      });
+
+      expect(resetResult?.error).toBeInstanceOf(Error);
+      expect(result.current.isResetting).toBe(false);
+    });
+
     it('calls resetMonitorBulkAPI and re-fetches health', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorBulkAPI.mockResolvedValue({
@@ -204,10 +222,12 @@ describe('useMonitorIntegrationHealth', () => {
 
       const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
+      let resetResult: { error?: Error } | undefined;
       await act(async () => {
-        await result.current.resetMonitors(['mon-2']);
+        resetResult = await result.current.resetMonitors(['mon-2']);
       });
 
+      expect(resetResult).toEqual({});
       expect(mockedResetMonitorBulkAPI).toHaveBeenCalledWith({ ids: ['mon-2'] });
       expect(result.current.isResetting).toBe(false);
     });

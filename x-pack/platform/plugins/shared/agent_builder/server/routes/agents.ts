@@ -50,6 +50,16 @@ const SKILLS_SCHEMA = schema.arrayOf(
   }
 );
 
+const PLUGINS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Plugin ID to assign to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of plugin IDs to assign to the agent.' },
+  }
+);
+
 const VISIBILITY_DISABLED_MESSAGE =
   'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.';
 
@@ -240,6 +250,7 @@ export function registerAgentRoutes({
                       { maxSize: 100 }
                     )
                   ),
+                  plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -399,6 +410,7 @@ export function registerAgentRoutes({
                         { maxSize: 100 }
                       )
                     ),
+                    plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

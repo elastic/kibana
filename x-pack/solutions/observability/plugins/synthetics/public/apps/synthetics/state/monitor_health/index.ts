@@ -29,6 +29,7 @@ export const monitorHealthReducer = createReducer(initialState, (builder) => {
     .addCase(fetchMonitorHealthAction.get, (state) => {
       state.loading = true;
       state.loaded = false;
+      state.error = null;
     })
     .addCase(fetchMonitorHealthAction.success, (state, action) => {
       state.data = action.payload;

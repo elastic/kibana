@@ -20,16 +20,20 @@ import {
 } from './liquid/liquid_completions';
 import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_suggestions';
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
+import { getTriggerConditionKqlSuggestions } from './trigger_condition/get_trigger_condition_kql_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
 import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
+import type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
 import { getPropertyHandler } from '../../../../../../common/schema';
 import type {
   AutocompleteContext,
   ExtendedAutocompleteContext,
 } from '../context/autocomplete.types';
+
+export type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
 
 const loopStepTypes = new Set<string>(LoopStepTypes);
 
@@ -156,8 +160,19 @@ async function handleMatchTypeSuggestions(
 }
 
 export async function getSuggestions(
-  autocompleteContext: ExtendedAutocompleteContext
+  autocompleteContext: ExtendedAutocompleteContext,
+  kqlServices?: WorkflowKqlCompletionServices
 ): Promise<monaco.languages.CompletionItem[]> {
+  if (
+    kqlServices &&
+    kqlServices?.kql &&
+    kqlServices?.fieldFormats &&
+    autocompleteContext.isInTriggerConditionField &&
+    autocompleteContext.triggerConditionDefinition
+  ) {
+    return getTriggerConditionKqlSuggestions(autocompleteContext, kqlServices);
+  }
+
   // Check if we're in a scheduled trigger's with block for RRule suggestions
   if (autocompleteContext.isInScheduledTriggerWithBlock) {
     return getRRuleSchedulingSuggestions(autocompleteContext.range);

@@ -8,9 +8,11 @@ triggers:
 inputs:
   - name: channel
     type: string
+    required: true
     description: "Public channel name or conversation ID to send the message to (e.g. #general or C123...)."
   - name: text
     type: string
+    required: true
     description: "Message text."
   - name: thread_ts
     type: string

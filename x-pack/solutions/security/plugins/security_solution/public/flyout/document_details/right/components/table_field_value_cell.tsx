@@ -50,6 +50,10 @@ export interface FieldValueCellProps {
    * Values for the field, to render in the second column of the table
    */
   values: string[] | null | undefined;
+  /**
+   * Entity Store canonical id for host/user preview navigation when known
+   */
+  entityId?: string;
 }
 
 /**
@@ -65,6 +69,7 @@ export const TableFieldValueCell = memo(
     getLinkValue,
     values,
     isRulePreview,
+    entityId,
   }: FieldValueCellProps) => {
     if (values == null) {
       return null;
@@ -91,6 +96,7 @@ export const TableFieldValueCell = memo(
                 <PreviewLink
                   field={data.field}
                   value={value}
+                  entityId={entityId}
                   scopeId={scopeId}
                   ruleId={ruleId}
                   data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}

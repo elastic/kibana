@@ -29,3 +29,9 @@ export {
   isKqlQueryValid,
   buildEsqlFilter,
 } from './query_helpers';
+
+export {
+  PRIORITIZED_CONTENT_FIELDS,
+  getDefaultTextField,
+  extractMessagesFromField,
+} from './pattern_extraction_helpers';

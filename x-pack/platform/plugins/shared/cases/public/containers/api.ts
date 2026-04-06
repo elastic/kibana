@@ -12,7 +12,7 @@ import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
   AttachmentRequest,
-  BulkCreateAttachmentsRequest,
+  BulkCreateAttachmentsRequestV2,
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
@@ -355,7 +355,17 @@ export const patchCase = async ({
   caseId: string;
   updatedCase: Pick<
     CasePatchRequest,
-    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+    | 'description'
+    | 'status'
+    | 'tags'
+    | 'title'
+    | 'settings'
+    | 'connector'
+    | 'severity'
+    | 'assignees'
+    | 'category'
+    | 'customFields'
+    | 'extended_fields'
   >;
   version: string;
   signal?: AbortSignal;
@@ -521,7 +531,7 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
-  attachments: BulkCreateAttachmentsRequest;
+  attachments: BulkCreateAttachmentsRequestV2;
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {

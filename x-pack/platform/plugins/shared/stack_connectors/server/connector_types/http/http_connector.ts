@@ -12,7 +12,10 @@ import { getOrElse, map } from 'fp-ts/Option';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { getProxySettings } from '@kbn/actions-utils';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
@@ -55,7 +58,7 @@ const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
   minimumLicenseRequired: 'gold',
   name: CONNECTOR_NAME,
-  supportedFeatureIds: [WorkflowsConnectorFeatureId],
+  supportedFeatureIds: [WorkflowsConnectorFeatureId, AgentBuilderConnectorFeatureId],
   renderParameterTemplates,
   executor,
 };

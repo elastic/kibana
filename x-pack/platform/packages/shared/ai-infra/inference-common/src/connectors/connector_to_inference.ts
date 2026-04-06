@@ -30,6 +30,15 @@ export const connectorToInference = (connector: RawConnector): InferenceConnecto
     config: connector.config ?? {},
     capabilities: {},
     isInferenceEndpoint: false,
+    isPreconfigured: connector.isPreconfigured ?? false,
+    ...(connector.isEis !== undefined && { isEis: connector.isEis }),
+    ...(connector.isDeprecated !== undefined && { isDeprecated: connector.isDeprecated }),
+    ...(connector.isConnectorTypeDeprecated !== undefined && {
+      isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated,
+    }),
+    ...(connector.isMissingSecrets !== undefined && {
+      isMissingSecrets: connector.isMissingSecrets,
+    }),
   };
 
   inferenceConnector.capabilities.contextWindowSize = getContextWindowSize(inferenceConnector);

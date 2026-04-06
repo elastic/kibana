@@ -81,7 +81,7 @@ export class AddItemPopover extends Component {
       <EuiButton
         size="s"
         color="primary"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.onButtonClick}
         isDisabled={this.props.canCreateFilter === false}

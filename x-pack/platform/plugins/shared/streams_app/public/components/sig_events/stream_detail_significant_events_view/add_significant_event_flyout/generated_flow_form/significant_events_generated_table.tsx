@@ -1,0 +1,215 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiCodeBlock,
+  EuiScreenReaderOnly,
+  EuiText,
+  type EuiBasicTableColumn,
+  type EuiTableSelectionType,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
+import { validateEsqlQuery } from '../common/validate_query';
+import { GeneratedEventPreview } from './generated_event_preview';
+import { SeverityBadge } from '../../../significant_events_discovery/components/severity_badge/severity_badge';
+
+interface Props {
+  definition: Streams.all.Definition;
+  generatedQueries: StreamQuery[];
+  setIsEditingQueries: (isEditingQueries: boolean) => void;
+  onEditQuery: (query: StreamQuery) => void;
+  selectedQueries: StreamQuery[];
+  isSubmitting: boolean;
+  onSelectionChange: (selectedItems: StreamQuery[]) => void;
+  dataViews: DataView[];
+}
+
+export function SignificantEventsGeneratedTable({
+  generatedQueries,
+  onEditQuery,
+  setIsEditingQueries,
+  selectedQueries,
+  onSelectionChange,
+  definition,
+  isSubmitting,
+  dataViews,
+}: Props) {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+  const [eventsInEditMode, setEventsInEditMode] = useState<string[]>([]);
+
+  const setIsEditing = useCallback(
+    (isEditing: boolean, query: StreamQuery) => {
+      const nextEventsInEditMode = isEditing
+        ? [...eventsInEditMode, query.id]
+        : eventsInEditMode.filter((id) => id !== query.id);
+      setEventsInEditMode(nextEventsInEditMode);
+      setIsEditingQueries(nextEventsInEditMode.length > 0);
+    },
+    [eventsInEditMode, setIsEditingQueries]
+  );
+
+  const toggleDetails = (query: StreamQuery) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+    if (itemIdToExpandedRowMapValues[query.id]) {
+      delete itemIdToExpandedRowMapValues[query.id];
+    } else {
+      itemIdToExpandedRowMapValues[query.id] = (
+        <GeneratedEventPreview
+          definition={definition}
+          query={query}
+          isEditing={eventsInEditMode.includes(query.id)}
+          setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
+          onSave={onEditQuery}
+        />
+      );
+    }
+
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
+  useEffect(() => {
+    const copy = { ...itemIdToExpandedRowMap };
+    for (const queryId of Object.keys(copy)) {
+      const query = generatedQueries.find((q) => q.id === queryId)!;
+      copy[queryId] = (
+        <GeneratedEventPreview
+          definition={definition}
+          query={query}
+          isEditing={eventsInEditMode.includes(query.id)}
+          setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
+          onSave={onEditQuery}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(copy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventsInEditMode, definition, onEditQuery, dataViews, generatedQueries]);
+
+  const columns: Array<EuiBasicTableColumn<StreamQuery>> = [
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.previewToggleColumn', {
+              defaultMessage: 'Preview toggle',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      mobileOptions: { header: false },
+      render: (query: StreamQuery) => {
+        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(query)}
+            aria-label={itemIdToExpandedRowMapValues[query.id] ? 'Collapse' : 'Expand'}
+            iconType={
+              itemIdToExpandedRowMapValues[query.id] ? 'chevronSingleDown' : 'chevronSingleRight'
+            }
+          />
+        );
+      },
+    },
+    {
+      field: 'title',
+      width: '30%',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
+        defaultMessage: 'Title',
+      }),
+      render: (title: StreamQuery['title']) => <EuiText size="s">{title}</EuiText>,
+    },
+    {
+      width: '35%',
+      field: 'esql',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.queryColumn', {
+        defaultMessage: 'Query',
+      }),
+      render: (esql: StreamQuery['esql']) => {
+        return (
+          <EuiCodeBlock language="esql" paddingSize="none">
+            {esql.query}
+          </EuiCodeBlock>
+        );
+      },
+    },
+    {
+      width: '10%',
+      field: 'severity_score',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.severityScoreColumn', {
+        defaultMessage: 'Severity',
+      }),
+      render: (score: StreamQuery['severity_score']) => {
+        return <SeverityBadge score={score} />;
+      },
+    },
+    {
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.dataColumn', {
+              defaultMessage: 'Data preview',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      width: '25%',
+      render: (query: StreamQuery) => {
+        const validation = validateEsqlQuery(query.esql.query);
+        return (
+          <PreviewDataSparkPlot
+            definition={definition}
+            query={query}
+            isQueryValid={!validation.isInvalid}
+            showTitle={false}
+            compressed={true}
+            hideAxis={true}
+            height={40}
+          />
+        );
+      },
+    },
+  ];
+
+  const selection: EuiTableSelectionType<StreamQuery> = {
+    onSelectionChange,
+    selected: selectedQueries,
+    selectable: () => !isSubmitting,
+  };
+
+  return (
+    <EuiBasicTable
+      tableLayout="auto"
+      responsiveBreakpoint={false}
+      items={generatedQueries}
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      itemId="id"
+      rowHeader="title"
+      columns={columns}
+      selection={selection}
+      noItemsMessage={i18n.translate(
+        'xpack.streams.addSignificantEventFlyout.aiFlow.noQueriesMessage',
+        { defaultMessage: 'No significant events queries generated' }
+      )}
+      tableCaption={i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.tableCaption', {
+        defaultMessage: 'Significant events queries',
+      })}
+    />
+  );
+}

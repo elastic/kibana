@@ -269,10 +269,14 @@ export type AppMenuPrimaryActionItem =
 
 /**
  * Configuration object for the AppMenu component.
+ * The maximum number of items that can be visible at once before overflowing into the "More"
+ * popover is determined by the APP_MENU_ITEM_LIMIT constant - currently 5 but it will
+ * be reduced to 3 in a future release.
  */
 export interface AppMenuConfig {
   /**
    * List of menu items to display in the app menu.
+
    */
   items?: AppMenuItemType[];
   /**
@@ -280,7 +284,7 @@ export interface AppMenuConfig {
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
   /**
-   * Secondary action button to display in the app menu.
+   * @deprecated secondaryActionItem will be removed in a future release. Use {@link AppMenuConfig.items} instead
    */
   secondaryActionItem?: AppMenuSecondaryActionItem;
 }

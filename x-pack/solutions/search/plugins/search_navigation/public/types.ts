@@ -10,6 +10,7 @@ import type { AppDeepLinkId, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNavigationPluginSetup {}
@@ -34,6 +35,7 @@ export interface AppPluginSetupDependencies {
 
 export interface AppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface ClassicNavItemDeepLink {

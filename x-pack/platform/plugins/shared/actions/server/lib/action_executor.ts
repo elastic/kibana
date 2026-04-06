@@ -73,6 +73,7 @@ export interface ActionExecutorContext {
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
+  getCurrentUserProfileIdFromAPIKey: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface TaskInfo {
@@ -404,6 +405,10 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
+    const providedProfileUid = request
+      ? await this.actionExecutorContext!.getCurrentUserProfileIdFromAPIKey(request)
+      : undefined;
+
     return withSpan(
       {
         name: executeLabel,
@@ -417,8 +422,9 @@ export class ActionExecutor {
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
-        const { actionTypeId, name, config, secrets } = actionInfo;
-
+        const { actionTypeId, name, config, secrets, rawAction } = actionInfo;
+        const authMode = rawAction.authMode;
+        const profileUid = providedProfileUid || currentUser?.profile_uid;
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
 
@@ -566,6 +572,8 @@ export class ActionExecutor {
             connectorUsageCollector,
             connectorTokenClient,
             signal,
+            authMode,
+            profileUid,
           });
 
           if (rawResult && rawResult.status === 'error') {

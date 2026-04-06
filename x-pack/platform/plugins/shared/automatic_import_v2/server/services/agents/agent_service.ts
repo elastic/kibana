@@ -8,16 +8,24 @@
 import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { HumanMessage } from '@langchain/core/messages';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import { createAutomaticImportAgent } from '../../agents';
 import {
   createIngestPipelineGeneratorAgent,
-  createLogsAnalyzerAgent,
-  createTextToEcsAgent,
+  createLogAndEcsAnalyzerAgent,
+  createReviewAgent,
 } from '../../agents/sub_agents';
 import {
   fetchSamplesTool,
-  fetchUniqueKeysTool,
+  fetchCurrentPipelineTool,
+  getEcsInfoTool,
   ingestPipelineValidatorTool,
+  modifyPipelineTool,
+  testPipelineTool,
+  submitAnalysisTool,
+  submitReviewTool,
+  BOILERPLATE_PIPELINE,
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
@@ -33,73 +41,91 @@ export class AgentService {
     this.logger = logger.get('agentService');
   }
 
-  /**
-   * Invokes the deep research agent with samples fetched from the index.
-   * Uses tool-based approach:
-   * - Service creates tools with samples and esClient
-   * - Agent can fetch samples on demand using fetch_log_samples tool
-   * - Validator tool has access to all samples
-   * - No samples in context unless agent explicitly requests them (saves tokens)
-   *
-   * @param integration_id - The integration ID
-   * @param data_stream_id - The data stream ID
-   * @param esClient - The Elasticsearch client
-   * @param model - The model to use for the agent
-   */
   public async invokeAutomaticImportAgent(
     integrationId: string,
     dataStreamId: string,
     esClient: ElasticsearchClient,
     model: InferenceChatModel,
+    fieldsMetadataClient: IFieldsMetadataClient,
     langSmithOptions?: LangSmithOptions
   ) {
     this.logger.debug(
       `invokeAutomaticImportAgent: Invoking automatic import agent for integration ${integrationId} and data stream ${dataStreamId}`
     );
 
-    // Fetch samples from the index (decoupled from agent building)
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
-      dataStreamId,
-      esClient
+      dataStreamId
     );
 
-    // Create tools at the service level
-    // Tools capture samples and esClient in their closures
     const fetchSamplesToolInstance = fetchSamplesTool(samples);
-    const validatorTool = ingestPipelineValidatorTool(esClient, samples);
-    const uniqueKeysTool = fetchUniqueKeysTool();
+    const modifyPipelineToolInstance = modifyPipelineTool({ esClient, samples });
+    const testPipelineToolInstance = testPipelineTool({ esClient, samples });
+    const fetchPipelineToolInstance = fetchCurrentPipelineTool();
+    const ecsInfoTool = getEcsInfoTool(fieldsMetadataClient);
 
-    // Create the sub agents with tools
-    const logsAnalyzerSubAgent = createLogsAnalyzerAgent({
-      prompt: `You have access to the fetch_log_samples tool. Use it to retrieve log samples, then analyze the format and provide structured analysis for ingest pipeline generation.
-      <workflow>
-        1. Call fetch_log_samples to retrieve 5-10 sample logs
-        2. Analyze the samples to identify format, fields, and characteristics
-        3. Provide structured analysis output as specified in your system prompt
-      </workflow>`,
-      tools: [fetchSamplesToolInstance],
+    const ecsFieldsets = await fieldsMetadataClient.getECSFieldsets();
+    const ecsRootFieldsSummary = ecsFieldsets.map((fieldset) => `- **${fieldset}**`).join('\n');
+
+    const validatorTool = ingestPipelineValidatorTool({
+      esClient,
+      samples,
+      packageName: integrationId,
+      dataStreamName: dataStreamId,
+      fieldsMetadataClient,
+    });
+
+    const logAndEcsAnalyzerSubAgent = createLogAndEcsAnalyzerAgent({
+      prompt: `You have access to fetch_log_samples, get_ecs_info, and submit_analysis tools.
+Log samples are pre-injected into your context. Use fetch_log_samples only if you need additional samples to verify structural variants or edge cases.
+
+<ecs_root_fields>
+The following ECS root field groups are available. Use get_ecs_info with root_fields to drill into any of these:
+${ecsRootFieldsSummary}
+</ecs_root_fields>
+
+<workflow>
+1. Review the log samples already provided in your context
+2. Analyze the samples to identify format, fields, and characteristics
+3. If you suspect structural variants not represented, fetch additional samples with fetch_log_samples
+4. Use get_ecs_info with relevant root_fields (batch multiple in one call) and field_paths to look up ECS field definitions
+5. Call submit_analysis with your full analysis and a brief summary as your final action
+</workflow>`,
+      tools: [fetchSamplesToolInstance, ecsInfoTool, submitAnalysisTool()],
     });
 
     const pipelineGeneratorSubAgent = createIngestPipelineGeneratorAgent({
       name: 'ingest_pipeline_generator',
       description:
-        'Generates an Elasticsearch ingest pipeline for the provided log samples and documentation.',
+        'Generates an Elasticsearch ingest pipeline based on log analysis and ECS mappings. ' +
+        'Builds with modify_pipeline (batches + quick simulate per call), finishes with validate_pipeline. ' +
+        'Optional test_pipeline simulates candidate processors (boilerplate + processors arg) without state. ' +
+        'Injected context uses structured tags; compact TOC or full pipeline at end of the task message.',
       prompt: INGEST_PIPELINE_GENERATOR_PROMPT,
-      tools: [validatorTool],
-      sampleCount: samples.length,
+      tools: [
+        modifyPipelineToolInstance,
+        testPipelineToolInstance,
+        validatorTool,
+        fetchPipelineToolInstance,
+        fetchSamplesToolInstance,
+      ],
     });
 
-    const textToEcsSubAgent = createTextToEcsAgent({
-      prompt:
-        'You may call tools as needed to inspect recent pipeline outputs and gather sample field values before proposing ECS mappings.',
-      tools: [uniqueKeysTool],
+    const reviewSubAgent = createReviewAgent({
+      prompt: `Context is injected with XML-style tags. The full pipeline is in <current_pipeline> at the end of the user message — do not call fetch_pipeline for routine reviews. Use get_ecs_info to verify ECS field compliance.
+Call submit_review as your final action with the full review and a concise summary.
+
+<ecs_root_fields>
+The following ECS root field groups are available. Use get_ecs_info with root_fields to drill into any of these:
+${ecsRootFieldsSummary}
+</ecs_root_fields>`,
+      tools: [fetchPipelineToolInstance, ecsInfoTool, submitReviewTool()],
     });
 
-    // Create and invoke the agent
     const automaticImportAgent = createAutomaticImportAgent({
       model,
-      subagents: [logsAnalyzerSubAgent, pipelineGeneratorSubAgent, textToEcsSubAgent],
+      samples,
+      subagents: [logAndEcsAnalyzerSubAgent, pipelineGeneratorSubAgent, reviewSubAgent],
     });
 
     const langSmithTracers =
@@ -114,11 +140,11 @@ export class AgentService {
     const result = await automaticImportAgent.invoke(
       {
         messages: [
-          {
-            role: 'user',
+          new HumanMessage({
             content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
-          },
+          }),
         ],
+        current_pipeline: BOILERPLATE_PIPELINE,
       },
       {
         callbacks: [...langSmithTracers],

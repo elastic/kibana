@@ -56,6 +56,31 @@ export interface VersionedAttachment<
    * Undefined for by-value attachments.
    */
   origin?: string;
+  /**
+   * When this attachment's content was last captured from the origin (for by-reference attachments),
+   * or when the attachment was stored.
+   */
+  origin_snapshot_at?: string;
+}
+
+/**
+ * A versioned attachment with a defined `origin` (by-reference).
+ */
+export type VersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+> = VersionedAttachment<Type, DataType> & { origin: string };
+
+/**
+ * Returns true when `origin` is defined. Narrows `attachment` to {@link VersionedAttachmentWithOrigin}.
+ */
+export function isVersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+>(
+  attachment: VersionedAttachment<Type, DataType>
+): attachment is VersionedAttachmentWithOrigin<Type, DataType> {
+  return attachment.origin !== undefined;
 }
 
 /**
@@ -110,7 +135,7 @@ export interface AttachmentDiff {
 /**
  * Input for creating a new versioned attachment.
  */
-export interface VersionedAttachmentInput<
+export interface AttachmentInput<
   Type extends string = string,
   DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
 > {
@@ -172,9 +197,10 @@ export const versionedAttachmentSchema = z.object({
   readonly: z.boolean().optional(),
   client_id: z.string().optional(),
   origin: z.string().optional(),
+  origin_snapshot_at: z.string().optional(),
 });
 
-export const versionedAttachmentInputSchema = z.object({
+export const attachmentInputSchema = z.object({
   id: z.string().optional(),
   type: z.string(),
   data: z.unknown().optional(),
@@ -285,3 +311,16 @@ export interface UpdateOriginResponse {
   success: boolean;
   attachment: VersionedAttachment;
 }
+
+/**
+ * Builds a stable key for deduplicating or grouping attachment inputs (e.g. pending rows).
+ */
+export const getContentKey = (input: AttachmentInput, fallback: string): string => {
+  if (input.data !== undefined) {
+    return `${input.type}:${hashContent(input.data)}`;
+  }
+  if (input.origin !== undefined) {
+    return `${input.type}:origin:${input.origin}`;
+  }
+  return `${input.type}:${fallback}`;
+};

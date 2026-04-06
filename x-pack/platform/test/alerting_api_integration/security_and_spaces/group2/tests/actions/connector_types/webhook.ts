@@ -160,6 +160,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           url: webhookSimulatorURL,
         },
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
@@ -204,7 +205,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
-        expect(fetchedAction).to.eql(expectedResult);
+        expect(fetchedAction).to.eql({ ...expectedResult, auth_mode: 'shared' });
       });
     }
 
@@ -284,6 +285,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           },
         },
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
@@ -428,6 +430,32 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
+      expect(result.message).to.match(/is not added to the Kibana config/);
+    });
+
+    it('should reject OAuth2 webhook when accessTokenUrl host is not in allowedHosts', async () => {
+      const tokenUrl = 'http://oauth.mynonexistent.com/token';
+      const { body: result } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'OAuth2 Webhook disallowed token URL',
+          connector_type_id: '.webhook',
+          secrets: {
+            clientSecret: 'secret',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            hasAuth: true,
+            authType: 'webhook-oauth2-client-credentials',
+            accessTokenUrl: tokenUrl,
+            clientId: 'client-id',
+          },
+        })
+        .expect(400);
+
+      expect(result.error).to.eql('Bad Request');
+      expect(result.message).to.contain(tokenUrl);
       expect(result.message).to.match(/is not added to the Kibana config/);
     });
 

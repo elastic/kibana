@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     "test/scout/**/*",
+    "test/scout_security_attacks_alignment/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -53,6 +54,7 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-io-ts-alerting-types",
+    "@kbn/kbn-client",
     "@kbn/test",
     "@kbn/std",
     "@kbn/rule-data-utils",
@@ -76,6 +78,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
     "@kbn/elastic-assistant",
+    "@kbn/inference-connectors",
     "@kbn/elastic-assistant-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
@@ -205,6 +208,7 @@
     "@kbn/cloud-security-posture-graph",
     "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
+    "@kbn/entity-store",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
     "@kbn/inference-plugin",
@@ -282,7 +286,10 @@
     "@kbn/workflows",
     "@kbn/deeplinks-workflows",
     "@kbn/core-rendering-browser",
+    "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
-    "@kbn/anonymization-common"
+    "@kbn/anonymization-common",
+    "@kbn/controls-schemas",
+    "@kbn/search-inference-endpoints",
   ]
 }

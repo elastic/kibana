@@ -33,8 +33,6 @@ import {
   getLiteralsSuggestions,
 } from '../../definitions/utils';
 import {
-  findFinalWord,
-  handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
   withAutoSuggest,
@@ -47,8 +45,9 @@ import {
   type ICommandContext,
   type ICommandCallbacks,
 } from '../types';
-import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
+
+const ENDS_WITH_NON_WHITESPACE = /\S$/;
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -114,6 +113,7 @@ export async function autocomplete(
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
+  const hasTypedFragment = ENDS_WITH_NON_WHITESPACE.test(innerText);
   const { prompt } = command as ESQLAstCompletionCommand;
   const isExistingColumn = columnExists(prompt?.text, context);
   const { position, expressionRoot } = getPosition(innerText, command, isExistingColumn);
@@ -163,25 +163,14 @@ export async function autocomplete(
       );
 
       const fieldsAndFunctionsSuggestions = uniqBy(allSuggestions, 'label');
-
-      const suggestions = await handleFragment(
-        innerText,
-        (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
-        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-          return fieldsAndFunctionsSuggestions.map((suggestion) => {
-            return withAutoSuggest({
-              ...suggestion,
-              text: `${suggestion.text} `,
-              rangeToReplace,
-            });
-          });
-        },
-        () => []
+      const suggestions = fieldsAndFunctionsSuggestions.map((suggestion) =>
+        withAutoSuggest({
+          ...suggestion,
+          text: `${suggestion.text} `,
+        })
       );
 
-      const lastWord = findFinalWord(innerText);
-
-      if (!lastWord) {
+      if (!hasTypedFragment) {
         suggestions.push({
           ...buildConstantsDefinitions(
             [promptSnippetText],

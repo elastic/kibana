@@ -76,6 +76,7 @@ describe('getDatasetIndex', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "esqlQuery": "from test_index | limit 10",
         "index": "test_index",
         "timeFieldName": undefined,
       }
@@ -246,7 +247,8 @@ describe('buildDatasourceStates', () => {
             label: 'test',
             column: 'test',
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
         sampling: 1,
@@ -267,7 +269,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
-                "index": "test",
+                "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
@@ -278,6 +280,8 @@ describe('buildDatasourceStates', () => {
         },
         "usedDataviews": Object {
           "layer_0": Object {
+            "dataSourceType": "esql",
+            "esqlQuery": "from test | limit 10",
             "index": "test",
             "timeFieldName": undefined,
             "type": "adHocDataView",
@@ -517,7 +521,8 @@ describe('filtersAndQueryToLensState', () => {
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
@@ -568,7 +573,8 @@ describe('filtersAndQueryToLensState', () => {
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
@@ -597,7 +603,8 @@ describe('filtersAndQueryToLensState', () => {
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,

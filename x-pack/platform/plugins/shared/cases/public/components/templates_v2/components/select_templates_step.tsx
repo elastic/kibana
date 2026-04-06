@@ -21,7 +21,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ParsedTemplateEntry, ParseYamlError } from '../hooks/use_parse_yaml';
 
 const getItemId = (item: ParsedTemplateEntry) => `${item.sourceFileName}-${item.documentIndex}`;

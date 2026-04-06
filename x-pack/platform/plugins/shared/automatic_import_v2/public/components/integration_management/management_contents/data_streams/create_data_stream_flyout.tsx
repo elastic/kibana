@@ -30,7 +30,13 @@ import {
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
-import type { DataStream, InputType } from '../../../../../common';
+import {
+  normalizeLogSamplesFromFileContent,
+  UPLOAD_SAMPLES_MAX_LINES,
+  type DataStream,
+  type InputType,
+} from '../../../../../common';
+import { PLUGIN_ID } from '../../../../../common/constants';
 import type { LogsSourceOption } from '../../forms/types';
 import { useIntegrationForm } from '../../forms/integration_form';
 import * as i18n from './translations';
@@ -42,7 +48,9 @@ import {
   useGetIntegrationById,
   useUploadSamples,
   normalizeTitleName,
+  useKibana,
 } from '../../../../common';
+import { useTelemetry } from '../../../telemetry_context';
 
 interface CreateDataStreamFlyoutProps {
   onClose: () => void;
@@ -126,8 +134,10 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const styles = useLayoutStyles();
   const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
+  const { reportAnalyzeLogsTriggered } = useTelemetry();
+  const { notifications, application } = useKibana().services;
 
-  const { integration, refetch: refetchIntegration } = useGetIntegrationById(currentIntegrationId);
+  const { integration } = useGetIntegrationById(currentIntegrationId);
   const { form, formData } = useIntegrationForm();
 
   const { indices, isLoading: isLoadingIndices } = useFetchIndices();
@@ -144,7 +154,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const [fileError, setFileError] = useState<string | undefined>(undefined);
   const [uploadedFileName, setUploadedFileName] = useState<string | undefined>(undefined);
 
-  const logsSourceOption = formData?.logsSourceOption ?? 'upload';
+  const logsSourceOption = formData?.logsSourceOption ?? 'file';
   const logSample = formData?.logSample;
   const selectedIndex = formData?.selectedIndex ?? '';
 
@@ -191,7 +201,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const handleLogsSourceChange = useCallback(
     async (option: LogsSourceOption) => {
       form.setFieldValue('logsSourceOption', option);
-      if (option === 'upload') {
+      if (option === 'file') {
         clearIndexValidationError();
       } else {
         setFileError(undefined);
@@ -235,7 +245,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     formData.dataCollectionMethod.length > 0;
 
   const isLogSourceValid =
-    (logsSourceOption === 'upload' && !!logSample) ||
+    (logsSourceOption === 'file' && !!logSample) ||
     (logsSourceOption === 'index' && !!selectedIndex && !indexValidationError);
 
   const isAnalyzeDisabled =
@@ -263,37 +273,64 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       inputTypes,
     };
 
-    if (logsSourceOption === 'upload' && logSample) {
-      const samples = logSample
-        .split('\n')
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0);
+    try {
+      if (logsSourceOption === 'file' && logSample) {
+        const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent(logSample);
 
-      await uploadSamplesMutation.mutateAsync({
+        if (linesOmittedOverLimit > 0) {
+          notifications.toasts.addWarning({
+            title: i18n.SAMPLES_NORMALIZED_WARNING_TITLE,
+            text: i18n.SAMPLES_NORMALIZED_WARNING_LINES_OMITTED(
+              linesOmittedOverLimit,
+              UPLOAD_SAMPLES_MAX_LINES
+            ),
+          });
+        }
+
+        await uploadSamplesMutation.mutateAsync({
+          integrationId,
+          dataStreamId,
+          samples,
+          originalSource: {
+            sourceType: 'file',
+            sourceValue: uploadedFileName ?? 'uploaded-file.log',
+          },
+        });
+      } else if (logsSourceOption === 'index' && selectedIndex) {
+        await uploadSamplesMutation.mutateAsync({
+          integrationId,
+          dataStreamId,
+          sourceIndex: selectedIndex,
+          originalSource: {
+            sourceType: 'index',
+            sourceValue: selectedIndex,
+          },
+        });
+      }
+
+      const result = await createUpdateIntegrationMutation.mutateAsync({
+        connectorId: formData.connectorId,
         integrationId,
-        dataStreamId,
-        samples,
-        originalSource: {
-          sourceType: 'file',
-          sourceValue: uploadedFileName ?? 'uploaded-file.log',
-        },
+        title: formData.title,
+        description: formData.description,
+        ...(formData.logo ? { logo: formData.logo } : {}),
+        dataStreams: [newDataStream],
       });
-    } else if (logsSourceOption === 'index' && selectedIndex) {
-      // For index source, we don't need to upload
-      // TODO: Add logic to fetch samples from the index.
+
+      onClose();
+
+      if (!currentIntegrationId && result.integration_id) {
+        application.navigateToApp(PLUGIN_ID, { path: `/edit/${result.integration_id}` });
+      }
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error('Unknown error'), {
+        title: i18n.CREATE_DATA_STREAM_ERROR,
+      });
+    } finally {
+      reportAnalyzeLogsTriggered({
+        logsSource: logsSourceOption,
+      });
     }
-
-    await createUpdateIntegrationMutation.mutateAsync({
-      connectorId: formData.connectorId,
-      integrationId,
-      title: formData.title,
-      description: formData.description,
-      ...(formData.logo ? { logo: formData.logo } : {}),
-      dataStreams: [newDataStream],
-    });
-
-    refetchIntegration();
-    onClose();
   }, [
     formData,
     createUpdateIntegrationMutation,
@@ -303,8 +340,10 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     logSample,
     selectedIndex,
     uploadedFileName,
-    refetchIntegration,
     onClose,
+    reportAnalyzeLogsTriggered,
+    notifications,
+    application,
   ]);
 
   return (
@@ -343,7 +382,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                 onChange={(e) => field.setValue(e.target.value)}
                 isInvalid={field.errors.length > 0}
                 placeholder=""
-                data-test-subj="dataStreamTitleInput"
+                data-test-subj="dataStreamTitleInputV2"
                 css={styles.formField}
                 fullWidth
               />
@@ -364,7 +403,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                 onChange={(e) => field.setValue(e.target.value)}
                 isInvalid={field.errors.length > 0}
                 placeholder=""
-                data-test-subj="dataStreamDescriptionInput"
+                data-test-subj="dataStreamDescriptionInputV2"
                 css={styles.formField}
                 fullWidth
               />
@@ -418,8 +457,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         <EuiCheckableCard
           id="logsSourceUpload"
           label={<FormStyledLabel text={i18n.UPLOAD_LOG_FILE_LABEL} />}
-          checked={logsSourceOption === 'upload'}
-          onChange={() => handleLogsSourceChange('upload')}
+          checked={logsSourceOption === 'file'}
+          onChange={() => handleLogsSourceChange('file')}
           data-test-subj="logsSourceUploadCard"
           css={styles.checkableCard}
         >
@@ -433,7 +472,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               aria-label={i18n.ARIA_LABELS.uploadLogFile}
               isLoading={isParsing}
               isInvalid={fileError != null}
-              disabled={logsSourceOption !== 'upload'}
+              disabled={logsSourceOption !== 'file'}
             />
           </EuiFormRow>
         </EuiCheckableCard>

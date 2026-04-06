@@ -194,7 +194,7 @@ export async function mountApp(
       return embeddableEditorIncomingState?.valueInput as LensSerializedState;
     }
     if (id) {
-      return { savedObjectId: id } as LensSerializedState;
+      return { ref_id: id };
     }
   };
 

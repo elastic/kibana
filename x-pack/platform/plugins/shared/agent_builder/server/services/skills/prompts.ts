@@ -6,21 +6,8 @@
  */
 
 import type { IFileStore } from '@kbn/agent-builder-server/runner';
-import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { isSkillFileEntry } from '../runner/store/volumes/skills/utils';
 import type { SkillFileEntry } from '../runner/store/volumes/skills/types';
-
-const renderSkillList = (entries: SkillFileEntry[]) =>
-  entries.map((entry) => ({
-    tagName: 'skill',
-    attributes: {
-      path: entry.path,
-    },
-    children: [
-      { tagName: 'name', children: [entry.metadata.skill_name] },
-      { tagName: 'description', children: [entry.metadata.skill_description] },
-    ],
-  }));
 
 export const getSkillsInstructions = async ({
   filesystem,
@@ -31,6 +18,10 @@ export const getSkillsInstructions = async ({
   const skillsFileEntries = fileEntries
     .filter(isSkillFileEntry)
     .toSorted((a, b) => a.path.localeCompare(b.path));
+
+  const skillToLine = (entry: SkillFileEntry) => {
+    return `- ${entry.metadata.skill_name} (${entry.path}): ${entry.metadata.skill_description}`;
+  };
 
   if (skillsFileEntries.length === 0) {
     return [
@@ -47,9 +38,6 @@ export const getSkillsInstructions = async ({
       'Skills provide specialized knowledge, domain-specific instructions, and access to inline tools that produce more accurate results than general-purpose alternatives.',
       'Skipping a relevant skill and going directly to general tools (e.g., search, execute_esql) is a protocol violation.',
     ].join(' '),
-    generateXmlTree({
-      tagName: 'skills',
-      children: renderSkillList(skillsFileEntries),
-    }),
+    ...skillsFileEntries.map(skillToLine),
   ].join('\n');
 };

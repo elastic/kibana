@@ -17,6 +17,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.otel',
     stream: {
+      type: 'wired',
       description: '',
       ingest: {
         lifecycle: { dsl: {} },
@@ -102,6 +103,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.otel.test',
     stream: {
+      type: 'wired',
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
@@ -123,6 +125,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.otel.test2',
     stream: {
+      type: 'wired',
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
@@ -153,6 +156,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.otel.deeply.nested.streamname',
     stream: {
+      type: 'wired',
       description: '',
       ingest: {
         lifecycle: { inherit: {} },

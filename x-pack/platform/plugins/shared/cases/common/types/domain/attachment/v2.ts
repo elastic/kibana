@@ -89,6 +89,7 @@ export const UnifiedAttachmentRt = rt.intersection([
 const UnifiedReferenceAttachmentPayloadPartialRt = rt.exact(
   rt.partial({
     type: rt.string,
+    owner: rt.string,
     attachmentId: rt.string,
     data: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
     metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
@@ -97,6 +98,7 @@ const UnifiedReferenceAttachmentPayloadPartialRt = rt.exact(
 const UnifiedValueAttachmentPayloadPartialRt = rt.exact(
   rt.partial({
     type: rt.string,
+    owner: rt.string,
     data: rt.record(rt.string, jsonValueRt),
     metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
   })
@@ -116,9 +118,15 @@ export type UnifiedAttachmentAttributes = rt.TypeOf<typeof UnifiedAttachmentAttr
 export type UnifiedAttachment = rt.TypeOf<typeof UnifiedAttachmentRt>;
 
 /**
+ * Transitional read-shape mode while v1/v2 attachments coexist.
+ */
+export type AttachmentMode = 'legacy' | 'unified';
+
+/**
  * Combined v1 legacy and v2 unified attachment types
  */
 export const AttachmentRtV2 = rt.union([AttachmentRt, UnifiedAttachmentRt]);
+export const AttachmentsRtV2 = rt.array(AttachmentRtV2);
 export const AttachmentAttributesRtV2 = rt.union([
   AttachmentAttributesRt,
   UnifiedAttachmentAttributesRt,
@@ -128,5 +136,6 @@ export const AttachmentPatchAttributesRtV2 = rt.union([
   UnifiedAttachmentPatchAttributesRt,
 ]);
 export type AttachmentV2 = rt.TypeOf<typeof AttachmentRtV2>;
+export type AttachmentsV2 = rt.TypeOf<typeof AttachmentsRtV2>;
 export type AttachmentAttributesV2 = rt.TypeOf<typeof AttachmentAttributesRtV2>;
 export type AttachmentPatchAttributesV2 = rt.TypeOf<typeof AttachmentPatchAttributesRtV2>;

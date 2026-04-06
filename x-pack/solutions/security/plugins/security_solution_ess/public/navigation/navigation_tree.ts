@@ -19,8 +19,7 @@ import { SOLUTION_NAME } from './translations';
 
 export const createNavigationTree = (
   services: Services,
-  chatExperience: AIChatExperience = AIChatExperience.Classic,
-  templatesEnabled: boolean = false
+  chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -64,7 +63,7 @@ export const createNavigationTree = (
       icon: 'bullseye',
       link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     },
-    defaultNavigationTree.cases(templatesEnabled),
+    defaultNavigationTree.cases(),
     defaultNavigationTree.entityAnalytics(),
     defaultNavigationTree.explore(),
     defaultNavigationTree.investigations(),
@@ -75,7 +74,7 @@ export const createNavigationTree = (
     },
     {
       id: SecurityPageName.assetInventory,
-      icon: 'editorChecklist',
+      icon: 'listCheck',
       link: securityLink(SecurityPageName.assetInventory),
     },
     defaultNavigationTree.assets(services),
@@ -86,7 +85,7 @@ export const createNavigationTree = (
       id: 'launchpad',
       title: i18nStrings.launchPad.title,
       renderAs: 'panelOpener',
-      icon: 'launch',
+      icon: 'rocket',
       children: [
         {
           children: [
@@ -123,7 +122,7 @@ export const createNavigationTree = (
     {
       link: 'dev_tools',
       title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
+      icon: 'code',
     },
     {
       id: DATA_MANAGEMENT_NAV_ID,
@@ -203,10 +202,6 @@ export const createNavigationTree = (
             {
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
-            },
-            {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
             },
           ],
         },

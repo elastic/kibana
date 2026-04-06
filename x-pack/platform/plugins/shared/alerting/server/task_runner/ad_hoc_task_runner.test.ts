@@ -29,6 +29,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import type { TaskRunnerContext } from './types';
 import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
@@ -415,6 +416,10 @@ describe('Ad Hoc Task Runner', () => {
   afterAll(() => fakeTimer.restore());
 
   test('successfully executes the task', async () => {
+    const addFrameworkMetricsSpy = jest.spyOn(
+      RuleMonitoringService.prototype,
+      'addFrameworkMetrics'
+    );
     ruleTypeWithAlerts.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -444,6 +449,10 @@ describe('Ad Hoc Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual({ state: {}, runAt: new Date('1970-01-01T00:00:00.000Z') });
+    expect(addFrameworkMetricsSpy).toHaveBeenCalledWith({
+      total_search_duration_ms: 23423,
+    });
+    addFrameworkMetricsSpy.mockRestore();
     await taskRunner.cleanup();
 
     // Verify all the expected calls were made before calling the rule executor
@@ -582,6 +591,48 @@ describe('Ad Hoc Task Runner', () => {
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  test('passes consumer metrics to AlertingEventLogger', async () => {
+    const consumerMetrics = {
+      alerts_candidate_count: 100,
+      total_enrichment_duration_ms: 50,
+    };
+    ruleTypeWithAlerts.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.ruleMonitoringService?.setMetrics(consumerMetrics);
+        return { state: {} };
+      }
+    );
+
+    const taskRunner = new AdHocTaskRunner({
+      context: taskRunnerFactoryInitializerParams,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+    });
+
+    await taskRunner.run();
+    await taskRunner.cleanup();
+
+    expect(alertingEventLogger.done).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consumerMetrics,
+        backfill: {
+          id: mockedAdHocRunSO.id,
+          start: schedule1.runAt,
+          interval: schedule1.interval,
+        },
+      })
+    );
   });
 
   test('should schedule actions for rule with actions', async () => {

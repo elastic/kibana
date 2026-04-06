@@ -21,7 +21,7 @@ import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverInternalState } from '../../../state_management/redux';
-import { selectTab } from '../../../state_management/redux/selectors';
+import { selectTab } from '../../../state_management/redux';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -147,11 +147,7 @@ export const getAlertsAppMenuItem = ({
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',
-      href: services.application.getUrlForApp(
-        services.application.isAppRegistered('rules')
-          ? 'rules'
-          : 'management/insightsAndAlerting/triggersActions/rules'
-      ),
+      href: getManageRulesUrl(services),
     });
 
     if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
@@ -191,7 +187,7 @@ export const getAlertsAppMenuItem = ({
     }),
     testId: 'discoverAlertsButton',
     order: 4,
-    iconType: 'alert',
+    iconType: 'warning',
     popoverWidth: 250,
     items,
   };
@@ -200,4 +196,12 @@ export const getAlertsAppMenuItem = ({
 function getTimeField(dataView: DataView | undefined) {
   const dateFields = dataView?.fields.getByType('date');
   return dataView?.timeFieldName || dateFields?.[0]?.name;
+}
+
+function getManageRulesUrl(services: DiscoverServices) {
+  return services.application.getUrlForApp(
+    services.application.isAppRegistered('rules')
+      ? 'rules'
+      : 'management/insightsAndAlerting/triggersActions/rules'
+  );
 }

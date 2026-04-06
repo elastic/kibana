@@ -5,56 +5,53 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { getStatusLabel } from '../../common/hooks/status_labels';
+import { kibanaService } from '../../../../../utils/kibana_service';
+import { PrivateLocationHealthStatusValue } from '@kbn/synthetics-plugin/common/runtime_types';
 
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
   const {
     isUnhealthy: hasMissingIntegrations,
+    isFixableByReset,
     getUnhealthyLocationStatuses: getMissingStatuses,
-    isAgentLevelIssue,
     resetMonitor,
     isResetting,
   } = useMonitorIntegrationHealth({
     configIds: [configId],
   });
 
-  const [resetSuccess, setResetSuccess] = useState(false);
-
   const isMissing = hasMissingIntegrations(configId);
+  const canReset = isFixableByReset(configId);
   const missingStatuses = getMissingStatuses(configId);
+  const allAgentLevelIssues = missingStatuses.every(({ status }) =>{
+    return (
+      status === PrivateLocationHealthStatusValue.MissingAgents ||
+      status === PrivateLocationHealthStatusValue.UnhealthyAgent
+    );
+  }, []);
 
-  // Hide the reset CTA when all unhealthy locations have agent-level issues,
-  // since resetting the monitor cannot fix missing or unhealthy agents.
-  const allAgentLevelIssues =
-    missingStatuses.length > 0 && missingStatuses.every((s) => isAgentLevelIssue(s.status));
 
   const handleReset = useCallback(async () => {
-    await resetMonitor(configId);
-    setResetSuccess(true);
+    const { error } = await resetMonitor(configId);
+    if (error) {
+      kibanaService.toasts.addDanger({
+        title: RESET_ERROR_TITLE,
+        toastLifeTimeMs: 5000,
+      });
+    } else {
+      kibanaService.toasts.addSuccess({
+        title: RESET_SUCCESS_TITLE,
+        toastLifeTimeMs: 3000,
+      });
+    }
   }, [resetMonitor, configId]);
 
-  if (!isMissing && !resetSuccess) {
+  if (!isMissing) {
     return null;
-  }
-
-  if (resetSuccess) {
-    return (
-      <>
-        <EuiCallOut
-          title={RESET_SUCCESS_TITLE}
-          color="success"
-          iconType="check"
-          data-test-subj="syntheticsMissingIntegrationResetSuccess"
-        >
-          <p>{RESET_SUCCESS_DESCRIPTION}</p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
   }
 
   return (
@@ -80,7 +77,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
             </ul>
           </EuiText>
         )}
-        {!allAgentLevelIssues && (
+        {canReset && (
           <>
             <EuiSpacer size="s" />
             <EuiButton
@@ -114,14 +111,10 @@ const RESET_BUTTON_LABEL = i18n.translate('xpack.synthetics.missingIntegration.r
   defaultMessage: 'Reset monitor',
 });
 
+const RESET_ERROR_TITLE = i18n.translate('xpack.synthetics.missingIntegration.resetError', {
+  defaultMessage: 'Failed to reset monitor',
+});
+
 const RESET_SUCCESS_TITLE = i18n.translate('xpack.synthetics.missingIntegration.resetSuccess', {
   defaultMessage: 'Monitor reset successfully',
 });
-
-const RESET_SUCCESS_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.missingIntegration.resetSuccess.description',
-  {
-    defaultMessage:
-      'The Fleet integration has been recreated. The monitor should start running again shortly.',
-  }
-);

@@ -14,12 +14,14 @@ import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
 
 interface UseNavigateToServiceDetailsParams {
+  entityId?: string;
   serviceName: string;
   scopeId: string;
   isRiskScoreExist: boolean;
 }
 
 export const useNavigateToServiceDetails = ({
+  entityId,
   serviceName,
   scopeId,
   isRiskScoreExist,
@@ -38,13 +40,12 @@ export const useNavigateToServiceDetails = ({
         params: {
           isRiskScoreExist,
           scopeId,
-          service: {
-            name: serviceName,
-          },
+          entityId,
+          serviceName,
           path,
         },
       });
     },
-    [isRiskScoreExist, openLeftPanel, scopeId, serviceName, telemetry]
+    [isRiskScoreExist, openLeftPanel, scopeId, entityId, serviceName, telemetry]
   );
 };

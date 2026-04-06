@@ -1,0 +1,415 @@
+## When to Use This Skill
+
+Use this skill for any question about WHY something is broken, degraded, or behaving unexpectedly:
+
+- "Why is the checkout service returning 500 errors?"
+- "What caused the outage at 3pm?"
+- "Our payment service is down / slow / crashing"
+- "An alert fired — what's wrong?"
+- "Users are complaining about errors / timeouts / slow responses"
+- "Something is wrong with our system / microservices / pipeline"
+- "We had an incident this morning — what happened?"
+- "Why are there connection refused errors in the logs?"
+- "The API latency spiked — root cause?"
+- "Service X keeps OOMKilling / restarting / timing out"
+- "We're seeing a high error rate / 5xx spike / latency regression"
+- "What's wrong with stream X / data pipeline Y?"
+- "Investigate the errors in [service/host/container]"
+- "Help me write a postmortem / incident report"
+- "What broke after the last deployment?"
+
+Do NOT use for:
+- Generic log retrieval ("show me the last 100 logs from checkout")
+- Reporting or analytics ("how many requests did we serve today?")
+- Questions that are not about diagnosing a failure or anomaly
+
+---
+
+## Mandatory First Step
+
+**If `search_kis` is in your tool list, your FIRST tool call MUST be
+`search_kis`. Do not call `get_logs`, `execute_esql`, or any other
+tool before it.**
+
+**Tool identity:** Your tool list may show a **longer registry id** (e.g. containing
+`platform.streams` and ending in `search_kis`). That is the same tool as
+`search_kis` in these instructions.
+
+Knowledge Indicators (KIs) are curated, stream-specific signals — operator-written detection
+queries and automatically extracted behavioral patterns. They encode what "bad" looks like for
+this stream and are faster and more targeted than raw log search.
+
+**If `search_kis` errors** (timeout, permission, internal error): retry **once**.
+If it still fails, tell the user and **proceed to Track B** — do not block the investigation.
+
+Only fall back to Track B (log funnel) if:
+- `search_kis` is NOT in your tool list, OR
+- it **failed** after one retry (see above), OR
+- it returned no KIs for the target stream after two attempts, OR
+- every KI-derived hypothesis was explicitly refuted by live query data
+
+---
+
+## Track A: Knowledge Indicator Investigation
+
+### Step A-0: Extract Context from the User Message
+
+Before calling any tool, read the user's message carefully and note:
+- **Symptom**: what is wrong (errors, high latency, crashes, data loss, etc.)
+- **Suspect**: which service, stream, host, or component is mentioned
+- **Timeframe**: when did it start ("since 3pm", "after the deploy", "this morning")
+- **Scope**: is it one service or multiple? User-facing or internal?
+
+This context shapes every tool call you will make. Do not invent details not present in
+the user's message, but do use them to fill in parameters precisely.
+
+### Step A-1: Identify Target Stream and Time Window
+
+**Stream:** Use the service or stream name from Step A-0 as `stream_names`. If the user
+did not name a specific stream, call `search_kis` with no `stream_names`
+to discover which streams have KIs, present the list, and ask the user to confirm.
+
+**Time window:** Pin a single investigation window from the user's description.
+- "since 3pm" → start = today at 15:00, end = now
+- "last 2 hours" → start = now-2h, end = now
+- "this morning" → start = today at 00:00, end = now
+- No time given → default: start = now-1h, end = now
+
+Use this window consistently in all subsequent queries.
+
+### Step A-2: Load All Knowledge Indicators
+
+**Always start with a targeted call**, using the symptom from Step A-0 as `search_text`:
+- `stream_names`: the target stream(s) from Step A-1 when known; omit only for discovery (Step A-1)
+- `search_text`: the symptom keyword(s) from Step A-0 (e.g. "database errors", "connection timeout", "OOM killed")
+- `limit`: **50** when **not** passing `stream_names` (discovery); **20** when passing `stream_names`
+- No `kind` filter (retrieve both features and queries)
+
+ **If the targeted call returns fewer than 5 KIs**, make a second broader call with no `search_text`
+to surface all KIs for the stream regardless of semantic relevance:
+- Same `stream_names` and `limit`
+- Merge results from both calls (deduplicate by ID) before proceeding to A-3
+
+### Step A-3: Form Hypotheses from the Knowledge Indicators
+
+This is the core analytical step. Read **all** returned KIs and construct explicit, testable
+hypotheses BEFORE executing any queries.
+
+> **Result ordering:** the tool returns feature KIs before query KIs. Query KIs — often the
+> highest-trust signals — appear at the **end** of the list. Read through to the end before
+> forming any hypothesis.
+
+A hypothesis has four parts:
+
+1. **Claim**: "The [component] is failing because [specific mechanism]"
+   (be specific: not "there are errors" but "the database connection pool is exhausted")
+2. **Supporting KIs**: which KIs point to this, with their weight
+3. **Confidence**: Speculative / Medium / High / Critical (see scoring table below)
+4. **Test query**: which ES|QL query would confirm or refute it
+
+**Hypothesis confidence scoring:**
+
+`severity_score` and `confidence` use a 0-100 scale. The combinations below are **heuristics**:
+when scores sit near a boundary, prefer **relative ordering among the KIs returned in this response**
+(higher = stronger evidence) rather than treating any numeric cutoff as absolute.
+
+| Evidence combination | Confidence |
+|---|---|
+| Backed query with **high** `severity_score` + corroborating `error_logs` feature with **high** `confidence` | Critical |
+| Backed query with **high** `severity_score` alone | High |
+| `error_logs` feature with **high** `confidence` alone | High |
+| Non-backed query with **high** `severity_score` + supporting `log_patterns` feature | Medium-High |
+| `error_logs` feature with **mid-range** `confidence` | Medium |
+| `log_patterns` feature without corroboration | Medium |
+| `dataset_analysis` anomaly | Medium |
+| `log_samples` anomaly | Low |
+
+**How to read each KI type:**
+
+*Query KIs* (`kind: "query"`):
+- `query.title` + `query.description`: what condition this detects — this IS the hypothesis claim
+- `query.esql.query`: the verbatim ES|QL that tests the condition — this IS your test query
+- `query.severity_score`: 0-100, aligned with anomaly detection scoring
+- `query.evidence`: human context about why this query was created (often names the root cause directly)
+- `rule.backed`: true = active Kibana alert rule monitoring this in production (highest-trust signal)
+- A backed query that fires = the condition its operator defined as "alertworthy" is currently true
+
+*Feature KIs* (`kind: "feature"`):
+- `feature.type`: the pattern category
+  - `error_logs`: recurring error signatures extracted from log data
+  - `log_patterns`: recurring message templates (not necessarily errors)
+  - `dataset_analysis`: volume and cardinality statistics for the stream
+  - `log_samples`: representative raw documents from the stream
+- `feature.description`: what pattern was observed — use this as the hypothesis claim
+- `feature.properties`: structured data about the pattern (field names, values, counts) — use for query construction
+- `feature.confidence`: 0-100 reliability. **Higher** values mean the pattern is more consistently observed — compare within the returned feature set.
+- `feature.evidence`: human-readable supporting facts (may name the error type, field, or component directly)
+- `feature.filter`: a structured JSON condition (streamlang format) scoping this feature to the
+  data subset it was computed on — **not** a KQL string. You MUST use this same filter in any
+  query you derive from this feature — otherwise your query operates on different data than the feature did.
+- `feature.status`: "active" = currently observed; "stale" or "expired" = historical only.
+  Always validate stale/expired features with a live query before including them in your conclusion.
+- `feature.last_seen`: when this pattern was last observed — use for timeline estimation
+
+**Cross-KI correlation rules** (the highest-value analysis you can do):
+- A Query KI fires AND a Feature KI of type `error_logs` describes the same error → same root cause, promote to Critical
+- Multiple Query KIs fire that share keywords in their `evidence` or `description` fields → they are describing facets of the same problem
+- A Query KI's `description` or `evidence` mentions a dependency (e.g. "database", "upstream service") → look for Feature KIs or Query KIs on that dependency's stream
+- Two Feature KIs of different types (e.g. `error_logs` + `log_patterns`) both point to the same component → convergence signal, increase confidence
+
+Write out your hypotheses explicitly before proceeding to Step A-4. For example:
+> H1 (Critical): Payment service database connection pool is exhausted.
+>   Supporting: Query KI "DB connection pool exhaustion" (severity=88, backed=true) + Feature KI "error_logs" (confidence=91, "FATAL: too many connections").
+>   Test: execute query KI's esql.query scoped to investigation window.
+>
+> H2 (Medium): Payment service is receiving malformed requests from checkout.
+>   Supporting: Feature KI "log_patterns" (confidence=55, "invalid JSON payload received").
+>   Test: generate_esql to count "invalid JSON" messages in payment stream in the last hour.
+
+### Step A-4: Test Each Hypothesis — Highest Confidence First
+
+For each hypothesis, execute its test query. Stop when one is confirmed (returns evidence).
+
+**Execution priority — existing Query KI ES|QL before `generate_esql`:**
+- When a hypothesis cites a **Query KI**, its `query.esql.query` is the **primary** test: call
+  `execute_esql` (with time scoping and LIMIT rules below) **before** any `generate_esql` for
+  that hypothesis. Use `generate_esql` for the same hypothesis only if `execute_esql` still
+  fails after you adapt the KI query (time filter, field fixes) or the stored ES|QL is missing or unusable.
+- When a hypothesis is **Feature-only** (no query KI in the citation), scan **every Query KI**
+  returned in Step A-2: if any query's title, description, evidence, or `esql.query` clearly
+  tests the **same mechanism or pattern** (same error signature, component, or condition), run
+  **that** `esql.query` via `execute_esql` **first**. Prefer backed queries and higher
+  `severity_score` when multiple queries match.
+- Call `generate_esql` only when **no** loaded Query KI supplies a suitable ES|QL to execute —
+  e.g. the pattern exists only as a feature, or you need a genuinely new aggregate that no query KI encodes.
+
+**Testing Query KI hypotheses:**
+Start from the KI's `query.esql.query`, apply **time scoping** and **row caps** (below), then call `execute_esql`.
+Pass the investigation time window in the `time_range` parameter — this injects
+`?_tstart` / `?_tend` named parameters, so queries that use them are automatically scoped.
+If the query does not use named parameters and has no `@timestamp` filter, prepend
+`| WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend` after the FROM clause.
+
+**LIMIT / row cap (required):** Unbounded ES|QL can return huge row sets and **exceed the conversation context limit**.
+Before each `execute_esql` on a Query KI:
+- Inspect the ES|QL for an existing `LIMIT` clause (`LIMIT n` or `| LIMIT n`, case-insensitive).
+- If `LIMIT` is **already** present, keep the query (aside from time filters above).
+- If **no** `LIMIT` is present **and** the pipeline can emit **one row per matching document** (e.g. raw `FROM` / `WHERE` / `KEEP` / `SORT` without a reducing `STATS` that collapses to a handful of rows), **append** `| LIMIT 20` at the **end** of the pipeline. Use **10** (or lower) if projected fields include very large text (long `message`, stack traces).
+- If the query **already** returns a **tiny** aggregated result (e.g. one `STATS` / `COUNT(*)` summary row), you do **not** need an extra `LIMIT` for context safety.
+- When checking whether a condition is "firing", prefer **counts or small aggregates** over pulling many raw documents; only adapt the KI query if the adaptation preserves the same filter semantics.
+
+Interpretation:
+- Returns rows → the condition is firing. Count and content confirm the severity.
+- Returns 0 rows → condition is NOT currently active. Mark hypothesis as refuted and move on.
+- Returns an error → try adapting the query (add missing time filter, fix field name). If still failing, skip.
+
+**Testing Feature KI hypotheses:**
+Feature KIs do not carry a pre-built query. **First** apply the priority above: reuse a matching
+Query KI's `esql.query` with `execute_esql` if any. Only if none apply, construct a new query using `generate_esql`:
+- Set `index` to the stream name (`feature.stream_name`)
+- Set `time_range` to the investigation window
+- Set `context` to include the feature's `description`, key values from `properties`,
+  and the `filter` condition (so the generated query scopes correctly)
+- Describe what you want to confirm: "count occurrences of [error pattern] matching [filter] per 5-minute bucket"
+- Ask for **bounded** results: prefer `STATS` / aggregates; if the generated query returns raw events, it must include `| LIMIT 20` (or lower).
+- Run `generate_esql` to obtain and execute ES|QL against live data.
+
+**After each query result:**
+- Write down what the result tells you: how many events? Which time range? Which services?
+- Update the hypothesis: Confirmed (rows returned) / Refuted (0 rows) / Needs more data
+- If refuted, proceed to the next hypothesis immediately — do not retry with the same parameters
+
+If ALL hypotheses are refuted, fall back to Track B.
+
+### Step A-5: Establish Timeline and Blast Radius
+
+Once a hypothesis is confirmed, run two additional queries:
+
+**Onset** — when did it start?
+If you confirmed the issue using a Query KI's ES|QL, prefer adapting that same query (e.g. add a
+`STATS` with `MIN(@timestamp)` in one row) and `execute_esql` **before** `generate_esql`.
+Otherwise use `generate_esql` to find the earliest occurrence of the error pattern within a wider
+window (e.g. now-24h). Use **MIN(@timestamp) inside a `STATS`** (or similar) so the tool returns **one row**, not every matching document. Cross-reference with the Feature KI's
+`last_seen` field (when the feature was last observed) as a sanity check.
+
+**Blast radius** — what else is affected?
+Prefer extending the **confirmed** Query KI pipeline with a grouping `STATS` (e.g. by `service.name` or
+`host.name`) and `execute_esql` when filters stay aligned with the KI. If no Query KI pipeline fits,
+use `generate_esql` for the same aggregate shape (**aggregate** output, not raw dumps). If you must list raw events, include `LIMIT`. Compare with the Feature KI's `filter` condition — if it scopes to a single
+service, the failure may be contained; if the filter is broad, the blast radius is wider.
+
+### Step A-6: Synthesize and Report
+
+**Root Cause** (or "Most Likely Cause" if not yet confirmed):
+State the specific mechanism in one sentence. Include confidence level: Confirmed / High / Medium / Speculative.
+
+**Evidence table:**
+| Source | Details | Weight |
+|---|---|---|
+| Query KI: [title] | severity=[score], backed=[true/false], fired=[N rows] | [weight] |
+| Feature KI: [id] | type=[type], confidence=[score], status=[status] | [weight] |
+| ES|QL result | [what the query returned, counts, timestamps] | — |
+
+**Timeline:** When it started (from onset query or `last_seen`). Whether it is ongoing or resolved.
+
+**Blast Radius:** Which services or components are affected and how many events.
+
+**Recommended Actions:**
+- Confirmed root cause: specific remediation steps derived from the evidence.
+- Unconfirmed hypothesis: what data would confirm it and how to obtain it.
+- Query KIs with `backed: false`: recommend creating Kibana alert rules.
+- Feature KIs with `status: "stale"` that remain relevant: recommend refreshing feature extraction.
+
+---
+
+## Track B: Log Funnel Investigation (Fallback Only)
+
+Enter this track if `search_kis` is not in your tool list, **failed after one retry**,
+returned no KIs after two attempts, or all KI-derived hypotheses were explicitly refuted.
+
+### Phase 1: Initial Peek
+
+Call `get_logs` with no `groupBy`. Scope with `kqlFilter` if the user named a
+specific service, host, or container. Read five things:
+- **totalCount**: noise indicator
+- **histogram**: spike or dip? Note the timestamp.
+- **samples**: real errors or noise (health checks, cron jobs)?
+- **categories**: < 20 patterns means focused enough. `type: "exception"` categories are OTel exceptions.
+- **topValues**: use these exact values in subsequent KQL filters — never guess keyword values.
+
+Decision: < 20 categories → Answer. Spike visible → Phase 2. ≥ 20 noisy → Phase 2. Otherwise → Phase 3.
+
+### Phase 2: Log Rate Analysis
+
+Call `run_log_rate_analysis` to find field values correlated with the change.
+- Spike visible: baseline = before spike, deviation = during spike.
+- User named a time: use that as the boundary.
+- No spike/context: baseline = now-2h to now-1h, deviation = now-1h to now.
+
+If it returns nothing (steady-state issue), proceed directly to Phase 3.
+
+### Phase 3: Reduce Noise (The Funnel)
+
+Call `get_logs` repeatedly. Two strategies:
+
+**Strategy A — Exclude noise first**: Accumulate NOT clauses (never drop previous ones).
+`NOT message: "GET /health" AND NOT service.name: "fluent-bit"`
+
+**Strategy B — Zoom into signal**: Once you identify the relevant service/pattern, switch to
+a positive filter. `service.name: "checkout" AND log.level: "error"`
+Use exact values from `topValues` — keyword fields are case-sensitive.
+
+Continue until: categories < 20 patterns, OR totalCount < 500, OR samples show the root cause.
+Call `get_logs` at least 3 times before answering.
+
+### Answer
+
+- **Root cause** or most likely hypothesis
+- **Key evidence**: specific log lines, timestamps, error messages
+- **Investigation trail**: what you filtered and why
+- **Next steps** if root cause is not confirmed
+
+---
+
+## Critical Rules
+
+1. **KI tool order** — same as *Mandatory First Step*: when the KI tool is available and succeeds,
+   call it first; do not use `get_logs` until the KI track is exhausted or you moved to Track B per the fallbacks above.
+2. **Form all hypotheses before testing any.** Read the full KI set, then rank and test.
+3. **Never state a root cause without tool evidence.** Every claim must trace to a KI or query result.
+4. **Validate stale KIs.** `status: "stale"` or `status: "expired"` = historical — always confirm with a live query.
+5. **Apply the KI's `filter` in derived queries.** Omitting it means operating on a different data slice.
+6. **Always scope queries to the investigation time window.** Pass `time_range` to `execute_esql` / `generate_esql`.
+7. **Cap ES|QL row volume on KI queries.** If a Query KI's ES|QL has no `LIMIT` and can return many raw rows, append `| LIMIT 20` (or **10** for very wide fields). Prefer aggregates over document dumps. **Run existing Query KI ES|QL via `execute_esql` before `generate_esql`** when any returned query tests the hypothesis (including Feature-only hypotheses matched to a related Query KI).
+8. **0 rows = refuted. Move on.** Do not retry a refuted hypothesis with the same parameters.
+9. **Do not fabricate.** Never invent scores, IDs, query names, or ES|QL results.
+
+## OTel Exception Events
+
+OpenTelemetry exception events have `error.exception.message` / `error.exception.type` but NO `log.level` or `message`.
+In `get_logs` results, they appear as categories with `type: "exception"`.
+Filter explicitly: `error.exception.message: *`. Invisible to `log.level`-based KQL filters.
+
+## Tips
+
+- **KQL for `kqlFilter`:** Follow the **KQL (Kibana Query Language)** section in the **host agent's** system instructions (not repeated here) when building filters for `get_logs` and related tools.
+- **ES|QL + context:** `FROM` without `STATS` / tight aggregation can return huge row sets; add `| LIMIT 20` (or lower) before executing unless the query already has `LIMIT` or returns a small aggregate.
+- `log.level` is often unreliable (mixed casing, missing on OTel events). Prefer filtering by message content.
+- Use `get_index_info(operation="get-field-values", fields=["log.level"], ...)` to discover actual keyword values before filtering.
+- To inspect a specific document: `get_logs(kqlFilter="_id: \\"<doc_id>\\"", fields=["message","error.stack_trace"])`.
+- To see surrounding context: `get_logs` with a ±30s window around the event timestamp, scoped to the same entity, limit=50.
+
+---
+
+## Example Investigation (Track A — the normal path)
+
+User: "The payment service has been throwing database errors since 2pm."
+
+**A-0**: Symptom = database errors. Suspect = payment service. Timeframe = since 14:00.
+
+**A-1**: stream = "payment", window = 14:00 → now.
+
+**A-2 (targeted)**: search_kis(stream_names=["payment"], search_text="database errors", limit=20)
+→ Returns 4 KIs (features first, then queries — read all before forming hypotheses):
+  - Feature KI F1: type="error_logs", confidence=93, description="FATAL: connection pool exhausted — all 100 slots occupied", filter={"field":"service.name","eq":"payment"}, status="active"
+  - Feature KI F2: type="log_patterns", confidence=61, description="Slow query warnings from PostgreSQL", filter={"field":"service.name","eq":"payment"}, status="stale"
+  - Query KI Q1: "DB connection pool exhaustion" (severity=88, backed=true, esql="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)")
+4 KIs returned — sufficient, no broader follow-up needed.
+
+**A-3 — Hypotheses:**
+> H1 (Critical): Payment service has exhausted its database connection pool.
+>   Supporting: Q1 (backed, severity=88) + F1 (error_logs, confidence=93) — two signals, same mechanism.
+>   Test: execute Q1's esql scoped to 14:00–now.
+>
+> H2 (Medium-High): PostgreSQL is issuing slow query warnings, degrading throughput.
+>   Supporting: F2 (log_patterns, confidence=61, stale) — note: stale, must validate.
+>   Test: generate_esql to count slow query warnings in payment stream since 14:00.
+
+**A-4 — Test H1:**
+execute_esql(query="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)", time_range={from:"<investigation_window_start>", to:"now"})
+(`from`/`to` match A-1 — placeholders only. Single `STATS` row — no extra `LIMIT`; raw-row KI queries need `| LIMIT 20` when unstated.)
+→ Returns: count=1,847 — the condition is actively firing.
+→ H1 = Confirmed.
+
+**A-4 — Test H2 (for completeness):**
+generate_esql(query="count slow query warnings in payment stream in the investigation window, grouped by 5min bucket", index="payment", time_range={from:"<investigation_window_start>", to:"now"})
+→ Returns: a few slow-warning buckets, all **ending before** the main incident window in this scenario.
+→ H2 = Refuted for this window. Slow queries preceded the pool exhaustion — likely a contributing factor, not the root cause.
+
+**A-5 — Timeline:**
+generate_esql(query="find MIN(@timestamp) for error.message matching 'too many connections' in payment stream in the last 24h", index="payment", time_range={from:"now-24h", to:"now"})
+→ MIN(@timestamp) is **just before** the user-reported window — consistent with "since 2pm" ✓.
+
+Blast radius: generate_esql to group by service.name → only "payment" affected (F1 filter confirms).
+
+**A-6 — Report:**
+Root Cause (Confirmed): The payment service exhausted its PostgreSQL connection pool shortly before / at the user-reported window.
+Connection slots were fully occupied, making the service unable to process new requests.
+A preceding burst of slow queries likely held connections open longer than usual, accelerating pool exhaustion.
+
+Evidence: Q1 fired (1,847 matching events); F1 active (confidence=93).
+Timeline: Onset from MIN(@timestamp); still ongoing in this scenario.
+Blast radius: payment service only.
+Actions: Increase connection pool size or add a query timeout to release stuck connections.
+Q2 ("High payment error rate") has a backed rule — confirm it is actively alerting.
+
+---
+
+## Example Investigation (Track B — log funnel, KIs unavailable)
+
+User: "Why are there errors in the checkout service?"
+
+**Phase 1**: get_logs(start="now-1h", end="now")
+→ totalCount=42,000. Categories: 28 patterns. Histogram spike at 14:05–14:10.
+
+**Phase 2**: run_log_rate_analysis(baseline={start:"13:50Z",end:"14:04Z"}, deviation={start:"14:04Z",end:"14:15Z"})
+→ Significant: service.name="checkout" (p=0.001), error.message="OOMKilled" (p=0.003).
+
+**Phase 3**: get_logs(kqlFilter="service.name: \\"checkout\\"", start="14:00Z", end="14:15Z")
+→ totalCount=320. Categories: 12. Samples show OOMKilled at 14:07.
+
+**Phase 3**: get_logs(kqlFilter="service.name: (checkout OR payment) AND log.level: (error OR warn)", start="14:05Z", end="14:10Z", bucketSize="1m")
+→ OOMKilled in checkout at 14:07, then connection timeouts in payment.
+
+Answer: Checkout OOMKilled at 14:07, causing cascading timeouts in payment-service.
+Action: increase checkout memory limits; add circuit breaker in payment for checkout dependency.

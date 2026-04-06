@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -47,10 +47,17 @@ export function useMonitorListColumns({
   loading,
   overviewStatus,
   setMonitorPendingDeletion,
+  setMonitorPendingReset,
+  isFixableByReset,
 }: {
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
   setMonitorPendingDeletion: (configs: string[]) => void;
+  setMonitorPendingReset: (val: {
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  }) => void;
+  isFixableByReset: (configId: string) => boolean;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
   const { http, spaces } = useKibana<ClientPluginsStart>().services;
@@ -88,8 +95,12 @@ export function useMonitorListColumns({
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <MonitorDetailsLink monitor={monitor} />
-            <UnhealthyTooltip configId={configId} />
+            <EuiFlexItem grow={false}>
+              <MonitorDetailsLink monitor={monitor} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <UnhealthyTooltip configId={configId} />
+            </EuiFlexItem>
           </EuiFlexGroup>
         );
       },
@@ -304,6 +315,41 @@ export function useMonitorListColumns({
             canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
             setMonitorPendingDeletion([fields[ConfigKey.CONFIG_ID]]);
+          },
+        },
+        {
+          'data-test-subj': 'syntheticsMonitorResetAction',
+          isPrimary: false,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
+            >
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.resetLabel', {
+                  defaultMessage: 'Reset monitor {monitorName}',
+                  values: { monitorName: fields[ConfigKey.NAME] },
+                })}
+              >
+                {labels.RESET_LABEL}
+              </span>
+            </NoPermissionsTooltip>
+          ),
+          description: labels.RESET_LABEL,
+          icon: 'refresh' as const,
+          type: 'icon' as const,
+          color: 'warning' as const,
+          available: (fields) => isFixableByReset(fields[ConfigKey.CONFIG_ID]),
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isServiceAllowed &&
+            isPublicLocationsAllowed(fields),
+          onClick: (fields) => {
+            setMonitorPendingReset({
+              resetIds: [fields[ConfigKey.CONFIG_ID]],
+              skippedMonitors: [],
+            });
           },
         },
         {

@@ -12,17 +12,22 @@ import {
   getMonitorListPageStateWithDefaults,
   selectMonitorListState,
 } from '../../../state';
-import { ConfigKey, LocationHealthStatusValue } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  PrivateLocationHealthStatusValue,
+} from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { isFixableByResetStatus } from './status_labels';
 
 export interface MonitorIntegrationStatus {
   configId: string;
   locationId: string;
   locationLabel: string;
-  policyId: string;
-  status: LocationHealthStatusValue;
+  packagePolicyId: string;
+  agentPolicyId?: string;
+  status: PrivateLocationHealthStatusValue;
   isUnhealthy: boolean;
 }
 
@@ -34,20 +39,22 @@ interface UseMonitorIntegrationHealthReturn {
   statuses: Map<string, MonitorIntegrationStatus[]>;
   loading: boolean;
   isResetting: boolean;
-  resetMonitor: (configId: string) => Promise<void>;
-  resetMonitors: (configIds: string[]) => Promise<void>;
+  resetMonitor: (configId: string) => Promise<{ error?: Error }>;
+  resetMonitors: (configIds: string[]) => Promise<{ error?: Error }>;
   isUnhealthy: (configId: string) => boolean;
-  isAgentLevelIssue: (status: LocationHealthStatusValue) => boolean;
+  isFixableByReset: (configId: string) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
-  getUnhealthyLocationCount: () => number;
   getUnhealthyMonitorCountForLocation: (locationId: string) => number;
   getUnhealthyConfigIdsForLocation: (locationId: string) => string[];
+  getUnhealthyMonitorsForLocation: (
+    locationId: string
+  ) => Array<{ configId: string; name: string }>;
 }
 
 export const useMonitorIntegrationHealth = (
   options?: UseMonitorIntegrationHealthOptions
 ): UseMonitorIntegrationHealthReturn => {
-  const { configIds: explicitConfigIds } = options ?? {};
+  const { configIds } = options ?? {};
   const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -61,14 +68,14 @@ export const useMonitorIntegrationHealth = (
   const { data: healthData, loading: healthLoading } = useSelector(selectMonitorHealth);
 
   useEffect(() => {
-    if (!explicitConfigIds && !listLoaded && !listLoading) {
+    if (!configIds && !listLoaded && !listLoading) {
       dispatch(fetchMonitorListAction.get(getMonitorListPageStateWithDefaults()));
     }
-  }, [dispatch, explicitConfigIds, listLoaded, listLoading]);
+  }, [dispatch, configIds, listLoaded, listLoading]);
 
   const monitorIdsToFetch = useMemo(() => {
-    if (explicitConfigIds) {
-      return explicitConfigIds;
+    if (configIds) {
+      return configIds;
     }
     if (!listLoaded) {
       return [];
@@ -76,7 +83,7 @@ export const useMonitorIntegrationHealth = (
     return listMonitors
       .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
       .map((m) => m[ConfigKey.CONFIG_ID]);
-  }, [explicitConfigIds, listLoaded, listMonitors]);
+  }, [configIds, listLoaded, listMonitors]);
 
   useEffect(() => {
     if (monitorIdsToFetch.length === 0) return;
@@ -88,13 +95,14 @@ export const useMonitorIntegrationHealth = (
     if (!healthData) return map;
 
     for (const monitor of healthData.monitors) {
-      const locationStatuses: MonitorIntegrationStatus[] = monitor.locations.map((loc) => ({
+      const locationStatuses: MonitorIntegrationStatus[] = monitor.privateLocations.map((loc) => ({
         configId: monitor.configId,
         locationId: loc.locationId,
         locationLabel: loc.locationLabel,
-        policyId: loc.policyId,
+        packagePolicyId: loc.packagePolicyId,
+        agentPolicyId: loc.agentPolicyId,
         status: loc.status,
-        isUnhealthy: loc.status !== LocationHealthStatusValue.Healthy,
+        isUnhealthy: loc.status !== PrivateLocationHealthStatusValue.Healthy,
       }));
       map.set(monitor.configId, locationStatuses);
     }
@@ -102,17 +110,18 @@ export const useMonitorIntegrationHealth = (
     return map;
   }, [healthData]);
 
-  const isAgentLevelIssue = useCallback((status: LocationHealthStatusValue): boolean => {
-    return (
-      status === LocationHealthStatusValue.MissingAgents ||
-      status === LocationHealthStatusValue.UnhealthyAgent
-    );
-  }, []);
-
   const isUnhealthy = useCallback(
     (configId: string): boolean => {
       const locationStatuses = statuses.get(configId);
       return locationStatuses?.some((s) => s.isUnhealthy) ?? false;
+    },
+    [statuses]
+  );
+
+  const isFixableByReset = useCallback(
+    (configId: string): boolean => {
+      const locationStatuses = statuses.get(configId);
+      return locationStatuses?.some((s) => isFixableByResetStatus(s.status)) ?? false;
     },
     [statuses]
   );
@@ -124,14 +133,6 @@ export const useMonitorIntegrationHealth = (
     },
     [statuses]
   );
-
-  const getUnhealthyLocationCount = useCallback((): number => {
-    let count = 0;
-    for (const locationStatuses of statuses.values()) {
-      if (locationStatuses.some((s) => s.isUnhealthy)) count++;
-    }
-    return count;
-  }, [statuses]);
 
   const getUnhealthyMonitorCountForLocation = useCallback(
     (locationId: string): number => {
@@ -157,6 +158,28 @@ export const useMonitorIntegrationHealth = (
     [statuses]
   );
 
+  const getUnhealthyMonitorsForLocation = useCallback(
+    (locationId: string): Array<{ configId: string; name: string }> => {
+      const monitorNameMap = new Map(
+        listMonitors.map((m) => [m[ConfigKey.CONFIG_ID], m[ConfigKey.NAME]])
+      );
+      const monitors: Array<{ configId: string; name: string }> = [];
+
+      for (const entries of statuses.values()) {
+        const entry = entries.find((s) => s.locationId === locationId && s.isUnhealthy);
+        if (entry) {
+          monitors.push({
+            configId: entry.configId,
+            name: monitorNameMap.get(entry.configId) || entry.configId,
+          });
+        }
+      }
+
+      return monitors;
+    },
+    [statuses, listMonitors]
+  );
+
   const refetchHealth = useCallback(() => {
     if (monitorIdsToFetch.length > 0) {
       dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
@@ -164,11 +187,14 @@ export const useMonitorIntegrationHealth = (
   }, [dispatch, monitorIdsToFetch]);
 
   const resetMonitor = useCallback(
-    async (configId: string): Promise<void> => {
+    async (configId: string): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
         await resetMonitorAPI({ id: configId });
         refetchHealth();
+        return {};
+      } catch (err) {
+        return { error: err instanceof Error ? err : new Error(String(err)) };
       } finally {
         setIsResetting(false);
       }
@@ -177,11 +203,19 @@ export const useMonitorIntegrationHealth = (
   );
 
   const resetMonitors = useCallback(
-    async (ids: string[]): Promise<void> => {
+    async (ids: string[]): Promise<{ error?: Error }> => {
       setIsResetting(true);
       try {
-        await resetMonitorBulkAPI({ ids });
+        const response = await resetMonitorBulkAPI({ ids });
+        const hasFailures = response.result.some((r) => !r.reset);
+        const hasTopLevelErrors = response.errors && response.errors.length > 0;
+        if (hasFailures || hasTopLevelErrors) {
+          return { error: new Error('Failed to reset one or more monitors') };
+        }
         refetchHealth();
+        return {};
+      } catch (err) {
+        return { error: err instanceof Error ? err : new Error(String(err)) };
       } finally {
         setIsResetting(false);
       }
@@ -189,7 +223,7 @@ export const useMonitorIntegrationHealth = (
     [refetchHealth]
   );
 
-  const loading = explicitConfigIds ? healthLoading : !listLoaded || healthLoading;
+  const loading = configIds ? healthLoading : !listLoaded || healthLoading;
 
   return {
     statuses,
@@ -198,10 +232,10 @@ export const useMonitorIntegrationHealth = (
     resetMonitor,
     resetMonitors,
     isUnhealthy,
-    isAgentLevelIssue,
+    isFixableByReset,
     getUnhealthyLocationStatuses,
-    getUnhealthyLocationCount,
     getUnhealthyMonitorCountForLocation,
     getUnhealthyConfigIdsForLocation,
+    getUnhealthyMonitorsForLocation,
   };
 };

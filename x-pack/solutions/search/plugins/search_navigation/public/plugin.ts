@@ -95,7 +95,12 @@ export class SearchNavigationPlugin
   private useClassicNavigation(history: ScopedHistory<unknown>) {
     if (this.coreStart === undefined || this.currentChromeStyle !== 'classic') return undefined;
 
-    return classicNavigationFactory(this.baseClassicNavItems, this.coreStart, history);
+    return classicNavigationFactory(
+      this.baseClassicNavItems,
+      this.coreStart,
+      history,
+      this.pluginsStart?.spaces
+    );
   }
 
   private getBaseClassicNavItems(): ClassicNavItem[] {

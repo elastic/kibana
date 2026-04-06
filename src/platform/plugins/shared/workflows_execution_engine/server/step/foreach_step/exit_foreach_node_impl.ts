@@ -8,6 +8,7 @@
  */
 
 import type { ExitForeachNode } from '@kbn/workflows/graph';
+import type { ForeachStepState } from './types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -22,7 +23,9 @@ export class ExitForeachNodeImpl implements NodeImplementation {
   ) {}
 
   public run(): void {
-    const foreachState = this.stepExecutionRuntime.getCurrentStepState();
+    const foreachState = this.stepExecutionRuntime.getCurrentStepState() as
+      | ForeachStepState
+      | undefined;
 
     if (!foreachState) {
       throw new Error(`Foreach state for step ${this.node.stepId} not found`);

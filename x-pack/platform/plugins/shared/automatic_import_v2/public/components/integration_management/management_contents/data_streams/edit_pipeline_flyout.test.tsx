@@ -39,6 +39,13 @@ jest.mock('@kbn/code-editor', () => ({
       >
         Change editor value
       </button>
+      <button
+        className="euiCodeBlock__copyButton"
+        data-test-subj="code-editor-copy"
+        aria-label="Copy"
+      >
+        Copy
+      </button>
     </div>
   )),
 }));
@@ -64,6 +71,21 @@ const mockUIState = {
 
 jest.mock('../../contexts', () => ({
   useUIState: () => mockUIState,
+}));
+
+const mockReportCodeEditorCopyClicked = jest.fn();
+const mockReportPipelineEdited = jest.fn();
+const mockReportEditPipelineTabOpened = jest.fn();
+jest.mock('../../../telemetry_context', () => ({
+  useTelemetry: () => ({
+    sessionId: 'test-session-id',
+    reportDataStreamFlyoutOpened: jest.fn(),
+    reportEditDataStreamFlyoutOpened: jest.fn(),
+    reportAnalyzeLogsTriggered: jest.fn(),
+    reportEditPipelineTabOpened: mockReportEditPipelineTabOpened,
+    reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
+    reportPipelineEdited: mockReportPipelineEdited,
+  }),
 }));
 
 const createMockDataStream = (overrides: Partial<DataStreamResponse> = {}): DataStreamResponse => ({
@@ -111,6 +133,7 @@ const createMockResults = (
 describe('EditPipelineFlyout', () => {
   const defaultProps = {
     integrationId: 'integration-123',
+    integrationName: 'Test Integration',
     dataStream: createMockDataStream(),
     onClose: jest.fn(),
   };
@@ -118,6 +141,7 @@ describe('EditPipelineFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockMutateAsync.mockResolvedValue(createMockResults());
+    mockReportCodeEditorCopyClicked.mockClear();
     mockUIState.selectedPipelineTab = 'table';
     mockUseGetDataStreamResults.mockReturnValue({
       data: createMockResults(),
@@ -313,6 +337,17 @@ describe('EditPipelineFlyout', () => {
       expect(mockSelectPipelineTab).toHaveBeenCalledWith('pipeline');
     });
 
+    it('calls reportEditPipelineTabOpened when pipeline tab is clicked', async () => {
+      mockUIState.selectedPipelineTab = 'table';
+
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      const pipelineTab = screen.getByRole('tab', { name: 'Ingest pipeline' });
+      await userEvent.click(pipelineTab);
+
+      expect(mockReportEditPipelineTabOpened).toHaveBeenCalled();
+    });
+
     it('should render save button and submit updated pipeline', async () => {
       mockUIState.selectedPipelineTab = 'pipeline';
       render(<EditPipelineFlyout {...defaultProps} />);
@@ -325,6 +360,32 @@ describe('EditPipelineFlyout', () => {
         dataStreamId: 'ds-1',
         ingestPipeline: expect.stringContaining('"processors"'),
       });
+    });
+
+    it('should report pipeline edited telemetry with line diff stats', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
+
+      expect(mockReportPipelineEdited).toHaveBeenCalledWith(
+        expect.objectContaining({
+          linesAdded: expect.any(Number),
+          linesRemoved: expect.any(Number),
+          netLineChange: expect.any(Number),
+        })
+      );
+    });
+
+    it('should report telemetry when copy button is clicked', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      const copyButton = screen.getByTestId('code-editor-copy');
+      await userEvent.click(copyButton);
+
+      expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith();
     });
   });
 

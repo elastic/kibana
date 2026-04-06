@@ -26,6 +26,8 @@ const queryRequestBodySchema = z.object({
 export interface QueryStreamObjectGetResponse {
   /** The view reference stored in the definition */
   query: Streams.QueryStream.Definition['query'] & { esql: string };
+  /** Field descriptions map (field name -> description) */
+  field_descriptions?: Record<string, string>;
 }
 
 const readQueryStreamRoute = createServerRoute({
@@ -35,6 +37,7 @@ const readQueryStreamRoute = createServerRoute({
     summary: 'Get query stream settings',
     description: 'Fetches the query settings of a query stream definition',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
   },
@@ -77,6 +80,7 @@ const readQueryStreamRoute = createServerRoute({
         ...definition.query,
         esql: esqlView.query,
       },
+      ...(definition.field_descriptions && { field_descriptions: definition.field_descriptions }),
     };
   },
 });
@@ -88,6 +92,7 @@ const upsertQueryStreamRoute = createServerRoute({
     description: 'Upserts the query settings of a query stream definition',
     summary: 'Upsert query stream settings',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
   },
@@ -103,6 +108,8 @@ const upsertQueryStreamRoute = createServerRoute({
     body: z.object({
       // API accepts esql for UX simplicity, not the stored query format
       query: queryRequestBodySchema,
+      // Optional field descriptions map
+      field_descriptions: z.record(z.string(), z.string()).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, context, logger }) => {
@@ -121,6 +128,7 @@ const upsertQueryStreamRoute = createServerRoute({
 
     const { name } = params.path;
     const { esql } = params.body.query;
+    const { field_descriptions: fieldDescriptions } = params.body;
 
     // Generate the view name from the stream name
     const viewName = getEsqlViewName(name);
@@ -137,7 +145,11 @@ const upsertQueryStreamRoute = createServerRoute({
     } catch (error) {
       if (error instanceof DefinitionNotFoundError) {
         // Create new query stream - the state management will handle view creation
-        return await streamsClient.createQueryStream({ name, query: queryReference });
+        return await streamsClient.createQueryStream({
+          name,
+          query: queryReference,
+          field_descriptions: fieldDescriptions,
+        });
       }
       throw error;
     }
@@ -167,11 +179,19 @@ const upsertQueryStreamRoute = createServerRoute({
     // Remove name and updated_at from definition - these are not allowed in UpsertRequest
     const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
+    // Merge field_descriptions: use provided value if present, otherwise preserve existing
+    // When fieldDescriptions is undefined, it means the caller didn't provide any update,
+    // so we preserve the existing descriptions from the definition.
+    // When fieldDescriptions is explicitly provided (even as {}), use it.
+    const mergedFieldDescriptions =
+      fieldDescriptions !== undefined ? fieldDescriptions : definition.field_descriptions;
+
     const upsertRequest: Streams.QueryStream.UpsertRequest = {
       dashboards,
       stream: {
         ...stream,
         query: queryReference,
+        ...(mergedFieldDescriptions && { field_descriptions: mergedFieldDescriptions }),
       },
       queries,
       rules,

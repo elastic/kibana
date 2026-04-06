@@ -435,7 +435,9 @@ describe('#extendsDeep', () => {
         type
           .extendsDeep({ unknowns: 'forbid' })
           .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } })
-      ).toThrowErrorMatchingInlineSnapshot(`"[test.baz]: definition for this key is missing"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[test.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+      );
     });
   });
 
@@ -473,7 +475,9 @@ describe('#extendsDeep', () => {
       const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
       expect(() =>
         forbidSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } })
-      ).toThrowErrorMatchingInlineSnapshot(`"[test.baz]: definition for this key is missing"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[test.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+      );
     });
   });
 });

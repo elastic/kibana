@@ -49,6 +49,7 @@ import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
 import type { SkillServiceStart } from '../skills';
+import type { PluginsServiceStart } from '../plugins/plugin_service';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -83,6 +84,7 @@ export interface CreateScopedRunnerDeps {
   skillsStore: WritableSkillsStore;
   attachmentStateManager: AttachmentStateManager;
   skillServiceStart: SkillServiceStart;
+  pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
   filestore: IFileStore;
 }

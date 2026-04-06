@@ -13,9 +13,13 @@ import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
+import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
+import { UpsellingProvider } from '../../../common/components/upselling_provider';
+import { DiscoverInTimelineContextProvider } from '../../../common/components/discover_in_timeline/provider';
 
 export const flyoutProviders = ({
   services,
@@ -43,9 +47,19 @@ export const flyoutProviders = ({
       <CellActionsProvider
         getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
       >
-        <Provider store={store}>
-          <ReactQueryClientProvider>{flyoutContent}</ReactQueryClientProvider>
-        </Provider>
+        <NavigationProvider core={services}>
+          <Provider store={store}>
+            <ReactQueryClientProvider>
+              <UserPrivilegesProvider kibanaCapabilities={services.application.capabilities}>
+                <UpsellingProvider upsellingService={services.upselling}>
+                  <DiscoverInTimelineContextProvider>
+                    {flyoutContent}
+                  </DiscoverInTimelineContextProvider>
+                </UpsellingProvider>
+              </UserPrivilegesProvider>
+            </ReactQueryClientProvider>
+          </Provider>
+        </NavigationProvider>
       </CellActionsProvider>
     </KibanaContextProvider>
   );

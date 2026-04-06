@@ -12,10 +12,12 @@
 export const internalNamespaces = {
   platformCore: 'platform.core',
   platformDashboard: 'platform.dashboard',
+  platformStreams: 'platform.streams',
   filestore: 'filestore',
   attachments: 'attachments',
   observability: 'observability',
   security: 'security',
+  streams: 'platform.streams',
   workflows: 'platform.workflows',
 } as const;
 
@@ -28,7 +30,9 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.filestore,
   internalNamespaces.observability,
   internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
+  internalNamespaces.platformStreams,
   internalNamespaces.security,
+  internalNamespaces.streams,
   internalNamespaces.workflows,
 ];
 

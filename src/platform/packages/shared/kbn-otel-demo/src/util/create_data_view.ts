@@ -84,9 +84,8 @@ export async function createDataView({
     }
 
     throw new Error(`Failed to create data view: ${response.status} ${responseText}`);
-  } catch (error: any) {
-    // Handle connection errors (Kibana not running)
-    if (error.code === 'ECONNREFUSED') {
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code === 'ECONNREFUSED') {
       log.warning(
         `Could not connect to Kibana at ${kibanaUrl}. Make sure Kibana is running before starting the OTel Demo.`
       );

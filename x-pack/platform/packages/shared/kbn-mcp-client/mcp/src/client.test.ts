@@ -623,7 +623,7 @@ describe('McpClient', () => {
       expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
     });
 
-    it('filters out resource_link content parts', async () => {
+    it('preserves resource_link content parts', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
@@ -639,7 +639,46 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
+      expect(result.content).toEqual([
+        { type: 'text', text: 'Text result' },
+        { type: 'resource_link', uri: 'https://example.com', name: 'Resource' },
+      ]);
+    });
+
+    it('preserves embedded resource content parts', async () => {
+      const client = await createConnectedClient();
+
+      mockClient.callTool.mockResolvedValue({
+        isError: false,
+        content: [
+          { type: 'text', text: 'Text result' },
+          {
+            type: 'resource',
+            resource: {
+              uri: 'file:///project/src/main.rs',
+              mimeType: 'text/x-rust',
+              text: 'fn main() {\\n  println!("Hello world!");\\n}',
+            },
+          },
+        ],
+      });
+
+      const result = await client.callTool({
+        name: 'test-tool',
+        arguments: {},
+      });
+
+      expect(result.content).toEqual([
+        { type: 'text', text: 'Text result' },
+        {
+          type: 'resource',
+          resource: {
+            uri: 'file:///project/src/main.rs',
+            mimeType: 'text/x-rust',
+            text: 'fn main() {\\n  println!("Hello world!");\\n}',
+          },
+        },
+      ]);
     });
 
     it('handles empty content array', async () => {
@@ -768,7 +807,7 @@ describe('McpClient', () => {
       );
     });
 
-    it('throws error with empty message when no text content parts', async () => {
+    it('throws error with default message when no text content parts', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
@@ -777,7 +816,7 @@ describe('McpClient', () => {
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        `Error calling tool 'test-tool' with arguments '{}': `
+        `Error calling tool 'test-tool' with arguments '{}': Unknown tool error`
       );
     });
 

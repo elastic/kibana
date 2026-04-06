@@ -17,6 +17,7 @@ const mockAddDynamicConnectorsToCache = jest.fn();
 jest.mock('../../../common/schema', () => ({
   getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
   addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
+  getCachedAllConnectorsMap: () => null,
 }));
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
@@ -25,9 +26,7 @@ const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, contex
 describe('registerGetStepDefinitionsTool', () => {
   let registeredTool: BuiltinToolDefinition;
   const api = {
-    getAvailableConnectors: jest
-      .fn()
-      .mockResolvedValue({ connectorsByType: {}, totalConnectors: 0 }),
+    getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
   } as any;
 
   beforeEach(async () => {
@@ -123,15 +122,27 @@ describe('registerGetStepDefinitionsTool', () => {
     expect(allParamNames).not.toContain('timeout');
   });
 
-  it('does not include outputSchema or outputSummary', async () => {
+  it('does not include outputSummary by default', async () => {
     const result = await invokeHandler(
       registeredTool,
-      { stepType: 'if' },
+      { stepType: 'kibana.createCase' },
       { spaceId: 'default', request: {} }
     );
     const data = result.results[0].data as any;
     expect(data.stepTypes[0]).not.toHaveProperty('outputSchema');
     expect(data.stepTypes[0]).not.toHaveProperty('outputSummary');
+  });
+
+  it('includes outputSummary when includeOutputSummary is true', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { stepType: 'kibana.createCase', includeOutputSummary: true },
+      { spaceId: 'default', request: {} }
+    );
+    const data = result.results[0].data as any;
+    expect(data.stepTypes[0]).not.toHaveProperty('outputSchema');
+    expect(data.stepTypes[0]).toHaveProperty('outputSummary');
+    expect(typeof data.stepTypes[0].outputSummary).toBe('string');
   });
 
   it('returns full schema when includeFullSchema is true', async () => {

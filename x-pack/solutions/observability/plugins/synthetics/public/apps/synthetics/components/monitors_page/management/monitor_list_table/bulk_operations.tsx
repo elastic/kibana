@@ -19,9 +19,12 @@ export const BulkOperations = ({
 }: {
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
-  setMonitorPendingReset: (val: string[]) => void;
+  setMonitorPendingReset: (val: {
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  }) => void;
 }) => {
-  const { isUnhealthy } = useMonitorIntegrationHealth();
+  const { isUnhealthy, isFixableByReset } = useMonitorIntegrationHealth();
 
   const onDeleted = () => {
     setMonitorPendingDeletion(selectedItems.map((item) => item[ConfigKey.CONFIG_ID]));
@@ -29,9 +32,16 @@ export const BulkOperations = ({
 
   const selectedConfigIds = selectedItems.map((item) => item[ConfigKey.CONFIG_ID]);
   const unhealthyConfigIds = selectedConfigIds.filter((id) => isUnhealthy(id));
+  const resetIds = unhealthyConfigIds.filter((id) => isFixableByReset(id));
+  const skippedMonitors = selectedItems
+    .filter((item) => {
+      const id = item[ConfigKey.CONFIG_ID];
+      return isUnhealthy(id) && !isFixableByReset(id);
+    })
+    .map((item) => ({ id: item[ConfigKey.CONFIG_ID], name: item[ConfigKey.NAME] }));
 
   const onReset = () => {
-    setMonitorPendingReset(unhealthyConfigIds);
+    setMonitorPendingReset({ resetIds, skippedMonitors });
   };
 
   if (selectedItems.length === 0) {
@@ -40,7 +50,7 @@ export const BulkOperations = ({
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
-      {unhealthyConfigIds.length > 0 && (
+      {resetIds.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="syntheticsBulkResetIntegrationButton"
@@ -52,7 +62,7 @@ export const BulkOperations = ({
             {i18n.translate('xpack.synthetics.bulkOperations.resetIntegration', {
               defaultMessage:
                 'Reset {count, number} {count, plural, one {monitor} other {monitors}}',
-              values: { count: unhealthyConfigIds.length },
+              values: { count: resetIds.length },
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>

@@ -11,7 +11,8 @@ import {
   useInstallEntityStoreV2,
   type Services,
 } from './useInstallEntityStoreV2';
-import { ENTITY_STORE_ROUTES, EntityStoreStatus, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
+import { EntityStoreStatus } from '../../common';
+import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
 
 interface MockServices {
   http: { get: jest.Mock; post: jest.Mock };

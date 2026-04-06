@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ValidatedFile, FileValidationError } from '../hooks/use_validate_yaml';
 import { useParseYaml } from '../hooks/use_parse_yaml';
 import type { ParsedTemplateEntry, ParseYamlError } from '../hooks/use_parse_yaml';

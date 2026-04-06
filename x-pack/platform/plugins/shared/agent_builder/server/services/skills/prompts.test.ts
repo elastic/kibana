@@ -82,7 +82,7 @@ describe('getSkillsInstructions', () => {
   });
 
   describe('when skills are available', () => {
-    it('returns formatted skills list under skills tag', async () => {
+    it('returns formatted skills list', async () => {
       const filesystem = createMockFileStore();
       const skill1 = createSkillFileEntry(
         '/skills/platform/core/test-skill/SKILL.md',
@@ -102,11 +102,9 @@ describe('getSkillsInstructions', () => {
       expect(result).toContain(
         'Before using any general-purpose tool or model knowledge, you MUST first check the available skills below.'
       );
-      expect(result).toContain('<skills>');
-      expect(result).toContain('</skills>');
     });
 
-    it('includes skill entries in XML format', async () => {
+    it('includes skill entries in markdown list format', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
         '/skills/platform/core/test-skill/SKILL.md',
@@ -117,10 +115,9 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<skill path="/skills/platform/core/test-skill/SKILL.md">');
-      expect(result).toContain('<name>test-skill</name>');
-      expect(result).toContain('<description>A test skill description</description>');
-      expect(result).toContain('</skill>');
+      expect(result).toContain(
+        '- test-skill (/skills/platform/core/test-skill/SKILL.md): A test skill description'
+      );
     });
 
     it('sorts skills by path', async () => {
@@ -194,7 +191,7 @@ describe('getSkillsInstructions', () => {
       expect(result).toContain('monitor-skill');
     });
 
-    it('includes all skill metadata in XML format', async () => {
+    it('includes all skill metadata in the list entry', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
         '/skills/platform/core/complex-skill/SKILL.md',
@@ -205,12 +202,8 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      const skillBlock = result.match(/<skill[^>]*>[\s\S]*?<\/skill>/)?.[0];
-      expect(skillBlock).toBeDefined();
-      expect(skillBlock).toContain('path="/skills/platform/core/complex-skill/SKILL.md"');
-      expect(skillBlock).toContain('<name>complex-skill</name>');
-      expect(skillBlock).toContain(
-        '<description>A complex skill with a longer description that explains what it does</description>'
+      expect(result).toContain(
+        '- complex-skill (/skills/platform/core/complex-skill/SKILL.md): A complex skill with a longer description that explains what it does'
       );
     });
 
@@ -230,11 +223,8 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<skills>');
       expect(result).toContain('incident-triage');
       expect(result).toContain('data-exploration');
-      expect(result).not.toContain('<user_skills>');
-      expect(result).not.toContain('<builtin_skills>');
       expect(result).not.toContain('HIGHEST PRIORITY');
     });
   });
@@ -251,7 +241,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<description></description>');
+      expect(result).toContain('- empty-desc (skills/platform/core/empty-desc/SKILL.md): ');
     });
 
     it('handles skills with special characters in description', async () => {
@@ -265,9 +255,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain(
-        'Description with &quot;quotes&quot; and &lt;tags&gt; and &amp;ampersands'
-      );
+      expect(result).toContain('Description with "quotes" and <tags> and &ampersands');
     });
 
     it('handles very long skill descriptions', async () => {

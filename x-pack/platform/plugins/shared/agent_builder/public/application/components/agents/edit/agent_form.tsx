@@ -58,6 +58,7 @@ import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { SkillsTab } from './tabs/skills_tab';
+import { PluginsTab } from './tabs/plugins_tab';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
@@ -146,6 +147,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     submit,
     tools,
     skills,
+    plugins,
     error,
   } = useAgentEdit({
     editingAgentId,
@@ -213,7 +215,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      deferNavigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+      deferNavigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: data.id }));
     },
     [deferNavigateToAgentBuilderUrl, handleSave]
   );
@@ -246,6 +248,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     const selectedIds = new Set(ids);
     return skills.filter((skill) => selectedIds.has(skill.id)).length;
   }, [skills, agentSkills]);
+
+  const agentPlugins = watch('configuration.plugin_ids') as string[] | undefined;
+  const activePluginsCount = useMemo(() => {
+    const ids = agentPlugins ?? [];
+    const selectedIds = new Set(ids);
+    return plugins.filter((plugin) => selectedIds.has(plugin.id)).length;
+  }, [plugins, agentPlugins]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -319,6 +328,32 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 </EuiNotificationBadge>
               ),
             },
+            {
+              id: 'plugins',
+              name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
+                defaultMessage: 'Plugins',
+              }),
+              content: (
+                <PluginsTab
+                  control={control}
+                  plugins={plugins}
+                  isLoading={isLoading}
+                  isFormDisabled={isFormDisabled || !manageAgents}
+                />
+              ),
+              append: (
+                <EuiNotificationBadge
+                  color="subdued"
+                  css={css`
+                    block-size: 20px;
+                    min-inline-size: ${euiTheme.size.l};
+                    padding: 0 ${euiTheme.size.xs};
+                  `}
+                >
+                  {activePluginsCount}
+                </EuiNotificationBadge>
+              ),
+            },
           ]
         : []),
     ],
@@ -331,11 +366,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       editingAgentId,
       tools,
       skills,
+      plugins,
       isLoading,
       euiTheme,
       activeToolsCount,
       agentState?.created_by,
       activeSkillsCount,
+      activePluginsCount,
       manageAgents,
       isExperimentalFeaturesEnabled,
     ]
@@ -394,7 +431,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         <EuiButton
           {...commonProps}
           onClick={() =>
-            navigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: editingAgentId }))
+            navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: editingAgentId }))
           }
         >
           {i18n.translate('xpack.agentBuilder.agents.form.chatButton', {

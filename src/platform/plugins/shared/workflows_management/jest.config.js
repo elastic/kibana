@@ -10,11 +10,15 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/shared/workflows_management'],
+  roots: [
+    '<rootDir>/src/platform/plugins/shared/workflows_management/common',
+    '<rootDir>/src/platform/plugins/shared/workflows_management/public',
+    '<rootDir>/src/platform/plugins/shared/workflows_management/test/connector_workflows',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/workflows_management',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/platform/plugins/shared/workflows_management/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/workflows_management/{common,public}/**/*.{js,ts,tsx}',
   ],
 };

@@ -51,6 +51,7 @@ interface GetCasesConnectorTypeArgs {
   ) => Promise<SavedObjectsClientContract>;
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: string;
+  isCasesAttachmentsEnabled: boolean;
 }
 
 export const getCasesConnectorType = ({
@@ -58,6 +59,7 @@ export const getCasesConnectorType = ({
   getSpaceId,
   getUnsecuredSavedObjectsClient,
   serverlessProjectType,
+  isCasesAttachmentsEnabled,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -66,7 +68,12 @@ export const getCasesConnectorType = ({
   name: CASES_CONNECTOR_TITLE,
   getService: (params) =>
     new CasesConnector({
-      casesParams: { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient },
+      casesParams: {
+        getCasesClient,
+        getSpaceId,
+        getUnsecuredSavedObjectsClient,
+        isCasesAttachmentsEnabled,
+      },
       connectorParams: params,
     }),
   schema: {

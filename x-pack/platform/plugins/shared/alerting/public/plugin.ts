@@ -139,10 +139,6 @@ export class AlertingPublicPlugin
           const navUrl = navigationHandler(rule);
           if (navUrl) return navUrl;
         }
-
-        if (rule.viewInAppRelativeUrl) {
-          return rule.viewInAppRelativeUrl;
-        }
       },
       getMaxAlertsPerRun: () => {
         return this.maxAlertsPerRun;

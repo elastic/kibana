@@ -6,51 +6,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LocationHealthStatusValue } from '../../../../../../common/runtime_types';
+import { PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 
 export const STATUS_LABELS: Record<
-  Exclude<LocationHealthStatusValue, LocationHealthStatusValue.Healthy>,
+  Exclude<PrivateLocationHealthStatusValue, PrivateLocationHealthStatusValue.Healthy>,
   string
 > = {
-  [LocationHealthStatusValue.MissingPackagePolicy]: i18n.translate(
+  [PrivateLocationHealthStatusValue.MissingPackagePolicy]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingPackagePolicy',
     {
-      defaultMessage: 'The Fleet package policy for this monitor/location pair does not exist.',
+      defaultMessage:
+        'The Fleet package policy for this monitor and private location pair does not exist.',
     }
   ),
-  [LocationHealthStatusValue.MissingAgentPolicy]: i18n.translate(
+  [PrivateLocationHealthStatusValue.MissingAgentPolicy]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingAgentPolicy',
     {
       defaultMessage: 'The agent policy referenced by this private location no longer exists.',
     }
   ),
-  [LocationHealthStatusValue.AgentPolicyMismatch]: i18n.translate(
-    'xpack.synthetics.monitorHealth.status.agentPolicyMismatch',
-    {
-      defaultMessage:
-        'The package policy exists but is attached to a different agent policy than expected.',
-    }
-  ),
-  [LocationHealthStatusValue.MissingLocation]: i18n.translate(
+  [PrivateLocationHealthStatusValue.MissingLocation]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingLocation',
     {
       defaultMessage: 'The monitor references a private location that no longer exists.',
     }
   ),
-  [LocationHealthStatusValue.PackageNotInstalled]: i18n.translate(
-    'xpack.synthetics.monitorHealth.status.packageNotInstalled',
-    {
-      defaultMessage: 'The synthetics Fleet package is not installed.',
-    }
-  ),
-  [LocationHealthStatusValue.MissingAgents]: i18n.translate(
+  [PrivateLocationHealthStatusValue.MissingAgents]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingAgents',
     {
       defaultMessage:
         'No Fleet agents are enrolled in the agent policy for this private location. Enroll an agent in Fleet to resolve this.',
     }
   ),
-  [LocationHealthStatusValue.UnhealthyAgent]: i18n.translate(
+  [PrivateLocationHealthStatusValue.UnhealthyAgent]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.unhealthyAgent',
     {
       defaultMessage:
@@ -59,7 +47,14 @@ export const STATUS_LABELS: Record<
   ),
 };
 
-export const getStatusLabel = (status: LocationHealthStatusValue): string | undefined => {
-  if (status === LocationHealthStatusValue.Healthy) return undefined;
+export const getStatusLabel = (status: PrivateLocationHealthStatusValue): string | undefined => {
+  if (status === PrivateLocationHealthStatusValue.Healthy) return undefined;
   return STATUS_LABELS[status];
 };
+
+export const RESET_FIXABLE_STATUSES = new Set([
+  PrivateLocationHealthStatusValue.MissingPackagePolicy,
+]);
+
+export const isFixableByResetStatus = (status: PrivateLocationHealthStatusValue): boolean =>
+  RESET_FIXABLE_STATUSES.has(status);

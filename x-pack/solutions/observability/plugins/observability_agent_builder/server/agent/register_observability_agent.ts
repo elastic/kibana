@@ -157,8 +157,8 @@ export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string 
   | Service Map | [Service Map](${urlPrefix}/app/apm/services/<serviceName>/service-map) | "Check the [Service Map](${urlPrefix}/app/apm/services/payments/service-map) to see dependencies." |
   | Dependencies | [Dependencies](${urlPrefix}/app/apm/services/<serviceName>/dependencies) | "View [Dependencies](${urlPrefix}/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
   | Alert | [<alertId>](${urlPrefix}/app/observability/alerts/<alertId>) | "Alert [alert-uuid-123](${urlPrefix}/app/observability/alerts/alert-uuid-123) was triggered." |
-  | Alert Rules | [<alertRuleId>](${urlPrefix}/app/observability/alerts/rules/<alertRuleId>) | "Alert Rule [alert-uuid-123](${urlPrefix}/app/observability/alerts/rules/alert-uuid-123)." |
-  | Logs Explorer | [Logs](${urlPrefix}/app/logs) | "View [Logs](${urlPrefix}/app/logs) to investigate the issue further." |
+  | Alert Rules | [<alertRuleId>](${urlPrefix}/app/rules/rule/<alertRuleId>) | "Alert Rule [alert-uuid-123](${urlPrefix}/app/rules/rule/alert-uuid-123)." |
+  | Discover | [Discover](${urlPrefix}/app/discover) | "Go to [Discover](${urlPrefix}/app/discover) to investigate the issue further." |
   </entity_linking>
 `);
 }

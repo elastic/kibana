@@ -83,6 +83,7 @@
     "@kbn/licensing-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/elastic-assistant",
+    "@kbn/inference-connectors",
     "@kbn/react-query",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
@@ -106,11 +107,14 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-data-streams-server",
     "@kbn/task-manager-plugin",
-    "@kbn/deeplinks-data-sources",
     "@kbn/evals-plugin",
     "@kbn/usage-api-plugin",
     "@kbn/es-query",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/security-plugin-types-server",
     "@kbn/shared-ux-ai-components",
     "@kbn/fs",
+    "@kbn/react-hooks",
+    "@kbn/search-inference-endpoints",
   ]
 }

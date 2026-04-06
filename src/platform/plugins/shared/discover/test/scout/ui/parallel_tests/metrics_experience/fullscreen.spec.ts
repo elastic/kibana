@@ -40,7 +40,7 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should toggle fullscreen mode via button', async ({ pageObjects }) => {
+    spaceTest('should toggle fullscreen mode via button', async ({ pageObjects, page }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
@@ -57,6 +57,17 @@ spaceTest.describe(
       await spaceTest.step('verify grid is visible in fullscreen', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
+      });
+
+      await spaceTest.step('fullscreen mode has no a11y violations', async () => {
+        // Exclude the grid subtree due to known aria-required-children /
+        // aria-required-parent violations (missing role="row" wrapper).
+        // Tracked in https://github.com/elastic/kibana/issues/258447
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="metricsGridWrapper-fullScreen"]'],
+          exclude: ['[data-test-subj="unifiedMetricsExperienceGrid"]'],
+        });
+        expect(violations).toHaveLength(0);
       });
 
       await spaceTest.step('exit fullscreen mode via button', async () => {

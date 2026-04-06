@@ -12,7 +12,7 @@ import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { isEcsAllowedValue } from '../utils/event_utils';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 
 export interface UseShowEventOverviewParams {
   /**

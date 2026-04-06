@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { SearchInferenceEndpointsPlugin } from './plugin';
 import {
+  ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
   MODEL_SETTINGS_APP_ID,
   PLUGIN_ID,
@@ -53,7 +54,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         minimumLicense: 'enterprise',
         category: DEFAULT_APP_CATEGORIES.management,
         management: {
-          ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+          ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
         },
       });
     });
@@ -65,7 +66,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       expect(feature.privileges?.all).toMatchObject({
         management: {
-          ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+          ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
         },
       });
     });

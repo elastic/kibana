@@ -6,10 +6,11 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ConfigKey,
-  LocationHealthStatusValue,
+  PrivateLocationHealthStatusValue,
   SourceType,
   type EncryptedSyntheticsMonitorAttributes,
 } from '../../common/runtime_types';
@@ -171,9 +172,13 @@ describe('MonitorIntegrationHealthApi', () => {
 
   describe('monitor fetching and partial errors', () => {
     it('returns empty monitors and errors when all monitors fail to fetch', async () => {
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'synthetics-monitor',
+        'mon-1'
+      );
       const api = buildApi({
         monitorConfigRepository: {
-          get: jest.fn().mockRejectedValue(new Error('Saved object not found')),
+          get: jest.fn().mockRejectedValue(notFoundError),
         },
       });
 
@@ -181,17 +186,21 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(0);
       expect(result.errors).toEqual([
-        { configId: 'mon-1', error: 'Saved object not found' },
-        { configId: 'mon-2', error: 'Saved object not found' },
+        { configId: 'mon-1', message: notFoundError.message, statusCode: 404 },
+        { configId: 'mon-2', message: notFoundError.message, statusCode: 404 },
       ]);
     });
 
     it('returns partial results when some monitors fail', async () => {
       const successSO = createMonitorSO('mon-1', { name: 'Good Monitor' });
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'synthetics-monitor',
+        'mon-2'
+      );
       const getMock = jest
         .fn()
         .mockResolvedValueOnce(successSO)
-        .mockRejectedValueOnce(new Error('Not found'));
+        .mockRejectedValueOnce(notFoundError);
 
       const api = buildApi({ monitorConfigRepository: { get: getMock } });
 
@@ -199,7 +208,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(1);
       expect(result.monitors[0].configId).toBe('mon-1');
-      expect(result.errors).toEqual([{ configId: 'mon-2', error: 'Not found' }]);
+      expect(result.errors).toEqual([
+        { configId: 'mon-2', message: notFoundError.message, statusCode: 404 },
+      ]);
     });
 
     it('provides a default error message when rejection has no message', async () => {
@@ -211,7 +222,40 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.errors).toEqual([{ configId: 'mon-1', error: 'Failed to fetch monitor' }]);
+      expect(result.errors).toEqual([
+        { configId: 'mon-1', message: 'Failed to fetch monitor', statusCode: 500 },
+      ]);
+    });
+
+    it('includes statusCode for non-404 SavedObjects errors via output.statusCode', async () => {
+      const forbiddenError = SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error('Access denied')
+      );
+      const api = buildApi({
+        monitorConfigRepository: {
+          get: jest.fn().mockRejectedValue(forbiddenError),
+        },
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.errors).toEqual([
+        { configId: 'mon-1', message: 'Access denied', statusCode: 403 },
+      ]);
+    });
+
+    it('defaults statusCode to 500 for generic errors without output.statusCode', async () => {
+      const api = buildApi({
+        monitorConfigRepository: {
+          get: jest.fn().mockRejectedValue(new Error('Something went wrong')),
+        },
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.errors).toEqual([
+        { configId: 'mon-1', message: 'Something went wrong', statusCode: 500 },
+      ]);
     });
   });
 
@@ -231,94 +275,11 @@ describe('MonitorIntegrationHealthApi', () => {
         {
           configId: 'mon-1',
           monitorName: 'Monitor mon-1',
-          isUnhealthy: false,
-          locations: [],
+          isHealthy: true,
+          privateLocations: [],
         },
       ]);
       expect(result.errors).toHaveLength(0);
-    });
-  });
-
-  describe('package not installed', () => {
-    it('returns PackageNotInstalled for all private locations when synthetics package is not installed', async () => {
-      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
-      const so = createMonitorSO('mon-1', {
-        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
-
-      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetInstallation,
-      });
-
-      const result = await api.getHealth(['mon-1']);
-
-      expect(result.monitors).toHaveLength(1);
-      const locStatus = result.monitors[0].locations[0];
-      expect(locStatus.status).toBe(LocationHealthStatusValue.PackageNotInstalled);
-      expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
-    });
-
-    it('skips package/agent policy fetches when package is not installed', async () => {
-      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
-      const so = createMonitorSO('mon-1', {
-        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
-
-      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const fleetGetByIDs = jest.fn();
-      const fleetAgentPolicyGetByIds = jest.fn();
-      const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetInstallation,
-        fleetGetByIDs,
-        fleetAgentPolicyGetByIds,
-      });
-
-      await api.getHealth(['mon-1']);
-
-      expect(fleetGetByIDs).not.toHaveBeenCalled();
-      expect(fleetAgentPolicyGetByIds).not.toHaveBeenCalled();
-    });
-
-    it('marks all locations across multiple monitors as PackageNotInstalled', async () => {
-      const privateLoc1 = createPrivateLocation('loc-1', 'agent-1', 'Location 1');
-      const privateLoc2 = createPrivateLocation('loc-2', 'agent-2', 'Location 2');
-
-      const so1 = createMonitorSO('mon-1', {
-        locations: [
-          { id: 'loc-1', label: 'Location 1', isServiceManaged: false },
-          { id: 'loc-2', label: 'Location 2', isServiceManaged: false },
-        ],
-      });
-      const so2 = createMonitorSO('mon-2', {
-        locations: [{ id: 'loc-1', label: 'Location 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
-
-      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const getMock = jest.fn().mockResolvedValueOnce(so1).mockResolvedValueOnce(so2);
-      const api = buildApi({
-        monitorConfigRepository: { get: getMock },
-        fleetGetInstallation,
-      });
-
-      const result = await api.getHealth(['mon-1', 'mon-2']);
-
-      expect(result.monitors).toHaveLength(2);
-      for (const monitor of result.monitors) {
-        expect(monitor.isUnhealthy).toBe(true);
-        for (const loc of monitor.locations) {
-          expect(loc.status).toBe(LocationHealthStatusValue.PackageNotInstalled);
-        }
-      }
     });
   });
 
@@ -346,13 +307,14 @@ describe('MonitorIntegrationHealthApi', () => {
         {
           configId: 'mon-1',
           monitorName: 'Monitor mon-1',
-          isUnhealthy: false,
-          locations: [
+          isHealthy: true,
+          privateLocations: [
             {
               locationId: 'priv-loc-1',
               locationLabel: 'Private Location priv-loc-1',
-              status: LocationHealthStatusValue.Healthy,
-              policyId: expectedPolicyId,
+              status: PrivateLocationHealthStatusValue.Healthy,
+              packagePolicyId: expectedPolicyId,
+              agentPolicyId: 'agent-policy-1',
             },
           ],
         },
@@ -377,10 +339,10 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      const locStatus = result.monitors[0].locations[0];
-      expect(locStatus.status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
+      const locStatus = result.monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.MissingPackagePolicy);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
   });
 
@@ -398,11 +360,11 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      const locStatus = result.monitors[0].locations[0];
-      expect(locStatus.status).toBe(LocationHealthStatusValue.MissingLocation);
+      const locStatus = result.monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.MissingLocation);
       expect(locStatus.locationLabel).toBe('Gone Location');
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
 
     it('falls back to location id when label is missing', async () => {
@@ -418,7 +380,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0].locationLabel).toBe('gone-loc');
+      expect(result.monitors[0].privateLocations[0].locationLabel).toBe('gone-loc');
     });
   });
 
@@ -439,10 +401,10 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      const locStatus = result.monitors[0].locations[0];
-      expect(locStatus.status).toBe(LocationHealthStatusValue.MissingAgentPolicy);
+      const locStatus = result.monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.MissingAgentPolicy);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
 
     it('correctly distinguishes between existing and missing agent policies across locations', async () => {
@@ -472,37 +434,12 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[1].status).toBe(
-        LocationHealthStatusValue.MissingAgentPolicy
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
       );
-    });
-  });
-
-  describe('agent policy mismatch', () => {
-    it('returns AgentPolicyMismatch when the package policy is attached to a different agent policy', async () => {
-      const privateLoc = createPrivateLocation('priv-loc-1', 'expected-agent-policy');
-      const so = createMonitorSO('mon-1', {
-        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
-
-      const expectedPolicyId = 'mon-1-priv-loc-1';
-      const packagePolicy = createPackagePolicy(expectedPolicyId, ['wrong-agent-policy']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-
-      const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
-      });
-
-      const result = await api.getHealth(['mon-1']);
-
-      const locStatus = result.monitors[0].locations[0];
-      expect(locStatus.status).toBe(LocationHealthStatusValue.AgentPolicyMismatch);
-      expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].privateLocations[1].status).toBe(
+        PrivateLocationHealthStatusValue.MissingAgentPolicy
+      );
     });
   });
 
@@ -527,8 +464,10 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[0].policyId).toBe(expectedPolicyId);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
+      expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(expectedPolicyId);
     });
   });
 
@@ -575,15 +514,19 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const mon1 = result.monitors[0];
       expect(mon1.configId).toBe('mon-1');
-      expect(mon1.locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(mon1.locations[1].status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
-      expect(mon1.isUnhealthy).toBe(true);
+      expect(mon1.privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(mon1.privateLocations[1].status).toBe(
+        PrivateLocationHealthStatusValue.MissingPackagePolicy
+      );
+      expect(mon1.isHealthy).toBe(false);
 
       const mon2 = result.monitors[1];
       expect(mon2.configId).toBe('mon-2');
-      expect(mon2.locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(mon2.locations[1].status).toBe(LocationHealthStatusValue.MissingLocation);
-      expect(mon2.isUnhealthy).toBe(true);
+      expect(mon2.privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(mon2.privateLocations[1].status).toBe(
+        PrivateLocationHealthStatusValue.MissingLocation
+      );
+      expect(mon2.isHealthy).toBe(false);
     });
   });
 
@@ -607,9 +550,11 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[0].policyId).toBe(legacyPolicyId);
-      expect(result.monitors[0].isUnhealthy).toBe(false);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
+      expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(legacyPolicyId);
+      expect(result.monitors[0].isHealthy).toBe(true);
     });
 
     it('prefers new-format policy ID when both formats exist', async () => {
@@ -636,11 +581,13 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[0].policyId).toBe(newPolicyId);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
+      expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
     });
 
-    it('reports AgentPolicyMismatch for legacy policy attached to wrong agent', async () => {
+    it('reports healthy for legacy policy even when attached to a different agent', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'expected-agent');
       const so = createMonitorSO('mon-1', {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
@@ -659,10 +606,10 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0].status).toBe(
-        LocationHealthStatusValue.AgentPolicyMismatch
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
       );
-      expect(result.monitors[0].locations[0].policyId).toBe(legacyPolicyId);
+      expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(legacyPolicyId);
     });
   });
 
@@ -690,10 +637,10 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      const locStatus = result.monitors[0].locations[0];
-      expect(locStatus.status).toBe(LocationHealthStatusValue.MissingAgents);
+      const locStatus = result.monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.MissingAgents);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
   });
 
@@ -721,10 +668,10 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      const locStatus = result.monitors[0].locations[0];
-      expect(locStatus.status).toBe(LocationHealthStatusValue.UnhealthyAgent);
+      const locStatus = result.monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.UnhealthyAgent);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
 
     it('returns Healthy when at least one agent is online', async () => {
@@ -750,8 +697,8 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].isUnhealthy).toBe(false);
+      expect(result.monitors[0].privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(result.monitors[0].isHealthy).toBe(true);
     });
   });
 
@@ -775,7 +722,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].locations[0]).not.toHaveProperty('reason');
+      expect(result.monitors[0].privateLocations[0]).not.toHaveProperty('reason');
     });
   });
 });

@@ -34,6 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const STREAM_NAME = 'logs.otel.queries-test';
   const stream: Streams.WiredStream.UpsertRequest['stream'] = {
+    type: 'wired',
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
@@ -157,6 +158,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const rules = await alertingApi.searchRules(roleAuthc, '');
         expect(rules.body.data).to.have.length(1);
         expect(rules.body.data[0].name).to.eql(query.title);
+      });
+
+      it('returns 400 and does not save when ES|QL query is missing METADATA _id,_source', async () => {
+        const queryId = v4();
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId },
+              body: {
+                title: 'missing metadata',
+                esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'x'")` },
+              },
+            },
+          })
+          .expect(400);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([]);
+      });
+
+      it('returns 400 and does not save when ES|QL query references invalid sources', async () => {
+        const queryId = v4();
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId },
+              body: {
+                title: 'invalid sources',
+                esql: { query: 'FROM logs.ecs METADATA _id, _source' },
+              },
+            },
+          })
+          .expect(400);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([]);
       });
 
       it('updates the query and create a new rule when updating an existing query esql', async () => {
@@ -389,6 +426,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(initialThirdRuleId).not.to.eql(
         updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
       );
+    });
+
+    it('returns 400 and does not apply changes when bulk includes an invalid ES|QL query', async () => {
+      const firstQuery = {
+        id: 'first',
+        title: 'first query',
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
+        },
+      };
+      await putStream(apiClient, STREAM_NAME, {
+        stream,
+        ...emptyAssets,
+        queries: [firstQuery],
+      });
+
+      const invalidQuery = {
+        id: 'invalid',
+        title: 'invalid query',
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query invalid")`,
+        },
+      };
+
+      await apiClient
+        .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME },
+            body: {
+              operations: [{ index: invalidQuery }, { delete: { id: firstQuery.id } }],
+            },
+          },
+        })
+        .expect(400);
+
+      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+      expect(getQueriesResponse.queries).to.eql([firstQuery]);
     });
   });
 }

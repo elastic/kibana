@@ -12,7 +12,7 @@ import { timeRangeSchema } from '@kbn/es-query-server';
 import { accessControlSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export const searchRequestBodySchema = schema.object({
+export const searchRequestParamsSchema = schema.object({
   page: schema.maybe(
     schema.number({
       meta: {
@@ -27,7 +27,7 @@ export const searchRequestBodySchema = schema.object({
       },
     })
   ),
-  search: schema.maybe(
+  query: schema.maybe(
     schema.string({
       meta: {
         description:
@@ -36,9 +36,19 @@ export const searchRequestBodySchema = schema.object({
     })
   ),
   tags: schema.maybe(
-    schema.object({
-      included: schema.maybe(schema.arrayOf(schema.string())),
-      excluded: schema.maybe(schema.arrayOf(schema.string())),
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching ANY of the tag IDs are included.',
+      },
+    })
+  ),
+  excluded_tags: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching ANY of the tag IDs are excluded.',
+      },
     })
   ),
 });

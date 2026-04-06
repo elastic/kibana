@@ -128,6 +128,7 @@
     "@kbn/esql",
     "@kbn/synthtrace-client",
     "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
     "@kbn/content-management-content-editor",
@@ -150,6 +151,12 @@
     "@kbn/lens-common",
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
+    "@kbn/cps",
+    "@kbn/cell-actions",
+    "@kbn/unified-data-table",
+    "@kbn/alerting-v2-plugin",
+    "@kbn/alerting-v2-episodes-ui",
+    "@kbn/expressions-plugin",
   ],
   "exclude": ["target/**/*"]
 }

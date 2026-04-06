@@ -203,7 +203,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) =>
-            createAgentBuilderUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
+            createAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: agent.id })),
         },
         {
           type: 'icon',

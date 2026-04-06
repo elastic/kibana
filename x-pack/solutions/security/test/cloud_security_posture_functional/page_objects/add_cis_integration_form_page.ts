@@ -289,10 +289,10 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickFirstElementOnIntegrationTableAddAgent = async () => {
-    const integrationList = await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
-    if (integrationList) {
-      await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
-    }
+    await retry.waitFor('Add Agent button to appear', async () => {
+      return await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
+    });
+    await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
   };
 
   const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
@@ -460,9 +460,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getFieldValueInAddAgentFlyout = async (field: string, value: string) => {
-    /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-    const integrationList = await testSubjects.findAll(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
-    await integrationList[0].click();
+    await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
     await PageObjects.header.waitUntilLoadingHasFinished();
     const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
     return fieldValue;

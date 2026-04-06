@@ -1,0 +1,546 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo, useState } from 'react';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
+  type EuiBasicTableColumn,
+  type CriteriaWithPagination,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { RuleApiResponse } from '../../services/rules_api';
+
+const descriptionTextStyle = css`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
+
+interface RuleActionsMenuProps {
+  rule: RuleApiResponse;
+  onEdit: (rule: RuleApiResponse) => void;
+  onClone: (rule: RuleApiResponse) => void;
+  onDelete: (rule: RuleApiResponse) => void;
+  onToggleEnabled: (rule: RuleApiResponse) => void;
+}
+
+const RuleActionsMenu = ({
+  rule,
+  onEdit,
+  onClone,
+  onDelete,
+  onToggleEnabled,
+}: RuleActionsMenuProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const menuItems = [
+    <EuiContextMenuItem
+      key="edit"
+      icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onEdit(rule);
+      }}
+      data-test-subj={`editRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="clone"
+      icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onClone(rule);
+      }}
+      data-test-subj={`cloneRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="toggleEnabled"
+      icon={<EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onToggleEnabled(rule);
+      }}
+      data-test-subj={`toggleEnabledRule-${rule.id}`}
+    >
+      {rule.enabled
+        ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
+            defaultMessage: 'Disable',
+          })
+        : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
+            defaultMessage: 'Enable',
+          })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="delete"
+      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onDelete(rule);
+      }}
+      data-test-subj={`deleteRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
+        defaultMessage: 'Delete',
+      })}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          iconType="boxesHorizontal"
+          aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+            defaultMessage: 'More actions',
+          })}
+          color="text"
+          onClick={() => setIsOpen((open) => !open)}
+          data-test-subj={`ruleActionsButton-${rule.id}`}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+      aria-label={i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
+        defaultMessage: 'Rule actions',
+      })}
+    >
+      <EuiContextMenuPanel size="s" items={menuItems} />
+    </EuiPopover>
+  );
+};
+
+export interface RulesListTableProps {
+  items: RuleApiResponse[];
+  totalItemCount: number;
+  page: number;
+  perPage: number;
+  search: string;
+  isLoading: boolean;
+
+  /** Bulk selection state */
+  selectedCount: number;
+  isAllSelected: boolean;
+  isPageSelected: boolean;
+  isRowSelected: (id: string) => boolean;
+  onSelectRow: (id: string) => void;
+  onSelectPage: () => void;
+  onSelectAll: () => void;
+  onClearSelection: () => void;
+
+  /** Bulk action callbacks */
+  onBulkEnable: () => void;
+  onBulkDisable: () => void;
+  onBulkDelete: () => void;
+
+  /** Row action callbacks */
+  onNavigateToDetails: (rule: RuleApiResponse) => void;
+  onEdit: (rule: RuleApiResponse) => void;
+  onClone: (rule: RuleApiResponse) => void;
+  onDelete: (rule: RuleApiResponse) => void;
+  onToggleEnabled: (rule: RuleApiResponse) => void;
+
+  /** Pagination callback */
+  onTableChange: (criteria: CriteriaWithPagination<RuleApiResponse>) => void;
+}
+
+export const RulesListTable: React.FC<RulesListTableProps> = ({
+  items,
+  totalItemCount,
+  page,
+  perPage,
+  search,
+  isLoading,
+  selectedCount,
+  isAllSelected,
+  isPageSelected,
+  isRowSelected,
+  onSelectRow,
+  onSelectPage,
+  onSelectAll,
+  onClearSelection,
+  onBulkEnable,
+  onBulkDisable,
+  onBulkDelete,
+  onNavigateToDetails,
+  onEdit,
+  onClone,
+  onDelete,
+  onToggleEnabled,
+  onTableChange,
+}) => {
+  const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
+
+  const handleBulkEnable = () => {
+    setIsBulkActionsOpen(false);
+    onBulkEnable();
+  };
+
+  const handleBulkDisable = () => {
+    setIsBulkActionsOpen(false);
+    onBulkDisable();
+  };
+
+  const handleBulkDelete = () => {
+    setIsBulkActionsOpen(false);
+    onBulkDelete();
+  };
+
+  const pagination = {
+    pageIndex: page - 1,
+    pageSize: perPage,
+    totalItemCount,
+    pageSizeOptions: [10, 20, 50],
+  };
+
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
+    () => [
+      {
+        field: 'id',
+        name: (
+          <EuiCheckbox
+            id="selectAllPage"
+            checked={isPageSelected}
+            onChange={onSelectPage}
+            aria-label={i18n.translate('xpack.alertingV2.rulesList.selectAllPage', {
+              defaultMessage: 'Select all rules on this page',
+            })}
+            data-test-subj="selectAllRulesOnPage"
+          />
+        ),
+        width: '32px',
+        render: (id: string) => (
+          <EuiCheckbox
+            id={`select-rule-${id}`}
+            checked={isRowSelected(id)}
+            onChange={() => onSelectRow(id)}
+            aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
+              defaultMessage: 'Select rule',
+            })}
+            data-test-subj={`checkboxSelectRow-${id}`}
+          />
+        ),
+      },
+      {
+        field: 'metadata',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
+        ),
+        truncateText: true,
+        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
+          <div>
+            <EuiLink
+              onClick={() => onNavigateToDetails(rule)}
+              data-test-subj={`ruleNameLink-${rule.id}`}
+            >
+              {metadata?.name ?? rule.id}
+            </EuiLink>
+            {metadata?.description && (
+              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+                {metadata.description}
+              </EuiText>
+            )}
+          </div>
+        ),
+      },
+      {
+        field: 'evaluation',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
+        ),
+        width: '18%',
+        truncateText: true,
+        render: (evaluation: RuleApiResponse['evaluation']) => {
+          const source = getIndexPatternFromESQLQuery(evaluation?.query?.base) || undefined;
+          return source ? (
+            <EuiBadge color="hollow">{source}</EuiBadge>
+          ) : (
+            <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
+          );
+        },
+      },
+      {
+        field: 'metadata',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
+        ),
+        width: '12%',
+        render: (_metadata: RuleApiResponse['metadata']) => {
+          const labels = _metadata?.labels;
+          if (!labels || labels.length === 0) {
+            return (
+              <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
+            );
+          }
+          return (
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+              {labels.map((label) => (
+                <EuiFlexItem key={label} grow={false}>
+                  <EuiBadge color="hollow">{label}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          );
+        },
+      },
+      {
+        field: 'kind',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
+        ),
+        width: '12%',
+        render: (kind: string) => (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type={kind === 'alert' ? 'bell' : 'securitySignalResolved'}
+                size="m"
+                aria-hidden={true}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {kind === 'alert'
+                ? i18n.translate('xpack.alertingV2.rulesList.modeAlerting', {
+                    defaultMessage: 'Alerting',
+                  })
+                : i18n.translate('xpack.alertingV2.rulesList.modeDetectOnly', {
+                    defaultMessage: 'Detect only',
+                  })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+      {
+        field: 'enabled',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
+        ),
+        width: '10%',
+        render: (enabled: boolean) =>
+          enabled ? (
+            <EuiBadge color="success" data-test-subj="ruleStatusEnabled">
+              {i18n.translate('xpack.alertingV2.rulesList.statusEnabled', {
+                defaultMessage: 'Enabled',
+              })}
+            </EuiBadge>
+          ) : (
+            <EuiBadge color="default" data-test-subj="ruleStatusDisabled">
+              {i18n.translate('xpack.alertingV2.rulesList.statusDisabled', {
+                defaultMessage: 'Disabled',
+              })}
+            </EuiBadge>
+          ),
+      },
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.column.actions"
+            defaultMessage="Actions"
+          />
+        ),
+        width: '6%',
+        align: 'right',
+        render: (rule: RuleApiResponse) => (
+          <RuleActionsMenu
+            rule={rule}
+            onEdit={onEdit}
+            onClone={onClone}
+            onDelete={onDelete}
+            onToggleEnabled={onToggleEnabled}
+          />
+        ),
+      },
+    ],
+    [
+      isPageSelected,
+      isRowSelected,
+      onSelectPage,
+      onSelectRow,
+      onNavigateToDetails,
+      onEdit,
+      onClone,
+      onDelete,
+      onToggleEnabled,
+    ]
+  );
+
+  const noItemsMessage = search
+    ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
+        defaultMessage: 'No rules match your search.',
+      })
+    : i18n.translate('xpack.alertingV2.rulesList.noRules', {
+        defaultMessage: 'No rules found.',
+      });
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" data-test-subj="rulesListShowingLabel">
+            <FormattedMessage
+              id="xpack.alertingV2.rulesList.showingLabel"
+              defaultMessage="Showing {rangeBold} of {totalBold}"
+              values={{
+                rangeBold: (
+                  <strong>
+                    {Math.min((page - 1) * perPage + 1, totalItemCount)}-
+                    {Math.min(page * perPage, totalItemCount)}
+                  </strong>
+                ),
+                totalBold: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.showingLabelTotal"
+                      defaultMessage="{total} {total, plural, one {Rule} other {Rules}}"
+                      values={{ total: totalItemCount }}
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {selectedCount > 0 ? (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="arrowDown"
+                    iconSide="right"
+                    onClick={() => setIsBulkActionsOpen((open) => !open)}
+                    data-test-subj="bulkActionsButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.selectedCount"
+                      defaultMessage="{count} Selected"
+                      values={{ count: selectedCount }}
+                    />
+                  </EuiButtonEmpty>
+                }
+                isOpen={isBulkActionsOpen}
+                closePopover={() => setIsBulkActionsOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+                aria-label={i18n.translate('xpack.alertingV2.rulesList.bulkAction.menu', {
+                  defaultMessage: 'Bulk actions',
+                })}
+              >
+                <EuiContextMenuPanel
+                  size="s"
+                  items={[
+                    <EuiContextMenuItem
+                      key="enable"
+                      icon={<EuiIcon type="checkCircle" size="m" aria-hidden={true} />}
+                      onClick={handleBulkEnable}
+                      data-test-subj="bulkEnableRules"
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.enable', {
+                        defaultMessage: 'Enable',
+                      })}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key="disable"
+                      icon={<EuiIcon type="crossInCircle" size="m" aria-hidden={true} />}
+                      onClick={handleBulkDisable}
+                      data-test-subj="bulkDisableRules"
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.disable', {
+                        defaultMessage: 'Disable',
+                      })}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key="delete"
+                      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
+                      onClick={handleBulkDelete}
+                      data-test-subj="bulkDeleteRules"
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
+                        defaultMessage: 'Delete',
+                      })}
+                    </EuiContextMenuItem>,
+                  ]}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+            {!isAllSelected ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="pagesSelect"
+                  onClick={onSelectAll}
+                  data-test-subj="selectAllRulesButton"
+                >
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.selectAll"
+                    defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
+                    values={{ total: totalItemCount }}
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="cross"
+                color="danger"
+                onClick={onClearSelection}
+                data-test-subj="clearSelectionButton"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.clearSelection"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
+      <EuiBasicTable
+        items={items}
+        itemId="id"
+        columns={columns}
+        loading={isLoading}
+        pagination={pagination}
+        noItemsMessage={noItemsMessage}
+        onChange={onTableChange}
+        responsiveBreakpoint={false}
+        tableCaption={i18n.translate('xpack.alertingV2.rulesList.tableCaption', {
+          defaultMessage: 'Rules',
+        })}
+        data-test-subj="rulesListTable"
+      />
+    </>
+  );
+};

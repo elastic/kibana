@@ -23,7 +23,7 @@ export const STATUS_ICON_MAP: Record<DataStreamResponse['status'], string> = {
   processing: '',
   completed: 'dot',
   failed: 'cross',
-  cancelled: 'minusInCircle',
+  cancelled: 'minusCircle',
   approved: 'check',
   deleting: '',
 };

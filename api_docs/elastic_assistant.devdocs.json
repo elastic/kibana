@@ -240,7 +240,7 @@
             "label": "anonymizationFields",
             "description": [],
             "signature": [
-              "z.infer<any>[] | undefined"
+              "{ id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 288,
@@ -346,7 +346,11 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -429,10 +433,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -1463,7 +1463,7 @@
             "label": "onNewReplacements",
             "description": [],
             "signature": [
-              "((newReplacements: z.infer<any>) => void) | undefined"
+              "((newReplacements: { [x: string]: string; }) => void) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 301,
@@ -1474,12 +1474,12 @@
               {
                 "parentPluginId": "elasticAssistant",
                 "id": "def-server.AssistantToolParams.onNewReplacements.$1",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "newReplacements",
                 "description": [],
                 "signature": [
-                  "z.infer<any>"
+                  "{ [x: string]: string; }"
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
                 "lineNumber": 301,
@@ -1494,12 +1494,12 @@
           {
             "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.replacements",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "replacements",
             "description": [],
             "signature": [
-              "any"
+              "{ [x: string]: string; } | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 302,
@@ -1516,7 +1516,7 @@
             "description": [],
             "signature": [
               "KibanaRequest",
-              "<unknown, unknown, any, any>"
+              "<unknown, unknown, { subAction: any; actionTypeId: string; replacements: { [x: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider: any; defaultSystemPromptId?: string | undefined; model?: string | undefined; }; size: number; subAction: any; connectorName?: string | undefined; end?: string | undefined; filter?: { [x: string]: unknown; } | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: { [x: string]: string; } | undefined; start?: string | undefined; } | { endpointIds: string[]; insightType: any; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider: any; defaultSystemPromptId?: string | undefined; model?: string | undefined; }; subAction: any; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: { [x: string]: string; } | undefined; }, any>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 303,

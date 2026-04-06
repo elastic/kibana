@@ -16,6 +16,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
@@ -46,13 +47,14 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     expect([200, 201]).toContain(response.statusCode);
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest('Link: should link entities to a target', async ({ apiClient, esClient }) => {
@@ -345,11 +347,11 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 });
 
 async function seedEntity(
-  apiClient: { put: Function },
+  apiClient: { post: Function },
   headers: Record<string, string>,
   entityId: string
 ): Promise<void> {
-  const response = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+  const response = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
     headers,
     responseType: 'json',
     body: { entity: { id: entityId } },

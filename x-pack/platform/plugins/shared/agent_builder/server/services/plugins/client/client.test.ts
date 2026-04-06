@@ -13,7 +13,6 @@ import type { PluginProperties } from './storage';
 const testSpace = 'default';
 
 const emptyUnmanagedAssets: UnmanagedPluginAssets = {
-  commands: [],
   agents: [],
   hooks: [],
   mcp_servers: [],
@@ -211,7 +210,6 @@ describe('PluginClient', () => {
         description: 'Brand new',
         manifest: {},
         unmanaged_assets: {
-          commands: [],
           agents: [],
           hooks: [],
           mcp_servers: [],
@@ -245,7 +243,6 @@ describe('PluginClient', () => {
           description: '',
           manifest: {},
           unmanaged_assets: {
-            commands: [],
             agents: [],
             hooks: [],
             mcp_servers: [],

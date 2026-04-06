@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
+import { dashboardSmlType } from './sml_types';
 
 export class DashboardAgentPlugin
   implements
@@ -29,6 +30,7 @@ export class DashboardAgentPlugin
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
     setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
+    setupDeps.agentBuilder.sml.registerType(dashboardSmlType);
     registerSkills(setupDeps.agentBuilder);
     return {};
   }

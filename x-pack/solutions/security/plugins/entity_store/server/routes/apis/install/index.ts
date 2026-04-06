@@ -7,11 +7,11 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { getMissingPrivileges } from '../utils/get_missing_privileges';
 
 export function registerInstall(router: EntityStorePluginRouter) {

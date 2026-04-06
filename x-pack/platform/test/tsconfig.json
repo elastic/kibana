@@ -178,8 +178,10 @@
     "@kbn/dashboard-plugin",
     "@kbn/automatic-import-v2-plugin",
     "@kbn/connector-specs",
+    "@kbn/alerting-v2-plugin",
     "@kbn/ftr-llm-proxy",
     "@kbn/dev-cli-runner",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/product-doc-common"
   ]
 }

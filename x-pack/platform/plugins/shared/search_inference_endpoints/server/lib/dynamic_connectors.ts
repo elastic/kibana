@@ -23,8 +23,6 @@ import {
   findEndpointsWithoutConnectors,
 } from '../utils/in_memory_connectors';
 
-export const initialDelayMs = 5000; // 5 seconds
-
 export class DynamicConnectorsPoller {
   private readonly logger: Logger;
   private readonly client: ElasticsearchClient;
@@ -67,18 +65,17 @@ export class DynamicConnectorsPoller {
 
   private createPollingObservable() {
     return of({}).pipe(
-      Rx.delay(initialDelayMs),
       Rx.tap(this.pollBegin.bind(this)),
       Rx.mergeMap(this.fetchInferenceEndpoints.bind(this)),
       Rx.map(this.handleInferenceEndpointsResponse.bind(this)),
       Rx.map(filterPreconfiguredEndpoints),
       Rx.map(this.generateConnectorsForEndpoints.bind(this)),
       Rx.tap(this.updateDynamicConnectors.bind(this)),
-      Rx.delay(this.pollingIntervalMs - initialDelayMs),
+      Rx.delay(this.pollingIntervalMs),
       Rx.repeat(),
       Rx.catchError(this.handleError.bind(this)),
       Rx.retry({
-        delay: this.pollingIntervalMs - initialDelayMs,
+        delay: this.pollingIntervalMs,
       })
     );
   }

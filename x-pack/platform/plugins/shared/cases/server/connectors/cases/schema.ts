@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
 import {
   CASES_CONNECTOR_TIME_WINDOW_REGEX,

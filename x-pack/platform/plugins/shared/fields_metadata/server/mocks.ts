@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createFieldsMetadataClientMock } from './services/fields_metadata/fields_metadata_client.mock';
 import {
   createFieldsMetadataServiceSetupMock,
   createFieldsMetadataServiceStartMock,
@@ -25,4 +26,5 @@ const createFieldsMetadataServerStartMock = (): jest.Mocked<FieldsMetadataServer
 export const fieldsMetadataPluginServerMock = {
   createSetupContract: createFieldsMetadataServerSetupMock,
   createStartContract: createFieldsMetadataServerStartMock,
+  createFieldsMetadataClientMock,
 };

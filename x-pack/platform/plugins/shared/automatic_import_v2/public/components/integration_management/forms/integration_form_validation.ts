@@ -55,7 +55,7 @@ const logSampleRequiredValidator = () => ({
   }) => {
     const isLogSampleProvided = value != null && value.trim();
     // Only require log sample value when upload option is selected
-    if (formData.logsSourceOption === 'upload' && !isLogSampleProvided) {
+    if (formData.logsSourceOption === 'file' && !isLogSampleProvided) {
       return { message: i18n.LOG_SAMPLE_REQUIRED };
     }
     return undefined;

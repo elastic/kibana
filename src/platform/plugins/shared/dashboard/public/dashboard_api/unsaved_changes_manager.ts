@@ -18,10 +18,8 @@ import type {
 
 import { of } from 'rxjs';
 import type { DashboardState } from '../../common';
-import {
-  getDashboardBackupService,
-  type DashboardBackupState,
-} from '../services/dashboard_backup_service';
+import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';

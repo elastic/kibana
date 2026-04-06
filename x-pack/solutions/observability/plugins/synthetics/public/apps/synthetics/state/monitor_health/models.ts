@@ -6,8 +6,8 @@
  */
 
 export {
-  LocationHealthStatusValue,
-  type LocationHealthStatus,
+  PrivateLocationHealthStatusValue as LocationHealthStatusValue,
+  type PrivateLocationHealthStatus,
   type MonitorHealthStatus,
   type MonitorHealthError,
   type MonitorsHealthResponse,

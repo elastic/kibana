@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(400);
       expect(response.body.message).to.be(
-        '[request query.xyz]: definition for this key is missing'
+        "[request query.xyz]: Additional properties are not allowed ('xyz' was unexpected)"
       );
     });
   });

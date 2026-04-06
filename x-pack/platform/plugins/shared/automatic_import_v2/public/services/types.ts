@@ -6,5 +6,9 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { AutomaticImportPluginStartDependencies } from '../types';
+import type { AIV2TelemetryService } from './telemetry';
 
-export type Services = CoreStart & AutomaticImportPluginStartDependencies;
+export type Services = CoreStart &
+  AutomaticImportPluginStartDependencies & {
+    telemetry: AIV2TelemetryService;
+  };

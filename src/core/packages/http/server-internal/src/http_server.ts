@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { context, trace, type Span as OTelSpan } from '@opentelemetry/api';
 import type { Request, Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
@@ -38,11 +39,11 @@ import type {
   OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreRoutingHandler,
-  RouteConfigOptions,
   RouteMethod,
   RouterDeprecatedApiDetails,
   RouterRoute,
   SessionStorageCookieOptions,
+  TimingEvent,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
@@ -75,7 +76,7 @@ function startEluMeasurement<T>(
   path: string,
   log: Logger,
   eluMonitorOptions: IHttpEluMonitorConfig | undefined
-): () => void {
+): (httpSpan?: OTelSpan) => void {
   if (!eluMonitorOptions?.enabled) {
     return identity;
   }
@@ -83,7 +84,7 @@ function startEluMeasurement<T>(
   const startUtilization = performance.eventLoopUtilization();
   const start = performance.now();
 
-  return function stopEluMeasurement() {
+  return function stopEluMeasurement(httpSpan?: OTelSpan) {
     const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
     apm.currentTransaction?.addLabels(
@@ -93,6 +94,10 @@ function startEluMeasurement<T>(
       },
       false
     );
+    httpSpan?.setAttributes({
+      'nodejs.eventloop.utilization': utilization,
+      'nodejs.eventloop.active': active,
+    });
 
     const duration = performance.now() - start;
 
@@ -396,11 +401,12 @@ export class HttpServer {
   }
 
   private getAuthOption(
-    authRequired: RouteConfigOptions<any>['authRequired'] = true
+    authRequired: boolean | 'optional' | 'minimal' = true
   ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
-    if (authRequired === true) {
+    // Minimal authentication still should go through the authentication handler.
+    if (authRequired === true || authRequired === 'minimal') {
       return { mode: 'required' };
     }
     if (authRequired === 'optional') {
@@ -539,23 +545,68 @@ export class HttpServer {
     this.server.events.on('response', this.handleServerResponseEvent);
   }
 
+  private formatServerTimingHeader(
+    totalTime: number,
+    customEvents: readonly TimingEvent[]
+  ): string {
+    const timingMetrics = [
+      `app-total;dur=${totalTime.toFixed(2)};desc="Application Server Processing Time (Total)"`,
+    ];
+
+    // Limit to 20 events, sanitize names, escape descriptions
+    for (const event of customEvents.slice(0, 20)) {
+      const safeName = event.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+      let metric = `${safeName};dur=${event.duration.toFixed(2)}`;
+      if (event.description) {
+        const safeDesc = event.description
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"')
+          .slice(0, 100);
+        metric += `;desc="${safeDesc}"`;
+      }
+      timingMetrics.push(metric);
+    }
+
+    return timingMetrics.join(', ');
+  }
+
   private setupRequestStateAssignment(
     config: HttpConfig,
     executionContext?: InternalExecutionContextSetup,
     userActivity?: InternalUserActivityServiceSetup
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
-      const stop = (request.app as KibanaRequestState).measureElu;
+      const app = request.app as KibanaRequestState;
+      app.httpSpan?.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+
+      const stop = app.measureElu;
 
       if (!stop) {
         return responseToolkit.continue;
       }
 
+      // Only add Server-Timing header if enabled in config (dev mode by default)
+      if (this.config?.serverTiming) {
+        const appState = request.app as KibanaRequestState;
+        const startTime = appState.startTime;
+        const totalTime = performance.now() - startTime;
+        const customEvents = appState.timingState?.events ?? [];
+        const serverTimingValue = this.formatServerTimingHeader(totalTime, customEvents);
+
+        if (isBoom(request.response)) {
+          request.response.output.headers['Server-Timing'] = serverTimingValue;
+        } else {
+          request.response.header('Server-Timing', serverTimingValue);
+        }
+      }
+
       if (isBoom(request.response)) {
-        stop();
+        stop(app.httpSpan);
+        app.otelSubSpan?.end();
       } else {
         request.response.events.once('finish', () => {
-          stop();
+          stop(app.httpSpan);
+          app.otelSubSpan?.end();
         });
       }
 
@@ -583,7 +634,19 @@ export class HttpServer {
 
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
-        apm.addLabels(executionContext.getAsLabels());
+        const labels = executionContext.getAsLabels();
+        apm.addLabels(labels);
+        const { name, id, page } = labels;
+        trace.getActiveSpan()?.setAttributes(
+          omitBy(
+            {
+              'kibana.execution_context.name': name,
+              'kibana.execution_context.id': id,
+              'kibana.execution_context.page': page,
+            },
+            isNil
+          ) as Record<string, string>
+        );
       }
 
       executionContext?.setRequestId(requestId);
@@ -595,8 +658,10 @@ export class HttpServer {
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-      app.traceId = apm.currentTraceIds['trace.id'];
+      app.traceId = apm.currentTraceIds['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId;
       app.span = apm.startSpan('pre-route handler middlewares');
+      app.httpSpan = trace.getActiveSpan();
+      app.otelSubSpan = this.createSubspan('pre-route handler middlewares');
 
       return responseToolkit.continue;
     });
@@ -619,8 +684,13 @@ export class HttpServer {
     });
 
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
-      (request.app as KibanaRequestState).span?.end();
-      (request.app as KibanaRequestState).span = null;
+      const app = request.app as KibanaRequestState;
+      app.span?.end();
+      app.otelSubSpan?.end();
+      // Clear the sub-spans for the handler because it is created when actually calling the handler
+      // in src/core/packages/http/router-server-internal/src/router.ts
+      app.span = null;
+      app.otelSubSpan = undefined;
 
       const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
       const { redactedSessionId } = request.app as KibanaRequestState;
@@ -653,7 +723,24 @@ export class HttpServer {
       return responseToolkit.continue;
     });
 
+    this.server!.ext('onPostHandler', (request, responseToolkit) => {
+      const app = request.app as KibanaRequestState;
+      app.otelSubSpan?.end();
+      app.otelSubSpan = this.createSubspan('post-route handler middlewares');
+
+      return responseToolkit.continue;
+    });
+
     this.instrumentMetrics();
+  }
+
+  private createSubspan(name: string): OTelSpan {
+    const span = trace.getTracer('kibana.http').startSpan(name);
+    context.with(context.active(), () => {
+      // Hold the active context until the otelSubSpan ends
+      context.bind(context.active(), span);
+    });
+    return span;
   }
 
   private instrumentMetrics() {
@@ -945,7 +1032,7 @@ export class HttpServer {
     const { tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
-    const authRequired = this.getSecurity(route)?.authc?.enabled ?? route.options.authRequired;
+    const authRequired = this.getSecurity(route)?.authc?.enabled;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),

@@ -5184,9 +5184,9 @@ const valuesDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.VALUES,
   description: i18n.translate('kbn-esql-language.esql.definitions.values', {
     defaultMessage:
-      'Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
+      'Returns unique (deduplicated) values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

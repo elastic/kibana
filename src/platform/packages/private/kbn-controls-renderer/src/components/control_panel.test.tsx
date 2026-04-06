@@ -10,11 +10,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-  OPTIONS_LIST_CONTROL,
-} from '@kbn/controls-constants';
+import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
   registerReactEmbeddableFactory,
   type EmbeddableFactory,
@@ -84,11 +80,10 @@ describe('render', () => {
       const controlPanel = render(
         <ControlPanel
           control={{
+            ...DEFAULT_PINNED_CONTROL_STATE,
             uid: 'control1',
             type: 'optionsListControl',
             order: 0,
-            width: DEFAULT_CONTROL_WIDTH,
-            grow: DEFAULT_CONTROL_GROW,
           }}
           parentApi={parentApi}
           setControlPanelRef={jest.fn()}

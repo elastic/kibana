@@ -36,6 +36,7 @@ export type SearchGettingStartedServicesContextDeps =
 export type SearchGettingStartedServicesContext = CoreStart &
   SearchGettingStartedAppPluginStartDependencies & {
     history: AppMountParameters['history'];
+    kibanaVersion: string;
   };
 
 export interface AppUsageTracker {

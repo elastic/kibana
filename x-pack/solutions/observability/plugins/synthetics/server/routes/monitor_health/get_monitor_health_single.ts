@@ -12,6 +12,7 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_HEALTH,
+  writeAccess: false,
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
@@ -28,13 +29,13 @@ export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
 
       if (!error || error.statusCode === 404) {
         return routeContext.response.notFound({
-          body: { message: error?.error ?? `Monitor ${monitorId} not found` },
+          body: { message: error?.message ?? `Monitor ${monitorId} not found` },
         });
       }
 
       return routeContext.response.customError({
-        statusCode: 500,
-        body: { message: error.error },
+        statusCode: error.statusCode,
+        body: { message: error.message },
       });
     }
 

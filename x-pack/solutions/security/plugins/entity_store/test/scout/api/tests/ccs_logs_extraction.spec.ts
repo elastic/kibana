@@ -16,6 +16,7 @@ import {
   LATEST_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 const DOCS_LIMIT = 2;
 const CCS_TEST_LOGS_INDEX = 'ccs-test-logs';
@@ -94,8 +95,7 @@ async function ingestDoc(
   });
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/256991
-apiTest.describe.skip(
+apiTest.describe(
   'Entity Store CCS logs extraction (test against local instance)',
   { tag: ENTITY_STORE_TAGS },
   () => {
@@ -135,6 +135,7 @@ apiTest.describe.skip(
           },
         },
       });
+      await clearEntityStoreIndices(esClient);
     });
 
     apiTest(

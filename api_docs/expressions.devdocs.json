@@ -42022,7 +42022,7 @@
         "label": "MathArguments",
         "description": [],
         "signature": [
-          "{ expression: string; onError?: \"false\" | \"null\" | \"zero\" | \"throw\" | undefined; }"
+          "{ expression: string; onError?: \"false\" | \"null\" | \"throw\" | \"zero\" | undefined; }"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/math.ts",
         "lineNumber": 14,
@@ -46875,7 +46875,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"false\" | \"null\" | \"zero\" | \"throw\")[]"
+                      "(\"false\" | \"null\" | \"throw\" | \"zero\")[]"
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/math.ts",
                     "lineNumber": 61,

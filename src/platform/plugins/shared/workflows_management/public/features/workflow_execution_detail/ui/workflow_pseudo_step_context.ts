@@ -9,7 +9,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isFailedBeforeSteps } from '@kbn/workflows';
 
 export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document';
 
@@ -32,7 +32,8 @@ export function buildTriggerContextFromExecution(
   if (isScheduled) {
     triggerType = 'scheduled';
   } else if (executionContext.event != null) {
-    if ((executionContext.event as Record<string, unknown>).alerts != null) {
+    const event = executionContext.event as Record<string, unknown>;
+    if (event.alerts != null || event.type === 'alert') {
       triggerType = 'alert';
     } else {
       triggerType = 'document';
@@ -60,13 +61,19 @@ export function buildTriggerStepExecutionFromContext(
     return null;
   }
 
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+
   return {
     id: 'trigger',
     stepId: triggerContext.triggerType,
     stepType: `trigger_${triggerContext.triggerType}`,
-    status: ExecutionStatus.COMPLETED,
+    status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: (workflowExecution.context?.output as JsonValue) ?? undefined,
+    output: (workflowExecution.context?.output as JsonValue | undefined) ?? undefined,
+    error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId || '',

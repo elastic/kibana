@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiToolTip, EuiBadge } from '@elastic/eui';
+import { EuiFlexItem, EuiPopover, EuiBadge, EuiSpacer, EuiButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 
-export const UnhealthyCountBadge = ({ item }: { item: { id: string } }) => {
-  const { getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation, statuses, isAgentLevelIssue } =
+export const UnhealthyCountBadge = ({ item }: { item: { id: string; label: string } }) => {
+  const { getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation } =
     useMonitorIntegrationHealth();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const history = useHistory();
 
   const unhealthyMonitorCount = getUnhealthyMonitorCountForLocation(item.id);
 
@@ -20,41 +24,61 @@ export const UnhealthyCountBadge = ({ item }: { item: { id: string } }) => {
     return null;
   }
 
-  const configIds = getUnhealthyConfigIdsForLocation(item.id);
-  const allAgentLevelIssues = configIds.every((configId) => {
-    const locationStatuses = statuses.get(configId);
-    return locationStatuses
-      ?.filter((s) => s.locationId === item.id && s.isUnhealthy)
-      .every((s) => isAgentLevelIssue(s.status));
+  const unhealthyConfigIds = getUnhealthyConfigIdsForLocation(item.id);
+  const href = history.createHref({
+    pathname: '/monitors',
+    search: `?locations=${JSON.stringify([item.label])}&configIds=${JSON.stringify(
+      unhealthyConfigIds
+    )}`,
   });
 
-  const tooltip = allAgentLevelIssues ? AGENT_ISSUE_TOOLTIP : UNHEALTHY_MONITORS_TOOLTIP;
+  const badge = (
+    <EuiBadge
+      color="warning"
+      data-test-subj="syntheticsLocationMissingIntegrationBadge"
+      onClick={() => setIsPopoverOpen((prev) => !prev)}
+      onClickAriaLabel={UNHEALTHY_MONITORS_ARIA_LABEL}
+    >
+      {i18n.translate('xpack.synthetics.privateLocations.missingIntegrations.count', {
+        defaultMessage: '{count, plural, one {# unhealthy monitor} other {# unhealthy monitors}}',
+        values: { count: unhealthyMonitorCount },
+      })}
+    </EuiBadge>
+  );
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={tooltip}>
-        <EuiBadge color="warning" data-test-subj="syntheticsLocationMissingIntegrationBadge">
-          {i18n.translate('xpack.synthetics.privateLocations.missingIntegrations.count', {
-            defaultMessage: '{count} {count, plural, one {unhealthy} other {unhealthy}}',
-            values: { count: unhealthyMonitorCount },
-          })}
-        </EuiBadge>
-      </EuiToolTip>
+      <EuiPopover
+        button={badge}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+      >
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.synthetics.privateLocations.missingIntegrations.popover"
+            defaultMessage="{count, plural, one {# monitor} other {# monitors}} at <strong>{name}</strong> {count, plural, one {is} other {are}} unhealthy and will not run until resolved."
+            values={{
+              count: unhealthyMonitorCount,
+              name: item.label,
+              strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiButton size="s" data-test-subj="syntheticsViewUnhealthyMonitorsButton" href={href}>
+          {VIEW_MONITORS_LABEL}
+        </EuiButton>
+      </EuiPopover>
     </EuiFlexItem>
   );
 };
 
-const UNHEALTHY_MONITORS_TOOLTIP = i18n.translate(
-  'xpack.synthetics.privateLocations.missingIntegrations.tooltip',
-  {
-    defaultMessage: 'These monitors are unhealthy and will not run until they are resolved.',
-  }
+const VIEW_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.privateLocations.missingIntegrations.viewMonitors',
+  { defaultMessage: 'View monitors' }
 );
 
-const AGENT_ISSUE_TOOLTIP = i18n.translate(
-  'xpack.synthetics.privateLocations.agentIssue.tooltip',
-  {
-    defaultMessage:
-      'These monitors are unhealthy due to agent issues. Check the Fleet agent status for this location.',
-  }
+const UNHEALTHY_MONITORS_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.privateLocations.missingIntegrations.ariaLabel',
+  { defaultMessage: 'View unhealthy monitors' }
 );
