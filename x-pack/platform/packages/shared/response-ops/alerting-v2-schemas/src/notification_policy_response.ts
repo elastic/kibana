@@ -20,6 +20,7 @@ export interface NotificationPolicyResponse {
   destinations: NotificationPolicyDestination[];
   matcher: string | null;
   groupBy: string[] | null;
+  tags: string[] | null;
   groupingMode: GroupingMode | null;
   throttle: { strategy?: ThrottleStrategy; interval?: string } | null;
   snoozedUntil: string | null;
