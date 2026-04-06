@@ -118,7 +118,14 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             />
           ),
         }),
-        { ownFocus: false, resizable: true, session: 'inherit', size: 's' }
+        {
+          maxWidth: '50%',
+          minWidth: 382,
+          ownFocus: false,
+          resizable: true,
+          session: 'inherit',
+          size: 's',
+        }
       ),
     [history, onAlertUpdated, services, store]
   );

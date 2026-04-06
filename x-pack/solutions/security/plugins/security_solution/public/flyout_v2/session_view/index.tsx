@@ -92,6 +92,8 @@ export const SessionView: FC<SessionViewProps> = memo(
             ),
           }),
           {
+            maxWidth: '50%',
+            minWidth: 382,
             ownFocus: false,
             resizable: true,
             session: 'inherit',

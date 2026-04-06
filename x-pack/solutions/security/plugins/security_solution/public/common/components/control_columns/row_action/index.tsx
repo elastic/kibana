@@ -133,6 +133,8 @@ const RowActionComponent = ({
           ),
         }),
         {
+          maxWidth: '50%',
+          minWidth: 382,
           ownFocus: false,
           resizable: true,
           size: 's',

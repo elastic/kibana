@@ -158,6 +158,8 @@ export const ResolverWithoutProviders = React.memo(
               ),
             }),
             {
+              maxWidth: '50%',
+              minWidth: 382,
               ownFocus: false,
               resizable: true,
               session: 'inherit',
