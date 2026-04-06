@@ -103,6 +103,13 @@ export function getForeachItemSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachParam: string
 ): z.ZodType {
+  const trimmed = foreachParam.trim();
+  // JSON array literals must be handled before Liquid parsing: the tokenizer can treat
+  // `[{...}]` as a property path.
+  if (trimmed.startsWith('[')) {
+    return extractForeachItemSchemaFromJson(trimmed);
+  }
+
   const parsedPath = parseVariablePath(foreachParam);
   const iterateOverPath = parsedPath?.propertyPath;
   const hasEntriesFilter = parsedPath?.filters?.includes(ENTRIES_FILTER) ?? false;
@@ -113,7 +120,6 @@ export function getForeachItemSchema(
     let itemSchema: z.ZodType = z.unknown().describe('Unable to parse foreach parameter');
     const { schema: iterableSchema } = getSchemaAtPath(stepContextSchema, iterateOverPath);
     if (!iterableSchema) {
-      // if we cannot resolve the path in the schema, we return an unknown schema
       return itemSchema;
     }
     if (iterableSchema instanceof z.ZodArray) {

@@ -407,6 +407,22 @@ steps:
     expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(['api-url']));
   });
 
+  it('should provide completions with dot notation for kebab-case keys inside a single-quoted YAML string', async () => {
+    const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  api-url: "https://api.example.com"
+steps:
+  - name: step0
+    type: console
+    with:
+      message: '{{consts.|<-}}'
+`.trim();
+    const suggestions = await getSuggestions(yamlContent);
+    expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(['api-url']));
+  });
+
   describe('@ completion restriction to value nodes', () => {
     it('should provide @ completions when cursor is in value node (after colon)', async () => {
       const yamlContent = `

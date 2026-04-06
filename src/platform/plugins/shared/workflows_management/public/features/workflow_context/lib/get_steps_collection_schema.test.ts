@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DynamicStepContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
@@ -94,16 +94,14 @@ describe('getStepsCollectionSchema', () => {
     // The actual schema for the foreach loop step
     const actualLoopSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.loop;
 
-    // Check that it's based on ForEachContextSchema
     expect(actualLoopSchema).toBeDefined();
-    expect(actualLoopSchema.def.type).toBe('object');
-
-    // Check the shape properties
-    const loopShape = (actualLoopSchema as z.ZodObject<any>).shape;
-    expect(loopShape.items.def.type).toBe('array');
-    expect(loopShape.items.element.def.type).toBe('string');
-    expect(loopShape.index.def.type).toBe('number');
-    expect(loopShape.total.def.type).toBe('number');
+    expectZodSchemaEqual(
+      actualLoopSchema,
+      ForEachContextSchema.extend({
+        item: z.string(),
+        items: z.array(z.string()),
+      })
+    );
 
     // For the main schema, check the step-1 output (unwrap ZodLazy for non-foreach steps)
     const step1Schema = unwrapStepSchema(
