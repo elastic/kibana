@@ -9,9 +9,10 @@
 
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilter, isAsCodeFilter } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import { isQuery } from '@kbn/data-plugin/public';
 import type { DashboardState } from '../../../../common';
-import { migrateLegacyQuery, toAsCodeQuery } from '../../../../common';
+import { migrateLegacyQuery } from '../../../../common';
 
 type DashboardSearchState = Pick<
   DashboardState,

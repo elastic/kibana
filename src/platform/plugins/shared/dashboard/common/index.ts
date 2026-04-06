@@ -20,4 +20,3 @@ export { getReferencesForPanelId, prefixReferencesFromPanel } from './reference_
 export { migrateLegacyQuery } from './migrate_legacy_query';
 export { isDashboardSection } from './is_dashboard_section';
 export { isDashboardPanel } from './is_dashboard_panel';
-export { toAsCodeQuery, toStoredQuery } from './query_utils';

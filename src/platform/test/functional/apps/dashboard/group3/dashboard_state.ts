@@ -202,8 +202,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (appState: Partial<DashboardLocatorParams>) => {
             return {
               query: {
-                language: 'kql',
-                expression: newQuery,
+                language: 'kuery',
+                query: newQuery,
               },
             };
           }

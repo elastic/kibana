@@ -13,6 +13,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { toStoredFilters, fromStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
@@ -38,7 +39,6 @@ import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
-import { toAsCodeQuery, toStoredQuery } from '../../common';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 export const COMPARE_DEBOUNCE = 100;

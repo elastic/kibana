@@ -7,21 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import type { Query } from '@kbn/es-query';
-import type { TypeOf } from '@kbn/config-schema';
-import type { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 
-type DashboardQuery = TypeOf<typeof asCodeQuerySchema>;
-
-export const toStoredQuery = (asCodeQuery: DashboardQuery | undefined): Query | undefined => {
-  if (!asCodeQuery) return;
-  return {
-    query: asCodeQuery.expression,
-    language: asCodeQuery.language === 'lucene' ? 'lucene' : 'kuery',
-  };
-};
-
-export const toAsCodeQuery = (storedQuery: Query | undefined): DashboardQuery | undefined => {
+export function toAsCodeQuery(storedQuery: Query | undefined): AsCodeQuery | undefined {
   if (!storedQuery) return;
   if (typeof storedQuery.query !== 'string') return;
 
@@ -29,4 +18,12 @@ export const toAsCodeQuery = (storedQuery: Query | undefined): DashboardQuery | 
     expression: storedQuery.query,
     language: storedQuery.language === 'lucene' ? 'lucene' : 'kql',
   };
-};
+}
+
+export function toStoredQuery(asCodeQuery: AsCodeQuery | undefined): Query | undefined {
+  if (!asCodeQuery) return;
+  return {
+    query: asCodeQuery.expression,
+    language: asCodeQuery.language === 'lucene' ? 'lucene' : 'kuery',
+  };
+}

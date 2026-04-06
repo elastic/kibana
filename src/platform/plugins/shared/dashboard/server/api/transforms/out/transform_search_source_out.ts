@@ -10,9 +10,10 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
-import { migrateLegacyQuery, toAsCodeQuery } from '../../../../common';
+import { migrateLegacyQuery } from '../../../../common';
 import { logger } from '../../../kibana_services';
 
 export function transformSearchSourceOut(
