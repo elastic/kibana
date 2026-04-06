@@ -195,12 +195,12 @@ export function buildVisualizationAPI(
     );
   }
   const layerPresence = getLayerPresence(dataLayers);
-  const decorations = convertStylingToAPIFormat(config, layerPresence);
+
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
     ...convertAxisSettingsToAPIFormat(config, layers),
-    ...(decorations ? { styling: decorations } : {}),
+    styling: convertStylingToAPIFormat(config, layerPresence),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
 }
