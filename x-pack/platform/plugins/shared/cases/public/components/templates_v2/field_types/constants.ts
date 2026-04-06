@@ -131,6 +131,16 @@ fields:
         - staging
         - production
       default: staging
+    display:
+      show_when:
+        combine: all
+        rules:
+          - field: affected_components
+            operator: contains
+            value: api
+          - field: affected_components
+            operator: contains
+            value: ui
   # CHECKBOX_GROUP: select 0-N options, optional defaults
   - name: affected_components
     control: CHECKBOX_GROUP
@@ -185,4 +195,7 @@ fields:
           - field: affected_components
             operator: contains
             value: ui
+          - field: environment
+            operator: eq 
+            value: production
 `.trimStart();
