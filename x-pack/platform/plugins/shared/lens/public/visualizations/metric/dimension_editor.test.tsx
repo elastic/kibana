@@ -200,7 +200,7 @@ describe('dimension editor', () => {
         const optionsList = await screen.findByTestId(
           'comboBoxOptionsList lns-icon-select-optionsList'
         );
-        const noneOption = within(optionsList).getByRole('button', { name: 'None' });
+        const noneOption = within(optionsList).getByRole('option', { name: 'None' });
         const popoverPanel = optionsList.closest('[id$="_panelId"]');
         if (popoverPanel) {
           await waitFor(() => {
