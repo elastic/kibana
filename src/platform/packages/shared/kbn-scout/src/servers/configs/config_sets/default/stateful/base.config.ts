@@ -226,8 +226,6 @@ export const defaultConfig: ScoutServerConfig = {
       `--server.publicBaseUrl=${kbnUrl}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
-      // Suppress announcement popups that would block UI interactions in tests
-      '--uiSettings.globalOverrides.hideAnnouncements=true',
     ],
   },
 };
