@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Search inference endpoints', () => {
       before(async () => {
-        await common.navigateToApp('management/ml/inference_endpoints');
+        await common.navigateToApp('management/modelManagement/inference_endpoints');
       });
 
       it('loads inference endpoints page', async function () {
