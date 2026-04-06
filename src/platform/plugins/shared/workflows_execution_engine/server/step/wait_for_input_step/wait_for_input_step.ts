@@ -64,7 +64,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
     }
 
     this.workflowLogger.logEvent({
-      message: `Workflow ${executionId} resumed by ${resumedBy} via kibana`,
+      message: `Workflow ${executionId} resumed by ${resumedBy}`,
       level: 'debug',
       event: {
         action: 'hitl:resumed',
@@ -74,7 +74,6 @@ export class WaitForInputStepImpl implements NodeImplementation {
       },
       labels: {
         responder: resumedBy,
-        resume_channel: 'kibana',
         execution_id: executionId,
       },
     });

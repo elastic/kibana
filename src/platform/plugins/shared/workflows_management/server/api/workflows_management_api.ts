@@ -17,6 +17,7 @@ import type {
   EsWorkflow,
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
+  ResumeWorkflowExecutionResponseDto,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowDetailDto,
@@ -483,7 +484,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     input: Record<string, unknown>,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }

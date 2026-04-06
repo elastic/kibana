@@ -21,7 +21,9 @@ const { getExecutionState } = jest.requireMock(
 describe('resumeWorkflowExecutionTool', () => {
   const createWorkflowsManagement = () => ({
     management: {
-      resumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      resumeWorkflowExecution: jest.fn().mockResolvedValue({
+        resumedBy: 'user',
+      }),
       getWorkflowExecution: jest.fn(),
     },
   });

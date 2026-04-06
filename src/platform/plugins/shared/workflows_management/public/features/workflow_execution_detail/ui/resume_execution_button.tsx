@@ -51,7 +51,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 
   // Honour autoOpen changes (e.g. when navigated to with ?resume=true)
   useEffect(() => {
-    if (autoOpen) setIsModalOpen(true);
+    if (autoOpen) {
+      modalOpenedAtRef.current = Date.now();
+      setIsModalOpen(true);
+    }
   }, [autoOpen]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
@@ -104,7 +107,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         closeModal();
       } catch (error) {
         const errorObj = error instanceof Error ? error : new Error(String(error));
-        notifications?.toasts.addError?.(error, {
+        notifications?.toasts.addError?.(errorObj, {
           title: i18n.translate(
             'workflowsManagement.executionDetail.resumeButton.errorNotificationTitle',
             { defaultMessage: 'Error resuming workflow' }

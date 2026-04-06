@@ -466,7 +466,7 @@ describe('Route privilege/ES-operation consistency', () => {
       executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'test-exec-id' }),
       executeWorkflowStep: jest.fn().mockResolvedValue({ workflowExecutionId: 'test-exec-id' }),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-      resumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'user' }),
       scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'test-exec-id' }),
     };
 

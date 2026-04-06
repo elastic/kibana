@@ -884,7 +884,6 @@ export class WorkflowsExecutionEnginePlugin
           resumeInput: input,
           resumedBy,
           resumedAt: new Date().toISOString(),
-          resumeChannel: 'kibana',
         },
       });
 
@@ -893,6 +892,8 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
       });
+
+      return { resumedBy };
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(

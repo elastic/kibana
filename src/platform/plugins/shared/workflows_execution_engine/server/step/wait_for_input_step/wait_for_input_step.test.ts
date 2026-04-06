@@ -195,11 +195,11 @@ describe('WaitForInputStepImpl', () => {
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
-    it('should emit a hitl:resumed audit log event with responder identity and channel', async () => {
+    it('should emit a hitl:resumed audit log event with responder identity', async () => {
       await underTest.run();
       expect(workflowLogger.logEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Workflow exec-abc resumed by jane.doe via kibana',
+          message: 'Workflow exec-abc resumed by jane.doe',
           level: 'debug',
           event: expect.objectContaining({
             action: 'hitl:resumed',
@@ -208,7 +208,6 @@ describe('WaitForInputStepImpl', () => {
           }),
           labels: expect.objectContaining({
             responder: 'jane.doe',
-            resume_channel: 'kibana',
             execution_id: 'exec-abc',
           }),
         })
