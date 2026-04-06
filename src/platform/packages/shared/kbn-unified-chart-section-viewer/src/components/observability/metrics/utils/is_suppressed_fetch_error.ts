@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function isSuppressedMetricsFetchError(error: unknown): boolean {
+export function isSuppressedFetchError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError';
-}
-
-export function shouldShowMetricsFetchError(error: unknown, isDiscoverLoading: boolean): boolean {
-  if (error == null || isDiscoverLoading) {
-    return false;
-  }
-  return !isSuppressedMetricsFetchError(error);
 }
