@@ -23,7 +23,7 @@ export const buildRuleSearchQuery = (search?: string): string | undefined => {
     .split(/\s+/)
     .filter(Boolean)
     .map((term) => {
-      const escapedTerm = escapeKuery(term);
+      const escapedTerm = escapeKuery(normalizeSearchTerm(term));
       return `(metadata.name: ${escapedTerm}* OR metadata.description: ${escapedTerm}* OR metadata.labels: ${escapedTerm}* OR grouping.fields: ${escapedTerm}*)`;
     });
 
