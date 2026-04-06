@@ -31,3 +31,5 @@ export {
   type VisualizationContent,
   type DashboardPanelInput,
 } from './converters';
+
+export { isDashboardAttachment } from './is_dashboard_attachment';

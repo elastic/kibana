@@ -8,12 +8,9 @@
 import { filter, ignoreElements, merge, tap, type Observable } from 'rxjs';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  attachmentDataToDashboardState,
-} from '@kbn/dashboard-agent-common';
+import { attachmentDataToDashboardState, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { createManualChanges$ } from './manual_changes_tracker';
@@ -61,8 +58,8 @@ export const createDashboardAttachmentMountSync$ = ({
     filter(isRoundCompleteEvent),
     tap((event) => {
       const updatedVersionedAttachment = event.data.attachments?.find(
-        (attachment): attachment is VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE> =>
-          attachment.type === DASHBOARD_ATTACHMENT_TYPE &&
+        (attachment) =>
+          isDashboardAttachment(attachment) &&
           event.data.round.input.attachment_refs?.some(
             (ref) =>
               ref.attachment_id === attachment.id &&
@@ -71,7 +68,7 @@ export const createDashboardAttachmentMountSync$ = ({
           ) === true
       );
 
-      if (!updatedVersionedAttachment) {
+      if (!updatedVersionedAttachment || !isDashboardAttachment(updatedVersionedAttachment)) {
         return;
       }
 
@@ -83,18 +80,11 @@ export const createDashboardAttachmentMountSync$ = ({
         return;
       }
 
-      const latestVersion = getLatestVersion(updatedVersionedAttachment);
-      if (!latestVersion) {
+      const latestVersionData = getLatestVersion(updatedVersionedAttachment)?.data;
+      if (!latestVersionData) {
         return;
       }
-
-      const attachment: DashboardAttachment = {
-        id: updatedVersionedAttachment.id,
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        data: latestVersion.data as DashboardAttachment['data'], // TODO: fix type
-        origin: updatedVersionedAttachment.origin,
-      };
-      api.setState(attachmentDataToDashboardState(attachment.data));
+      api.setState(attachmentDataToDashboardState(latestVersionData));
     }),
     ignoreElements()
   );
