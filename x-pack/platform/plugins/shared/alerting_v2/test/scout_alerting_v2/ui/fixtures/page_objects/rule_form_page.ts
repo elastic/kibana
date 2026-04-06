@@ -7,11 +7,12 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import type { DiscoverAppMenu } from './discover_app_menu';
 
 export class RuleFormPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly discoverAppMenu: DiscoverAppMenu) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
@@ -85,17 +86,12 @@ export class RuleFormPage {
     await this.page.testSubj.locator('select-text-based-language-btn').click();
   }
 
+  /**
+   * Alerts → Create ES|QL rule (v2). Uses the shared {@link DiscoverAppMenu} page object so selectors
+   * stay in sync with `discover_alerts_menu.spec.ts`.
+   */
   async openRulesFlyoutFromDiscover() {
-    const alertsButton = this.page.testSubj.locator('discoverAlertsButton');
-
-    if (await alertsButton.isVisible()) {
-      await alertsButton.click();
-    } else {
-      await this.page.testSubj.locator('app-menu-overflow-button').click();
-      await alertsButton.click();
-    }
-
-    await this.page.testSubj.locator('discoverCreateEsqlRuleV2Button').click();
+    await this.discoverAppMenu.openCreateEsqlRuleV2Flyout();
   }
 
   flyout() {

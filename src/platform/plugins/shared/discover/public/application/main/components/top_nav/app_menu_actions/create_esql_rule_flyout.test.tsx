@@ -9,21 +9,10 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { CreateESQLRuleFlyout } from './create_esql_rule_flyout';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 import { internalStateActions } from '../../../state_management/redux';
-
-const discoverParamsMock: AppMenuExtensionParams = {
-  dataView: dataViewMock,
-  adHocDataViews: [],
-  isEsqlMode: true,
-  authorizedRuleTypeIds: [ES_QUERY_ID],
-  actions: { updateAdHocDataViews: jest.fn() },
-};
 
 const renderFlyout = async ({
   onClose = jest.fn(),
@@ -46,10 +35,10 @@ const renderFlyout = async ({
 
   render(
     <CreateESQLRuleFlyout
-      discoverParams={discoverParamsMock}
       services={services}
       tabId={tabId}
       getState={toolkit.internalState.getState}
+      subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
       onClose={onClose}
     />
   );
@@ -82,10 +71,10 @@ describe('CreateESQLRuleFlyout', () => {
 
     render(
       <CreateESQLRuleFlyout
-        discoverParams={discoverParamsMock}
         services={services}
         tabId={tabId}
         getState={toolkit.internalState.getState}
+        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
         onClose={onClose}
       />
     );
