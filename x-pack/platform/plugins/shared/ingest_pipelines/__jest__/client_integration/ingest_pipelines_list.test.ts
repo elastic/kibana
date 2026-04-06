@@ -368,8 +368,8 @@ describe('<PipelinesList />', () => {
           });
 
           expect(screen.getByTestId('pipelinesTable')).toBeInTheDocument();
-          expect(screen.getByTestId('pipelineDetails')).toBeInTheDocument();
-          expect(screen.getByTestId('pipelineTreePanel')).toBeInTheDocument();
+          expect(await screen.findByTestId('pipelineDetails')).toBeInTheDocument();
+          expect(await screen.findByTestId('pipelineTreePanel')).toBeInTheDocument();
         });
       });
     });
