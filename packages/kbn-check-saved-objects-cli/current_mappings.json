@@ -370,6 +370,9 @@
       "groupingMode": {
         "type": "keyword"
       },
+      "tags": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {

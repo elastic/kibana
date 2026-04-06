@@ -28,14 +28,39 @@ describe('RuleHeaderDescription', () => {
     expect(screen.getByText('infra')).toBeInTheDocument();
   });
 
-  it('returns null when tags are empty', () => {
+  it('renders description text', () => {
+    const rule = {
+      ...baseRule,
+      metadata: { name: 'My Rule', description: 'Alert when errors exceed threshold.' },
+    } as RuleApiResponse;
+    wrap(<RuleHeaderDescription rule={rule} />);
+    expect(screen.getByTestId('ruleDescription')).toHaveTextContent(
+      'Alert when errors exceed threshold.'
+    );
+  });
+
+  it('renders both description and tags when both are present', () => {
+    const rule = {
+      ...baseRule,
+      metadata: {
+        name: 'My Rule',
+        description: 'Some description',
+        tags: ['prod', 'infra'],
+      },
+    } as RuleApiResponse;
+    wrap(<RuleHeaderDescription rule={rule} />);
+    expect(screen.getByTestId('ruleDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
+  });
+
+  it('returns null when tags are empty and no description', () => {
     const { container } = wrap(
       <RuleHeaderDescription rule={{ ...baseRule, metadata: { name: 'No Tags' } }} />
     );
     expect(container.innerHTML).toBe('');
   });
 
-  it('returns null when tags are undefined', () => {
+  it('returns null when tags are undefined and no description', () => {
     const rule = { ...baseRule, metadata: { name: 'No Tags' } } as RuleApiResponse;
     const { container } = wrap(<RuleHeaderDescription rule={rule} />);
     expect(container.innerHTML).toBe('');
