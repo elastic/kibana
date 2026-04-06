@@ -15,17 +15,35 @@ const mockGet = jest.fn();
 const mockPost = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+const mockAddWarning = jest.fn();
+const mockHistoryPush = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
       http: { get: mockGet, post: mockPost },
       notifications: {
-        toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
+        toasts: {
+          addSuccess: mockAddSuccess,
+          addError: mockAddError,
+          addWarning: mockAddWarning,
+        },
       },
     },
   }),
 }));
+
+// The SuiteDetailFlyout uses react-router's useHistory() to navigate to the
+// run detail page when the user clicks "View results →". In a test renderer
+// without a Router ancestor, useHistory() returns undefined and the link
+// click would throw; mock it so we can assert navigation.
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useHistory: () => ({ push: mockHistoryPush }),
+  };
+});
 
 const mockSuites = [
   {
@@ -242,6 +260,89 @@ describe('SuitesListPage', () => {
     });
   });
 
+  describe('run mutation error handling', () => {
+    // Helper: open the run modal and click the confirm button so the
+    // mocked `http.post` rejection triggers the onError handler.
+    const confirmRun = async () => {
+      renderPage();
+      await waitFor(() => {
+        expect(screen.getByText('Attack Discovery')).toBeInTheDocument();
+      });
+      const runButtons = screen.getAllByLabelText('Run');
+      await userEvent.click(runButtons[0]);
+      await waitFor(() => {
+        const confirmButton = screen.getByTestId('evalsSuiteRunConfirmButton');
+        expect(confirmButton).not.toBeDisabled();
+      });
+      await userEvent.click(screen.getByTestId('evalsSuiteRunConfirmButton'));
+    };
+
+    it('shows a warning toast (not an error modal) on 409 Conflict with the active suite id', async () => {
+      // core.http rejects with an IHttpFetchError shape: `response.status`
+      // and `body` are populated. The onError guard `isHttpConflictError`
+      // checks for response.status === 409 and extracts active_suite_id
+      // from body.attributes.
+      const conflictError: Error & {
+        response: { status: number };
+        body: { message: string; attributes: { active_suite_id: string; active_run_id: string } };
+      } = Object.assign(new Error('Conflict'), {
+        response: { status: 409 },
+        body: {
+          message: 'A suite run is already in progress: esql-generation (run-active-123)',
+          attributes: {
+            active_suite_id: 'esql-generation',
+            active_run_id: 'run-active-123',
+          },
+        },
+      });
+      mockPost.mockRejectedValueOnce(conflictError);
+
+      await confirmRun();
+
+      await waitFor(() => {
+        expect(mockAddWarning).toHaveBeenCalledTimes(1);
+      });
+      // The toast body references the active suite id so users can find
+      // the run they need to wait on.
+      const warningCall = mockAddWarning.mock.calls[0][0];
+      expect(warningCall.title).toMatch(/already in progress/i);
+      expect(warningCall.text).toContain('esql-generation');
+      // And the default error modal (with scary stack trace) must NOT fire.
+      expect(mockAddError).not.toHaveBeenCalled();
+    });
+
+    it('falls back to addError for non-409 failures', async () => {
+      // A genuine server crash (500) should still surface through the
+      // error modal so the user sees the full diagnostic.
+      const serverError: Error & { response: { status: number }; body: { message: string } } =
+        Object.assign(new Error('Internal Server Error'), {
+          response: { status: 500 },
+          body: { message: 'spawn ENOENT' },
+        });
+      mockPost.mockRejectedValueOnce(serverError);
+
+      await confirmRun();
+
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalledTimes(1);
+      });
+      expect(mockAddWarning).not.toHaveBeenCalled();
+    });
+
+    it('falls back to addError for plain Error objects (no HTTP response shape)', async () => {
+      // Network/parse errors can have `error instanceof Error` true but no
+      // `response` property. The duck-type guard must not match these.
+      mockPost.mockRejectedValueOnce(new Error('Network request failed'));
+
+      await confirmRun();
+
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalledTimes(1);
+      });
+      expect(mockAddWarning).not.toHaveBeenCalled();
+    });
+  });
+
   describe('detail flyout', () => {
     it('opens flyout when clicking suite name', async () => {
       renderPage();
@@ -371,6 +472,150 @@ describe('SuitesListPage', () => {
         expect(screen.queryByTestId('suiteDetailFlyout')).not.toBeInTheDocument();
         // Run modal should open
         expect(screen.getByText(/Run suite/)).toBeInTheDocument();
+      });
+    });
+
+    describe('View results link', () => {
+      // Override the runs fixture for these cases so we can control whether
+      // `eval_run_id` is present. The default mockGet is still in place for
+      // the suites / connectors calls.
+      const withRunsResponse = (runs: unknown[]) => {
+        mockGet.mockImplementation((url: string) => {
+          if (url === '/api/actions/connectors') {
+            return Promise.resolve(mockConnectors);
+          }
+          if (url.includes('/runs')) {
+            return Promise.resolve({ runs });
+          }
+          if (url.includes('/internal/evals/suites') && !url.includes('/status')) {
+            return Promise.resolve({ suites: mockSuites });
+          }
+          return Promise.resolve({ status: 'idle', suite_id: '' });
+        });
+      };
+
+      it('renders "View results →" link when latest run has eval_run_id', async () => {
+        withRunsResponse([
+          {
+            run_id: 'run-abc-123',
+            suite_id: 'attack-discovery',
+            status: 'completed',
+            started_at: new Date(Date.now() - 300_000).toISOString(),
+            completed_at: new Date(Date.now() - 60_000).toISOString(),
+            exit_code: 0,
+            eval_run_id: 'fc92eee9615d949e',
+            output: ['3 passed'],
+          },
+        ]);
+
+        renderPage();
+        await waitFor(() => {
+          expect(screen.getByText('Attack Discovery')).toBeInTheDocument();
+        });
+        await userEvent.click(screen.getAllByTestId('evalsSuiteName')[0]);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('suiteRunViewResultsLink')).toBeInTheDocument();
+        });
+      });
+
+      it('navigates to /runs/{eval_run_id} when View results is clicked', async () => {
+        withRunsResponse([
+          {
+            run_id: 'run-abc-123',
+            suite_id: 'attack-discovery',
+            status: 'completed',
+            started_at: new Date(Date.now() - 300_000).toISOString(),
+            completed_at: new Date(Date.now() - 60_000).toISOString(),
+            exit_code: 0,
+            eval_run_id: 'fc92eee9615d949e',
+            output: ['3 passed'],
+          },
+        ]);
+
+        renderPage();
+        await waitFor(() => {
+          expect(screen.getByText('Attack Discovery')).toBeInTheDocument();
+        });
+        await userEvent.click(screen.getAllByTestId('evalsSuiteName')[0]);
+
+        const link = await screen.findByTestId('suiteRunViewResultsLink');
+        await userEvent.click(link);
+
+        expect(mockHistoryPush).toHaveBeenCalledWith('/runs/fc92eee9615d949e');
+      });
+
+      it('does not render View results link when eval_run_id is undefined', async () => {
+        withRunsResponse([
+          {
+            run_id: 'run-abc-123',
+            suite_id: 'attack-discovery',
+            status: 'completed',
+            started_at: new Date(Date.now() - 300_000).toISOString(),
+            completed_at: new Date(Date.now() - 60_000).toISOString(),
+            exit_code: 0,
+            // eval_run_id intentionally omitted — early in a run, before
+            // the first experiment has logged its score-export message.
+            output: ['3 passed'],
+          },
+        ]);
+
+        renderPage();
+        await waitFor(() => {
+          expect(screen.getByText('Attack Discovery')).toBeInTheDocument();
+        });
+        await userEvent.click(screen.getAllByTestId('evalsSuiteName')[0]);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('suiteDetailFlyout')).toBeInTheDocument();
+        });
+        // Flyout is open, run is rendered, but no link.
+        expect(screen.queryByTestId('suiteRunViewResultsLink')).not.toBeInTheDocument();
+      });
+
+      it('renders View results link on failed runs too (scores are still in ES)', async () => {
+        // A failed run ("All evaluator scores were zero") still has scores
+        // exported to the kibana-evaluations index, so the link should
+        // point the user at the detail page where they can see the 0s.
+        // We include two runs (mirroring the mockRuns pattern from the
+        // outer describe) so the flyout's timeline + latestRun panel both
+        // populate correctly.
+        withRunsResponse([
+          {
+            run_id: 'run-abc-123',
+            suite_id: 'attack-discovery',
+            status: 'failed',
+            started_at: new Date(Date.now() - 300_000).toISOString(),
+            completed_at: new Date(Date.now() - 60_000).toISOString(),
+            exit_code: 0,
+            error: 'All evaluator scores were zero',
+            eval_run_id: 'fc92eee9615d949e',
+            output: ['Overall | 3 | mean: 0'],
+          },
+        ]);
+
+        renderPage();
+        await waitFor(() => {
+          expect(screen.getByText('Attack Discovery')).toBeInTheDocument();
+        });
+        await userEvent.click(screen.getAllByTestId('evalsSuiteName')[0]);
+
+        // Wait for the flyout to open first — same pattern as the other
+        // passing tests in this describe block.
+        await waitFor(() => {
+          expect(screen.getByTestId('suiteDetailFlyout')).toBeInTheDocument();
+        });
+
+        // The results link is available for drilling into the scores even
+        // though the run is marked failed.
+        expect(screen.getByTestId('suiteRunViewResultsLink')).toBeInTheDocument();
+        // The "Run failed" error callout is rendered somewhere in the
+        // flyout — either in the latest-run panel or in the timeline entry.
+        // Use an innerHTML assertion because EuiCallOut can split long
+        // strings across nested elements, defeating getByText's
+        // node-level matching.
+        const flyout = screen.getByTestId('suiteDetailFlyout');
+        expect(flyout.textContent).toContain('All evaluator scores were zero');
       });
     });
   });
