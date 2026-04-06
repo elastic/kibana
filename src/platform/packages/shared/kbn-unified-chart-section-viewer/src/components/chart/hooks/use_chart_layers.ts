@@ -48,9 +48,8 @@ export const useChartLayers = ({
       return [];
     }
 
-    const types = fieldTypes.length > 0 ? fieldTypes : [type];
     const metricField = createMetricAggregation({
-      type: types,
+      type: fieldTypes.length > 0 ? fieldTypes : [type],
       instrument,
       metricName: metricItem.metricName,
       customFunction,
