@@ -65,7 +65,7 @@ export function useMonitorFiltersState() {
 
   const { configIds } = urlParams;
   useEffect(() => {
-    dispatch(updateManagementPageStateAction({ configIds }));    
+    dispatch(updateManagementPageStateAction({ configIds }));
   }, [dispatch, configIds]);
   const { useLogicalAndFor } = urlParams;
 
