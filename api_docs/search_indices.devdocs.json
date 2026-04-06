@@ -229,23 +229,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "searchIndices",
-        "id": "def-common.SEARCH_INDEX_MANAGEMENT_APP_ID",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_INDEX_MANAGEMENT_APP_ID",
-        "description": [],
-        "signature": [
-          "\"elasticsearchIndexManagement\""
-        ],
-        "path": "x-pack/solutions/search/plugins/search_indices/common/index.ts",
-        "lineNumber": 14,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "objects": []

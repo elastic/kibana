@@ -263,7 +263,7 @@ export const SearchIndexDetailsPage = () => {
                         isLoading={isInitialLoading}
                         data-test-subj="useInPlaygroundLink"
                         onClick={navigateToPlayground}
-                        iconType="launch"
+                        iconType="rocket"
                         fill
                       >
                         <FormattedMessage

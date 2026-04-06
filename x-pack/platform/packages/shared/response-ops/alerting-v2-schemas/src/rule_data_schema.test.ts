@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_ARTIFACT_VALUE_LIMIT,
+  ARTIFACT_VALUE_LIMITS,
+  RUNBOOK_ARTIFACT_TYPE,
+} from '@kbn/alerting-v2-constants';
 import { createRuleDataSchema, updateRuleDataSchema } from './rule_data_schema';
 
 const validCreateData = {
@@ -12,11 +17,6 @@ const validCreateData = {
   metadata: { name: 'test rule' },
   schedule: { every: '5m' },
   evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
-};
-
-const validCreateDataWithCondition = {
-  ...validCreateData,
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
 };
 
 describe('createRuleDataSchema', () => {
@@ -33,21 +33,9 @@ describe('createRuleDataSchema', () => {
       });
     });
 
-    it('accepts a minimal valid payload with condition', () => {
-      const result = createRuleDataSchema.parse(validCreateDataWithCondition);
-
-      expect(result).toEqual({
-        kind: 'alert',
-        metadata: { name: 'test rule' },
-        time_field: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
-      });
-    });
-
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
-        ...validCreateDataWithCondition,
+        ...validCreateData,
         metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
@@ -271,62 +259,6 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         evaluation: { query: { base: 'FROM |' } },
-      });
-      expect(result.success).toBe(false);
-    });
-  });
-
-  describe('evaluation.query.condition', () => {
-    it('accepts an alert rule without condition', () => {
-      const result = createRuleDataSchema.safeParse(validCreateData);
-      expect(result.success).toBe(true);
-      expect(result.data?.evaluation.query.condition).toBeUndefined();
-    });
-
-    it('accepts an alert rule with condition', () => {
-      const result = createRuleDataSchema.safeParse(validCreateDataWithCondition);
-      expect(result.success).toBe(true);
-      expect(result.data?.evaluation.query.condition).toBe('count > 0');
-    });
-
-    it('accepts a signal rule without condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        kind: 'signal',
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects a signal rule with condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateDataWithCondition,
-        kind: 'signal',
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
-    });
-
-    it('requires condition when no_data is configured', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        no_data: { behavior: 'no_data', timeframe: '10m' },
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
-    });
-
-    it('accepts no_data with condition present', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateDataWithCondition,
-        no_data: { behavior: 'no_data', timeframe: '10m' },
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects an empty condition string', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: '' } },
       });
       expect(result.success).toBe(false);
     });
@@ -590,51 +522,83 @@ describe('createRuleDataSchema', () => {
       });
       expect(result.success).toBe(false);
     });
+  });
 
-    it('accepts recovery_policy with type "query" and query.condition', () => {
+  describe('artifacts value length', () => {
+    it('accepts a runbook artifact at the maximum allowed length', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: 'status == "ok"' },
-        },
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
+          },
+        ],
       });
       expect(result.success).toBe(true);
-      expect(result.data?.recovery_policy?.query?.condition).toBe('status == "ok"');
     });
 
-    it('accepts recovery_policy with type "query" without condition', () => {
+    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1' },
-        },
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('accepts a non-runbook artifact at the default maximum length', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
+          },
+        ],
       });
       expect(result.success).toBe(true);
-      expect(result.data?.recovery_policy?.query?.condition).toBeUndefined();
     });
 
-    it('rejects recovery_policy with an empty condition string', () => {
+    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: '' },
-        },
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
+          },
+        ],
       });
       expect(result.success).toBe(false);
-    });
-
-    it('rejects recovery_policy condition exceeding 5000 characters', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: 'x'.repeat(5001) },
-        },
-      });
-      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining(
+                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
+              ),
+            }),
+          ])
+        );
+      }
     });
   });
 
@@ -784,6 +748,80 @@ describe('updateRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('artifacts value length', () => {
+    it('accepts a runbook artifact at the maximum allowed length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('accepts a non-runbook artifact at the default maximum length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining(
+                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
+              ),
+            }),
+          ])
+        );
+      }
     });
   });
 

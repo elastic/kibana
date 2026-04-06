@@ -110,7 +110,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-data-streams-server'
   - '@kbn/task-manager-plugin'
-  - '@kbn/deeplinks-data-sources'
   - '@kbn/evals-plugin'
   - '@kbn/usage-api-plugin'
   - '@kbn/es-query'
@@ -120,6 +119,7 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/react-hooks'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/response-ops-oauth-hooks'
 tags:
   - plugin
   - prod

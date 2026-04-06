@@ -238,6 +238,7 @@ describe('useUnifiedWaterfallFetcher', () => {
           end: '2025-01-15T01:00:00.000Z',
           entryTransactionId: 'tx-1',
           serviceName: 'test-service',
+          ecsOnly: true,
         },
       },
     });

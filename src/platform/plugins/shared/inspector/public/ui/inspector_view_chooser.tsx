@@ -8,6 +8,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import {
   EuiButtonEmpty,
@@ -110,6 +111,9 @@ export class InspectorViewChooser extends Component<Props, State> {
         panelPaddingSize="none"
         anchorPosition="downRight"
         repositionOnScroll
+        aria-label={i18n.translate('inspector.viewChooser.popover.ariaLabel', {
+          defaultMessage: 'Inspector view selector',
+        })}
       >
         <EuiContextMenuPanel items={views.map(this.renderView)} />
       </EuiPopover>
