@@ -369,9 +369,14 @@ bundle:
   output_directory: docs/releases
   # Whether to resolve (copy contents) by default
   resolve: true
-  # When true, PR/issue links to repos marked private in assembler.yml are rewritten in bundle output
-  # (requires resolve: true). Option-based: --sanitize-private-links / --no-sanitize-private-links.
-  sanitize_private_links: true
+  # PR/issue link allowlist: when set (including []), only links to these owner/repo pairs are kept
+  # in bundle output; others are rewritten to '# PRIVATE:' sentinels (requires resolve: true).
+  # When omitted, no link filtering is applied.
+  # Add your repository and any others whose PR/issue links should appear in published docs.
+  link_allow_repos:
+    - elastic/elasticsearch
+    - elastic/kibana
+    - elastic/roadmap
   repo: kibana
   owner: elastic
 
