@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/search-shared-ui'
   - '@kbn/search-code-examples'
   - '@kbn/try-in-console'
-  - '@kbn/deeplinks-search'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
   - '@kbn/react-query'
@@ -68,26 +67,6 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

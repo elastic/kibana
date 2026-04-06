@@ -9,7 +9,10 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText, EuiLink, EuiBadge } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type { TimePrecision } from '../types';
 
 import {
   PanelContainer,
@@ -18,62 +21,109 @@ import {
   PanelBodySection,
   PanelBodySectionInfo,
   SubPanelHeading,
+  PanelFooter,
 } from '../date_range_picker_panel_ui';
 import { AutoRefresh } from '../settings/auto_refresh';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { settingsPanelTexts } from '../translations';
+import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
 
-// TODO replace with real Kibana advanced settings URL
-const ADVANCED_SETTINGS_URL = '/app/management/kibana/settings';
+const ADVANCED_SETTINGS_URL_TIME_ZONE = '/app/management/kibana/settings?query=dateFormat:tz';
+const ADVANCED_SETTINGS_URL_LEGACY_PICKER =
+  '/app/management/kibana/settings?query=timepicker:useDateRangePicker';
 
 /**
  * Settings panel for the date range picker, accessible from the main panel gear button.
  */
 export function SettingsPanel() {
-  const { settings, onSettingsChange, hasAutoRefresh } = useDateRangePickerContext();
+  const { settings, onSettingsChange, hasAutoRefresh, timeZone, prependBasePath } =
+    useDateRangePickerContext();
 
   const handleRoundRelativeTimeChange = useCallback(() => {
     onSettingsChange({ ...settings, roundRelativeTime: !settings.roundRelativeTime });
   }, [settings, onSettingsChange]);
 
+  const timePrecision = settings.timePrecision;
+  const handleTimePrecisionChange = useCallback(
+    (id: string) => {
+      onSettingsChange({ ...settings, timePrecision: id as TimePrecision });
+    },
+    [settings, onSettingsChange]
+  );
+
+  const timePrecisionOptions = [
+    { id: 'none', label: settingsPanelTexts.timePrecisionNone },
+    { id: 's', label: settingsPanelTexts.timePrecisionSeconds },
+    { id: 'ms', label: settingsPanelTexts.timePrecisionMilliseconds },
+  ];
+
+  const timeZoneDisplayAbbr = useTimeZoneDisplay(timeZone, null, true);
+  const timeZoneLabel =
+    timeZone === 'Browser'
+      ? settingsPanelTexts.timeZoneBrowserLocale(timeZoneDisplayAbbr ?? '')
+      : `${timeZone} (${timeZoneDisplayAbbr})`;
+
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerSettingsPanel">
       <PanelHeader>
         <SubPanelHeading>{settingsPanelTexts.heading}</SubPanelHeading>
       </PanelHeader>
       <PanelBody spacingSide="both">
         <PanelBodySection>
-          <EuiFlexGroup gutterSize="xl" direction="column">
-            <EuiFlexGroup gutterSize="m" direction="column">
-              {hasAutoRefresh && settings.autoRefresh ? (
-                <AutoRefresh autoRefresh={settings.autoRefresh} />
-              ) : null}
-              <EuiFormRow helpText={settingsPanelTexts.roundRelativeTimeDescription}>
-                <EuiSwitch
-                  label={settingsPanelTexts.roundRelativeTimeLabel}
-                  checked={settings.roundRelativeTime}
-                  onChange={handleRoundRelativeTimeChange}
-                  compressed
+          <EuiFlexGroup gutterSize="l" direction="column">
+            {hasAutoRefresh && settings.autoRefresh ? (
+              <AutoRefresh autoRefresh={settings.autoRefresh} />
+            ) : null}
+            <PanelBodySectionInfo
+              heading={settingsPanelTexts.timeFormatHeading}
+              markdown={settingsPanelTexts.timeFormatDescription(timeZoneLabel)}
+              linkLabel={settingsPanelTexts.advancedSettingsLink}
+              linkHref={prependBasePath(ADVANCED_SETTINGS_URL_TIME_ZONE)}
+            />
+            <PanelBodySectionInfo heading={settingsPanelTexts.relativeTimeRangeHeading}>
+              <EuiSwitch
+                label={settingsPanelTexts.roundRelativeTimeLabel}
+                checked={settings.roundRelativeTime}
+                onChange={handleRoundRelativeTimeChange}
+                compressed
+                data-test-subj="dateRangePickerSettingRoundRelativeTime"
+              />
+            </PanelBodySectionInfo>
+            {timePrecision !== undefined ? (
+              <PanelBodySectionInfo heading={settingsPanelTexts.absoluteTimeRangeHeading}>
+                <EuiText size="s" component="p">
+                  {settingsPanelTexts.timePrecisionPrompt}
+                </EuiText>
+                <EuiButtonGroup
+                  legend={settingsPanelTexts.timePrecisionLabel}
+                  options={timePrecisionOptions}
+                  idSelected={timePrecision}
+                  onChange={handleTimePrecisionChange}
+                  buttonSize="compressed"
+                  isFullWidth
+                  data-test-subj="dateRangePickerSettingTimePrecision"
                 />
-              </EuiFormRow>
-            </EuiFlexGroup>
-            <EuiFlexGroup gutterSize="m" direction="column">
-              <PanelBodySectionInfo
-                heading={settingsPanelTexts.timeFormatHeading}
-                markdown={settingsPanelTexts.timeFormatDescription}
-                linkLabel={settingsPanelTexts.advancedSettingsLink}
-                linkHref={ADVANCED_SETTINGS_URL}
-              />
-              <PanelBodySectionInfo
-                heading={settingsPanelTexts.newTimePickerHeading}
-                markdown={settingsPanelTexts.newTimePickerDescription}
-                linkLabel={settingsPanelTexts.advancedSettingsLink}
-                linkHref={ADVANCED_SETTINGS_URL}
-              />
-            </EuiFlexGroup>
+              </PanelBodySectionInfo>
+            ) : null}
           </EuiFlexGroup>
         </PanelBodySection>
       </PanelBody>
+      <PanelFooter>
+        <EuiBadge aria-label="Tech preview" color="hollow" iconType="flask" />
+        <EuiText size="xs" color="subdued" component="p">
+          <FormattedMessage
+            id="sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice"
+            defaultMessage="This time picker is in a technical preview. You can revert to the legacy picker in {advancedSettingsLink}."
+            values={{
+              advancedSettingsLink: (
+                <EuiLink href={prependBasePath(ADVANCED_SETTINGS_URL_LEGACY_PICKER)}>
+                  {settingsPanelTexts.advancedSettingsLink}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      </PanelFooter>
     </PanelContainer>
   );
 }

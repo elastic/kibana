@@ -21,7 +21,7 @@ export const MigrationsLastError = React.memo<MigrationsLastErrorProps>(
       data-test-subj={`${migrationType}MigrationLastError`}
       title={MIGRATION_ERROR_TITLE}
       color="danger"
-      iconType="alert"
+      iconType="warning"
       size="s"
     >
       <EuiText size="s">{message}</EuiText>

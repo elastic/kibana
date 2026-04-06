@@ -140,13 +140,13 @@ describe('<ExpandablePanel />', () => {
       );
 
       const toggle = getByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID));
-      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'chevronSingleRight');
       await userEvent.click(toggle);
 
       expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toHaveTextContent(
         'test content'
       );
-      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowDown');
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'chevronSingleDown');
     });
 
     it('should not render toggle or content when content is null', () => {
@@ -189,11 +189,11 @@ describe('<ExpandablePanel />', () => {
       );
 
       const toggle = getByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID));
-      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowDown');
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'chevronSingleDown');
       expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toBeInTheDocument();
 
       await userEvent.click(toggle);
-      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'chevronSingleRight');
       expect(queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).not.toBeInTheDocument();
     });
 

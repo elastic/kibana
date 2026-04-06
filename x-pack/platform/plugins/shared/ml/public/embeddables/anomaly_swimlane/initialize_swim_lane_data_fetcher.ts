@@ -6,8 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { type TimeRange } from '@kbn/es-query';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { fetch$ } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
   catchError,
@@ -21,7 +20,6 @@ import {
   of,
   shareReplay,
   skipWhile,
-  startWith,
   switchMap,
   tap,
 } from 'rxjs';
@@ -41,10 +39,6 @@ export const initializeSwimLaneDataFetcher = (
   chartWidth$: Observable<number | undefined>,
   dataLoading$: BehaviorSubject<boolean | undefined>,
   blockingError$: BehaviorSubject<Error | undefined>,
-  appliedTimeRange$: Observable<TimeRange | undefined>,
-  query$: PublishesUnifiedSearch['query$'],
-  filters$: PublishesUnifiedSearch['filters$'],
-  refresh$: Observable<void>,
   services: AnomalySwimlaneServices
 ) => {
   const { anomalyTimelineService, anomalyDetectorService } = services;
@@ -63,16 +57,20 @@ export const initializeSwimLaneDataFetcher = (
     fromPage: swimLaneApi.fromPage,
   });
 
+  const fetchContext$ = fetch$(swimLaneApi).pipe(shareReplay(1));
+
   const bucketInterval$ = combineLatest([
     selectedJobs$,
     chartWidth$.pipe(distinctUntilChanged()),
-    appliedTimeRange$,
+    fetchContext$,
   ]).pipe(
     skipWhile(([jobs, width]) => {
       return !Array.isArray(jobs) || !width;
     }),
-    tap(([, , timeRange]) => {
-      anomalyTimelineService.setTimeRange(timeRange!);
+    tap(([, , fetchContext]) => {
+      if (fetchContext.timeRange) {
+        anomalyTimelineService.setTimeRange(fetchContext.timeRange);
+      }
     }),
     map(([jobs, width]) => anomalyTimelineService.getSwimlaneBucketInterval(jobs!, width!))
   );
@@ -80,17 +78,16 @@ export const initializeSwimLaneDataFetcher = (
   const subscription = combineLatest([
     selectedJobs$,
     swimLaneInput$,
-    query$,
-    filters$,
+    fetchContext$,
     bucketInterval$,
-    refresh$.pipe(startWith(null)),
   ])
     .pipe(
       tap(() => {
         dataLoading$.next(true);
       }),
       debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-      switchMap(([explorerJobs, input, query, filters, bucketInterval]) => {
+      switchMap(([explorerJobs, input, fetchContext, bucketInterval]) => {
+        const { query, filters } = fetchContext;
         if (!explorerJobs) {
           // couldn't load the list of jobs
           return of(undefined);

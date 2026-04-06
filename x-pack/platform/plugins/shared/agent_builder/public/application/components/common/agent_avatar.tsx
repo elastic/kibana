@@ -86,21 +86,23 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
   const isDefaultAgent = agentId === agentBuilderDefaultAgentId;
   const shouldUseIcon = !symbol && (isBuiltIn || isDefaultAgent || Boolean(icon));
 
+  const borderAndShapeStyles = css`
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    ${shape === 'circle' ? 'border-radius: 50%;' : roundedBorderRadiusStyles}
+  `;
+
   if (shouldUseIcon) {
     const iconType = icon ?? 'logoElastic';
     const iconSize = getIconSize({ size });
-    if (hasBackground) {
-      const panelStyles = css`
-        background-color: ${color};
-        ${roundedBorderRadiusStyles}
-      `;
-      return (
-        <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
-          <EuiIcon type={iconType} size={iconSize} />
-        </EuiPanel>
-      );
-    }
-    return <EuiIcon type={iconType} size={iconSize} />;
+    const panelStyles = css`
+      ${hasBackground ? `background-color: ${color};` : ''}
+      ${borderAndShapeStyles}
+    `;
+    return (
+      <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
+        <EuiIcon type={iconType} size={iconSize} />
+      </EuiPanel>
+    );
   }
 
   let type: 'user' | 'space' | undefined;
@@ -109,7 +111,6 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
   } else if (shape === 'square') {
     type = 'space';
   }
-  const avatarStyles = shape === 'square' && roundedBorderRadiusStyles;
   return (
     <EuiAvatar
       size={size}
@@ -117,7 +118,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
       initials={symbol}
       type={type}
       color={color}
-      css={avatarStyles}
+      css={borderAndShapeStyles}
     />
   );
 };

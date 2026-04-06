@@ -11,16 +11,17 @@ import path from 'path';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
+import { WORKFLOW_CLONE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerCloneWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerCloneWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow/{id}/clone',
       access: 'public',
-      security: WORKFLOW_CREATE_SECURITY,
+      security: WORKFLOW_CLONE_SECURITY,
       summary: 'Clone a workflow',
       description: 'Create a copy of an existing workflow.',
       options: {
@@ -49,8 +50,16 @@ export function registerCloneWorkflowRoute({ router, api, spaces }: RouteDepende
             return response.notFound();
           }
           const createdWorkflow = await api.cloneWorkflow(workflow, spaceId, request);
+          audit.logWorkflowCloned(request, {
+            sourceId: id,
+            newId: createdWorkflow.id,
+          });
           return response.ok({ body: createdWorkflow });
         } catch (error) {
+          audit.logWorkflowCloned(request, {
+            sourceId: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import type { CommandMatchResult, CommandMenuHandle, CommandBadgeData } from './types';
 import { CommandMenuPopover } from './command_menu_popover';
 import { useCommandMenuAnchor } from './use_command_menu_anchor';
-import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
 
 const containerStyles = css`
   position: relative;
@@ -42,19 +41,15 @@ export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
     containerRef,
   });
 
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-
   return (
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
-      {isExperimentalFeaturesEnabled && (
-        <CommandMenuPopover
-          commandMatch={commandMatch}
-          anchorPosition={anchorPosition}
-          onSelect={onSelect}
-          commandMenuRef={commandMenuRef}
-        />
-      )}
+      <CommandMenuPopover
+        commandMatch={commandMatch}
+        anchorPosition={anchorPosition}
+        onSelect={onSelect}
+        commandMenuRef={commandMenuRef}
+      />
     </div>
   );
 };

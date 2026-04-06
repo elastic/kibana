@@ -64,7 +64,7 @@ export interface MetricVisualizationState {
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
   titleWeight?: TitleFontWeightString;
-  primaryPosition?: MetricStyle['valuePosition'];
+  primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;
