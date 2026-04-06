@@ -157,6 +157,66 @@ describe('IntegrationCards', () => {
 
     expect(screen.getByText('Installed')).toBeInTheDocument();
   });
+
+  describe('accessibility when isClickable is false', () => {
+    it('sets aria-disabled on card wrappers', async () => {
+      render(
+        <IntegrationCardsWithSuspense
+          onIntegrationInstalled={mockOnIntegrationInstalled}
+          isClickable={false}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await waitForIntegrationCardsToLoad();
+
+      const cards = screen.getAllByTestId('entity_analytics-integration-card');
+      cards.forEach((card) => {
+        expect(card).toHaveAttribute('aria-disabled', 'true');
+      });
+    });
+
+    it('sets tabIndex to -1 on card wrappers to prevent keyboard focus', async () => {
+      render(
+        <IntegrationCardsWithSuspense
+          onIntegrationInstalled={mockOnIntegrationInstalled}
+          isClickable={false}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await waitForIntegrationCardsToLoad();
+
+      const cards = screen.getAllByTestId('entity_analytics-integration-card');
+      cards.forEach((card) => {
+        expect(card).toHaveAttribute('tabindex', '-1');
+      });
+    });
+
+    it('does NOT set aria-disabled or tabIndex when isClickable is true', async () => {
+      render(
+        <IntegrationCardsWithSuspense
+          onIntegrationInstalled={mockOnIntegrationInstalled}
+          isClickable={true}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await waitForIntegrationCardsToLoad();
+
+      const cards = screen.getAllByTestId('entity_analytics-integration-card');
+      cards.forEach((card) => {
+        expect(card).not.toHaveAttribute('aria-disabled');
+        expect(card).not.toHaveAttribute('tabindex');
+      });
+    });
+  });
 });
 
 const waitForIntegrationCardsToLoad = async () => {
