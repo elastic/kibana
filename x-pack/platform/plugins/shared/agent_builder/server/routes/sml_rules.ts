@@ -7,6 +7,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -137,6 +138,9 @@ export function registerSmlRulesRoutes({
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+  const featureFlagConfig = {
+    featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  };
 
   // Create or update an SML rule
   router.versioned
@@ -178,7 +182,7 @@ export function registerSmlRulesRoutes({
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
         const rule = await smlRules.createOrUpdate(request.params.ruleId, request.body, esClient);
         return response.ok<CreateOrUpdateSmlRuleResponse>({ body: rule });
-      })
+      }, featureFlagConfig)
     );
 
   // List all SML rules
@@ -220,7 +224,7 @@ export function registerSmlRulesRoutes({
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
         const rules = await smlRules.list(esClient);
         return response.ok<ListSmlRulesResponse>({ body: { results: rules } });
-      })
+      }, featureFlagConfig)
     );
 
   // Get a single SML rule by ID
@@ -260,7 +264,7 @@ export function registerSmlRulesRoutes({
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
         const rule = await smlRules.get(request.params.ruleId, esClient);
         return response.ok<GetSmlRuleResponse>({ body: rule });
-      })
+      }, featureFlagConfig)
     );
 
   // Delete an SML rule
@@ -305,6 +309,6 @@ export function registerSmlRulesRoutes({
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
         const success = await smlRules.delete(request.params.ruleId, esClient);
         return response.ok<DeleteSmlRuleResponse>({ body: { success } });
-      })
+      }, featureFlagConfig)
     );
 }

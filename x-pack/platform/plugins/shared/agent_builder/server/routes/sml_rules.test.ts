@@ -44,11 +44,11 @@ describe('SML Rules Routes', () => {
 
   const mockEsClient = { mock: true };
 
-  const createMockContext = () => ({
+  const createMockContext = (experimentalFeaturesEnabled = true) => ({
     core: Promise.resolve({
       uiSettings: {
         client: {
-          get: mockUiSettingsGet.mockResolvedValue(false),
+          get: mockUiSettingsGet.mockResolvedValue(experimentalFeaturesEnabled),
         },
       },
     }),
@@ -225,6 +225,19 @@ describe('SML Rules Routes', () => {
 
       expect(mockDelete).toHaveBeenCalledWith('rule-1', mockEsClient);
       expect(result).toMatchObject({ type: 'ok', body: { success: true } });
+    });
+  });
+
+  describe('feature flag gating', () => {
+    it('returns notFound when experimentalFeatures is disabled', async () => {
+      const handler = getHandler('POST', `${publicApiPath}/sml/rule/{ruleId}`)!;
+      const ctx = createMockContext(false);
+      const request = { params: { ruleId: 'rule-1' }, body: sampleRuleBody };
+
+      const result = await handler(ctx, request, mockResponse);
+
+      expect(mockCreateOrUpdate).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'notFound' });
     });
   });
 });
