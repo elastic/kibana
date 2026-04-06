@@ -60,6 +60,7 @@ import {
   getMetricAccessor,
   getDatasourceLayers,
   getLensStateLayer,
+  stripUndefined,
 } from './utils';
 import {
   fromColorByValueAPIToLensState,
@@ -125,40 +126,45 @@ function convertStylingToStateFormat(
   styling: MetricStyling | undefined,
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
-  const primaryStyling = styling?.primary;
-  const secondaryStyling = styling?.secondary;
+  if (!styling) {
+    return {};
+  }
+  const primaryStyling = styling.primary;
+  const secondaryStyling = styling.secondary;
 
-  return {
-    valueFontMode: primaryStyling?.value?.fit ? 'fit' : 'default',
-    ...(primaryStyling?.labels?.alignment
-      ? { titlesTextAlign: primaryStyling.labels.alignment }
-      : {}),
-    ...(primaryStyling?.value?.alignment ? { primaryAlign: primaryStyling.value.alignment } : {}),
-    ...(primaryStyling?.position ? { primaryPosition: primaryStyling.position } : {}),
-    ...(primaryStyling?.title_weight ? { titleWeight: primaryStyling.title_weight } : {}),
-    ...(primaryStyling?.icon
-      ? { icon: primaryStyling.icon.name, iconAlign: primaryStyling.icon.alignment }
-      : {}),
+  if (!primaryStyling && !secondaryStyling) {
+    return {};
+  }
+
+  return stripUndefined({
+    valueFontMode:
+      primaryStyling?.value?.fit != null
+        ? primaryStyling.value.fit
+          ? 'fit'
+          : 'default'
+        : undefined,
+    titlesTextAlign: primaryStyling?.labels?.alignment,
+    primaryAlign: primaryStyling?.value?.alignment,
+    primaryPosition: primaryStyling?.position,
+    titleWeight: primaryStyling?.title_weight,
+    icon: primaryStyling?.icon?.name,
+    iconAlign: primaryStyling?.icon?.alignment,
     ...(hasSecondary
-      ? {
-          ...(secondaryStyling?.label
-            ? {
-                ...(!secondaryStyling.label.visible ? { secondaryLabel: '' } : {}),
-                secondaryLabelPosition: secondaryStyling.label.placement,
-              }
-            : {}),
+      ? stripUndefined({
+          secondaryLabel: secondaryStyling?.label?.visible === false ? '' : undefined,
+          secondaryLabelPosition: secondaryStyling?.label?.placement,
           secondaryAlign: secondaryStyling?.value?.alignment,
-        }
+        })
       : {}),
-  };
+  });
 }
 
 function convertStylingToAPIFormat(
   visualization: MetricVisualizationState,
   hasSecondary: boolean
 ): MetricStyling {
-  return {
-    primary: {
+  return stripUndefined({
+    primary: stripUndefined({
       position: visualization.primaryPosition ?? DEFAULT_PRIMARY_POSITION,
       title_weight: visualization.titleWeight ?? DEFAULT_PRIMARY_TITLE_WEIGHT,
       labels: {
@@ -171,32 +177,28 @@ function convertStylingToAPIFormat(
           visualization.valuesTextAlign ??
           DEFAULT_PRIMARY_VALUE_ALIGNMENT,
       },
-      ...(visualization.icon
+      icon: visualization.icon
         ? {
-            icon: {
-              name: visualization.icon,
-              alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
-            },
+            name: visualization.icon,
+            alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
           }
-        : {}),
-    },
-    ...(hasSecondary
+        : undefined,
+    }),
+    secondary: hasSecondary
       ? {
-          secondary: {
-            label: {
-              visible:
-                (visualization.secondaryLabel ?? visualization.secondaryPrefix) === ''
-                  ? false
-                  : DEFAULT_SECONDARY_LABEL_VISIBLE,
-              placement: visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
-            },
-            value: {
-              alignment: visualization.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT,
-            },
+          label: {
+            visible:
+              (visualization.secondaryLabel ?? visualization.secondaryPrefix) === ''
+                ? false
+                : DEFAULT_SECONDARY_LABEL_VISIBLE,
+            placement: visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+          },
+          value: {
+            alignment: visualization.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT,
           },
         }
-      : {}),
-  };
+      : undefined,
+  });
 }
 
 function buildVisualizationState(config: MetricState): MetricVisualizationState {
