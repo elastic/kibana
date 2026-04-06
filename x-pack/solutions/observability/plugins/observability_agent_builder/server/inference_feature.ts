@@ -35,8 +35,7 @@ const observabilityAiInsightsChatCompletionFeature: InferenceFeatureConfig = {
   featureDescription: i18n.translate(
     'xpack.observabilityAgentBuilder.inferenceFeature.aiSettingsDescription',
     {
-      defaultMessage:
-        'The model powering AI-driven analysis in Observability AI Insights.',
+      defaultMessage: 'The model powering AI-driven analysis in Observability AI Insights.',
     }
   ),
   taskType: 'chat_completion',
