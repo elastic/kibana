@@ -446,6 +446,11 @@
             "type": "keyword"
           },
           "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            },
             "type": "text"
           },
           "owner": {
