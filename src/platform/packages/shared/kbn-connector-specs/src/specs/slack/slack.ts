@@ -575,7 +575,7 @@ export const Slack: ConnectorSpec = {
           scope: 'channels:read chat:write search:read',
           scopeParamName: 'user_scope',
           accessTokenPath: 'authed_user.access_token',
-          tokenType: 'bearer',
+          tokenType: 'Bearer',
         },
       },
     ],
