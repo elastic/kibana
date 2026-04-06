@@ -55,3 +55,25 @@ export const STREAMS_TIERED_FEATURES = [
 ];
 
 export const FAILURE_STORE_SELECTOR = '::failures';
+
+/**
+ * Continuous KI extraction workflow
+ *
+ * A scheduled workflow that periodically identifies knowledge indicators (KI)
+ * across eligible streams. It selects streams, schedules feature identification
+ * tasks, and polls their status until completion or timeout.
+ */
+
+// Workflow identity
+export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
+
+// Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
+// timeout 1 minute shorter to avoid overlapping with the next run.
+export const COORDINATOR_INTERVAL_MINUTES = 10;
+
+// Stream selection: how many streams to process per run and how often
+export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
+export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
+export const MAX_SCHEDULED_STREAMS = 5;
+
+export const POLL_DELAY_SECONDS = 5;
