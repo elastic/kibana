@@ -9,7 +9,6 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
-  LENS_METRIC_STATE_DEFAULTS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
   type PersistedIndexPatternLayer,
@@ -20,6 +19,16 @@ import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DeepWriteable, LensAttributes } from '../../types';
+import {
+  DEFAULT_PRIMARY_POSITION,
+  DEFAULT_PRIMARY_TITLE_WEIGHT,
+  DEFAULT_PRIMARY_LABELS_ALIGNMENT,
+  DEFAULT_PRIMARY_VALUE_ALIGNMENT,
+  DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_SECONDARY_LABEL_VISIBLE,
+  DEFAULT_SECONDARY_LABEL_PLACEMENT,
+  DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+} from './metric_defaults';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
@@ -124,6 +133,10 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     throw new Error('The second metric must be the secondary metric.');
   }
 
+  const { styling } = layer;
+  const primaryStyling = styling?.primary;
+  const secondaryStyling = styling?.secondary;
+
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
@@ -137,35 +150,35 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
     subtitle: primaryMetric.sub_label ?? '',
     showBar: false,
-    valueFontMode: primaryMetric.fit ? 'fit' : 'default',
-    ...(primaryMetric.labels?.alignment || primaryMetric.value?.alignment
+    valueFontMode: primaryStyling?.value?.fit ? 'fit' : 'default',
+    ...(primaryStyling?.labels?.alignment
       ? {
-          primaryAlign: primaryMetric.value?.alignment,
-          titlesTextAlign: primaryMetric.labels?.alignment,
+          titlesTextAlign: primaryStyling?.labels?.alignment,
         }
       : {}),
-    ...(primaryMetric.position ? { primaryPosition: primaryMetric.position } : {}),
-    ...(primaryMetric.title_weight ? { titleWeight: primaryMetric.title_weight } : {}),
-    ...(primaryMetric.icon
+    ...(primaryStyling?.value?.alignment
       ? {
-          icon: primaryMetric.icon.name,
-          iconAlign: primaryMetric.icon.alignment,
+          primaryAlign: primaryStyling?.value?.alignment,
+        }
+      : {}),
+    ...(primaryStyling?.position ? { primaryPosition: primaryStyling.position } : {}),
+    ...(primaryStyling?.title_weight ? { titleWeight: primaryStyling.title_weight } : {}),
+    ...(primaryStyling?.icon
+      ? {
+          icon: primaryStyling.icon.name,
+          iconAlign: primaryStyling.icon.alignment,
         }
       : {}),
     ...(secondaryMetric
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
-          ...('caption' in secondaryMetric && secondaryMetric.caption
+          ...(secondaryStyling?.label
             ? {
-                ...(secondaryMetric.caption.type === 'custom'
-                  ? { secondaryLabel: secondaryMetric.caption.value }
-                  : {}),
-                secondaryLabelPosition: secondaryMetric.caption.placement,
+                ...(!secondaryStyling.label.visible ? { secondaryLabel: '' } : {}),
+                secondaryLabelPosition: secondaryStyling.label.placement,
               }
             : {}),
-          secondaryAlign:
-            ('value' in secondaryMetric && secondaryMetric.value?.alignment) ||
-            ('value' in primaryMetric ? primaryMetric.value?.alignment : undefined),
+          secondaryAlign: secondaryStyling?.value?.alignment,
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
@@ -391,43 +404,6 @@ function enrichConfigurationWithVisualizationProperties(
     if (visualization.applyColorTo) {
       primaryMetric.apply_color_to = visualization.applyColorTo;
     }
-
-    if (visualization.icon) {
-      primaryMetric.icon = {
-        name: visualization.icon,
-        alignment: visualization.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign,
-      };
-    }
-
-    if (
-      visualization.primaryAlign ||
-      visualization.valuesTextAlign ||
-      visualization.titlesTextAlign
-    ) {
-      if (visualization.primaryAlign || visualization.valuesTextAlign) {
-        primaryMetric.value = {
-          alignment:
-            visualization.primaryAlign ??
-            visualization.valuesTextAlign ??
-            LENS_METRIC_STATE_DEFAULTS.primaryAlign,
-        };
-      }
-      if (visualization.titlesTextAlign) {
-        primaryMetric.labels = {
-          alignment: visualization.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-        };
-      }
-    }
-
-    primaryMetric.fit = visualization.valueFontMode === 'fit';
-
-    if (visualization.primaryPosition) {
-      primaryMetric.position = visualization.primaryPosition;
-    }
-
-    if (visualization.titleWeight) {
-      primaryMetric.title_weight = visualization.titleWeight;
-    }
   }
 
   if (secondaryMetric) {
@@ -435,20 +411,9 @@ function enrichConfigurationWithVisualizationProperties(
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
-    const captionValue = visualization.secondaryLabel ?? visualization.secondaryPrefix;
-    const secondaryLabelPosition =
-      visualization.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition;
-    if (captionValue != null) {
-      secondaryMetric.caption = {
-        type: 'custom',
-        value: captionValue,
-        placement: secondaryLabelPosition,
-      };
-    } else {
-      secondaryMetric.caption = {
-        type: 'auto',
-        placement: secondaryLabelPosition,
-      };
+    const secondaryLabelOverride = visualization.secondaryLabel ?? visualization.secondaryPrefix;
+    if (secondaryLabelOverride && secondaryLabelOverride.length > 0) {
+      secondaryMetric.label = secondaryLabelOverride;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
@@ -457,13 +422,49 @@ function enrichConfigurationWithVisualizationProperties(
         color: visualization.secondaryTrend.color,
       };
     }
-
-    if (visualization.secondaryAlign) {
-      secondaryMetric.value = {
-        alignment: visualization.secondaryAlign,
-      };
-    }
   }
+
+  // Build the styling object
+  state.styling = {
+    primary: {
+      position: visualization.primaryPosition ?? DEFAULT_PRIMARY_POSITION,
+      title_weight: visualization.titleWeight ?? DEFAULT_PRIMARY_TITLE_WEIGHT,
+      labels: {
+        alignment: visualization.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT,
+      },
+      value: {
+        fit: visualization.valueFontMode === 'fit',
+        alignment:
+          visualization.primaryAlign ??
+          visualization.valuesTextAlign ??
+          DEFAULT_PRIMARY_VALUE_ALIGNMENT,
+      },
+      ...(visualization.icon
+        ? {
+            icon: {
+              name: visualization.icon,
+              alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
+            },
+          }
+        : {}),
+    },
+    ...(secondaryMetric
+      ? {
+          secondary: {
+            label: {
+              visible:
+                (visualization.secondaryLabel ?? visualization.secondaryPrefix) === ''
+                  ? false
+                  : DEFAULT_SECONDARY_LABEL_VISIBLE,
+              placement: visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+            },
+            value: {
+              alignment: visualization.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+            },
+          },
+        }
+      : {}),
+  };
 
   if (state.breakdown_by) {
     if (visualization.maxCols) {

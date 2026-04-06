@@ -9,10 +9,18 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS } from '@kbn/lens-common';
 import {
-  LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
-  LENS_METRIC_STATE_DEFAULTS,
-} from '@kbn/lens-common';
+  DEFAULT_PRIMARY_POSITION,
+  DEFAULT_PRIMARY_TITLE_WEIGHT,
+  DEFAULT_PRIMARY_LABELS_ALIGNMENT,
+  DEFAULT_PRIMARY_VALUE_ALIGNMENT,
+  DEFAULT_PRIMARY_VALUE_FIT,
+  DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_SECONDARY_LABEL_VISIBLE,
+  DEFAULT_SECONDARY_LABEL_PLACEMENT,
+  DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+} from '../../transforms/charts/metric_defaults';
 import {
   metricOperationDefinitionSchema,
   esqlColumnSchema,
@@ -96,6 +104,180 @@ const metricStateBackgroundChartSchemaESQL = {
   background_chart: schema.maybe(complementaryVizSchemaESQL),
 };
 
+const metricStylingSchema = schema.object(
+  {
+    primary: schema.maybe(
+      schema.object({
+        /**
+         * Position of the primary metric value. Possible values:
+         * - 'top': Value appears above the labels
+         * - 'middle': Value appears between the labels
+         * - 'bottom': Value appears below the labels
+         */
+        position: schema.maybe(
+          metricValuePositionSchema({
+            meta: { description: 'Position of the primary metric value (top, middle, or bottom)' },
+            defaultValue: DEFAULT_PRIMARY_POSITION,
+          })
+        ),
+        /**
+         * Font weight for title. Possible values:
+         * - 'bold': Bold font weight
+         * - 'normal': Normal font weight
+         */
+        title_weight: schema.maybe(
+          schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
+            defaultValue: DEFAULT_PRIMARY_TITLE_WEIGHT,
+            meta: { description: 'Font weight for title' },
+          })
+        ),
+        /**
+         * Labels configuration
+         */
+        labels: schema.maybe(
+          schema.object(
+            {
+              /**
+               * Alignment for labels. Possible values:
+               * - 'left': Align label to the left
+               * - 'center': Align label to the center
+               * - 'right': Align label to the right
+               */
+              alignment: schema.maybe(
+                horizontalAlignmentSchema({
+                  meta: { description: 'Alignment for labels' },
+                  defaultValue: DEFAULT_PRIMARY_LABELS_ALIGNMENT,
+                })
+              ),
+            },
+            {
+              meta: { description: 'Labels configuration' },
+            }
+          )
+        ),
+        /**
+         * Values configuration
+         */
+        value: schema.maybe(
+          schema.object(
+            {
+              /**
+               * Alignment for values. Possible values:
+               * - 'left': Align value to the left
+               * - 'center': Align value to the center
+               * - 'right': Align value to the right
+               */
+              alignment: schema.maybe(
+                horizontalAlignmentSchema({
+                  meta: { description: 'Alignment for values' },
+                  defaultValue: DEFAULT_PRIMARY_VALUE_ALIGNMENT,
+                })
+              ),
+              /**
+               * Whether to fit the value
+               */
+              fit: schema.maybe(
+                schema.boolean({
+                  meta: { description: 'Whether to fit the value' },
+                  defaultValue: DEFAULT_PRIMARY_VALUE_FIT,
+                })
+              ),
+            },
+            {
+              meta: { description: 'Values configuration' },
+            }
+          )
+        ),
+        /**
+         * Icon configuration
+         */
+        icon: schema.maybe(
+          schema.object(
+            {
+              /**
+               * Icon name
+               */
+              name: schema.string({ meta: { description: 'Icon name' } }),
+              /**
+               * Icon alignment. Possible values:
+               * - 'right': Icon is aligned to the right
+               * - 'left': Icon is aligned to the left
+               */
+              alignment: schema.maybe(
+                leftRightAlignmentSchema({
+                  meta: { description: 'Icon alignment' },
+                  defaultValue: DEFAULT_PRIMARY_ICON_ALIGNMENT,
+                })
+              ),
+            },
+            {
+              meta: {
+                id: 'metricIconConfig',
+                title: 'Icon Configuration',
+                description: 'Icon configuration for primary metric',
+              },
+            }
+          )
+        ),
+      })
+    ),
+    secondary: schema.maybe(
+      schema.object({
+        /**
+         * Label configuration
+         */
+        label: schema.maybe(
+          schema.object({
+            /**
+             * Whether to display the label
+             */
+            visible: schema.maybe(
+              schema.boolean({
+                meta: { description: 'Whether to display the label' },
+                defaultValue: DEFAULT_SECONDARY_LABEL_VISIBLE,
+              })
+            ),
+            /**
+             * Label placement relative to the secondary metric value. Possible values:
+             * - 'before': Label appears before the value
+             * - 'after': Label appears after the value
+             */
+            placement: schema.maybe(
+              placementSchema({
+                meta: { description: 'Label placement relative to the secondary metric value' },
+                defaultValue: DEFAULT_SECONDARY_LABEL_PLACEMENT,
+              })
+            ),
+          })
+        ),
+        value: schema.maybe(
+          schema.object(
+            {
+              /**
+               * Alignment for secondary values. Possible values:
+               * - 'left': Align value to the left
+               * - 'center': Align value to the center
+               * - 'right': Align value to the right
+               */
+              alignment: horizontalAlignmentSchema({
+                meta: { description: 'Alignment for secondary values' },
+                defaultValue: DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+              }),
+            },
+            { meta: { description: 'Value configuration' } }
+          )
+        ),
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'metricStyling',
+      description: 'Visual styling options for the chart',
+    },
+  }
+);
+
 const metricStatePrimaryMetricOptionsSchema = {
   // this is used to differentiate primary and secondary metrics
   // unfortunately given the lack of tuple schema support we need to have some way
@@ -105,76 +287,6 @@ const metricStatePrimaryMetricOptionsSchema = {
    * Sub label
    */
   sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
-  labels: schema.object(
-    {
-      /**
-       * Alignment for labels. Possible values:
-       * - 'left': Align label to the left
-       * - 'center': Align label to the center
-       * - 'right': Align label to the right
-       */
-      alignment: horizontalAlignmentSchema({
-        meta: { description: 'Alignment for labels' },
-        defaultValue: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-      }),
-    },
-    {
-      meta: { description: 'Labels configuration' },
-    }
-  ),
-  /**
-   * Values configuration
-   */
-  value: schema.object(
-    {
-      /**
-       * Alignment for values. Possible values:
-       * - 'left': Align value to the left
-       * - 'center': Align value to the center
-       * - 'right': Align value to the right
-       */
-      alignment: horizontalAlignmentSchema({
-        meta: { description: 'Alignment for values' },
-        defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
-      }),
-    },
-    {
-      meta: { description: 'Values configuration' },
-    }
-  ),
-  /**
-   * Whether to fit the value
-   */
-  fit: schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false }),
-  /**
-   * Icon configuration
-   */
-  icon: schema.maybe(
-    schema.object(
-      {
-        /**
-         * Icon name
-         */
-        name: schema.string({ meta: { description: 'Icon name' } }),
-        /**
-         * Icon alignment. Possible values:
-         * - 'right': Icon is aligned to the right
-         * - 'left': Icon is aligned to the left
-         */
-        alignment: leftRightAlignmentSchema({
-          meta: { description: 'Icon alignment' },
-          defaultValue: LENS_METRIC_STATE_DEFAULTS.iconAlign,
-        }),
-      },
-      {
-        meta: {
-          id: 'metricIconConfig',
-          title: 'Icon Configuration',
-          description: 'Icon configuration for primary metric',
-        },
-      }
-    )
-  ),
   /**
    * Color configuration
    */
@@ -183,28 +295,6 @@ const metricStatePrimaryMetricOptionsSchema = {
    * Where to apply the color (background or value)
    */
   apply_color_to: schema.maybe(applyColorToSchema),
-  /**
-   * Position of the primary metric value. Possible values:
-   * - 'top': Value appears above the labels
-   * - 'middle': Value appears between the labels
-   * - 'bottom': Value appears below the labels
-   */
-  position: schema.maybe(
-    metricValuePositionSchema({
-      meta: { description: 'Position of the primary metric value (top, middle, or bottom)' },
-      defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryPosition,
-    })
-  ),
-  /**
-   * Font weight for title and subtitle. Possible values:
-   * - 'bold': Bold font weight
-   * - 'normal': Normal font weight
-   */
-  title_weight: schema.maybe(
-    schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
-      meta: { description: 'Font weight for title and subtitle' },
-    })
-  ),
 };
 
 const metricStateSecondaryMetricOptionsSchema = {
@@ -212,57 +302,6 @@ const metricStateSecondaryMetricOptionsSchema = {
   // unfortunately given the lack of tuple schema support we need to have some way
   // to avoid default injection in the wrong type
   type: schema.literal('secondary'),
-  /**
-   * Caption configuration for the secondary metric.
-   * Controls the label text and its placement relative to the value.
-   */
-  caption: schema.maybe(
-    schema.oneOf(
-      [
-        schema.object(
-          {
-            type: schema.literal('auto'),
-            /**
-             * Label placement relative to the secondary metric value. Possible values:
-             * - 'before': Label appears before the value
-             * - 'after': Label appears after the value
-             */
-            placement: placementSchema({
-              meta: { description: 'Label placement relative to the secondary metric value' },
-              defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
-            }),
-          },
-          { meta: { id: 'metricLabelCaptionAuto', title: 'Auto Secondary Label Caption' } }
-        ),
-        schema.object(
-          {
-            type: schema.literal('custom'),
-            /**
-             * Custom label text for the secondary metric
-             */
-            value: schema.string({
-              meta: { description: 'Custom label text for the secondary metric' },
-            }),
-            /**
-             * Label placement relative to the secondary metric value. Possible values:
-             * - 'before': Label appears before the value
-             * - 'after': Label appears after the value
-             */
-            placement: placementSchema({
-              meta: { description: 'Label placement relative to the secondary metric value' },
-              defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
-            }),
-          },
-          { meta: { id: 'metricLabelCaptionCustom', title: 'Custom Secondary Label Caption' } }
-        ),
-      ],
-      {
-        meta: {
-          description: 'Caption configuration for the secondary metric label text and placement',
-        },
-      }
-    )
-  ),
   /**
    * Compare to
    */
@@ -282,23 +321,6 @@ const metricStateSecondaryMetricOptionsSchema = {
         { meta: { id: 'metricCompareToPrimary', title: 'Compare To Primary' } }
       ),
     ])
-  ),
-  value: schema.maybe(
-    schema.object(
-      {
-        /**
-         * Alignment for secondary values. Possible values:
-         * - 'left': Align value to the left
-         * - 'center': Align value to the center
-         * - 'right': Align value to the right
-         */
-        alignment: horizontalAlignmentSchema({
-          meta: { description: 'Alignment for secondary values' },
-          defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
-        }),
-      },
-      { meta: { description: 'Value configuration' } }
-    )
   ),
   /**
    * Color configuration
@@ -370,6 +392,7 @@ export const metricStateSchemaNoESQL = schema.object(
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    styling: schema.maybe(metricStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
@@ -411,6 +434,7 @@ export const esqlMetricState = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
+    styling: schema.maybe(metricStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
