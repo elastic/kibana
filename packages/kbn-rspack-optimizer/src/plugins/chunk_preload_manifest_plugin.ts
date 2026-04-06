@@ -48,27 +48,26 @@ export class ChunkPreloadManifestPlugin {
               ? splitChunksConfig.cacheGroups
               : undefined;
 
-          const staticNames = new Set<string>();
+          // Build a map from cache group KEY → static name.  We use the key
+          // (not the name) because rspack stamps each chunk's `idNameHints`
+          // with the cache group key, giving us a reliable way to identify
+          // which group produced a chunk — even for maxSize sub-chunks whose
+          // names differ from the original static name.
+          const staticNameGroupKeys = new Set<string>();
           if (cacheGroups && typeof cacheGroups === 'object') {
-            for (const group of Object.values(cacheGroups)) {
+            for (const [key, group] of Object.entries(cacheGroups)) {
               if (group && typeof group === 'object' && typeof group.name === 'string') {
-                staticNames.add(group.name);
+                staticNameGroupKeys.add(key);
               }
             }
           }
 
-          // When maxSize splits a named chunk, rspack generates sub-chunks
-          // named `<staticName><delimiter><hash>`. We match both the exact
-          // name and any maxSize-split derivatives.
-          const delimiter =
-            typeof splitChunksConfig === 'object' && splitChunksConfig
-              ? (splitChunksConfig as Record<string, unknown>).automaticNameDelimiter ?? '-'
-              : '-';
-
-          const isNamedSharedChunk = (chunkName: string): boolean => {
-            if (staticNames.has(chunkName)) return true;
-            for (const staticName of staticNames) {
-              if (chunkName.startsWith(`${staticName}${delimiter}`)) return true;
+          const isNamedSharedChunk = (chunk: Chunk): boolean => {
+            // idNameHints contains the cache group key(s) that produced this
+            // chunk.  If ANY hint matches a static-name group, the chunk (or
+            // its maxSize parent) was created by that group.
+            for (const hint of chunk.idNameHints) {
+              if (staticNameGroupKeys.has(hint)) return true;
             }
             return false;
           };
@@ -85,7 +84,7 @@ export class ChunkPreloadManifestPlugin {
           const sharedChunks = new Set<Chunk>();
 
           for (const chunk of compilation.chunks) {
-            if (chunk.name && isNamedSharedChunk(chunk.name)) {
+            if (isNamedSharedChunk(chunk)) {
               collectJsFiles(chunk, chunkFiles);
               sharedChunks.add(chunk);
             }

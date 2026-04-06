@@ -39,6 +39,7 @@ describe('RSPack cache invalidation configuration', () => {
       'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
       'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
       'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
+      'packages/kbn-rspack-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
       'packages/kbn-swc-config/src/browser.ts',
       'packages/kbn-transpiler-config/src/shared_config.ts',
     ];
@@ -82,6 +83,10 @@ describe('RSPack cache invalidation configuration', () => {
 
     it('should reference hmr_boundary_loader', () => {
       expect(configSource).toContain('hmr_boundary_loader');
+    });
+
+    it('should reference chunk_preload_manifest_plugin', () => {
+      expect(configSource).toContain('chunk_preload_manifest_plugin');
     });
   });
 

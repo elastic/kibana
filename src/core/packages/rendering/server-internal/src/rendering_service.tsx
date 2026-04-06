@@ -326,7 +326,7 @@ export class RenderingService {
           `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
           `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
           `${bundlesHref}/kibana.bundle.js`,
-          ...chunkFilenames.map((f) => `${bundlesHref}/chunks/${f}`),
+          ...chunkFilenames.map((f) => `${bundlesHref}/${f}`),
         ]
       : undefined;
 
