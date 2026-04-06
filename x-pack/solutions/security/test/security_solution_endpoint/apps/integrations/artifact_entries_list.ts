@@ -8,6 +8,7 @@
 import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
@@ -26,6 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointArtifactsTestResources = getService('endpointArtifactTestResources');
+  const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
   const toasts = getService('toasts');
@@ -42,7 +44,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(60_000 * 5);
 
+    let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
+
+    before(async () => {
+      indexedData = await endpointTestResources.loadEndpointData({
+        waitUntilTransformed: false,
+        alertsPerHost: 0,
+        withResponseActions: false,
+      });
+    });
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
+    });
 
     const checkFleetArtifacts = async (
       identifier: string,
