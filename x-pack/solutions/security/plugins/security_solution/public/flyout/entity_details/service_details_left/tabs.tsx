@@ -33,7 +33,7 @@ export const useTabs = (
       : [];
 
     const resolutionTab = entityStoreEntityId
-      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'service' })]
+      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.service })]
       : [];
 
     return [...riskTab, ...graphTab, ...resolutionTab];
