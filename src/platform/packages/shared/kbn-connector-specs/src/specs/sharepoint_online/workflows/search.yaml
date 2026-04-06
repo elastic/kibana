@@ -18,7 +18,7 @@ inputs:
       - "listItem"
       - "drive"
       - "driveItem"
-    description: "Entity types to search. Valid values: site, list, listItem, drive, driveItem. Note: not all combinations can be mixed in a single request."
+    description: "Entity types to search. Valid values: site, list, listItem, drive, driveItem. Note: not all combinations can be mixed in a single request. The different combinations could be: (driveItem, listItem), (site, list), (drive)."
   - name: region
     type: choice
     default: "NAM"

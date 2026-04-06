@@ -115,7 +115,10 @@ export class ServiceManager {
       return runner;
     };
 
-    const attachments = this.services.attachments.start();
+    const attachments = this.services.attachments.start({
+      spaces,
+      savedObjects,
+    });
     const sml = this.services.sml.start({
       logger: logger.get('sml'),
       securityAuthz: securityPlugin?.authz,

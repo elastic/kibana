@@ -1,0 +1,87 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-endpoint.events.security-default",
+    "template": {
+      "index_patterns": ["logs-endpoint.events.security-*"],
+      "name": "scout-elastic-defend-events",
+      "priority": 10000,
+      "data_stream": {},
+      "template": {
+        "settings": {
+          "number_of_shards": 1
+        },
+        "mappings": {
+          "properties": {
+            "@timestamp": { "type": "date" },
+            "event": {
+              "properties": {
+                "action": { "type": "keyword" },
+                "outcome": { "type": "keyword" },
+                "category": { "type": "keyword" },
+                "kind": { "type": "keyword" },
+                "module": { "type": "keyword" },
+                "type": { "type": "keyword" },
+                "dataset": { "type": "keyword" },
+                "id": { "type": "keyword" },
+                "created": { "type": "date" }
+              }
+            },
+            "host": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "name": { "type": "keyword" },
+                "hostname": { "type": "keyword" },
+                "domain": { "type": "keyword" },
+                "ip": { "type": "ip" },
+                "mac": { "type": "keyword" },
+                "os": {
+                  "properties": {
+                    "name": { "type": "keyword" },
+                    "type": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "user": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "name": { "type": "keyword" },
+                "email": { "type": "keyword" },
+                "domain": { "type": "keyword" }
+              }
+            },
+            "process": {
+              "properties": {
+                "Ext": {
+                  "properties": {
+                    "session_info": {
+                      "properties": {
+                        "logon_type": { "type": "keyword" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "agent": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "type": { "type": "keyword" },
+                "version": { "type": "keyword" }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": { "type": "keyword" },
+                "namespace": { "type": "keyword" },
+                "type": { "type": "keyword" }
+              }
+            },
+            "message": { "type": "text" }
+          }
+        }
+      }
+    }
+  }
+}

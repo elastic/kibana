@@ -68,7 +68,8 @@ export const SharepointOnline: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
                 }
               ),
             },
@@ -100,6 +101,7 @@ export const SharepointOnline: ConnectorSpec = {
                 }
               ),
             },
+            scope: { disabled: true },
           },
         },
       },
@@ -522,7 +524,7 @@ export const SharepointOnline: ConnectorSpec = {
           entityTypes?: Array<'site' | 'list' | 'listItem' | 'drive' | 'driveItem'>;
           from?: number;
           size?: number;
-          region?: 'US' | 'EUR' | 'APC' | 'LAM' | 'MEA';
+          region?: 'NAM' | 'EUR' | 'APC' | 'LAM' | 'MEA';
         };
 
         if (!typedInput.query) {

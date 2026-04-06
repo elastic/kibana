@@ -47,12 +47,17 @@ export interface AlertFlyoutOverviewTabProps {
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
 }
 
 export const AlertFlyoutOverviewTab = ({
   hit,
   servicesPromise,
   storePromise,
+  onAlertUpdated,
 }: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -92,7 +97,11 @@ export const AlertFlyoutOverviewTab = ({
       <>
         <DataViewManagerBootstrap />
         {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
-        <OverviewTab hit={hit} renderCellActions={noopCellActionRenderer} />
+        <OverviewTab
+          hit={hit}
+          renderCellActions={noopCellActionRenderer}
+          onAlertUpdated={onAlertUpdated}
+        />
       </>
     ),
   });

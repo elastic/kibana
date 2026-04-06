@@ -20,7 +20,7 @@ export const CreateIndexCalloutBrowseIntegrationBtn = () => {
     <EuiButtonEmpty
       color="text"
       iconSide="right"
-      iconType="popout"
+      iconType="external"
       data-test-subj="analyzeLogsBrowseIntegrations"
       href={analyzeLogsIntegration}
       target="_blank"

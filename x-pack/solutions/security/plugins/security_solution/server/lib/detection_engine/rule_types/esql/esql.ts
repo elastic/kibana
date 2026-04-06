@@ -240,6 +240,9 @@ export const esqlExecutor = async ({
           };
         });
 
+        // Collect rule execution metrics
+        result.alertsCandidateCount = syntheticHits.length;
+
         if (
           isAlertSuppressionActive &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)

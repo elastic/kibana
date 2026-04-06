@@ -6,8 +6,9 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
-import { hashEuid } from '../../../../server/domain/crud/utils';
+
 import {
   ENTITY_STORE_ROUTES,
   HISTORY_INDEX_PATTERN,
@@ -204,7 +205,7 @@ export const triggerMaintainerRun = async (
 ) => {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const response = await apiClient.post(
-      ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN(maintainerId),
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId),
       {
         headers,
         responseType: 'json',
@@ -243,7 +244,7 @@ export const forceLogExtraction = async (
   fromDateISO: string,
   toDateISO: string
 ) =>
-  await apiClient.post(ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION(entityType), {
+  await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,
     responseType: 'json',
     body: { fromDateISO, toDateISO },

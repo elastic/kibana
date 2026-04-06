@@ -225,3 +225,14 @@ export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>
 export type DataSourceAutoResolution = Record<string, 'readOnly'>;
 
 export type IndicesResolutionType = 'readonly' | 'reindex' | 'unfreeze';
+
+export interface CloudStackVersionInfo {
+  currentVersion: string;
+  lookupVersionUsed: string;
+  latestAvailableVersion: string;
+  minVersionToUpgradeToLatest?: string;
+  directUpgradeableVersionRange?: {
+    min: string;
+    max: string;
+  };
+}

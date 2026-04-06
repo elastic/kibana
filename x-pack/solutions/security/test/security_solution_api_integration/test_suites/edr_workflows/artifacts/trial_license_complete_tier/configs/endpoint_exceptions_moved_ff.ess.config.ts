@@ -43,6 +43,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(
           securitySolutionEnableExperimental
         )}`,
+
+        // Uncomment to enable debug logger to see full eval traces in kibana logs
+        // `--logging.loggers=${JSON.stringify([
+        //   {
+        //     name: 'plugins.securitySolution',
+        //     level: 'debug',
+        //   },
+        // ])}`,
       ],
     },
   };

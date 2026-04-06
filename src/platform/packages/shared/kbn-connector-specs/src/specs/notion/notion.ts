@@ -32,6 +32,11 @@ export const NotionConnector: ConnectorSpec = {
       'bearer',
       {
         type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+          },
+        },
         defaults: {
           authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
           tokenUrl: 'https://api.notion.com/v1/oauth/token',
