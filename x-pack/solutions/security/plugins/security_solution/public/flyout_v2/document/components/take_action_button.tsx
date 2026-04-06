@@ -18,6 +18,8 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
+import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
+import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -92,13 +94,39 @@ export const TakeActionButton = memo(
       refetch: onAssigneesUpdate,
     });
 
+    const { runWorkflowMenuItem: alertWorkflowMenuItem, runAlertWorkflowPanel } =
+      useRunAlertWorkflowPanel({
+        closePopover: closePopoverHandler,
+        ecsRowData: ecsData,
+      });
+
+    const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
+      useRunDocumentWorkflowPanel({
+        closePopover: closePopoverHandler,
+        documents: [
+          {
+            _id: eventId,
+            _index: hit.raw._index ?? '',
+            ...hit.flattened,
+          },
+        ],
+      });
+
     const items = useMemo(
       () => [
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
         ...(isAlert ? alertAssigneesItems : []),
+        ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
       ],
-      [addToCaseActionItems, isAlert, statusActionItems, alertAssigneesItems]
+      [
+        addToCaseActionItems,
+        isAlert,
+        statusActionItems,
+        alertAssigneesItems,
+        alertWorkflowMenuItem,
+        documentWorkflowMenuItem,
+      ]
     );
 
     const panels = useMemo(
@@ -106,8 +134,16 @@ export const TakeActionButton = memo(
         { id: 0, items },
         ...(isAlert ? statusActionPanels : []),
         ...(isAlert ? alertAssigneesPanels : []),
+        ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
       ],
-      [isAlert, items, statusActionPanels, alertAssigneesPanels]
+      [
+        isAlert,
+        items,
+        statusActionPanels,
+        alertAssigneesPanels,
+        runAlertWorkflowPanel,
+        runDocumentWorkflowPanel,
+      ]
     );
 
     const takeActionButton = (

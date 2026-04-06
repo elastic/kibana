@@ -22,6 +22,28 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions'
 );
 
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
+  () => ({
+    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+  })
+);
+
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
+  () => ({
+    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+  })
+);
+
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;

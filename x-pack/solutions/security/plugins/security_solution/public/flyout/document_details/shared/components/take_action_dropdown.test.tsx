@@ -37,6 +37,28 @@ jest.mock('../../../../common/components/endpoint/responder');
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
+  () => ({
+    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+  })
+);
+
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
+  () => ({
+    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+  })
+);
+
 jest.mock('../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ hasIndexWrite: true }]),
 }));
@@ -492,6 +514,52 @@ describe('take action dropdown', () => {
           expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
         });
       });
+    });
+  });
+
+  describe('searchHit prop', () => {
+    it('should pass searchHit._source fields to the document workflow panel', () => {
+      const searchHit = {
+        _id: 'alert-123',
+        _index: 'alerts-index',
+        _source: { 'host.name': 'my-host', 'agent.type': 'endpoint' },
+      };
+
+      mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} searchHit={searchHit} />
+        </TestProviders>
+      );
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documents: [
+            expect.objectContaining({
+              _id: defaultProps.dataAsNestedObject._id,
+              'host.name': 'my-host',
+              'agent.type': 'endpoint',
+            }),
+          ],
+        })
+      );
+    });
+
+    it('should pass empty source fields when searchHit is undefined', () => {
+      mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documents: [
+            expect.objectContaining({
+              _id: defaultProps.dataAsNestedObject._id,
+            }),
+          ],
+        })
+      );
     });
   });
 });
