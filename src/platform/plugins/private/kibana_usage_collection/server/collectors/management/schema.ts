@@ -45,6 +45,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:excludedGapReasons': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Array of excluded gap reasons.' },
+    },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },

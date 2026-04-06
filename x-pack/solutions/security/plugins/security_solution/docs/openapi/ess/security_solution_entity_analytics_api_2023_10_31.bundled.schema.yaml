@@ -2320,6 +2320,15 @@ components:
           items:
             type: string
           type: array
+        related_entities:
+          items:
+            type: object
+            properties:
+              entity_id:
+                type: string
+              relationship_type:
+                type: string
+          type: array
         score_type:
           description: Distinguishes base, propagated, and resolution scores.
           enum:

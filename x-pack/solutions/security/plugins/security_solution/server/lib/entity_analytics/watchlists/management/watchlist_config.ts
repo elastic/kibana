@@ -36,6 +36,7 @@ interface WatchlistConfigClientDeps {
 
 type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
+type WatchlistObjectWithId = WatchlistObject & { id: string };
 
 const omitWatchlistMeta = (
   watchlist: Partial<WatchlistObject>
@@ -125,27 +126,22 @@ export class WatchlistConfigClient {
    * List all watchlists and populate entity counts for each watchlist
    * @returns List of watchlists with entity counts
    */
-  async list(): Promise<WatchlistObject[]> {
+  async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
     const response = await this.deps.soClient.find<WatchlistObject>({
       type: watchlistConfigTypeName,
       namespaces: [this.deps.namespace],
-      perPage: MAX_PER_PAGE,
+      perPage: limit, // ← from main
     });
-
-    const watchlists = response.saved_objects.map(toWatchlistObject);
-
-    // Extract valid IDs to bulk-fetch entity counts
-    const watchlistIds = watchlists.map((w) => w.id).filter((id): id is string => id != null);
-
+    const watchlists = response.saved_objects.map(
+      (so) => toWatchlistObject(so) as WatchlistObjectWithId
+    );
+    const watchlistIds = watchlists.map((w) => w.id);
     if (watchlistIds.length > 0) {
       const countsMap = await this.getEntityCounts(watchlistIds);
       for (const w of watchlists) {
-        if (w.id != null) {
-          w.entityCount = countsMap[w.id] ?? 0;
-        }
+        w.entityCount = countsMap[w.id] ?? 0;
       }
     }
-
     return watchlists;
   }
 

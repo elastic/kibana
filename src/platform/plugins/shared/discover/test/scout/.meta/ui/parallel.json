@@ -1,5 +1,5 @@
 {
-  "sha1": "c8a438505f5d70acfd4e978d17a2d1377e2feaa9",
+  "sha1": "aa110322c607758a30cc461d2f9dc7a49cd1b5dc",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -845,6 +845,28 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/flyout_cascade_close.spec.ts",
         "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "6274006e10c2393-292942683092e7c",
+      "title": "Traces in Discover - Logs overview tab Similar errors - occurrences chart renders without error in the log child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/logs_overview_tab.spec.ts",
+        "line": 59,
         "column": 14
       }
     },

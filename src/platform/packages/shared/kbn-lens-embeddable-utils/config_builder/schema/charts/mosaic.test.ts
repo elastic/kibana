@@ -43,7 +43,7 @@ describe('Mosaic Schema', () => {
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.type).toBe('mosaic');
-      expect(validated.metric.operation).toBe('count');
+      expect(validated.metric).toHaveProperty('operation', 'count');
       expect(validated.group_by).toHaveLength(1);
     });
 
@@ -86,7 +86,7 @@ describe('Mosaic Schema', () => {
       };
 
       const validated = mosaicStateSchema.validate(input);
-      expect(validated.metric.operation).toBe('sum');
+      expect(validated.metric).toHaveProperty('operation', 'sum');
       expect(validated.group_by).toHaveLength(1);
       expect(validated.group_breakdown_by).toHaveLength(1);
     });
@@ -580,7 +580,6 @@ describe('Mosaic Schema', () => {
       const input: MosaicState = {
         ...baseESQLMosaicConfig,
         metric: {
-          operation: 'value',
           column: 'foo',
         },
       };
@@ -594,22 +593,18 @@ describe('Mosaic Schema', () => {
       const input: MosaicState = {
         ...baseESQLMosaicConfig,
         metric: {
-          operation: 'value',
           column: 'foo',
         },
         group_breakdown_by: [
           {
-            operation: 'value',
             column: 'bar',
             collapse_by: 'sum',
           },
           {
-            operation: 'value',
             column: 'bar',
             collapse_by: 'sum',
           },
           {
-            operation: 'value',
             column: 'bar',
           },
         ],
