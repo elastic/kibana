@@ -21,6 +21,7 @@ export interface IntegrationCardsProps {
   showInstallationStatus?: boolean;
   onIntegrationInstalled?: (count: number) => void;
   titleSize?: 'xs' | 's';
+  isClickable?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export const IntegrationCards = ({
   maxCardWidth,
   showInstallationStatus = false,
   titleSize = 's',
+  isClickable = true,
 }: IntegrationCardsProps) => {
   const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
   const { navigateTo } = useNavigation();
@@ -76,6 +78,11 @@ export const IntegrationCards = ({
             data-test-subj="entity_analytics-integration-card"
             css={css`
               max-width: ${maxCardWidth}px;
+              ${!isClickable &&
+              `
+                pointer-events: none;
+                cursor: default;
+              `}
             `}
           >
             <LazyPackageCard
@@ -89,9 +96,17 @@ export const IntegrationCards = ({
               title={title}
               titleSize={titleSize}
               version={version}
-              onCardClick={() => {
-                navigateToIntegration(name, version);
-              }}
+              onCardClick={
+                isClickable
+                  ? () => {
+                      navigateToIntegration(name, version);
+                    }
+                  : // If we pass undefined, PackageCard's onClick defaults to its internal `onCardClick` navigation function:
+                    // `onClick={onClickProp ?? onCardClick}`
+                    // So we MUST pass a no-op function to prevent navigation, and then rely on
+                    // `pointer-events: none` on the wrapper to kill the pointer/hover UI entirely.
+                    () => {}
+              }
               // Required values that don't make sense for this scenario
               categories={[]}
               integration={''}

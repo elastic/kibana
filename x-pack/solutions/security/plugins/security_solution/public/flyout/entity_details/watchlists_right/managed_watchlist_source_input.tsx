@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { IntegrationCards } from '../../../entity_analytics/components/entity_analytics_integrations_cards';
@@ -28,12 +29,44 @@ export const ManagedWatchlistSourceInput = ({ watchlist }: ManagedWatchlistSourc
   // eslint-disable-next-line no-console
   console.log('currentPath', currentPath);
   return (
-    <EuiFormRow fullWidth>
-      {isPrivilegedUserMonitoring ? (
-        <IntegrationCards maxCardWidth={360} showInstallationStatus titleSize="xs" />
-      ) : (
-        <div>{'Managed source type not supported yet.'}</div>
-      )}
-    </EuiFormRow>
+    <>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <strong>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.managedDataSourcesTitle"
+                defaultMessage="Managed Data Sources"
+              />
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.managedDataSourcesDescription"
+                defaultMessage="Data sources for {watchlistName}"
+                values={{ watchlistName: watchlist.name }}
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFormRow fullWidth>
+        {isPrivilegedUserMonitoring ? (
+          <IntegrationCards
+            maxCardWidth={360}
+            showInstallationStatus
+            titleSize="xs"
+            isClickable={false}
+          />
+        ) : (
+          <div>{'Managed source type not supported yet.'}</div>
+        )}
+      </EuiFormRow>
+    </>
   );
 };
