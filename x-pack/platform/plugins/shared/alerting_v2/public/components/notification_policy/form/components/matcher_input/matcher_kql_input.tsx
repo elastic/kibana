@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
-import type { KqlPluginStart } from '@kbn/kql/public';
+import type { KqlPluginStart, SuggestionsAbstraction } from '@kbn/kql/public';
 import { useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
@@ -19,21 +19,13 @@ interface MatcherInputProps {
   fullWidth?: boolean;
   placeholder?: string;
   'data-test-subj'?: string;
+  dataFieldNames?: string[];
 }
 
-const syntheticDataView = [
-  {
-    title: '',
-    fieldFormatMap: {},
-    fields: MATCHER_CONTEXT_FIELDS.map((f) => ({
-      name: f.path,
-      type: f.type === 'boolean' ? 'boolean' : 'string',
-      esTypes: [f.type === 'boolean' ? 'boolean' : 'keyword'],
-      searchable: true,
-      aggregatable: true,
-    })),
-  },
-] as unknown as DataView[];
+const matcherSuggestionsAbstraction: SuggestionsAbstraction = {
+  type: 'notification_policies',
+  fields: {},
+};
 
 export const MatcherInput = ({
   value,
@@ -41,8 +33,35 @@ export const MatcherInput = ({
   fullWidth,
   placeholder,
   'data-test-subj': dataTestSubj,
+  dataFieldNames,
 }: MatcherInputProps) => {
   const { QueryStringInput } = useService(PluginStart('kql')) as KqlPluginStart;
+
+  const syntheticDataView = useMemo(() => {
+    const baseFields = MATCHER_CONTEXT_FIELDS.map((f) => ({
+      name: f.path,
+      type: f.type === 'boolean' ? 'boolean' : 'string',
+      esTypes: [f.type === 'boolean' ? 'boolean' : 'keyword'],
+      searchable: true,
+      aggregatable: true,
+    }));
+
+    const dataFields = (dataFieldNames ?? []).map((name) => ({
+      name,
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+    }));
+
+    return [
+      {
+        title: '',
+        fieldFormatMap: {},
+        fields: [...baseFields, ...dataFields],
+      },
+    ] as unknown as DataView[];
+  }, [dataFieldNames]);
 
   const query: Query = useMemo(() => ({ query: value, language: 'kuery' }), [value]);
 
@@ -65,6 +84,8 @@ export const MatcherInput = ({
       dataTestSubj={dataTestSubj}
       size="s"
       className={fullWidth ? 'euiFieldText--fullWidth' : undefined}
+      suggestionsAbstraction={matcherSuggestionsAbstraction}
+      suggestionsDebounceMs={300}
     />
   );
 };

@@ -13,7 +13,7 @@ import { startCase } from 'lodash';
 import { EventKind } from '../constants/event_kinds';
 
 const DEFAULT_DOCUMENT_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.header.headerTitle',
+  'xpack.securitySolution.flyout.document.header.title',
   { defaultMessage: 'Document details' }
 );
 
@@ -25,7 +25,7 @@ const DEFAULT_EVENT_TITLE = i18n.translate(
 );
 
 const EXTERNAL_ALERT_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.title.alertEventTitle',
+  'xpack.securitySolution.flyout.document.title.alertTitle',
   {
     defaultMessage: 'External alert details',
   }
@@ -73,7 +73,7 @@ export const getEventTitle = (
   eventCategory: string | null | undefined,
   getField: FieldAccessor
 ): string => {
-  if (eventKind === 'event' && eventCategory) {
+  if (eventKind === EventKind.event && eventCategory) {
     const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
     if (fieldName) {
       return getField(fieldName) ?? DEFAULT_EVENT_TITLE;
@@ -81,7 +81,7 @@ export const getEventTitle = (
     return DEFAULT_EVENT_TITLE;
   }
 
-  if (eventKind === 'alert') {
+  if (eventKind === EventKind.alert) {
     return EXTERNAL_ALERT_TITLE;
   }
 

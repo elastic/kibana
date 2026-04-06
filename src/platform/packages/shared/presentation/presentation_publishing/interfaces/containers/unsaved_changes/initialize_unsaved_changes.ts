@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import type { MaybePromise } from '@kbn/utility-types';
 import { combineLatestWith, debounceTime, map, of } from 'rxjs';
+import type { HasSerializableState } from '../../has_serializable_state';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
 import { getTitle } from '../../titles/publishes_title';
@@ -33,13 +34,17 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   serializeState: () => StateType;
   getComparators: () => StateComparators<StateType>;
   defaultState?: Partial<StateType>;
-  onReset: (lastSavedPanelState?: StateType) => MaybePromise<void>;
+  onReset?: (lastSavedPanelState?: StateType) => MaybePromise<void>;
   checkRefEquality?: boolean;
-}): PublishesUnsavedChanges => {
+}): PublishesUnsavedChanges & Pick<HasSerializableState<StateType>, 'applySerializedState'> => {
+  const applySerializedState = async (state?: StateType) => {
+    await onReset?.(state);
+  };
+
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
     return {
+      applySerializedState,
       hasUnsavedChanges$: of(false),
-      resetUnsavedChanges: () => Promise.resolve(),
     };
   }
 
@@ -67,10 +72,5 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     })
   );
 
-  const resetUnsavedChanges = async () => {
-    const lastSavedState = parentApi.getLastSavedStateForChild(uuid);
-    await onReset(lastSavedState);
-  };
-
-  return { hasUnsavedChanges$, resetUnsavedChanges };
+  return { applySerializedState, hasUnsavedChanges$ };
 };

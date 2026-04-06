@@ -279,6 +279,60 @@ const SlackResolveChannelIdInputSchema = z.object({
 });
 type SlackResolveChannelIdInput = z.infer<typeof SlackResolveChannelIdInputSchema>;
 
+const SlackCreateConversationInputSchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.createConversation.input.name.description',
+        {
+          defaultMessage:
+            'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.',
+        }
+      )
+    ),
+  isPrivate: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.createConversation.input.isPrivate.description',
+        {
+          defaultMessage: 'Whether to create a private channel. Defaults to false (public).',
+        }
+      )
+    ),
+});
+type SlackCreateConversationInput = z.infer<typeof SlackCreateConversationInputSchema>;
+
+const SlackInviteToConversationInputSchema = z.object({
+  channel: z
+    .string()
+    .min(1)
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.inviteToConversation.input.channel.description',
+        {
+          defaultMessage: 'The ID of the channel to invite users to (e.g. C... or G...).',
+        }
+      )
+    ),
+  users: z
+    .string()
+    .min(1)
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.inviteToConversation.input.users.description',
+        {
+          defaultMessage:
+            'Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234).',
+        }
+      )
+    ),
+});
+type SlackInviteToConversationInput = z.infer<typeof SlackInviteToConversationInputSchema>;
+
 const SlackSendMessageInputSchema = z.object({
   channel: z
     .string()
@@ -458,6 +512,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * - channels:read - to list channels/conversations (public/private/DMs depending on workspace + membership)
  * - chat:write - for sending messages to public channels
  * - search:read.public (and related granular scopes) - for searching messages (requires a user token)
+ * - groups:write - to create private channels and invite users
  *
  * Optional (possible future usage):
  * - groups:read - to list private channels (future)
@@ -713,6 +768,118 @@ export const Slack: ConnectorSpec = {
           pagesFetched,
           nextCursor: cursor,
         };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.create
+    createConversation: {
+      isTool: false,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.createConversation.description',
+        {
+          defaultMessage: 'Create a new Slack channel (public or private)',
+        }
+      ),
+      input: SlackCreateConversationInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackCreateConversationInput =
+          SlackCreateConversationInputSchema.parse(input);
+
+        const payload: Record<string, unknown> = {
+          name: typedInput.name,
+          is_private: typedInput.isPrivate ?? false,
+        };
+
+        try {
+          ctx.log.debug(`Slack createConversation request: name=${typedInput.name}`);
+          const response = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'createConversation',
+            maxRetries: SLACK_MAX_RETRIES,
+            request: () =>
+              ctx.client.post(`${SLACK_API_BASE}/conversations.create`, payload, {
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
+              }),
+          });
+
+          if (!response.data.ok) {
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'createConversation',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
+          }
+
+          return response.data;
+        } catch (error) {
+          const err = error as AxiosError<unknown>;
+          ctx.log.error(
+            `Slack createConversation failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
+          );
+          throw error;
+        }
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.invite
+    inviteToConversation: {
+      isTool: false,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.inviteToConversation.description',
+        {
+          defaultMessage: 'Invite users to a Slack channel',
+        }
+      ),
+      input: SlackInviteToConversationInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackInviteToConversationInput =
+          SlackInviteToConversationInputSchema.parse(input);
+
+        const payload: Record<string, unknown> = {
+          channel: typedInput.channel,
+          users: typedInput.users,
+        };
+
+        try {
+          ctx.log.debug(`Slack inviteToConversation request: channel=${typedInput.channel}`);
+          const response = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'inviteToConversation',
+            maxRetries: SLACK_MAX_RETRIES,
+            request: () =>
+              ctx.client.post(`${SLACK_API_BASE}/conversations.invite`, payload, {
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
+              }),
+          });
+
+          if (!response.data.ok) {
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'inviteToConversation',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
+          }
+
+          return response.data;
+        } catch (error) {
+          const err = error as AxiosError<unknown>;
+          ctx.log.error(
+            `Slack inviteToConversation failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
+          );
+          throw error;
+        }
       },
     },
 
