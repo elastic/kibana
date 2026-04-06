@@ -87,7 +87,6 @@ export const ElasticInferenceServiceModelsPage = () => {
   if (isError) {
     return (
       <EuiEmptyPrompt
-
         iconType="warning"
         title={
           <h2>
