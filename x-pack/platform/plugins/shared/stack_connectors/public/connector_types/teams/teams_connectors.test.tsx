@@ -7,11 +7,17 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act, render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import TeamsActionFields from './teams_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('TeamsActionFields renders', () => {
   test('all connector fields are rendered', async () => {
@@ -55,7 +61,7 @@ describe('TeamsActionFields renders', () => {
         secrets: {
           webhookUrl: 'https://test.com',
         },
-        id: 'test',
+        id: 'teams',
         actionTypeId: '.teams',
         name: 'teams',
         config: {},
@@ -72,21 +78,21 @@ describe('TeamsActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          secrets: {
-            webhookUrl: 'https://test.com',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            secrets: {
+              webhookUrl: 'https://test.com',
+            },
+            id: 'teams',
+            actionTypeId: '.teams',
+            name: 'teams',
+            isDeprecated: false,
           },
-          id: 'test',
-          actionTypeId: '.teams',
-          name: 'teams',
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -119,7 +125,9 @@ describe('TeamsActionFields renders', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

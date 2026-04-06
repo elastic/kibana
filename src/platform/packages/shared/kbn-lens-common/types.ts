@@ -428,7 +428,6 @@ export interface LensDocument {
    * savedObjectId must be required when the LensDocument is by ref
    */
   savedObjectId?: string;
-  type?: string; // what is this type for? It's always 'lens'
   title: string;
   description?: string;
   visualizationType: string | null;
