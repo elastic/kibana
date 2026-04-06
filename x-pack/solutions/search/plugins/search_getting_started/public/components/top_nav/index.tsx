@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  useCurrentEuiBreakpoint,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import React from 'react';
@@ -26,20 +25,21 @@ interface TopNavLinkItem {
   buttonLabel: string;
   buttonHref: string;
   dataTestSubj: string;
+  id: string;
 }
 
 export const SearchGettingStartedSectionTopNavigation = () => {
   const {
     services: { licensing },
   } = useKibana();
-  const currentBreakpoint = useCurrentEuiBreakpoint();
-  console.log('currentBreakpoint', currentBreakpoint);
+
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
   const shouldReduceLinks = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
 
   const topNavLinks: TopNavLinkItem[] = [
     {
-      buttonLabel: i18n.translate('xpack.gettingStarted.topNav.buttonLabel.cloudHome', {
+      id: 'elasticCloud',
+      buttonLabel: i18n.translate('xpack.search.gettingStarted.topNav.buttonLabel.cloudHome', {
         defaultMessage: 'Elastic cloud',
       }),
       buttonHref: docLinks.cloudHome,
@@ -48,16 +48,21 @@ export const SearchGettingStartedSectionTopNavigation = () => {
     ...(!shouldReduceLinks
       ? [
           {
-            buttonLabel: i18n.translate('xpack.gettingStarted.topNav.buttonLabel.usage', {
+            id: 'usage',
+            buttonLabel: i18n.translate('xpack.search.gettingStarted.topNav.buttonLabel.usage', {
               defaultMessage: 'Usage',
             }),
             buttonHref: docLinks.cloudUsage,
             dataTestSubj: 'gettingStartedUsage',
           },
           {
-            buttonLabel: i18n.translate('xpack.gettingStarted.topNav.buttonLabel.organization', {
-              defaultMessage: 'Organization',
-            }),
+            id: 'organization',
+            buttonLabel: i18n.translate(
+              'xpack.search.gettingStarted.topNav.buttonLabel.organization',
+              {
+                defaultMessage: 'Organization',
+              }
+            ),
             buttonHref: docLinks.cloudOrganizationMembers,
             dataTestSubj: 'gettingStartedCloudOrganizationMembers',
           },
@@ -84,6 +89,7 @@ export const SearchGettingStartedSectionTopNavigation = () => {
               </EuiFlexItem>
               {topNavLinks.map((link) => (
                 <TopNavLinks
+                  key={link.id}
                   dataTestSubj={link.dataTestSubj}
                   buttonHref={link.buttonHref}
                   buttonLabel={link.buttonLabel}

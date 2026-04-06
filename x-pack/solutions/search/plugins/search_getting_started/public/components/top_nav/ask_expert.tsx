@@ -26,9 +26,14 @@ export const AskExpert: React.FC<{ askExpertLink: string }> = ({ askExpertLink }
         grow={false}
         css={css`
           border-right: ${euiTheme.border.thick};
-          borderradius: euiTheme.border.radius.medium;
           padding: ${euiTheme.size.s};
         `}
+        aria-label={i18n.translate(
+          'xpack.search.gettingStarted.topNav.ariaLabel.askAnExpertLinkLabel',
+          {
+            defaultMessage: 'Need help? ask an expert',
+          }
+        )}
       >
         <EuiLink target="_blank" href={askExpertLink} data-test-subj="gettingStartedAskExpert">
           {i18n.translate('xpack.search.gettingStarted.topNav.askAnExpertLinkLabel', {

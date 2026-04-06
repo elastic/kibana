@@ -15,8 +15,8 @@ interface Props {
 export const TopNavLinks: React.FC<Props> = ({ buttonLabel, buttonHref, dataTestSubj }) => {
   return (
     <EuiFlexItem grow={false}>
-      <EuiLink data-test-subj={dataTestSubj} href={buttonHref}>
-        <p>{buttonLabel}</p>
+      <EuiLink data-test-subj={dataTestSubj} href={buttonHref} aria-label={buttonLabel}>
+        {buttonLabel}
       </EuiLink>
     </EuiFlexItem>
   );

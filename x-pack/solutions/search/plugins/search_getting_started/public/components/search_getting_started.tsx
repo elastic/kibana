@@ -26,7 +26,7 @@ export const SearchGettingStartedPage: React.FC = () => {
 
   return (
     <SearchGettingStartedPageTemplate>
-      <EuiPageTemplate.Section data-test-subj="gettingStartedTopNav" paddingSize="xl" grow={false}>
+      <EuiPageTemplate.Section data-test-subj="gettingStartedTopNav" grow={false}>
         <SearchGettingStartedSectionTopNavigation />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section data-test-subj="gettingStartedHeader" paddingSize="xl" grow={false}>

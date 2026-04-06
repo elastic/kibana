@@ -17,30 +17,30 @@ import { useGetLicenseInfo } from '../hooks';
 interface Props {
   licensing: LicensingPluginStart;
 }
+const LICENSE_LABEL: Record<LicenseType, string> = {
+  trial: i18n.translate('xpack.searchSharedUI.licenseLabel.trial', {
+    defaultMessage: 'TRIAL',
+  }),
+  basic: i18n.translate('xpack.searchSharedUI.licenseLabel.basic', {
+    defaultMessage: 'BASIC',
+  }),
+  standard: i18n.translate('xpack.searchSharedUI.licenseLabel.standard', {
+    defaultMessage: 'STANDARD',
+  }),
+  gold: i18n.translate('xpack.searchSharedUI.licenseLabel.gold', {
+    defaultMessage: 'GOLD',
+  }),
+  platinum: i18n.translate('xpack.searchSharedUI.licenseLabel.platinum', {
+    defaultMessage: 'PLATINUM',
+  }),
+  enterprise: i18n.translate('xpack.searchSharedUI.licenseLabel.enterprise', {
+    defaultMessage: 'ENTERPRISE',
+  }),
+};
 export const LicenseBadge: React.FC<Props> = ({ licensing }: Props) => {
   const { isTrial, licenseType } = useGetLicenseInfo(licensing);
   const { euiTheme } = useEuiTheme();
 
-  const LICENSE_LABEL: Record<LicenseType, string> = {
-    trial: i18n.translate('xpack.searchHomepage.licenseLabel.trial', {
-      defaultMessage: 'TRIAL',
-    }),
-    basic: i18n.translate('xpack.searchHomepage.licenseLabel.basic', {
-      defaultMessage: 'BASIC',
-    }),
-    standard: i18n.translate('xpack.searchHomepage.licenseLabel.standard', {
-      defaultMessage: 'STANDARD',
-    }),
-    gold: i18n.translate('xpack.searchHomepage.licenseLabel.gold', {
-      defaultMessage: 'GOLD',
-    }),
-    platinum: i18n.translate('xpack.searchHomepage.licenseLabel.platinum', {
-      defaultMessage: 'PLATINUM',
-    }),
-    enterprise: i18n.translate('xpack.searchHomepage.licenseLabel.enterprise', {
-      defaultMessage: 'ENTERPRISE',
-    }),
-  };
   return (
     licenseType && (
       <EuiBadge
@@ -49,6 +49,7 @@ export const LicenseBadge: React.FC<Props> = ({ licensing }: Props) => {
           padding: `0 ${euiTheme.size.m}`,
         })}
         color={isTrial ? 'primary' : 'hollow'}
+        aria-label={LICENSE_LABEL[licenseType]}
       >
         {LICENSE_LABEL[licenseType]}
       </EuiBadge>

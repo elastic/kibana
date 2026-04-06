@@ -14,14 +14,19 @@ export const WelcomeMessage = () => {
   const user = useAuthenticatedUser();
   return (
     <EuiFlexItem grow={false}>
-      <EuiTitle size="xs">
+      <EuiTitle
+        size="xs"
+        aria-label={i18n.translate('undefined.welcomeMessage.euiTitle.welcomeMessageLabel', {
+          defaultMessage: 'Welcome message',
+        })}
+      >
         <h4>
           {user?.email
-            ? i18n.translate('xpack.searchHomepage.welcome.title', {
+            ? i18n.translate('xpack.search.gettingStarted.welcome.title', {
                 defaultMessage: 'Welcome, {email}',
                 values: { email: user.email },
               })
-            : i18n.translate('xpack.searchHomepage.welcome.title.default', {
+            : i18n.translate('xpack.search.gettingStarted.welcome.title.default', {
                 defaultMessage: 'Welcome',
               })}
         </h4>
