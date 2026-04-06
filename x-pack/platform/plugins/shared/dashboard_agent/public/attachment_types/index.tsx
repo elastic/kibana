@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EMPTY, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
@@ -19,8 +20,8 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './canvas_integration/dashboard_canvas_content';
+import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
-import { onAttachmentMount } from './on_attachment_mount';
 
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
@@ -56,8 +57,26 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
-      onAttachmentMount({ ...params, agentBuilder, dashboardPlugin, checkSavedDashboardExist }),
+    onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) => {
+      const apiSubscription = dashboardPlugin.dashboardAppClientApi$
+        .pipe(
+          switchMap((api) =>
+            api
+              ? createDashboardAppIntegration$({
+                  ...params,
+                  agentBuilder,
+                  api,
+                  checkSavedDashboardExist,
+                })
+              : EMPTY
+          )
+        )
+        .subscribe();
+
+      return () => {
+        apiSubscription.unsubscribe();
+      };
+    },
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}

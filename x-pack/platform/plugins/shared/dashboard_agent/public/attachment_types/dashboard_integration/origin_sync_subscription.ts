@@ -12,12 +12,12 @@ export const createOriginSyncSubscription = ({
   api,
   attachmentOrigin,
   checkSavedDashboardExist,
-  onOriginChange,
+  updateOrigin,
 }: {
   api: DashboardApi;
   attachmentOrigin: string | undefined;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-  onOriginChange: (origin: string) => void;
+  updateOrigin: (origin: string) => void;
 }): Subscription => {
   let origin = attachmentOrigin;
 
@@ -31,7 +31,7 @@ export const createOriginSyncSubscription = ({
     // - the attachment already points to this dashboard (subsequent saves)
     // - the saved dashboard was previously the attachment origin (save as)
     if (!origin || dashboardId === origin || previousDashboardId === origin) {
-      onOriginChange(dashboardId);
+      updateOrigin(dashboardId);
       origin = dashboardId;
       return;
     }
@@ -43,7 +43,7 @@ export const createOriginSyncSubscription = ({
       return;
     }
 
-    onOriginChange(dashboardId);
+    updateOrigin(dashboardId);
     origin = dashboardId;
   });
 };

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { merge, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createManualChangesSubscription } from './manual_changes_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 
@@ -27,31 +28,30 @@ export const registerDashboardAppIntegration = ({
   checkSavedDashboardExist,
   updateOrigin,
 }: DashboardAppIntegrationParams): (() => void) => {
-  const subscription = merge(
-    new Observable<never>(() =>
-      createOriginSyncSubscription({
-        api,
-        attachmentOrigin: getAttachment().origin,
-        checkSavedDashboardExist,
-        onOriginChange: (origin) => {
-          void updateOrigin(origin);
-        },
-      })
-    ),
-    new Observable<never>(() =>
-      createManualChangesSubscription({
-        agentBuilder,
-        api,
-        getAttachment,
-      })
-    )
-  ).subscribe();
+  const originSyncSubscription = createOriginSyncSubscription({
+    api,
+    attachmentOrigin: getAttachment().origin,
+    checkSavedDashboardExist,
+    updateOrigin,
+  });
+  const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
+    agentBuilder,
+    api,
+  });
+  const manualChangesSubscription = createManualChangesSubscription({
+    agentBuilder,
+    api,
+    getAttachment,
+  });
 
   return () => {
-    subscription.unsubscribe();
+    originSyncSubscription.unsubscribe();
+    agentLiveUpdatesSubscription.unsubscribe();
+    manualChangesSubscription.unsubscribe();
   };
 };
 
 export const createDashboardAppIntegration$ = (
   params: DashboardAppIntegrationParams
+  // this stream is meant to be subscribed to for the side effect of registering the integration, it doesn't emit any values and completes when the integration is unregistered
 ): Observable<never> => new Observable<never>(() => registerDashboardAppIntegration(params));
