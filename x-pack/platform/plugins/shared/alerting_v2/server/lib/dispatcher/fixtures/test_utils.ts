@@ -102,7 +102,6 @@ export function createNotificationGroup(
   return {
     id: 'group-1',
     spaceId: 'default',
-    ruleId: 'rule-1',
     policyId: 'policy-1',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},
