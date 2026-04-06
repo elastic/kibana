@@ -37,7 +37,6 @@ const controlGroupManagerMock = {
     }),
   },
 } as unknown as ReturnType<typeof initializeControlGroupManager>;
-const setStateMock = () => {};
 
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
