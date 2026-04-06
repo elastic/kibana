@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useStartServices } from '../../../../../hooks';
 
 import type {
-  AIV2Telemetry,
+  AutomaticImportTelemetry,
   CreatedIntegrationRow,
   DataStreamResultsFlyoutComponent,
 } from './manage_integrations_table';
@@ -62,7 +62,7 @@ export const ManageIntegrationActions: React.FC<{
   onInstallToCluster,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { automaticImportVTwo } = useStartServices();
+  const { automaticImport } = useStartServices();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -115,11 +115,11 @@ export const ManageIntegrationActions: React.FC<{
   const openReviewModal = useCallback(() => {
     setIsPopoverOpen(false);
     setShowReviewModal(true);
-    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-      'aiv2_review_approve_menu_clicked',
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_review_approve_menu_clicked',
       {}
     );
-  }, [automaticImportVTwo]);
+  }, [automaticImport]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
