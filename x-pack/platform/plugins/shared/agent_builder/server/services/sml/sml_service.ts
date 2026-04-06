@@ -619,4 +619,6 @@ const mapSourceToDocument = (source: SmlDocument): SmlDocument => ({
   tags: source.tags,
   user_defined: source.user_defined,
   params: source.params,
+  semantic_title: source.semantic_title,
+  semantic_content: source.semantic_content,
 });
