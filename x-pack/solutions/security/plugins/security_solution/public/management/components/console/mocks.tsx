@@ -168,6 +168,7 @@ const getInputTextFullValue = (
 /**
  * Finds the console in the Render Result and enters the command provided
  * @param renderResult
+ * @param user
  * @param cmd
  * @param inputOnly
  * @param useKeyboard
@@ -245,7 +246,8 @@ export const triggerConsoleCommandInputEvent = async (
 };
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
-  const user = userEvent as unknown as UserEvent;
+  // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   const mockedContext = createAppRootMockRenderer();
   const { startServices, coreStart, depsStart, queryClient, history, setExperimentalFlag } =
     mockedContext;
