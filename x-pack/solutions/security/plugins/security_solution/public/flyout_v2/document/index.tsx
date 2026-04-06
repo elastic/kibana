@@ -75,9 +75,6 @@ export const DocumentFlyout = memo(
     if (isAlert && loading) {
       return <FlyoutLoading data-test-subj="document-overview-loading" />;
     }
-    if (isAlert && loading) {
-      return <FlyoutLoading data-test-subj="document-overview-loading" />;
-    }
 
     if (missingAlertsPrivilege) {
       return <FlyoutMissingAlertsPrivilege />;
@@ -101,7 +98,7 @@ export const DocumentFlyout = memo(
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <Footer hit={hit} onAlertUpdated={onAlertUpdated} />
+          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
         </EuiFlyoutFooter>
       </>
     );

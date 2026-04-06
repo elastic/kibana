@@ -34,7 +34,6 @@ const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
-
 const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord =>
   ({
     id: 'test-id',
@@ -42,12 +41,14 @@ const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord
     flattened,
     isAnchor: false,
   } as DataTableRecord);
+
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
 const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
+const mockOnShowNotes = jest.fn();
 
 const defaultProps = {
   hit: createMockHit(),
@@ -55,6 +56,7 @@ const defaultProps = {
   nonEcsData: mockNonEcsData,
   refetchFlyoutData: mockRefetchFlyoutData,
   onAlertUpdated: mockOnAlertUpdated,
+  onShowNotes: mockOnShowNotes,
 };
 
 const renderTakeActionButton = (props = defaultProps) => render(<TakeActionButton {...props} />);
@@ -222,20 +224,24 @@ describe('<TakeActionButton />', () => {
       mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [tagsItem], alertTagsPanels: [] });
     });
 
-    it('should include status and assignees items for alert documents (event.kind === signal)', () => {
+    it('should include status, assignees and tags items for alert documents (event.kind === signal)', () => {
       const alertHit = createMockHit({ 'event.kind': 'signal' });
-      const { getByTestId, getByText } = renderTakeActionButton({ ...defaultProps, hit: alertHit });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
 
       fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
       expect(getByText('Mark as acknowledged')).toBeInTheDocument();
       expect(getByText('Assign alert')).toBeInTheDocument();
       expect(getByText('Apply alert tags')).toBeInTheDocument();
+      expect(queryByText('Add note')).not.toBeInTheDocument();
     });
 
-    it('should exclude status and assignees items for non-alert documents', () => {
+    it('should exclude status, assignees and tags items but have note item for non-alert documents', () => {
       const eventHit = createMockHit({ 'event.kind': 'event' });
-      const { getByTestId, queryByText } = renderTakeActionButton({
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
         ...defaultProps,
         hit: eventHit,
       });
@@ -245,10 +251,11 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
       expect(queryByText('Assign alert')).not.toBeInTheDocument();
       expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+      expect(getByText('Add note')).toBeInTheDocument();
     });
 
-    it('should exclude status and assignees items when event.kind is not set', () => {
-      const { getByTestId, queryByText } = renderTakeActionButton({
+    it('should exclude status, assignees and tags items but have note item when event.kind is not set', () => {
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
         ...defaultProps,
         hit: createMockHit(),
       });
@@ -258,6 +265,19 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
       expect(queryByText('Assign alert')).not.toBeInTheDocument();
       expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+      expect(getByText('Add note')).toBeInTheDocument();
     });
+  });
+
+  it('should call onShowNotes when "Add note" is clicked', () => {
+    const { getByTestId, getByText } = renderTakeActionButton({
+      ...defaultProps,
+      hit: createMockHit(),
+    });
+
+    fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+    fireEvent.click(getByText('Add note'));
+
+    expect(mockOnShowNotes).toHaveBeenCalledTimes(1);
   });
 });
