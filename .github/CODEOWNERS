@@ -2280,6 +2280,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 /x-pack/platform/test/api_integration/apis/features  @elastic/kibana-security
 
 # Kibana Platform Security
+packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-security
 /src/setup_node_env/harden @elastic/kibana-security
 
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security

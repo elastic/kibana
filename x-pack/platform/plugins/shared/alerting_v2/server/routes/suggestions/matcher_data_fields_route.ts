@@ -22,10 +22,13 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
     },
   };
-  static routeOptions = { access: 'internal' as const };
+  static routeOptions = {
+    summary: 'Get matcher data fields suggestions',
+    description: 'Get suggestions for matcher data fields.',
+  } as const;
   static validate = false as const;
 
-  protected readonly routeName = 'matcher data fields';
+  protected readonly routeName = 'matcher data fields suggestions';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,

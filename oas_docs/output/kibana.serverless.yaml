@@ -632,6 +632,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 36
+            minLength: 1
             type: string
       requestBody:
         content:
