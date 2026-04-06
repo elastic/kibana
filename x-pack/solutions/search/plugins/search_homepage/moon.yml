@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/search-shared-ui'
   - '@kbn/search-code-examples'
   - '@kbn/try-in-console'
-  - '@kbn/deeplinks-search'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
   - '@kbn/react-query'

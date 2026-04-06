@@ -339,6 +339,22 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContext.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -351,7 +367,7 @@
         "label": "MatcherContextFieldDescriptor",
         "description": [],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -364,7 +380,7 @@
             "label": "path",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -377,10 +393,10 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"boolean\" | \"string[]\""
+              "\"string\" | \"boolean\" | \"object\" | \"string[]\""
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -396,7 +412,7 @@
         "label": "NotificationPolicyResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-        "lineNumber": 10,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -409,7 +425,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 11,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -425,7 +441,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 12,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -438,7 +454,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 13,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -451,7 +467,7 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 14,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -464,7 +480,7 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 15,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -480,7 +496,7 @@
               "{ type: any; id: string; }[]"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 16,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -496,7 +512,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 17,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -512,7 +528,23 @@
               "string[] | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 18,
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.groupingMode",
+            "type": "Any",
+            "tags": [],
+            "label": "groupingMode",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -525,10 +557,10 @@
             "label": "throttle",
             "description": [],
             "signature": [
-              "{ interval: string; } | null"
+              "{ strategy?: any; interval?: string | undefined; } | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 19,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +576,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 20,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -560,7 +592,7 @@
               "{ owner: string; createdByUser: boolean; }"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 21,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -576,7 +608,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 25,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -592,7 +624,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 26,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -605,7 +637,7 @@
             "label": "createdAt",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 27,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -621,7 +653,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 28,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -637,7 +669,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 29,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -650,7 +682,7 @@
             "label": "updatedAt",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
-            "lineNumber": 30,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -659,8 +691,83 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ALERT_EPISODE_ACTION_TYPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "ALERT_EPISODE_ACTION_TYPE",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ALERT_EPISODE_STATUS",
+        "type": "Enum",
+        "tags": [],
+        "label": "ALERT_EPISODE_STATUS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.AlertEpisodeActionType",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertEpisodeActionType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.ALERT_EPISODE_ACTION_TYPE",
+            "text": "ALERT_EPISODE_ACTION_TYPE"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.AlertEpisodeStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertEpisodeStatus",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.ALERT_EPISODE_STATUS",
+            "text": "ALERT_EPISODE_STATUS"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/alerting-v2-schemas",
         "id": "def-common.BulkActionNotificationPoliciesBody",
@@ -672,7 +779,7 @@
           "{ actions: ({ id: string; action: any; } | { id: string; action: any; } | { id: string; action: any; snoozedUntil: string; } | { id: string; action: any; } | { id: string; action: any; } | { id: string; action: any; })[]; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 74,
+        "lineNumber": 142,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -689,7 +796,7 @@
           "any[]"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 83,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -706,41 +813,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 74,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-v2-schemas",
-        "id": "def-common.BulkGetAlertActionsBody",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkGetAlertActionsBody",
-        "description": [],
-        "signature": [
-          "{ episode_ids: string[]; }"
-        ],
-        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 95,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-v2-schemas",
-        "id": "def-common.BulkGetAlertActionsResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkGetAlertActionsResponse",
-        "description": [],
-        "signature": [
-          "{ episode_id: string; rule_id: any; group_hash: any; last_ack_action: any; last_deactivate_action: any; last_snooze_action: any; tags: any; }[]"
-        ],
-        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 120,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -765,16 +838,50 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateAckAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAckAlertActionBody",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateActivateAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateActivateAlertActionBody",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 94,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
         "id": "def-common.CreateAlertActionBody",
         "type": "Type",
         "tags": [],
         "label": "CreateAlertActionBody",
         "description": [],
         "signature": [
-          "{ action_type: any; episode_id: string; } | { action_type: any; episode_id: string; } | { action_type: any; tags: string[]; } | { action_type: any; } | { action_type: any; } | { action_type: any; reason: string; } | { action_type: any; reason: string; }"
+          "{ action_type: any; episode_id: string; } | { action_type: any; episode_id: string; } | { action_type: any; tags: string[]; } | { action_type: any; expiry?: string | undefined; } | { action_type: any; } | { action_type: any; reason: string; } | { action_type: any; reason: string; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 57,
+        "lineNumber": 117,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -791,7 +898,24 @@
           "{ group_hash: string; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 65,
+        "lineNumber": 125,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateDeactivateAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateDeactivateAlertActionBody",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -805,10 +929,10 @@
         "label": "CreateNotificationPolicyData",
         "description": [],
         "signature": [
-          "{ name: string; description: string; destinations: { type: any; id: string; }[]; matcher?: string | undefined; groupBy?: string[] | undefined; throttle?: { interval: string; } | undefined; }"
+          "{ name: string; description: string; destinations: { type: any; id: string; }[]; groupingMode: any; matcher?: string | undefined; groupBy?: string[] | undefined; throttle?: { strategy: any; interval?: string | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 89,
+        "lineNumber": 160,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -822,11 +946,113 @@
         "label": "CreateRuleData",
         "description": [],
         "signature": [
-          "{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; condition?: string | undefined; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
+          "{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 242,
+        "lineNumber": 243,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateSnoozeAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateSnoozeAlertActionBody",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateTagAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateTagAlertActionBody",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateUnackAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateUnackAlertActionBody",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateUnsnoozeAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateUnsnoozeAlertActionBody",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.GroupingMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GroupingMode",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.groupingModeSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "groupingModeSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -849,7 +1075,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -923,7 +1149,7 @@
           "{ id: string; action: any; } | { id: string; action: any; } | { id: string; action: any; snoozedUntil: string; } | { id: string; action: any; } | { id: string; action: any; } | { id: string; action: any; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 68,
+        "lineNumber": 136,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -940,7 +1166,7 @@
           "{ type: any; id: string; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 20,
+        "lineNumber": 88,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -957,7 +1183,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 91,
+        "lineNumber": 95,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -974,7 +1200,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 92,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -993,7 +1219,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 90,
+        "lineNumber": 94,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1010,7 +1236,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 30,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1029,7 +1255,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 28,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1063,8 +1289,42 @@
           "{ snoozedUntil: string; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 26,
+        "lineNumber": 94,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ThrottleStrategy",
+        "type": "Type",
+        "tags": [],
+        "label": "ThrottleStrategy",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.throttleStrategySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "throttleStrategySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1080,7 +1340,7 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 109,
+        "lineNumber": 190,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1094,10 +1354,10 @@
         "label": "UpdateNotificationPolicyData",
         "description": [],
         "signature": [
-          "{ name?: string | undefined; description?: string | undefined; destinations?: { type: any; id: string; }[] | undefined; matcher?: any; groupBy?: any; throttle?: any; }"
+          "{ groupingMode: any; name?: string | undefined; description?: string | undefined; destinations?: { type: any; id: string; }[] | undefined; matcher?: any; groupBy?: any; throttle?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 103,
+        "lineNumber": 184,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1111,7 +1371,7 @@
         "label": "UpdateRuleData",
         "description": [],
         "signature": [
-          "{ metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
+          "{ metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
         "lineNumber": 272,
@@ -1152,7 +1412,7 @@
           "<{ id: ",
           "ZodString",
           "; action: any; snoozedUntil: ",
-          "ZodString",
+          "ZodISODateTime",
           "; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
@@ -1178,7 +1438,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 70,
+        "lineNumber": 138,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1219,7 +1479,11 @@
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
-          "<{ action_type: any; }, ",
+          "<{ action_type: any; expiry: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
@@ -1246,7 +1510,7 @@
           "$strip>>>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 76,
+        "lineNumber": 136,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1285,7 +1549,11 @@
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
-          "<{ action_type: any; }, ",
+          "<{ action_type: any; expiry: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
@@ -1312,69 +1580,7 @@
           "$strip>>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 67,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-v2-schemas",
-        "id": "def-common.bulkGetAlertActionsBodySchema",
-        "type": "Object",
-        "tags": [],
-        "label": "bulkGetAlertActionsBodySchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ episode_ids: ",
-          "ZodArray",
-          "<",
-          "ZodString",
-          ">; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>"
-        ],
-        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 85,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-v2-schemas",
-        "id": "def-common.bulkGetAlertActionsResponseSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "bulkGetAlertActionsResponseSchema",
-        "description": [],
-        "signature": [
-          "ZodArray",
-          "<",
-          "ZodObject",
-          "<{ episode_id: ",
-          "ZodString",
-          "; rule_id: ",
-          "ZodNullable",
-          "<",
-          "ZodString",
-          ">; group_hash: ",
-          "ZodNullable",
-          "<",
-          "ZodString",
-          ">; last_ack_action: any; last_deactivate_action: any; last_snooze_action: any; tags: ",
-          "ZodNullable",
-          "<",
-          "ZodArray",
-          "<",
-          "ZodString",
-          ">>; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>>"
-        ],
-        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 97,
+        "lineNumber": 127,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1458,6 +1664,46 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createAckAlertActionBodySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createAckAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{}, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createActivateAlertActionBodySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createActivateAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{}, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 91,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
         "id": "def-common.createAlertActionBodySchema",
         "type": "Object",
         "tags": [],
@@ -1487,7 +1733,11 @@
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
-          "<{ action_type: any; }, ",
+          "<{ action_type: any; expiry: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
@@ -1508,7 +1758,7 @@
           "$strip>], \"action_type\">"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 43,
+        "lineNumber": 103,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1530,7 +1780,27 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 59,
+        "lineNumber": 119,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createDeactivateAlertActionBodySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createDeactivateAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{}, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1569,20 +1839,22 @@
           "ZodArray",
           "<",
           "ZodString",
-          ">>; throttle: ",
+          ">>; groupingMode: any; throttle: ",
           "ZodOptional",
           "<",
           "ZodObject",
-          "<{ interval: ",
+          "<{ strategy: any; interval: ",
+          "ZodOptional",
+          "<",
           "ZodString",
-          "; }, ",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>>; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 78,
+        "lineNumber": 146,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1639,11 +1911,7 @@
           "ZodObject",
           "<{ base: ",
           "ZodString",
-          "; condition: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; }, ",
+          "; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strict>; }, ",
           "node_modules/zod/v4/core/schemas",
@@ -1656,10 +1924,6 @@
           "<",
           "ZodObject",
           "<{ base: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; condition: ",
           "ZodOptional",
           "<",
           "ZodString",
@@ -1730,7 +1994,87 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 219,
+        "lineNumber": 228,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createSnoozeAlertActionBodySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createSnoozeAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{}, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 81,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createTagAlertActionBodySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createTagAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{}, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createUnackAlertActionBodySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createUnackAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{}, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createUnsnoozeAlertActionBodySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createUnsnoozeAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{}, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 86,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1796,7 +2140,7 @@
           "<{ id: ",
           "ZodString",
           "; action: any; snoozedUntil: ",
-          "ZodString",
+          "ZodISODateTime",
           "; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
@@ -1820,7 +2164,7 @@
           "$strip>], \"action\">"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 59,
+        "lineNumber": 127,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1882,13 +2226,13 @@
         "signature": [
           "ZodObject",
           "<{ snoozedUntil: ",
-          "ZodString",
+          "ZodISODateTime",
           "; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 22,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1908,7 +2252,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 105,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1957,22 +2301,24 @@
           "ZodArray",
           "<",
           "ZodString",
-          ">>>; throttle: ",
+          ">>>; groupingMode: any; throttle: ",
           "ZodNullable",
           "<",
           "ZodOptional",
           "<",
           "ZodObject",
-          "<{ interval: ",
+          "<{ strategy: any; interval: ",
+          "ZodOptional",
+          "<",
           "ZodString",
-          "; }, ",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>>>; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
-        "lineNumber": 91,
+        "lineNumber": 162,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2053,10 +2399,6 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; condition: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
           ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strict>>; }, ",
@@ -2075,15 +2417,13 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; condition: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
           ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strict>>; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strict>>>; state_transition: ",
+          "ZodNullable",
+          "<",
           "ZodNullable",
           "<",
           "ZodOptional",
@@ -2107,7 +2447,7 @@
           "ZodString",
           ">; }, ",
           "node_modules/zod/v4/core/schemas",
-          "$strict>>>; grouping: ",
+          "$strict>>>>; grouping: ",
           "ZodNullable",
           "<",
           "ZodOptional",
@@ -2156,7 +2496,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 246,
+        "lineNumber": 247,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

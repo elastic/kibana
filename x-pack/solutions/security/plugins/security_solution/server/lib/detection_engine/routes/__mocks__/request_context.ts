@@ -11,6 +11,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
+
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
@@ -197,9 +199,11 @@ const createSecuritySolutionRequestContextMock = (
     getAuditLogger: jest.fn(() => mockAuditLogger),
     getLogger: jest.fn(() => clients.logger),
     getDataViewsService: jest.fn(),
+    getInternalDataViewsService: jest.fn(async () => dataViewsService),
     getEntityStoreApiKeyManager: jest.fn(),
     getPrivilegedUserMonitoringApiKeyManager: jest.fn(),
     getEntityStoreCrudClient: jest.fn(() => clients.entityStoreCrudClient),
+    getEntityStoreUpdateClient: jest.fn(() => clients.entityStoreCrudClient as never),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
     getPadPackageInstallationClient: jest.fn(() => clients.padPackageInstallationClient),

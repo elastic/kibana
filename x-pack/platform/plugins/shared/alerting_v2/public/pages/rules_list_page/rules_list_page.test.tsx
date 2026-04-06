@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -42,6 +42,10 @@ jest.mock('@kbn/core-di-browser', () => ({
 const mockUseFetchRules = jest.fn();
 jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+}));
+
+jest.mock('../../hooks/use_fetch_rule_tags', () => ({
+  useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
 }));
 
 const mockDeleteMutate = jest.fn();
@@ -263,7 +267,10 @@ describe('RulesListPage', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith({
       page: 1,
       perPage: 20,
+      filter: undefined,
       search: undefined,
+      sortField: 'name',
+      sortOrder: 'asc',
     });
 
     act(() => {
@@ -274,7 +281,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'Rule One',
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
   });
@@ -304,7 +314,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'prod',
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
 
@@ -320,7 +333,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
   });
@@ -342,7 +358,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 2,
         perPage: 20,
+        filter: undefined,
         search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
 
@@ -353,7 +372,10 @@ describe('RulesListPage', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith({
       page: 2,
       perPage: 20,
+      filter: undefined,
       search: undefined,
+      sortField: 'name',
+      sortOrder: 'asc',
     });
 
     act(() => {
@@ -364,8 +386,237 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'Rule',
+        sortField: 'name',
+        sortOrder: 'asc',
       });
+    });
+  });
+
+  it('renders filter controls', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('rulesListStatusFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTagsFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListModeFilter')).toBeInTheDocument();
+  });
+
+  it('does not show an active count on the status filter when nothing is selected', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('rulesListStatusFilter')).toHaveTextContent(/^Status$/);
+  });
+
+  it('passes status filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListStatusFilter'));
+    fireEvent.click(screen.getByTestId('rulesListStatusFilterOption-true'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: 'enabled: true',
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('passes tags filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+    fireEvent.click(screen.getByTestId('rulesListTagsFilterOption-prod'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: '(metadata.labels: "prod")',
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('passes mode filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListModeFilter'));
+    fireEvent.click(screen.getByTestId('rulesListModeFilterOption-signal'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: 'kind: signal',
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('uses name ascending as the default sort', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+      page: 1,
+      perPage: 20,
+      filter: undefined,
+      search: undefined,
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+  });
+
+  it('sorts by name when the Name header is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const nameHeader = screen.getByRole('columnheader', { name: /^name$/i });
+    fireEvent.click(within(nameHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: undefined,
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'desc',
+      });
+    });
+  });
+
+  it('sorts by mode when the Mode header is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const modeHeader = screen.getByRole('columnheader', { name: /^mode$/i });
+    fireEvent.click(within(modeHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: undefined,
+        search: undefined,
+        sortField: 'kind',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('changes sort parameters when a sortable header is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
+    fireEvent.click(within(statusHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: undefined,
+        search: undefined,
+        sortField: 'enabled',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('toggles sort direction when the same header is clicked twice', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
+    fireEvent.click(within(statusHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortField: 'enabled', sortOrder: 'asc' })
+      );
+    });
+
+    fireEvent.click(within(statusHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortField: 'enabled', sortOrder: 'desc' })
+      );
     });
   });
 
