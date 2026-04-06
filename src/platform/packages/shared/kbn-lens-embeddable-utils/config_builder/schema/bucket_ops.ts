@@ -14,7 +14,7 @@ import {
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
   LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
-  LENS_TERMS_SIZE_DEFAULT,
+  LENS_TERMS_LIMIT_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
@@ -94,11 +94,11 @@ export const bucketTermsOperationSchema = schema.object(
       { minSize: 1, maxSize: 4 }
     ),
     /**
-     * Size of the terms
+     * Maximum number of terms.
      */
-    size: schema.number({
-      defaultValue: LENS_TERMS_SIZE_DEFAULT,
-      meta: { description: 'Size of the terms' },
+    limit: schema.number({
+      defaultValue: LENS_TERMS_LIMIT_DEFAULT,
+      meta: { description: 'Maximum number of terms' },
     }),
     /**
      * Whether to increase accuracy

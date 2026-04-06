@@ -82,7 +82,6 @@ describe('useTopNavLinks', () => {
       () =>
         useTopNavLinks({
           dataView: dataViewMock,
-          onOpenInspector: jest.fn(),
           services,
           hasUnsavedChanges: false,
           isEsqlMode: false,
@@ -209,6 +208,23 @@ describe('useTopNavLinks', () => {
         (item) => item.id === 'backgroundSearch'
       );
       expect(backgroundSearchItem).toBeUndefined();
+    });
+  });
+
+  describe('inspect menu item', () => {
+    it('should include the inspect menu item when onOpenInspector is provided', async () => {
+      const appMenuConfig = await setup({ onOpenInspector: jest.fn() });
+
+      const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
+      expect(inspectItem).toBeDefined();
+      expect(inspectItem?.label).toBe('Inspect');
+    });
+
+    it('should NOT include the inspect menu item when onOpenInspector is not provided', async () => {
+      const appMenuConfig = await setup();
+
+      const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
+      expect(inspectItem).toBeUndefined();
     });
   });
 
@@ -376,53 +392,57 @@ describe('useTopNavLinks', () => {
       ).result.current;
     };
 
-    it('should include the createRule menu item when in ES|QL mode and alerting v2 is enabled', async () => {
+    it('should include the alerts menu when in ES|QL mode and alerting v2 is enabled', async () => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
 
-      const createRuleItem = appMenuConfig.items?.find(
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
+      expect(alertsItem?.label).toBe('Alerts');
+
+      const createRuleTopLevel = appMenuConfig.items?.find(
         (item) => item.id === AppMenuActionId.createRule
       );
-      expect(createRuleItem).toBeDefined();
-      expect(createRuleItem?.label).toBe('Rules');
+      expect(createRuleTopLevel).toBeUndefined();
     });
 
-    it('should NOT include the createRule menu item when not in ES|QL mode', async () => {
-      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
+    it('should prepend the v2 ES|QL rule row inside the alerts popover when v2 is enabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
 
-      const createRuleItem = appMenuConfig.items?.find(
-        (item) => item.id === AppMenuActionId.createRule
-      );
-      expect(createRuleItem).toBeUndefined();
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem?.items).toBeDefined();
+
+      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeDefined();
+      expect(v2Row?.order).toBe(0);
+      expect(v2Row?.labelBadgeText).toBe('New');
     });
 
-    it('should NOT include the createRule menu item when alerting v2 is disabled', async () => {
-      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, false);
-
-      const createRuleItem = appMenuConfig.items?.find(
-        (item) => item.id === AppMenuActionId.createRule
-      );
-      expect(createRuleItem).toBeUndefined();
-    });
-
-    it('should include the legacy alerts menu when not in ES|QL mode', async () => {
+    it('should NOT include the v2 row when not in ES|QL mode', async () => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
+
+      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
     });
 
-    it('should NOT include the legacy alerts menu when in ES|QL mode and v2 is enabled', async () => {
-      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
-
-      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
-      expect(alertsItem).toBeUndefined();
-    });
-
-    it('should include legacy alerts menu when in ES|QL mode but v2 is disabled', async () => {
+    it('should NOT include the v2 row when alerting v2 is disabled', async () => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, false);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
+
+      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
+    });
+
+    it('should include alerts menu in both ES|QL and classic modes', async () => {
+      const esqlConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
+      const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
+
+      expect(esqlConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
+      expect(classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
     });
   });
 });

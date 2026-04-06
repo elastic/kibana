@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-query'
   - '@kbn/kql'
+  - '@kbn/entity-store'
 tags:
   - plugin
   - prod

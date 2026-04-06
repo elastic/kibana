@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_settings',
         'create_comment',
         'case_reopen',
+        'cases_manage_templates',
       ],
       generalCasesV3: [
         'all',
@@ -53,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         'create_comment',
         'case_reopen',
         'cases_assign',
+        'cases_manage_templates',
       ],
       observabilityCases: [
         'all',
@@ -71,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_settings',
         'create_comment',
         'case_reopen',
+        'cases_manage_templates',
       ],
       observabilityCasesV3: [
         'all',
@@ -82,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         'create_comment',
         'case_reopen',
         'cases_assign',
+        'cases_manage_templates',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
       agentBuilder: [
@@ -93,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         'manage_tools',
         'manage_skills',
       ],
+      automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -328,6 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_settings',
         'create_comment',
         'case_reopen',
+        'cases_manage_templates',
       ],
       securitySolutionCasesV3: [
         'all',
@@ -339,6 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
         'create_comment',
         'case_reopen',
         'cases_assign',
+        'cases_manage_templates',
       ],
       securitySolutionTimeline: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],

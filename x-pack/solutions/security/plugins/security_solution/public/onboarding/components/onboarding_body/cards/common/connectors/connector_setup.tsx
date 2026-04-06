@@ -68,7 +68,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="createConnectorButton"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 iconSide="left"
                 onClick={() => setIsModalVisible(true)}
                 isLoading={false}

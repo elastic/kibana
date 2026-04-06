@@ -23,7 +23,7 @@ describe('AppMenuRegistry', () => {
         id: 'test-item',
         order: 1,
         label: 'Test Item',
-        iconType: 'search',
+        iconType: 'magnify',
         testId: 'testItem',
         run: jest.fn(),
       };
@@ -40,7 +40,7 @@ describe('AppMenuRegistry', () => {
         id: 'test-item',
         order: 1,
         label: 'Test Item 1',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -68,14 +68,14 @@ describe('AppMenuRegistry', () => {
           id: 'item-1',
           order: 1,
           label: 'Item 1',
-          iconType: 'search',
+          iconType: 'magnify',
           run: jest.fn(),
         },
         {
           id: 'item-2',
           order: 2,
           label: 'Item 2',
-          iconType: 'alert',
+          iconType: 'warning',
           run: jest.fn(),
         },
         {
@@ -156,7 +156,7 @@ describe('AppMenuRegistry', () => {
         id: 'parent',
         order: 1,
         label: 'Parent',
-        iconType: 'alert',
+        iconType: 'warning',
         items: [],
       };
 
@@ -186,7 +186,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-item',
         order: 1,
         label: 'Custom Item',
-        iconType: 'beaker',
+        iconType: 'flask',
         testId: 'customItem',
         run: jest.fn(),
       };
@@ -203,7 +203,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-item',
         order: 1,
         label: 'Custom Item 1',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 
@@ -228,7 +228,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-1',
         order: 1,
         label: 'Custom 1',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 
@@ -264,7 +264,7 @@ describe('AppMenuRegistry', () => {
         id: 'regular-item',
         order: 2,
         label: 'Regular Item',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -272,7 +272,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-item',
         order: 1,
         label: 'Custom Item',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 
@@ -290,7 +290,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-parent',
         order: 1,
         label: 'Custom Parent',
-        iconType: 'beaker',
+        iconType: 'flask',
         items: [],
       };
 
@@ -328,7 +328,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-parent',
         order: 1,
         label: 'Custom Parent',
-        iconType: 'beaker',
+        iconType: 'flask',
         items: [],
       };
 
@@ -347,7 +347,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-parent',
         order: 1,
         label: 'Custom Parent',
-        iconType: 'beaker',
+        iconType: 'flask',
         items: [],
       };
 
@@ -385,7 +385,7 @@ describe('AppMenuRegistry', () => {
         id: 'item-1',
         order: 1,
         label: 'Item 1',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -446,7 +446,7 @@ describe('AppMenuRegistry', () => {
         id: 'regular',
         order: 2,
         label: 'Regular',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -454,7 +454,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom',
         order: 1,
         label: 'Custom',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 
@@ -464,264 +464,6 @@ describe('AppMenuRegistry', () => {
       const config = registry.getAppMenuConfig();
 
       expect(config.items).toHaveLength(2);
-    });
-  });
-
-  describe('getItem', () => {
-    it('should return a registered item by ID', () => {
-      const item: DiscoverAppMenuItemType = {
-        id: 'test-item',
-        order: 1,
-        label: 'Test Item',
-        iconType: 'search',
-        run: jest.fn(),
-      };
-
-      registry.registerItem(item);
-
-      const result = registry.getItem('test-item');
-      expect(result).toEqual(item);
-    });
-
-    it('should return undefined for non-existent item', () => {
-      const result = registry.getItem('non-existent');
-      expect(result).toBeUndefined();
-    });
-
-    it('should return custom item by ID', () => {
-      const customItem: DiscoverAppMenuItemType = {
-        id: 'custom-item',
-        order: 1,
-        label: 'Custom Item',
-        iconType: 'beaker',
-        run: jest.fn(),
-      };
-
-      registry.registerCustomItem(customItem);
-
-      const result = registry.getItem('custom-item');
-      expect(result).toEqual(customItem);
-    });
-
-    it('should not include isCustom flag in returned item', () => {
-      const customItem: DiscoverAppMenuItemType = {
-        id: 'custom-item',
-        order: 1,
-        label: 'Custom Item',
-        iconType: 'beaker',
-        run: jest.fn(),
-      };
-
-      registry.registerCustomItem(customItem);
-
-      const result = registry.getItem('custom-item');
-      expect(result).not.toHaveProperty('isCustom');
-    });
-  });
-
-  describe('deleteItem', () => {
-    it('should remove a registered item by ID', () => {
-      const item: DiscoverAppMenuItemType = {
-        id: 'to-delete',
-        order: 1,
-        label: 'Delete Me',
-        iconType: 'trash',
-        run: jest.fn(),
-      };
-
-      registry.registerItem(item);
-      expect(registry.getItem('to-delete')).toBeDefined();
-
-      registry.deleteItem('to-delete');
-      expect(registry.getItem('to-delete')).toBeUndefined();
-
-      const config = registry.getAppMenuConfig();
-      expect(config.items).toHaveLength(0);
-    });
-
-    it('should not throw when deleting a non-existent item', () => {
-      expect(() => registry.deleteItem('non-existent')).not.toThrow();
-    });
-
-    it('should only remove the specified item, leaving others intact', () => {
-      registry.registerItem({
-        id: 'keep',
-        order: 1,
-        label: 'Keep',
-        iconType: 'check',
-        run: jest.fn(),
-      });
-      registry.registerItem({
-        id: 'remove',
-        order: 2,
-        label: 'Remove',
-        iconType: 'trash',
-        run: jest.fn(),
-      });
-
-      registry.deleteItem('remove');
-
-      const config = registry.getAppMenuConfig();
-      expect(config.items).toHaveLength(1);
-      expect(config.items?.[0].id).toBe('keep');
-    });
-  });
-
-  describe('mergePopoverItems', () => {
-    it('should merge popover items from source menu into target submenu', () => {
-      const targetMenu: DiscoverAppMenuItemType = {
-        id: 'target-menu',
-        order: 1,
-        label: 'Target Menu',
-        iconType: 'alert',
-        items: [
-          {
-            id: 'target-submenu',
-            order: 1,
-            label: 'Target Submenu',
-            items: [{ id: 'existing-item', order: 1, label: 'Existing', run: jest.fn() }],
-          },
-        ],
-      };
-
-      const sourceMenu: DiscoverAppMenuItemType = {
-        id: 'source-menu',
-        order: 2,
-        label: 'Source Menu',
-        iconType: 'bell',
-        items: [
-          { id: 'source-item-1', order: 2, label: 'Source 1', run: jest.fn() },
-          { id: 'source-item-2', order: 3, label: 'Source 2', run: jest.fn() },
-        ],
-      };
-
-      registry.registerItem(targetMenu);
-      registry.registerItem(sourceMenu);
-
-      registry.mergePopoverItems('target-menu', 'target-submenu', 'source-menu');
-
-      const result = registry.getItem('target-menu');
-      const submenu = result?.items?.find((item) => item.id === 'target-submenu');
-
-      expect(submenu?.items).toHaveLength(3);
-      expect(submenu?.items?.[0].id).toBe('existing-item');
-      expect(submenu?.items?.[1].id).toBe('source-item-1');
-      expect(submenu?.items?.[2].id).toBe('source-item-2');
-    });
-
-    it('should do nothing when target menu does not exist', () => {
-      const sourceMenu: DiscoverAppMenuItemType = {
-        id: 'source-menu',
-        order: 1,
-        label: 'Source Menu',
-        iconType: 'bell',
-        items: [{ id: 'source-item', order: 1, label: 'Source', run: jest.fn() }],
-      };
-
-      registry.registerItem(sourceMenu);
-
-      // Should not throw
-      registry.mergePopoverItems('non-existent', 'submenu', 'source-menu');
-
-      const config = registry.getAppMenuConfig();
-      expect(config.items).toHaveLength(1);
-    });
-
-    it('should do nothing when source menu does not exist', () => {
-      const targetMenu: DiscoverAppMenuItemType = {
-        id: 'target-menu',
-        order: 1,
-        label: 'Target Menu',
-        iconType: 'alert',
-        items: [
-          {
-            id: 'target-submenu',
-            order: 1,
-            label: 'Target Submenu',
-            items: [],
-          },
-        ],
-      };
-
-      registry.registerItem(targetMenu);
-
-      // Should not throw
-      registry.mergePopoverItems('target-menu', 'target-submenu', 'non-existent');
-
-      const result = registry.getItem('target-menu');
-      const submenu = result?.items?.find((item) => item.id === 'target-submenu');
-      expect(submenu?.items).toHaveLength(0);
-    });
-
-    it('should do nothing when source menu has no items', () => {
-      const targetMenu: DiscoverAppMenuItemType = {
-        id: 'target-menu',
-        order: 1,
-        label: 'Target Menu',
-        iconType: 'alert',
-        items: [
-          {
-            id: 'target-submenu',
-            order: 1,
-            label: 'Target Submenu',
-            items: [{ id: 'existing', order: 1, label: 'Existing', run: jest.fn() }],
-          },
-        ],
-      };
-
-      const sourceMenu: DiscoverAppMenuItemType = {
-        id: 'source-menu',
-        order: 2,
-        label: 'Source Menu',
-        iconType: 'bell',
-        items: [],
-      };
-
-      registry.registerItem(targetMenu);
-      registry.registerItem(sourceMenu);
-
-      registry.mergePopoverItems('target-menu', 'target-submenu', 'source-menu');
-
-      const result = registry.getItem('target-menu');
-      const submenu = result?.items?.find((item) => item.id === 'target-submenu');
-      expect(submenu?.items).toHaveLength(1);
-    });
-
-    it('should sort merged items by order', () => {
-      const targetMenu: DiscoverAppMenuItemType = {
-        id: 'target-menu',
-        order: 1,
-        label: 'Target Menu',
-        iconType: 'alert',
-        items: [
-          {
-            id: 'target-submenu',
-            order: 1,
-            label: 'Target Submenu',
-            items: [{ id: 'existing-high-order', order: 100, label: 'High Order', run: jest.fn() }],
-          },
-        ],
-      };
-
-      const sourceMenu: DiscoverAppMenuItemType = {
-        id: 'source-menu',
-        order: 2,
-        label: 'Source Menu',
-        iconType: 'bell',
-        items: [{ id: 'source-low-order', order: 1, label: 'Low Order', run: jest.fn() }],
-      };
-
-      registry.registerItem(targetMenu);
-      registry.registerItem(sourceMenu);
-
-      registry.mergePopoverItems('target-menu', 'target-submenu', 'source-menu');
-
-      const result = registry.getItem('target-menu');
-      const submenu = result?.items?.find((item) => item.id === 'target-submenu');
-
-      // Items should be sorted by order
-      expect(submenu?.items?.[0].id).toBe('source-low-order');
-      expect(submenu?.items?.[1].id).toBe('existing-high-order');
     });
   });
 });

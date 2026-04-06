@@ -137,7 +137,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -513,7 +513,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>
@@ -813,7 +813,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -1241,7 +1241,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>

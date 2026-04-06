@@ -22,7 +22,8 @@ const SOLUTION_NAME = i18n.translate(
 
 export const createAiNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false
+  workflowsUiEnabled: boolean = false,
+  showAlertingV2: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -49,7 +50,7 @@ export const createAiNavigationTree = (
         {
           id: SecurityPageName.configurations,
           link: securityLink(SecurityPageName.configurations),
-          icon: 'controlsHorizontal',
+          icon: 'controls',
           children: [
             {
               id: SecurityPageName.configurationsIntegrations,
@@ -105,12 +106,12 @@ export const createAiNavigationTree = (
     {
       id: SecurityPageName.landing,
       link: securityLink(SecurityPageName.landing),
-      icon: 'launch',
+      icon: 'rocket',
     },
     {
       link: 'dev_tools',
       title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
+      icon: 'code',
     },
     {
       title: i18nStrings.ingestAndManageData.title,
@@ -164,6 +165,19 @@ export const createAiNavigationTree = (
             },
           ],
         },
+        ...(showAlertingV2
+          ? [
+              {
+                id: 'v2_alerting_preview',
+                title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
+                renderAs: 'panelOpener' as const,
+                children: [
+                  { link: 'management:rules' as const },
+                  { link: 'management:notification_policies' as const },
+                ],
+              },
+            ]
+          : []),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [
@@ -180,6 +194,14 @@ export const createAiNavigationTree = (
             {
               link: 'management:trained_models',
             },
+          ],
+        },
+        {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
           ],
         },
         {

@@ -460,7 +460,7 @@ paths:
                             threat: []
                             to: 'now'
                             references:
-                              - 'https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html'
+                              - 'https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem'
                             version: 6
                             exceptions_list: []
                             immutable: false
@@ -1222,6 +1222,9 @@ components:
           type: array
           items:
             $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          type: string
 
     BulkDeleteRules:
       allOf:

@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '@kbn/scout';
-import { INTERNAL_API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from '../fixtures';
+import { API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from '../fixtures';
 
 /**
  * E2E episode lifecycle tests for alerting_v2 alert rules.
@@ -59,7 +59,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
     for (const ruleId of ruleIds) {
       await apiClient
         .delete(`${RULE_API_PATH}/${ruleId}`, {
-          headers: { ...INTERNAL_API_HEADERS, ...apiKeyHeader },
+          headers: { ...API_HEADERS, ...apiKeyHeader },
         })
         .catch(() => {});
     }
@@ -227,7 +227,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
 
       // Create an alert rule that queries the source index
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...INTERNAL_API_HEADERS, ...apiKeyHeader },
+        headers: { ...API_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'e2e-lifecycle-pending-active' },
@@ -235,8 +235,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
-              base: `FROM ${SOURCE_INDEX} | STATS count = COUNT(*) BY host.name`,
-              condition: 'WHERE count >= 1',
+              base: `FROM ${SOURCE_INDEX} | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           recovery_policy: { type: 'no_breach' },
@@ -299,7 +298,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
 
       // Create rule with pending_count=0 and recovering_count=0 (skip intermediate states)
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...INTERNAL_API_HEADERS, ...apiKeyHeader },
+        headers: { ...API_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'e2e-lifecycle-recovery' },
@@ -307,8 +306,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-1" | STATS count = COUNT(*) BY host.name`,
-              condition: 'WHERE count >= 1',
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-1" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           recovery_policy: { type: 'no_breach' },
@@ -376,7 +374,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
       });
 
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...INTERNAL_API_HEADERS, ...apiKeyHeader },
+        headers: { ...API_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'e2e-lifecycle-multi-group' },
@@ -384,8 +382,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-a", "host-multi-b") | STATS count = COUNT(*) BY host.name`,
-              condition: 'WHERE count >= 1',
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-a", "host-multi-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           recovery_policy: { type: 'no_breach' },
@@ -452,7 +449,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
       //   Exec 1: no previous → enters pending (statusCount=1)
       //   Exec 2: statusCount=1, nextCount=2 >= 2 → transitions to active
       const createResponse = await apiClient.post(RULE_API_PATH, {
-        headers: { ...INTERNAL_API_HEADERS, ...apiKeyHeader },
+        headers: { ...API_HEADERS, ...apiKeyHeader },
         body: {
           kind: 'alert',
           metadata: { name: 'e2e-lifecycle-threshold' },
@@ -460,8 +457,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-threshold-1" | STATS count = COUNT(*) BY host.name`,
-              condition: 'WHERE count >= 1',
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-threshold-1" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           recovery_policy: { type: 'no_breach' },
