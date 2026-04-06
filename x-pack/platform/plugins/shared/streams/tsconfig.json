@@ -12,11 +12,9 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
-    "test/**/*",
+    "test/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
@@ -90,5 +88,7 @@
     "@kbn/synthtrace",
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows"
   ]
 }

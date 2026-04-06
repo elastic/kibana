@@ -15,6 +15,7 @@ import type {
 import type { SetOptional } from 'type-fest';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import { validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
@@ -32,6 +33,7 @@ interface WatchlistConfigClientDeps {
 
 type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
+type WatchlistObjectWithId = WatchlistObject & { id: string };
 
 const omitWatchlistMeta = (
   watchlist: Partial<WatchlistObject>
@@ -102,6 +104,9 @@ export class WatchlistConfigClient {
 
   async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
+
+    validateWatchlistUpdate(id, attrs, existing);
+
     const existingAttrs = omitWatchlistMeta(existing);
     const attrsNoMeta = omitWatchlistMeta(attrs);
     const update: Partial<WatchlistSavedObjectAttributes> = {
@@ -117,16 +122,15 @@ export class WatchlistConfigClient {
     return this.get(id);
   }
 
-  async list(): Promise<WatchlistObject[]> {
+  async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
     return this.deps.soClient
       .find<WatchlistObject>({
         type: watchlistConfigTypeName,
         namespaces: [this.deps.namespace],
-        perPage: MAX_PER_PAGE,
+        perPage: limit,
       })
-
       .then((response) => {
-        return response.saved_objects.map((so) => toWatchlistObject(so));
+        return response.saved_objects.map((so) => toWatchlistObject(so) as WatchlistObjectWithId);
       });
   }
 

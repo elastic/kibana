@@ -89,6 +89,8 @@ dependsOn:
   - '@kbn/synthtrace'
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod
