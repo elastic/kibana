@@ -130,7 +130,7 @@ export class WatchlistConfigClient {
     const response = await this.deps.soClient.find<WatchlistObject>({
       type: watchlistConfigTypeName,
       namespaces: [this.deps.namespace],
-      perPage: limit, // ← from main
+      perPage: limit,
     });
     const watchlists = response.saved_objects.map(
       (so) => toWatchlistObject(so) as WatchlistObjectWithId
