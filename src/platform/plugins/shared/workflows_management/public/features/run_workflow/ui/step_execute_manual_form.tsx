@@ -62,9 +62,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
         direction="column"
         gutterSize="s"
         css={css`
-          flex: 1;
           min-height: 0;
-          align-self: stretch;
         `}
       >
         {(errors || warnings) && (
@@ -74,10 +72,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
         )}
         <EuiFlexItem
           css={css`
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
+            overflow: hidden;
           `}
         >
           <EuiFormRow
@@ -90,14 +85,14 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
               display: flex;
               flex-direction: column;
               min-height: 0;
-              .euiFormRow__labelWrapper {
-                padding-left: 0;
-              }
               .euiFormRow__fieldWrapper {
                 flex: 1;
                 min-height: 0;
                 display: flex;
                 flex-direction: column;
+              }
+              .euiFormRow__labelWrapper {
+                padding-left: 0;
               }
             `}
           >

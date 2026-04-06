@@ -224,9 +224,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
               direction="column"
               gutterSize="m"
               css={css`
-                flex: 1;
                 min-height: 0;
-                align-self: stretch;
               `}
             >
               <EuiFlexItem
@@ -282,10 +280,6 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
               <EuiFlexItem
                 css={css`
-                  flex: 1;
-                  min-height: 0;
-                  display: flex;
-                  flex-direction: column;
                   overflow: hidden;
                   background-color: ${euiTheme.colors.backgroundBaseSubdued};
                   padding: ${euiTheme.size.m} ${euiTheme.size.l};
