@@ -12,8 +12,7 @@
 export const hybridSearchSkill = {
   id: 'hybrid-search',
   name: 'hybrid-search',
-  description:
-    'Guide for building hybrid search combining keyword (BM25) and vector (semantic) retrieval with Elasticsearch. Use when a developer needs both exact text matching AND meaning-based search — the best of both worlds.',
+  description: 'Guide for building hybrid search combining keyword (BM25) and vector (semantic) retrieval with Elasticsearch. Use when a developer needs both exact text matching AND meaning-based search — the best of both worlds.',
   content: `# Hybrid Search Guide
 
 Guide developers through building hybrid search in Elasticsearch: combining BM25 keyword retrieval with kNN vector retrieval via Reciprocal Rank Fusion (RRF).

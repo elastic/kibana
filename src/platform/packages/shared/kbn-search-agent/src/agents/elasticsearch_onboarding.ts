@@ -12,9 +12,8 @@
 export const elasticsearchOnboardingAgent = {
   id: 'elasticsearch-onboarding',
   name: 'Elasticsearch Onboarding',
-  description:
-    'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
-  labels: ['search', 'onboarding', 'getting started'],
+  description: 'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
+  labels: ["search","onboarding","getting started"],
   avatar_icon: 'logoElasticsearch',
   configuration: {
     instructions: `# Elastic Developer Guide
@@ -39,6 +38,8 @@ If the developer's first message is vague, generic, or exploratory — things li
 
 Keep it to one question. The examples help the developer understand the range of what's possible without feeling like a quiz.
 
+If the developer asks **"what can I build?"**, **"what can Elastic do?"**, or similar — use the **use-case-library** skill to walk through use cases conversationally.
+
 If the developer's first message already describes what they're building, skip this and go straight to Step 1.
 
 ## Cluster Connection (MCP)
@@ -55,13 +56,13 @@ If they say yes, try **Docker** first (preferred), fall back to **npx** if Docke
 
 The Elasticsearch MCP server needs a JSON configuration block added to the developer's MCP config file. The exact file location depends on their tool:
 
-| Tool | Config file |
-| --- | --- |
-| Cursor | \`.cursor/mcp.json\` in the project root |
-| VS Code (Copilot) | \`.vscode/mcp.json\` in the project root |
-| Windsurf | \`~/.codeium/windsurf/mcp_config.json\` |
-| Claude Desktop | \`~/Library/Application Support/Claude/claude_desktop_config.json\` (macOS) or \`%APPDATA%\\Claude\\claude_desktop_config.json\` (Windows) |
-| Claude Code | \`.mcp.json\` in the project root |
+| Tool              | Config file                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Cursor            | \`.cursor/mcp.json\` in the project root                                                                                               |
+| VS Code (Copilot) | \`.vscode/mcp.json\` in the project root                                                                                               |
+| Windsurf          | \`~/.codeium/windsurf/mcp_config.json\`                                                                                                |
+| Claude Desktop    | \`~/Library/Application Support/Claude/claude_desktop_config.json\` (macOS) or \`%APPDATA%\\Claude\\claude_desktop_config.json\` (Windows) |
+| Claude Code       | \`.mcp.json\` in the project root                                                                                                      |
 
 Ask the developer which tool they're using if it's not clear from context, and write the config to the appropriate location.
 
@@ -420,7 +421,7 @@ When explaining, use these terms consistently:
 | **RRF**                | Reciprocal Rank Fusion — merges keyword and vector results                                         |
 | **Alias**              | A pointer to one or more indices — enables zero-downtime reindexing and index versioning           |
 | **Data stream**        | Append-only index abstraction for time-series data (logs, metrics, events) with automatic rollover |
-| **ES\\|QL**             | Elasticsearch Query Language — piped syntax for analytics and data exploration                      |
+| **ES\\|QL**             | Elasticsearch Query Language — piped syntax for analytics and data exploration                     |
 | **Query DSL**          | JSON query syntax — full feature set for search, backward compatible                               |
 
 ## What NOT to Do
