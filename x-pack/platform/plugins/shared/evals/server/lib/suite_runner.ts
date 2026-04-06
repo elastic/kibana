@@ -46,6 +46,16 @@ const MAX_RUNS_HISTORY = 10;
 const MAX_OUTPUT_LINES = 200;
 const PROCESS_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
+/**
+ * Matches the "Overall" row of the kbn-evals ASCII results table, e.g.:
+ *   ║ Overall                  │ 3 │                      mean: 0.42 ║
+ * Captures the mean score as group 1. The table uses box-drawing
+ * characters which render differently in terminals vs log files; we
+ * match on "Overall" + "mean:" rather than the border glyphs to be
+ * robust to ANSI color stripping and box style variants.
+ */
+const OVERALL_MEAN_REGEX = /Overall\s*[│|]\s*\d+\s*[│|]\s*mean:\s*([\d.]+)/;
+
 /** Patterns that indicate startup noise rather than meaningful test output */
 const NOISE_PATTERNS = [
   /^\{".+"\s*:\s*/, // JSON objects (APM agent config, structured logs from startup)
@@ -79,8 +89,21 @@ const resolveMainRepoRoot = (worktreeRoot: string): string | undefined => {
   return resolve(resolve(worktreeRoot, match[1]), '..', '..', '..');
 };
 
+/**
+ * Internal bookkeeping per run, kept private so it doesn't pollute the
+ * public `SuiteRunStatus` API. Populated from the Playwright process
+ * stdout/stderr as lines stream in.
+ */
+interface RunInternalState {
+  /** True once we've observed at least one "Overall ... mean: X" line. */
+  sawOverallTable: boolean;
+  /** True if any observed Overall mean was strictly greater than zero. */
+  sawPositiveOverallMean: boolean;
+}
+
 export class SuiteRunner {
   private runs = new Map<string, SuiteRunStatus>();
+  private internalState = new Map<string, RunInternalState>();
   private activeRunId: string | null = null;
 
   constructor(
@@ -188,6 +211,10 @@ export class SuiteRunner {
     };
 
     this.runs.set(runId, status);
+    this.internalState.set(runId, {
+      sawOverallTable: false,
+      sawPositiveOverallMean: false,
+    });
     this.activeRunId = runId;
 
     // Trim old runs
@@ -199,6 +226,7 @@ export class SuiteRunner {
         .slice(0, this.runs.size - MAX_RUNS_HISTORY);
       for (const [id] of toRemove) {
         this.runs.delete(id);
+        this.internalState.delete(id);
       }
     }
 
@@ -256,15 +284,31 @@ export class SuiteRunner {
 
       child.unref();
 
-      // Capture stdout/stderr into the run's output ring buffer
+      // Capture stdout/stderr into the run's output ring buffer, and
+      // inline-parse kbn-evals result tables so we don't rely on the
+      // buffer (which only retains the last MAX_OUTPUT_LINES lines and
+      // may drop early experiments in multi-project suites).
       const appendOutput = (chunk: Buffer) => {
         const run = this.runs.get(runId);
+        const internal = this.internalState.get(runId);
         if (!run) return;
         const lines = chunk
           .toString('utf-8')
           .split('\n')
           .map(sanitizeLine)
           .filter((line) => line.length > 0 && !isNoiseLine(line));
+
+        if (internal) {
+          for (const line of lines) {
+            const match = line.match(OVERALL_MEAN_REGEX);
+            if (!match) continue;
+            const mean = parseFloat(match[1]);
+            if (Number.isNaN(mean)) continue;
+            internal.sawOverallTable = true;
+            if (mean > 0) internal.sawPositiveOverallMean = true;
+          }
+        }
+
         run.output.push(...lines);
         if (run.output.length > MAX_OUTPUT_LINES) {
           run.output.splice(0, run.output.length - MAX_OUTPUT_LINES);
@@ -298,15 +342,29 @@ export class SuiteRunner {
       child.on('exit', (code) => {
         clearTimeout(timeout);
         const run = this.runs.get(runId);
+        const internal = this.internalState.get(runId);
         if (run) {
           run.exitCode = code ?? undefined;
-          run.status = code === 0 ? 'completed' : 'failed';
           run.completedAt = new Date().toISOString();
-          if (code !== 0 && !run.error) {
-            run.error = `Process exited with code ${code}`;
+
+          // Non-zero exit is an unambiguous failure.
+          if (code !== 0) {
+            run.status = 'failed';
+            if (!run.error) run.error = `Process exited with code ${code}`;
+          } else if (internal?.sawOverallTable && !internal.sawPositiveOverallMean) {
+            // Playwright exited 0 (no test threw), but every observed
+            // "Overall" row in the kbn-evals results table had mean: 0
+            // — the suite ran to completion but the evaluation failed.
+            // Mark it failed so the UI doesn't show a green checkmark
+            // for a run where every scored example was wrong.
+            run.status = 'failed';
+            run.error = 'All evaluator scores were zero';
+          } else {
+            run.status = 'completed';
           }
+
           this.logger.info(
-            `[SuiteRunner] Suite "${config.suiteId}" (run: ${runId}) finished with code ${code}`
+            `[SuiteRunner] Suite "${config.suiteId}" (run: ${runId}) finished with code ${code}, status: ${run.status}`
           );
         }
         if (this.activeRunId === runId) this.activeRunId = null;

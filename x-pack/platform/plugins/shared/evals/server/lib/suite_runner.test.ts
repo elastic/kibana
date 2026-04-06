@@ -202,6 +202,92 @@ describe('SuiteRunner', () => {
 
       expect(runner.getCurrentRun()).toBeUndefined();
     });
+
+    describe('eval-result-aware status', () => {
+      // Sample of the ASCII results table that kbn-evals prints at the end
+      // of each experiment. Real output contains box-drawing characters
+      // around the columns; the matcher is permissive about those.
+      const allZeroResultsTable = [
+        '═══ EVALUATION RESULTS ═══',
+        '║ Dataset                  │ # │ ES|QL Functional Equivalence ║',
+        '║ esql: analytical queries │ 3 │                      mean: 0 ║',
+        '║                          │   │                       std: 0 ║',
+        '║ Overall                  │ 3 │                      mean: 0 ║',
+        '║                          │   │                       std: 0 ║',
+      ].join('\n');
+
+      const positiveResultsTable = [
+        '═══ EVALUATION RESULTS ═══',
+        '║ Dataset                  │ # │ ES|QL Functional Equivalence ║',
+        '║ esql: analytical queries │ 3 │                   mean: 0.67 ║',
+        '║                          │   │                    std: 0.47 ║',
+        '║ Overall                  │ 3 │                   mean: 0.67 ║',
+        '║                          │   │                    std: 0.47 ║',
+      ].join('\n');
+
+      it('downgrades exit-0 to failed when every Overall mean is 0', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(Buffer.from(allZeroResultsTable));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.status).toBe('failed');
+        expect(status?.exitCode).toBe(0);
+        expect(status?.error).toBe('All evaluator scores were zero');
+      });
+
+      it('keeps exit-0 completed when at least one Overall mean is > 0', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(Buffer.from(positiveResultsTable));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.status).toBe('completed');
+        expect(status?.error).toBeUndefined();
+      });
+
+      it('keeps exit-0 completed when at least one of multiple projects scored > 0', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        // First project: all zero. Second: positive. Real multi-project
+        // runs stream tables sequentially as each experiment finishes.
+        child.stdout.write(Buffer.from(allZeroResultsTable));
+        child.stdout.write(Buffer.from(positiveResultsTable));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.status).toBe('completed');
+      });
+
+      it('keeps exit-0 completed when no results table is produced (fallback)', () => {
+        // A suite that doesn't use kbn-evals result tables — e.g. a plain
+        // Playwright test — should still be considered completed on exit 0.
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(Buffer.from('ran 5 tests, all passed\n'));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.status).toBe('completed');
+        expect(status?.error).toBeUndefined();
+      });
+
+      it('keeps non-zero exit as failed regardless of positive scores', () => {
+        // If the Playwright process crashes after emitting a successful
+        // results table, we still want to surface the process failure.
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(Buffer.from(positiveResultsTable));
+        child.emit('exit', 1);
+
+        const status = runner.getStatus(runId);
+        expect(status?.status).toBe('failed');
+        expect(status?.exitCode).toBe(1);
+        expect(status?.error).toContain('exited with code 1');
+      });
+    });
   });
 
   describe('spawn arguments', () => {
