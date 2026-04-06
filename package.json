@@ -1404,6 +1404,7 @@
     "jsonwebtoken": "9.0.2",
     "jsts": "1.6.2",
     "jszip": "3.10.1",
+    "just-bash": "2.14.0",
     "kea": "2.6.0",
     "langchain": "1.2.30",
     "langsmith": "0.5.7",

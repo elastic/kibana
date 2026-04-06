@@ -102,6 +102,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'visualization-creation',
   'graph-creation',
 
+  // Platform – Bash execution
+  'bash-execution',
+
   // Platform – Dashboard
   'dashboard-management',
 

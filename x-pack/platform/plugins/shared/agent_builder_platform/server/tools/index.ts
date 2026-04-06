@@ -25,6 +25,7 @@ import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
+import { executeBashTool } from './execute_bash';
 
 export const registerTools = ({
   coreSetup,
@@ -47,6 +48,7 @@ export const registerTools = ({
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),
+    executeBashTool(),
   ];
 
   if (setupDeps.workflowsManagement) {
