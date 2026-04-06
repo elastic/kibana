@@ -58,7 +58,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EpisodeLifecycleHeatmap } from './components/episode_lifecycle_heatmap';
 
 const episodeDetailsBreadcrumbFallback = i18n.translate(
-  'xpack.observability.breadcrumbs.episodeDetailsFallback',
+  'xpack.alertingV2.breadcrumbs.episodeDetailsFallback',
   {
     defaultMessage: 'Episode',
   }
@@ -66,7 +66,7 @@ const episodeDetailsBreadcrumbFallback = i18n.translate(
 
 function formatDurationMs(ms: number): string {
   if (ms < 1000) {
-    return i18n.translate('xpack.observability.episodeDetails.durationMs', {
+    return i18n.translate('xpack.alertingV2.episodeDetails.durationMs', {
       defaultMessage: '{ms} ms',
       values: { ms: Math.round(ms) },
     });
@@ -76,24 +76,24 @@ function formatDurationMs(ms: number): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   if (days > 0) {
-    return i18n.translate('xpack.observability.episodeDetails.durationDays', {
+    return i18n.translate('xpack.alertingV2.episodeDetails.durationDays', {
       defaultMessage: '{days} d',
       values: { days },
     });
   }
   if (hours > 0) {
-    return i18n.translate('xpack.observability.episodeDetails.durationHours', {
+    return i18n.translate('xpack.alertingV2.episodeDetails.durationHours', {
       defaultMessage: '{hours} h',
       values: { hours },
     });
   }
   if (minutes > 0) {
-    return i18n.translate('xpack.observability.episodeDetails.durationMinutes', {
+    return i18n.translate('xpack.alertingV2.episodeDetails.durationMinutes', {
       defaultMessage: '{minutes} min',
       values: { minutes },
     });
   }
-  return i18n.translate('xpack.observability.episodeDetails.durationSeconds', {
+  return i18n.translate('xpack.alertingV2.episodeDetails.durationSeconds', {
     defaultMessage: '{seconds} s',
     values: { seconds },
   });
@@ -195,10 +195,10 @@ export function EpisodeDetailsPage() {
 
   const ruleKindLabel =
     rule?.kind === 'signal'
-      ? i18n.translate('xpack.observability.episodeDetails.ruleKindSignal', {
+      ? i18n.translate('xpack.alertingV2.episodeDetails.ruleKindSignal', {
           defaultMessage: 'Signal',
         })
-      : i18n.translate('xpack.observability.episodeDetails.ruleKindAlerting', {
+      : i18n.translate('xpack.alertingV2.episodeDetails.ruleKindAlerting', {
           defaultMessage: 'Alerting',
         });
 
@@ -225,7 +225,7 @@ export function EpisodeDetailsPage() {
         <EuiTitle size="l">
           <h1 data-test-subj="alertingV2EpisodeDetailsRuleTitle">
             {rule?.metadata.name ??
-              i18n.translate('xpack.observability.episodeDetails.loadingRuleTitle', {
+              i18n.translate('xpack.alertingV2.episodeDetails.loadingRuleTitle', {
                 defaultMessage: 'Episode details',
               })}
           </h1>
@@ -267,13 +267,13 @@ export function EpisodeDetailsPage() {
     ) : undefined;
 
   const episodeDetailsSidebarTitle = i18n.translate(
-    'xpack.observability.episodeDetails.sidebarTitle',
+    'xpack.alertingV2.episodeDetails.sidebarTitle',
     {
       defaultMessage: 'Episode details',
     }
   );
 
-  const runbookSidebarTitle = i18n.translate('xpack.observability.episodeDetails.runbookTitle', {
+  const runbookSidebarTitle = i18n.translate('xpack.alertingV2.episodeDetails.runbookTitle', {
     defaultMessage: 'Runbook',
   });
 
@@ -299,7 +299,7 @@ export function EpisodeDetailsPage() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
-            legend={i18n.translate('xpack.observability.episodeDetails.sidebarViewLegend', {
+            legend={i18n.translate('xpack.alertingV2.episodeDetails.sidebarViewLegend', {
               defaultMessage: 'Sidebar section',
             })}
             type="single"
@@ -310,7 +310,7 @@ export function EpisodeDetailsPage() {
               {
                 id: 'episode_details',
                 'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabEpisodeDetails',
-                label: i18n.translate('xpack.observability.episodeDetails.sidebarTabTitle', {
+                label: i18n.translate('xpack.alertingV2.episodeDetails.sidebarTabTitle', {
                   defaultMessage: 'Details',
                 }),
               },
@@ -346,19 +346,19 @@ export function EpisodeDetailsPage() {
               type="responsiveColumn"
               listItems={[
                 {
-                  title: i18n.translate('xpack.observability.episodeDetails.episodeIdLabel', {
+                  title: i18n.translate('xpack.alertingV2.episodeDetails.episodeIdLabel', {
                     defaultMessage: 'Alert episode id',
                   }),
                   description: episodeId ?? '—',
                 },
                 {
-                  title: i18n.translate('xpack.observability.episodeDetails.groupingLabel', {
+                  title: i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
                     defaultMessage: 'Grouping',
                   }),
                   description: <AlertEpisodeGroupingFields fields={rule?.grouping?.fields ?? []} />,
                 },
                 {
-                  title: i18n.translate('xpack.observability.episodeDetails.triggeredLabel', {
+                  title: i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
                     defaultMessage: 'Triggered',
                   }),
                   description: triggeredAt
@@ -369,7 +369,7 @@ export function EpisodeDetailsPage() {
                     : '—',
                 },
                 {
-                  title: i18n.translate('xpack.observability.episodeDetails.durationLabel', {
+                  title: i18n.translate('xpack.alertingV2.episodeDetails.durationLabel', {
                     defaultMessage: 'Duration',
                   }),
                   description: durationMs != null ? formatDurationMs(durationMs) : '—',
@@ -388,7 +388,7 @@ export function EpisodeDetailsPage() {
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
                       <h3 data-test-subj="alertingV2EpisodeDetailsRuleOverviewHeading">
-                        {i18n.translate('xpack.observability.episodeDetails.ruleOverviewTitle', {
+                        {i18n.translate('xpack.alertingV2.episodeDetails.ruleOverviewTitle', {
                           defaultMessage: 'Rule overview',
                         })}
                       </h3>
@@ -402,7 +402,7 @@ export function EpisodeDetailsPage() {
                       href={http.basePath.prepend(paths.ruleDetails(rule.id))}
                       data-test-subj="alertingV2EpisodeDetailsViewRuleDetailsButton"
                     >
-                      {i18n.translate('xpack.observability.episodeDetails.viewRuleDetails', {
+                      {i18n.translate('xpack.alertingV2.episodeDetails.viewRuleDetails', {
                         defaultMessage: 'View rule details',
                       })}
                     </EuiButtonEmpty>
@@ -448,15 +448,12 @@ export function EpisodeDetailsPage() {
                         data-test-subj="alertingV2EpisodeDetailsRuleStatusBadge"
                       >
                         {rule.enabled
-                          ? i18n.translate('xpack.observability.episodeDetails.ruleStatusEnabled', {
+                          ? i18n.translate('xpack.alertingV2.episodeDetails.ruleStatusEnabled', {
                               defaultMessage: 'Enabled',
                             })
-                          : i18n.translate(
-                              'xpack.observability.episodeDetails.ruleStatusDisabled',
-                              {
-                                defaultMessage: 'Disabled',
-                              }
-                            )}
+                          : i18n.translate('xpack.alertingV2.episodeDetails.ruleStatusDisabled', {
+                              defaultMessage: 'Disabled',
+                            })}
                       </EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -487,7 +484,7 @@ export function EpisodeDetailsPage() {
           </EuiMarkdownFormat>
         ) : (
           <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeDetailsRunbookEmpty">
-            {i18n.translate('xpack.observability.episodeDetails.runbookEmpty', {
+            {i18n.translate('xpack.alertingV2.episodeDetails.runbookEmpty', {
               defaultMessage: 'No runbook has been added to this rule.',
             })}
           </EuiText>
@@ -545,12 +542,9 @@ export function EpisodeDetailsPage() {
                     buttonContent={
                       <EuiText>
                         <h3>
-                          {i18n.translate(
-                            'xpack.observability.episodeDetails.relatedEpisodesTitle',
-                            {
-                              defaultMessage: 'Related alert episodes',
-                            }
-                          )}
+                          {i18n.translate('xpack.alertingV2.episodeDetails.relatedEpisodesTitle', {
+                            defaultMessage: 'Related alert episodes',
+                          })}
                         </h3>
                       </EuiText>
                     }
@@ -574,7 +568,7 @@ export function EpisodeDetailsPage() {
                           <EuiFlexItem grow={false}>
                             <EuiText size="s" color="subdued" textAlign="center">
                               {i18n.translate(
-                                'xpack.observability.episodeDetails.relatedEpisodesEmpty',
+                                'xpack.alertingV2.episodeDetails.relatedEpisodesEmpty',
                                 {
                                   defaultMessage: 'No related episodes found.',
                                 }
