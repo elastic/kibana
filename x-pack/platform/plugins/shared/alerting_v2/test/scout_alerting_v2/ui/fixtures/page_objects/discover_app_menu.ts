@@ -10,17 +10,34 @@ import type { ScoutPage } from '@kbn/scout';
 export class DiscoverAppMenu {
   constructor(private readonly page: ScoutPage) {}
 
-  async openAlertsMenu() {
-    const alertsButton = this.page.testSubj.locator('discoverAlertsButton');
+  /**
+   * Opens the Alerts app-menu popover. Uses the explicit test id from Discover's `get_alerts`
+   * (`discoverAlertsButton`), with a fallback to the chrome default `app-menu-item-${id}` when
+   * the explicit id is absent (`app-menu-item-alerts`).
+   */
+  alertsMenuTrigger() {
+    return this.page.testSubj
+      .locator('discoverAlertsButton')
+      .or(this.page.testSubj.locator('app-menu-item-alerts'));
+  }
 
-    if (await alertsButton.isVisible()) {
-      await alertsButton.click();
+  async openAlertsMenu() {
+    const trigger = this.alertsMenuTrigger();
+
+    if (await trigger.isVisible()) {
+      await trigger.click();
       return;
     }
 
-    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    await overflowButton.click();
-    await alertsButton.click();
+    await this.page.testSubj.locator('app-menu-overflow-button').click();
+    await trigger.waitFor({ state: 'visible' });
+    await trigger.click();
+  }
+
+  /** Opens Alerts → "Create ES|QL rule" (v2) and leaves the rule flyout open. */
+  async openCreateEsqlRuleV2Flyout() {
+    await this.openAlertsMenu();
+    await this.getV2RuleButton().click();
   }
 
   getV2RuleButton() {
