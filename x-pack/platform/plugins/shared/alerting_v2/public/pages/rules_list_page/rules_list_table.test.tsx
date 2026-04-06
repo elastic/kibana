@@ -29,12 +29,43 @@ const mockRules = [
   },
 ];
 
+const mockRulesWithManyLabels = [
+  {
+    id: 'rule-many-labels',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Many Labels',
+      labels: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
+    },
+    schedule: { every: '1m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  },
+];
+
+const mockRulesWithLongLabels = [
+  {
+    id: 'rule-long-labels',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Long Labels',
+      labels: ['this-is-a-very-long-label-name-that-should-be-truncated'],
+    },
+    schedule: { every: '1m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  },
+];
+
 const defaultProps: RulesListTableProps = {
   items: mockRules as any,
   totalItemCount: 2,
   page: 1,
   perPage: 20,
   search: '',
+  hasActiveFilters: false,
+  sortField: undefined,
+  sortDirection: undefined,
   isLoading: false,
   selectedCount: 0,
   isAllSelected: false,
@@ -47,6 +78,7 @@ const defaultProps: RulesListTableProps = {
   onBulkEnable: jest.fn(),
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
+  onNavigateToDetails: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),
@@ -91,7 +123,7 @@ describe('RulesListTable', () => {
     });
 
     it('renders a generic empty state when there are no rules', () => {
-      renderTable({ items: [], totalItemCount: 0, search: '' });
+      renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
       expect(screen.getByText('No rules found.')).toBeInTheDocument();
     });
@@ -99,7 +131,13 @@ describe('RulesListTable', () => {
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search.')).toBeInTheDocument();
+      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+    });
+
+    it('renders a filter-specific empty state when no rules match', () => {
+      renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
+
+      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {
@@ -127,6 +165,34 @@ describe('RulesListTable', () => {
       renderTable();
 
       expect(screen.getByText('prod')).toBeInTheDocument();
+    });
+
+    it('truncates labels to show only the first 1 and a +N badge for overflow', () => {
+      renderTable({
+        items: mockRulesWithManyLabels as any,
+        totalItemCount: 1,
+      });
+
+      // First label should be visible
+      expect(screen.getByText('new')).toBeInTheDocument();
+
+      // Remaining 8 labels should be hidden behind +8 badge
+      expect(screen.getByTestId('overflowLabelsBadge')).toHaveTextContent('+8');
+
+      // Overflow labels should not be directly visible
+      expect(screen.queryByText('rna')).not.toBeInTheDocument();
+    });
+
+    it('renders long label text with native EuiBadge truncation', () => {
+      renderTable({
+        items: mockRulesWithLongLabels as any,
+        totalItemCount: 1,
+      });
+
+      // The full label text is in the DOM; CSS handles visual truncation
+      expect(
+        screen.getByText('this-is-a-very-long-label-name-that-should-be-truncated')
+      ).toBeInTheDocument();
     });
   });
 
@@ -361,6 +427,23 @@ describe('RulesListTable', () => {
       await waitFor(() => {
         expect(screen.getByTestId('toggleEnabledRule-rule-2')).toHaveTextContent('Enable');
       });
+    });
+  });
+
+  describe('rule name link', () => {
+    it('renders rule name as a clickable link', () => {
+      renderTable();
+
+      expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
+    });
+
+    it('calls onNavigateToDetails when rule name link is clicked', () => {
+      const onNavigateToDetails = jest.fn();
+      renderTable({ onNavigateToDetails });
+
+      fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
+
+      expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
   });
 });

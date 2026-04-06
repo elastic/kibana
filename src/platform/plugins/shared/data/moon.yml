@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/apm-utils'
   - '@kbn/std'
   - '@kbn/core-elasticsearch-server'
 tags:

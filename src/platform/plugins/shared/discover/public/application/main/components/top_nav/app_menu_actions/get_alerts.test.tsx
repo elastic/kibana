@@ -24,11 +24,13 @@ const getAlertsMenuItem = async ({
   isEsqlMode = false,
   authorizedRuleTypeIds = [ES_QUERY_ID],
   services = createDiscoverServicesMock(),
+  showCreateRuleV2,
 }: {
   dataView?: DataView;
   isEsqlMode?: boolean;
   authorizedRuleTypeIds?: string[];
   services?: DiscoverServices;
+  showCreateRuleV2?: boolean;
 } = {}): Promise<DiscoverAppMenuItemType> => {
   const toolkit = getDiscoverInternalStateMock({ services });
 
@@ -55,6 +57,7 @@ const getAlertsMenuItem = async ({
     services,
     tabId: currentTab.id,
     getState: toolkit.internalState.getState,
+    showCreateRuleV2,
   });
 };
 
@@ -170,6 +173,50 @@ describe('getAlertsAppMenuItem', () => {
         (item) => item.testId === 'discoverManageAlertsButton'
       );
       expect(manageAlertsItem?.href).toBe('/app/rules');
+    });
+  });
+
+  describe('v2 ES|QL rule row', () => {
+    it('should prepend the v2 row with order 0 when showCreateRuleV2 is true', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeDefined();
+      expect(v2Row?.order).toBe(0);
+      expect(v2Row?.testId).toBe('discoverCreateEsqlRuleV2Button');
+    });
+
+    it('should include a New badge on the v2 row', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row?.labelBadgeText).toBe('New');
+    });
+
+    it('should NOT include the v2 row when showCreateRuleV2 is false', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: false });
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
+    });
+
+    it('should NOT include the v2 row when showCreateRuleV2 is undefined', async () => {
+      const alertsMenuItem = await getAlertsMenuItem();
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
+    });
+
+    it('should place the v2 row before the search threshold rule', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
+      const items = alertsMenuItem.items ?? [];
+
+      const v2Row = items.find((item) => item.id === 'create-esql-rule-v2');
+      const thresholdRow = items.find((item) => item.testId === 'discoverCreateAlertButton');
+
+      expect(v2Row).toBeDefined();
+      expect(thresholdRow).toBeDefined();
+      expect(v2Row!.order).toBeLessThan(thresholdRow!.order);
     });
   });
 });

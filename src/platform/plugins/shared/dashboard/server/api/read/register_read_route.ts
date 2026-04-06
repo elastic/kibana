@@ -50,27 +50,28 @@ export function registerReadRoute(
         response: {
           200: {
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard with the given ID is retrieved successfully',
+            description: 'success',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
           404: {
-            description: 'Indicates that the dashboard with the given ID is not found.',
+            description: 'not found',
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(
+        const { body, resolveHeaders } = await read(
           ctx,
           getCachedDashboardStateSchema(),
           req.params.id,
           isDashboardAppRequest
         );
         return res.ok({
-          body: result,
+          body,
+          ...(isDashboardAppRequest && { headers: resolveHeaders }),
         });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
