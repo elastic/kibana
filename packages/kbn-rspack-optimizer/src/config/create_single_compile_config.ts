@@ -505,18 +505,17 @@ export async function createSingleCompileConfig(
       // is only available on NormalModule.
       //
       // CACHE GROUP PRIORITY ORDER (highest wins):
-      //   35: sharedPlugins   - /plugins/  (broadest; catches platform + solution plugins)
-      //   32: corePackages    - /src/core/packages/
-      //   30: sharedPackages  - /packages/(shared|private)/  (platform packages)
-      //   30: vendorsHeavy    - specific heavy node_modules (reuseExistingChunk)
-      //   29: solutionPackages - /solutions/*/packages/  (wins over rootPackages for kbn-*)
-      //   28: rootPackages    - /packages/kbn-/  (repo root + x-pack/packages)
-      //   20: vendors         - /node_modules/ (minChunks: 3)
-      //  -20: default         - catch-all (minChunks: 3, name: 'shared-misc')
+      //   35: sharedPlugins    - /plugins/  (all cross-plugin shared code)
+      //   32: corePackages     - /src/core/packages/
+      //   30: sharedPackages   - /packages/(shared|private)/  (platform packages)
+      //   30: vendorsHeavy     - specific heavy node_modules (per-library)
+      //   29: solutionPackages - /solutions/*/packages/
+      //   28: rootPackages     - /packages/kbn-/  (repo root + x-pack/packages)
+      //   20: vendors          - /node_modules/ (minChunks: 3)
+      //  -20: default          - catch-all (minChunks: 3, name: 'shared-misc')
       //
-      // Directories NOT covered (intentionally):
-      //   x-pack/packages/ only has 3 packages, caught by rootPackages via /packages/kbn-/
-      //   src/platform/test/**/plugins/** are test-only, filtered by minChunks: 2
+      // All groups use category-level static names.  No maxSize — benchmarked
+      // at 500K/1M/6M/10M/20M (global and per-group); all caused regressions.
       splitChunks: {
         chunks: 'async',
         minSize: 20000,
@@ -529,24 +528,15 @@ export async function createSingleCompileConfig(
           // unnecessary small vendor chunks via the hidden default.
           defaultVendors: false,
 
-          // --- Plugin cache groups ---
-          // Consolidate modules from the same source plugin into one named chunk.
-          // Covers all plugin directories:
+          // --- Plugin cache group ---
+          // All cross-plugin shared modules merged into a single 'shared-plugins'
+          // chunk.  Covers all plugin directories:
           //   - src/platform/plugins/(shared|private)/<name>/
           //   - x-pack/platform/plugins/(shared|private)/<name>/
           //   - x-pack/solutions/<solution>/plugins/<name>/
           sharedPlugins: {
             test: /[\\/]plugins[\\/]/,
-            name: (module: Module) => {
-              const resource = module.nameForCondition?.();
-              if (!resource) return 'shared-plugins';
-              const platformMatch = resource.match(/plugins[\\/](?:shared|private)[\\/]([^\\/]+)/);
-              if (platformMatch) return `shared-plugin-${platformMatch[1]}`;
-              const solutionMatch = resource.match(/solutions[\\/][^\\/]+[\\/]plugins[\\/]([^\\/]+)/);
-              if (solutionMatch) return `shared-plugin-${solutionMatch[1]}`;
-              const genericMatch = resource.match(/plugins[\\/]([^\\/]+)/);
-              return genericMatch ? `shared-plugin-${genericMatch[1]}` : 'shared-plugins';
-            },
+            name: 'shared-plugins',
             chunks: 'async' as const,
             priority: 35,
             minChunks: 3,
@@ -555,19 +545,13 @@ export async function createSingleCompileConfig(
           },
 
           // --- Core packages cache group ---
-          // src/core/packages/<domain>/ (e.g., chrome/, rendering/)
-          // ~122 browser-relevant packages merged by first-level domain.
-          // Uses single-level naming (shared-core-chrome, not shared-core-chrome-browser-internal)
-          // to keep chunk count low — critical for HTTP/1.1 where each file is a
-          // separate connection and core's async loading adds per-file overhead.
+          // src/core/packages/ (~122 browser-relevant packages).
+          // All core modules merge into a single 'shared-core' chunk to minimise
+          // HTTP requests under HTTP/1.1.  Kibana deploys as a whole, so
+          // per-subdomain cache isolation adds no value.
           corePackages: {
             test: /[\\/]src[\\/]core[\\/]packages[\\/]/,
-            name: (module: Module) => {
-              const resource = module.nameForCondition?.();
-              if (!resource) return 'shared-core';
-              const match = resource.match(/src[\\/]core[\\/]packages[\\/]([^\\/]+)/);
-              return match ? `shared-core-${match[1]}` : 'shared-core';
-            },
+            name: 'shared-core',
             chunks: 'async' as const,
             priority: 32,
             minChunks: 3,
@@ -576,16 +560,12 @@ export async function createSingleCompileConfig(
           },
 
           // --- Platform packages cache group ---
-          // packages/(shared|private)/ -- the most impactful shared packages
+          // packages/(shared|private)/ — the most impactful shared packages
           // (kbn-palettes, shared-ux, kbn-field-types, etc.).
+          // Merged into a single 'shared-packages' chunk.
           sharedPackages: {
             test: /[\\/]packages[\\/](?:shared|private)[\\/]/,
-            name: (module: Module) => {
-              const resource = module.nameForCondition?.();
-              if (!resource) return 'shared-packages';
-              const match = resource.match(/packages[\\/](?:shared|private)[\\/]([^\\/]+)/);
-              return match ? `shared-pkg-${match[1]}` : 'shared-packages';
-            },
+            name: 'shared-packages',
             chunks: 'async' as const,
             priority: 30,
             minChunks: 3,
@@ -594,16 +574,11 @@ export async function createSingleCompileConfig(
           },
 
           // --- Solution packages cache group ---
-          // x-pack/solutions/<solution>/packages/<name>/ (~47 browser-relevant).
-          // Priority 29 > rootPackages (28) to win for kbn-* packages under solutions/.
+          // x-pack/solutions/<solution>/packages/ (~47 browser-relevant).
+          // Merged into a single 'shared-solution-packages' chunk.
           solutionPackages: {
             test: /[\\/]solutions[\\/][^\\/]+[\\/]packages[\\/]/,
-            name: (module: Module) => {
-              const resource = module.nameForCondition?.();
-              if (!resource) return 'shared-solution-pkg';
-              const match = resource.match(/solutions[\\/][^\\/]+[\\/]packages[\\/]([^\\/]+)/);
-              return match ? `shared-solution-${match[1]}` : 'shared-solution-pkg';
-            },
+            name: 'shared-solution-packages',
             chunks: 'async' as const,
             priority: 29,
             minChunks: 3,
@@ -612,20 +587,12 @@ export async function createSingleCompileConfig(
           },
 
           // --- Root packages cache group ---
-          // packages/kbn-*/ at repo root (~46 shared-common packages).
-          // Also catches x-pack/packages/kbn-*/ (3 packages).
-          // Most root packages are tooling/build-only; minChunks: 2 filters
-          // out packages that aren't actually shared across browser bundles.
-          // Priority below sharedPackages (30) and solutionPackages (29) so
-          // packages/(shared|private)/ and solutions/*/packages/ win first.
+          // packages/kbn-*/ at repo root + x-pack/packages/kbn-*/.
+          // Currently all ~60 are tooling/server-only so this produces no
+          // chunks, but kept as a safety net for future browser-side packages.
           rootPackages: {
             test: /[\\/]packages[\\/]kbn-/,
-            name: (module: Module) => {
-              const resource = module.nameForCondition?.();
-              if (!resource) return 'shared-root-pkg';
-              const match = resource.match(/packages[\\/](kbn-[^\\/]+)/);
-              return match ? `shared-root-${match[1]}` : 'shared-root-pkg';
-            },
+            name: 'shared-root-packages',
             chunks: 'async' as const,
             priority: 28,
             minChunks: 3,
@@ -633,9 +600,9 @@ export async function createSingleCompileConfig(
             reuseExistingChunk: true,
           },
 
-          // Heavy vendors NOT in ui-shared-deps - split per package for lazy loading.
-          // Each matched package gets its own chunk (e.g., vendors-heavy-maplibre-gl)
-          // so pages only download the specific heavy vendor they need.
+          // Heavy vendors NOT in ui-shared-deps — split per package for lazy
+          // loading.  Each matched package gets its own chunk so pages only
+          // download the specific heavy vendor they need (e.g., maplibre 2MB+).
           vendorsHeavy: {
             test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
             name: (module: Module) => {
@@ -650,9 +617,11 @@ export async function createSingleCompileConfig(
             minSize: 0,
             reuseExistingChunk: true,
           },
-          // Shared vendors - extract if used by 3+ chunks
+          // Shared vendors — all node_modules shared by 3+ chunks,
+          // consolidated into a single 'vendors' chunk with maxSize safety.
           vendors: {
             test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
             priority: 20,
             minChunks: 3,
             reuseExistingChunk: true,
