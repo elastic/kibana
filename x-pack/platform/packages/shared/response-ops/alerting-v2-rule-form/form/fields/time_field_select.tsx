@@ -11,7 +11,7 @@ import { Controller, useWatch, useFormContext } from 'react-hook-form';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
-import { firstFieldOption, getTimeFieldOptions } from '../utils';
+import { getTimeFieldOptions } from '../utils';
 import { useDataFields } from '../hooks/use_data_fields';
 import { useRuleFormServices } from '../contexts';
 
@@ -20,6 +20,13 @@ const PREFERRED_TIME_FIELD = '@timestamp';
 const REQUIRED_MESSAGE = i18n.translate('xpack.alertingV2.ruleForm.timeFieldRequired', {
   defaultMessage: 'A time field is required.',
 });
+
+const NO_TIME_FIELDS_OPTION = {
+  text: i18n.translate('xpack.alertingV2.ruleForm.timeField.noTimeFields', {
+    defaultMessage: 'No time fields available',
+  }),
+  value: '',
+};
 
 export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
@@ -40,7 +47,9 @@ export const TimeFieldSelect = () => {
         const selectedField = preferredField?.value || options[0]?.value || '';
 
         if (selectedField) {
-          setValue('timeField', selectedField);
+          setValue('timeField', selectedField, { shouldValidate: true });
+        } else {
+          setValue('timeField', '', { shouldValidate: true });
         }
       }
     },
@@ -54,10 +63,10 @@ export const TimeFieldSelect = () => {
     onSuccess: handleAutoSelect,
   });
 
-  const timeFieldOptions = useMemo(
-    () => [firstFieldOption, ...getTimeFieldOptions(data ?? {})],
-    [data]
-  );
+  const timeFieldOptions = useMemo(() => {
+    const options = getTimeFieldOptions(data ?? {});
+    return options.length > 0 ? options : [NO_TIME_FIELDS_OPTION];
+  }, [data]);
 
   return (
     <Controller
@@ -80,6 +89,7 @@ export const TimeFieldSelect = () => {
             error={error?.message}
             fullWidth
           >
+            {/* eslint-disable-next-line @elastic/eui/consistent-is-invalid-props */}
             <EuiSelect
               options={timeFieldOptions}
               value={value ?? ''}
@@ -88,7 +98,6 @@ export const TimeFieldSelect = () => {
                 defaultMessage: 'Select time field for rule execution',
               })}
               inputRef={ref}
-              isInvalid={!!error}
               isLoading={isLoading}
               fullWidth
             />

@@ -120,23 +120,21 @@ describe('TimeFieldSelect', () => {
     expect(select).toHaveValue('event_time');
   });
 
-  it('shows validation error on submit when time field is empty', async () => {
+  it('shows validation error on submit when no date fields are available', async () => {
     const user = userEvent.setup();
 
     jest.mocked(useDataFieldsModule.useDataFields).mockReturnValue({
-      data: {
-        '@timestamp': { name: '@timestamp', type: 'date' },
-        event_time: { name: 'event_time', type: 'date' },
-      },
+      data: {},
       isLoading: false,
     } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
 
     render(<SubmittableTimeFieldSelect />, {
-      wrapper: createFormWrapper({ timeField: '@timestamp' }, mockServices),
+      wrapper: createFormWrapper({ timeField: '' }, mockServices),
     });
 
-    // Clear the time field by selecting the empty placeholder
-    await user.selectOptions(screen.getByRole('combobox'), '');
+    // Only the "No time fields available" option should be visible
+    expect(screen.getByRole('combobox')).toHaveValue('');
+    expect(screen.getByText('No time fields available')).toBeInTheDocument();
 
     // Submit — should show required error
     await user.click(screen.getByText('Submit'));
@@ -144,6 +142,24 @@ describe('TimeFieldSelect', () => {
     await waitFor(() => {
       expect(screen.getByText('A time field is required.')).toBeInTheDocument();
     });
+  });
+
+  it('does not show placeholder when date fields are available', () => {
+    jest.mocked(useDataFieldsModule.useDataFields).mockReturnValue({
+      data: {
+        '@timestamp': { name: '@timestamp', type: 'date' },
+      },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
+
+    render(<TimeFieldSelect />, {
+      wrapper: createFormWrapper({ timeField: '@timestamp' }, mockServices),
+    });
+
+    const select = screen.getByRole('combobox');
+    const options = Array.from(select.querySelectorAll('option'));
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveTextContent('@timestamp');
   });
 
   it('passes query to useDataFields hook', () => {
