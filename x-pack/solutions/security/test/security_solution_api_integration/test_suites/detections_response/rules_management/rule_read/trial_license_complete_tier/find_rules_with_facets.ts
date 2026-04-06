@@ -11,10 +11,11 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { DETECTION_ENGINE_RULES_URL_FIND_GRANULAR } from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '@kbn/security-solution-plugin/common/constants';
 import {
-  encodeGranularRulesCursor,
-  MAX_GRANULAR_RULES_SEARCH_TERM_LENGTH,
+  encodeFindRulesWithFacetsCursor,
+  FIND_RULES_WITH_FACETS_CURSOR_SCHEMA_VERSION,
+  MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import {
   getSimpleRule,
@@ -24,28 +25,26 @@ import {
 } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-const FIND_RULES_GRANULAR_API_VERSION = '2026-04-01';
-
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  const findRulesGranular = (query: Record<string, unknown>) =>
+  const findRulesWithFacets = (query: Record<string, unknown>) =>
     supertest
-      .get(DETECTION_ENGINE_RULES_URL_FIND_GRANULAR)
+      .get(DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS)
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, FIND_RULES_GRANULAR_API_VERSION)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(query);
 
-  describe('@ess @serverless @skipInServerlessMKI find_rules_granular', () => {
+  describe('@ess @serverless @skipInServerlessMKI find_rules_with_facets', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
 
     it('returns an empty page when no rules exist', async () => {
-      const { body } = await findRulesGranular({}).expect(200);
+      const { body } = await findRulesWithFacets({}).expect(200);
       expect(body).to.eql({
         data: [],
         page: 1,
@@ -56,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('returns rules with the same shape as classic _find for a simple rule', async () => {
       await createRule(supertest, log, getSimpleRule());
-      const { body } = await findRulesGranular({}).expect(200);
+      const { body } = await findRulesWithFacets({}).expect(200);
       expect(body.total).to.be(1);
       expect(body.page).to.be(1);
       expect(body.perPage).to.be(20);
@@ -67,8 +66,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('filters with KQL and intersects legacy search', async () => {
-      await createRule(supertest, log, getSimpleRule('granular-kql-search', true));
-      const { body } = await findRulesGranular({
+      await createRule(supertest, log, getSimpleRule('facets-kql-search', true));
+      const { body } = await findRulesWithFacets({
         filter: 'alert.attributes.enabled: true',
         search: { term: 'Simple', mode: 'legacy' },
       }).expect(200);
@@ -77,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('returns facet counts when include_counts is set', async () => {
       await createRule(supertest, log, getSimpleRule());
-      const { body } = await findRulesGranular({
+      const { body } = await findRulesWithFacets({
         include_counts: ['enabled'],
       }).expect(200);
       expect(body.total).to.be(1);
@@ -89,14 +88,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('accepts sort tokens', async () => {
       await createRule(supertest, log, getSimpleRule());
-      const { body } = await findRulesGranular({
+      const { body } = await findRulesWithFacets({
         sort: ['name:desc'],
       }).expect(200);
       expect(body.total).to.be(1);
     });
 
     it('returns 400 for invalid KQL filter', async () => {
-      const { body } = await findRulesGranular({
+      const { body } = await findRulesWithFacets({
         filter: 'alert.attributes.name: (',
       }).expect(400);
       expect(body.status_code).to.be(400);
@@ -104,8 +103,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect((body.message as string[]).some((m) => m.includes('invalid KQL filter'))).to.be(true);
     });
 
-    it('returns 400 for unsupported sort field in granular sort syntax', async () => {
-      const { body } = await findRulesGranular({
+    it('returns 400 for unsupported sort field in facet sort syntax', async () => {
+      const { body } = await findRulesWithFacets({
         sort: ['not_a_supported_field:asc'],
       }).expect(400);
       expect(body.status_code).to.be(400);
@@ -116,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 400 when cursor cannot be decoded', async () => {
-      const { body } = await findRulesGranular({
+      const { body } = await findRulesWithFacets({
         cursor: 'not-valid-cursor-payload',
       }).expect(400);
       expect(body.status_code).to.be(400);
@@ -124,11 +123,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 400 when cursor is provided without sort', async () => {
-      const cursor = encodeGranularRulesCursor({
-        v: 1,
+      const cursor = encodeFindRulesWithFacetsCursor({
+        v: FIND_RULES_WITH_FACETS_CURSOR_SCHEMA_VERSION,
         searchAfter: ['nonsense-sort-token'],
       });
-      const { body } = await findRulesGranular({
+      const { body } = await findRulesWithFacets({
         cursor,
       }).expect(400);
       expect(body.status_code).to.be(400);
@@ -136,8 +135,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 400 when search.term exceeds max length', async () => {
-      const { body } = await findRulesGranular({
-        search: { term: 'x'.repeat(MAX_GRANULAR_RULES_SEARCH_TERM_LENGTH + 1) },
+      const { body } = await findRulesWithFacets({
+        search: { term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1) },
       }).expect(400);
       const status = body.status_code ?? body.statusCode;
       expect(status).to.be(400);

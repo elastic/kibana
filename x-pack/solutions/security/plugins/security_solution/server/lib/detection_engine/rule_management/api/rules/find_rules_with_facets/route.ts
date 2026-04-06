@@ -11,18 +11,18 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import {
-  DETECTION_ENGINE_RULES_URL_FIND_GRANULAR,
+  DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
   MAX_RULES_WITH_GAPS_TO_FETCH,
   MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
 } from '../../../../../../../common/constants';
 import type {
   FacetCounts,
-  FindRulesGranularResponse,
+  FindRulesWithFacetsResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import {
-  FindRulesGranularRequestQuery,
-  validateFindRulesGranularRequestQuery,
+  FindRulesWithFacetsRequestQuery,
+  validateFindRulesWithFacetsRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
@@ -34,11 +34,14 @@ import { resolveGranularFindCursor } from '../../../logic/search/resolve_granula
 import { buildSiemResponse } from '../../../../routes/utils';
 import { transformFindAlerts } from '../../../utils/utils';
 
-export const findRulesGranularRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+/**
+ * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
+ */
+export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .get({
-      access: 'public',
-      path: DETECTION_ENGINE_RULES_URL_FIND_GRANULAR,
+      access: 'internal',
+      path: DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
       security: {
         authz: {
           requiredPrivileges: [RULES_API_READ],
@@ -47,17 +50,17 @@ export const findRulesGranularRoute = (router: SecuritySolutionPluginRouter, log
     })
     .addVersion(
       {
-        version: '2026-04-01',
+        version: '1',
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindRulesGranularRequestQuery),
+            query: buildRouteValidationWithZod(FindRulesWithFacetsRequestQuery),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<FindRulesGranularResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<FindRulesWithFacetsResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        const validationErrors = validateFindRulesGranularRequestQuery(request.query);
+        const validationErrors = validateFindRulesWithFacetsRequestQuery(request.query);
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
@@ -114,7 +117,7 @@ export const findRulesGranularRoute = (router: SecuritySolutionPluginRouter, log
             }
 
             if (gapRuleIds.length === 0) {
-              const emptyBody: FindRulesGranularResponse = {
+              const emptyBody: FindRulesWithFacetsResponse = {
                 ...transformFindAlerts(
                   {
                     data: [],
@@ -158,7 +161,7 @@ export const findRulesGranularRoute = (router: SecuritySolutionPluginRouter, log
           }
 
           const base = transformFindAlerts(rules, warnings);
-          const body: FindRulesGranularResponse = {
+          const body: FindRulesWithFacetsResponse = {
             ...base,
             ...counts,
           };

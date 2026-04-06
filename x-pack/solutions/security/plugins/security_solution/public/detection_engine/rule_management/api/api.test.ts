@@ -27,7 +27,7 @@ import {
   updateRule,
   patchRule,
   fetchRules,
-  fetchRulesGranular,
+  fetchRulesWithFacets,
   fetchRuleById,
   importRules,
   exportRules,
@@ -505,19 +505,19 @@ describe('Detections Rules API', () => {
     });
   });
 
-  describe('fetchRulesGranular', () => {
+  describe('fetchRulesWithFacets', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(rulesMock);
     });
 
-    test('uses _find_granular with sort tokens, API version, and default facet counts', async () => {
-      await fetchRulesGranular({});
+    test('uses _find_with_facets with sort tokens, API version, and default facet counts', async () => {
+      await fetchRulesWithFacets({});
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/rules/_find_granular',
+        '/api/detection_engine/rules/_find_with_facets',
         expect.objectContaining({
           method: 'GET',
-          version: '2026-04-01',
+          version: '1',
           query: expect.objectContaining({
             page: 1,
             per_page: 20,
@@ -528,35 +528,33 @@ describe('Detections Rules API', () => {
       );
     });
 
-    test('splits search bar text into search_term and structured filter', async () => {
-      await fetchRulesGranular({
-        filterOptions: {
-          filter: 'hello',
-          showCustomRules: true,
-          showElasticRules: false,
-          tags: [],
-        },
+    test('sends structured filter, legacy search, and sort token', async () => {
+      await fetchRulesWithFacets({
+        filter: 'alert.attributes.params.immutable: false',
+        search: { term: 'hello', mode: 'legacy' },
+        sort: 'name:asc',
       });
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/rules/_find_granular',
+        '/api/detection_engine/rules/_find_with_facets',
         expect.objectContaining({
           query: expect.objectContaining({
-            search_term: 'hello',
-            search_mode: 'legacy',
+            'search[term]': 'hello',
+            'search[mode]': 'legacy',
             filter: 'alert.attributes.params.immutable: false',
+            sort: ['name:asc'],
           }),
         })
       );
     });
 
-    test('omits include_counts when includeFacetCounts is false', async () => {
-      await fetchRulesGranular({ includeFacetCounts: false });
+    test('omits include_counts when includeCountsCategories is empty', async () => {
+      await fetchRulesWithFacets({ includeCountsCategories: [] });
       const [, options] = fetchMock.mock.calls[0];
       expect(options.query).not.toHaveProperty('include_counts');
     });
 
     test('passes cursor in the query when provided', async () => {
-      await fetchRulesGranular({ cursor: 'opaque-cursor' });
+      await fetchRulesWithFacets({ cursor: 'opaque-cursor' });
       const [, options] = fetchMock.mock.calls[0];
       expect(options.query).toEqual(expect.objectContaining({ cursor: 'opaque-cursor' }));
     });

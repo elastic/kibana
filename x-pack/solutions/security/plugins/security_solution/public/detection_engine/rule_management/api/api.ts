@@ -14,10 +14,7 @@ import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
-import {
-  convertRulesFilterToKQL,
-  splitRuleFilterSearchFromStructuredKql,
-} from '../../../../common/detection_engine/rule_management/rule_filtering';
+import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   GetPrebuiltRuleBaseVersionRequest,
   GetPrebuiltRuleBaseVersionResponseBody,
@@ -66,7 +63,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_RULES_URL_FIND_GRANULAR,
+  DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
 } from '../../../../common/constants';
 
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
@@ -83,8 +80,8 @@ import type {
   FetchCoverageOverviewProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
-  FetchRulesGranularProps,
-  FetchRulesGranularResponse,
+  FetchRulesWithFacetsProps,
+  FetchRulesWithFacetsResponse,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -98,7 +95,7 @@ import type {
 } from '../logic/types';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { defaultRangeValue } from '../../rule_gaps/constants';
-import { RULES_TABLE_GRANULAR_INCLUDE_COUNTS } from './rules_table_granular_include_counts';
+import { RULES_TABLE_WITH_FACETS_INCLUDE_COUNTS } from './rules_table_with_facets_include_counts';
 
 /**
  * Create provided Rule
@@ -236,59 +233,53 @@ export const fetchRules = async ({
 };
 
 /**
- * Fetches rules via `_find_granular` (KQL filter + legacy search_term, optional facet counts, sort tokens).
- * Use for faceted rule-management surfaces; keep {@link fetchRules} for legacy `_find` consumers.
+ * Fetches rules via internal `_find_with_facets` (KQL `filter` + optional `search` term/mode, `sort` token).
+ * Not a public HTTP contract yet. Use {@link fetchRules} for classic `_find`.
  */
-export const fetchRulesGranular = async ({
-  filterOptions = {
-    filter: '',
-    showCustomRules: false,
-    showElasticRules: false,
-    tags: [],
-  },
-  sortingOptions = {
-    field: 'enabled',
-    order: 'desc',
-  },
+export const fetchRulesWithFacets = async ({
+  filter = '',
+  search,
+  sort = 'enabled:desc',
   pagination = {
     page: 1,
     perPage: 20,
   },
   signal,
   schedulerId,
-  includeFacetCounts = true,
-  includeCountsCategories = RULES_TABLE_GRANULAR_INCLUDE_COUNTS,
+  includeCountsCategories = RULES_TABLE_WITH_FACETS_INCLUDE_COUNTS,
   cursor,
-}: FetchRulesGranularProps): Promise<FetchRulesGranularResponse> => {
-  const { structuredKql, searchTerm } = splitRuleFilterSearchFromStructuredKql(filterOptions);
-
-  const shouldApplyDefaultGapsRange = Boolean(filterOptions?.gapFillStatuses?.length);
+  gapFillStatuses,
+}: FetchRulesWithFacetsProps): Promise<FetchRulesWithFacetsResponse> => {
+  const shouldApplyDefaultGapsRange = Boolean(gapFillStatuses?.length);
   const defaultGapsRange = shouldApplyDefaultGapsRange ? getGapRange(defaultRangeValue) : undefined;
+  const trimmedSearchTerm = search?.term?.trim() ?? '';
+  const searchMode = search?.mode ?? 'legacy';
 
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort: [`${sortingOptions.field}:${sortingOptions.order}`],
-    ...(filterOptions?.gapFillStatuses?.length
-      ? { gap_fill_statuses: filterOptions.gapFillStatuses }
-      : {}),
+    sort: [sort],
+    ...(gapFillStatuses?.length ? { gap_fill_statuses: gapFillStatuses } : {}),
     ...(defaultGapsRange
       ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
       : {}),
-    ...(structuredKql !== '' ? { filter: structuredKql } : {}),
-    ...(searchTerm !== '' ? { search_term: searchTerm, search_mode: 'legacy' as const } : {}),
-    ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
-    ...(includeFacetCounts && includeCountsCategories.length > 0
-      ? { include_counts: includeCountsCategories }
+    ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
+    ...(trimmedSearchTerm !== ''
+      ? {
+          'search[term]': trimmedSearchTerm,
+          'search[mode]': searchMode,
+        }
       : {}),
+    ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
+    ...(includeCountsCategories.length > 0 ? { include_counts: includeCountsCategories } : {}),
     ...(cursor ? { cursor } : {}),
   };
 
-  return KibanaServices.get().http.fetch<FetchRulesGranularResponse>(
-    DETECTION_ENGINE_RULES_URL_FIND_GRANULAR,
+  return KibanaServices.get().http.fetch<FetchRulesWithFacetsResponse>(
+    DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
     {
       method: 'GET',
-      version: '2026-04-01',
+      version: '1',
       query,
       signal,
     }

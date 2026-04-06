@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Granular rules API shared contract
-  version: '2026-04-01'
+  version: '1'
 paths: {}
 components:
   x-codegen-enabled: true

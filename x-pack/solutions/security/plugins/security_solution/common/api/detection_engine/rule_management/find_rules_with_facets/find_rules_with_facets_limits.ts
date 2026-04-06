@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-/** Matches OpenAPI `search_term.maxLength` on `_find_granular` and prebuilt `_review` bodies. */
-export const MAX_GRANULAR_RULES_SEARCH_TERM_LENGTH = 1000;
+/** Matches OpenAPI `search.term` max length on `_find_with_facets` and prebuilt `_review` bodies. */
+export const MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH = 1000;
 
 /** Soft guard for KQL filter size before parser work; tune with product limits as needed. */
-export const MAX_GRANULAR_RULES_FILTER_KQL_LENGTH = 10_000;
+export const MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH = 10_000;

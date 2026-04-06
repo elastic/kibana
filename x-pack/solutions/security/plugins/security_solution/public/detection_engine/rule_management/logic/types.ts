@@ -25,6 +25,9 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  FindRulesWithFacetsResponse,
+  GranularRulesFacetCategory,
+  GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
@@ -114,6 +117,27 @@ export interface FetchRulesResponse {
   data: RuleResponse[];
   warnings?: WarningSchema[];
 }
+
+/**
+ * Props for internal `_find_with_facets`. Intentionally separate from {@link FetchRulesProps} so the
+ * facets endpoint is not tied to classic `_find`'s request shape as it evolves.
+ *
+ * `filter` is structured KQL. `search` is optional free-text plus mode (same semantics as the HTTP `search` query).
+ * `sort` is a single token, e.g. `enabled:desc`.
+ */
+export interface FetchRulesWithFacetsProps {
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  filter?: string;
+  search?: GranularRulesSearch;
+  sort?: string;
+  includeCountsCategories?: GranularRulesFacetCategory[];
+  cursor?: string;
+  signal?: AbortSignal;
+  schedulerId?: string;
+  gapFillStatuses?: GapFillStatus[];
+}
+
+export type FetchRulesWithFacetsResponse = FindRulesWithFacetsResponse;
 
 export interface FetchRuleProps {
   id: string;

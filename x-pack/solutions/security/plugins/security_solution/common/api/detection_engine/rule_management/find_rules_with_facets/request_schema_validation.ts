@@ -9,21 +9,21 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import type { FindRulesRequestQueryInput } from '../find_rules/find_rules_route.gen';
 import { validateFindRulesRequestQuery } from '../find_rules/request_schema_validation';
-import type { FindRulesGranularRequestQueryInput } from './find_rules_granular_route.gen';
+import type { FindRulesWithFacetsRequestQueryInput } from './find_rules_with_facets_route.gen';
 import {
-  MAX_GRANULAR_RULES_FILTER_KQL_LENGTH,
-  MAX_GRANULAR_RULES_SEARCH_TERM_LENGTH,
-} from './granular_rules_limits';
+  MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH,
+  MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
+} from './find_rules_with_facets_limits';
 
 /**
  * Validates KQL syntax only (not field allow-lists). Empty or whitespace-only strings are accepted.
  */
-export const validateGranularRulesKqlFilter = (filter: string | undefined): string[] => {
+export const validateFindRulesWithFacetsKqlFilter = (filter: string | undefined): string[] => {
   if (filter == null || filter.trim() === '') {
     return [];
   }
-  if (filter.length > MAX_GRANULAR_RULES_FILTER_KQL_LENGTH) {
-    return [`filter exceeds maximum length of ${MAX_GRANULAR_RULES_FILTER_KQL_LENGTH}`];
+  if (filter.length > MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH) {
+    return [`filter exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH}`];
   }
   try {
     fromKueryExpression(filter);
@@ -63,19 +63,21 @@ const validateSortTokens = (sort: string[] | undefined): string[] => {
 };
 
 /**
- * Additional validation for `_find_granular` beyond generated Zod (gaps parity, KQL parse, sort fields).
+ * Additional validation for internal `_find_with_facets` beyond generated Zod (gaps parity, KQL parse, sort fields).
  */
-export const validateFindRulesGranularRequestQuery = (
-  query: FindRulesGranularRequestQueryInput
+export const validateFindRulesWithFacetsRequestQuery = (
+  query: FindRulesWithFacetsRequestQueryInput
 ): string[] => {
   const errors = [...validateFindRulesRequestQuery(query as FindRulesRequestQueryInput)];
 
   const searchTerm = query.search?.term;
-  if (searchTerm != null && searchTerm.length > MAX_GRANULAR_RULES_SEARCH_TERM_LENGTH) {
-    errors.push(`search.term exceeds maximum length of ${MAX_GRANULAR_RULES_SEARCH_TERM_LENGTH}`);
+  if (searchTerm != null && searchTerm.length > MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH) {
+    errors.push(
+      `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+    );
   }
 
-  errors.push(...validateGranularRulesKqlFilter(query.filter));
+  errors.push(...validateFindRulesWithFacetsKqlFilter(query.filter));
   errors.push(...validateSortTokens(query.sort as string[] | undefined));
 
   const searchMode = query.search?.mode;

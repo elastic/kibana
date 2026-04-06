@@ -62,6 +62,10 @@ import type {
   ExportRulesRequestBodyInput,
 } from './detection_engine/rule_management/export_rules/export_rules_route.gen';
 import type {
+  FindRulesWithFacetsRequestQueryInput,
+  FindRulesWithFacetsResponse,
+} from './detection_engine/rule_management/find_rules_with_facets/find_rules_with_facets_route.gen';
+import type {
   FindRulesRequestQueryInput,
   FindRulesResponse,
 } from './detection_engine/rule_management/find_rules/find_rules_route.gen';
@@ -1677,6 +1681,37 @@ finalize it.
         path: '/api/detection_engine/rules/_find',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * **Internal Kibana API** — not part of the public REST surface yet; called only from
+first-party Security Solution UI with an internal-origin request. Subject to change
+before promotion to `access: public`.
+
+Paginated listing of installed detection rules using a KQL `filter` string (friendly field
+vocabulary, rewritten to `alert.attributes.*` server-side), optional legacy search, facet
+counts, multi-sort, and opaque cursor pagination.
+
+When `search_mode` is `legacy` and `search_term` is set, the server ANDs the filter KQL
+with a KQL fragment derived from `search_term` (same semantics as legacy rule management search).
+
+Sorting is expressed as repeated `sort` query parameters or a single comma-separated value;
+each token must be `<field>:<order>` where `<order>` is `asc` or `desc` and `<field>` is a
+supported rule sort field (see `FindRulesSortField` on the classic `_find` endpoint).
+
+    */
+  async findRulesWithFacets(props: FindRulesWithFacetsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API FindRulesWithFacets`);
+    return this.kbnClient
+      .request<FindRulesWithFacetsResponse>({
+        path: '/api/detection_engine/rules/_find_with_facets',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -3773,6 +3808,9 @@ export interface FindAssetCriticalityRecordsProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
+}
+export interface FindRulesWithFacetsProps {
+  query: FindRulesWithFacetsRequestQueryInput;
 }
 export interface GetAllTranslationStatsDashboardMigrationProps {
   params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;

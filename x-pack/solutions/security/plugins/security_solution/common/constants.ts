@@ -297,8 +297,9 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as con
 
 export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules` as const;
 export const DETECTION_ENGINE_RULES_URL_FIND = `${DETECTION_ENGINE_RULES_URL}/_find` as const;
-export const DETECTION_ENGINE_RULES_URL_FIND_GRANULAR =
-  `${DETECTION_ENGINE_RULES_URL}/_find_granular` as const;
+/** Internal-only listing API (facets + cursor); not a public REST contract yet. */
+export const DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS =
+  `${DETECTION_ENGINE_RULES_URL}/_find_with_facets` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;

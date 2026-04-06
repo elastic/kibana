@@ -41,6 +41,20 @@ interface RulesFilterOptions {
 }
 
 /**
+ * Splits free-text rules search bar (`filter`) from structured facet filters for `_find_with_facets`.
+ */
+export function splitRuleFilterSearchFromStructuredKql(
+  filterOptions: Partial<RulesFilterOptions>
+): { structuredKql: string; searchTerm: string } {
+  const searchTerm = (filterOptions.filter ?? '').trim();
+  const structuredKql = convertRulesFilterToKQL({
+    ...filterOptions,
+    filter: '',
+  });
+  return { structuredKql, searchTerm };
+}
+
+/**
  * Convert rules filter options object to KQL query
  *
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)

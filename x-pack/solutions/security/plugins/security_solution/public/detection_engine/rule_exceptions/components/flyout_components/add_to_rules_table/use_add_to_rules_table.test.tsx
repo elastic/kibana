@@ -35,13 +35,8 @@ describe('useAddToRulesTable', () => {
       })
     );
     expect(useFindRules as jest.Mock).toBeCalledWith({
-      filterOptions: {
-        filter: '',
-        showCustomRules: false,
-        showElasticRules: false,
-        tags: [],
-      },
-      sortingOptions: undefined,
+      filter: '',
+      sort: 'enabled:desc',
       pagination: {
         page: 1,
         perPage: 10000,

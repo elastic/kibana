@@ -8,9 +8,9 @@
 import type { GranularRulesFacetCategory } from '../../../../common/api/detection_engine/rule_management';
 
 /**
- * Facet dimensions requested with the rules table `_find_granular` call (filter-toolbar dimensions).
+ * Facet dimensions requested with the rules table `_find_with_facets` call (filter-toolbar dimensions).
  */
-export const RULES_TABLE_GRANULAR_INCLUDE_COUNTS: GranularRulesFacetCategory[] = [
+export const RULES_TABLE_WITH_FACETS_INCLUDE_COUNTS: GranularRulesFacetCategory[] = [
   'tags',
   'enabled',
   'type',

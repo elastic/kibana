@@ -19,6 +19,7 @@ import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/ap
 import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
+import { splitRuleFilterSearchFromStructuredKql } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -246,6 +247,20 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
+  const findRulesQueryArgs = useMemo(() => {
+    const { structuredKql, searchTerm } = splitRuleFilterSearchFromStructuredKql(filterOptions);
+    return {
+      filter: structuredKql,
+      sort: `${sortingOptions.field}:${sortingOptions.order}`,
+      pagination,
+      schedulerId: activeSchedulerId,
+      ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
+      ...(filterOptions.gapFillStatuses?.length
+        ? { gapFillStatuses: filterOptions.gapFillStatuses }
+        : {}),
+    };
+  }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
+
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
     setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
     setPage(1);
@@ -304,21 +319,13 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindRules(
-    {
-      filterOptions,
-      sortingOptions,
-      pagination,
-      schedulerId: activeSchedulerId,
-    },
-    {
-      // We don't need refreshes on windows focus and reconnects if auto-refresh if off
-      refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
-      refetchOnReconnect: isRefreshOn && !isActionInProgress,
-      refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
-      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-    }
-  );
+  } = useFindRules(findRulesQueryArgs, {
+    // We don't need refreshes on windows focus and reconnects if auto-refresh if off
+    refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
+    refetchOnReconnect: isRefreshOn && !isActionInProgress,
+    refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
+    keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+  });
 
   // Fetch rules snooze settings
   const {

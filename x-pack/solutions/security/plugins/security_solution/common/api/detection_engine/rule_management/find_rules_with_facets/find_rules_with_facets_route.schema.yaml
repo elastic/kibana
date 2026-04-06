@@ -1,15 +1,19 @@
 openapi: 3.0.0
 info:
-  title: Find detection rules (granular filters)
-  version: '2026-04-01'
+  title: Find detection rules (with facets, internal)
+  version: '1'
 paths:
-  /api/detection_engine/rules/_find_granular:
+  /api/detection_engine/rules/_find_with_facets:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: FindRulesGranular
-      summary: List detection rules with granular KQL filter, facets, and cursor pagination
+      operationId: FindRulesWithFacets
+      summary: List detection rules with KQL filter, facet counts, and cursor pagination (internal)
       description: |
+        **Internal Kibana API** — not part of the public REST surface yet; called only from
+        first-party Security Solution UI with an internal-origin request. Subject to change
+        before promotion to `access: public`.
+
         Paginated listing of installed detection rules using a KQL `filter` string (friendly field
         vocabulary, rewritten to `alert.attributes.*` server-side), optional legacy search, facet
         counts, multi-sort, and opaque cursor pagination.
@@ -47,7 +51,6 @@ paths:
             type: array
             items:
               $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFacetCategory'
-            maxItems: 32
         - name: search
           in: query
           required: false
@@ -61,7 +64,6 @@ paths:
             type: array
             items:
               type: string
-            maxItems: 16
         - name: page
           in: query
           required: false

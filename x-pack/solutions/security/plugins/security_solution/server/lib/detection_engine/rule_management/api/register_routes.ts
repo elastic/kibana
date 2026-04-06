@@ -15,7 +15,7 @@ import { createRuleRoute } from './rules/create_rule/route';
 import { deleteRuleRoute } from './rules/delete_rule/route';
 import { exportRulesRoute } from './rules/export_rules/route';
 import { findRulesRoute } from './rules/find_rules/route';
-import { findRulesGranularRoute } from './rules/find_rules_granular/route';
+import { findRulesWithFacetsRoute } from './rules/find_rules_with_facets/route';
 import { importRulesRoute } from './rules/import_rules/route';
 import { getRuleManagementFilters } from './rules/filters/route';
 import { patchRuleRoute } from './rules/patch_rule/route';
@@ -46,7 +46,7 @@ export const registerRuleManagementRoutes = (
 
   // Rules search
   findRulesRoute(router, logger);
-  findRulesGranularRoute(router, logger);
+  findRulesWithFacetsRoute(router, logger);
 
   // Rule tags
   readTagsRoute(router);

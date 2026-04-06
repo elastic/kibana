@@ -33,6 +33,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
 import type { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import type { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
+import type { FindRulesWithFacetsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules_with_facets/find_rules_with_facets_route.gen';
 import type {
   GetRuleExecutionEventsRequestQueryInput,
   GetRuleExecutionEventsRequestParamsInput,
@@ -262,6 +263,31 @@ finalize it.
       .get(getRouteUrlForSpace('/api/detection_engine/rules/_find', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * **Internal Kibana API** — not part of the public REST surface yet; called only from
+first-party Security Solution UI with an internal-origin request. Subject to change
+before promotion to `access: public`.
+
+Paginated listing of installed detection rules using a KQL `filter` string (friendly field
+vocabulary, rewritten to `alert.attributes.*` server-side), optional legacy search, facet
+counts, multi-sort, and opaque cursor pagination.
+
+When `search_mode` is `legacy` and `search_term` is set, the server ANDs the filter KQL
+with a KQL fragment derived from `search_term` (same semantics as legacy rule management search).
+
+Sorting is expressed as repeated `sort` query parameters or a single comma-separated value;
+each token must be `<field>:<order>` where `<order>` is `asc` or `desc` and `<field>` is a
+supported rule sort field (see `FindRulesSortField` on the classic `_find` endpoint).
+
+      */
+  findRulesWithFacets(props: FindRulesWithFacetsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/rules/_find_with_facets', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
@@ -661,6 +687,9 @@ export interface FinalizeAlertsMigrationProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
+}
+export interface FindRulesWithFacetsProps {
+  query: FindRulesWithFacetsRequestQueryInput;
 }
 export interface GetRuleExecutionEventsProps {
   query: GetRuleExecutionEventsRequestQueryInput;

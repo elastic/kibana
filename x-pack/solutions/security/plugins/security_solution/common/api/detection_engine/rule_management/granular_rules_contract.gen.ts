@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Granular rules API shared contract
- *   version: 2026-04-01
+ *   version: 1
  */
 
 import { z } from '@kbn/zod/v4';
@@ -28,12 +28,11 @@ export const GranularRulesSearchMode = z.literal('legacy').default('legacy');
   * Free-text search combined with the KQL `filter` (e.g. `search[term]` / `search[mode]` query keys).
 
   */
-const GranularRulesSearchSchema = z.object({
+export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
+export const GranularRulesSearch = z.object({
   term: z.string().max(1000).optional(),
   mode: GranularRulesSearchMode.optional(),
 });
-export type GranularRulesSearch = z.infer<typeof GranularRulesSearchSchema>;
-export const GranularRulesSearch = GranularRulesSearchSchema;
 
 /**
   * Facet dimension to include in `counts` when requested via `include_counts`.

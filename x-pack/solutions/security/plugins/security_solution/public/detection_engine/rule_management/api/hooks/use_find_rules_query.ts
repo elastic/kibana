@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
-import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
-import type { FilterOptions, PaginationOptions, SortingOptions } from '../../logic';
-import { fetchRules } from '../api';
+import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../common/constants';
+import type { PaginationOptions } from '../../logic';
+import { fetchRulesWithFacets } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
-  filterOptions?: FilterOptions;
-  sortingOptions?: SortingOptions;
+  filter?: string;
+  search?: GranularRulesSearch;
+  sort?: string;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  gapsRange?: {
-    start: string;
-    end: string;
-  };
   schedulerId?: string;
+  gapFillStatuses?: GapFillStatus[];
 }
 
-const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];
+const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS];
 
 export interface RulesQueryResponse {
   rules: RuleResponse[];
@@ -55,7 +55,11 @@ export const useFindRulesQuery = (
   return useQuery(
     [...FIND_RULES_QUERY_KEY, queryArgs],
     async ({ signal }) => {
-      const response = await fetchRules({ signal, ...queryArgs });
+      const response = await fetchRulesWithFacets({
+        signal,
+        ...queryArgs,
+        includeCountsCategories: [],
+      });
 
       return { rules: response.data, total: response.total, warnings: response.warnings };
     },
