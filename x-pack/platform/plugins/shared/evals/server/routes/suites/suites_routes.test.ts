@@ -14,6 +14,7 @@ import { registerListSuitesRoute } from './list_suites';
 import { registerRunSuiteRoute } from './run_suite';
 import { registerGetSuiteStatusRoute } from './get_suite_status';
 import { registerGetSuiteRunsRoute } from './get_suite_runs';
+import { SuiteRunConflictError } from '../../lib/suite_runner';
 import type { SuiteRunner, SuiteRunStatus } from '../../lib/suite_runner';
 import { readFileSync } from 'fs';
 
@@ -303,11 +304,43 @@ describe('suite routes', () => {
       expect(suiteRunner.startRun).not.toHaveBeenCalled();
     });
 
-    it('returns 500 when startRun throws', async () => {
+    it('returns 409 Conflict with structured attributes when a run is already in progress', async () => {
       mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
       const suiteRunner = createMockSuiteRunner();
       suiteRunner.startRun.mockImplementationOnce(() => {
-        throw new Error('A suite run is already in progress');
+        throw new SuiteRunConflictError('esql-generation', 'run-abc-123');
+      });
+
+      const { handler } = setup(suiteRunner);
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: SUITE_RUN_URL.replace('{suiteId}', 'attack-discovery'),
+        params: { suiteId: 'attack-discovery' },
+        body: { connector_id: 'connector-abc' },
+      });
+
+      const response = await handler({} as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(409);
+      expect(response.payload).toEqual({
+        message: expect.stringContaining('already in progress'),
+        attributes: {
+          active_suite_id: 'esql-generation',
+          active_run_id: 'run-abc-123',
+        },
+      });
+      // 409 is a client-facing state, not a server failure —
+      // we log at info level, not error.
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalled();
+    });
+
+    it('returns 500 when startRun throws an unexpected error', async () => {
+      mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
+      const suiteRunner = createMockSuiteRunner();
+      suiteRunner.startRun.mockImplementationOnce(() => {
+        throw new Error('spawn ENOENT');
       });
 
       const { handler } = setup(suiteRunner);
@@ -322,9 +355,7 @@ describe('suite routes', () => {
       const response = await handler({} as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
-      expect(response.payload).toEqual({
-        message: 'A suite run is already in progress',
-      });
+      expect(response.payload).toEqual({ message: 'spawn ENOENT' });
       expect(logger.error).toHaveBeenCalled();
     });
 

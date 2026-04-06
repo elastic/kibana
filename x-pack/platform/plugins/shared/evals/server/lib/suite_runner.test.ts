@@ -11,7 +11,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { join, resolve } from 'path';
 import { tmpdir } from 'os';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { SuiteRunner } from './suite_runner';
+import { SuiteRunner, SuiteRunConflictError } from './suite_runner';
 import type { SuiteRunConfig } from './suite_runner';
 
 type MockStream = PassThrough;
@@ -82,10 +82,21 @@ describe('SuiteRunner', () => {
       expect(status.runId).toBeDefined();
     });
 
-    it('throws when another run is already active', () => {
-      runner.startRun(baseConfig);
+    it('throws SuiteRunConflictError when another run is already active', () => {
+      const firstRun = runner.startRun(baseConfig);
 
-      expect(() => runner.startRun(baseConfig)).toThrow(/already in progress/);
+      let thrown: unknown;
+      try {
+        runner.startRun({ ...baseConfig, suiteId: 'different-suite' });
+      } catch (err) {
+        thrown = err;
+      }
+
+      expect(thrown).toBeInstanceOf(SuiteRunConflictError);
+      const conflict = thrown as SuiteRunConflictError;
+      expect(conflict.activeSuiteId).toBe(firstRun.suiteId);
+      expect(conflict.activeRunId).toBe(firstRun.runId);
+      expect(conflict.message).toContain('already in progress');
     });
 
     it('allows a new run after previous completes', () => {

@@ -11,6 +11,7 @@ import { spawn } from 'child_process';
 import { existsSync, mkdirSync, readFileSync, statSync, symlinkSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import type { Logger } from '@kbn/logging';
+import { SuiteRunConflictError } from './suite_run_errors';
 
 // SuiteRunner reads/writes files OUTSIDE Kibana's data/ directory — specifically
 // `.git` (to resolve main-worktree path) and `.scout/servers/local.json` (to
@@ -76,6 +77,11 @@ const OVERALL_MEAN_REGEX = /Overall\s*[│|]\s*\d+\s*[│|]\s*mean:\s*([\d.]+)/;
  * deterministic so a tight regex is safe.
  */
 const EVAL_RUN_ID_REGEX = /\brun_id:"([^"]+)"/;
+
+// Re-export so existing consumers (plugin.ts, routes) can still import the
+// error class from this module — the actual definition lives in a dedicated
+// file to satisfy the @typescript-eslint/max-classes-per-file rule.
+export { SuiteRunConflictError } from './suite_run_errors';
 
 /** Patterns that indicate startup noise rather than meaningful test output */
 const NOISE_PATTERNS = [
@@ -214,9 +220,7 @@ export class SuiteRunner {
     if (this.activeRunId) {
       const activeRun = this.runs.get(this.activeRunId);
       if (activeRun?.status === 'running') {
-        throw new Error(
-          `A suite run is already in progress: ${activeRun.suiteId} (${this.activeRunId})`
-        );
+        throw new SuiteRunConflictError(activeRun.suiteId, this.activeRunId);
       }
     }
 

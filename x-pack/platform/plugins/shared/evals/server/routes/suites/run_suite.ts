@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { SuiteRouteDependencies } from '.';
 import { loadSuites } from './list_suites';
+import { SuiteRunConflictError } from '../../lib/suite_runner';
 
 const paramsSchema = z.object({ suiteId: z.string() });
 
@@ -80,6 +81,25 @@ export function registerRunSuiteRoute({
             },
           });
         } catch (error) {
+          // "Another run is already in progress" is a client-facing
+          // state error (409 Conflict), not a server failure. The UI
+          // needs the active run's identifiers so it can point the
+          // user at the in-progress work instead of showing a generic
+          // "Internal Server Error" toast.
+          if (error instanceof SuiteRunConflictError) {
+            logger.info(
+              `[Evals] Rejected suite run request — already running: ${error.activeSuiteId} (${error.activeRunId})`
+            );
+            return response.conflict({
+              body: {
+                message: error.message,
+                attributes: {
+                  active_suite_id: error.activeSuiteId,
+                  active_run_id: error.activeRunId,
+                },
+              },
+            });
+          }
           const msg = error instanceof Error ? error.message : String(error);
           logger.error(`[Evals] Failed to start suite run: ${msg}`);
           return response.customError({

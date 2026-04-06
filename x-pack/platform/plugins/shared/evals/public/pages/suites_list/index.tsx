@@ -52,6 +52,38 @@ interface SuiteStatus {
 
 const INTERNAL_VERSION = '1';
 
+/**
+ * Structured error body returned by POST /internal/evals/suites/{id}/run
+ * when another run is already in progress. Matches the shape produced by
+ * the server-side `run_suite.ts` route (`response.conflict({ body: ... })`).
+ */
+interface SuiteRunConflictBody {
+  message?: string;
+  attributes?: {
+    active_suite_id?: string;
+    active_run_id?: string;
+  };
+}
+
+/**
+ * Duck-type guard for a core.http fetch error. We don't import
+ * `isHttpFetchError` because it's not re-exported from `@kbn/core/public`
+ * in this branch, and adding a fresh package dependency for this single
+ * callsite isn't worth it — the HTTP error shape is stable enough that
+ * checking for `response.status` directly is safe.
+ */
+const isHttpConflictError = (
+  error: unknown
+): error is Error & { response: { status: number }; body?: SuiteRunConflictBody } => {
+  if (!(error instanceof Error)) return false;
+  const candidate = error as { response?: { status?: unknown } };
+  return (
+    typeof candidate.response === 'object' &&
+    candidate.response !== null &&
+    candidate.response.status === 409
+  );
+};
+
 const useSuites = () => {
   const { services } = useKibana<{ http: HttpStart }>();
   return useQuery({
@@ -103,6 +135,27 @@ const useRunSuite = () => {
       queryClient.invalidateQueries({ queryKey: ['evals', 'suites', suiteId, 'status'] });
     },
     onError: (error: Error) => {
+      // 409 Conflict = another run is already in progress. SuiteRunner
+      // allows only one active run across all suites at a time. Show a
+      // warning toast with the active run's id instead of the default
+      // "Failed to start suite run" error modal, which hides the actual
+      // message behind a stack trace.
+      if (isHttpConflictError(error)) {
+        const activeSuiteId = error.body?.attributes?.active_suite_id;
+        services.notifications!.toasts.addWarning({
+          title: i18n.translate('xpack.evals.suites.runConflictTitle', {
+            defaultMessage: 'A suite run is already in progress',
+          }),
+          text: activeSuiteId
+            ? i18n.translate('xpack.evals.suites.runConflictMessage', {
+                defaultMessage: 'Wait for "{activeSuiteId}" to finish before starting another run.',
+                values: { activeSuiteId },
+              })
+            : error.body?.message,
+        });
+        return;
+      }
+
       services.notifications!.toasts.addError(error, {
         title: i18n.translate('xpack.evals.suites.runFailed', {
           defaultMessage: 'Failed to start suite run',
