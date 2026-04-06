@@ -64,9 +64,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
       this.stepExecutionRuntime.updateWorkflowExecution({ context: restContext });
     }
 
-    this.workflowLogger.logEvent({
-      message: `Workflow ${executionId} resumed by ${resumedBy}`,
-      level: 'debug',
+    this.workflowLogger.logDebug(`Workflow ${executionId} resumed by ${resumedBy}`, {
       event: {
         action: 'hitl:resumed',
         category: ['workflow'],

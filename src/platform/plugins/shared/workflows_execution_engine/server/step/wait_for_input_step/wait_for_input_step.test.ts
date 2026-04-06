@@ -55,7 +55,6 @@ describe('WaitForInputStepImpl', () => {
 
     workflowLogger = {
       logDebug: jest.fn(),
-      logEvent: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
     underTest = new WaitForInputStepImpl(
@@ -197,10 +196,9 @@ describe('WaitForInputStepImpl', () => {
 
     it('should emit a hitl:resumed audit log event with responder identity', async () => {
       await underTest.run();
-      expect(workflowLogger.logEvent).toHaveBeenCalledWith(
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        'Workflow exec-abc resumed by jane.doe',
         expect.objectContaining({
-          message: 'Workflow exec-abc resumed by jane.doe',
-          level: 'debug',
           event: expect.objectContaining({
             action: 'hitl:resumed',
             category: ['workflow'],
