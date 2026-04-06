@@ -22,7 +22,11 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
 import { TemplateEditorLayout } from './template_editor_layout';
-import { updateYamlFieldDefault } from '../utils/update_yaml_field_default';
+import {
+  type FieldDefaultValue,
+  updateYamlFieldDefault,
+  removeYamlFieldDefault,
+} from '../utils/update_yaml_field_default';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 
 interface TemplateFormLayoutProps {
@@ -84,9 +88,17 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
-      let parsedValue: string | number | string[];
-      if (control === FieldType.INPUT_NUMBER && value !== '') {
-        parsedValue = Number(value);
+      const trimmedValue = value.trim();
+      if (control === FieldType.INPUT_NUMBER && trimmedValue === '') {
+        const updatedYaml = removeYamlFieldDefault(yamlValueRef.current, fieldName);
+        if (updatedYaml !== yamlValueRef.current) {
+          onYamlChange(updatedYaml);
+        }
+        return;
+      }
+      let parsedValue: FieldDefaultValue;
+      if (control === FieldType.INPUT_NUMBER) {
+        parsedValue = Number(trimmedValue);
       } else if (control === FieldType.CHECKBOX_GROUP) {
         try {
           parsedValue = JSON.parse(value) as string[];
@@ -94,7 +106,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
           parsedValue = [];
         }
       } else {
-        parsedValue = value;
+        parsedValue = trimmedValue;
       }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {

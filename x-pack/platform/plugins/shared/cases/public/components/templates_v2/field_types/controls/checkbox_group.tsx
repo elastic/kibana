@@ -6,8 +6,9 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
+  type FieldHook,
   UseField,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -21,12 +22,15 @@ import { FIELD_REQUIRED } from '../../translations';
 
 type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> & ConditionRenderProps;
 
+const toStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+
 const toArray = (value: unknown): string[] => {
-  if (Array.isArray(value)) return value as string[];
+  if (Array.isArray(value)) return toStringArray(value);
   if (typeof value === 'string' && value !== '') {
     try {
       const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
+      return toStringArray(parsed);
     } catch {
       return [];
     }
@@ -41,42 +45,54 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   metadata,
   isRequired,
 }) => {
-  const validations = isRequired
-    ? [
-        {
-          validator: ({ value }: { value: unknown }) => {
-            if (toArray(value).length === 0) {
-              return { message: FIELD_REQUIRED };
-            }
-          },
-        },
-      ]
-    : [];
+  const options = useMemo(
+    () => metadata.options.map((option) => ({ id: option, label: option })),
+    [metadata.options]
+  );
+
+  const config = useMemo(
+    () => ({
+      defaultValue: JSON.stringify(metadata.default ?? []),
+      validations: isRequired
+        ? [
+            {
+              validator: ({ value }: { value: unknown }) => {
+                if (toArray(value).length === 0) {
+                  return { message: FIELD_REQUIRED };
+                }
+              },
+            },
+          ]
+        : [],
+    }),
+    [isRequired, metadata.default]
+  );
+
+  const renderField = useCallback(
+    (field: FieldHook<string>) => {
+      const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      const selected = toArray(field.value);
+      return (
+        <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+          <EuiCheckboxGroup
+            options={options}
+            idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
+            onChange={(id) => {
+              const next = selected.includes(id)
+                ? selected.filter((s) => s !== id)
+                : [...selected, id];
+              field.setValue(JSON.stringify(next));
+            }}
+          />
+        </EuiFormRow>
+      );
+    },
+    [label, options]
+  );
 
   return (
-    <UseField
-      key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
-      config={{ validations, defaultValue: JSON.stringify(metadata.default ?? []) }}
-    >
-      {(field) => {
-        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-        const selected = toArray(field.value);
-        return (
-          <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
-            <EuiCheckboxGroup
-              options={metadata.options.map((option) => ({ id: option, label: option }))}
-              idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
-              onChange={(id) => {
-                const next = selected.includes(id)
-                  ? selected.filter((s) => s !== id)
-                  : [...selected, id];
-                field.setValue(JSON.stringify(next));
-              }}
-            />
-          </EuiFormRow>
-        );
-      }}
+    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
+      {renderField}
     </UseField>
   );
 };

@@ -6,8 +6,9 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
+  type FieldHook,
   UseField,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -28,41 +29,53 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   metadata,
   isRequired,
 }) => {
-  const validations = isRequired
-    ? [
-        {
-          validator: ({ value }: { value: unknown }) => {
-            if (!value) {
-              return { message: i18n.FIELD_REQUIRED };
+  const options = useMemo(
+    () => metadata.options.map((option) => ({ id: option, label: option })),
+    [metadata.options]
+  );
+
+  const config = useMemo(
+    () => ({
+      defaultValue: metadata.default ?? metadata.options[0],
+      validations: isRequired
+        ? [
+            {
+              validator: ({ value }: { value: unknown }) => {
+                if (!value) {
+                  return { message: i18n.FIELD_REQUIRED };
+                }
+              },
+            },
+          ]
+        : [],
+    }),
+    [isRequired, metadata.default, metadata.options]
+  );
+
+  const renderField = useCallback(
+    (field: FieldHook<string>) => {
+      const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      return (
+        <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+          <EuiRadioGroup
+            name={name}
+            options={options}
+            idSelected={
+              typeof field.value === 'string' && field.value !== ''
+                ? field.value
+                : metadata.options[0]
             }
-          },
-        },
-      ]
-    : [];
+            onChange={(id) => field.setValue(id)}
+          />
+        </EuiFormRow>
+      );
+    },
+    [label, name, options, metadata.options]
+  );
 
   return (
-    <UseField
-      key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
-      config={{ validations, defaultValue: metadata.default ?? metadata.options[0] }}
-    >
-      {(field) => {
-        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-        return (
-          <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
-            <EuiRadioGroup
-              name={name}
-              options={metadata.options.map((option) => ({ id: option, label: option }))}
-              idSelected={
-                typeof field.value === 'string' && field.value !== ''
-                  ? field.value
-                  : metadata.options[0]
-              }
-              onChange={(id) => field.setValue(id)}
-            />
-          </EuiFormRow>
-        );
-      }}
+    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
+      {renderField}
     </UseField>
   );
 };

@@ -10,6 +10,7 @@ import moment from 'moment-timezone';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useYamlFormSync } from './use_yaml_form_sync';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import type { FieldDefaultValue } from '../../utils/update_yaml_field_default';
 
 describe('useYamlFormSync', () => {
   let mockForm: jest.Mocked<FormHook>;
@@ -32,7 +33,7 @@ describe('useYamlFormSync', () => {
       name: string;
       type: string;
       control: string;
-      defaultValue?: string | number | string[];
+      defaultValue?: FieldDefaultValue;
     }>
   ) =>
     fields.map((f) => ({

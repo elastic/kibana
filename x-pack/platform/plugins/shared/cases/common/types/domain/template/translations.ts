@@ -24,13 +24,13 @@ export const FIELD_DEFAULT_VALUES_MUST_BE_UNIQUE = i18n.translate(
 export const FIELD_OPTIONS_MAX_ITEMS = (max: number) =>
   i18n.translate('xpack.cases.templates.fieldSchema.optionsMaxItems', {
     values: { max },
-    defaultMessage: 'Options must not exceed {max} items.',
+    defaultMessage: 'Options must not exceed {max, plural, one {# item} other {# items}}.',
   });
 
 export const FIELD_OPTIONS_MIN_ITEMS = (min: number) =>
   i18n.translate('xpack.cases.templates.fieldSchema.optionsMinItems', {
     values: { min },
-    defaultMessage: 'Options must have at least {min} items.',
+    defaultMessage: 'Options must have at least {min, plural, one {# item} other {# items}}.',
   });
 
 export const FIELD_DEFAULT_NOT_IN_OPTIONS = i18n.translate(

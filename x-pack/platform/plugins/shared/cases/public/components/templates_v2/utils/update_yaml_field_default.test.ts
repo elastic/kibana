@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { updateYamlFieldDefault, hasFieldDefault } from './update_yaml_field_default';
+import {
+  updateYamlFieldDefault,
+  removeYamlFieldDefault,
+  hasFieldDefault,
+} from './update_yaml_field_default';
 
 describe('updateYamlFieldDefault', () => {
   const baseYaml = `name: Test Template
@@ -342,6 +346,71 @@ fields:
 
     expect(result).toContain('default: new value # important comment');
     expect(result).not.toContain('old value');
+  });
+});
+
+describe('removeYamlFieldDefault', () => {
+  it('removes metadata.default from a field that has it', () => {
+    const yaml = `name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+    metadata:
+      default: 42
+`;
+    const result = removeYamlFieldDefault(yaml, 'score');
+
+    expect(result).not.toContain('default');
+    expect(result).toContain('name: score');
+  });
+
+  it('preserves other metadata keys when removing default', () => {
+    const yaml = `name: Test
+fields:
+  - name: priority
+    control: SELECT_BASIC
+    type: keyword
+    metadata:
+      options:
+        - low
+        - high
+      default: low
+`;
+    const result = removeYamlFieldDefault(yaml, 'priority');
+
+    expect(result).not.toContain('default');
+    expect(result).toContain('options:');
+    expect(result).toContain('- low');
+    expect(result).toContain('- high');
+  });
+
+  it('returns original yaml when field has no default', () => {
+    const yaml = `name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+`;
+    const result = removeYamlFieldDefault(yaml, 'score');
+
+    expect(result).toBe(yaml);
+  });
+
+  it('returns original yaml when field does not exist', () => {
+    const yaml = `name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+`;
+    const result = removeYamlFieldDefault(yaml, 'nonexistent');
+
+    expect(result).toBe(yaml);
+  });
+
+  it('returns original yaml when yaml is empty', () => {
+    expect(removeYamlFieldDefault('', 'score')).toBe('');
   });
 });
 

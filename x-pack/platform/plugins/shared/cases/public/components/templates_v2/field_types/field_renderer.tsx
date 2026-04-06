@@ -37,6 +37,11 @@ export const FieldsRenderer: FC<{
     [parsedTemplate.fields]
   );
 
+  const fieldControlMap = useMemo(
+    () => Object.fromEntries(parsedTemplate.fields.map((f) => [f.name, f.control])),
+    [parsedTemplate.fields]
+  );
+
   const allFieldPaths = useMemo(
     () => parsedTemplate.fields.map((f) => `${CASE_EXTENDED_FIELDS}.${f.name}_as_${f.type}`),
     [parsedTemplate.fields]
@@ -57,7 +62,12 @@ export const FieldsRenderer: FC<{
       {parsedTemplate.fields.map((field) => {
         // Evaluate display condition — skip rendering if false
         if (field.display?.show_when) {
-          const shouldShow = evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
+          const shouldShow = evaluateCondition(
+            field.display.show_when,
+            fieldValues,
+            fieldTypeMap,
+            fieldControlMap
+          );
           if (!shouldShow) return null;
         }
 
@@ -65,7 +75,12 @@ export const FieldsRenderer: FC<{
         const isRequired =
           field.validation?.required === true ||
           (field.validation?.required_when
-            ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
+            ? evaluateCondition(
+                field.validation.required_when,
+                fieldValues,
+                fieldTypeMap,
+                fieldControlMap
+              )
             : false);
 
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;

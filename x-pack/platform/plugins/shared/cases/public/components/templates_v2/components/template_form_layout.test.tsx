@@ -374,6 +374,59 @@ fields:
     expect(updatedYaml).not.toContain("default: '42'");
   });
 
+  it('removes the default key when INPUT_NUMBER value is cleared to empty string', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+    metadata:
+      default: 42
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('score', '', 'INPUT_NUMBER');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).not.toContain('default');
+  });
+
+  it('trims whitespace from INPUT_NUMBER value before parsing', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('score', '  42  ', 'INPUT_NUMBER');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: 42');
+  });
+
+  it('trims whitespace from INPUT_TEXT value', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: summary
+    control: INPUT_TEXT
+    type: keyword
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('summary', '  hello  ', 'INPUT_TEXT');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: hello');
+  });
+
   it('passes the string value unchanged for INPUT_TEXT control', () => {
     setupWithYaml(`name: Test
 fields:

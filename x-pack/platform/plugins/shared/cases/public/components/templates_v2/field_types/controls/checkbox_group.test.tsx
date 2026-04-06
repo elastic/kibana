@@ -79,6 +79,19 @@ describe('CheckboxGroup', () => {
       expect(screen.getByLabelText('backend')).toBeChecked();
       expect(screen.getByLabelText('database')).not.toBeChecked();
     });
+
+    it('ignores non-string items in the initial value array', () => {
+      // Cast to bypass TS — simulates malformed YAML-parsed data at runtime
+      render(
+        <FormWrapper
+          initialValue={['frontend', 42, null, true] as unknown as string[]}
+          onSubmitResult={jest.fn()}
+        />
+      );
+      expect(screen.getByLabelText('frontend')).toBeChecked();
+      expect(screen.getByLabelText('backend')).not.toBeChecked();
+      expect(screen.getByLabelText('database')).not.toBeChecked();
+    });
   });
 
   describe('interaction', () => {

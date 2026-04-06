@@ -146,8 +146,6 @@ fields:
       default:
         - api
   # shown only when "database" is among the selected components
-  # contains checks for the substring in the stored JSON string,
-  # wrapping the value in double-quotes ensures an exact element match
   - name: db_connection
     control: INPUT_TEXT
     label: Database connection string
@@ -156,12 +154,12 @@ fields:
       show_when:
         field: affected_components
         operator: contains
-        value: '"database"'
+        value: database
     validation:
       required_when:
         field: affected_components
         operator: contains
-        value: '"database"'
+        value: database
   # shown only when "auth" is among the selected components
   - name: auth_details
     control: TEXTAREA
@@ -171,7 +169,7 @@ fields:
       show_when:
         field: affected_components
         operator: contains
-        value: '"auth"'
+        value: auth
   # shown only when BOTH "api" and "ui" are selected (compound all condition)
   - name: integration_notes
     control: TEXTAREA
@@ -183,8 +181,8 @@ fields:
         rules:
           - field: affected_components
             operator: contains
-            value: '"api"'
+            value: api
           - field: affected_components
             operator: contains
-            value: '"ui"'
+            value: ui
 `.trimStart();
