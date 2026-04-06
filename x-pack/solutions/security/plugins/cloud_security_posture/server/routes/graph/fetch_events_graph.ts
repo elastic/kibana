@@ -374,10 +374,10 @@ const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): s
         ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${euidColumn})`)}, "")`;
     })
     .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
-  return `REPLACE(
+  return `
+  REPLACE(
     REPLACE(
-      REPLACE(
-        REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
+      REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
     "\\\\{,", ${JSON_OBJECT_START}),
   ",}", ${JSON_OBJECT_END})`;
 };
