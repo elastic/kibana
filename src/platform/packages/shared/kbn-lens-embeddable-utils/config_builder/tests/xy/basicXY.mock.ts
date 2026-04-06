@@ -1143,7 +1143,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1157,8 +1157,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     },
   ],
   query: {
-    query: '',
-    language: 'kuery',
+    expression: 'test: true',
+    language: 'kql',
   },
 };
 
@@ -1239,7 +1239,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1253,8 +1253,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
     },
   ],
   query: {
-    query: '',
-    language: 'kuery',
+    expression: 'test: true',
+    language: 'kql',
   },
 };
 
@@ -1330,7 +1330,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1344,7 +1344,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     },
   ],
   query: {
-    query: '',
-    language: 'kuery',
+    expression: 'test: true',
+    language: 'kql',
   },
 };

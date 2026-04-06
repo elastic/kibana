@@ -5,21 +5,47 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiPageHeader, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFieldSearch,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiSpacer,
+  type Criteria,
+} from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CriteriaWithPagination } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
+import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 import { RulesListTableContainer } from './rules_list_table_container';
+import type { RulesListTableSortField } from './rules_list_table';
+import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
+import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
+import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
+import { buildRulesListFilter } from './utils';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
+
+const SORT_FIELD_TO_TABLE_FIELD: Record<FindRulesSortField, RulesListTableSortField> = {
+  kind: 'kind',
+  enabled: 'enabled',
+  name: 'metadata',
+};
+
+const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
+  Object.entries(SORT_FIELD_TO_TABLE_FIELD).map(([api, table]) => [table, api])
+) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
   const { basePath } = useService(CoreStart('http'));
@@ -29,22 +55,60 @@ export const RulesListPage = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [searchInput, setSearchInput] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+  const [modeFilter, setModeFilter] = useState('');
+  const [sortField, setSortField] = useState<FindRulesSortField>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+
+  const filter = useMemo(
+    () =>
+      buildRulesListFilter({
+        enabled: statusFilter,
+        tags: tagsFilter,
+        kind: modeFilter,
+      }),
+    [statusFilter, tagsFilter, modeFilter]
+  );
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, filter]);
 
   const { data, isLoading, isError, error } = useFetchRules({
     page,
     perPage,
+    filter,
     search: debouncedSearch || undefined,
+    sortField,
+    sortOrder: sortDirection,
   });
 
-  const onTableChange = ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
-    setPage(tablePage.index + 1);
-    setPerPage(tablePage.size);
+  const { data: allTags } = useFetchRuleTags();
+
+  const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
+    if (tablePage) {
+      setPage(tablePage.index + 1);
+      setPerPage(tablePage.size);
+    }
+
+    if (sort) {
+      const nextSortField = TABLE_FIELD_TO_API_SORT_FIELD[sort.field as string];
+      if (nextSortField) {
+        const sortChanged = nextSortField !== sortField || sort.direction !== sortDirection;
+        setSortField(nextSortField);
+        setSortDirection(sort.direction);
+        if (sortChanged) {
+          setPage(1);
+        }
+      }
+    }
   };
+
+  const availableTagOptions = allTags ?? [];
+
+  const hasActiveFilters = Boolean(filter);
 
   return (
     <div>
@@ -58,6 +122,7 @@ export const RulesListPage = () => {
         rightSideItems={[
           <EuiButton
             key="create-rule"
+            fill
             href={basePath.prepend(paths.ruleCreate)}
             data-test-subj="createRuleButton"
           >
@@ -89,17 +154,31 @@ export const RulesListPage = () => {
       ) : null}
       {!isError ? (
         <>
-          <EuiSearchBar
-            query={searchInput}
-            box={{
-              incremental: true,
-              placeholder: i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
-                defaultMessage: 'Search rules',
-              }),
-              'data-test-subj': 'rulesListSearchBar',
-            }}
-            onChange={({ queryText }) => setSearchInput(queryText ?? '')}
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                isClearable
+                value={searchInput}
+                placeholder={i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
+                  defaultMessage: 'Search rules',
+                })}
+                onChange={(event) => setSearchInput(event.target.value)}
+                data-test-subj="rulesListSearchBar"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                <StatusFilterPopover value={statusFilter} onChange={setStatusFilter} />
+                <TagsFilterPopover
+                  options={availableTagOptions}
+                  value={tagsFilter}
+                  onChange={setTagsFilter}
+                />
+                <ModeFilterPopover value={modeFilter} onChange={setModeFilter} />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <RulesListTableContainer
             items={data?.items ?? []}
@@ -107,6 +186,9 @@ export const RulesListPage = () => {
             page={page}
             perPage={perPage}
             search={debouncedSearch}
+            hasActiveFilters={hasActiveFilters}
+            sortField={SORT_FIELD_TO_TABLE_FIELD[sortField]}
+            sortDirection={sortDirection}
             isLoading={isLoading}
             onTableChange={onTableChange}
           />

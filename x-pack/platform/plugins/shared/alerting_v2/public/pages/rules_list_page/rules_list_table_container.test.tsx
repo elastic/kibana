@@ -75,6 +75,7 @@ const renderContainer = (overrides = {}) => {
     page: 1,
     perPage: 20,
     search: '',
+    hasActiveFilters: false,
     isLoading: false,
     onTableChange: jest.fn(),
     ...overrides,
@@ -120,7 +121,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/insightsAndAlerting/alerting_v2/edit/rule-1'
+        '/app/management/alertingV2/rules/edit/rule-1'
       );
     });
 
@@ -136,7 +137,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
+        '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
       );
     });
   });

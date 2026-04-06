@@ -24,7 +24,8 @@ const streamTypes = ['classic stream', 'wired stream', 'stream'];
 
 export function createStreamsGlobalSearchResultProvider(
   core: CoreSetup,
-  logger: Logger
+  logger: Logger,
+  getIsSecurityEnabled: () => Promise<boolean>
 ): GlobalSearchResultProvider {
   return {
     id: 'streams',
@@ -36,9 +37,9 @@ export function createStreamsGlobalSearchResultProvider(
 
       const storageClient = createStreamsStorageClient(client.asInternalUser, logger);
 
-      return from(findStreams({ term, types, maxResults, storageClient, client, core })).pipe(
-        takeUntil(aborted$)
-      );
+      return from(
+        findStreams({ term, types, maxResults, storageClient, client, core, getIsSecurityEnabled })
+      ).pipe(takeUntil(aborted$));
     },
   };
 }
@@ -50,6 +51,7 @@ async function findStreams({
   storageClient,
   client,
   core,
+  getIsSecurityEnabled,
 }: {
   term: string;
   types: string[];
@@ -57,6 +59,7 @@ async function findStreams({
   storageClient: StreamsStorageClient;
   client: IScopedClusterClient;
   core: CoreSetup;
+  getIsSecurityEnabled: () => Promise<boolean>;
 }) {
   const [coreStart] = await core.getStartServices();
   const soClient = coreStart.savedObjects.getUnsafeInternalClient();
@@ -95,9 +98,12 @@ async function findStreams({
     ({ _source: definition }) => !('group' in definition)
   ); // Filter out old Group streams
 
+  const isSecurityEnabled = await getIsSecurityEnabled();
+
   const privileges = await checkAccessBulk({
     names: hits.map((hit) => hit._source.name),
     esClient: client.asCurrentUser,
+    isSecurityEnabled,
   });
 
   const hitsWithAccess = searchResponse.hits.hits.filter((hit) => {

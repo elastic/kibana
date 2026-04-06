@@ -145,7 +145,7 @@ describe('emitEvent', () => {
       triggerEventHandler: handler,
     });
     const requestWithContext = {} as any;
-    setWorkflowEventChainContext(requestWithContext, { depth: 1, sourceWorkflowId: 'wf-1' });
+    setWorkflowEventChainContext(requestWithContext, { depth: 1, sourceExecutionId: 'exec-1' });
 
     await emitEvent(
       {
@@ -159,9 +159,69 @@ describe('emitEvent', () => {
 
     expect(handler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventChainContext: { depth: 1, sourceWorkflowId: 'wf-1' },
+        eventChainContext: { depth: 1, sourceExecutionId: 'exec-1' },
       })
     );
+  });
+
+  it('skips schema validation when eventSchema has no safeParse method', async () => {
+    const registry = new TriggerRegistry();
+    registry.register({
+      id: 'cases.updated',
+      eventSchema,
+    } as ServerTriggerDefinition);
+    // Overwrite the definition's eventSchema with an object that lacks safeParse
+    const definition = registry.get('cases.updated')!;
+    (definition as any).eventSchema = { shape: {} };
+    const handler = jest.fn().mockResolvedValue(undefined);
+    const deps = createDeps({
+      triggerRegistry: registry,
+      triggerEventHandler: handler,
+    });
+
+    await emitEvent(
+      {
+        triggerId: 'cases.updated',
+        spaceId: 'default',
+        payload: { anything: 'goes' },
+        request: mockRequest,
+      },
+      deps
+    );
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes stringified error when schema validation error is not an Error instance', async () => {
+    const registry = new TriggerRegistry();
+    registry.register({
+      id: 'cases.updated',
+      eventSchema,
+    } as ServerTriggerDefinition);
+    // Replace eventSchema with a fake that returns a non-Error failure
+    const definition = registry.get('cases.updated')!;
+    (definition as any).eventSchema = {
+      safeParse: () => ({ success: false, error: 'string-error-detail' }),
+    };
+    const handler = jest.fn();
+    const deps = createDeps({
+      triggerRegistry: registry,
+      triggerEventHandler: handler,
+    });
+
+    await expect(
+      emitEvent(
+        {
+          triggerId: 'cases.updated',
+          spaceId: 'default',
+          payload: { caseId: '123', status: 'open' },
+          request: mockRequest,
+        },
+        deps
+      )
+    ).rejects.toThrow('string-error-detail');
+
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it('throws when no handler is registered', async () => {

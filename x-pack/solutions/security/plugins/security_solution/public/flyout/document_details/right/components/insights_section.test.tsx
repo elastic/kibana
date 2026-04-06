@@ -15,15 +15,15 @@ import {
   INSIGHTS_HEADER_TEST_ID,
 } from './test_ids';
 import {
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   CORRELATIONS_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   PREVALENCE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { useFetchThreatIntelligence } from '../../../../flyout_v2/document/hooks/use_fetch_threat_intelligence';
+import { useFetchThreatIntelligence } from '../../../../flyout_v2/threat_intelligence/hooks/use_fetch_threat_intelligence';
 import { usePrevalence } from '../../../../flyout_v2/prevalence/hooks/use_prevalence';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
@@ -110,7 +110,7 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const mockUseHostDetails = useHostDetails as jest.Mock;
 jest.mock('../../../../explore/hosts/containers/hosts/details');
 
-jest.mock('../../../../flyout_v2/document/hooks/use_fetch_threat_intelligence');
+jest.mock('../../../../flyout_v2/threat_intelligence/hooks/use_fetch_threat_intelligence');
 jest.mock('../../../../flyout_v2/prevalence/hooks/use_prevalence');
 jest.mock('../../../../flyout_v2/correlations/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../../../flyout_v2/correlations/hooks/use_show_related_alerts_by_same_source_event');
