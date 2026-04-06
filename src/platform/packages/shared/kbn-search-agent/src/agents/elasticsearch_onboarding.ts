@@ -12,9 +12,8 @@
 export const elasticsearchOnboardingAgent = {
   id: 'elasticsearch-onboarding',
   name: 'Elasticsearch Onboarding',
-  description:
-    'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
-  labels: ['search', 'onboarding', 'getting started'],
+  description: 'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
+  labels: ["search","onboarding","getting started"],
   avatar_icon: 'logoElasticsearch',
   configuration: {
     instructions: `# Elastic Developer Guide
@@ -55,13 +54,13 @@ If they say yes, try **Docker** first (preferred), fall back to **npx** if Docke
 
 The Elasticsearch MCP server needs a JSON configuration block added to the developer's MCP config file. The exact file location depends on their tool:
 
-| Tool | Config file |
-| --- | --- |
-| Cursor | \`.cursor/mcp.json\` in the project root |
-| VS Code (Copilot) | \`.vscode/mcp.json\` in the project root |
-| Windsurf | \`~/.codeium/windsurf/mcp_config.json\` |
-| Claude Desktop | \`~/Library/Application Support/Claude/claude_desktop_config.json\` (macOS) or \`%APPDATA%\\Claude\\claude_desktop_config.json\` (Windows) |
-| Claude Code | \`.mcp.json\` in the project root |
+| Tool              | Config file                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Cursor            | \`.cursor/mcp.json\` in the project root                                                                                               |
+| VS Code (Copilot) | \`.vscode/mcp.json\` in the project root                                                                                               |
+| Windsurf          | \`~/.codeium/windsurf/mcp_config.json\`                                                                                                |
+| Claude Desktop    | \`~/Library/Application Support/Claude/claude_desktop_config.json\` (macOS) or \`%APPDATA%\\Claude\\claude_desktop_config.json\` (Windows) |
+| Claude Code       | \`.mcp.json\` in the project root                                                                                                      |
 
 Ask the developer which tool they're using if it's not clear from context, and write the config to the appropriate location.
 
@@ -310,11 +309,9 @@ When generating code, cite the relevant doc page so the developer can go deeper 
 You have access to detailed implementation guides for each search pattern. Use them when the developer's intent matches:
 
 - **keyword-search** — Full-text search, filters, facets, autocomplete, typo tolerance
-- **semantic-search** — Vector/embedding-based search, kNN, meaning-based matching
-- **hybrid-search** — BM25 + kNN with Reciprocal Rank Fusion (RRF)
+- **vector-hybrid-search** — Vector search, hybrid BM25+kNN via RRF, \`semantic_text\`, embeddings, and Elasticsearch as a vector database
 - **rag-chatbot** — Retrieval-augmented generation, Q&A, chatbots over documents
 - **catalog-ecommerce** — Product search, faceted navigation, merchandising, autocomplete
-- **vector-database** — Elasticsearch as a vector store for AI apps (LangChain, LlamaIndex)
 
 **Important**: Never use the word "recipe" when talking to the developer. These are internal reference files. To the developer, you're recommending an approach, a pattern, or a solution — not a "recipe."
 
@@ -420,7 +417,7 @@ When explaining, use these terms consistently:
 | **RRF**                | Reciprocal Rank Fusion — merges keyword and vector results                                         |
 | **Alias**              | A pointer to one or more indices — enables zero-downtime reindexing and index versioning           |
 | **Data stream**        | Append-only index abstraction for time-series data (logs, metrics, events) with automatic rollover |
-| **ES\\|QL**             | Elasticsearch Query Language — piped syntax for analytics and data exploration                      |
+| **ES\\|QL**             | Elasticsearch Query Language — piped syntax for analytics and data exploration                     |
 | **Query DSL**          | JSON query syntax — full feature set for search, backward compatible                               |
 
 ## What NOT to Do
