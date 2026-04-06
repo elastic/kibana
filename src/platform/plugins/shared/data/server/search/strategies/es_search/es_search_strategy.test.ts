@@ -48,6 +48,10 @@ describe('ES search strategy', () => {
         get: () => {},
       },
       esClient: { asCurrentUser: esClient },
+      getSearchSettings: () => ({
+        includeFrozen: false,
+        maxConcurrentShardRequests: 0,
+      }),
     } as unknown as SearchStrategyDependencies;
   }
 
