@@ -7,6 +7,9 @@
 
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { join, resolve } from 'path';
+import { tmpdir } from 'os';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SuiteRunner } from './suite_runner';
 import type { SuiteRunConfig } from './suite_runner';
@@ -338,6 +341,90 @@ describe('SuiteRunner', () => {
       // Should keep the last 200 lines (50-249)
       expect(status?.output[0]).toBe('line 50');
       expect(status?.output[199]).toBe('line 249');
+    });
+  });
+
+  describe('syncScoutConfig', () => {
+    let tmpRepoRoot: string;
+    const configRelPath = join('.scout', 'servers', 'local.json');
+
+    beforeEach(() => {
+      tmpRepoRoot = mkdtempSync(join(tmpdir(), 'kbn-evals-suite-runner-'));
+    });
+
+    afterEach(() => {
+      rmSync(tmpRepoRoot, { recursive: true, force: true });
+    });
+
+    it('creates .scout/servers/local.json when missing, with live URLs', () => {
+      const localRunner = new SuiteRunner(tmpRepoRoot, logger);
+
+      localRunner.syncScoutConfig({
+        kibanaUrl: 'http://localhost:5676',
+        elasticsearchUrl: 'http://localhost:9275',
+      });
+
+      const written = JSON.parse(readFileSync(resolve(tmpRepoRoot, configRelPath), 'utf-8'));
+      expect(written.hosts.kibana).toBe('http://localhost:5676');
+      expect(written.hosts.elasticsearch).toBe('http://localhost:9275');
+      expect(written.auth).toEqual({ username: 'elastic', password: 'changeme' });
+      expect(written.serverless).toBe(false);
+    });
+
+    it('updates hosts in-place when local.json already exists, preserving other fields', () => {
+      mkdirSync(resolve(tmpRepoRoot, '.scout', 'servers'), { recursive: true });
+      writeFileSync(
+        resolve(tmpRepoRoot, configRelPath),
+        JSON.stringify({
+          serverless: false,
+          hosts: { kibana: 'http://localhost:5683', elasticsearch: 'http://localhost:9282' },
+          auth: { username: 'elastic', password: 'changeme' },
+          metadata: { generatedOn: 'old', preserveMe: true },
+        })
+      );
+
+      const localRunner = new SuiteRunner(tmpRepoRoot, logger);
+      localRunner.syncScoutConfig({
+        kibanaUrl: 'http://localhost:5676',
+        elasticsearchUrl: 'http://localhost:9275',
+      });
+
+      const written = JSON.parse(readFileSync(resolve(tmpRepoRoot, configRelPath), 'utf-8'));
+      expect(written.hosts.kibana).toBe('http://localhost:5676');
+      expect(written.hosts.elasticsearch).toBe('http://localhost:9275');
+      // Preserve caller-supplied fields that aren't hosts
+      expect(written.metadata).toEqual({ generatedOn: 'old', preserveMe: true });
+    });
+
+    it('is a no-op when URLs already match (does not rewrite the file)', () => {
+      mkdirSync(resolve(tmpRepoRoot, '.scout', 'servers'), { recursive: true });
+      const original = JSON.stringify({
+        serverless: false,
+        hosts: { kibana: 'http://localhost:5676', elasticsearch: 'http://localhost:9275' },
+        auth: { username: 'elastic', password: 'changeme' },
+      });
+      writeFileSync(resolve(tmpRepoRoot, configRelPath), original);
+
+      const localRunner = new SuiteRunner(tmpRepoRoot, logger);
+      localRunner.syncScoutConfig({
+        kibanaUrl: 'http://localhost:5676',
+        elasticsearchUrl: 'http://localhost:9275',
+      });
+
+      // Byte-for-byte equal = no rewrite
+      expect(readFileSync(resolve(tmpRepoRoot, configRelPath), 'utf-8')).toBe(original);
+    });
+
+    it('constructor applies syncScoutConfig when serverInfo is passed', () => {
+      const localRunner = new SuiteRunner(tmpRepoRoot, logger, {
+        kibanaUrl: 'http://localhost:5676',
+        elasticsearchUrl: 'http://localhost:9275',
+      });
+      expect(localRunner).toBeDefined();
+
+      const written = JSON.parse(readFileSync(resolve(tmpRepoRoot, configRelPath), 'utf-8'));
+      expect(written.hosts.kibana).toBe('http://localhost:5676');
+      expect(written.hosts.elasticsearch).toBe('http://localhost:9275');
     });
   });
 });

@@ -121,8 +121,16 @@ export class SuiteRunner {
   /**
    * Update .scout/servers/local.json to point at the currently running Kibana
    * so eval suite runs connect to the right instance.
+   *
+   * Called from the plugin's `start()` once the real Kibana/ES URLs are known.
+   * Safe to call multiple times — no-ops if URLs haven't changed.
+   *
+   * NOTE: When running inside a git worktree, `.scout` is symlinked to the
+   * main repo's `.scout` directory, so this config is **shared across all
+   * worktrees**. Running two worktrees' eval suites simultaneously is unsafe
+   * — last writer wins. Sequential use is fine.
    */
-  private syncScoutConfig({ kibanaUrl, elasticsearchUrl }: ServerInfo): void {
+  public syncScoutConfig({ kibanaUrl, elasticsearchUrl }: ServerInfo): void {
     const configPath = resolve(this.repoRoot, '.scout', 'servers', 'local.json');
 
     try {

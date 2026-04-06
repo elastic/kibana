@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -97,6 +98,30 @@ export class EvalsPlugin
 
     try {
       this.suiteRunner = new SuiteRunner(this.repoRoot, this.logger);
+
+      // Sync .scout/servers/local.json with the live Kibana/ES URLs so Scout-based
+      // eval suites connect to THIS Kibana (not the default port 5683 that Scout
+      // uses when no local config exists). Fire-and-forget: the ES legacy config$
+      // observable resolves after setup() returns, but the write is cheap and the
+      // suite runs start via an HTTP route so they'll see the updated file.
+      void firstValueFrom(coreSetup.elasticsearch.legacy.config$)
+        .then((esConfig) => {
+          const httpInfo = coreSetup.http.getServerInfo();
+          if (httpInfo.protocol !== 'http' && httpInfo.protocol !== 'https') {
+            return; // socket or unknown protocol — nothing meaningful to write
+          }
+          const kibanaUrl = `${httpInfo.protocol}://${httpInfo.hostname}:${httpInfo.port}`;
+          const elasticsearchUrl = esConfig.hosts[0];
+          if (!elasticsearchUrl) return;
+          this.suiteRunner?.syncScoutConfig({ kibanaUrl, elasticsearchUrl });
+        })
+        .catch((err) => {
+          this.logger.warn(
+            `[Evals] Failed to resolve server info for SuiteRunner: ${
+              err instanceof Error ? err.message : err
+            }`
+          );
+        });
     } catch (err) {
       this.logger.warn(
         `[Evals] Failed to initialize SuiteRunner: ${err instanceof Error ? err.message : err}`
