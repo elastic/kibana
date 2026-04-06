@@ -152,9 +152,6 @@ export const previewRulesRoute = (
           });
           throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
 
-          const listsContext = await context.lists;
-          await listsContext?.getExceptionListClient().createEndpointList();
-
           const spaceId = siemClient.getSpaceId();
           const previewId = uuidv4();
           const username = security?.authc.getCurrentUser(request)?.username;

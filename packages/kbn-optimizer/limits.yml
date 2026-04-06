@@ -6,11 +6,10 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 157791
+  alertingVTwo: 176204
   apm: 25363
   apmSourcesAccess: 2278
-  automaticImport: 12162
-  automaticImportVTwo: 15269
+  automaticImport: 15269
   banners: 4006
   canvas: 14881
   cases: 177203
@@ -59,7 +58,7 @@ pageLoadAssetSize:
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 29638
+  evals: 34345
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -178,14 +177,14 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 11422
+  streams: 12500
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
   timelines: 131503
   transform: 16515
-  triggersActionsUi: 114000
+  triggersActionsUi: 123512
   uiActions: 35278
   unifiedDocViewer: 15000
   unifiedSearch: 19500

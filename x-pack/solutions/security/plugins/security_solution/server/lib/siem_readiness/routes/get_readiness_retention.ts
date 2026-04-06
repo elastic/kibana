@@ -150,7 +150,8 @@ const extractStandaloneIndices = (
 
 export const getReadinessRetentionRoute = (
   router: SiemReadinessRoutesDeps['router'],
-  logger: SiemReadinessRoutesDeps['logger']
+  logger: SiemReadinessRoutesDeps['logger'],
+  isServerless: boolean
 ) => {
   router.versioned
     .get({
@@ -175,11 +176,43 @@ export const getReadinessRetentionRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          // 1. Get all data streams
+          // 1. Get all data streams (works in both serverless and non-serverless)
           const dataStreamsResponse: IndicesGetDataStreamResponse =
             await esClient.indices.getDataStream({ name: '*' });
 
-          // 2. Get all ILM policies
+          // In serverless, ILM is not available. Data streams use DSL (data stream lifecycle)
+          // only, and there are no standalone indices — so skip ILM and resolveIndex calls.
+          if (isServerless) {
+            const dataStreamItems: RetentionInfo[] = dataStreamsResponse.data_streams.map(
+              (dataStream) => {
+                const { retentionType, retentionPeriod, policyName } = extractRetentionInfo(
+                  dataStream,
+                  {} // no ILM policies in serverless
+                );
+                const retentionDays = parseRetentionToDays(retentionPeriod);
+
+                return {
+                  indexName: dataStream.name,
+                  isDataStream: true,
+                  retentionType,
+                  retentionPeriod,
+                  retentionDays,
+                  policyName,
+                  status: getRetentionStatus(retentionDays),
+                };
+              }
+            );
+
+            const responseBody: RetentionResponse = { items: dataStreamItems };
+
+            logger.info(
+              `Retrieved retention data for ${dataStreamItems.length} data streams (serverless mode)`
+            );
+
+            return response.ok({ body: responseBody });
+          }
+
+          // 2. Get all ILM policies (non-serverless only)
           const ilmPoliciesResponse: IlmGetLifecycleResponse = await esClient.ilm.getLifecycle();
 
           // 3. Resolve index to get standalone indices (excludes backing indices)
