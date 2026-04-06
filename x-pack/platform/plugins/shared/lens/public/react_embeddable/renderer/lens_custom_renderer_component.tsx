@@ -90,12 +90,15 @@ export function LensRenderer({
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
-  // TODO find where people are setting type on attributes to lens
-  const {
-    type: _type,
-    id: _id,
-    ...cleanedAttributes
-  } = props.attributes as LensRendererProps['attributes'] & { type: string; id: string };
+  const cleanedAttributes = useMemo(() => {
+    // TODO find where people are setting type on attributes to lens
+    const {
+      type: _type,
+      id: _id,
+      ...rest
+    } = props.attributes as LensRendererProps['attributes'] & { type: string; id: string };
+    return rest;
+  }, [props.attributes]);
   const initialStateRef = useRef<LensSerializedState>(
     props.attributes ? { attributes: cleanedAttributes } : createEmptyLensState(null, title)
   );
