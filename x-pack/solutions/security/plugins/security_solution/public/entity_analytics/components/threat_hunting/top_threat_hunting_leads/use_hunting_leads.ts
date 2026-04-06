@@ -55,10 +55,7 @@ export const useHuntingLeads = () => {
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
     mutationFn: async () => {
-      abortCtrl.current = new AbortController();
-      const { signal } = abortCtrl.current;
-
-      await generateLeadsApi({ params: {} });
+      await generateLeadsApi({ params: {}, signal });
 
       const deadline = Date.now() + POLL_TIMEOUT_MS;
       while (Date.now() < deadline) {
