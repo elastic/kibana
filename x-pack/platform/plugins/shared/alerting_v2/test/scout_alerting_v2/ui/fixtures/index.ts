@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-import { test as baseTest } from '@kbn/scout';
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { createLazyPageObject } from '@kbn/scout';
+import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { DiscoverAppMenu } from './page_objects/discover_app_menu';
 import { RuleFormPage } from './page_objects/rule_form_page';
 
-interface AlertingV2Fixtures extends ScoutTestFixtures {
-  pageObjects: ScoutTestFixtures['pageObjects'] & { ruleForm: RuleFormPage };
+export interface AlertingV2UiFixtures extends ScoutTestFixtures {
+  pageObjects: PageObjects & {
+    discoverAppMenu: DiscoverAppMenu;
+    ruleForm: RuleFormPage;
+  };
 }
 
-export const test = baseTest.extend<AlertingV2Fixtures, ScoutWorkerFixtures>({
+export const test = baseTest.extend<AlertingV2UiFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
       page,
     }: {
-      pageObjects: AlertingV2Fixtures['pageObjects'];
-      page: ScoutPage;
+      pageObjects: AlertingV2UiFixtures['pageObjects'];
+      page: AlertingV2UiFixtures['page'];
     },
-    use: (pageObjects: AlertingV2Fixtures['pageObjects']) => Promise<void>
+    use: (pageObjects: AlertingV2UiFixtures['pageObjects']) => Promise<void>
   ) => {
-    const ruleForm = createLazyPageObject(RuleFormPage, page);
-    await use({ ...pageObjects, ruleForm });
+    const discoverAppMenu = createLazyPageObject(DiscoverAppMenu, page);
+    const extendedPageObjects = {
+      ...pageObjects,
+      discoverAppMenu,
+      ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu),
+    };
+
+    await use(extendedPageObjects);
   },
 });

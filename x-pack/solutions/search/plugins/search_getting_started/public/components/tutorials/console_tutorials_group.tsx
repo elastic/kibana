@@ -127,6 +127,23 @@ export const ConsoleTutorialsGroup = () => {
         buttonRef: React.createRef<HTMLButtonElement>(),
         publishedAt: new Date('2026-02-04'),
       },
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.vectorSearchTitle', {
+          defaultMessage: 'Vector Database',
+        }),
+        dataTestSubj: 'console_tutorials_vector_search',
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.vectorSearchDescription',
+          {
+            defaultMessage:
+              'Store and search vectors for semantic search, chatbots, recommenders, and RAG. Generate embeddings or bring your own vectors.',
+          }
+        ),
+        request: consoleTutorials.vectorDatabase,
+        image: `${assetBasePath}/search_hourglass.svg`,
+        buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2026-04-01'),
+      },
     ];
     return orderBy(items, ({ publishedAt }) => publishedAt.getTime(), ['desc']).slice(
       0,

@@ -18,11 +18,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { MatcherInput } from './components/matcher_input';
+import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
 import { DispatchSection } from './components/dispatch_section';
+import { MatcherInput } from './components/matcher_input';
+import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { NotificationPolicyFormState } from './types';
-import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
 
 const optionalLabel = (
   <EuiText color="subdued" size="xs">
@@ -109,6 +110,21 @@ export const NotificationPolicyForm = () => {
                   )}
                   rows={3}
                 />
+              </EuiFormRow>
+            )}
+          />
+          <Controller
+            name="tags"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.tags', {
+                  defaultMessage: 'Tags',
+                })}
+                labelAppend={optionalLabel}
+                fullWidth
+              >
+                <TagsInput value={field.value} onChange={field.onChange} />
               </EuiFormRow>
             )}
           />
