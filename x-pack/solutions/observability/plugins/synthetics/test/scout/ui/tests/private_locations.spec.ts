@@ -103,7 +103,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await page.testSubj.click('settings-page-link');
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
-      const deleteLocationButton = page.locator(`[data-test-subj="deleteLocation-${locationId}"]`);
+      const deleteLocationButton = page.testSubj.locator('action-delete');
       await expect(deleteLocationButton).toBeDisabled();
     });
 
