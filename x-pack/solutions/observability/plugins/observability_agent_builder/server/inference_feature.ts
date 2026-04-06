@@ -13,14 +13,14 @@ import {
 } from '../common/constants';
 
 export const observabilityParentFeature: InferenceFeatureConfig = {
-  featureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
+  featureId: OBSERVABILITY_AI_INSIGHTS_INFERENCE_PARENT_FEATURE_ID,
   featureName: i18n.translate(
     'xpack.observabilityAgentBuilder.inferenceFeature.observabilityParentName',
-    { defaultMessage: 'Observability' }
+    { defaultMessage: 'Observability AI Insights' }
   ),
   featureDescription: i18n.translate(
     'xpack.observabilityAgentBuilder.inferenceFeature.observabilityParentDescription',
-    { defaultMessage: 'Inference endpoint settings for Observability features' }
+    { defaultMessage: 'Inference endpoint settings for Observability AI Insights features' }
   ),
   taskType: 'chat_completion',
   recommendedEndpoints: [],
@@ -36,7 +36,7 @@ const observabilityAiInsightsChatCompletionFeature: InferenceFeatureConfig = {
     'xpack.observabilityAgentBuilder.inferenceFeature.aiSettingsDescription',
     {
       defaultMessage:
-        'Inference endpoint configuration for AI Insights (Observability Agent is configured separately in the Agent Builder feature)',
+        'The model powering AI-driven analysis in Observability AI Insights.',
     }
   ),
   taskType: 'chat_completion',
