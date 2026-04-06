@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
-import { addEpisodeAggregation } from './episodes_query';
+import { addEpisodeAggregation, ALERT_EPISODE_FIELDS } from './episodes_query';
 
 /**
  * ES|QL query listing alert episodes for a rule, excluding one episode id.
@@ -22,5 +22,6 @@ export const buildRelatedAlertEpisodesEsqlQuery = (ruleId: string, excludeEpisod
   // prettier-ignore
   return query
     .sort([TIME_FIELD, 'DESC'])
-    .limit(5);
+    .limit(5)
+    .keep(...ALERT_EPISODE_FIELDS);
 };

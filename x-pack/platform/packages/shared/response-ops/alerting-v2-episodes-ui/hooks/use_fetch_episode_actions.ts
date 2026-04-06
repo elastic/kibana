@@ -7,10 +7,9 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { AlertEpisodeAction } from '../types/action';
-import { executeEsqlQuery } from '../utils/execute_esql_query';
+import type { EpisodeActionState } from '../types/action';
+import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
 import { queryKeys } from '../query_keys';
-import { buildEpisodeActionsQuery } from '../queries/episode_actions_query';
 
 export interface UseFetchEpisodeActionsOptions {
   episodeIds: string[];
@@ -20,20 +19,12 @@ export interface UseFetchEpisodeActionsOptions {
 export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) =>
   useQuery({
     queryKey: queryKeys.actions(episodeIds),
-    queryFn: async ({ signal }) => {
-      return executeEsqlQuery({
-        expressions: services.expressions,
-        query: buildEpisodeActionsQuery(episodeIds).print('basic'),
-        input: null,
-        abortSignal: signal,
-        noCache: true,
-      });
-    },
+    queryFn: ({ signal }) => fetchEpisodeActions({ episodeIds, abortSignal: signal, services }),
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
-    select: (result) => {
-      const map = new Map<string, AlertEpisodeAction>();
-      for (const row of result.rows) {
+    select: (rows) => {
+      const map = new Map<string, EpisodeActionState>();
+      for (const row of rows) {
         map.set(row.episode_id, {
           episodeId: row.episode_id,
           ruleId: row.rule_id ?? null,

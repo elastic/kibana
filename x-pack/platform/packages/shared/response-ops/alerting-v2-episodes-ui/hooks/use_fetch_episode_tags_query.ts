@@ -7,7 +7,10 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
-import { buildEpisodeTagsEsqlQuery } from '../queries/episode_tags_query';
+import {
+  buildGetLastAlertActionEsqlQuery,
+  type LatestAlertAction,
+} from '../queries/episode_tags_query';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
@@ -23,17 +26,16 @@ export interface UseFetchEpisodeTagsQueryOptions {
 export const useFetchEpisodeTagsQuery = ({ episodeId, data }: UseFetchEpisodeTagsQueryOptions) => {
   return useQuery({
     queryKey: queryKeys.episodeTags(episodeId ?? ''),
-    queryFn: async ({ signal }) => {
-      const raw = await runEsqlAsyncSearch({
+    queryFn: ({ signal }) =>
+      runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeTagsEsqlQuery(episodeId as string).print('basic'),
+          query: buildGetLastAlertActionEsqlQuery(episodeId!).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
-      });
-      return esqlResponseToObjectRows(raw)[0];
-    },
+      }),
+    select: (raw) => esqlResponseToObjectRows<LatestAlertAction>(raw)[0],
     enabled: Boolean(episodeId),
   });
 };

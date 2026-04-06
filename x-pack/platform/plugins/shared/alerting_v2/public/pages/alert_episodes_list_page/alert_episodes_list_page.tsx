@@ -39,6 +39,7 @@ import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/component
 import { AlertEpisodeActions } from '@kbn/alerting-v2-episodes-ui/components/actions/actions';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import type {
+  AlertEpisode,
   EpisodesFilterState,
   EpisodesSortState,
 } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
@@ -88,6 +89,12 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
     justify-content: flex-end;
   }
 `;
+
+const alertEpisodeToDataTableRecord = (row: AlertEpisode, idx: number): DataTableRecord => ({
+  id: String(idx),
+  raw: {},
+  flattened: Object.fromEntries(Object.entries(row)),
+});
 
 function EmptyToolbar() {
   return <></>;
@@ -162,8 +169,8 @@ export const AlertEpisodesListPage = () => {
   }, []);
 
   const ruleIds = useMemo(
-    () => [...new Set(episodesData?.rows.map((row) => row['rule.id'] as string) ?? [])],
-    [episodesData?.rows]
+    () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
+    [episodesData]
   );
 
   const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({
@@ -180,28 +187,16 @@ export const AlertEpisodesListPage = () => {
     [rulesCache]
   );
 
-  const rows = useMemo(
-    () =>
-      episodesData?.rows.map((row, idx) => {
-        const record: DataTableRecord = {
-          id: String(idx),
-          raw: row,
-          flattened: row,
-        };
-
-        return record;
-      }),
-    [episodesData?.rows]
-  );
+  const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
   const episodeIds = useMemo(
-    () => rows?.map((row) => row.flattened['episode.id'] as string).filter(Boolean),
-    [rows]
+    () => episodesData?.map((row) => row['episode.id']).filter(Boolean),
+    [episodesData]
   );
 
   const groupHashes = useMemo(
-    () => [...new Set(rows?.map((row) => row.flattened.group_hash as string).filter(Boolean))],
-    [rows]
+    () => [...new Set(episodesData?.map((row) => row.group_hash).filter(Boolean))],
+    [episodesData]
   );
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
@@ -302,9 +297,7 @@ export const AlertEpisodesListPage = () => {
                 }}
                 externalCustomRenderers={{
                   'episode.status': (props) => {
-                    const status = props.row.flattened[
-                      props.columnId
-                    ] as unknown as AlertEpisodeStatus;
+                    const status = props.row.flattened[props.columnId] as AlertEpisodeStatus;
                     const episodeId = props.row.flattened['episode.id'] as string;
                     const groupHash = props.row.flattened.group_hash as string;
 
@@ -387,7 +380,7 @@ export const AlertEpisodesListPage = () => {
                   },
                 }}
                 rows={rows}
-                totalHits={!episodesData?.rows.length ? 0 : PAGE_SIZE + 1}
+                totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
                 loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                 isPaginationEnabled
                 paginationMode="singlePage"

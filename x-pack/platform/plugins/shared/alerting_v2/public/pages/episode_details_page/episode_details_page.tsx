@@ -140,7 +140,7 @@ export function EpisodeDetailsPage() {
     services,
   });
 
-  const { data: relatedEpisodesResult, isLoading: isLoadingRelatedEpisodes } =
+  const { data: relatedEpisodeRows = [], isLoading: isLoadingRelatedEpisodes } =
     useFetchRelatedAlertEpisodesQuery({
       ruleId,
       excludeEpisodeId: episodeId,
@@ -149,16 +149,8 @@ export function EpisodeDetailsPage() {
       toastDanger: (message) => notifications.toasts.addDanger(message),
     });
 
-  const relatedEpisodeRows = useMemo(
-    () => relatedEpisodesResult?.rows ?? [],
-    [relatedEpisodesResult?.rows]
-  );
-
   const relatedEpisodeIds = useMemo(
-    () =>
-      relatedEpisodeRows
-        .map((row) => row['episode.id'] as string | undefined)
-        .filter((id): id is string => Boolean(id)),
+    () => relatedEpisodeRows.map((row) => row['episode.id']).filter(Boolean),
     [relatedEpisodeRows]
   );
 
@@ -166,7 +158,7 @@ export function EpisodeDetailsPage() {
     () => [
       ...new Set(
         relatedEpisodeRows
-          .map((row) => row.group_hash as string | undefined)
+          .map((row) => row.group_hash)
           .filter((hash): hash is string => Boolean(hash))
       ),
     ],
@@ -598,8 +590,8 @@ export function EpisodeDetailsPage() {
                     ) : (
                       <EuiFlexGroup direction="column" gutterSize="s">
                         {relatedEpisodeRows.map((row) => {
-                          const relatedId = row['episode.id'] as string;
-                          const relatedGroupHash = row.group_hash as string | undefined;
+                          const relatedId = row['episode.id'];
+                          const relatedGroupHash = row.group_hash;
                           return (
                             <RelatedAlertEpisode
                               key={relatedId}

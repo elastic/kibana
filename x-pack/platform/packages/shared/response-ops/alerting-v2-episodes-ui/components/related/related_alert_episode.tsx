@@ -8,15 +8,16 @@
 import React from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AlertEpisodeStatus, RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisodeAction, AlertEpisodeGroupAction } from '../../types/action';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '../../queries/episodes_query';
+import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertEpisodeGroupingFields } from '../grouping/grouping_fields';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 
 export interface RelatedAlertEpisodeProps {
-  episode: Record<string, unknown>;
+  episode: AlertEpisode;
   rule: RuleResponse;
-  episodeAction?: AlertEpisodeAction;
+  episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
   href: string;
 }
@@ -28,8 +29,8 @@ export function RelatedAlertEpisode({
   groupAction,
   href,
 }: RelatedAlertEpisodeProps) {
-  const status = episode['episode.status'] as AlertEpisodeStatus | undefined;
-  const episodeId = episode['episode.id'] as string | undefined;
+  const status = episode['episode.status'];
+  const episodeId = episode['episode.id'];
   return (
     <EuiCard
       display="subdued"

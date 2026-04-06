@@ -12,14 +12,14 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
 import { AlertEpisodeAcknowledgeActionButton } from './acknowledge_action_button';
 import { AlertEpisodeSnoozeActionButton } from './snooze_action_button';
-import type { AlertEpisodeAction, AlertEpisodeGroupAction } from '../../types/action';
+import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertEpisodeResolveActionButton } from './resolve_action_button';
 import { AlertEpisodeViewDetailsActionButton } from './view_details_action_button';
 
 export interface AlertEpisodeActionsProps {
   episodeId?: string;
   groupHash?: string;
-  episodeAction?: AlertEpisodeAction;
+  episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
   /**
    * When set, "View details" is an anchor link (pass a base-path-prefixed app URL from the embedding plugin).

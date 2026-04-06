@@ -6,24 +6,22 @@
  */
 
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { EpisodeEventRow } from '../queries/episode_events_query';
 
 /**
  * Last row by @timestamp order (caller should pass rows sorted ascending by time).
  */
-export const getLastEpisodeStatus = (
-  rows: Record<string, unknown>[]
-): AlertEpisodeStatus | undefined => {
+export const getLastEpisodeStatus = (rows: EpisodeEventRow[]): AlertEpisodeStatus | undefined => {
   if (!rows.length) {
     return undefined;
   }
-  const last = rows[rows.length - 1];
-  return last['episode.status'] as AlertEpisodeStatus | undefined;
+  return rows[rows.length - 1]['episode.status'];
 };
 
-export const getRuleIdFromEpisodeRows = (rows: Record<string, unknown>[]): string | undefined => {
+export const getRuleIdFromEpisodeRows = (rows: EpisodeEventRow[]): string | undefined => {
   for (const row of rows) {
     const id = row['rule.id'];
-    if (typeof id === 'string' && id.length) {
+    if (id && id.length) {
       return id;
     }
   }
@@ -31,36 +29,31 @@ export const getRuleIdFromEpisodeRows = (rows: Record<string, unknown>[]): strin
 };
 
 /** ISO timestamp string of the first event where episode.status === 'active'. */
-export const getTriggeredTimestamp = (rows: Record<string, unknown>[]): string | undefined => {
+export const getTriggeredTimestamp = (rows: EpisodeEventRow[]): string | undefined => {
   for (const row of rows) {
-    if (row['episode.status'] === 'active' && typeof row['@timestamp'] === 'string') {
+    if (row['episode.status'] === 'active') {
       return row['@timestamp'];
     }
   }
   return undefined;
 };
 
-export const getGroupHashFromEpisodeRows = (
-  rows: Record<string, unknown>[]
-): string | undefined => {
+export const getGroupHashFromEpisodeRows = (rows: EpisodeEventRow[]): string | undefined => {
   for (const row of rows) {
     const hash = row.group_hash;
-    if (typeof hash === 'string' && hash.length) {
+    if (hash && hash.length) {
       return hash;
     }
   }
   return undefined;
 };
 
-export const getEpisodeDurationMs = (rows: Record<string, unknown>[]): number | undefined => {
+export const getEpisodeDurationMs = (rows: EpisodeEventRow[]): number | undefined => {
   if (rows.length < 2) {
     return undefined;
   }
   const first = rows[0]['@timestamp'];
   const last = rows[rows.length - 1]['@timestamp'];
-  if (typeof first !== 'string' || typeof last !== 'string') {
-    return undefined;
-  }
   const a = Date.parse(first);
   const b = Date.parse(last);
   if (Number.isNaN(a) || Number.isNaN(b)) {

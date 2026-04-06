@@ -7,7 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { buildEpisodeTagsEsqlQuery } from '../queries/episode_tags_query';
+import { buildGetLastAlertActionEsqlQuery } from '../queries/episode_tags_query';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeTagsQuery } from './use_fetch_episode_tags_query';
@@ -65,7 +65,7 @@ describe('useFetchEpisodeTagsQuery', () => {
     expect(runEsqlAsyncSearchMock).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
-          query: buildEpisodeTagsEsqlQuery(episodeId).print('basic'),
+          query: buildGetLastAlertActionEsqlQuery(episodeId).print('basic'),
           time_zone: 'UTC',
         }),
       })

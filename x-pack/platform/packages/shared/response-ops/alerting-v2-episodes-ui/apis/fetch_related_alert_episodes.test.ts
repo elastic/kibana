@@ -21,9 +21,10 @@ describe('fetchRelatedAlertEpisodes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExecuteEsqlQuery.mockResolvedValue([]);
   });
 
-  it('calls executeEsqlQuery with the related-episodes ES|QL and page size variable', () => {
+  it('calls executeEsqlQuery with the related-episodes ES|QL and page size variable', async () => {
     const pageSize = 5;
     const ruleId = 'rule-1';
     const excludeEpisodeId = 'ep-current';
@@ -31,7 +32,7 @@ describe('fetchRelatedAlertEpisodes', () => {
       'basic'
     );
 
-    fetchRelatedAlertEpisodes({
+    await fetchRelatedAlertEpisodes({
       pageSize,
       ruleId,
       excludeEpisodeId,
@@ -56,7 +57,7 @@ describe('fetchRelatedAlertEpisodes', () => {
     });
   });
 
-  it('passes abortSignal when provided', () => {
+  it('passes abortSignal when provided', async () => {
     const abortController = new AbortController();
     const ruleId = 'r';
     const excludeEpisodeId = 'e';
@@ -64,7 +65,7 @@ describe('fetchRelatedAlertEpisodes', () => {
       'basic'
     );
 
-    fetchRelatedAlertEpisodes({
+    await fetchRelatedAlertEpisodes({
       pageSize: 3,
       ruleId,
       excludeEpisodeId,

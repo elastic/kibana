@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { fetchRelatedAlertEpisodes } from '../apis/fetch_related_alert_episodes';
@@ -50,8 +50,7 @@ describe('useFetchRelatedAlertEpisodesQuery', () => {
   });
 
   it('fetches related episodes when rule and exclude id are set', async () => {
-    const table = { type: 'datatable', columns: [], rows: [] } as unknown as Datatable;
-    fetchRelatedAlertEpisodesMock.mockResolvedValue(table);
+    fetchRelatedAlertEpisodesMock.mockResolvedValue([]);
 
     const ruleId = 'rule-1';
     const excludeEpisodeId = 'ep-current';
@@ -78,6 +77,6 @@ describe('useFetchRelatedAlertEpisodesQuery', () => {
         services: expect.objectContaining({ expressions: mockExpressions }),
       })
     );
-    expect(result.current.data).toEqual(table);
+    expect(result.current.data).toEqual([]);
   });
 });

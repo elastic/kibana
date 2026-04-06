@@ -8,6 +8,13 @@
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 
+export interface AlertEpisodeAction {
+  episode_id: string;
+  rule_id: string | null;
+  group_hash: string | null;
+  last_ack_action: string | null;
+}
+
 export const buildEpisodeActionsQuery = (episodeIds: string[]) => {
   const episodeIdLiterals = episodeIds.map((id) => esql.str(id));
 

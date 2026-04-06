@@ -6,12 +6,12 @@
  */
 
 import { TIME_FIELD } from '../constants';
-import { buildEpisodeTagsEsqlQuery } from './episode_tags_query';
+import { buildGetLastAlertActionEsqlQuery } from './episode_tags_query';
 
-describe('buildEpisodeTagsEsqlQuery', () => {
+describe('buildGetLastAlertActionEsqlQuery', () => {
   it('returns the latest alert-actions row for the episode', () => {
     const episodeId = 'ep-1';
-    const queryString = buildEpisodeTagsEsqlQuery(episodeId).print('basic');
+    const queryString = buildGetLastAlertActionEsqlQuery(episodeId).print('basic');
     expect(queryString).toContain('episode_id');
     expect(queryString).toContain(episodeId);
     expect(queryString).toContain(`SORT ${TIME_FIELD} DESC`);

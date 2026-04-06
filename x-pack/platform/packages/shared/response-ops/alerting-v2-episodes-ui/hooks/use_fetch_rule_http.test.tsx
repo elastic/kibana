@@ -35,7 +35,7 @@ describe('useFetchRule', () => {
   it('GETs the alerting v2 rule by id', async () => {
     const ruleId = 'my-rule';
     const ruleBody = { id: ruleId, metadata: { name: 'Rule' } };
-    http.get.mockResolvedValue(ruleBody as unknown as object);
+    http.get.mockResolvedValue(ruleBody);
 
     const { result } = renderHook(() => useFetchRule({ http, ruleId }), { wrapper });
 

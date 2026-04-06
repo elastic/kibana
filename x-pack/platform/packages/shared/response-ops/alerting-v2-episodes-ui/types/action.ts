@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface AlertEpisodeAction {
+export interface EpisodeActionState {
   episodeId: string;
   ruleId: string | null;
   groupHash: string | null;

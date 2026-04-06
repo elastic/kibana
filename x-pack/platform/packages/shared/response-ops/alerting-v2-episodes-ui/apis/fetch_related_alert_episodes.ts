@@ -9,6 +9,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
+import type { AlertEpisode } from '../queries/episodes_query';
 import { buildRelatedAlertEpisodesEsqlQuery } from '../queries/related_episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
@@ -29,8 +30,8 @@ export const fetchRelatedAlertEpisodes = ({
   ruleId,
   excludeEpisodeId,
   services: { expressions },
-}: FetchRelatedAlertEpisodesOptions) => {
-  return executeEsqlQuery({
+}: FetchRelatedAlertEpisodesOptions): Promise<AlertEpisode[]> => {
+  return executeEsqlQuery<AlertEpisode>({
     expressions,
     query: buildRelatedAlertEpisodesEsqlQuery(ruleId, excludeEpisodeId).print('basic'),
     input: {

@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '../../queries/episodes_query';
 import { RelatedAlertEpisode } from './related_alert_episode';
 
 describe('RelatedAlertEpisode', () => {
@@ -17,13 +18,22 @@ describe('RelatedAlertEpisode', () => {
     grouping: { fields: ['host.name'] },
   } as RuleResponse;
 
+  const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
+    '@timestamp': '2026-04-06T13:30:00.000Z',
+    'episode.id': 'ep-0',
+    'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+    'rule.id': 'rule-1',
+    group_hash: 'hash-1',
+    first_timestamp: '2026-04-06T13:30:00.000Z',
+    last_timestamp: '2026-04-06T13:31:00.000Z',
+    duration: 60000,
+    ...overrides,
+  });
+
   it('renders rule name, status badges, and grouping', () => {
     render(
       <RelatedAlertEpisode
-        episode={{
-          'episode.id': 'ep-1',
-          'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-        }}
+        episode={makeEpisode({ 'episode.id': 'ep-1' })}
         rule={rule}
         href="/app/management/alertingV2/episodes/ep-1"
       />
@@ -36,8 +46,13 @@ describe('RelatedAlertEpisode', () => {
   });
 
   it('omits status badges when episode status is missing', () => {
-    render(<RelatedAlertEpisode episode={{ 'episode.id': 'ep-2' }} rule={rule} href="/x" />);
+    const { 'episode.status': _status, ...episodeWithoutStatus } = makeEpisode({
+      'episode.id': 'ep-2',
+    });
 
-    expect(screen.queryByTestId('relatedAlertEpisodeGrouping')).toBeInTheDocument();
+    // @ts-expect-error - testing missing status field
+    render(<RelatedAlertEpisode episode={episodeWithoutStatus} rule={rule} href="/x" />);
+
+    expect(screen.queryByTestId('alertEpisodeStatusCell')).not.toBeInTheDocument();
   });
 });

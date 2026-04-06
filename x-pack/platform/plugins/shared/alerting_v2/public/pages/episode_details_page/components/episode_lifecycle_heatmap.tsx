@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { EpisodeEventRow } from '@kbn/alerting-v2-episodes-ui/queries/episode_events_query';
 import type { AlertingV2EpisodesKibanaServices } from '../../../episodes_kibana_services';
 
 /** Short strip: one heatmap row. Timestamps are rendered outside the chart. */
@@ -131,7 +132,7 @@ interface HeatmapTableDatum {
 }
 
 export interface EpisodeLifecycleHeatmapProps {
-  eventRows: Record<string, unknown>[];
+  eventRows: EpisodeEventRow[];
 }
 
 export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapProps) => {
@@ -141,13 +142,9 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
 
   const data: HeatmapDatum[] = useMemo(() => {
     const rows = eventRows
-      .filter((row) => {
-        const status = row['episode.status'];
-        return typeof status === 'string' && status in STATUS_VALUE;
-      })
+      .filter((row) => row['episode.status'] in STATUS_VALUE)
       .map((row, rowIndex) => {
-        const status = row['episode.status'] as AlertEpisodeStatus;
-        const ts = typeof row['@timestamp'] === 'string' ? row['@timestamp'] : '';
+        const { '@timestamp': ts, 'episode.status': status } = row;
         const tsMs = ts ? Date.parse(ts) : Number.NaN;
         return {
           ts,

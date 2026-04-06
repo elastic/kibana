@@ -43,19 +43,15 @@ export const useFetchAlertingEpisodesQuery = ({
   const query = useQuery({
     enabled: dataView != null,
     queryKey,
-    queryFn: async ({ signal: abortSignal }) => {
-      if (!dataView) {
-        return { type: 'datatable' as const, columns: [], rows: [], total: 0 };
-      }
-      return await fetchAlertingEpisodes({
+    queryFn: ({ signal: abortSignal }) =>
+      fetchAlertingEpisodes({
         abortSignal,
         pageSize,
         services,
         filterState,
         sortState,
         timeRange,
-      });
-    },
+      }),
     keepPreviousData: true,
   });
 

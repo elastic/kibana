@@ -14,7 +14,7 @@ import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
 } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisodeAction, AlertEpisodeGroupAction } from '../../types/action';
+import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertEpisodeStatusBadge } from './status_badge';
 
 // Flex anchor avoids inline line-height missizing
@@ -22,7 +22,7 @@ const tooltipAnchorProps = { css: { display: 'flex' } };
 
 export interface AlertEpisodeStatusBadgesProps {
   status: AlertEpisodeStatus;
-  episodeAction?: AlertEpisodeAction;
+  episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
 }
 

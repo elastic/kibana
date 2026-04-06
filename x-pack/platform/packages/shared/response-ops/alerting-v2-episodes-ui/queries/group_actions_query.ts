@@ -8,6 +8,15 @@
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 
+export interface GroupActionRow {
+  group_hash: string;
+  rule_id: string | null;
+  last_deactivate_action: string | null;
+  last_snooze_action: string | null;
+  snooze_expiry: string | null;
+  tags: string | string[] | null;
+}
+
 export const buildGroupActionsQuery = (groupHashes: string[]) => {
   const groupHashLiterals = groupHashes.map((h) => esql.str(h));
   // prettier-ignore

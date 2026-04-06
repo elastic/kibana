@@ -7,7 +7,30 @@
 
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM, PAGE_SIZE_ESQL_VARIABLE } from '../constants';
+
+export interface AlertEpisode {
+  '@timestamp': string;
+  'episode.id': string;
+  'episode.status': AlertEpisodeStatus;
+  'rule.id': string;
+  group_hash: string;
+  first_timestamp: string;
+  last_timestamp: string;
+  duration: number;
+}
+
+export const ALERT_EPISODE_FIELDS = [
+  '@timestamp',
+  'episode.id',
+  'episode.status',
+  'rule.id',
+  'group_hash',
+  'first_timestamp',
+  'last_timestamp',
+  'duration',
+] as const;
 
 export interface EpisodesFilterState {
   /** Single episode status (inactive | pending | active | recovering) or null for All */
@@ -86,5 +109,7 @@ export const buildEpisodesQuery = (
     query.where`rule.id == ${filterState.ruleId}`;
   }
 
-  return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`;
+  return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
+    ...ALERT_EPISODE_FIELDS
+  );
 };

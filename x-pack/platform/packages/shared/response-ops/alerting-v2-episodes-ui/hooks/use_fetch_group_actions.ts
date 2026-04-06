@@ -8,11 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { AlertEpisodeGroupAction } from '../types/action';
-import { executeEsqlQuery } from '../utils/execute_esql_query';
+import type { GroupActionRow } from '../queries/group_actions_query';
+import { fetchGroupActions } from '../apis/fetch_group_actions';
 import { queryKeys } from '../query_keys';
-import { buildGroupActionsQuery } from '../queries/group_actions_query';
 
-const tagsFromRow = (value: unknown): string[] => {
+const tagsFromRow = (value: GroupActionRow['tags']): string[] => {
   if (value == null) {
     return [];
   }
@@ -20,7 +20,7 @@ const tagsFromRow = (value: unknown): string[] => {
     return [value];
   }
   if (Array.isArray(value)) {
-    return value as string[];
+    return value;
   }
   return [];
 };
@@ -33,26 +33,18 @@ export interface UseFetchGroupActionsOptions {
 export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) =>
   useQuery({
     queryKey: queryKeys.groupActions(groupHashes),
-    queryFn: async ({ signal }) => {
-      return executeEsqlQuery({
-        expressions: services.expressions,
-        query: buildGroupActionsQuery(groupHashes).print('basic'),
-        input: null,
-        abortSignal: signal,
-        noCache: true,
-      });
-    },
+    queryFn: ({ signal }) => fetchGroupActions({ groupHashes, abortSignal: signal, services }),
     enabled: groupHashes.length > 0,
     keepPreviousData: true,
-    select: (result) => {
+    select: (rows) => {
       const map = new Map<string, AlertEpisodeGroupAction>();
-      for (const row of result.rows) {
+      for (const row of rows) {
         map.set(row.group_hash, {
-          groupHash: row.group_hash as string,
-          ruleId: (row.rule_id as string) ?? null,
-          lastDeactivateAction: (row.last_deactivate_action as string) ?? null,
-          lastSnoozeAction: (row.last_snooze_action as string) ?? null,
-          snoozeExpiry: (row.snooze_expiry as string) ?? null,
+          groupHash: row.group_hash,
+          ruleId: row.rule_id ?? null,
+          lastDeactivateAction: row.last_deactivate_action ?? null,
+          lastSnoozeAction: row.last_snooze_action ?? null,
+          snoozeExpiry: row.snooze_expiry ?? null,
           tags: tagsFromRow(row.tags),
         });
       }
