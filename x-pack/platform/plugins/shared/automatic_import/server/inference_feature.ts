@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceFeatureConfig } from '@kbn/search-inference-endpoints/server';
 import {
   AUTOMATIC_IMPORT_INFERENCE_FEATURE_ID,
@@ -17,14 +16,12 @@ import {
   AUTOMATIC_IMPORT_PARENT_FEATURE_NAME,
 } from './inference_feature_translations';
 
-const ELASTIC_LLM_CONNECTOR_ID = '.rainbow-sprinkles-elastic';
-
 export const automaticImportParentInferenceFeature: InferenceFeatureConfig = {
   featureId: AUTOMATIC_IMPORT_PARENT_INFERENCE_FEATURE_ID,
   featureName: AUTOMATIC_IMPORT_PARENT_FEATURE_NAME,
   featureDescription: AUTOMATIC_IMPORT_PARENT_FEATURE_DESCRIPTION,
   taskType: 'completion',
-  recommendedEndpoints: [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION],
+  recommendedEndpoints: [],
 };
 
 export const automaticImportInferenceFeature: InferenceFeatureConfig = {
@@ -33,8 +30,5 @@ export const automaticImportInferenceFeature: InferenceFeatureConfig = {
   featureName: AUTOMATIC_IMPORT_FEATURE_NAME,
   featureDescription: AUTOMATIC_IMPORT_FEATURE_DESCRIPTION,
   taskType: 'completion',
-  recommendedEndpoints: [
-    ELASTIC_LLM_CONNECTOR_ID,
-    defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
-  ],
+  recommendedEndpoints: [],
 };

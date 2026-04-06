@@ -37,8 +37,7 @@ import * as i18n from './translations';
 /**
  * Returns the default connector with priority based on available connectors:
  * 1. User's settings default (if set and exists)
- * 2. Recommended connector (per feature registry)
- * 3. First available connector
+ * 2. First available connector (recommended ones are sorted to the top)
  */
 const getDefaultConnector = (
   connectors: AIConnector[] | undefined,
@@ -58,13 +57,7 @@ const getDefaultConnector = (
     }
   }
 
-  // 2. Recommended connectors in order by feature registry
-  const preferred = validConnectors.find((c) => c.isRecommended);
-  if (preferred) {
-    return preferred;
-  }
-
-  // 3. First available connector
+  // 2. First available connector (recommended ones are sorted to the top from inference connectors)
   return validConnectors[0];
 };
 
@@ -320,7 +313,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR
   );
 
-  // Get default connector using priority: settings default > Elastic LLM > OpenAI/Azure > others
+  // Get default connector using priority: settings default > first available (recommended sorted first)
   const defaultConnector = useMemo(
     () => getDefaultConnector(connectors, settingsDefaultConnectorId),
     [connectors, settingsDefaultConnectorId]
