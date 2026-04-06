@@ -58,61 +58,6 @@ const MITRE_TACTICS = [
   { id: 'TA0040', name: 'Impact', techniques: ['T1485', 'T1486', 'T1490'] },
 ];
 
-// Persona Definitions
-interface Persona {
-  id: string;
-  name: string;
-  role: 'soc_analyst' | 'sre' | 'developer' | 'security_engineer';
-  skillLevel: 'junior' | 'mid' | 'senior';
-  behaviors: QueryBehavior[];
-}
-
-interface QueryBehavior {
-  pattern: string;
-  frequency: 'continuous' | 'hourly' | 'daily' | 'weekly';
-  queriesPerDay: number;
-}
-
-const _PERSONAS: Persona[] = [
-  {
-    id: 'alice_soc_l3',
-    name: 'Alice (SOC L3 Analyst)',
-    role: 'soc_analyst',
-    skillLevel: 'senior',
-    behaviors: [
-      { pattern: 'triage_high_severity_alerts', frequency: 'hourly', queriesPerDay: 20 },
-      { pattern: 'investigate_suspicious_ips', frequency: 'daily', queriesPerDay: 15 },
-      { pattern: 'correlate_related_alerts', frequency: 'daily', queriesPerDay: 10 },
-      { pattern: 'enrich_with_threat_intel', frequency: 'daily', queriesPerDay: 8 },
-      { pattern: 'map_to_mitre_attack', frequency: 'daily', queriesPerDay: 12 },
-      { pattern: 'search_historical_alerts', frequency: 'hourly', queriesPerDay: 25 },
-    ],
-  },
-  {
-    id: 'bob_sre',
-    name: 'Bob (Senior SRE)',
-    role: 'sre',
-    skillLevel: 'senior',
-    behaviors: [
-      { pattern: 'monitor_service_performance', frequency: 'continuous', queriesPerDay: 50 },
-      { pattern: 'investigate_anomalies', frequency: 'hourly', queriesPerDay: 15 },
-      { pattern: 'trace_errors', frequency: 'daily', queriesPerDay: 10 },
-      { pattern: 'analyze_latency_spikes', frequency: 'daily', queriesPerDay: 8 },
-      { pattern: 'check_service_health', frequency: 'hourly', queriesPerDay: 20 },
-    ],
-  },
-  {
-    id: 'charlie_dev',
-    name: 'Charlie (Junior Developer)',
-    role: 'developer',
-    skillLevel: 'junior',
-    behaviors: [
-      { pattern: 'debug_application_errors', frequency: 'daily', queriesPerDay: 12 },
-      { pattern: 'analyze_performance', frequency: 'weekly', queriesPerDay: 3 },
-      { pattern: 'search_logs_for_exceptions', frequency: 'daily', queriesPerDay: 8 },
-    ],
-  },
-];
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN DATA GENERATOR
