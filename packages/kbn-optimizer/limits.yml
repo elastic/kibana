@@ -36,7 +36,6 @@ pageLoadAssetSize:
   data: 496646
   dataQuality: 11469
   datasetQuality: 49315
-  dataSources: 6748
   dataUsage: 8743
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -155,7 +154,6 @@ pageLoadAssetSize:
   searchAssistant: 6150
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchIndices: 9991
   searchInferenceEndpoints: 9400
   searchNavigation: 8900
   searchNotebooks: 18826
