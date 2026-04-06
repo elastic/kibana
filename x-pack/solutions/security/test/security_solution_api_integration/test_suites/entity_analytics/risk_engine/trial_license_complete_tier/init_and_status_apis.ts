@@ -127,6 +127,12 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    calculation_run_id: {
+                      type: 'keyword',
+                    },
+                    score_type: {
+                      type: 'keyword',
+                    },
                     modifiers: {
                       properties: {
                         contribution: {
@@ -149,6 +155,17 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     notes: {
                       type: 'keyword',
+                    },
+                    related_entities: {
+                      type: 'object',
+                      properties: {
+                        entity_id: {
+                          type: 'keyword',
+                        },
+                        relationship_type: {
+                          type: 'keyword',
+                        },
+                      },
                     },
                     inputs: {
                       properties: {
@@ -206,6 +223,12 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    calculation_run_id: {
+                      type: 'keyword',
+                    },
+                    score_type: {
+                      type: 'keyword',
+                    },
                     inputs: {
                       properties: {
                         category: {
@@ -252,6 +275,17 @@ export default ({ getService }: FtrProviderContext) => {
                     notes: {
                       type: 'keyword',
                     },
+                    related_entities: {
+                      type: 'object',
+                      properties: {
+                        entity_id: {
+                          type: 'keyword',
+                        },
+                        relationship_type: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
                   },
                   type: 'object',
                 },
@@ -285,6 +319,12 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    calculation_run_id: {
+                      type: 'keyword',
+                    },
+                    score_type: {
+                      type: 'keyword',
+                    },
                     modifiers: {
                       properties: {
                         contribution: {
@@ -307,6 +347,17 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     notes: {
                       type: 'keyword',
+                    },
+                    related_entities: {
+                      type: 'object',
+                      properties: {
+                        entity_id: {
+                          type: 'keyword',
+                        },
+                        relationship_type: {
+                          type: 'keyword',
+                        },
+                      },
                     },
                     inputs: {
                       properties: {
@@ -466,6 +517,12 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    calculation_run_id: {
+                      type: 'keyword',
+                    },
+                    score_type: {
+                      type: 'keyword',
+                    },
                     modifiers: {
                       properties: {
                         contribution: {
@@ -488,6 +545,17 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     notes: {
                       type: 'keyword',
+                    },
+                    related_entities: {
+                      type: 'object',
+                      properties: {
+                        entity_id: {
+                          type: 'keyword',
+                        },
+                        relationship_type: {
+                          type: 'keyword',
+                        },
+                      },
                     },
                     inputs: {
                       properties: {
@@ -545,6 +613,12 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    calculation_run_id: {
+                      type: 'keyword',
+                    },
+                    score_type: {
+                      type: 'keyword',
+                    },
                     inputs: {
                       properties: {
                         category: {
@@ -591,6 +665,17 @@ export default ({ getService }: FtrProviderContext) => {
                     notes: {
                       type: 'keyword',
                     },
+                    related_entities: {
+                      type: 'object',
+                      properties: {
+                        entity_id: {
+                          type: 'keyword',
+                        },
+                        relationship_type: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
                   },
                   type: 'object',
                 },
@@ -624,6 +709,12 @@ export default ({ getService }: FtrProviderContext) => {
                     id_value: {
                       type: 'keyword',
                     },
+                    calculation_run_id: {
+                      type: 'keyword',
+                    },
+                    score_type: {
+                      type: 'keyword',
+                    },
                     modifiers: {
                       properties: {
                         contribution: {
@@ -646,6 +737,17 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     notes: {
                       type: 'keyword',
+                    },
+                    related_entities: {
+                      type: 'object',
+                      properties: {
+                        entity_id: {
+                          type: 'keyword',
+                        },
+                        relationship_type: {
+                          type: 'keyword',
+                        },
+                      },
                     },
                     inputs: {
                       properties: {
@@ -767,7 +869,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 6,
+            mappingsVersion: 8,
           },
           enableResetToZero: true,
         });

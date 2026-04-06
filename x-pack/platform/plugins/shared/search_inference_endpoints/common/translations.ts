@@ -167,7 +167,7 @@ export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
 );
 
 export const SETTINGS_TITLE = i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
-  defaultMessage: 'Settings',
+  defaultMessage: 'Model settings',
 });
 
 export const SETTINGS_SAVE_BUTTON = i18n.translate(

@@ -81,6 +81,7 @@ import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_up
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -142,6 +143,18 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     aboutStepDefault: aboutRuleData,
     scheduleStepDefault: scheduleRuleData,
     actionsStepDefault: ruleActionsData,
+  });
+
+  useAgentBuilderRuleCreation({
+    defineStepForm,
+    aboutStepForm,
+    scheduleStepForm,
+    actionsStepForm,
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
