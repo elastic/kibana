@@ -19050,6 +19050,16 @@ paths:
         content:
           application/json:
             examples:
+              Elastic Defend:
+                description: Endpoint runscript to collect logs
+                summary: Run a script against an Elastic Defend agent
+                value:
+                  agent_type: endpoint
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+                    scriptInput: '--path= /usr/log/exec.log'
               MDE:
                 description: Microsoft Defender Endpoint runscript
                 summary: Run a script against a Microsoft Defender Endpoint agent
@@ -19463,6 +19473,353 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/protection_updates_note/{package_policy_id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/endpoint/scripts_library:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a list of scripts
+      operationId: EndpointScriptLibraryListScripts
+      parameters:
+        - description: Page number of the results to return. Defaults to 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_Page'
+        - description: Number of results to return per page. Defaults to 10. Max value is 1000.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiPageSize'
+        - description: The field to sort the results by. Defaults to name.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiSortField'
+        - description: The direction to sort the results by. Defaults to asc (ascending).
+          in: query
+          name: sortDirection
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_SortDirection'
+        - description: |
+            A KQL query string to filter the list of scripts. Nearly all fields in the script object are searchable.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Security_Endpoint_Management_API_Kuery'
+              - example: platform:windows
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                response:
+                  summary: List of scripts response example
+                  value:
+                    data: []
+                    page: 1
+                    pageSize: 10
+                    sortDirection: asc
+                    sortField: name
+                    total: 100
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScript'
+                    type: array
+                  page:
+                    $ref: '#/components/schemas/Security_Endpoint_Management_API_Page'
+                  pageSize:
+                    $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiPageSize'
+                  sortDirection:
+                    $ref: '#/components/schemas/Security_Endpoint_Management_API_SortDirection'
+                  sortField:
+                    $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiSortField'
+                  total:
+                    description: The total number of scripts matching the query
+                    type: integer
+          description: List of scripts response
+      summary: Get a list of scripts
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new script entry by uploading a script file
+      operationId: EndpointScriptLibraryCreateScript
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              CreateArchiveScriptEntry:
+                summary: Create an archive script entry
+                value:
+                  description: Collects host data for investigation
+                  example: ./collect_host_data.sh --help
+                  file: ./collect_host_data.zip
+                  fileType: archive
+                  instructions: Collects host data for investigation
+                  name: Collect host data
+                  pathToExecutable: ./bin/collect_host_data.sh
+                  platform:
+                    - linux
+                    - macos
+                  requiresInput: false
+              CreateScriptEntry:
+                summary: Create a script entry
+                value:
+                  description: Collects host data for investigation
+                  example: ./collect_host_data.sh --help
+                  file: ./collect_host_data.sh
+                  fileType: script
+                  instructions: Collects host data for investigation
+                  name: Collect host data
+                  platform:
+                    - linux
+                    - macos
+                  requiresInput: false
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_CreateScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                CreateScriptEntrySuccess:
+                  summary: Create a script entry
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptsApiResponse'
+          description: Action request was successfully created
+      summary: Create script
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/endpoint/scripts_library/{script_id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library/{script_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a script
+      operationId: EndpointScriptLibraryDeleteScript
+      parameters:
+        - description: The ID of the script entry to be deleted.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry to be deleted.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                response:
+                  summary: Delete script response example.
+                  value: null
+              schema:
+                type: object
+          description: Delete script response.
+      summary: Delete a scripts
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library/{script_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a script
+      operationId: EndpointScriptLibraryGetOneScript
+      parameters:
+        - description: The ID of the script entry.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                UpdateScriptEntrySuccess:
+                  summary: Get one script entry success
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptsApiResponse'
+          description: Get script response
+      summary: Get script
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    patch:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library/{script_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update (full or partial) a script entry
+      operationId: EndpointScriptLibraryPatchUpdateScript
+      parameters:
+        - description: The ID of the script entry to be updated.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry to be updated.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              PatchUpdateScriptEntry:
+                summary: Update script entry instructions
+                value:
+                  instructions: ./collect_host_data.sh --help
+              PatchUpdateScriptEntryFromArchiveToScript:
+                summary: Update script entry from an archive to a script
+                value:
+                  fileType: script
+              PatchUpdateScriptEntryToArchive:
+                summary: Update script entry to be an archive
+                value:
+                  fileType: archive
+                  pathToExecutable: ./bin/collect_host_data.sh
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_PatchUpdateScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                UpdateScriptEntrySuccess:
+                  summary: Update script entry success
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptsApiResponse'
+          description: Action request was successfully updated
+      summary: Update script
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/endpoint/scripts_library/{script_id}/download:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library/{script_id}/download</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Download a script file
+      operationId: EndpointScriptLibraryDownloadScript
+      parameters:
+        - description: The ID of the script entry.
+          example: fr518850-681a-4y60-aa98-e22640cae2b8
+          in: path
+          name: script_id
+          required: true
+          schema:
+            description: The ID of the script entry.
+            example: fr518850-681a-4y60-aa98-e22640cae2b8
+            type: string
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              examples:
+                response:
+                  summary: Download script file response example.
+                  value: null
+              schema:
+                description: A download stream is returned.
+                format: binary
+                type: object
+          description: Download script file response.
+      summary: Download a script file
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/entity_analytics/monitoring/engine/delete:
     delete:
       operationId: DeleteMonitoringEngine
@@ -80242,17 +80599,17 @@ components:
       type: object
       properties:
         scriptId:
+          description: The ID of the script to run (from the Kibana Script library)
           type: string
         scriptInput:
+          description: The arguments to pass to the script (if any)
           type: string
         timeout:
           description: Specify the timeout in seconds for the script execution
           example: 60
           type: integer
     Security_Detections_API_RunscriptParams:
-      description: |
-        > warn
-        > This functionality is currently not available
+      description: Run a script on the Elastic Defend host that triggered the alert.
       type: object
       properties:
         command:
@@ -82726,6 +83083,28 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
+    Security_Endpoint_Management_API_ApiPageSize:
+      default: 10
+      description: Number of items per page
+      example: 10
+      maximum: 1000
+      minimum: 1
+      type: integer
+    Security_Endpoint_Management_API_ApiSortField:
+      description: Determines which field is used to sort the results.
+      enum:
+        - name
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+        - fileSize
+      example: updatedAt
+      type: string
+    Security_Endpoint_Management_API_ArchivePathToExecutableSchema:
+      description: Used only for when the uploaded script is an archive (.zip file for example). This property defines the relative path to the file included in the archive that should be executed once its contents are extracted. The path should be relative to the root of the archive.
+      example: ./bin/script.sh
+      type: string
     Security_Endpoint_Management_API_Cancel:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
@@ -82844,6 +83223,47 @@ components:
       description: Optional comment
       example: This is a comment
       type: string
+    Security_Endpoint_Management_API_CreateScriptRouteRequestBody:
+      type: object
+      properties:
+        description:
+          description: Description of the script and its purpose/functionality
+          type: string
+        example:
+          description: Example usage of the script
+          type: string
+        file:
+          description: The script file upload
+          format: binary
+          type: object
+        fileType:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptFileType'
+        instructions:
+          description: Instructions for using the script, including details around its supported input arguments
+          type: string
+        name:
+          description: Name of the script
+          type: string
+        pathToExecutable:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ArchivePathToExecutableSchema'
+        platform:
+          description: Platforms supported by the the script
+          items:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          description: Whether the script requires input arguments
+          type: boolean
+        tags:
+          description: Tags to categorize the script
+          items:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptTags'
+          type: array
+      required:
+        - name
+        - platform
+        - file
+        - fileType
     Security_Endpoint_Management_API_DownloadUri:
       type: object
       properties:
@@ -82955,6 +83375,118 @@ components:
               revision: 2
       type: object
       properties: {}
+    Security_Endpoint_Management_API_EndpointRunScriptParameters:
+      description: Parameters for Run Script response action against Elastic Defend agent type.
+      example:
+        agent_type: endpoint
+        endpoint_ids:
+          - endpoint-id-1
+        parameters:
+          scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+          scriptInput: '--some-parameter some-value'
+      properties:
+        scriptId:
+          description: The script ID from the scripts library that will be executed.
+          minLength: 1
+          type: string
+        scriptInput:
+          description: The input parameter arguments (if any) for the script that will be executed.
+          minLength: 1
+          type: string
+      required:
+        - scriptId
+      title: Elastic Defend Run Script Parameters
+      type: object
+    Security_Endpoint_Management_API_EndpointScript:
+      type: object
+      properties:
+        createdAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: elastic
+          type: string
+        description:
+          description: Description of the script and its purpose/functionality
+          example: Collects host data for investigation
+          type: string
+        downloadUri:
+          description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
+          example: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          type: string
+        example:
+          type: string
+        fileHash:
+          description: SHA256 hash of the script file that was uploaded
+          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          type: string
+        fileName:
+          description: Name of the script file that was uploaded
+          example: collect_host_data.sh
+          type: string
+        fileSize:
+          description: Size of the script file that was uploaded in bytes
+          example: 12345
+          type: integer
+        id:
+          example: 123e4567-e89b-12d3-a456-426655440000
+          format: uuid
+          type: string
+        instructions:
+          description: Instructions for using the script, including details around its supported input arguments
+          type: string
+        name:
+          example: Collect host data
+          type: string
+        pathToExecutable:
+          description: |
+            The relative path to the file included in the archive that should be executed once its contents are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).
+          type: string
+        platform:
+          items:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          type: boolean
+        tags:
+          description: Tags that categorize the script
+          items:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptTags'
+          type: array
+        updatedAt:
+          format: date-time
+          type: string
+        updatedBy:
+          example: admin
+          type: string
+        version:
+          type: string
+    Security_Endpoint_Management_API_EndpointScriptFileType:
+      description: The type of the uploaded file, which determines the expected value of `pathToExecutable`. If `fileType` is "script", then `pathToExecutable` should not be included. If `fileType` is "archive", then `pathToExecutable` is required and should specify the path to the executable file within the archive.
+      enum:
+        - script
+        - archive
+      type: string
+    Security_Endpoint_Management_API_EndpointScriptPlatform:
+      enum:
+        - linux
+        - macos
+        - windows
+      type: string
+    Security_Endpoint_Management_API_EndpointScriptTags:
+      enum:
+        - remediationAction
+        - dataCollection
+        - networkDiagnostics
+        - networkAction
+        - systemInventory
+        - forensicCollection
+        - threatHunting
+        - discovery
+        - systemManagement
+        - userManagement
+        - troubleshooting
+      type: string
     Security_Endpoint_Management_API_Execute:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
@@ -83891,6 +84423,44 @@ components:
     Security_Endpoint_Management_API_Parameters:
       description: Optional parameters object
       type: object
+    Security_Endpoint_Management_API_PatchUpdateScriptRouteRequestBody:
+      description: The script entry properties to be updated. At least one property must be provided.
+      minProperties: 1
+      type: object
+      properties:
+        description:
+          description: Description of the script and its purpose/functionality
+          type: string
+        example:
+          description: Example usage of the script
+          type: string
+        file:
+          description: The script file upload
+          format: binary
+          type: object
+        fileType:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptFileType'
+        instructions:
+          description: Instructions for using the script, including details around its supported input arguments
+          type: string
+        name:
+          description: Name of the script
+          type: string
+        pathToExecutable:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ArchivePathToExecutableSchema'
+        platform:
+          description: Platforms supported by the the script
+          items:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          description: Whether the script requires input arguments
+          type: boolean
+        tags:
+          description: Tags to categorize the script
+          items:
+            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptTags'
+          type: array
     Security_Endpoint_Management_API_PendingActionDataType:
       type: integer
     Security_Endpoint_Management_API_PendingActionsSchema:
@@ -84195,8 +84765,9 @@ components:
           properties:
             parameters:
               description: |
-                One of the following set of parameters must be provided
+                One of the following set of parameters must be provided for the `agentType` that is specified.
               oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointRunScriptParameters'
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
@@ -84305,6 +84876,26 @@ components:
           wasSuccessful: false
       type: object
       properties: {}
+    Security_Endpoint_Management_API_ScriptsApiResponse:
+      example:
+        data:
+          description: Collects host data for investigation
+          downloadUri: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          example: ./collect_host_data.sh --help
+          fileHash: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          fileName: collect_host_data.sh
+          fileSize: 12345
+          id: 123e4567-e89b-12d3-a456-426655440000
+          instructions: Collects host data for investigation
+          name: Collect host data
+          platform:
+            - linux
+            - macos
+          requiresInput: false
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScript'
     Security_Endpoint_Management_API_SentinelOneRunScriptParameters:
       description: Parameters for Run Script response action against SentinelOne agent type.
       example:
