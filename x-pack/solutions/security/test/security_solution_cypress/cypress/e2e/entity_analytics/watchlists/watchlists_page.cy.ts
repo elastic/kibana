@@ -19,7 +19,6 @@ import {
   WATCHLISTS_MANAGEMENT_TABLE,
 } from '../../../screens/entity_analytics/watchlists_management';
 
-// Fix for: https://github.com/elastic/kibana/issues/256685
 describe(
   'Entity Analytics Watchlists Management Page ',
   {
