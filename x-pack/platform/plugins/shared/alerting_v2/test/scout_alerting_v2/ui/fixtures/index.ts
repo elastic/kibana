@@ -9,9 +9,13 @@ import { test as baseTest } from '@kbn/scout';
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { RuleFormPage } from './page_objects/rule_form_page';
+import { RulesListPage } from './page_objects/rules_list_page';
 
 interface AlertingV2Fixtures extends ScoutTestFixtures {
-  pageObjects: ScoutTestFixtures['pageObjects'] & { ruleForm: RuleFormPage };
+  pageObjects: ScoutTestFixtures['pageObjects'] & {
+    ruleForm: RuleFormPage;
+    rulesList: RulesListPage;
+  };
 }
 
 export const test = baseTest.extend<AlertingV2Fixtures, ScoutWorkerFixtures>({
@@ -26,6 +30,7 @@ export const test = baseTest.extend<AlertingV2Fixtures, ScoutWorkerFixtures>({
     use: (pageObjects: AlertingV2Fixtures['pageObjects']) => Promise<void>
   ) => {
     const ruleForm = createLazyPageObject(RuleFormPage, page);
-    await use({ ...pageObjects, ruleForm });
+    const rulesList = createLazyPageObject(RulesListPage, page);
+    await use({ ...pageObjects, ruleForm, rulesList });
   },
 });
