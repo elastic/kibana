@@ -243,7 +243,6 @@ describe('buildDatasourceStates', () => {
         metrics: [
           {
             type: 'primary',
-            operation: 'value',
             label: 'test',
             column: 'test',
             fit: false,
@@ -517,7 +516,6 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
@@ -569,7 +567,6 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
@@ -599,7 +596,6 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
@@ -691,8 +687,8 @@ describe('filtersAndQueryToApiFormat', () => {
           },
         ],
         "query": Object {
-          "language": "kuery",
-          "query": "brand: \\"apple\\"",
+          "expression": "brand: \\"apple\\"",
+          "language": "kql",
         },
       }
     `);

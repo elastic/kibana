@@ -112,6 +112,7 @@
     "groupingMode",
     "name",
     "snoozedUntil",
+    "tags",
     "throttle",
     "throttle.strategy",
     "updatedAt",
@@ -404,7 +405,8 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "result"
+    "result",
+    "title"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
