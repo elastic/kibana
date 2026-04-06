@@ -77,8 +77,8 @@ const mockUseApmRoutePath = useApmRoutePath as jest.Mock;
 const mockUseApmRouter = useApmRouter as jest.Mock;
 const mockUseApmPluginContext = useApmPluginContext as jest.Mock;
 
-const mockSetConversationFlyoutActiveConfig = jest.fn();
-const mockClearConversationFlyoutActiveConfig = jest.fn();
+const mockSetAgentBuilderChatConfig = jest.fn();
+const mockClearAgentBuilderChatConfig = jest.fn();
 
 const baseQuery = {
   rangeFrom: 'now-15m',
@@ -225,7 +225,7 @@ describe('TransactionDetails', () => {
     );
 
     expect(screen.getByRole('heading', { name: 'GET /api/users', level: 2 })).toBeInTheDocument();
-    expect(mockSetConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    expect(mockSetAgentBuilderChatConfig).not.toHaveBeenCalled();
   });
 
   it('configures agent builder with transaction attachment when agentBuilder is available', () => {
@@ -242,8 +242,8 @@ describe('TransactionDetails', () => {
     mockUseApmRoutePath.mockReturnValue('/services/{serviceName}/transactions/view');
     mockUseApmPluginContext.mockReturnValue({
       agentBuilder: {
-        setConversationFlyoutActiveConfig: mockSetConversationFlyoutActiveConfig,
-        clearConversationFlyoutActiveConfig: mockClearConversationFlyoutActiveConfig,
+        setChatConfig: mockSetAgentBuilderChatConfig,
+        clearChatConfig: mockClearAgentBuilderChatConfig,
       },
     });
 
@@ -253,7 +253,7 @@ describe('TransactionDetails', () => {
       </MemoryRouter>
     );
 
-    expect(mockSetConversationFlyoutActiveConfig).toHaveBeenCalledWith({
+    expect(mockSetAgentBuilderChatConfig).toHaveBeenCalledWith({
       agentId: 'observability.agent',
       attachments: [
         expect.objectContaining({
@@ -282,8 +282,8 @@ describe('TransactionDetails', () => {
     mockUseApmRoutePath.mockReturnValue('/services/{serviceName}/transactions/view');
     mockUseApmPluginContext.mockReturnValue({
       agentBuilder: {
-        setConversationFlyoutActiveConfig: mockSetConversationFlyoutActiveConfig,
-        clearConversationFlyoutActiveConfig: mockClearConversationFlyoutActiveConfig,
+        setChatConfig: mockSetAgentBuilderChatConfig,
+        clearChatConfig: mockClearAgentBuilderChatConfig,
       },
     });
 
@@ -295,6 +295,6 @@ describe('TransactionDetails', () => {
 
     unmount();
 
-    expect(mockClearConversationFlyoutActiveConfig).toHaveBeenCalled();
+    expect(mockClearAgentBuilderChatConfig).toHaveBeenCalled();
   });
 });

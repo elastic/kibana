@@ -20,6 +20,7 @@ const linksByValueStateSchema = schema.object({
 
 // Links by-reference state schema (contains savedObjectId)
 const linksByReferenceStateSchema = schema.object({
+  // TODO change to ref_id
   savedObjectId: schema.string({
     meta: { description: 'The ID of the saved links object' },
   }),

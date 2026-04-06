@@ -40,19 +40,19 @@ const BASE_DEEP_LINKS = [
     path: '/agents',
     title: i18n.translate('xpack.agentBuilder.agents.title', { defaultMessage: 'Agents' }),
   },
+  {
+    id: 'skills',
+    path: '/skills',
+    title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
+  },
+  {
+    id: 'connectors',
+    path: '/connectors',
+    title: i18n.translate('xpack.agentBuilder.connectors.title', {
+      defaultMessage: 'Connectors',
+    }),
+  },
 ];
-
-const SKILLS_DEEP_LINK = {
-  id: 'skills',
-  path: '/skills',
-  title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
-};
-
-export const enableSkillsDeepLink = (appUpdater$: BehaviorSubject<AppUpdater>) => {
-  appUpdater$.next(() => ({
-    deepLinks: [...BASE_DEEP_LINKS, SKILLS_DEEP_LINK],
-  }));
-};
 
 export const registerApp = ({
   core,

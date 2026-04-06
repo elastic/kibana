@@ -90,6 +90,65 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
+  ],
+  "alerting_notification_policy": [
+    "auth",
+    "auth.apiKey",
+    "auth.createdByUser",
+    "auth.owner",
+    "createdAt",
+    "createdBy",
+    "createdByUsername",
+    "description",
+    "destinations",
+    "destinations.id",
+    "destinations.type",
+    "enabled",
+    "groupBy",
+    "groupingMode",
+    "name",
+    "snoozedUntil",
+    "throttle",
+    "throttle.strategy",
+    "updatedAt",
+    "updatedBy",
+    "updatedByUsername"
+  ],
+  "alerting_rule": [
+    "createdAt",
+    "createdBy",
+    "enabled",
+    "evaluation",
+    "evaluation.query",
+    "evaluation.query.base",
+    "evaluation.query.condition",
+    "grouping",
+    "grouping.fields",
+    "kind",
+    "metadata",
+    "metadata.description",
+    "metadata.labels",
+    "metadata.name",
+    "metadata.owner",
+    "no_data",
+    "no_data.behavior",
+    "no_data.timeframe",
+    "recovery_policy",
+    "recovery_policy.query",
+    "recovery_policy.query.base",
+    "recovery_policy.query.condition",
+    "recovery_policy.type",
+    "schedule",
+    "schedule.every",
+    "schedule.lookback",
+    "time_field",
+    "updatedAt",
+    "updatedBy"
+  ],
   "alerting_rule_template": [
     "description",
     "name",
@@ -345,7 +404,8 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "result"
+    "result",
+    "title"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -427,6 +487,9 @@
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
+    "dependencies",
+    "dependencies.name",
+    "dependencies.version",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -438,6 +501,7 @@
     "install_started_at",
     "install_status",
     "install_version",
+    "installed_as_dependency",
     "installed_es",
     "installed_es.deferred",
     "installed_es.id",
@@ -446,11 +510,13 @@
     "installed_kibana",
     "installed_kibana_space_id",
     "internal",
+    "is_dependency_of",
     "keep_policies_up_to_date",
     "latest_executed_state",
     "latest_install_failed_attempts",
     "name",
     "package_assets",
+    "pending_upgrade_review",
     "previous_version",
     "verification_key_id",
     "verification_status",
@@ -598,11 +664,13 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_enabled",
     "monitoring_output_id",
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -651,6 +719,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -708,6 +777,7 @@
     "title",
     "type"
   ],
+  "inference-settings": [],
   "infra-custom-dashboards": [
     "assetType",
     "dashboardFilterAssetIdEnabled",
@@ -736,6 +806,7 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "min_agent_version",
     "monitoring_diagnostics",
     "monitoring_enabled",
     "monitoring_http",
@@ -744,6 +815,7 @@
     "name",
     "namespace",
     "overrides",
+    "package_agent_version_conditions",
     "required_versions",
     "revision",
     "schema_version",
@@ -842,6 +914,7 @@
     "package.requires_root",
     "package.title",
     "package.version",
+    "package_agent_version_condition",
     "policy_id",
     "policy_ids",
     "revision",
@@ -962,6 +1035,11 @@
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
+  "oauth_state": [
+    "connectorId",
+    "expiresAt",
+    "state"
+  ],
   "observability-onboarding-state": [
     "progress",
     "state",
@@ -974,6 +1052,7 @@
   "osquery-pack": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "enabled",
     "name",
@@ -988,6 +1067,7 @@
     "shards",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "osquery-pack-asset": [
@@ -1007,6 +1087,7 @@
   "osquery-saved-query": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "ecs_mapping",
     "id",
@@ -1016,6 +1097,7 @@
     "timeout",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "policy-settings-protection-updates-note": [
@@ -1093,6 +1175,7 @@
     "provider"
   ],
   "security-rule": [
+    "deprecated",
     "name",
     "risk_score",
     "rule_id",
@@ -1326,6 +1409,7 @@
   ],
   "task": [
     "attempts",
+    "cost",
     "enabled",
     "ownerId",
     "partition",
@@ -1349,6 +1433,13 @@
   ],
   "ui-metric": [
     "count"
+  ],
+  "uiam_api_keys_provisioning_status": [
+    "@timestamp",
+    "entityId",
+    "entityType",
+    "message",
+    "status"
   ],
   "upgrade-assistant-ml-upgrade-operation": [
     "snapshotId"
@@ -1376,6 +1467,11 @@
   "usage-counters": [
     "domainId"
   ],
+  "user_connector_token": [
+    "connectorId",
+    "credentialType",
+    "profileUid"
+  ],
   "visualization": [
     "description",
     "kibanaSavedObjectMeta",
@@ -1387,6 +1483,12 @@
     "managed",
     "name",
     "riskModifier"
+  ],
+  "watchlist-entity-source": [
+    "enabled",
+    "managed",
+    "name",
+    "type"
   ],
   "workplace_search_telemetry": []
 }

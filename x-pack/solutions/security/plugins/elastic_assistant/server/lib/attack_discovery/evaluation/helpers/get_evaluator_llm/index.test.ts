@@ -6,12 +6,12 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 import { getEvaluatorLlm } from '.';
-import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/langchain/server', () => ({
   ...jest.requireActual('@kbn/langchain/server'),
@@ -22,27 +22,30 @@ jest.mock('@kbn/langchain/server', () => ({
 const connectorTimeout = 1000;
 
 const evaluatorConnectorId = 'evaluator-connector-id';
-const evaluatorConnector = {
-  id: 'evaluatorConnectorId',
-  actionTypeId: '.gen-ai',
+const evaluatorConnector: InferenceConnector = {
+  connectorId: 'evaluatorConnectorId',
+  type: InferenceConnectorType.OpenAI,
   name: 'GPT-4o',
+  config: {},
+  capabilities: {},
+  isInferenceEndpoint: false,
   isPreconfigured: true,
-  isSystemAction: false,
-  isDeprecated: false,
-} as Connector;
+};
 
-const experimentConnector: Connector = createMockConnector({
+const experimentConnector: InferenceConnector = {
+  connectorId: 'gemini-1-5-pro-002',
+  type: InferenceConnectorType.Gemini,
   name: 'Gemini 1.5 Pro 002',
-  actionTypeId: '.gemini',
   config: {
     apiUrl: 'https://example.com',
     defaultModel: 'gemini-1.5-pro-002',
     gcpRegion: 'test-region',
     gcpProjectID: 'test-project-id',
   },
-  id: 'gemini-1-5-pro-002',
+  capabilities: {},
+  isInferenceEndpoint: false,
   isPreconfigured: true,
-});
+};
 
 const logger = loggerMock.create();
 
@@ -50,78 +53,72 @@ describe('getEvaluatorLlm', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('getting the evaluation connector', () => {
-    it("calls actionsClient.get with the evaluator connector ID when it's provided", async () => {
-      const actionsClient = {
-        get: jest.fn(),
-      } as unknown as ActionsClient;
+    it("calls getInferenceConnectorById with the evaluator connector ID when it's provided", async () => {
+      const actionsClient = {} as unknown as ActionsClient;
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(evaluatorConnector);
 
       await getEvaluatorLlm({
         actionsClient,
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector,
+        getInferenceConnectorById,
         langSmithApiKey: undefined,
         logger,
       });
 
-      expect(actionsClient.get).toHaveBeenCalledWith({
-        id: evaluatorConnectorId,
-        throwIfSystemAction: false,
-      });
+      expect(getInferenceConnectorById).toHaveBeenCalledWith(evaluatorConnectorId);
     });
 
-    it("calls actionsClient.get with the experiment connector ID when the evaluator connector ID isn't provided", async () => {
-      const actionsClient = {
-        get: jest.fn().mockResolvedValue(null),
-      } as unknown as ActionsClient;
+    it("calls getInferenceConnectorById with the experiment connector ID when the evaluator connector ID isn't provided", async () => {
+      const actionsClient = {} as unknown as ActionsClient;
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(experimentConnector);
 
       await getEvaluatorLlm({
         actionsClient,
         connectorTimeout,
         evaluatorConnectorId: undefined,
         experimentConnector,
+        getInferenceConnectorById,
         langSmithApiKey: undefined,
         logger,
       });
 
-      expect(actionsClient.get).toHaveBeenCalledWith({
-        id: experimentConnector.id,
-        throwIfSystemAction: false,
-      });
+      expect(getInferenceConnectorById).toHaveBeenCalledWith(experimentConnector.connectorId);
     });
 
-    it('falls back to the experiment connector when the evaluator connector is not found', async () => {
-      const actionsClient = {
-        get: jest.fn().mockResolvedValue(null),
-      } as unknown as ActionsClient;
+    it('falls back to the experiment connector when getInferenceConnectorById throws', async () => {
+      const actionsClient = {} as unknown as ActionsClient;
+      const getInferenceConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
 
       await getEvaluatorLlm({
         actionsClient,
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector,
+        getInferenceConnectorById,
         langSmithApiKey: undefined,
         logger,
       });
 
       expect(ActionsClientLlm).toHaveBeenCalledWith(
         expect.objectContaining({
-          connectorId: experimentConnector.id,
+          connectorId: experimentConnector.connectorId,
         })
       );
     });
   });
 
   it('logs the expected connector names and types', async () => {
-    const actionsClient = {
-      get: jest.fn().mockResolvedValue(evaluatorConnector),
-    } as unknown as ActionsClient;
+    const actionsClient = {} as unknown as ActionsClient;
+    const getInferenceConnectorById = jest.fn().mockResolvedValue(evaluatorConnector);
 
     await getEvaluatorLlm({
       actionsClient,
       connectorTimeout,
       evaluatorConnectorId,
       experimentConnector,
+      getInferenceConnectorById,
       langSmithApiKey: undefined,
       logger,
     });
@@ -132,15 +129,15 @@ describe('getEvaluatorLlm', () => {
   });
 
   it('creates a new ActionsClientLlm instance with the expected traceOptions', async () => {
-    const actionsClient = {
-      get: jest.fn().mockResolvedValue(evaluatorConnector),
-    } as unknown as ActionsClient;
+    const actionsClient = {} as unknown as ActionsClient;
+    const getInferenceConnectorById = jest.fn().mockResolvedValue(evaluatorConnector);
 
     await getEvaluatorLlm({
       actionsClient,
       connectorTimeout,
       evaluatorConnectorId,
       experimentConnector,
+      getInferenceConnectorById,
       langSmithApiKey: 'test-api-key',
       logger,
     });

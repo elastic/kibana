@@ -7,49 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefAttributes } from 'react';
+import type { ComponentProps, ComponentRef, RefAttributes } from 'react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState, useEffect } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { DocViewerTab } from './doc_viewer_tab';
-import type { DocView, DocViewRenderProps, DocViewerRestorableState } from '../../types';
+import type { DocView, DocViewRenderProps } from '../../types';
+import { useDocViewerTabViewedEvent } from '../../analytics';
+import { useRestorableState, withRestorableState } from './restorable_state';
 
 export const INITIAL_TAB = 'unifiedDocViewer:initialTab';
 
-export interface DocViewerApi {
+export interface InternalDocViewerApi {
   setSelectedTabId: (tabId: string) => void;
 }
 
-export interface DocViewerProps extends DocViewRenderProps, RefAttributes<DocViewerApi> {
+export interface InternalDocViewerProps
+  extends DocViewRenderProps,
+    RefAttributes<InternalDocViewerApi>,
+    Pick<AnalyticsServiceStart, 'reportEvent'> {
   docViews: DocView[];
   initialTabId?: DocView['id'];
-  initialDocViewerState?: DocViewerRestorableState;
-  onInitialDocViewerStateChange?: (state: DocViewerRestorableState) => void;
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
 }
 
 const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
 const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewer_tab_', '');
 
-/**
- * Rendering tabs with different views of 1 Elasticsearch hit in Discover.
- * The tabs are provided by the `docs_views` registry.
- * A view can contain a React `component`, or any JS framework by using
- * a `render` function.
- */
-export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
-  (
-    {
-      docViews,
-      initialTabId,
-      initialDocViewerState,
-      onInitialDocViewerStateChange,
-      onUpdateSelectedTabId,
-      ...renderProps
-    },
-    ref
-  ) => {
+const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProps>(
+  ({ docViews, initialTabId, onUpdateSelectedTabId, reportEvent, ...renderProps }, ref) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map((docView: DocView) => ({
@@ -60,8 +48,6 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
             key={`${renderProps.hit.id}_${docView.id}`}
             docView={docView}
             renderProps={renderProps}
-            initialDocViewerState={initialDocViewerState}
-            onInitialDocViewerStateChange={onInitialDocViewerStateChange}
           />
         ),
         ['data-test-subj']: `docViewerTab-${docView.id}`,
@@ -71,7 +57,8 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
     const [selectedTabId, setSelectedTabId] = useState<string | undefined>(
       initialTabId ? getFullTabId(initialTabId) : storedInitialTabId
     );
-    const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : undefined;
+    const selectedTab =
+      (selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : undefined) ?? tabs.at(0);
 
     useEffect(() => {
       onUpdateSelectedTabId?.(selectedTabId ? getOriginalTabId(selectedTabId) : undefined);
@@ -87,6 +74,19 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
       }),
       [setInitialTabId]
     );
+
+    const [initialDocViewerViewedEventKey, setInitialDocViewerViewedEventKey] = useRestorableState(
+      'initialDocViewerViewedEventKey',
+      undefined
+    );
+
+    useDocViewerTabViewedEvent({
+      reportEvent,
+      tabId: selectedTab ? getOriginalTabId(selectedTab.id) : undefined,
+      hit: renderProps.hit,
+      initialEventKey: initialDocViewerViewedEventKey,
+      onEventKeyChange: setInitialDocViewerViewedEventKey,
+    });
 
     const onTabClick = useCallback(
       (tab: EuiTabbedContentTab) => {
@@ -109,3 +109,8 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
     );
   }
 );
+
+export const DocViewer = withRestorableState(InternalDocViewer);
+
+export type DocViewerProps = ComponentProps<typeof DocViewer>;
+export type DocViewerApi = ComponentRef<typeof DocViewer>;

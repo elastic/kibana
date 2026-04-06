@@ -14,7 +14,7 @@ import type {
   ESQLRegistrySolutionId,
 } from '@kbn/esql-types';
 import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getSourceCommandFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 
 /**
@@ -32,6 +32,7 @@ import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 export class ESQLExtensionsRegistry {
   private recommendedQueries: Map<string, RecommendedQuery[]> = new Map();
   private recommendedFields: Map<string, RecommendedField[]> = new Map();
+  private sourceCommandCache: Map<string, string> = new Map();
 
   private setRecommendedItems<T extends { name: string }>(
     map: Map<string, T[]>,
@@ -135,6 +136,14 @@ export class ESQLExtensionsRegistry {
         if (typeof recommendedQuery.query !== 'string') {
           return undefined;
         }
+
+        if (!this.sourceCommandCache.has(recommendedQuery.query)) {
+          this.sourceCommandCache.set(
+            recommendedQuery.query,
+            getSourceCommandFromESQLQuery(recommendedQuery.query)
+          );
+        }
+
         return getIndexPatternFromESQLQuery(recommendedQuery.query);
       },
       (existingQueries, newQuery) => existingQueries.some((q) => q.query === newQuery.query),
@@ -180,7 +189,19 @@ export class ESQLExtensionsRegistry {
       }
     }
 
-    return uniqBy(matchedQueries, 'query');
+    const currentSourceCommand = getSourceCommandFromESQLQuery(queryString);
+
+    const filteredQueries = matchedQueries.filter((recommendedQuery) => {
+      if (!currentSourceCommand || recommendedQuery.isStandalone) {
+        return true;
+      }
+
+      const registeredSourceCommand = this.sourceCommandCache.get(recommendedQuery.query) ?? '';
+
+      return !registeredSourceCommand || currentSourceCommand === registeredSourceCommand;
+    });
+
+    return uniqBy(filteredQueries, 'query');
   }
 
   unsetRecommendedQueries(

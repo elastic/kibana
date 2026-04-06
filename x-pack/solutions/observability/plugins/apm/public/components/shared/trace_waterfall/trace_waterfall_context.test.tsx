@@ -10,6 +10,7 @@ import { renderHook, act } from '@testing-library/react';
 import {
   groupByParent,
   filterMapByCriticalPath,
+  getAncestorIds,
   TraceWaterfallContextProvider,
   useTraceWaterfallContext,
 } from './trace_waterfall_context';
@@ -284,6 +285,118 @@ describe('filterMapByCriticalPath', () => {
     const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
 
     expect(result.parent1[0]).toBe(child1);
+  });
+});
+
+describe('getAncestorIds', () => {
+  const item = (id: string, parentId?: string): TraceWaterfallItem => ({
+    id,
+    parentId,
+    depth: 0,
+    offset: 0,
+    skew: 0,
+    color: '#fff',
+    timestampUs: 1000,
+    name: id,
+    traceId: 't1',
+    duration: 100,
+    serviceName: 'svc',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'span',
+  });
+
+  it('returns empty set when targetId is undefined', () => {
+    const items = [item('a'), item('b', 'a')];
+    expect(getAncestorIds(items, undefined)).toEqual(new Set());
+  });
+
+  it('returns empty set when target is the root (no parent)', () => {
+    const items = [item('root'), item('child', 'root')];
+    expect(getAncestorIds(items, 'root')).toEqual(new Set());
+  });
+
+  it('returns empty set when targetId is not found in items', () => {
+    const items = [item('a'), item('b', 'a')];
+    expect(getAncestorIds(items, 'nonexistent')).toEqual(new Set());
+  });
+
+  it('returns the direct parent for a single-level child', () => {
+    const items = [item('root'), item('child', 'root')];
+    expect(getAncestorIds(items, 'child')).toEqual(new Set(['root']));
+  });
+
+  it('returns all ancestors for a deeply nested item', () => {
+    const items = [
+      item('root'),
+      item('level1', 'root'),
+      item('level2', 'level1'),
+      item('level3', 'level2'),
+    ];
+    expect(getAncestorIds(items, 'level3')).toEqual(new Set(['root', 'level1', 'level2']));
+  });
+});
+
+describe('TraceWaterfallContextProvider - scroll strategy', () => {
+  const mockTraceItem: TraceItem = {
+    id: '1',
+    parentId: undefined,
+    name: 'root',
+    traceId: 't1',
+    timestampUs: 1000,
+    duration: 100,
+    serviceName: 'svcA',
+    agentName: 'nodejs',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'transaction',
+  };
+
+  const createWrapper =
+    (props: Partial<React.ComponentProps<typeof TraceWaterfallContextProvider>>) =>
+    ({ children }: { children: React.ReactNode }) =>
+      (
+        <TraceWaterfallContextProvider
+          traceItems={[mockTraceItem]}
+          showAccordion={false}
+          isEmbeddable={false}
+          showLegend={false}
+          {...props}
+        >
+          {children}
+        </TraceWaterfallContextProvider>
+      );
+
+  it('defaults scrollStrategy to "window" when not provided', () => {
+    const { result } = renderHook(() => useTraceWaterfallContext(), {
+      wrapper: createWrapper({}),
+    });
+
+    expect(result.current.scrollStrategy).toBe('window');
+  });
+
+  it('passes scrollStrategy="parent" through to the context', () => {
+    const { result } = renderHook(() => useTraceWaterfallContext(), {
+      wrapper: createWrapper({ scrollStrategy: 'parent' }),
+    });
+
+    expect(result.current.scrollStrategy).toBe('parent');
+  });
+
+  it('passes scrollToHighlightedOnMount through to the context when scrollStrategy is "parent"', () => {
+    const { result } = renderHook(() => useTraceWaterfallContext(), {
+      wrapper: createWrapper({ scrollStrategy: 'parent', scrollToHighlightedOnMount: true }),
+    });
+
+    expect(result.current.scrollToHighlightedOnMount).toBe(true);
+  });
+
+  it('does not expose scrollToHighlightedOnMount when scrollStrategy is "window"', () => {
+    const { result } = renderHook(() => useTraceWaterfallContext(), {
+      wrapper: createWrapper({ scrollStrategy: 'window' }),
+    });
+
+    expect(result.current.scrollToHighlightedOnMount).toBeUndefined();
   });
 });
 

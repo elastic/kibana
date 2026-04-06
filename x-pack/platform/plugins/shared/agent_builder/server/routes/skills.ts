@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { skillCreateRequestSchema, skillUpdateRequestSchema } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -20,8 +20,10 @@ import type {
   UpdateSkillResponse,
 } from '../../common/http_api/skills';
 import { publicApiPath } from '../../common/constants';
-import { internalToPublicDefinition } from '../services/skills/utils';
-import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from './route_security';
+import { internalToPublicDefinition, internalToPublicSummary } from '../services/skills/utils';
+import { AGENT_BUILDER_READ_SECURITY, SKILLS_WRITE_SECURITY } from './route_security';
+import { asError } from '../utils/as_error';
+import { SKILL_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/skills';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   schema.object({
@@ -40,13 +42,11 @@ const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
 
 const SKILL_ID_PARAMS_SCHEMA = schema.object({
   skillId: schema.string({
+    minLength: 1,
+    maxLength: 512,
     meta: { description: 'The unique identifier of the skill.' },
   }),
 });
-
-const featureFlagConfig = {
-  featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-};
 
 export function registerSkillsRoutes({
   router,
@@ -75,19 +75,29 @@ export function registerSkillsRoutes({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            query: schema.object({
+              include_plugins: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'Set to true to include skills from plugins.' },
+              }),
+            }),
+          },
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        const skills = await registry.list();
-        const publicSkills = await Promise.all(skills.map(internalToPublicDefinition));
-        return response.ok<ListSkillsResponse>({
-          body: {
-            results: publicSkills,
-          },
+        const skills = await registry.list({
+          summaryOnly: true,
+          includePlugins: request.query.include_plugins,
         });
-      }, featureFlagConfig)
+        const results = await Promise.all(skills.map(internalToPublicSummary));
+        return response.ok<ListSkillsResponse>({
+          body: { results },
+        });
+      })
     );
 
   // get skill by ID
@@ -130,14 +140,14 @@ export function registerSkillsRoutes({
         return response.ok<GetSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // create skill
   router.versioned
     .post({
       path: `${publicApiPath}/skills`,
-      security: AGENT_BUILDER_WRITE_SECURITY,
+      security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create a skill',
       description: 'Create a new user-defined skill.',
@@ -201,14 +211,14 @@ export function registerSkillsRoutes({
         return response.ok<CreateSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // update skill
   router.versioned
     .put({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: AGENT_BUILDER_WRITE_SECURITY,
+      security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update a skill',
       description: 'Update an existing user-created skill.',
@@ -276,17 +286,18 @@ export function registerSkillsRoutes({
         return response.ok<UpdateSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // delete skill
   router.versioned
     .delete({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: AGENT_BUILDER_WRITE_SECURITY,
+      security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a skill',
-      description: 'Delete a user-created skill by ID. This action cannot be undone.',
+      description:
+        'Delete a user-created skill by ID. If agents still reference the skill, the request returns 409 unless force=true, which removes the skill from agents first. Built-in skills cannot be deleted.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
         availability: {
@@ -301,21 +312,88 @@ export function registerSkillsRoutes({
         validate: {
           request: {
             params: SKILL_ID_PARAMS_SCHEMA,
+            query: schema.object({
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'If true, removes the skill from agents that use it and then deletes it. If false and any agent uses the skill, the request returns 409 Conflict with the list of agents.',
+                },
+              }),
+            }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
         const { skillId } = request.params;
-        const { skills: skillService, auditLogService } = getInternalServices();
+        const { force = false } = request.query ?? {};
+        const {
+          skills: skillService,
+          agents: agentsService,
+          auditLogService,
+        } = getInternalServices();
+
         const registry = await skillService.getRegistry({ request });
-        const success = await registry.delete(skillId);
-        if (success) {
-          analyticsService?.reportSkillDeleted({ skillId });
-          auditLogService.logSkillDeleted(request, { skillId });
+        const skill = await registry.get(skillId);
+        if (!skill) {
+          return response.notFound({
+            body: { message: `Skill with id '${skillId}' not found` },
+          });
         }
-        return response.ok<DeleteSkillResponse>({
-          body: { success },
-        });
-      }, featureFlagConfig)
+        if (skill.readonly) {
+          return response.badRequest({
+            body: { message: `Skill '${skillId}' is read-only and cannot be deleted` },
+          });
+        }
+
+        if (!force) {
+          const { agents } = await agentsService.getAgentsUsingSkills({
+            request,
+            skillIds: [skillId],
+          });
+          if (agents.length > 0) {
+            return response.conflict({
+              body: {
+                message:
+                  'Skill is used by one or more agents. Use force=true to remove it from agents and delete.',
+                attributes: {
+                  code: SKILL_USED_BY_AGENTS_ERROR_CODE,
+                  agents,
+                },
+              },
+            });
+          }
+        } else {
+          await agentsService.removeSkillRefsFromAgents({
+            request,
+            skillIds: [skillId],
+          });
+        }
+
+        try {
+          const success = await registry.delete(skillId);
+          if (success) {
+            analyticsService?.reportSkillDeleted({ skillId });
+            auditLogService.logSkillDeleted(request, { skillId });
+          } else {
+            auditLogService.logSkillDeleted(request, {
+              skillId,
+              error: new Error('Skill delete returned false'),
+            });
+          }
+          return response.ok<DeleteSkillResponse>({
+            body: { success },
+          });
+        } catch (error) {
+          auditLogService.logSkillDeleted(request, {
+            skillId,
+            error: asError(error),
+          });
+          throw error;
+        }
+      })
     );
 }

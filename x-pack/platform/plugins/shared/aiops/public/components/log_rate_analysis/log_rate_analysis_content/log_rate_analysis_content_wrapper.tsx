@@ -88,6 +88,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
       'uiSettings',
       'userProfile',
       'i18n',
+      'cps',
     ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,

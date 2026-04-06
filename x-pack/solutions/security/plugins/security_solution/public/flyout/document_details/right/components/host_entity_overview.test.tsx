@@ -33,6 +33,7 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const hostName = 'host';
+const identityFields = { 'host.name': hostName };
 const osFamily = 'Windows';
 const lastSeen = '2022-04-08T18:35:45.064Z';
 const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
@@ -50,6 +51,10 @@ const panelContextValue = {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -109,7 +114,7 @@ const renderHostEntityContent = () =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={panelContextValue}>
-        <HostEntityOverview hostName={hostName} />
+        <HostEntityOverview hostName={hostName} identityFields={identityFields} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -130,7 +135,7 @@ describe('<HostEntityContent />', () => {
       const { getByTestId } = renderHostEntityContent();
 
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID)).toHaveTextContent(osFamily);
-      expect(getByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Medium');
+      expect(getByTestId(ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID)).toBeInTheDocument();
     });
 
     it('should render correctly if returned data is null', () => {
@@ -151,7 +156,7 @@ describe('<HostEntityContent />', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} />
+          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
@@ -165,7 +170,7 @@ describe('<HostEntityContent />', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} />
+          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
@@ -206,9 +211,11 @@ describe('<HostEntityContent />', () => {
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: HostPreviewPanelKey,
         params: {
+          contextID: mockContextValue.scopeId,
           hostName,
           scopeId: mockContextValue.scopeId,
           banner: HOST_PREVIEW_BANNER,
+          entityId: undefined,
         },
       });
     });

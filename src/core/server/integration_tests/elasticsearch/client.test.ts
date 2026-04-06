@@ -60,15 +60,16 @@ describe('elasticsearch clients', () => {
   });
 });
 
-function createFakeElasticsearchServer() {
-  const server = http.createServer((req, res) => {
-    // Reply with a 200 and empty response by default (intentionally malformed response)
-    res.writeHead(200);
-    res.end();
+function createFakeElasticsearchServer(): Promise<http.Server> {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      // Reply with a 200 and empty response by default (intentionally malformed response)
+      res.writeHead(200);
+      res.end();
+    });
+    server.on('error', reject);
+    server.listen(esTestConfig.getPort(), () => resolve(server));
   });
-  server.listen(esTestConfig.getPort());
-
-  return server;
 }
 
 describe('fake elasticsearch', () => {
@@ -83,7 +84,7 @@ describe('fake elasticsearch', () => {
       },
       status: { allowAnonymous: true },
     });
-    esServer = createFakeElasticsearchServer();
+    esServer = await createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();

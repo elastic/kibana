@@ -102,7 +102,11 @@
     "@kbn/response-ops-retry-service",
     "@kbn/openapi-generator",
     "@kbn/workflows-extensions",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/resizable-layout",
+    "@kbn/css-utils",
+    "@kbn/shared-ux-column-presets"
   ],
   "exclude": ["target/**/*"]
 }

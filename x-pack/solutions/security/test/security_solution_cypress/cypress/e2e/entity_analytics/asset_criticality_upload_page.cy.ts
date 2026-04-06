@@ -29,7 +29,7 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('include.text', 'Entity store');
+      cy.get(PAGE_TITLE).should('include.text', 'Entity analytics');
     });
 
     it('uploads a file', () => {

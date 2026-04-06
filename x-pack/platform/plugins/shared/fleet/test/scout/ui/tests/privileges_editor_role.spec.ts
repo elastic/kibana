@@ -16,7 +16,12 @@ test.describe('When the user has Editor built-in role', { tag: tags.stateful.cla
     browserAuth,
     pageObjects,
     page,
+    config,
   }) => {
+    test.skip(
+      config.isCloud === true,
+      `This scenario is not working as expected on ECH for 'Editor' role`
+    );
     // Mock the fleet setup API to indicate fleet server is ready
     await page.route('**/api/fleet/agents/setup', (route) =>
       route.fulfill({

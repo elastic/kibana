@@ -25,7 +25,6 @@ import { useI18n } from '@kbn/i18n-react';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
@@ -42,11 +41,15 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
+  useInternalStateGetState,
+  useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
+import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 
 /**
  * Helper function to build the top nav links
@@ -54,7 +57,6 @@ import { useDataState } from '../../hooks/use_data_state';
 export const useTopNavLinks = ({
   dataView,
   services,
-  state,
   onOpenInspector,
   hasUnsavedChanges,
   isEsqlMode,
@@ -64,8 +66,7 @@ export const useTopNavLinks = ({
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
-  state: DiscoverStateContainer;
-  onOpenInspector: () => void;
+  onOpenInspector?: () => void;
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
@@ -74,6 +75,8 @@ export const useTopNavLinks = ({
 }): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
+  const getState = useInternalStateGetState();
+  const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
   const currentTab = useCurrentTabSelector((tabState) => tabState);
@@ -82,7 +85,8 @@ export const useTopNavLinks = ({
       http: services.http,
       toasts: services.notifications.toasts,
     });
-  const totalHits$ = state.dataState.data$.totalHits$;
+  const dataStateContainer = useCurrentTabDataStateContainer();
+  const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
@@ -108,17 +112,24 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
   );
 
+  const canCreateESQLRule = !!services.capabilities.alertingVTwo;
+  const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
+
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
-    const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-    items.push(inspectAppMenuItem);
+    if (onOpenInspector) {
+      const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
+      items.push(inspectAppMenuItem);
+    }
 
     if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
-        stateContainer: state,
+        tabId: currentTab.id,
+        getState,
+        showCreateRuleV2,
       });
       items.push(alertsAppMenuItem);
     }
@@ -179,7 +190,6 @@ export const useTopNavLinks = ({
     const shareAppMenuItem = getShareAppMenuItem({
       discoverParams,
       services,
-      stateContainer: state,
       hasIntegrations: hasShareIntegration,
       hasUnsavedChanges,
       currentTab,
@@ -194,17 +204,18 @@ export const useTopNavLinks = ({
     services,
     discoverParams,
     appId,
-    onOpenInspector,
-    state,
     dispatch,
+    getState,
     isEsqlMode,
     currentDataView,
     currentTab,
+    onOpenInspector,
     persistedDiscoverSession,
     hasShareIntegration,
     hasUnsavedChanges,
     totalHitsState,
     intl,
+    showCreateRuleV2,
   ]);
 
   const transitionFromDataViewToESQL = useCurrentTabAction(
@@ -212,6 +223,7 @@ export const useTopNavLinks = ({
   );
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
+
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
 
@@ -225,7 +237,7 @@ export const useTopNavLinks = ({
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
-        iconType: 'editorCodeBlock',
+        iconType: 'code',
         color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
@@ -248,7 +260,9 @@ export const useTopNavLinks = ({
           await onSaveDiscoverSession({
             initialCopyOnSave: true,
             services,
-            state,
+            dispatch,
+            getState,
+            runtimeStateManager,
           });
         },
         id: 'saveAs',
@@ -270,18 +284,28 @@ export const useTopNavLinks = ({
               defaultMessage: 'Save',
             }),
         testId: 'discoverSaveButton',
-        iconType: isEmbeddedEditor ? 'checkInCircleFilled' : 'save',
+        iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
         run: async () => {
           await onSaveDiscoverSession({
             services,
-            state,
-            onSaveCb: isEmbeddedEditor ? services.embeddableEditor.transferBackToEditor : undefined,
+            dispatch,
+            getState,
+            runtimeStateManager,
+            onSaveCb: isEmbeddedEditor
+              ? (saveState) => {
+                  const action = saveState
+                    ? TransferAction.SaveSession
+                    : TransferAction.SaveByValue;
+
+                  services.embeddableEditor.transferBackToEditor(action, { state: saveState });
+                }
+              : undefined,
           });
         },
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
-          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
             defaultMessage: 'Save options',
           }),
@@ -291,13 +315,14 @@ export const useTopNavLinks = ({
                 items: [
                   savedAsButton,
                   {
-                    run: () => services.embeddableEditor.transferBackToEditor(),
+                    run: () =>
+                      services.embeddableEditor.transferBackToEditor(TransferAction.Cancel),
                     id: 'cancel',
                     order: 100,
                     label: i18n.translate('discover.localMenu.cancelTitle', {
                       defaultMessage: 'Cancel',
                     }),
-                    iconType: 'editorUndo',
+                    iconType: 'undo',
                     testId: 'discoverCancelButton',
                   },
                 ],
@@ -318,12 +343,10 @@ export const useTopNavLinks = ({
                     run: async () => {
                       dismissFlyouts([DiscoverFlyouts.lensEdit]);
 
-                      const internalState = state.internalState.getState();
+                      const internalState = getState();
 
                       if (internalState.persistedDiscoverSession) {
-                        await state.internalState
-                          .dispatch(internalStateActions.resetDiscoverSession())
-                          .unwrap();
+                        await dispatch(internalStateActions.resetDiscoverSession()).unwrap();
                       }
                     },
                     id: 'resetChanges',
@@ -331,7 +354,7 @@ export const useTopNavLinks = ({
                     label: i18n.translate('discover.localMenu.resetChangesTitle', {
                       defaultMessage: 'Reset changes',
                     }),
-                    iconType: 'editorUndo',
+                    iconType: 'undo',
                     testId: 'revertUnsavedChangesButton',
                     disableButton: !hasUnsavedChanges,
                   },
@@ -346,7 +369,9 @@ export const useTopNavLinks = ({
       appMenuRegistry: () => newAppMenuRegistry,
     }));
 
-    return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+
+    return registry;
   }, [
     getAppMenuAccessor,
     discoverParams,
@@ -355,7 +380,8 @@ export const useTopNavLinks = ({
     isEsqlMode,
     dataView,
     dispatch,
-    state,
+    getState,
+    runtimeStateManager,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
     persistedDiscoverSession,

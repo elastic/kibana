@@ -35,3 +35,10 @@ export const AGENTS_WRITE_SECURITY: RouteSecurity = {
 export const TOOLS_WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.manageTools] },
 };
+
+/**
+ * Security configuration object for write access to skills.
+ */
+export const SKILLS_WRITE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [apiPrivileges.manageSkills] },
+};

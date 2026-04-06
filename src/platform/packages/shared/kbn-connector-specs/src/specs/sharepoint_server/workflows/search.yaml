@@ -1,0 +1,28 @@
+version: '1'
+name: 'sources.sharepoint-server.search'
+description: 'Search SharePoint Server content with KQL. Actions and inputs: search (query required, optional from, optional size). The query input accepts Keyword Query Language (KQL).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: "KQL search query string"
+  - name: from
+    type: number
+    required: false
+    description: "Start row offset for pagination"
+  - name: size
+    type: number
+    required: false
+    description: "Number of results to return"
+steps:
+  - name: search-sharepoint-server
+    type: sharepoint-server.search
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with:
+      query: "${{ inputs.query }}"
+      from: ${{ inputs.from }}
+      size: ${{ inputs.size }}

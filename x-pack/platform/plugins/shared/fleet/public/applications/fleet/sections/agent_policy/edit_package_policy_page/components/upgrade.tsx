@@ -136,7 +136,7 @@ const ReadyToUpgradeCallOut = ({
         defaultMessage: 'Ready to upgrade',
       })}
       color="success"
-      iconType="checkInCircleFilled"
+      iconType="checkCircleFill"
     >
       <FormattedMessage
         id="xpack.fleet.upgradePackagePolicy.statusCallout.successContent"
@@ -149,6 +149,21 @@ const ReadyToUpgradeCallOut = ({
     </EuiCallOut>
   );
 };
+
+const InputMigrationCallout = () => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.inputMigrationTitle', {
+      defaultMessage: 'Input type migration',
+    })}
+    color="primary"
+    iconType="info"
+  >
+    <FormattedMessage
+      id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationContent"
+      defaultMessage="This upgrade replaces the input used for data collection. Your existing configuration has been automatically carried over."
+    />
+  </EuiCallOut>
+);
 
 export const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
@@ -164,6 +179,10 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
   const isReadyForUpgrade = currentPackagePolicy && !dryRunData[0].hasErrors;
 
+  const hasMigratedInputs = (proposedUpgradePackagePolicy?.inputs ?? []).some(
+    (input) => !!input.migrate_from
+  );
+
   return (
     <>
       {isPreviousVersionFlyoutOpen && currentPackagePolicy && (
@@ -171,6 +190,7 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
           <EuiFlyout
             onClose={() => setIsPreviousVersionFlyoutOpen(false)}
             maxWidth={MAX_FLYOUT_WIDTH}
+            aria-label="Previous version configuration flyout"
           >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
@@ -208,6 +228,12 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
         <>
           <EuiSpacer size="m" />
           <HasNewSecretsCallOut newSecrets={newSecrets} />
+        </>
+      )}
+      {hasMigratedInputs && (
+        <>
+          <EuiSpacer size="m" />
+          <InputMigrationCallout />
         </>
       )}
     </>

@@ -52,6 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const v2CommentPayload = {
           type: 'comment' as const,
           data: { content: 'v2 unified comment' },
+          owner: 'securitySolutionFixture',
         };
         const updatedCase = await bulkCreateAttachments({
           supertest,

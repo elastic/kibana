@@ -30,7 +30,11 @@ import { createMemoryHistory } from 'history';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
-import type { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AdditionalContext,
+  AlertDetailsNavigation,
+  RenderContext,
+} from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -62,6 +66,9 @@ const { ObservabilityAIAssistantContextualInsight } =
 
 const prependMock = jest.fn().mockImplementation((args) => args);
 mockKibana.services.http.basePath.prepend = prependMock;
+mockKibana.services.application.getUrlForApp.mockImplementation(
+  (appId: string, { path }: { path?: string } = {}) => `/app/${appId}${path ? `${path}` : ''}`
+);
 
 const config: ConfigSchema = {
   unsafe: {
@@ -123,6 +130,11 @@ describe('ObservabilityActions component', () => {
       },
     });
 
+    const alertDetailsNavigation: AlertDetailsNavigation = {
+      appId: 'observability',
+      getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+    };
+
     const props: Pick<
       ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>,
       | 'tableId'
@@ -135,6 +147,7 @@ describe('ObservabilityActions component', () => {
       | 'clearSelection'
       | 'observabilityRuleTypeRegistry'
       | 'refresh'
+      | 'alertDetailsNavigation'
     > = {
       tableId: pageId,
       config,
@@ -146,6 +159,7 @@ describe('ObservabilityActions component', () => {
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       refresh,
+      alertDetailsNavigation,
     };
 
     const services = {
@@ -218,7 +232,7 @@ describe('ObservabilityActions component', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().prop('href')).toBe(
-        '/app/observability/alerts/rules/06f53080-0f91-11ed-9d86-013908b232ef'
+        '/app/rules/rule/06f53080-0f91-11ed-9d86-013908b232ef'
       );
     });
   });

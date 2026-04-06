@@ -34,6 +34,8 @@ export async function fetchLatestAssets(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
+    // Exclude deprecated rule assets so they are not returned as installable/upgradeable
+    filter: `NOT ${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.deprecated: true`,
     // Aggregation groups prebuilt rule assets by rule_id and gets a rule with the highest version for each group.
     aggs: {
       rules: {

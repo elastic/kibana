@@ -225,6 +225,7 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     getTemplate: jest.fn(),
     createTemplate: jest.fn(),
     updateTemplate: jest.fn(),
+    incrementUsageStats: jest.fn(),
     deleteTemplate: jest.fn(),
     getTags: jest.fn(),
     getAuthors: jest.fn(),

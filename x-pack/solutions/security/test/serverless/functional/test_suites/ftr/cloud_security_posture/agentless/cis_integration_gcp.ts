@@ -72,6 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    // credentials_json field component changed, getFieldAttributeValue returns [object Object]
     describe.skip('Serverless - Agentless CIS_GCP edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newCredentialsJSON = 'newJson';

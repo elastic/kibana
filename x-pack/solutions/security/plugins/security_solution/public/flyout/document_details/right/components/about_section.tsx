@@ -22,8 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { MitreAttack } from './mitre_attack';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
@@ -40,6 +39,7 @@ import {
   ALERT_REASON_BANNER,
   AlertReason,
 } from '../../../../flyout_v2/document/components/alert_reason';
+import { MitreAttack } from '../../../../flyout_v2/document/components/mitre_attack';
 
 const KEY = 'about';
 
@@ -53,7 +53,7 @@ export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, eventId, indexName, isRulePreview, scopeId, searchHit } =
     useDocumentDetailsContext();
-  const { rulesPrivileges } = useUserPrivileges();
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const { ruleId, ruleName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
@@ -73,7 +73,7 @@ export const AboutSection = memo(() => {
   });
 
   const ruleSummaryDisabled =
-    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !rulesPrivileges?.rules.read;
+    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !canReadRules;
 
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
@@ -115,7 +115,7 @@ export const AboutSection = memo(() => {
           ruleSummaryDisabled={ruleSummaryDisabled}
         />
         <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
-        <MitreAttack />
+        <MitreAttack hit={hit} />
         <AlertStatus hit={hit} />
       </>
     ) : (

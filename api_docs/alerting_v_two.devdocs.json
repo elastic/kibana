@@ -1,0 +1,193 @@
+{
+  "id": "alertingVTwo",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-public.AlertingV2PublicStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertingV2PublicStart",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/public/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.AlertingV2PublicStart.DynamicRuleFormFlyout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "DynamicRuleFormFlyout",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<",
+              {
+                "pluginId": "alertingVTwo",
+                "scope": "public",
+                "docId": "kibAlertingVTwoPluginApi",
+                "section": "def-public.CreateRuleFormFlyoutProps",
+                "text": "CreateRuleFormFlyoutProps"
+              },
+              ", any> | React.FunctionComponent<",
+              {
+                "pluginId": "alertingVTwo",
+                "scope": "public",
+                "docId": "kibAlertingVTwoPluginApi",
+                "section": "def-public.CreateRuleFormFlyoutProps",
+                "text": "CreateRuleFormFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-public.CreateRuleFormFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateRuleFormFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.push",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "push",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-public.module",
+        "type": "Object",
+        "tags": [],
+        "label": "module",
+        "description": [],
+        "signature": [
+          "ContainerModule"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/public/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-server.PluginConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginConfig",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly ui: Readonly<{} & { enabled: boolean; }>; readonly invalidateApiKeysTask: Readonly<{} & { interval: string; removalDelay: string; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/server/config.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "alertingVTwo",
+        "id": "def-server.module",
+        "type": "Object",
+        "tags": [],
+        "label": "module",
+        "description": [],
+        "signature": [
+          "ContainerModule"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting_v2/server/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

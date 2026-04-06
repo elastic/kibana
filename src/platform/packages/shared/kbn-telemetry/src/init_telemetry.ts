@@ -40,6 +40,14 @@ export const initTelemetry = (
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
   const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
+  if (apmConfig.active !== false && telemetryConfig.tracing.enabled) {
+    throw new Error(
+      'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.\n' +
+        'To use OpenTelemetry tracing, disable APM by setting `elastic.apm.active: false` in your Kibana configuration.\n' +
+        'To use Elastic APM, disable OpenTelemetry tracing by setting `telemetry.tracing.enabled: false`.'
+    );
+  }
+
   // resource.attributes.*
   const resource = resources
     .detectResources({
@@ -71,12 +79,22 @@ export const initTelemetry = (
 
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {
-      initTracing({ resource, tracingConfig: telemetryConfig.tracing });
       maybeInitAutoInstrumentations();
     }
 
-    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
-      initMetrics({ resource, metricsConfig: telemetryConfig.metrics, monitoringCollectionConfig });
-    }
+    const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
+    asyncSettled.then(() => {
+      if (telemetryConfig.tracing.enabled) {
+        initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+      }
+
+      if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+        initMetrics({
+          resource,
+          metricsConfig: telemetryConfig.metrics,
+          monitoringCollectionConfig,
+        });
+      }
+    });
   }
 };

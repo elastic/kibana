@@ -55,7 +55,7 @@ describe('loadDashboardApi', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_backup_service').getDashboardBackupService = () => ({
+    require('../../services/dashboard_api_services').getDashboardBackupService = () => ({
       getState: () => ({
         query: lastSavedQuery,
       }),

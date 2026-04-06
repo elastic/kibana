@@ -160,7 +160,7 @@ describe('UserActionBuilder', () => {
             owner: SECURITY_SOLUTION_OWNER,
           },
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -207,7 +207,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -264,7 +264,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentES,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -316,7 +316,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: persistableStateAttachment,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -885,7 +885,7 @@ describe('UserActionBuilder', () => {
             owner: SECURITY_SOLUTION_OWNER,
           },
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -910,7 +910,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -935,7 +935,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentES,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -960,7 +960,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: persistableStateAttachment,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 

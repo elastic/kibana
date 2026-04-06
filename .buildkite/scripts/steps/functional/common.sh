@@ -42,4 +42,3 @@ upload_scout_cypress_events() {
     echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
   fi
 }
-

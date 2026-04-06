@@ -128,6 +128,12 @@ interface YamlValidationResultTriggerConditionError extends YamlValidationResult
   owner: 'trigger-condition-validation';
 }
 
+interface YamlValidationResultWorkflowOutput extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-output-validation';
+}
+
 interface YamlValidationResultIfConditionError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -153,12 +159,17 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'custom-property-validation',
   'workflow-inputs-validation',
   'trigger-condition-validation',
+  'workflow-output-validation',
   'if-condition-validation',
 ] as const;
 
+export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
-  return [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
-    owner as YamlValidationResult['owner']
+  return (
+    [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
+      owner as YamlValidationResult['owner']
+    ) || owner === BATCHED_CUSTOM_MARKER_OWNER
   );
 }
 
@@ -175,4 +186,9 @@ export type YamlValidationResult =
   | YamlValidationResultCustomPropertyValid
   | YamlValidationResultWorkflowInputsError
   | YamlValidationResultTriggerConditionError
+  | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError;
+
+export function validationResultFingerprint(r: YamlValidationResult): string {
+  return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;
+}

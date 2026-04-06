@@ -10,6 +10,7 @@
 import React, { Suspense } from 'react';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
 import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
@@ -37,7 +38,7 @@ export class DeveloperToolbarPlugin
 
   public start(core: CoreStart): DeveloperToolbarStart {
     const LazyToolbar = React.lazy(() => import('./toolbar'));
-    core.chrome.setGlobalFooter(
+    (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
         <LazyToolbar items$={this.items$} envInfo={this.context.env} />
       </Suspense>

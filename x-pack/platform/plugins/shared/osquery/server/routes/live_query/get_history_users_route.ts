@@ -96,7 +96,8 @@ export const getHistoryUsersRoute = (
           ];
 
           if (searchTerm?.trim()) {
-            filter.push({ wildcard: { user_id: `*${searchTerm.trim()}*` } });
+            const escaped = searchTerm.trim().replace(/[\\*?]/g, '\\$&');
+            filter.push({ wildcard: { user_id: `*${escaped}*` } });
           }
 
           const result = await esClient.search({
@@ -135,7 +136,7 @@ export const getHistoryUsersRoute = (
         } catch (e) {
           return response.customError({
             statusCode: e.statusCode ?? 500,
-            body: { message: e.message },
+            body: { message: 'Failed to fetch history users' },
           });
         }
       }

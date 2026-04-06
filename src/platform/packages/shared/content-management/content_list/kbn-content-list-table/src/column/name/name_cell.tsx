@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 import type { ContentListItem } from '@kbn/content-list-provider';
 
+import { StarButton } from '../starred/star_button';
 import { NameCellTitle as Title } from './cell_title';
 import { NameCellDescription as Description } from './cell_description';
 import { NameCellTags as Tags, type NameCellTagsProps } from './cell_tags';
@@ -32,6 +35,13 @@ export interface NameCellProps {
    */
   showTags?: boolean;
   /**
+   * Whether to show a star button inline after the title.
+   * Requires `services.favorites` to be configured on the `ContentListProvider`.
+   *
+   * @default false
+   */
+  showStarred?: boolean;
+  /**
    * Optional click handler for tag badges.
    * When omitted, the built-in handler in {@link NameCellTags} toggles
    * include/exclude filters via `useContentListFilters`.
@@ -42,6 +52,7 @@ export interface NameCellProps {
 /**
  * Default rich renderer for the name column that includes:
  * - Clickable title (with href or onClick).
+ * - Inline star button (if `showStarred` is true and `supports.starred`).
  * - Description (if available and `showDescription` is true).
  * - Tag badges (if available and `showTags` is true).
  *
@@ -52,13 +63,43 @@ export interface NameCellProps {
  * Memoized to prevent unnecessary re-renders when parent table re-renders.
  */
 export const NameCell = memo(
-  ({ item, showDescription = true, showTags = false, onTagClick }: NameCellProps) => {
+  ({
+    item,
+    showDescription = true,
+    showTags = false,
+    showStarred = false,
+    onTagClick,
+  }: NameCellProps) => {
     const { tags: tagIds } = item;
     const hasTags = showTags && tagIds && tagIds.length > 0;
+    const { euiTheme } = useEuiTheme();
+
+    // Aligns title and star button on the same row.
+    const titleRowCss = useMemo(
+      () => css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.xxs};
+      `,
+      [euiTheme]
+    );
+
+    // Vertical margin compensation matches `TableListView`'s `ItemDetails` component.
+    // Memoized so `StarButton` receives a stable css reference across re-renders.
+    const inlineStarCss = useMemo(
+      () => css`
+        margin-top: -${euiTheme.size.m};
+        margin-bottom: -${euiTheme.size.s};
+      `,
+      [euiTheme]
+    );
 
     return (
       <div>
-        <Title item={item} />
+        <div css={showStarred ? titleRowCss : undefined}>
+          <Title item={item} />
+          {showStarred && <StarButton id={item.id} wrapperCss={inlineStarCss} />}
+        </div>
         {showDescription && <Description item={item} />}
         {hasTags && <Tags tagIds={tagIds} onTagClick={onTagClick} />}
       </div>

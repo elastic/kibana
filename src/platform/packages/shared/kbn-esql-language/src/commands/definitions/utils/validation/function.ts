@@ -12,7 +12,6 @@ import {
   isFunctionExpression,
   isIdentifier,
   isInlineCast,
-  isLiteral,
   isParamLiteral,
 } from '@elastic/esql';
 import type {
@@ -36,7 +35,8 @@ import type {
   PromQLSignature,
   SupportedDataType,
 } from '../../types';
-import { getExpressionType, getMatchingSignatures } from '../expressions';
+import { resolveArgumentTypes } from '../expressions';
+import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
 
 export function validateFunction({
@@ -74,14 +74,14 @@ class FunctionValidator {
     private readonly parentAggFunction: string | undefined = undefined
   ) {
     this.definition = getFunctionDefinition(fn.name);
-    for (const _arg of this.fn.args) {
-      const arg = Array.isArray(_arg) ? _arg[0] : _arg; // for some reason, some args are wrapped in an array, for example named params
 
-      this.argTypes.push(
-        getExpressionType(arg, this.context.columns, this.context.unmappedFieldsStrategy)
-      );
-      this.argLiteralsMask.push(isLiteral(arg));
-    }
+    const resolved = resolveArgumentTypes(this.fn.args, {
+      columns: this.context.columns,
+      unmappedFieldsStrategy: this.context.unmappedFieldsStrategy,
+    });
+
+    this.argTypes = resolved.argTypes;
+    this.argLiteralsMask = resolved.literalMask;
   }
 
   /**
@@ -265,29 +265,10 @@ class FunctionValidator {
    * Checks if the function has a valid number of arguments
    */
   private get hasValidArity(): boolean {
-    const { min, max } = getMaxMinNumberOfParams(this.definition!);
+    const { min, max } = getMaxMinNumberOfParams(this.definition!.signatures);
     const arity = this.fn.args.length;
     return arity >= min && arity <= max;
   }
-}
-
-/**
- * Returns the maximum and minimum number of parameters allowed by a function
- *
- * Used for too-many, too-few arguments validation
- */
-function getMaxMinNumberOfParams(definition: FunctionDefinition) {
-  if (definition.signatures.length === 0) {
-    return { min: 0, max: 0 };
-  }
-
-  let min = Infinity;
-  let max = 0;
-  definition.signatures.forEach(({ params, minParams }) => {
-    min = Math.min(min, minParams ?? params.filter(({ optional }) => !optional).length);
-    max = Math.max(max, minParams ? Infinity : params.length);
-  });
-  return { min, max };
 }
 
 function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {

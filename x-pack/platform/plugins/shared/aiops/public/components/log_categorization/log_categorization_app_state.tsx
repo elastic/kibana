@@ -63,6 +63,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
       'uiSettings',
       'userProfile',
       'i18n',
+      'cps',
     ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,

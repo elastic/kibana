@@ -10,7 +10,13 @@
 import { isAllowlisted, type Allowlist } from '../allowlist/load_allowlist';
 
 export interface BreakingChange {
-  type: 'path_removed' | 'method_removed' | 'operation_breaking';
+  type:
+    | 'path_removed'
+    | 'method_removed'
+    | 'request_property_removed'
+    | 'response_property_removed'
+    | 'parameter_removed'
+    | 'operation_breaking';
   path: string;
   method?: string;
   reason: string;

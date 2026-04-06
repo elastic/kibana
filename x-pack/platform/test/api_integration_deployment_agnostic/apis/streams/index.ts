@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./flush_config'));
     loadTestFile(require.resolve('./attachments/attachments'));
     loadTestFile(require.resolve('./schema'));
+    loadTestFile(require.resolve('./description_only_inheritance'));
     loadTestFile(require.resolve('./processing_date_suggestions'));
     loadTestFile(require.resolve('./processing_simulate'));
     loadTestFile(require.resolve('./processing_validation'));
@@ -22,6 +23,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./lifecycle'));
     loadTestFile(require.resolve('./failure_store'));
     loadTestFile(require.resolve('./significant_events'));
+    loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./queries'));
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./content'));

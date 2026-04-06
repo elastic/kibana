@@ -22,6 +22,9 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import downloadWorkflow from './workflows/download.yaml';
+import listWorkflow from './workflows/list.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 /**
  * Common output schema for Microsoft Graph API responses that return a collection.
@@ -37,10 +40,12 @@ export const SharepointOnline: ConnectorSpec = {
     id: '.sharepoint-online',
     displayName: 'SharePoint Online',
     description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.metadata.description', {
-      defaultMessage: 'Kibana Stack Connector for SharePoint Online.',
+      defaultMessage:
+        'Search content, browse sites and document libraries, and download files from SharePoint Online',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -49,11 +54,54 @@ export const SharepointOnline: ConnectorSpec = {
         type: 'oauth_client_credentials',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
-          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
         },
         overrides: {
           meta: {
             scope: { hidden: true },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: 'Sites.Read.All Files.Read.All offline_access',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.authorizationUrl.helpText',
+                {
+                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
+                }
+              ),
+            },
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.tokenUrl.helpText',
+                {
+                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
+                }
+              ),
+            },
+            scope: { disabled: true },
           },
         },
       },
@@ -63,18 +111,44 @@ export const SharepointOnline: ConnectorSpec = {
   actions: {
     getAllSites: {
       isTool: true,
-      input: z.object({}).optional(),
+      input: z
+        .object({
+          search: z
+            .string()
+            .optional()
+            .describe(
+              'Search keyword to filter sites. Used with delegated auth (oauth_authorization_code) where /sites/getAllSites is not available.'
+            ),
+        })
+        .optional(),
       output: GraphCollectionOutputSchema,
-      handler: async (ctx) => {
-        ctx.log.debug('SharePoint listing all sites');
-        const response = await ctx.client.get(
-          'https://graph.microsoft.com/v1.0/sites/getAllSites/',
-          {
-            params: {
-              $select: 'id,displayName,webUrl,siteCollection',
-            },
-          }
-        );
+      handler: async (ctx, input) => {
+        const typedInput = input as { search?: string } | undefined;
+        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
+
+        if (isAppOnly) {
+          ctx.log.debug('SharePoint listing all sites (app-only auth)');
+          const response = await ctx.client.get(
+            'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+            {
+              params: {
+                $select: 'id,displayName,webUrl,siteCollection',
+              },
+            }
+          );
+          return response.data;
+        }
+
+        // Delegated auth: /sites/getAllSites is application-only, so fall back to
+        // /sites?search={query} which supports delegated permissions.
+        const search = typedInput?.search || '*';
+        ctx.log.debug(`SharePoint searching sites with keyword: ${search} (delegated auth)`);
+        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/sites', {
+          params: {
+            search,
+            $select: 'id,displayName,webUrl,siteCollection',
+          },
+        });
         return response.data;
       },
     },
@@ -89,6 +163,11 @@ export const SharepointOnline: ConnectorSpec = {
         const typedInput = input as {
           siteId: string;
         };
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSitePages requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
         ctx.log.debug(`SharePoint listing all pages from siteId ${typedInput.siteId}`);
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`,
@@ -114,6 +193,16 @@ export const SharepointOnline: ConnectorSpec = {
           siteId: string;
           pageId: string;
         };
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSitePageContents requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
+        if (!typedInput.pageId) {
+          throw new Error(
+            'getSitePageContents requires a pageId. Use getSitePages to list available pages for a site.'
+          );
+        }
         const url = `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/${typedInput.pageId}/microsoft.graph.sitePage`;
 
         ctx.log.debug(`SharePoint getting page contents from ${url}`);
@@ -136,6 +225,13 @@ export const SharepointOnline: ConnectorSpec = {
       ]),
       handler: async (ctx, input) => {
         const typedInput = input as { siteId: string } | { relativeUrl: string };
+        const hasSiteId = 'siteId' in typedInput && typedInput.siteId;
+        const hasRelativeUrl = 'relativeUrl' in typedInput && typedInput.relativeUrl;
+        if (!hasSiteId && !hasRelativeUrl) {
+          throw new Error(
+            'getSite requires either a siteId or a relativeUrl. Use getAllSites to discover sites.'
+          );
+        }
 
         let url = 'https://graph.microsoft.com/v1.0/sites/';
         if ('siteId' in typedInput) {
@@ -165,6 +261,11 @@ export const SharepointOnline: ConnectorSpec = {
           siteId: string;
         };
 
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSiteDrives requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
         ctx.log.debug(`SharePoint getting all drives of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/drives/`,
@@ -192,6 +293,11 @@ export const SharepointOnline: ConnectorSpec = {
           siteId: string;
         };
 
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSiteLists requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
         ctx.log.debug(`SharePoint getting all lists of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/`,
@@ -219,6 +325,16 @@ export const SharepointOnline: ConnectorSpec = {
           listId: string;
         };
 
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSiteListItems requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
+        if (!typedInput.listId) {
+          throw new Error(
+            'getSiteListItems requires a listId. Use getSiteLists to list available lists for a site.'
+          );
+        }
         ctx.log.debug(
           `SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`
         );
@@ -242,6 +358,11 @@ export const SharepointOnline: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { driveId: string; path?: string };
+        if (!typedInput.driveId) {
+          throw new Error(
+            'getDriveItems requires a driveId. Use getSiteDrives to list available drives for a site.'
+          );
+        }
         const baseUrl = `https://graph.microsoft.com/v1.0/drives/${typedInput.driveId}`;
         const url = typedInput.path
           ? `${baseUrl}/root:/${typedInput.path}:/children`
@@ -274,6 +395,16 @@ export const SharepointOnline: ConnectorSpec = {
           driveId: string;
           itemId: string;
         };
+        if (!typedInput.driveId) {
+          throw new Error(
+            'downloadDriveItem requires a driveId. Use getSiteDrives to list available drives for a site.'
+          );
+        }
+        if (!typedInput.itemId) {
+          throw new Error(
+            'downloadDriveItem requires an itemId. Use getDriveItems to list available items in a drive.'
+          );
+        }
         const baseUrl = `https://graph.microsoft.com/v1.0/drives/${typedInput.driveId}/items/${typedInput.itemId}`;
 
         const contentUrl = `${baseUrl}/content`;
@@ -303,6 +434,11 @@ export const SharepointOnline: ConnectorSpec = {
           downloadUrl: string;
         };
 
+        if (!typedInput.downloadUrl) {
+          throw new Error(
+            'downloadItemFromURL requires a downloadUrl. Use getDriveItems to find items with @microsoft.graph.downloadUrl.'
+          );
+        }
         ctx.log.debug(`SharePoint downloading item from URL ${typedInput.downloadUrl}`);
         const response = await ctx.client.get(typedInput.downloadUrl, {
           responseType: 'arraybuffer',
@@ -376,7 +512,7 @@ export const SharepointOnline: ConnectorSpec = {
           .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
           .optional()
           .describe(
-            'Search region (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
+            'Search region, only used with app-only (client credentials) auth. Ignored for delegated auth. (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
           ),
         from: z.number().optional().describe('Offset for pagination'),
         size: z.number().optional().describe('Number of results to return'),
@@ -391,6 +527,16 @@ export const SharepointOnline: ConnectorSpec = {
           region?: 'NAM' | 'EUR' | 'APC' | 'LAM' | 'MEA';
         };
 
+        if (!typedInput.query) {
+          throw new Error(
+            'search requires a query string. Provide a KQL query to search SharePoint content.'
+          );
+        }
+
+        // region is only required for app-only (client credentials) auth.
+        // Sending region with delegated auth can cause a 400 error.
+        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
+
         const searchRequest = {
           requests: [
             {
@@ -398,7 +544,7 @@ export const SharepointOnline: ConnectorSpec = {
               query: {
                 queryString: typedInput.query,
               },
-              region: typedInput.region ?? 'NAM',
+              ...(isAppOnly && { region: typedInput.region ?? 'NAM' }),
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },
@@ -434,4 +580,6 @@ export const SharepointOnline: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, searchWorkflow],
 };

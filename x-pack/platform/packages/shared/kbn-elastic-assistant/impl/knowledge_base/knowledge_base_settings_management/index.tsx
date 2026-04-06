@@ -365,6 +365,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               <EuiLoadingSpinner data-test-subj="spinning" size="l" />
             ) : isKbSetup ? (
               <EuiInMemoryTable
+                tableCaption={i18n.KNOWLEDGE_BASE_TABLE_CAPTION}
                 data-test-subj="knowledge-base-entries-table"
                 columns={columns}
                 items={entries.data ?? []}

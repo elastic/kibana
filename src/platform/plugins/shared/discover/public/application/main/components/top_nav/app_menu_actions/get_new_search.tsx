@@ -24,7 +24,7 @@ export const getNewSearchAppMenuItem = ({
     label: i18n.translate('discover.localMenu.localMenu.newDiscoverSessionTitle', {
       defaultMessage: 'New',
     }),
-    iconType: 'plusInCircle',
+    iconType: 'plusCircle',
     testId: 'discoverNewButton',
     href: newSearchUrl,
     run: () => {

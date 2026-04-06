@@ -9,6 +9,8 @@ import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../shared/components/expandable_section';
@@ -16,6 +18,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { AlertDescription } from './alert_description';
 import { AlertReason } from './alert_reason';
 import { AlertStatus } from './alert_status';
+import { MitreAttack } from './mitre_attack';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 
@@ -42,7 +45,10 @@ export interface AboutSectionProps {
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection = memo(({ hit }: AboutSectionProps) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, 'event.kind') as string) === 'signal', [hit]);
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -66,6 +72,9 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AlertReason hit={hit} onShowFullReason={undefined} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <MitreAttack hit={hit} />
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertStatus hit={hit} />

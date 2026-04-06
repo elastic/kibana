@@ -6,16 +6,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
+
+import { css } from '@emotion/react';
 
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
 import { ResponsivePackageGrid } from './components/responsive_package_grid';
-import { SearchAndFiltersBar, StickyFlexItem } from './components/search_and_filters_bar';
+import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
 import { useSetUrlCategory } from './hooks/url_categories';
@@ -24,14 +25,13 @@ import {
   ManageIntegrationsTable,
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
-import { CreateNewIntegrationButton } from './components/create_new_integration';
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImportVTwo, application } = useStartServices();
+  const { automaticImport, application } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
@@ -40,10 +40,10 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     application.capabilities as Record<string, { view?: boolean } | undefined>
   ).automatic_import;
   const canReadAutomaticImportIntegrations =
-    automaticImportCapabilities?.view ?? Boolean(automaticImportVTwo);
+    automaticImportCapabilities?.view ?? Boolean(automaticImport);
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
-    ? automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
     : useEmptyAllIntegrations;
   const {
     integrations,
@@ -117,34 +117,21 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         onCategoryChange={onCategoryChange}
         CreateIntegrationCardButton={
           canReadAutomaticImportIntegrations
-            ? automaticImportVTwo?.components.CreateIntegrationSideCardButton
+            ? automaticImport?.components.CreateIntegrationSideCardButton
             : undefined
         }
         hasCreatedIntegrations={hasCreatedIntegrations}
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {isManageIntegrationsView ? (
-            <StickyFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow>
-                  <EuiFieldSearch
-                    compressed
-                    placeholder={i18n.translate(
-                      'xpack.fleet.epmList.manageIntegrations.searchPlaceholder',
-                      { defaultMessage: 'Search integrations' }
-                    )}
-                    fullWidth
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <CreateNewIntegrationButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </StickyFlexItem>
-          ) : (
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={css`
+            padding: 16px 8px;
+          `}
+        >
+          {!isManageIntegrationsView && (
             <SearchAndFiltersBar
               categories={mainCategories}
               availableSubCategories={availableSubCategories}

@@ -50,7 +50,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
           defaultMessage: 'Developer tools',
         }),
         link: 'dev_tools',
-        icon: 'editorCodeBlock',
+        icon: 'code',
       },
       {
         id: 'management',
@@ -99,6 +99,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             }),
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:evals', breadcrumbStatus: 'hidden' },
               {
                 link: 'management:observabilityAiAssistantManagement',
                 breadcrumbStatus: 'hidden',

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isWellKnownWorkflowTriggerSource } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { parseWorkflowYamlForAutocomplete } from '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete';
 
@@ -22,6 +23,22 @@ function isConnectorStep(step: unknown): boolean {
     'connector-id' in step &&
     step['connector-id'] !== undefined
   );
+}
+
+const ON_FAILURE_KEYS = ['on-failure', 'iteration-on-failure'] as const;
+
+function getFallbackSteps(step: Record<string, unknown>): Array<WorkflowYaml['steps']> {
+  const result: Array<WorkflowYaml['steps']> = [];
+  for (const key of ON_FAILURE_KEYS) {
+    const container = step[key];
+    if (container && typeof container === 'object' && 'fallback' in container) {
+      const { fallback } = container as { fallback: unknown };
+      if (Array.isArray(fallback)) {
+        result.push(fallback as WorkflowYaml['steps']);
+      }
+    }
+  }
+  return result;
 }
 
 /**
@@ -66,6 +83,11 @@ export interface WorkflowTelemetryMetadata {
    * Number of triggers defined in the workflow
    */
   triggerCount: number;
+  /**
+   * Whether at least one trigger config includes an on.condition value.
+   * The condition text is never emitted, only presence/absence.
+   */
+  hasTriggerConditions: boolean;
   /**
    * Maximum concurrent runs if concurrency is configured
    */
@@ -119,6 +141,7 @@ export function extractWorkflowMetadata(
     inputCount: 0,
     constCount: 0,
     triggerCount: 0,
+    hasTriggerConditions: false,
     settingsUsed: [],
     hasDescription: false,
     tagCount: 0,
@@ -157,8 +180,8 @@ export function extractWorkflowMetadata(
         if ('else' in step && Array.isArray(step.else)) {
           countStepTypesRecursive(step.else);
         }
-        if ('fallback' in step && Array.isArray(step.fallback)) {
-          countStepTypesRecursive(step.fallback);
+        for (const fb of getFallbackSteps(step as Record<string, unknown>)) {
+          countStepTypesRecursive(fb);
         }
       }
     }
@@ -179,6 +202,20 @@ export function extractWorkflowMetadata(
       triggers.filter((trigger) => trigger?.type).map((trigger) => trigger.type as string)
     ),
   ];
+  const hasTriggerConditions = triggers.some((trigger) => {
+    if (trigger == null || typeof trigger !== 'object') {
+      return false;
+    }
+
+    const triggerType =
+      'type' in trigger && typeof trigger.type === 'string' ? trigger.type : undefined;
+    if (isWellKnownWorkflowTriggerSource(triggerType)) {
+      return false;
+    }
+
+    const condition = (trigger as { on?: { condition?: unknown } }).on?.condition;
+    return typeof condition === 'string' && condition.trim().length > 0;
+  });
 
   // Count inputs
   const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
@@ -211,6 +248,7 @@ export function extractWorkflowMetadata(
     inputCount,
     constCount,
     triggerCount: triggers.length,
+    hasTriggerConditions,
     ...(concurrencyMax !== undefined && { concurrencyMax }),
     ...(concurrencyStrategy && { concurrencyStrategy }),
     settingsUsed,
@@ -269,8 +307,8 @@ function findStepRecursive(
       const found = findStepRecursive(step.else, stepId);
       if (found) return found;
     }
-    if ('fallback' in step && Array.isArray(step.fallback)) {
-      const found = findStepRecursive(step.fallback, stepId);
+    for (const fb of getFallbackSteps(step as Record<string, unknown>)) {
+      const found = findStepRecursive(fb, stepId);
       if (found) return found;
     }
   }

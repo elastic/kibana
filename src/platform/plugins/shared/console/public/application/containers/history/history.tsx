@@ -317,7 +317,7 @@ export function History() {
                         data-test-subj="consoleHistoryApplyButton"
                         fill
                         color="primary"
-                        iconType="plusInCircle"
+                        iconType="plusCircle"
                         disabled={!viewingReq}
                         onClick={() => restoreRequestFromHistory(RestoreMethod.RESTORE)}
                       >

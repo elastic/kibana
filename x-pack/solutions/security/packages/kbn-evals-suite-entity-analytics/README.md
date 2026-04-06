@@ -15,14 +15,18 @@ For general information about writing evaluation tests, configuration, and usage
 If using phoenix, configure Phoenix exporter in `kibana.dev.yml`:
 
 ```yaml
-telemetry.enabled: false
-telemetry.tracing.enabled: false
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+telemetry.enabled: true
+telemetry.tracing.enabled: true
 telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - phoenix:
       base_url: "http://0.0.0.0:6006"
       public_url: "http://0.0.0.0:6006"
 ```
+
+> **Note:** `elastic.apm.active: false` and `elastic.apm.contextPropagationOnly: false` are required — Elastic APM and OpenTelemetry tracing cannot run simultaneously.
 
 ### Configure AI Connectors
 
@@ -77,6 +81,9 @@ node scripts/playwright test --config x-pack/solutions/security/packages/kbn-eva
 
 # Run with specific connector
 node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts --project="my-connector"
+
+# Run with multiple workers (parallel test files; default is usually 1–2 for evals)
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts --workers=4
 
 # Run with LLM-as-a-judge for consistent evaluation results
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts

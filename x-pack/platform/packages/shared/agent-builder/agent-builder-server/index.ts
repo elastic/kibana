@@ -35,6 +35,7 @@ export type {
   ToolPromptManager,
   ToolStateManager,
 } from './runner';
+export { getAgentFromRunContext } from './runner';
 export type {
   ToolHandlerFn,
   ToolHandlerReturn,
@@ -95,3 +96,4 @@ export {
   applyAfterToolCallResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
+export type { BuiltInPluginDefinition } from './plugins';

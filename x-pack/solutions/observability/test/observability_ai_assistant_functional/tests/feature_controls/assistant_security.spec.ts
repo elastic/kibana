@@ -99,13 +99,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           observabilityAIAssistant: ['all'],
         });
       });
-      it('loads conversations UI with connector error message', async () => {
+      it('loads conversations UI with setup connector message', async () => {
         await PageObjects.common.navigateToUrl('obsAIAssistant', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail(ui.pages.conversations.connectorsErrorMsg);
+        await testSubjects.existOrFail(ui.pages.conversations.setupGenAiConnectorsButtonSelector);
       });
       after(async () => {
         await deleteAndLogoutUser(getService, getPageObjects);

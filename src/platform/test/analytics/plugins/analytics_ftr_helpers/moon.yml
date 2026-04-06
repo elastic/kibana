@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/analytics-ftr-helpers-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/analytics-ftr-helpers-plugin'
+  title: '@kbn/analytics-ftr-helpers-plugin'
   description: Moon project for @kbn/analytics-ftr-helpers-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/analytics/plugins/analytics_ftr_helpers
+  sourceRoot: src/platform/test/analytics/plugins/analytics_ftr_helpers
 dependsOn:
   - '@kbn/core'
   - '@kbn/std'
@@ -34,16 +33,6 @@ fileGroups:
     - public/**/*.ts
     - server/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

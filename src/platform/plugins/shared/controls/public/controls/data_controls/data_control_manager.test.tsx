@@ -12,9 +12,11 @@ import { first, skip } from 'rxjs';
 import { dataViewsService } from '../../services/kibana_services';
 import { initializeDataControlManager } from './data_control_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 describe('initializeDataControlManager', () => {
   const dataControlState = {
+    ...DEFAULT_DATA_CONTROL_STATE,
     data_view_id: 'myDataViewId',
     field_name: 'myFieldName',
   };

@@ -17,7 +17,12 @@ import { buildWatchlistsManagementTableColumns } from './columns';
 describe('buildWatchlistsManagementTableColumns', () => {
   const euiTheme = {} as unknown as EuiThemeComputed;
 
-  const getColumns = () => buildWatchlistsManagementTableColumns(euiTheme);
+  const getColumns = () =>
+    buildWatchlistsManagementTableColumns(
+      euiTheme,
+      jest.fn(), // onEdit
+      jest.fn() // onDelete
+    );
 
   const getColumnByField = (field: string): EuiBasicTableColumn<WatchlistTableItemType> =>
     getColumns().find(

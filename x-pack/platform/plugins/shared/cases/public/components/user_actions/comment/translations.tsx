@@ -54,13 +54,6 @@ export const DELETE_EVENTS_SUCCESS_TITLE = (totalEvents: number) =>
     values: { totalEvents },
   });
 
-export const DELETE_COMMENT_SUCCESS_TITLE = i18n.translate(
-  'xpack.cases.userActions.attachments.comment.successToasterTitle',
-  {
-    defaultMessage: 'Deleted comment',
-  }
-);
-
 export const DELETE_REGISTERED_ATTACHMENT = i18n.translate(
   'xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle',
   {

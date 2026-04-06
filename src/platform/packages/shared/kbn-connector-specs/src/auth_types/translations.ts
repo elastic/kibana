@@ -117,6 +117,27 @@ export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL = i18n.translate(
+  'connectorSpecs.oauthTokenEndpointAuthMethod.label',
+  {
+    defaultMessage: 'Token endpoint auth method',
+  }
+);
+
+export const OAUTH_AUTHORIZATION_CODE_LABEL = i18n.translate(
+  'connectorSpecs.oauthAuthorizationCode.label',
+  {
+    defaultMessage: 'OAuth 2.0 Authorization Code',
+  }
+);
+
+export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
+  'connectorSpecs.oauthAuthorizationUrl.label',
+  {
+    defaultMessage: 'Authorization URL',
+  }
+);
+
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });
@@ -198,3 +219,7 @@ export const AWS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
     defaultMessage: 'Secret Access Key is required',
   }
 );
+
+export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
+  defaultMessage: 'OAuth 2.0 via Elastic-owned apps',
+});

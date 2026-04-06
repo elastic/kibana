@@ -35,5 +35,5 @@ export const journey = new Journey({
   })
   .step('Wait for Trace Waterfall on the page to load', async ({ page }) => {
     await page.click(subj('apmTransactionDetailLinkLink'));
-    await page.waitForSelector(subj('apmWaterfallButton'));
+    await page.waitForSelector(subj('traceWaterfallAccordionButton'));
   });

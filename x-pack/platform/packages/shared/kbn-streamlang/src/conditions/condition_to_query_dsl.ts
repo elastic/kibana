@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FilterCondition, Condition, RangeCondition } from '../../types/conditions';
 import {
   isFilterCondition,
@@ -77,9 +78,9 @@ function conditionToClause(condition: FilterCondition) {
   }
 }
 
-export function conditionToQueryDsl(condition: Condition): any {
+export function conditionToQueryDsl(condition: Condition): QueryDslQueryContainer {
   if (isFilterCondition(condition)) {
-    return conditionToClause(condition);
+    return conditionToClause(condition) as QueryDslQueryContainer;
   }
   if (isAndCondition(condition)) {
     const and = condition.and.map((filter) => conditionToQueryDsl(filter));

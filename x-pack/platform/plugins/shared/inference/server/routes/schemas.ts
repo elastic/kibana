@@ -55,7 +55,7 @@ export const messageOptionsSchema = schema.object({
 });
 
 export const chatCompleteBaseSchema = schema.object({
-  connectorId: schema.string(),
+  connectorId: schema.string({ minLength: 1 }),
   maxRetries: schema.maybe(schema.number()),
   retryConfiguration: schema.maybe(
     schema.object({

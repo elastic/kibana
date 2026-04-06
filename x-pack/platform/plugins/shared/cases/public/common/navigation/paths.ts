@@ -14,9 +14,9 @@ import {
   CASE_VIEW_PATH,
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_TAB_PATH,
-  CASES_TEMPLATES_PATH,
-  CASES_CREATE_TEMPLATE_PATH,
-  CASES_EDIT_TEMPLATE_PATH,
+  CASES_CONFIGURE_TEMPLATES_PATH,
+  CASES_CONFIGURE_CREATE_TEMPLATE_PATH,
+  CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
 } from '../../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
@@ -41,22 +41,21 @@ export const getCaseViewPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASE_VIEW_PATH}`);
 export const getCaseViewWithCommentPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASE_VIEW_COMMENT_PATH}`);
-export const getCasesTemplatesPath = (casesBasePath: string) =>
-  normalizePath(`${casesBasePath}${CASES_TEMPLATES_PATH}`);
-export const getCasesCreateTemplatePath = (casesBasePath: string) =>
-  normalizePath(`${casesBasePath}${CASES_CREATE_TEMPLATE_PATH}`);
-export const getCasesEditTemplatePath = (casesBasePath: string) =>
-  normalizePath(`${casesBasePath}${CASES_EDIT_TEMPLATE_PATH}`);
-
 export interface TemplateViewPathParams {
   templateId: string;
 }
 
-export const generateTemplateEditPath = (params: TemplateViewPathParams): string => {
+export const getCasesConfigureTemplatesPath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_TEMPLATES_PATH}`);
+export const getCasesConfigureCreateTemplatePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_CREATE_TEMPLATE_PATH}`);
+export const getCasesConfigureEditTemplatePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_EDIT_TEMPLATE_PATH}`);
+export const generateConfigureTemplateEditPath = (params: TemplateViewPathParams): string => {
   return normalizePath(
     generatePath(
-      CASES_EDIT_TEMPLATE_PATH,
-      params as ExtractRouteParams<typeof CASES_EDIT_TEMPLATE_PATH>
+      CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
+      params as ExtractRouteParams<typeof CASES_CONFIGURE_EDIT_TEMPLATE_PATH>
     )
   );
 };

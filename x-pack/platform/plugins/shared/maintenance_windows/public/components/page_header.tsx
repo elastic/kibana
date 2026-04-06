@@ -79,7 +79,7 @@ export const PageHeader = React.memo<PageHeaderProps>(
                 margin-bottom: ${euiTheme.size.s};
               `}
             >
-              <LinkIcon onClick={navigateToMaintenanceWindowsClick} iconType="arrowLeft">
+              <LinkIcon onClick={navigateToMaintenanceWindowsClick} iconType="chevronSingleLeft">
                 {i18n.MAINTENANCE_WINDOWS_RETURN_LINK}
               </LinkIcon>
             </div>

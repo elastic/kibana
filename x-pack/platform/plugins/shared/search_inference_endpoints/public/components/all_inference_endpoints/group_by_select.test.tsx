@@ -38,7 +38,7 @@ describe('GroupBySelect', () => {
     expect(getByText(/None/i)).toBeInTheDocument();
   });
 
-  it('should render the filter button with "Models" when model_id is selected', () => {
+  it('should render the filter button with "Model Author" when model_id is selected', () => {
     const { getByText } = render(
       <Wrapper>
         <GroupBySelect value={GroupByOptions.Model} onChange={mockOnChange} />
@@ -46,7 +46,7 @@ describe('GroupBySelect', () => {
     );
 
     expect(getByText(/Group:/i)).toBeInTheDocument();
-    expect(getByText(/Models/i)).toBeInTheDocument();
+    expect(getByText(/Model Author/i)).toBeInTheDocument();
   });
 
   it('should render the filter button with "Service" when service is selected', () => {
@@ -118,7 +118,7 @@ describe('GroupBySelect', () => {
     // Find and click the "Models" option
     const options = document.querySelectorAll('[role="option"]');
     const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.includes('Models')
+      option.textContent?.includes('Model Author')
     );
 
     expect(modelsOption).toBeDefined();
@@ -211,7 +211,7 @@ describe('GroupBySelect', () => {
     // Select an option
     const options = document.querySelectorAll('[role="option"]');
     const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.includes('Models')
+      option.textContent?.includes('Model Author')
     );
 
     if (modelsOption) {
@@ -243,7 +243,7 @@ describe('GroupBySelect', () => {
     // Check that the "Models" option is marked as checked
     const options = document.querySelectorAll('[role="option"]');
     const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.includes('Models')
+      option.textContent?.includes('Model Author')
     ) as HTMLElement;
 
     expect(modelsOption).toBeDefined();

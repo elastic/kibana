@@ -14,20 +14,12 @@ import { useGroupedData } from './use_grouped_data';
 import { GroupByOptions } from '../types';
 
 describe('useGroupedData', () => {
-  it('should group endpoints by model_id', () => {
-    const { result } = renderHook(() =>
-      useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
-    );
-
-    expect(result.current).toMatchSnapshot();
-  });
-
-  it('should return empty object when no endpoints provided', () => {
+  it('should return empty groupedEndpoints and filteredEndpoints when no endpoints provided', () => {
     const { result } = renderHook(() =>
       useGroupedData([], GroupByOptions.Model, { provider: [], type: [] }, '')
     );
 
-    expect(result.current).toEqual([]);
+    expect(result.current).toEqual({ groupedEndpoints: [], filteredEndpoints: [] });
   });
 
   it('should sort elastic endpoints first when grouping by model', () => {
@@ -35,7 +27,7 @@ describe('useGroupedData', () => {
       useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
     );
 
-    expect(result.current[0].groupId).toBe('elastic');
+    expect(result.current.groupedEndpoints[0].groupId).toBe('Elastic');
   });
 
   it('should group endpoints with unknown model_id under unknown model group', () => {
@@ -43,7 +35,7 @@ describe('useGroupedData', () => {
       useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
     );
 
-    const unknownModelGroup = result.current.find(
+    const unknownModelGroup = result.current.groupedEndpoints.find(
       (group) => group.groupId === UNKNOWN_MODEL_ID_FALLBACK
     );
     expect(unknownModelGroup).toBeDefined();

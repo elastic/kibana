@@ -52,7 +52,11 @@ export const DetailsPageError = ({
       actions={
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="danger" iconType="arrowLeft" onClick={navigateToIndicesList}>
+            <EuiButtonEmpty
+              color="danger"
+              iconType="chevronSingleLeft"
+              onClick={navigateToIndicesList}
+            >
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
                 defaultMessage="Back to indices"

@@ -14,15 +14,22 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import type { UpgradePackagePolicyDryRunResponseItem } from '../../../common/types';
+import { AUTO_UPDATE_PACKAGES } from '../../../common/constants';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 import type { Installation, PackagePolicy } from '../../types';
 
 import { appContextService } from '../app_context';
-import { getInstallation, getInstallations } from '../epm/packages';
+import {
+  getInstallation,
+  getInstallationObject,
+  getInstallations,
+  getPackageInfo,
+} from '../epm/packages';
 import { packagePolicyService } from '../package_policy';
 import { runWithCache } from '../epm/packages/cache';
+import { hasNewDeprecations, getDeprecationDetails } from '../epm/packages/deprecation_helpers';
 
 export interface UpgradeManagedPackagePoliciesResult {
   packagePolicyId: string;
@@ -76,28 +83,29 @@ async function runUpgradeManagedPackagePoliciesTask(
  * @param esClient
  * @returns
  */
-export const setupUpgradeManagedPackagePolicies = async (
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) => {
+export const setupUpgradeManagedPackagePolicies = async (soClient: SavedObjectsClientContract) => {
   appContextService
     .getLogger()
-    .debug('Scheduling required package policies upgrades for managed policies');
+    .debug(
+      '[UpgradeManagedPackagePoliciesTask] Scheduling required package policies upgrades for managed policies'
+    );
 
   const installedPackages = await getInstallations(soClient, {
     filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed AND ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.keep_policies_up_to_date:true`,
   });
-  for (const { attributes: installedPackage } of installedPackages.saved_objects) {
+  for (const { id: soId, attributes: installedPackage } of installedPackages.saved_objects) {
     const packagePoliciesFinder = await getPackagePoliciesNotMatchingVersion(
       soClient,
       installedPackage.name,
       installedPackage.version
     );
     let shouldRegisterTask = false;
+    let oldPolicyVersion: string | undefined;
     for await (const packagePolicies of packagePoliciesFinder) {
       for (const packagePolicy of packagePolicies) {
         if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
           shouldRegisterTask = true;
+          oldPolicyVersion = packagePolicy.package?.version;
           break;
         }
       }
@@ -106,10 +114,27 @@ export const setupUpgradeManagedPackagePolicies = async (
       }
     }
     if (shouldRegisterTask) {
+      // AUTO_UPDATE_PACKAGES are stack-aligned and they shouldn't require user review
+      const stackAlignedPackages = AUTO_UPDATE_PACKAGES.some(
+        (pkg) => pkg.name === installedPackage.name
+      );
+      // If the package is not an auto-update package, check the deprecation gate
+      if (!stackAlignedPackages) {
+        const isUpgradeAccepted = await checkUserReview(
+          soClient,
+          soId,
+          installedPackage,
+          oldPolicyVersion
+        );
+        if (!isUpgradeAccepted) {
+          continue;
+        }
+      }
+
       appContextService
         .getLogger()
         .debug(
-          `Scheduled package policies upgrades for package: ${installedPackage.name}@${installedPackage.version}`
+          `[UpgradeManagedPackagePoliciesTask] Scheduled package policies upgrades for package: ${installedPackage.name}@${installedPackage.version}`
         );
       await runUpgradeManagedPackagePoliciesTask(
         appContextService.getTaskManagerStart()!,
@@ -129,7 +154,9 @@ export const upgradeManagedPackagePolicies = async (
   pkgName: string
 ): Promise<UpgradeManagedPackagePoliciesResult[]> => {
   const logger = appContextService.getLogger();
-  logger.debug('Running required package policies upgrades for managed policies');
+  logger.debug(
+    '[UpgradeManagedPackagePoliciesTask] Running required package policies upgrades for managed policies'
+  );
 
   const results: UpgradeManagedPackagePoliciesResult[] = [];
 
@@ -140,7 +167,9 @@ export const upgradeManagedPackagePolicies = async (
   });
 
   if (!installedPackage) {
-    logger.debug('Aborting upgrading managed package policies: package is not installed');
+    logger.debug(
+      '[UpgradeManagedPackagePoliciesTask] Aborting upgrading managed package policies: package is not installed'
+    );
     return [];
   }
 
@@ -161,7 +190,11 @@ export const upgradeManagedPackagePolicies = async (
   }
 
   if (upgradedCount > 0) {
-    logger.info(`Completed upgrading ${upgradedCount} package policies for ${pkgName}`);
+    logger.info(
+      `[UpgradeManagedPackagePoliciesTask] Completed upgrading ${upgradedCount} package policies for ${pkgName}`
+    );
+
+    await clearPendingUpgradeReview(soClient, pkgName);
   }
 
   return results;
@@ -186,6 +219,117 @@ function isPolicyVersionLtInstalledVersion(
     packagePolicy.package !== undefined &&
     semverLt(packagePolicy.package.version, installedPackage.version)
   );
+}
+
+async function clearPendingUpgradeReview(soClient: SavedObjectsClientContract, pkgName: string) {
+  try {
+    const installationSo = await getInstallationObject({
+      savedObjectsClient: soClient,
+      pkgName,
+    });
+    if (!installationSo) {
+      return;
+    }
+
+    if (installationSo.attributes.pending_upgrade_review) {
+      await soClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installationSo.id, {
+        pending_upgrade_review: null,
+      } as unknown as Partial<Installation>);
+    }
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(
+        `[UpgradeManagedPackagePoliciesTask] Failed to clear pending upgrade review for ${pkgName}: ${error.message}`
+      );
+  }
+}
+
+async function checkUserReview(
+  soClient: SavedObjectsClientContract,
+  soId: string,
+  installedPackage: Installation,
+  oldPolicyVersion: string | undefined
+): Promise<boolean> {
+  const logger = appContextService.getLogger();
+  const review = installedPackage.pending_upgrade_review;
+
+  if (review?.target_version === installedPackage.version) {
+    if (review.action === 'accepted') {
+      logger.debug(
+        `[UpgradeManagedPackagePoliciesTask] User accepted policy upgrade for ${installedPackage.name}@${installedPackage.version}, proceeding`
+      );
+      return true;
+    }
+
+    if (review.action === 'declined') {
+      logger.debug(
+        `[UpgradeManagedPackagePoliciesTask] Skipping policy upgrade for ${installedPackage.name}: user declined upgrade to ${installedPackage.version}`
+      );
+      return false;
+    }
+
+    if (review.action === 'pending' || !review.action) {
+      logger.debug(
+        `[UpgradeManagedPackagePoliciesTask] Skipping policy upgrade for ${installedPackage.name}: pending user review for ${installedPackage.version}`
+      );
+      return false;
+    }
+
+    return false;
+  }
+
+  if (!oldPolicyVersion) {
+    return true;
+  }
+
+  try {
+    const [currentPkgInfo, targetPkgInfo] = await Promise.all([
+      getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: installedPackage.name,
+        pkgVersion: oldPolicyVersion,
+        skipArchive: true,
+      }),
+      getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: installedPackage.name,
+        pkgVersion: installedPackage.version,
+        skipArchive: true,
+      }),
+    ]);
+
+    if (hasNewDeprecations(currentPkgInfo, targetPkgInfo)) {
+      const deprecationDetails = getDeprecationDetails(targetPkgInfo);
+      logger.info(
+        `[UpgradeManagedPackagePoliciesTask] Blocking policy auto-upgrade for ${installedPackage.name}@${installedPackage.version}: new deprecations detected, awaiting user review`
+      );
+      await writePendingUpgradeReview(soClient, soId, installedPackage, deprecationDetails);
+      return false;
+    }
+  } catch (error) {
+    logger.warn(
+      `[UpgradeManagedPackagePoliciesTask]Failed to check deprecations for ${installedPackage.name}, proceeding with upgrade: ${error.message}`
+    );
+  }
+
+  return true;
+}
+
+async function writePendingUpgradeReview(
+  soClient: SavedObjectsClientContract,
+  soId: string,
+  installedPackage: Installation,
+  deprecationDetails?: import('../../../common/types').DeprecationInfo
+) {
+  await soClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, soId, {
+    pending_upgrade_review: {
+      target_version: installedPackage.version,
+      reason: 'deprecated',
+      created_at: new Date().toISOString(),
+      deprecation_details: deprecationDetails,
+    },
+  });
 }
 
 async function upgradePackagePolicy(

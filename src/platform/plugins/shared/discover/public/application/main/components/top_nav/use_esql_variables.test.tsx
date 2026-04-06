@@ -19,7 +19,6 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { internalStateActions } from '../../state_management/redux';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
-import { selectTabRuntimeState } from '../../state_management/redux';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
@@ -69,10 +68,10 @@ describe('useESQLVariables', () => {
   const setup = async () => {
     const toolkit = getDiscoverInternalStateMock();
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
-    return { toolkit, stateContainer };
+    return { toolkit };
   };
 
   const renderUseESQLVariables = async ({
@@ -89,11 +88,6 @@ describe('useESQLVariables', () => {
     onUpdateESQLQuery?: (query: string) => void;
   }) => {
     toolkit ??= (await setup()).toolkit;
-
-    const stateContainer = selectTabRuntimeState(
-      toolkit.runtimeStateManager,
-      toolkit.internalState.getState().tabs.unsafeCurrentId
-    ).stateContainer$.getValue()!;
 
     const hook = renderHook(
       () =>
@@ -112,7 +106,7 @@ describe('useESQLVariables', () => {
 
     await act(() => setTimeout(() => {}, 0));
 
-    return { hook, toolkit, stateContainer };
+    return { hook, toolkit };
   };
 
   beforeEach(() => {
@@ -152,10 +146,11 @@ describe('useESQLVariables', () => {
         { key: 'foo', type: 'values', value: 'bar' },
       ] as ESQLControlVariable[];
 
-      const { toolkit, stateContainer } = await renderUseESQLVariables({
+      const { toolkit } = await renderUseESQLVariables({
         isEsqlMode: true,
       });
-      const fetchSpy = jest.spyOn(stateContainer.dataState, 'fetch');
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      const fetchSpy = jest.spyOn(dataStateContainer, 'fetch');
       const tabId = toolkit.getCurrentTab().id;
 
       // Simulate initial input from controlGroupAPI
@@ -260,7 +255,7 @@ describe('useESQLVariables', () => {
 
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledTimes(1);
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledWith({
-        panelType: 'esqlControl',
+        panelType: 'esql_control',
         serializedState: {
           ...mockControlState,
         },

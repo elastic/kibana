@@ -15,6 +15,7 @@ import type { ColumnBuilderContext } from './types';
 import type { NameColumnProps } from './name/name_builder';
 import type { UpdatedAtColumnProps } from './updated_at/updated_at_builder';
 import type { ActionsColumnProps } from './actions/actions_builder';
+import type { StarredColumnProps } from './starred/starred_builder';
 
 /**
  * Props for the `Column` component (custom columns).
@@ -55,6 +56,12 @@ export interface ColumnNamespace {
   Name: (props: NameColumnProps) => ReactNode;
   UpdatedAt: (props: UpdatedAtColumnProps) => ReactNode;
   Actions: (props: ActionsColumnProps) => ReactNode;
+  /**
+   * Pre-built star-toggle column for favoritable items.
+   *
+   * @param props - {@link StarredColumnProps}
+   */
+  Starred: (props: StarredColumnProps) => ReactNode;
 }
 
 /** Preset-to-props mapping for table columns. */
@@ -62,6 +69,7 @@ export interface ColumnPresets {
   name: NameColumnProps;
   updatedAt: UpdatedAtColumnProps;
   actions: ActionsColumnProps;
+  starred: StarredColumnProps;
 }
 
 /** Part factory for table columns. */

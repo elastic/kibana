@@ -22,7 +22,14 @@ const defaultContext: ColumnBuilderContext = {
   itemConfig: undefined,
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: true, selection: true, tags: false },
+  supports: {
+    sorting: true,
+    pagination: true,
+    search: true,
+    selection: true,
+    tags: false,
+    starred: false,
+  },
 };
 
 describe('updated at column builder', () => {
@@ -67,7 +74,14 @@ describe('updated at column builder', () => {
     it('forces sortable false when sorting is unsupported', () => {
       const context: ColumnBuilderContext = {
         ...defaultContext,
-        supports: { sorting: false, pagination: true, search: true, selection: true, tags: false },
+        supports: {
+          sorting: false,
+          pagination: true,
+          search: true,
+          selection: true,
+          tags: false,
+          starred: false,
+        },
       };
 
       const result = buildUpdatedAtColumn({}, context);

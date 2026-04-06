@@ -14,6 +14,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 
 import { GcpCredentialsFormAgentless } from './gcp_credentials_form_agentless';
 
@@ -24,6 +25,7 @@ jest.mock('../utils');
 jest.mock('../utils', () => ({
   getTemplateUrlFromPackageInfo: jest.fn(),
   updatePolicyWithInputs: jest.fn(),
+  getCloudCredentialVarsConfig: jest.fn().mockReturnValue({}),
   gcpField: {
     fields: {
       'gcp.project_id': { label: 'Project ID', type: 'text' },
@@ -31,7 +33,6 @@ jest.mock('../utils', () => ({
       'gcp.credentials.json': { label: 'Credentials JSON', type: 'password' },
     },
   },
-  getGcpInputVarsFields: jest.fn(),
 }));
 
 jest.mock('./gcp_setup_info', () => ({
@@ -81,6 +82,14 @@ jest.mock('./gcp_credentials_guide', () => ({
   ),
 }));
 
+jest.mock('./gcp_credential_type_selector', () => ({
+  GcpCredentialTypeSelector: ({ type }: { type: string }) => (
+    <div data-test-subj="gcp-credential-type-selector-mock">
+      <span data-test-subj="credential-type">{type}</span>
+    </div>
+  ),
+}));
+
 jest.mock('../common', () => ({
   ReadDocumentation: ({ url }: { url: string }) => (
     <div data-test-subj="read-documentation">
@@ -89,12 +98,20 @@ jest.mock('../common', () => ({
   ),
 }));
 
+const mockCloudConnectorSetup = jest.fn((_props?: unknown) => (
+  <div data-test-subj="cloud-connector-setup-mock" />
+));
+
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/public'),
+  LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(props),
+}));
+
 // Get mocked functions from jest modules
 const { useCloudSetup: mockUseCloudSetup } = jest.requireMock('../hooks/use_cloud_setup_context');
 const {
   getTemplateUrlFromPackageInfo: mockGetTemplateUrlFromPackageInfo,
   updatePolicyWithInputs: mockUpdatePolicyWithInputs,
-  getGcpInputVarsFields: mockGetGcpInputVarsFields,
 } = jest.requireMock('../utils');
 
 const renderWithIntl = (component: React.ReactElement) =>
@@ -170,22 +187,8 @@ const getDefaultGcpAgentlessCloudSetup = () => ({
   templateName: 'cspm',
   gcpPolicyType: 'cloudbeat/cis_gcp',
   gcpOverviewPath: '/app/cloud-security-posture/overview/gcp',
+  isGcpCloudConnectorEnabled: false,
 });
-
-const getMockGcpAgentlessFields = () => [
-  {
-    id: 'gcp.project_id',
-    label: 'Project ID',
-    type: 'text' as const,
-    value: 'test-project',
-  },
-  {
-    id: 'gcp.credentials.json',
-    label: 'Credentials JSON',
-    type: 'password' as const,
-    value: '{"type":"service_account"}',
-  },
-];
 
 describe('GcpCredentialsFormAgentless', () => {
   const mockUpdatePolicy = jest.fn();
@@ -200,19 +203,18 @@ describe('GcpCredentialsFormAgentless', () => {
     packageInfo: mockPackageInfo,
     disabled: false,
     hasInvalidRequiredVars: false,
+    setupTechnology: SetupTechnology.AGENTLESS,
   };
 
   const defaultCloudSetup = getDefaultGcpAgentlessCloudSetup();
-  const mockFields = getMockGcpAgentlessFields();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCloudConnectorSetup.mockClear();
     mockUseCloudSetup.mockReturnValue(defaultCloudSetup);
     mockUpdatePolicyWithInputs.mockImplementation(
       (policy: NewPackagePolicy): NewPackagePolicy => policy
     );
-    // Ensure getGcpInputVarsFields always returns an array
-    mockGetGcpInputVarsFields.mockReturnValue(mockFields);
     mockGetTemplateUrlFromPackageInfo.mockReturnValue(
       'https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/elastic/cloudbeat&cloudshell_workspace=deploy/cloud&shellonly=true&cloudshell_tutorial=deploy/cloud/cloud-shell-gcp.md&env_vars=CLOUD_SHELL_DEPLOYMENT_TYPE=cspm,CLOUD_SHELL_CSPM_ACCOUNT_TYPE=single-account'
     );
@@ -271,7 +273,7 @@ describe('GcpCredentialsFormAgentless', () => {
       renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
 
       expect(screen.getByTestId('organization-state')).toHaveTextContent('false');
-      expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+      expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
     });
 
     it('generates correct cloud shell URL for single account', () => {
@@ -360,7 +362,7 @@ describe('GcpCredentialsFormAgentless', () => {
       it('filters fields correctly for single account', () => {
         renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
 
-        expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+        expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
       });
 
       it('filters fields correctly for organization account', () => {
@@ -382,7 +384,7 @@ describe('GcpCredentialsFormAgentless', () => {
 
         renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} input={orgInput} />);
 
-        expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+        expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
       });
     });
   });
@@ -394,7 +396,7 @@ describe('GcpCredentialsFormAgentless', () => {
 
         const launchButton = screen.getByTestId('launchGoogleCloudShellAgentlessButton');
         expect(launchButton).toHaveAttribute('target', '_blank');
-        expect(launchButton.querySelector('[data-euiicon-type="launch"]')).toBeInTheDocument();
+        expect(launchButton.querySelector('[data-euiicon-type="rocket"]')).toBeInTheDocument();
       });
 
       it('handles missing cloud shell URL gracefully', () => {
@@ -418,6 +420,63 @@ describe('GcpCredentialsFormAgentless', () => {
       expect(screen.getByTestId('read-documentation')).toBeInTheDocument();
       expect(screen.getByTestId('doc-url')).toHaveTextContent(
         '/app/cloud-security-posture/overview/gcp'
+      );
+    });
+  });
+
+  describe('cloud connector integration', () => {
+    const cloudConnectorCloudSetup = {
+      ...defaultCloudSetup,
+      isGcpCloudConnectorEnabled: true,
+    };
+
+    const inputWithCloudConnectors = {
+      ...mockInput,
+      streams: [
+        {
+          ...mockInput.streams[0],
+          vars: {
+            ...mockInput.streams[0].vars,
+            'gcp.credentials.type': {
+              value: 'cloud_connectors',
+              type: 'text',
+            },
+          },
+        },
+      ],
+    };
+
+    it('renders CloudConnectorSetup when cloud connectors enabled and credential type is cloud_connectors', () => {
+      mockUseCloudSetup.mockReturnValue(cloudConnectorCloudSetup);
+
+      renderWithIntl(
+        <GcpCredentialsFormAgentless {...defaultProps} input={inputWithCloudConnectors} />
+      );
+
+      expect(screen.getByTestId('cloud-connector-setup-mock')).toBeInTheDocument();
+    });
+
+    it('does not render CloudConnectorSetup when cloud connectors are not enabled', () => {
+      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
+
+      expect(screen.queryByTestId('cloud-connector-setup-mock')).not.toBeInTheDocument();
+    });
+
+    it('passes iacTemplateUrl to CloudConnectorSetup', () => {
+      mockUseCloudSetup.mockReturnValue(cloudConnectorCloudSetup);
+      const mockCloudShellUrl = 'https://shell.cloud.google.com/cloudshell/?test=cloud-connectors';
+      mockGetTemplateUrlFromPackageInfo.mockReturnValue(mockCloudShellUrl);
+
+      renderWithIntl(
+        <GcpCredentialsFormAgentless {...defaultProps} input={inputWithCloudConnectors} />
+      );
+
+      expect(mockCloudConnectorSetup).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iacTemplateUrl: mockCloudShellUrl,
+          cloudProvider: 'gcp',
+          accountType: 'single-account',
+        })
       );
     });
   });

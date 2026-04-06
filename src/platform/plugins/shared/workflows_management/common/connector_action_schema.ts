@@ -500,7 +500,7 @@ export const staticConnectors: BaseConnectorContract[] = [
       ),
     description: i18n.translate('workflows.connectors.kibana.request.description', {
       defaultMessage:
-        'Make a generic request to a Kibana API. APIs that return 204 No Content or 304 Not Modified produce an empty output ({}).',
+        "Make a generic request to a Kibana API. APIs that return 204 No Content or 304 Not Modified produce an empty output ('{}').",
     }),
   },
 ];

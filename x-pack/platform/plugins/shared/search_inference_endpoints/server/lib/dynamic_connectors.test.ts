@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import { DynamicConnectorsPoller, initialDelayMs } from './dynamic_connectors';
+import { DynamicConnectorsPoller } from './dynamic_connectors';
 import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints';
 
 import { filterPreconfiguredEndpoints, connectorFromEndpoint } from '../utils/in_memory_connectors';
@@ -36,7 +36,7 @@ describe('DynamicConnectorsPoller', () => {
   let poller: DynamicConnectorsPoller;
   const pollingIntervalMins = 1;
   const pollingIntervalMs = pollingIntervalMins * 60 * 1000;
-  const testInitialAdvance = initialDelayMs + 100;
+  const testInitialAdvance = 100;
 
   beforeEach(() => {
     mockLogger = loggingSystemMock.createLogger();

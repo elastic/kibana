@@ -26,7 +26,7 @@ interface ObservabilityAgentExample extends Example {
   };
   output: {
     criteria?: string[];
-    expected: string;
+    expected?: string;
   };
 }
 
@@ -55,6 +55,10 @@ export const evaluate = base.extend<
   evaluateDataset: [
     ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(async ({ dataset: { name, description, examples } }) => {
+        const includeQuantitativeCorrectness = examples.some((example) =>
+          Boolean(example.output.expected)
+        );
+
         await executorClient.runExperiment(
           {
             dataset: { name, description, examples } satisfies EvaluationDataset,
@@ -64,16 +68,20 @@ export const evaluate = base.extend<
                 attachments: input.attachments,
               });
 
-              const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
-                input,
-                expected: { expected: output.expected },
-                output: {
-                  messages: [response.messages[response.messages.length - 1]].map((message) => ({
-                    message: message.content,
-                  })),
-                },
-                metadata,
-              });
+              const correctnessResult = output.expected
+                ? await evaluators.correctnessAnalysis().evaluate({
+                    input,
+                    expected: { expected: output.expected },
+                    output: {
+                      messages: [response.messages[response.messages.length - 1]].map(
+                        (message) => ({
+                          message: message.content,
+                        })
+                      ),
+                    },
+                    metadata,
+                  })
+                : undefined;
               const traceId = getCurrentTraceId();
 
               return {
@@ -87,7 +95,7 @@ export const evaluate = base.extend<
           },
           [
             createCriteriaEvaluator({ evaluators }),
-            ...createQuantitativeCorrectnessEvaluators(),
+            ...(includeQuantitativeCorrectness ? createQuantitativeCorrectnessEvaluators() : []),
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,

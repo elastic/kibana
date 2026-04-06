@@ -9,17 +9,46 @@
 
 import { Query } from '@elastic/eui';
 import type { ContentManagementTagsServices, ParsedQuery, Tag } from '@kbn/content-management-tags';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { MOCK_TAGS } from './tags';
 
+const INITIAL_FAVORITE_IDS = ['dashboard-001', 'dashboard-003', 'vis-001', 'map-001'];
+
 /**
- * Mock favorites client for testing favorites filtering in stories.
- * Returns a static set of favorited item IDs.
+ * Creates a stateful mock favorites client implementing the full
+ * `FavoritesClientPublic` interface. Add/remove operations mutate
+ * an in-memory set so Storybook interactions are reflected immediately.
  */
-export const mockFavoritesClient = {
-  getFavorites: async () => ({
-    favoriteIds: ['dashboard-001', 'dashboard-003', 'vis-001', 'map-001'],
-  }),
+export const createMockFavoritesClient = (
+  initialIds: string[] = INITIAL_FAVORITE_IDS
+): FavoritesClientPublic => {
+  const favoriteIds = new Set(initialIds);
+
+  return {
+    getFavorites: async () => ({
+      favoriteIds: [...favoriteIds],
+      favoriteMetadata: {} as Record<string, never>,
+    }),
+    addFavorite: async ({ id }: { id: string }) => {
+      favoriteIds.add(id);
+      return { favoriteIds: [...favoriteIds] };
+    },
+    removeFavorite: async ({ id }: { id: string }) => {
+      favoriteIds.delete(id);
+      return { favoriteIds: [...favoriteIds] };
+    },
+    isAvailable: async () => true,
+    getFavoriteType: () => 'mock',
+    reportAddFavoriteClick: () => {},
+    reportRemoveFavoriteClick: () => {},
+  };
 };
+
+/**
+ * Pre-built mock favorites client for testing starred filtering in stories.
+ * Stateful — add/remove calls persist within the current session.
+ */
+export const mockFavoritesClient: FavoritesClientPublic = createMockFavoritesClient();
 
 // =============================================================================
 // Mock Tags Service

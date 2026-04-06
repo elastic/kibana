@@ -115,10 +115,6 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.ex
 );
 
 const esqlColumn = {
-  /**
-   * Value
-   */
-  operation: schema.literal('value'),
   column: schema.string({
     meta: {
       description: 'Column to use',
@@ -126,10 +122,12 @@ const esqlColumn = {
   }),
 };
 
-export const esqlColumnSchema = schema.object(esqlColumn);
+export const esqlColumnSchema = schema.object({
+  ...esqlColumn,
+  ...labelSharedProp,
+});
 
-export const esqlColumnOperationWithLabelAndFormatSchema =
-  genericOperationOptionsSchema.extends(esqlColumn);
+export const esqlColumnWithFormatSchema = esqlColumnSchema.extends(formatSchema);
 
 export const metricOperationSharedSchema =
   genericOperationOptionsSchema.extends(advancedOperationSettings);
@@ -336,3 +334,6 @@ export type LensApiAllMetricOrFormulaOperations =
   | LensApiMovingAverageOperation
   | LensApiCumulativeSumOperation
   | LensApiCounterRateOperation;
+
+export type LensApiESQLColumn = TypeOf<typeof esqlColumnSchema>;
+export type LensApiESQLColumnWithFormat = TypeOf<typeof esqlColumnWithFormatSchema>;

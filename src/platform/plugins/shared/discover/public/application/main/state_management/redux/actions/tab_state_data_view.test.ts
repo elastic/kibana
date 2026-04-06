@@ -9,18 +9,10 @@
 
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  getDiscoverInternalStateMock,
-  getDiscoverStateMock,
-} from '../../../../../__mocks__/discover_state.mock';
-import {
-  createRuntimeStateManager,
-  internalStateActions,
-  selectTabRuntimeState,
-  selectTab,
-} from '..';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { internalStateActions, selectTabRuntimeState, selectTab } from '..';
 import { createDataViewDataSource } from '../../../../../../common/data_sources';
-import { createDiscoverServicesMock, discoverServiceMock } from '../../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import {
@@ -30,6 +22,7 @@ import {
 } from '../../../../../__mocks__/data_view_complex';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabStateActions from './tab_state';
+import { selectDataSourceProfileId } from '../runtime_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -94,29 +87,46 @@ describe('tab_state_data_view actions', () => {
   });
 
   describe('changeDataView', () => {
-    const setupTestParams = (dataView: DataView | undefined) => {
-      const savedSearch = savedSearchMock;
-      const services = discoverServiceMock;
-      const runtimeStateManager = createRuntimeStateManager();
-      const discoverState = getDiscoverStateMock({ savedSearch, runtimeStateManager, services });
-      discoverState.internalState.dispatch(
-        discoverState.injectCurrentTab(internalStateActions.setDataView)({
-          dataView: savedSearch.searchSource.getField('index')!,
-        })
-      );
-      services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
+    const setupTestParams = async (dataView: DataView) => {
+      const services = createDiscoverServicesMock();
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [
+          savedSearchMock.searchSource.getField('index')!,
+          dataViewMockWithTimeField,
+          dataViewMock,
+          dataViewComplexMock,
+          dataViewWithDefaultColumnMock,
+        ],
+      });
+
+      const persistedTab = getPersistedTabMock({
+        dataView: savedSearchMock.searchSource.getField('index')!,
+        services,
+      });
+
+      await toolkit.initializeTabs({
+        persistedDiscoverSession: createDiscoverSessionMock({
+          id: 'test-session',
+          tabs: [persistedTab],
+        }),
+      });
+      await toolkit.initializeSingleTab({ tabId: persistedTab.id });
+
+      const getDataView = jest.spyOn(services.dataViews, 'get').mockResolvedValue(dataView);
+
       return {
         services,
-        internalState: discoverState.internalState,
-        runtimeStateManager,
-        injectCurrentTab: discoverState.injectCurrentTab,
-        getCurrentTab: discoverState.getCurrentTab,
+        internalState: toolkit.internalState,
+        runtimeStateManager: toolkit.runtimeStateManager,
+        injectCurrentTab: toolkit.injectCurrentTab,
+        getCurrentTab: toolkit.getCurrentTab,
+        getDataView,
       };
     };
 
     it('should set the right app state when a valid data view (which includes the preconfigured default column) to switch to is given', async () => {
-      const params = setupTestParams(dataViewWithDefaultColumnMock);
-      const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
+      const params = await setupTestParams(dataViewWithDefaultColumnMock);
       const promise = params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
           dataViewOrDataViewId: dataViewWithDefaultColumnMock.id!,
@@ -124,22 +134,41 @@ describe('tab_state_data_view actions', () => {
       );
       expect(params.getCurrentTab().isDataViewLoading).toBe(true);
       await promise;
-      expect(updateAppStateSpy).toHaveBeenCalledWith({
-        tabId: params.getCurrentTab().id,
-        appState: {
-          columns: ['default_column'], // default_column would be added as dataViewWithDefaultColumn has it as a mapped field
-          dataSource: createDataViewDataSource({
-            dataViewId: 'data-view-with-user-default-column-id',
-          }),
-          sort: [['@timestamp', 'desc']],
-        },
-      });
+      expect(params.getCurrentTab().appState.columns).toEqual(['default_column']);
+      expect(params.getCurrentTab().appState.dataSource).toEqual(
+        createDataViewDataSource({
+          dataViewId: 'data-view-with-user-default-column-id',
+        })
+      );
+      expect(params.getCurrentTab().appState.sort).toEqual([['@timestamp', 'desc']]);
       expect(params.getCurrentTab().isDataViewLoading).toBe(false);
     });
 
+    it('should reset profile fields without syncing snapshots when switching data view', async () => {
+      const params = await setupTestParams(dataViewComplexMock);
+      const profileId = selectDataSourceProfileId(
+        params.runtimeStateManager,
+        params.getCurrentTab().id
+      );
+      const previousSnapshot =
+        params.getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
+      const previousResetId = params.getCurrentTab().defaultProfileState.resetId;
+
+      await params.internalState.dispatch(
+        params.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
+
+      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('all');
+      expect(params.getCurrentTab().defaultProfileState.resetId).not.toBe(previousResetId);
+      expect(params.getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId]).toBe(
+        previousSnapshot
+      );
+    });
+
     it('should set the right app state when a valid data view to switch to is given', async () => {
-      const params = setupTestParams(dataViewComplexMock);
-      const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
+      const params = await setupTestParams(dataViewComplexMock);
       const promise = params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
           dataViewOrDataViewId: dataViewComplexMock.id!,
@@ -147,22 +176,20 @@ describe('tab_state_data_view actions', () => {
       );
       expect(params.getCurrentTab().isDataViewLoading).toBe(true);
       await promise;
-      expect(updateAppStateSpy).toHaveBeenCalledWith({
-        tabId: params.getCurrentTab().id,
-        appState: {
-          columns: [], // default_column would not be added as dataViewComplexMock does not have it as a mapped field
-          dataSource: createDataViewDataSource({
-            dataViewId: 'data-view-with-various-field-types-id',
-          }),
-          sort: [['data', 'desc']],
-        },
-      });
+      expect(params.getCurrentTab().appState.columns).toEqual([]);
+      expect(params.getCurrentTab().appState.dataSource).toEqual(
+        createDataViewDataSource({
+          dataViewId: 'data-view-with-various-field-types-id',
+        })
+      );
+      expect(params.getCurrentTab().appState.sort).toEqual([['data', 'desc']]);
       expect(params.getCurrentTab().isDataViewLoading).toBe(false);
     });
 
     it('should not set the app state when an invalid data view to switch to is given', async () => {
-      const params = setupTestParams(undefined);
-      const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
+      const params = await setupTestParams(dataViewComplexMock);
+      params.getDataView.mockRejectedValueOnce(new Error('Data view not found'));
+      const previousAppState = params.getCurrentTab().appState;
       const promise = params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
           dataViewOrDataViewId: 'data-view-with-various-field-types',
@@ -170,33 +197,19 @@ describe('tab_state_data_view actions', () => {
       );
       expect(params.getCurrentTab().isDataViewLoading).toBe(true);
       await promise;
-      expect(updateAppStateSpy).not.toHaveBeenCalled();
+      expect(params.getCurrentTab().appState).toBe(previousAppState);
       expect(params.getCurrentTab().isDataViewLoading).toBe(false);
     });
 
-    it('should call setResetDefaultProfileState correctly when switching data view', async () => {
-      const params = setupTestParams(dataViewComplexMock);
-      expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
-        expect.objectContaining({
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        })
-      );
+    it('should call setProfileStateFieldsToReset correctly when switching data view', async () => {
+      const params = await setupTestParams(dataViewComplexMock);
+      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('none');
       await params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
           dataViewOrDataViewId: dataViewComplexMock.id!,
         })
       );
-      expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
-        expect.objectContaining({
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: true,
-        })
-      );
+      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('all');
     });
   });
 

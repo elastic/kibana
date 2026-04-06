@@ -24,7 +24,10 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import type { HeatmapRenderProps, HeatmapArguments } from '../../common';
-import HeatmapComponent from './heatmap_component';
+import HeatmapComponent, {
+  computeMinIntervalFromData,
+  getDateFormatPattern,
+} from './heatmap_component';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
@@ -672,6 +675,147 @@ describe('HeatmapComponent', function () {
           },
         ],
       });
+    });
+  });
+
+  describe('time-based heatmap with ES|QL data', () => {
+    it('renders time-based heatmap with ES|QL data and scaled date formatting', async () => {
+      const timeData: Datatable = {
+        type: 'datatable',
+        meta: { type: 'esql' },
+        columns: [
+          { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
+          { id: 'category', name: 'category', meta: { type: 'string' } },
+          { id: 'value', name: 'value', meta: { type: 'number' } },
+        ],
+        rows: [
+          { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
+          { timestamp: '2024-01-01T00:01:00.000Z', category: 'A', value: 20 },
+          { timestamp: '2024-01-01T00:02:00.000Z', category: 'B', value: 15 },
+        ],
+      };
+
+      const timeArgs: HeatmapArguments = {
+        ...args,
+        xAccessor: 'timestamp',
+        yAccessor: 'category',
+        valueAccessor: 'value',
+        gridConfig: {
+          ...args.gridConfig,
+          xScaleType: 'time',
+        },
+      };
+
+      const mockUISettings = {
+        get: jest.fn((key: string) => {
+          if (key === 'dateFormat:scaled') {
+            return [
+              ['', 'HH:mm:ss.SSS'],
+              ['PT1S', 'HH:mm:ss'],
+              ['PT1M', 'HH:mm'],
+              ['PT1H', 'YYYY-MM-DD HH:mm'],
+            ];
+          }
+          return 'YYYY-MM-DD';
+        }),
+      } as any;
+
+      const newProps = {
+        ...wrapperProps,
+        data: timeData,
+        args: timeArgs,
+        uiSettings: mockUISettings,
+      };
+
+      const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+      await act(async () => {
+        await component.update();
+      });
+
+      // Verify that Heatmap component is rendered with time scale
+      const heatmapComponent = component.find(Heatmap);
+      expect(heatmapComponent.exists()).toBe(true);
+      expect(heatmapComponent.prop('xScale')).toEqual(
+        expect.objectContaining({
+          type: 'time',
+        })
+      );
+    });
+  });
+
+  describe('computeMinIntervalFromData', () => {
+    it('computes minimum interval from timestamp data', () => {
+      const timestampData = [
+        { x: 1000, y: 'a', value: 1 },
+        { x: 2000, y: 'a', value: 2 },
+        { x: 3500, y: 'b', value: 3 },
+      ];
+      expect(computeMinIntervalFromData(timestampData, 'x')).toBe(1000);
+    });
+
+    it('returns undefined for insufficient data', () => {
+      const singleRow = [{ x: 1000, y: 'a', value: 1 }];
+      expect(computeMinIntervalFromData(singleRow, 'x')).toBeUndefined();
+    });
+
+    it('returns undefined for empty data', () => {
+      expect(computeMinIntervalFromData([], 'x')).toBeUndefined();
+    });
+
+    it('returns undefined when xAccessor is not provided', () => {
+      const timestampData = [
+        { x: 1000, y: 'a', value: 1 },
+        { x: 2000, y: 'a', value: 2 },
+      ];
+      expect(computeMinIntervalFromData(timestampData, undefined)).toBeUndefined();
+    });
+  });
+
+  describe('getDateFormatPattern', () => {
+    it('selects correct pattern based on interval', () => {
+      const mockUISettings = {
+        get: (key: string) => {
+          if (key === 'dateFormat:scaled') {
+            return [
+              ['', 'HH:mm:ss.SSS'],
+              ['PT1S', 'HH:mm:ss'],
+              ['PT1M', 'HH:mm'],
+              ['PT1H', 'YYYY-MM-DD HH:mm'],
+            ];
+          }
+          return 'YYYY-MM-DD';
+        },
+      } as any;
+
+      expect(getDateFormatPattern(500, mockUISettings)).toBe('HH:mm:ss.SSS');
+      expect(getDateFormatPattern(1500, mockUISettings)).toBe('HH:mm:ss');
+      expect(getDateFormatPattern(60000, mockUISettings)).toBe('HH:mm');
+      expect(getDateFormatPattern(3600000, mockUISettings)).toBe('YYYY-MM-DD HH:mm');
+    });
+
+    it('returns undefined when intervalMs is not provided', () => {
+      const mockUISettings = {
+        get: jest.fn(),
+      } as any;
+
+      expect(getDateFormatPattern(undefined, mockUISettings)).toBeUndefined();
+    });
+
+    it('returns undefined when uiSettings is not provided', () => {
+      expect(getDateFormatPattern(1000, undefined)).toBeUndefined();
+    });
+
+    it('returns default date format when no rules match', () => {
+      const mockUISettings = {
+        get: (key: string) => {
+          if (key === 'dateFormat:scaled') {
+            return [];
+          }
+          return 'YYYY-MM-DD';
+        },
+      } as any;
+
+      expect(getDateFormatPattern(1000, mockUISettings)).toBe('YYYY-MM-DD');
     });
   });
 });

@@ -22,7 +22,7 @@ import { createStoryFindItems, StateDiagnosticPanel } from './stories_helpers';
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Content List',
+  title: 'Content List/Core Features',
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>

@@ -34,6 +34,17 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
             }),
           }),
         },
+        response: {
+          200: {
+            description: 'deleted',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          404: {
+            description: 'not found',
+          },
+        },
       },
     },
     async (ctx, req, res) => {
@@ -48,12 +59,12 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
           });
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest();
+        return res.badRequest({ body: { message: e.message } });
       }
 
-      return res.ok();
+      return res.noContent();
     }
   );
 }

@@ -13,7 +13,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { colorByValueSchema } from '../color';
-import { esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   sharedPanelInfoSchema,
   layerSettingsSchema,
@@ -21,21 +21,24 @@ import {
   axisTitleSchemaProps,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendSizeSchema, mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
-import { positionSchema } from '../alignments';
+import {
+  baseLegendVisibilitySchema,
+  legendSizeSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+  xScaleSchema,
+} from './shared';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
+  visibility: baseLegendVisibilitySchema,
   size: legendSizeSchema,
-  position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
 
 const labelsSchemaProps = {
   visible: schema.maybe(
-    schema.boolean({ defaultValue: true, meta: { description: 'Whether to show axis labels' } })
+    schema.boolean({ defaultValue: true, meta: { description: 'Show axis labels' } })
   ),
   orientation: schema.maybe(
     builderEnums.orientation({
@@ -73,6 +76,7 @@ const heatmapSharedStateSchema = {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(schema.object(labelsSchemaProps)),
               sort: schema.maybe(heatmapSortPredicateSchema),
+              scale: xScaleSchema,
             },
             {
               meta: {
@@ -117,7 +121,7 @@ const heatmapSharedStateSchema = {
             visible: schema.maybe(
               schema.boolean({
                 defaultValue: false,
-                meta: { description: 'Whether to show cell labels' },
+                meta: { description: 'Show cell labels' },
               })
             ),
           })
@@ -129,13 +133,13 @@ const heatmapSharedStateSchema = {
 };
 
 const heatmapAxesStateSchemaProps = {
-  xAxis: bucketOperationDefinitionSchema,
-  yAxis: schema.maybe(bucketOperationDefinitionSchema),
+  x: bucketOperationDefinitionSchema,
+  y: schema.maybe(bucketOperationDefinitionSchema),
 };
 
 const heatmapAxesStateESQLSchemaProps = {
-  xAxis: esqlColumnSchema,
-  yAxis: schema.maybe(esqlColumnSchema),
+  x: esqlColumnWithFormatSchema,
+  y: schema.maybe(esqlColumnWithFormatSchema),
 };
 
 const heatmapStateMetricOptionsSchemaProps = {
@@ -160,7 +164,7 @@ export const heatmapStateSchemaESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
     ...datasetEsqlTableSchema,
-    metric: esqlColumnSchema.extends(heatmapStateMetricOptionsSchemaProps),
+    metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );

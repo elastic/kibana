@@ -9,6 +9,7 @@
 
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { OptionalKeys } from 'utility-types';
 import type { CollapseFunction, LensLayerType } from '../types';
 
@@ -25,7 +26,7 @@ export type SecondaryTrend =
   | {
       type: 'dynamic';
       visuals: 'icon' | 'value' | 'both';
-      paletteId: string;
+      paletteId: KbnPaletteId;
       reversed: boolean;
       baselineValue: number | 'primary';
     };
@@ -63,7 +64,7 @@ export interface MetricVisualizationState {
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
   titleWeight?: TitleFontWeightString;
-  primaryPosition?: MetricStyle['valuePosition'];
+  primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;

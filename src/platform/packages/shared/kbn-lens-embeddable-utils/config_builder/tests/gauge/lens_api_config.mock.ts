@@ -61,7 +61,6 @@ export const esqlGauge: GaugeState = {
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
   metric: {
-    operation: 'value',
     column: 'count',
   },
   sampling: 1,
@@ -86,9 +85,12 @@ export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
     min: { operation: 'formula', formula: 'round(average(bytes) - 1000)' },
     max: { operation: 'max', field: 'bytes' },
     goal: { operation: 'static_value', value: 7000 },
-    hide_title: false,
+    title: { visible: true },
     sub_title: 'Bytes Subtitle',
-    ticks: 'bands',
+    ticks: {
+      visible: true,
+      mode: 'bands',
+    },
     color: {
       type: 'dynamic',
       steps: [
@@ -119,9 +121,12 @@ export const comprehensiveGaugeWithDataView: GaugeState = {
     field: 'bytes',
     min: { operation: 'formula', formula: 'round(average(bytes) - 1000)' },
     goal: { operation: 'static_value', value: 7000 },
-    hide_title: false,
+    title: { visible: true },
     sub_title: 'Bytes Subtitle',
-    ticks: 'bands',
+    ticks: {
+      visible: true,
+      mode: 'bands',
+    },
     color: {
       type: 'dynamic',
       steps: [
@@ -148,12 +153,14 @@ export const comprehensiveEsqlGauge: GaugeState = {
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },
   metric: {
-    operation: 'value',
     column: 'countA',
-    min: { operation: 'value', column: 'countB' },
-    hide_title: true,
+    min: { column: 'countB' },
+    title: { visible: false },
     sub_title: 'Bytes Subtitle',
-    ticks: 'bands',
+    ticks: {
+      visible: true,
+      mode: 'bands',
+    },
     color: {
       type: 'dynamic',
       steps: [

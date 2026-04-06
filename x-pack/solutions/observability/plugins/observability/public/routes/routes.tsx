@@ -11,6 +11,7 @@ import { AnnotationsPage } from '../pages/annotations/annotations';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
+import { AlertsV2Page } from '../pages/alerts_v2/alerts_v2';
 import { AlertDetails } from '../pages/alert_details/alert_details';
 import { CasesPage } from '../pages/cases/cases';
 import { LandingPage } from '../pages/landing/landing';
@@ -21,6 +22,7 @@ import { RulePage } from '../pages/rules/rule';
 import {
   ALERT_DETAIL_PATH,
   ALERTS_PATH,
+  ALERTING_V2_PATH,
   ANNOTATIONS_PATH,
   CASES_PATH,
   CREATE_RULE_PATH,
@@ -54,7 +56,7 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
       to = pathname.split('/slos')[1];
     }
     navigateToApp(redirectToApp, {
-      path: `/${to}${search ? `?${search}` : ''}${hash}`,
+      path: `/${to}${search}${hash}`,
       replace: true,
     });
   } else if (to) {
@@ -123,6 +125,13 @@ const routes = {
   [ALERTS_PATH]: {
     handler: () => {
       return <AlertsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [ALERTING_V2_PATH]: {
+    handler: () => {
+      return <AlertsV2Page />;
     },
     params: {},
     exact: true,

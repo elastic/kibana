@@ -13,6 +13,8 @@ export interface ChartActions {
   readonly viewDetails: Locator;
   readonly copyToDashboard: Locator;
   readonly explore: Locator;
+  readonly inspect: Locator;
+  readonly addToCase: Locator;
 }
 
 export function createChartActions(page: ScoutPage): ChartActions {
@@ -26,5 +28,7 @@ export function createChartActions(page: ScoutPage): ChartActions {
     explore: page.testSubj.locator(
       'embeddablePanelAction-ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB'
     ),
+    inspect: page.testSubj.locator('embeddablePanelAction-openInspector'),
+    addToCase: page.testSubj.locator('embeddablePanelAction-embeddable_addToExistingCase'),
   };
 }
