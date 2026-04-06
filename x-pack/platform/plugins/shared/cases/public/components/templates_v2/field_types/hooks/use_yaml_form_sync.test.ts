@@ -44,13 +44,10 @@ describe('useYamlFormSync', () => {
     }));
 
   beforeEach(() => {
-    jest.useFakeTimers();
     mockForm = createMockForm();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -188,12 +185,6 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
-      // Wait for syncingFromYamlRef to be reset
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Simulate form change
       act(() => {
         mockSubscriptionCallback({
           data: {
@@ -221,12 +212,6 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
-      // Wait for syncingFromYamlRef to be reset
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Simulate form reporting the same value as YAML
       act(() => {
         mockSubscriptionCallback({
           data: {
@@ -254,10 +239,6 @@ describe('useYamlFormSync', () => {
       ]);
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
-
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
 
       act(() => {
         mockSubscriptionCallback({
@@ -292,11 +273,6 @@ describe('useYamlFormSync', () => {
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
       act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Form value is the JSON string equivalent of the YAML array default
-      act(() => {
         mockSubscriptionCallback({
           data: {
             internal: {
@@ -325,11 +301,6 @@ describe('useYamlFormSync', () => {
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
       act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Form library returns a raw array instead of a JSON string
-      act(() => {
         mockSubscriptionCallback({
           data: {
             internal: {
@@ -348,36 +319,10 @@ describe('useYamlFormSync', () => {
         'CHECKBOX_GROUP'
       );
     });
-
-    it('does not call onFieldDefaultChange when syncing from YAML', () => {
-      const mockOnFieldDefaultChange = jest.fn();
-      const parsedFields = createParsedFields([
-        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'YAML value' },
-      ]);
-
-      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
-
-      // Do NOT advance timers - syncingFromYamlRef is still true
-      // Simulate form change while syncing
-      act(() => {
-        mockSubscriptionCallback({
-          data: {
-            internal: {
-              [CASE_EXTENDED_FIELDS]: {
-                summary_as_keyword: 'Different value',
-              },
-            },
-          },
-        });
-      });
-
-      // Should not be called because we're still syncing from YAML
-      expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
-    });
   });
 
   describe('feedback loop prevention', () => {
-    it('prevents feedback loop by ignoring form changes during YAML sync', () => {
+    it('does not call onFieldDefaultChange when subscription fires with the YAML default value (no bounce-back)', () => {
       const mockOnFieldDefaultChange = jest.fn();
       const parsedFields = createParsedFields([
         { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
@@ -385,7 +330,7 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
-      // Simulate subscription firing immediately after setFieldValue (before setTimeout callback)
+      // Subscription fires with exactly the YAML default — no callback expected
       act(() => {
         mockSubscriptionCallback({
           data: {
@@ -398,15 +343,17 @@ describe('useYamlFormSync', () => {
         });
       });
 
-      // Should not trigger callback during sync
       expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
+    });
 
-      // Now advance timers to allow sync flag to reset
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
+    it('calls onFieldDefaultChange when subscription fires with a value that differs from YAML default', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields([
+        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
+      ]);
 
-      // Now form changes should trigger callback
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
       act(() => {
         mockSubscriptionCallback({
           data: {
@@ -423,6 +370,74 @@ describe('useYamlFormSync', () => {
         'summary',
         'User changed',
         'INPUT_TEXT'
+      );
+    });
+
+    it('does NOT call setFieldValue again when parsedFields re-renders with the same content (user selection preserved)', () => {
+      const parsedFields = createParsedFields([
+        {
+          name: 'environment',
+          type: 'keyword',
+          control: 'RADIO_GROUP',
+          defaultValue: 'production',
+        },
+      ]);
+
+      const { rerender } = renderHook(({ fields }) => useYamlFormSync(mockForm, fields), {
+        initialProps: { fields: parsedFields },
+      });
+
+      // Initial mount syncs the YAML default
+      expect(mockForm.setFieldValue).toHaveBeenCalledTimes(1);
+      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.environment_as_keyword`,
+        'production'
+      );
+
+      mockForm.setFieldValue.mockClear();
+
+      // Re-render with a new array reference but identical content (e.g. from re-parsing same YAML)
+      const identicalFields = createParsedFields([
+        {
+          name: 'environment',
+          type: 'keyword',
+          control: 'RADIO_GROUP',
+          defaultValue: 'production',
+        },
+      ]);
+      expect(identicalFields).not.toBe(parsedFields);
+
+      rerender({ fields: identicalFields });
+
+      // setFieldValue must NOT be called again — user's UI selection must be preserved
+      expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+    });
+
+    it('calls setFieldValue when the YAML default genuinely changes (e.g. user edits YAML)', () => {
+      const parsedFields = createParsedFields([
+        {
+          name: 'environment',
+          type: 'keyword',
+          control: 'RADIO_GROUP',
+          defaultValue: 'production',
+        },
+      ]);
+
+      const { rerender } = renderHook(({ fields }) => useYamlFormSync(mockForm, fields), {
+        initialProps: { fields: parsedFields },
+      });
+
+      mockForm.setFieldValue.mockClear();
+
+      const updatedFields = createParsedFields([
+        { name: 'environment', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'staging' },
+      ]);
+
+      rerender({ fields: updatedFields });
+
+      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.environment_as_keyword`,
+        'staging'
       );
     });
   });
@@ -495,10 +510,6 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, undefined));
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
       // Should not throw when callback is undefined
       expect(() => {
         act(() => {
@@ -523,11 +534,6 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
-      // Simulate form data without extendedFields
       act(() => {
         mockSubscriptionCallback({
           data: {
@@ -575,10 +581,6 @@ describe('useYamlFormSync', () => {
 
       expect(mockForm.setFieldValue).toHaveBeenCalledTimes(4);
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
       // Change the number field
       act(() => {
         mockSubscriptionCallback({
@@ -612,10 +614,6 @@ describe('useYamlFormSync', () => {
       ]);
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
-
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
 
       // Only the checkbox group changes
       act(() => {
@@ -656,10 +654,6 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
       const momentValue = moment.utc('2024-06-15T14:30:00.000Z');
 
       act(() => {
@@ -687,10 +681,6 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
       // Moment in a non-UTC timezone — should still serialize as UTC
       const localMoment = moment('2024-06-15T14:30:00.000').tz('America/New_York');
 
@@ -717,10 +707,6 @@ describe('useYamlFormSync', () => {
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
 
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
-
       // Moment that serializes to the same value as the YAML default
       const momentValue = moment.utc('2024-06-01T09:00:00.000Z');
 
@@ -744,10 +730,6 @@ describe('useYamlFormSync', () => {
       const parsedFields = createParsedFields(dateField);
 
       renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
-
-      act(() => {
-        jest.advanceTimersByTime(0);
-      });
 
       const dateValue = new Date('2024-06-15T14:30:00.000Z');
 

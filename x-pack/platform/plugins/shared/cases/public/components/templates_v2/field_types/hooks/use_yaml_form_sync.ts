@@ -26,9 +26,12 @@ type OnFieldDefaultChange = (fieldName: string, value: string, control: string) 
 /**
  * Hook that syncs form field values with YAML metadata.default values bidirectionally.
  *
- * - When YAML changes (parsedFields updates), form fields are updated
- * - When form fields change (user input), onFieldDefaultChange callback is called
- * - Prevents feedback loops by tracking synced values
+ * - When YAML changes (parsedFields updates), form fields are updated only if the YAML
+ *   default for that field actually changed (content-based), not just because parsedFields
+ *   is a new array reference.
+ * - When form fields change (user input), onFieldDefaultChange callback is called.
+ * - Prevents feedback loops: a YAML sync never overwrites a user's UI selection unless
+ *   the YAML author explicitly changed the default to a different value.
  */
 export const useYamlFormSync = (
   form: FormHook,
@@ -36,7 +39,9 @@ export const useYamlFormSync = (
   onFieldDefaultChange?: OnFieldDefaultChange
 ) => {
   const yamlDefaultsRef = useRef<Record<string, string>>({});
-  const syncingFromYamlRef = useRef(false);
+  // Tracks the last YAML default we actually pushed into the form per field.
+  // We only call setFieldValue when the YAML default for a field genuinely changes.
+  const lastSyncedYamlDefaultRef = useRef<Record<string, string>>({});
   const onFieldDefaultChangeRef = useRef(onFieldDefaultChange);
   onFieldDefaultChangeRef.current = onFieldDefaultChange;
 
@@ -47,30 +52,33 @@ export const useYamlFormSync = (
   }
   yamlDefaultsRef.current = currentYamlDefaults;
 
-  // Sync YAML defaults to form fields
+  // Sync YAML defaults to form fields — only when a field's default genuinely changes.
   useEffect(() => {
-    syncingFromYamlRef.current = true;
+    const fieldsToSync: Array<{ path: string; name: string; yamlDefault: string }> = [];
 
     for (const field of parsedFields) {
       const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+      const lastSynced = lastSyncedYamlDefaultRef.current[field.name];
       const fieldPath = `${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`;
-      form.setFieldValue(fieldPath, yamlDefault);
+
+      // Only push to the form if this is a new field (never synced) OR the YAML default
+      // for this field has genuinely changed since the last sync.
+      if (lastSynced === undefined || lastSynced !== yamlDefault) {
+        fieldsToSync.push({ path: fieldPath, name: field.name, yamlDefault });
+      }
     }
 
-    // Reset the flag after all subscription callbacks triggered by setFieldValue have been processed
-    setTimeout(() => {
-      syncingFromYamlRef.current = false;
-    }, 0);
+    if (fieldsToSync.length === 0) return;
+
+    for (const { path, name, yamlDefault } of fieldsToSync) {
+      lastSyncedYamlDefaultRef.current[name] = yamlDefault;
+      form.setFieldValue(path, yamlDefault);
+    }
   }, [parsedFields, form]);
 
   // Subscribe to form changes and propagate to YAML
   useEffect(() => {
     const subscription = form.subscribe(({ data }) => {
-      // Skip if we're syncing from YAML to avoid feedback loop
-      if (syncingFromYamlRef.current) {
-        return;
-      }
-
       const extendedFields = (data.internal as Record<string, Record<string, unknown>>)?.[
         CASE_EXTENDED_FIELDS
       ];

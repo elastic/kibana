@@ -9,7 +9,7 @@ import type {
   ConditionRule,
   CompoundCondition,
 } from '../../../../common/types/domain/template/fields';
-import { FieldType } from './constants';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 
 const parseCheckboxValue = (value: unknown): string[] => {
   if (typeof value !== 'string' || value === '') return [];
