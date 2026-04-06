@@ -27,7 +27,7 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
@@ -156,18 +156,18 @@ const RowActionComponent = ({
       });
     }
   }, [
-    eventId,
-    hit,
-    indexName,
     newFlyoutSystemEnabled,
-    openFlyout,
+    hit,
     overlays,
-    history,
     services,
     store,
+    history,
+    eventId,
+    indexName,
+    handleAlertUpdated,
+    openFlyout,
     tableId,
     telemetry,
-    handleAlertUpdated,
   ]);
 
   const toggleShowNotes = useCallback(() => {

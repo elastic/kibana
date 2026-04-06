@@ -71,12 +71,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
-    for (const stepKey of [
-      'pick_test_group_run_order',
-      'build_scout_tests',
-      'check_oas_snapshot',
-      'build_api_docs',
-    ]) {
+    for (const stepKey of ['pick_test_group_run_order', 'build_scout_tests', 'build_api_docs']) {
       execFileSync('buildkite-agent', [
         'meta-data',
         'set',

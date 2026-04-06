@@ -10998,7 +10998,7 @@
           "BaseMetadata"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 3,
         "deprecated": false,
         "trackAdoption": false,
@@ -11014,7 +11014,7 @@
               "[key: string]:  unknown"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -16208,6 +16208,10 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
               }
             ],
             "children": [
@@ -17492,6 +17496,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
               }
             ],
             "children": [
@@ -18473,14 +18481,6 @@
                 "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
-                "plugin": "@kbn/alerting-v2-schemas",
-                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts"
-              },
-              {
-                "plugin": "@kbn/alerting-v2-schemas",
-                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts"
-              },
-              {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/tools/tool_types/esql/create_schema.ts"
               },
@@ -18685,6 +18685,22 @@
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-lists-common/api/model/list_schemas.gen.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/common.gen.ts"
               },
@@ -18777,20 +18793,8 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/common.gen.ts"
               },
               {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
               },
               {
                 "plugin": "securitySolution",
