@@ -10,8 +10,8 @@ import { useQuery } from '@kbn/react-query';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 interface EntitiesIndexExistsResult {
   indexExists: boolean;

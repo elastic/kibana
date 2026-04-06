@@ -6,7 +6,7 @@
  */
 
 import { useHasGraphVisualizationLicense } from '../../../common/hooks/use_has_graph_visualization_license';
-import { useIsEntityStoreV2Available } from '../../../entity_analytics/components/entity_store/hooks/use_is_entity_store_v2_available';
+import { useIsEntityStoreV2Available } from './use_is_entity_store_v2_available';
 
 /**
  * Hook to determine if the graph visualization should be shown in the alert, event or entity flyout.

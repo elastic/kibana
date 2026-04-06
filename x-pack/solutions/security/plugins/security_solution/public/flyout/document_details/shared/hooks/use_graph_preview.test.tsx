@@ -21,10 +21,8 @@ import {
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
-jest.mock(
-  '../../../../entity_analytics/components/entity_store/hooks/use_is_entity_store_v2_available'
-);
-import { useIsEntityStoreV2Available } from '../../../../entity_analytics/components/entity_store/hooks/use_is_entity_store_v2_available';
+jest.mock('../../../shared/hooks/use_is_entity_store_v2_available');
+import { useIsEntityStoreV2Available } from '../../../shared/hooks/use_is_entity_store_v2_available';
 const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as jest.Mock;
 
 // All EUID source fields (must explicitly handle to avoid mockFieldData bleed-through)
