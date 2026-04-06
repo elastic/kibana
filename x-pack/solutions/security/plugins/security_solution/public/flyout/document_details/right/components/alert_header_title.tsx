@@ -7,27 +7,27 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/discover-utils';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
-import { ALERT_RULE_UUID, ALERT_WORKFLOW_ASSIGNEE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
-import { DocumentStatus } from './status';
-import { useRefetchByScope } from '../hooks/use_refetch_by_scope';
+import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { Assignees } from './assignees';
+import { Assignees } from '../../../../flyout_v2/document/components/assignees';
+import { Notes } from '../../../../flyout_v2/shared/components/notes';
 import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
-import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
-import {
-  ALERT_SUMMARY_PANEL_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
-  RISK_SCORE_TITLE_TEST_ID,
-} from '../../../../flyout_v2/shared/components/test_ids';
-import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import { HEADER_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
+import { LeftPanelNotesTab } from '../../left';
+import { STATUS_TITLE_TEST_ID } from './test_ids';
+import { Title } from '../../../../flyout_v2/document/components/title';
+import { Status } from '../../../../flyout_v2/document/components/status';
+import type { CellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { CellActions } from '../../shared/components/cell_actions';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -40,79 +40,52 @@ const urlParamOverride = { timeline: { isOpen: false } };
  * Alert details flyout right section header
  */
 export const AlertHeaderTitle = memo(() => {
-  const { eventId, scopeId, isRulePreview, refetchFlyoutData, getFieldsData, searchHit } =
-    useDocumentDetailsContext();
+  const { scopeId, isRulePreview, refetchFlyoutData, searchHit } = useDocumentDetailsContext();
+  const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
-  const title = useMemo(() => getDocumentTitle(hit), [hit]);
   const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
-  const ruleTitle = useMemo(
-    () =>
-      href ? (
-        <EuiLink href={href} target="_blank" external={false}>
-          <FlyoutTitle
-            title={title}
-            iconType={'warning'}
-            isLink
-            data-test-subj={HEADER_TITLE_TEST_ID}
-          />
-        </EuiLink>
-      ) : (
-        <FlyoutTitle title={title} iconType={'warning'} data-test-subj={HEADER_TITLE_TEST_ID} />
-      ),
-    [title, href]
-  );
 
   const { refetch } = useRefetchByScope({ scopeId });
-  const alertAssignees = useMemo(
-    () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
-    [getFieldsData]
-  );
-  const onAssigneesUpdated = useCallback(() => {
+
+  const onAlertUpdated = useCallback(() => {
     refetch();
     refetchFlyoutData();
   }, [refetch, refetchFlyoutData]);
 
-  const riskScore = useMemo(
-    () => (
-      <AlertHeaderBlock
-        hasBorder
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
-            defaultMessage="Risk score"
-          />
-        }
-        data-test-subj={RISK_SCORE_TITLE_TEST_ID}
-      >
-        <RiskScore hit={hit} />
-      </AlertHeaderBlock>
+  const renderStatusCellActions = useCallback<CellActionRenderer>(
+    ({ children, field, value }) => (
+      <CellActions field={field} value={value as string | string[] | null | undefined}>
+        {children}
+      </CellActions>
     ),
-    [hit]
+    []
   );
 
-  const assignees = useMemo(
-    () => (
-      <AlertHeaderBlock
-        hasBorder
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.assignedTitle"
-            defaultMessage="Assignees"
-          />
-        }
-        data-test-subj={ASSIGNEES_TITLE_TEST_ID}
-      >
-        <Assignees
-          eventId={eventId}
-          assignedUserIds={alertAssignees}
-          onAssigneesUpdated={onAssigneesUpdated}
-          showAssignees={!isRulePreview}
+  const status = useMemo(
+    () =>
+      isRulePreview ? (
+        <AlertHeaderBlock
+          hasBorder
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.header.statusTitle"
+              defaultMessage="Status"
+            />
+          }
+          data-test-subj={STATUS_TITLE_TEST_ID}
+        >
+          {getEmptyTagValue()}
+        </AlertHeaderBlock>
+      ) : (
+        <Status
+          hit={hit}
+          renderCellActions={renderStatusCellActions}
+          onAlertUpdated={onAlertUpdated}
         />
-      </AlertHeaderBlock>
-    ),
-    [alertAssignees, eventId, isRulePreview, onAssigneesUpdated]
+      ),
+    [hit, isRulePreview, onAlertUpdated, renderStatusCellActions]
   );
 
   return (
@@ -121,7 +94,7 @@ export const AlertHeaderTitle = memo(() => {
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
-      {ruleTitle}
+      <Title hit={hit} titleHref={href ?? undefined} />
       <EuiSpacer size="m" />
       <EuiFlexGroup
         direction="row"
@@ -132,17 +105,23 @@ export const AlertHeaderTitle = memo(() => {
       >
         <EuiFlexItem css={blockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>{status}</EuiFlexItem>
             <EuiFlexItem>
-              <DocumentStatus />
+              <RiskScore hit={hit} />
             </EuiFlexItem>
-            <EuiFlexItem>{riskScore}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={blockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-            <EuiFlexItem>{assignees}</EuiFlexItem>
             <EuiFlexItem>
-              <Notes />
+              <Assignees hit={hit} onAlertUpdated={onAlertUpdated} showAssignees={!isRulePreview} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Notes
+                documentId={hit.raw._id ?? ''}
+                onShowNotes={openNotesTab}
+                disabled={isRulePreview}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

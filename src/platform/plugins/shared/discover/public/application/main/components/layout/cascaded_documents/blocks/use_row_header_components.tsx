@@ -381,6 +381,10 @@ const textSlotStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noValue', {
+  defaultMessage: '(blank)',
+});
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
@@ -461,13 +465,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
                           <EuiBadge color="hollow" css={textSlotStyles}>
                             {Array.isArray(aggregatedValue)
                               ? aggregatedValue
-                                  .map(
-                                    (value) =>
-                                      value ||
-                                      i18n.translate('discover.dataCascade.row.action.noValue', {
-                                        defaultMessage: '(blank)',
-                                      })
-                                  )
+                                  .map((value) => value || NO_VALUE_PLACEHOLDER)
                                   .join(', ')
                               : '-'}
                           </EuiBadge>

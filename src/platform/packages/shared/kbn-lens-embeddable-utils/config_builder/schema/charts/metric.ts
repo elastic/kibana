@@ -32,7 +32,7 @@ import {
 } from './shared';
 import {
   horizontalAlignmentSchema,
-  verticalAlignmentSchema,
+  metricValuePositionSchema,
   leftRightAlignmentSchema,
   placementSchema,
 } from '../alignments';
@@ -186,11 +186,13 @@ const metricStatePrimaryMetricOptionsSchema = {
   /**
    * Position of the primary metric value. Possible values:
    * - 'top': Value appears above the labels
+   * - 'middle': Value appears between the labels
    * - 'bottom': Value appears below the labels
    */
   position: schema.maybe(
-    verticalAlignmentSchema({
-      meta: { description: 'Position of the primary metric value (top or bottom)' },
+    metricValuePositionSchema({
+      meta: { description: 'Position of the primary metric value (top, middle, or bottom)' },
+      defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryPosition,
     })
   ),
   /**
