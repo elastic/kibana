@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { lensApiStateSchema } from '@kbn/lens-embeddable-utils';
 import {
-  lensCommonSavedObjectSchemaV3,
-  lensItemDataSchemaV3,
-  lensSavedObjectSchemaV3,
+  lensCommonSavedObjectSchemaV2,
+  lensItemDataSchemaV2,
+  lensSavedObjectSchemaV2,
 } from '../../../../../content_management';
 import { pickFromObjectSchema } from '../../../../../utils';
 
@@ -19,7 +19,7 @@ import { pickFromObjectSchema } from '../../../../../utils';
  */
 export const lensItemMetaSchema = schema.object(
   {
-    ...pickFromObjectSchema(lensCommonSavedObjectSchemaV3.getPropSchemas(), [
+    ...pickFromObjectSchema(lensCommonSavedObjectSchemaV2.getPropSchemas(), [
       'type',
       'createdAt',
       'updatedAt',
@@ -37,8 +37,8 @@ export const lensItemMetaSchema = schema.object(
  */
 export const lensResponseItemSchema = schema.object(
   {
-    id: lensSavedObjectSchemaV3.getPropSchemas().id,
-    data: schema.oneOf([lensApiStateSchema, lensItemDataSchemaV3]),
+    id: lensSavedObjectSchemaV2.getPropSchemas().id,
+    data: schema.oneOf([lensApiStateSchema, lensItemDataSchemaV2]),
     meta: lensItemMetaSchema,
   },
   { unknowns: 'forbid', meta: { id: 'visualizationResponse' } }

@@ -8,22 +8,21 @@
 import type { LensAttributesV0 } from './v0';
 import type { LensAttributesV1 } from './v1';
 import type { LensAttributesV2 } from './v2';
-import type { LensAttributesV3 } from './v3';
 
 export function isLensAttributesV0(
-  attributes: LensAttributesV0 | LensAttributesV1 | LensAttributesV2 | LensAttributesV3
+  attributes: LensAttributesV0 | LensAttributesV1 | LensAttributesV2
 ): attributes is LensAttributesV0 {
   return !attributes.version;
 }
 
 export function isLensAttributesV1(
-  attributes: LensAttributesV0 | LensAttributesV1 | LensAttributesV2 | LensAttributesV3
+  attributes: LensAttributesV0 | LensAttributesV1 | LensAttributesV2
 ): attributes is LensAttributesV1 {
   return attributes.version === 1;
 }
 
 export function isLensAttributesV2(
-  attributes: LensAttributesV0 | LensAttributesV1 | LensAttributesV2 | LensAttributesV3
+  attributes: LensAttributesV0 | LensAttributesV1 | LensAttributesV2
 ): attributes is LensAttributesV2 {
   return attributes.version === 2;
 }

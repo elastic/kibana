@@ -13,7 +13,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { Suggestion } from './types';
 
-const LENS_ITEM_LATEST_VERSION = 3 as const;
+const LENS_ITEM_LATEST_VERSION = 2 as const;
 
 interface LensAttributesFromSuggestion {
   references: Array<{ name: string; id: string; type: string }>;
