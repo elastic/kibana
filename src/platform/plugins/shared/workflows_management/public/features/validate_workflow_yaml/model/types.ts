@@ -163,9 +163,13 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'if-condition-validation',
 ] as const;
 
+export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
-  return [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
-    owner as YamlValidationResult['owner']
+  return (
+    [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
+      owner as YamlValidationResult['owner']
+    ) || owner === BATCHED_CUSTOM_MARKER_OWNER
   );
 }
 
@@ -184,3 +188,7 @@ export type YamlValidationResult =
   | YamlValidationResultTriggerConditionError
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError;
+
+export function validationResultFingerprint(r: YamlValidationResult): string {
+  return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;
+}
