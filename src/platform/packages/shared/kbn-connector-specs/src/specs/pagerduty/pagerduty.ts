@@ -32,13 +32,6 @@ import type {
   ListTeamsInput,
   ListUsersInput,
 } from './types';
-import searchWorkflow from './workflows/search.yaml';
-import getByIdWorkflow from './workflows/get_by_id.yaml';
-import getIncidentsWorkflow from './workflows/get_incidents.yaml';
-import getOncallsWorkflow from './workflows/get_oncalls.yaml';
-import getSchedulesWorkflow from './workflows/get_schedules.yaml';
-import getEscalationPoliciesWorkflow from './workflows/get_escalation_policies.yaml';
-import whoAmIWorkflow from './workflows/who_am_i.yaml';
 import {
   ListToolsInputSchema,
   GetUserDataInputSchema,
@@ -287,14 +280,4 @@ export const PagerdutyConnector: ConnectorSpec = {
       });
     },
   },
-
-  agentBuilderWorkflows: [
-    searchWorkflow,
-    getByIdWorkflow,
-    getIncidentsWorkflow,
-    getOncallsWorkflow,
-    getSchedulesWorkflow,
-    getEscalationPoliciesWorkflow,
-    whoAmIWorkflow,
-  ],
 };
