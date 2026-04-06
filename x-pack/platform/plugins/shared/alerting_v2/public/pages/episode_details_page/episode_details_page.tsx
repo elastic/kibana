@@ -36,7 +36,6 @@ import { RelatedAlertEpisode } from '@kbn/alerting-v2-episodes-ui/components/rel
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRelatedAlertEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_related_alert_episodes_query';
-import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule_http';
 import {
   getEpisodeDurationMs,
   getGroupHashFromEpisodeRows,
@@ -51,6 +50,7 @@ import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/component
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
 import type { AlertingV2EpisodesKibanaServices } from '../../episodes_kibana_services';
@@ -124,11 +124,7 @@ export function EpisodeDetailsPage() {
   const ruleId = useMemo(() => getRuleIdFromEpisodeRows(eventRows), [eventRows]);
   const groupHash = useMemo(() => getGroupHashFromEpisodeRows(eventRows), [eventRows]);
 
-  const { data: rule, isLoading: isLoadingRule } = useFetchRule({
-    http,
-    ruleId,
-    toastDanger: (message) => notifications.toasts.addDanger(message),
-  });
+  const { data: rule, isLoading: isLoadingRule } = useFetchRule(ruleId);
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
