@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, within } from '@testing-library/react';
+import { screen, cleanup, act, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -453,6 +453,11 @@ describe('Trusted devices form', () => {
     it('should show performance warning when operator is matches and value contains "**"', async () => {
       await userEvent.click(getConditionsOperatorSelect());
       await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
+
+      // Wait for operator popover to close (EuiFocusTrap blocks value field interaction)
+      await waitFor(() => {
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      });
 
       // ensure the component receives the updated item with type: 'wildcard'
       rerenderWithLatestProps();
