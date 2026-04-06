@@ -464,7 +464,7 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
-        filter: '(metadata.labels: "prod")',
+        filter: '(metadata.tags: "prod")',
         search: undefined,
         sortField: 'name',
         sortOrder: 'asc',

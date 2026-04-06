@@ -31,7 +31,7 @@ describe('buildRuleSearchQuery', () => {
   });
 
   it('normalizes leading punctuation so name searches can still match analyzed text', () => {
-    expect(buildRuleSearchQuery('#1')).toBe('(metadata.name: 1* OR metadata.labels: 1*)');
+    expect(buildRuleSearchQuery('#1')).toBe('(metadata.name: 1* OR metadata.tags: 1*)');
   });
 });
 

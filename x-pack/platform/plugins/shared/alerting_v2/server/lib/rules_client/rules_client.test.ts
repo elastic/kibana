@@ -876,7 +876,7 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.labels: alerts*'
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
           ),
         })
       );
