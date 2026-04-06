@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import FormData from 'form-data';
+import type { RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { apiTest, testData } from '../fixtures';
+
+const { MANAGEMENT_API } = testData;
+
+function generateVisualizationNdjson(startIdx: number, endIdx: number): string {
+  const lines: string[] = [];
+  for (let i = startIdx; i <= endIdx; i++) {
+    lines.push(
+      JSON.stringify({
+        type: 'visualization',
+        id: `test-vis-${i}`,
+        attributes: {
+          title: `My visualization (${i})`,
+          uiStateJSON: '{}',
+          visState: '{}',
+        },
+        references: [],
+      })
+    );
+  }
+  return lines.join('\n');
+}
+
+apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentAgnostic }, () => {
+  let adminCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
+    adminCredentials = await requestAuth.getAdminApiKey();
+    await kbnClient.savedObjects.cleanStandardList();
+
+    for (const [start, end] of [
+      [1, 6000],
+      [6001, 12000],
+    ]) {
+      const ndjson = generateVisualizationNdjson(start, end);
+      const formData = new FormData();
+      formData.append('file', ndjson, 'export.ndjson');
+
+      const response = await apiClient.post(MANAGEMENT_API.IMPORT, {
+        headers: {
+          ...adminCredentials.apiKeyHeader,
+          ...testData.COMMON_HEADERS,
+          ...formData.getHeaders(),
+        },
+        body: formData.getBuffer(),
+      });
+      expect(response).toHaveStatusCode(200);
+    }
+  });
+
+  apiTest.afterAll(async ({ kbnClient }) => {
+    const batches = [
+      [1, 3000],
+      [3001, 6000],
+      [6001, 9000],
+      [9001, 12000],
+    ];
+    for (const [start, end] of batches) {
+      const objects = [];
+      for (let i = start; i <= end; i++) {
+        objects.push({ type: 'visualization', id: `test-vis-${i}` });
+      }
+      await kbnClient.savedObjects.bulkDelete({ objects });
+    }
+  });
+
+  apiTest('returns the correct count for each included types', async ({ apiClient }) => {
+    const response = await apiClient.post(MANAGEMENT_API.SCROLL_COUNT, {
+      headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+      body: { typesToInclude: ['visualization'] },
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toStrictEqual({ visualization: 12000 });
+  });
+});
