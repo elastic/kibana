@@ -68,7 +68,7 @@ export const DefaultExperienceCallout = ({ isConversationApp }: DefaultExperienc
         onDismiss={onDismiss}
         iconType="info"
         title={i18n.translate('xpack.aiAssistant.defaultExperienceCallout.title', {
-          defaultMessage: 'AI Assistant is moving to AI Agent',
+          defaultMessage: 'AI Agent is becoming the default',
         })}
         size="m"
         color="primary"
