@@ -87,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
             filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
+            queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -569,6 +570,7 @@ export default function ({ getService }: FtrProviderContext) {
               'readAlertDeleteSettings',
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
+            queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           reserved: [
