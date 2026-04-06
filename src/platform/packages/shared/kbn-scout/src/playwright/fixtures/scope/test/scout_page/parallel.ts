@@ -34,6 +34,16 @@ export const scoutPageParallelFixture = base.extend<
     extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }));
 
+    // Suppress announcement modals that check localStorage before the page renders,
+    // avoiding overlay masks that block UI interactions in tests.
+    await page.addInitScript(() => {
+      const orig = Storage.prototype.getItem;
+      Storage.prototype.getItem = function (key: string) {
+        if (key.startsWith('agentBuilder.announcementModal.')) return 'true';
+        return orig.call(this, key);
+      };
+    });
+
     log.serviceLoaded(`scoutPage`);
     await use(extendedPage);
   },
