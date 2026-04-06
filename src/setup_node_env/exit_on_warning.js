@@ -107,11 +107,6 @@ var IGNORE_WARNINGS = [
     messageContains:
       'Keys with collection values will be stringified due to JS Object restrictions',
   },
-  // Node.js v22+ warns when both FORCE_COLOR and NO_COLOR are set;
-  // Playwright sets FORCE_COLOR while some environments also set NO_COLOR.
-  {
-    messageContains: "The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set",
-  },
 ];
 
 if (process.noProcessWarnings !== true) {
