@@ -15,7 +15,7 @@ const baseRule = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'My Rule', labels: ['prod', 'infra'] },
+  metadata: { name: 'My Rule', tags: ['prod', 'infra'] },
 } as RuleApiResponse;
 
 const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -45,7 +45,7 @@ describe('RuleHeaderDescription', () => {
       metadata: {
         name: 'My Rule',
         description: 'Some description',
-        labels: ['prod', 'infra'],
+        tags: ['prod', 'infra'],
       },
     } as RuleApiResponse;
     wrap(<RuleHeaderDescription rule={rule} />);
@@ -53,15 +53,15 @@ describe('RuleHeaderDescription', () => {
     expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
   });
 
-  it('returns null when labels are empty and no description', () => {
+  it('returns null when tags are empty and no description', () => {
     const { container } = wrap(
       <RuleHeaderDescription rule={{ ...baseRule, metadata: { name: 'No Tags' } }} />
     );
     expect(container.innerHTML).toBe('');
   });
 
-  it('returns null when labels are undefined and no description', () => {
-    const rule = { ...baseRule, metadata: { name: 'No Labels' } } as RuleApiResponse;
+  it('returns null when tags are undefined and no description', () => {
+    const rule = { ...baseRule, metadata: { name: 'No Tags' } } as RuleApiResponse;
     const { container } = wrap(<RuleHeaderDescription rule={rule} />);
     expect(container.innerHTML).toBe('');
   });

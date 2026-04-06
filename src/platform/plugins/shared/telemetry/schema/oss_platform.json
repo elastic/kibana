@@ -11467,12 +11467,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "dataSources:enabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "workflows:ui:enabled": {
           "type": "boolean",
           "_meta": {
@@ -11823,6 +11817,12 @@
         },
         "elasticConsole:enabled": {
           "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "query_activity:minRunningTime": {
+          "type": "long",
           "_meta": {
             "description": "Non-default value of setting."
           }
