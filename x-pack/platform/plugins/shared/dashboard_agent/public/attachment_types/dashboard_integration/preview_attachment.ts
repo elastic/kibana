@@ -33,23 +33,23 @@ export const previewAttachmentInDashboard = async ({
   }
 
   // Check if the attachment's linked dashboard still exists
-  const linkedDashboardExists =
-    attachment.origin && (await checkSavedDashboardExist(attachment.origin));
+  const linkedDashboardExists = attachment.origin
+    ? await checkSavedDashboardExist(attachment.origin)
+    : false;
 
-  // b) Attachment's linked dashboard has been deleted -> clear origin and apply state
-  if (attachment.origin && !linkedDashboardExists) {
-    await updateOrigin('');
+  if (!currentSavedObjectId && !linkedDashboardExists) {
+    // b) Viewing unsaved dashboard + attachment linked to deleted dashboard
     dashboardApi.setState(dashboardState);
     return;
   }
 
-  // c) Attachment linked to different existing dashboard -> navigate to linked dashboard
+  // c) Attachment linked to different existing dashboard -> navigate to linked dashboard or a new unsaved dashboard with the attachment's state
   dashboardApi.locator?.navigate({
     title: dashboardState.title,
     description: dashboardState.description,
     panels: dashboardState.panels,
     time_range: dashboardState.time_range,
-    dashboardId: attachment.origin,
+    dashboardId: linkedDashboardExists ? attachment.origin : undefined,
     viewMode: 'edit',
   });
 };

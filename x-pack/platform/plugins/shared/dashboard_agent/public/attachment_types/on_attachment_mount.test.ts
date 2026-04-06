@@ -106,6 +106,7 @@ describe('onAttachmentMount - manual changes sync', () => {
   let dashboardAppClientApi$: BehaviorSubject<MockDashboardApi | undefined>;
   let chat$: Subject<ChatEvent>;
   let getAttachment: jest.Mock;
+  let checkSavedDashboardExist: jest.Mock;
   let updateOrigin: jest.Mock;
   let addAttachment: jest.Mock;
   let cleanup: () => void;
@@ -116,6 +117,7 @@ describe('onAttachmentMount - manual changes sync', () => {
     dashboardAppClientApi$ = new BehaviorSubject<MockDashboardApi | undefined>(undefined);
     chat$ = new Subject<ChatEvent>();
     getAttachment = jest.fn().mockReturnValue(createMockAttachment());
+    checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
     updateOrigin = jest.fn().mockResolvedValue(undefined);
     addAttachment = jest.fn();
   });
@@ -127,6 +129,7 @@ describe('onAttachmentMount - manual changes sync', () => {
 
   const mountHandler = () => {
     const agentBuilder = {
+      addAttachment,
       events: { chat$ },
     } as unknown as AgentBuilderPluginStart;
 
@@ -135,6 +138,7 @@ describe('onAttachmentMount - manual changes sync', () => {
       dashboardPlugin: {
         dashboardAppClientApi$,
       },
+      checkSavedDashboardExist,
       getAttachment,
       updateOrigin,
       addAttachment,
@@ -356,7 +360,7 @@ describe('onAttachmentMount - manual changes sync', () => {
   });
 
   describe('save origin sync', () => {
-    it('updates origin on the first save of an unsaved dashboard', () => {
+    it('updates origin on the first save of an unsaved dashboard', async () => {
       getAttachment.mockReturnValue(createMockAttachment({ origin: undefined }));
 
       mountHandler();
@@ -367,11 +371,12 @@ describe('onAttachmentMount - manual changes sync', () => {
         dashboardId: 'new-dashboard-id',
         dashboardState: mockSavedDashboardState,
       });
+      await Promise.resolve();
 
       expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
     });
 
-    it('updates origin on save as when the attachment is linked to the previous dashboard', () => {
+    it('updates origin on save as when the attachment is linked to the previous dashboard', async () => {
       getAttachment.mockReturnValue(createMockAttachment({ origin: 'dashboard-a' }));
 
       mountHandler();
@@ -382,11 +387,29 @@ describe('onAttachmentMount - manual changes sync', () => {
         dashboardId: 'dashboard-b',
         dashboardState: mockSavedDashboardState,
       });
+      await Promise.resolve();
 
       expect(updateOrigin).toHaveBeenCalledWith('dashboard-b');
     });
 
-    it('does not relink the attachment after navigating to a different saved dashboard', () => {
+    it('does not check dashboard existence when saving the dashboard already linked by origin', async () => {
+      getAttachment.mockReturnValue(createMockAttachment({ origin: 'dashboard-a' }));
+
+      mountHandler();
+      dashboardAppClientApi$.next(mockApi);
+
+      mockApi.onSave$.next({
+        previousDashboardId: 'some-other-dashboard',
+        dashboardId: 'dashboard-a',
+        dashboardState: mockSavedDashboardState,
+      });
+      await Promise.resolve();
+
+      expect(checkSavedDashboardExist).not.toHaveBeenCalled();
+      expect(updateOrigin).toHaveBeenCalledWith('dashboard-a');
+    });
+
+    it('does not relink the attachment after navigating to a different saved dashboard', async () => {
       getAttachment.mockReturnValue(createMockAttachment({ origin: 'dashboard-a' }));
       mockApi.savedObjectId$.next('dashboard-b');
 
@@ -398,8 +421,27 @@ describe('onAttachmentMount - manual changes sync', () => {
         dashboardId: 'dashboard-b',
         dashboardState: mockSavedDashboardState,
       });
+      await Promise.resolve();
 
       expect(updateOrigin).not.toHaveBeenCalled();
+    });
+
+    it('relinks to the current dashboard when the stored origin no longer exists', async () => {
+      getAttachment.mockReturnValue(createMockAttachment({ origin: 'deleted-dashboard' }));
+      checkSavedDashboardExist.mockResolvedValue(false);
+
+      mountHandler();
+      dashboardAppClientApi$.next(mockApi);
+
+      mockApi.onSave$.next({
+        previousDashboardId: undefined,
+        dashboardId: 'current-dashboard',
+        dashboardState: mockSavedDashboardState,
+      });
+      await Promise.resolve();
+
+      expect(checkSavedDashboardExist).toHaveBeenCalledWith('deleted-dashboard');
+      expect(updateOrigin).toHaveBeenCalledWith('current-dashboard');
     });
   });
 

@@ -57,7 +57,13 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
     getIcon: () => 'productDashboard',
     onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
-      onAttachmentMount({ ...params, agentBuilder, dashboardPlugin, addAttachment }),
+      onAttachmentMount({
+        ...params,
+        agentBuilder,
+        dashboardPlugin,
+        addAttachment,
+        checkSavedDashboardExist,
+      }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}

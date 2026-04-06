@@ -15,6 +15,7 @@ import { createOriginSyncSubscription } from './origin_sync_subscription';
 export interface DashboardAttachmentMountSyncParams {
   api: DashboardApi;
   getAttachment: () => DashboardAttachment;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   updateOrigin: (origin: string) => Promise<unknown>;
   addAttachment: (attachment: AttachmentInput) => void;
 }
@@ -22,6 +23,7 @@ export interface DashboardAttachmentMountSyncParams {
 export const createDashboardAttachmentMountSync$ = ({
   api,
   getAttachment,
+  checkSavedDashboardExist,
   updateOrigin,
   addAttachment,
 }: DashboardAttachmentMountSyncParams): RxObservable<never> => {
@@ -29,6 +31,7 @@ export const createDashboardAttachmentMountSync$ = ({
     createOriginSyncSubscription({
       api,
       attachmentOrigin: getAttachment().origin,
+      checkSavedDashboardExist,
       onOriginChange: (origin) => {
         void updateOrigin(origin);
       },

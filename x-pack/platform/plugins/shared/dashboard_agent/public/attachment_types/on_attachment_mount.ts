@@ -18,6 +18,7 @@ export interface OnAttachmentMountParams extends AttachmentLifecycleParams<Dashb
   agentBuilder: AgentBuilderPluginStart;
   dashboardPlugin: DashboardStart;
   addAttachment: (attachment: AttachmentInput) => void;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
 /**
@@ -27,9 +28,10 @@ export interface OnAttachmentMountParams extends AttachmentLifecycleParams<Dashb
 export const onAttachmentMount = ({
   agentBuilder,
   dashboardPlugin,
+  addAttachment,
+  checkSavedDashboardExist,
   getAttachment,
   updateOrigin,
-  addAttachment,
 }: OnAttachmentMountParams) => {
   const apiSubscription = dashboardPlugin.dashboardAppClientApi$
     .pipe(
@@ -39,8 +41,9 @@ export const onAttachmentMount = ({
               createDashboardAttachmentMountSync$({
                 api,
                 getAttachment,
-                updateOrigin,
                 addAttachment,
+                checkSavedDashboardExist,
+                updateOrigin,
               }),
               new Observable<never>(() => createAgentLiveUpdatesSubscription({ agentBuilder, api }))
             )

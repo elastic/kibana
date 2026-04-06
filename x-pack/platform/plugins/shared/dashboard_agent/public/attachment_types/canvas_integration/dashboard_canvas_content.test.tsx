@@ -191,8 +191,6 @@ describe('DashboardCanvasContent', () => {
     });
 
     it('should include existing dashboard ID when saved object exists', async () => {
-      const checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
-
       const attachmentWithOrigin: DashboardAttachment = {
         ...mockAttachment,
         origin: 'existing-dashboard-id',
@@ -200,7 +198,6 @@ describe('DashboardCanvasContent', () => {
 
       const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
         attachment: attachmentWithOrigin,
-        checkSavedDashboardExist,
       });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
@@ -210,7 +207,6 @@ describe('DashboardCanvasContent', () => {
         await editButton?.handler();
       });
 
-      expect(checkSavedDashboardExist).toHaveBeenCalledWith('existing-dashboard-id');
       expect(mockApi.locator?.navigate).toHaveBeenCalledWith(
         expect.objectContaining({
           dashboardId: 'existing-dashboard-id',
@@ -221,8 +217,6 @@ describe('DashboardCanvasContent', () => {
 
   describe('Save button', () => {
     it('should run quick save when linked saved object exists', async () => {
-      const checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
-
       const attachmentWithOrigin: DashboardAttachment = {
         ...mockAttachment,
         origin: 'existing-dashboard-id',
@@ -230,7 +224,6 @@ describe('DashboardCanvasContent', () => {
 
       const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
         attachment: attachmentWithOrigin,
-        checkSavedDashboardExist,
       });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
