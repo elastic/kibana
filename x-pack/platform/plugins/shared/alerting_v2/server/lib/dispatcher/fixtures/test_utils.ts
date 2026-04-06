@@ -84,6 +84,7 @@ export function createNotificationPolicy(
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
+    tags: [],
     ...overrides,
   };
 }

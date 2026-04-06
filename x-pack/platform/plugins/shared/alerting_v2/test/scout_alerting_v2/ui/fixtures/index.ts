@@ -28,10 +28,11 @@ export const test = baseTest.extend<AlertingV2UiFixtures, ScoutWorkerFixtures>({
     },
     use: (pageObjects: AlertingV2UiFixtures['pageObjects']) => Promise<void>
   ) => {
+    const discoverAppMenu = createLazyPageObject(DiscoverAppMenu, page);
     const extendedPageObjects = {
       ...pageObjects,
-      discoverAppMenu: createLazyPageObject(DiscoverAppMenu, page),
-      ruleForm: createLazyPageObject(RuleFormPage, page),
+      discoverAppMenu,
+      ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu),
     };
 
     await use(extendedPageObjects);
