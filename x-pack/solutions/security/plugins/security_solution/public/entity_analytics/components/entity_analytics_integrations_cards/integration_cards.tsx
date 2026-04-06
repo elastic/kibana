@@ -79,7 +79,7 @@ export const IntegrationCards = ({
             aria-disabled={!isClickable || undefined}
             tabIndex={!isClickable ? -1 : undefined}
             css={css`
-              max-width: ${maxCardWidth}px;
+              ${maxCardWidth != null && `max-width: ${maxCardWidth}px;`}
               ${!isClickable &&
               `
                 pointer-events: none;

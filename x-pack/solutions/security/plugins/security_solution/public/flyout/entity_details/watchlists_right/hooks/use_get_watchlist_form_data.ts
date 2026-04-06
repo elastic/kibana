@@ -11,6 +11,7 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/
 import type { GetWatchlistResponse } from '../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import type { SourceType } from './rule_based_source_helpers';
 
 export type WatchlistFormValues = CreateWatchlistRequestBodyInput;
 
@@ -69,12 +70,16 @@ export const useGetWatchlistFormData = (watchlistId?: string) => {
     [entitySourcesQuery.data]
   );
 
-  // Map source type → persisted ID so the mutation layer knows whether to
-  // create or update each source independently.
-  const ruleBasedSourceIds = useMemo<Record<string, string>>(() => {
-    const map: Record<string, string> = {};
+  /**
+   * Maps source type → persisted ID so the mutation layer knows whether to
+   * create or update each source independently.
+   * A server-side upsert endpoint for entity sources would remove the need
+   * for this client side mapping. Issue here: https://github.com/elastic/security-team/issues/14466?issue=elastic%7Csecurity-team%7C16659
+   */
+  const ruleBasedSourceIds = useMemo<Partial<Record<SourceType, string>>>(() => {
+    const map: Partial<Record<SourceType, string>> = {};
     for (const s of ruleBasedSources) {
-      if (s.id && s.type) {
+      if (s.id && (s.type === 'index' || s.type === 'store')) {
         map[s.type] = s.id;
       }
     }

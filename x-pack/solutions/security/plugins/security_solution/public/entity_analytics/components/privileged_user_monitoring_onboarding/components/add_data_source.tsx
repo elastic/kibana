@@ -24,7 +24,6 @@ import { useBoolean } from '@kbn/react-hooks';
 import { IndexSelectorModal } from './select_index_modal';
 import { UploadPrivilegedUsersModal } from './file_uploader/upload_privileged_users_modal';
 import { IntegrationCards } from '../../entity_analytics_integrations_cards';
-import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../../common/constants';
 
 interface AddDataSourcePanelProps {
   onComplete: (userCount: number) => void;
@@ -70,10 +69,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
           </EuiFlexGrid>
         }
       >
-        <IntegrationCards
-          onIntegrationInstalled={onComplete}
-          redirectPath={ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH}
-        />
+        <IntegrationCards onIntegrationInstalled={onComplete} />
       </Suspense>
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceAround" responsive={false}>

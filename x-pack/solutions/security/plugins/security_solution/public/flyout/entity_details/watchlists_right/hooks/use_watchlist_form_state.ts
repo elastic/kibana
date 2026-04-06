@@ -7,6 +7,7 @@
 
 import type { WatchlistsFlyoutMode } from '..';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import type { SourceType } from './rule_based_source_helpers';
 import { useCreateWatchlistFormState } from './use_watchlist_form_state_create';
 import { useEditWatchlistFormState } from './use_watchlist_form_state_edit';
 
@@ -19,7 +20,7 @@ export interface WatchlistFormState {
   watchlist: CreateWatchlistRequestBodyInput;
   normalizedWatchlistId?: string;
   /** Maps source type ('store' | 'index') → persisted entity-source ID. */
-  ruleBasedSourceIds: Record<string, string>;
+  ruleBasedSourceIds: Partial<Record<SourceType, string>>;
   isEditMode: boolean;
   isDisabled: boolean;
   isNameInvalid: boolean;

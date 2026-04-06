@@ -11,11 +11,11 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/
 import type { UpdateWatchlistEntitySourceRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/data_source/update.gen';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import type { SourceType } from './rule_based_source_helpers';
 
 export interface UseUpdateWatchlistOptions {
   watchlistId?: string;
-  /** Maps source type ('store' | 'index') → persisted entity-source ID. */
-  ruleBasedSourceIds: Record<string, string>;
+  ruleBasedSourceIds: Partial<Record<SourceType, string>>;
   watchlist: CreateWatchlistRequestBodyInput;
   spaceId?: string;
   onSuccess?: () => void;

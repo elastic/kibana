@@ -6,6 +6,7 @@
  */
 
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import type { SourceType } from './rule_based_source_helpers';
 import { useCreateWatchlist } from './use_create_watchlist';
 import { useUpdateWatchlist } from './use_update_watchlist';
 
@@ -13,7 +14,7 @@ export interface UseWatchlistMutationsParams {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
   /** Maps source type ('store' | 'index') → persisted entity-source ID. */
-  ruleBasedSourceIds: Record<string, string>;
+  ruleBasedSourceIds: Partial<Record<SourceType, string>>;
   spaceId?: string;
   isEditMode: boolean;
   onSuccess: () => void;

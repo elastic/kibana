@@ -304,7 +304,7 @@ describe(
       cy.get('[data-test-subj="watchlist-flyout-header"]').contains('Edit watchlist');
 
       cy.contains('Managed Data Sources').should('exist');
-      cy.contains('Rule Based Data Sources').should('not.exist');
+      cy.contains('Rule Based Data Sources').should('exist');
       cy.get('input[name="WatchlistName"]').should('have.value', managedWatchlist.name);
       cy.get('[data-test-subj="watchlist-flyout-cancel"]').click();
     });

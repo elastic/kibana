@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLocation } from 'react-router-dom';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { IntegrationCards } from '../../../entity_analytics/components/entity_analytics_integrations_cards';
 import { PRIVILEGED_USER_WATCHLIST_NAME } from '../../../../common/constants';
@@ -18,9 +17,6 @@ export interface ManagedWatchlistSourceInputProps {
 }
 
 export const ManagedWatchlistSourceInput = ({ watchlist }: ManagedWatchlistSourceInputProps) => {
-  const location = useLocation();
-  const currentPath = `${location.pathname}${location.search}${location.hash}`;
-
   // Currently, Privileged User Monitoring is our only managed source that uses IntegrationCards.
   // In the future, this can be expanded into a switch statement or component map
   // when more managed source types are added.
@@ -62,7 +58,12 @@ export const ManagedWatchlistSourceInput = ({ watchlist }: ManagedWatchlistSourc
             isClickable={false}
           />
         ) : (
-          <div>{'Managed source type not supported yet.'}</div>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.watchlists.flyout.managedSourceNotSupported"
+              defaultMessage="Managed source type not supported yet."
+            />
+          </EuiText>
         )}
       </EuiFormRow>
     </>
