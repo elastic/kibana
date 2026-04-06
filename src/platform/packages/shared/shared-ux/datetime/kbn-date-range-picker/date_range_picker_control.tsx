@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
-import { resolveInitialFocus } from './utils';
+import { isRelativeToNow, resolveInitialFocus } from './utils';
 import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refresh_button';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
@@ -57,16 +57,19 @@ export function DateRangePickerControl() {
     hasAutoRefresh,
     autoRefreshSecondsRemaining,
     toggleAutoRefresh,
+    timeRange,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
 
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
+  const wasClearedRef = useRef(false);
 
   /** Focus the button when transitioning from editing to idle. */
   useEffect(() => {
     if (wasEditingRef.current && !isEditing) {
+      wasClearedRef.current = false;
       buttonRef.current?.focus();
     }
     wasEditingRef.current = isEditing;
@@ -74,7 +77,7 @@ export function DateRangePickerControl() {
 
   useSelectTextPartsWithArrowKeys({
     inputRef,
-    isActive: isEditing,
+    isActive: isEditing && !wasClearedRef.current,
     // TODO this is simply increasing/decreasing integers,
     // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
     onModifyPart: ({ text: currentText, part, action }) => {
@@ -97,6 +100,7 @@ export function DateRangePickerControl() {
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
+    if (nextValue === '') wasClearedRef.current = true;
     setText(nextValue);
     onInputChange?.(nextValue);
   };
@@ -147,10 +151,18 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
-  // The CSS custom property --kbnDateRangePickerWidth is not set by this component,
-  // allowing consumers to override the width; 21.25rem is the default fallback.
+  const rangeIsRelativeToNow = isRelativeToNow(timeRange);
+  // Hide the badge when not collapsed and the range is relative-to-now,
+  // because the label (e.g. "Last 15 minutes") already conveys the duration.
+  const hideBadge = rangeIsRelativeToNow && !collapsed;
+
+  // The CSS custom properties are not set by this component,
+  // allowing consumers to override the widths; the rem values are defaults.
   const wrapperRestrictedStyles = css`
-    inline-size: var(--kbnDateRangePickerWidth, 21.25rem);
+    inline-size: var(--kbnDateRangePickerWidthRestricted, 21.25rem);
+  `;
+  const wrapperAutoInputStyles = css`
+    inline-size: var(--kbnDateRangePickerInputWidthAuto, 24rem);
   `;
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
@@ -160,7 +172,13 @@ export function DateRangePickerControl() {
     <div
       ref={controlRef}
       onKeyDown={onControlKeyDown}
-      css={width === 'restricted' ? wrapperRestrictedStyles : undefined}
+      css={
+        width === 'restricted'
+          ? wrapperRestrictedStyles
+          : width === 'auto' && isEditing
+          ? wrapperAutoInputStyles
+          : undefined
+      }
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
@@ -214,15 +232,20 @@ export function DateRangePickerControl() {
           >
             <EuiFormControlButton
               data-test-subj="dateRangePickerControlButton"
+              data-date-range={`${timeRange.start} to ${timeRange.end}`}
               buttonRef={buttonRef}
               aria-label={collapsed ? displayText : undefined}
-              value={collapsed ? '' : displayText}
+              value={collapsed ? undefined : displayText}
               onClick={onButtonClick}
               isInvalid={isInvalid}
               disabled={disabled}
               compressed={compressed}
             >
-              <EuiBadge>{displayShortDuration ?? '--'}</EuiBadge>
+              {!hideBadge && (
+                <EuiBadge data-test-subj="dateRangePickerDurationBadge">
+                  {displayShortDuration ?? '--'}
+                </EuiBadge>
+              )}
             </EuiFormControlButton>
           </EuiToolTip>
         )}

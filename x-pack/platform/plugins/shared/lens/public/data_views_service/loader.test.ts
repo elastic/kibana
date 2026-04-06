@@ -499,7 +499,6 @@ describe('loader', () => {
           query: 'FROM logs-*',
           options: {
             skipFetchFields: true,
-            id: 'dv1',
             createNewInstanceEvenIfCachedOneAvailable: true,
           },
           http: mockHttp,

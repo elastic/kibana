@@ -26,6 +26,9 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab';
 import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
+import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
+import { EntityResolutionTab } from '../components/entity_resolution';
+import { useUiSetting$ } from '../../common/lib/kibana';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
@@ -44,6 +47,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID,
   RISK_SCORE_TAB_TEST_ID,
   ASSET_CRITICALITY_TAB_TEST_ID,
+  WATCHLISTS_TAB_TEST_ID,
   ENGINE_STATUS_TAB_TEST_ID,
   ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
@@ -51,6 +55,8 @@ import {
 export enum TabId {
   RiskScore = 'risk_score',
   AssetCriticality = 'asset_criticality',
+  Watchlists = 'watchlists',
+  EntityResolution = 'entity_resolution',
   Status = 'status',
 }
 
@@ -85,6 +91,8 @@ export const EntityAnalyticsManagementPage = () => {
   }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
+  const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
+  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
 
   const entityStoreStatus = useEntityStoreStatus();
   const entityTypes = useEntityStoreTypes();
@@ -136,7 +144,16 @@ export const EntityAnalyticsManagementPage = () => {
     if (selectedTabId === TabId.Status && !isStatusDataLoading && !shouldDisplayEngineStatusTab) {
       history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
-  }, [shouldDisplayEngineStatusTab, isStatusDataLoading, selectedTabId, history]);
+    if (selectedTabId === TabId.EntityResolution && !isEntityStoreV2Enabled) {
+      history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
+    }
+  }, [
+    shouldDisplayEngineStatusTab,
+    isStatusDataLoading,
+    isEntityStoreV2Enabled,
+    selectedTabId,
+    history,
+  ]);
 
   const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);
 
@@ -239,6 +256,32 @@ export const EntityAnalyticsManagementPage = () => {
             defaultMessage="Asset Criticality"
           />
         </EuiTab>
+        {isWatchlistsEnabled && (
+          <EuiTab
+            key={TabId.Watchlists}
+            isSelected={selectedTabId === TabId.Watchlists}
+            onClick={() => handleTabChange(TabId.Watchlists)}
+            data-test-subj={WATCHLISTS_TAB_TEST_ID}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.watchlists.tabTitle"
+              defaultMessage="Watchlists"
+            />
+          </EuiTab>
+        )}
+        {isEntityStoreV2Enabled && (
+          <EuiTab
+            key={TabId.EntityResolution}
+            isSelected={selectedTabId === TabId.EntityResolution}
+            onClick={() => handleTabChange(TabId.EntityResolution)}
+            data-test-subj="entityResolutionTab"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.entityResolution.tabTitle"
+              defaultMessage="Entity Resolution"
+            />
+          </EuiTab>
+        )}
         {shouldDisplayEngineStatusTab && (
           <EuiTab
             key={TabId.Status}
@@ -279,6 +322,18 @@ export const EntityAnalyticsManagementPage = () => {
       <div hidden={selectedTabId !== TabId.AssetCriticality}>
         <AssetCriticalityTab />
       </div>
+
+      {isWatchlistsEnabled && (
+        <div hidden={selectedTabId !== TabId.Watchlists}>
+          <WatchlistsTab />
+        </div>
+      )}
+
+      {isEntityStoreV2Enabled && (
+        <div hidden={selectedTabId !== TabId.EntityResolution}>
+          <EntityResolutionTab />
+        </div>
+      )}
 
       {shouldDisplayEngineStatusTab && (
         <div hidden={selectedTabId !== TabId.Status}>

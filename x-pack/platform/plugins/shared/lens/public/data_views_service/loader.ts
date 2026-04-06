@@ -220,7 +220,6 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
       query: layer.query.esql,
       options: {
         skipFetchFields: true,
-        id: layer.index,
         createNewInstanceEvenIfCachedOneAvailable: true,
       },
       http,
