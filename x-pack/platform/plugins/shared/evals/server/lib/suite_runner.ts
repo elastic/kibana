@@ -65,7 +65,12 @@ const PROCESS_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
  * Captures the mean score as group 1. The table uses box-drawing
  * characters which render differently in terminals vs log files; we
  * match on "Overall" + "mean:" rather than the border glyphs to be
- * robust to ANSI color stripping and box style variants.
+ * robust to box style variants.
+ *
+ * IMPORTANT: apply `stripAnsiSgr(line)` before matching. kbn-evals colors
+ * the Overall row with SGR escape sequences (`\x1b[1m\x1b[32m...`) and
+ * sanitizeLine() intentionally preserves them for frontend rendering.
+ * They interrupt the `\s*` gaps between tokens and break the match.
  */
 const OVERALL_MEAN_REGEX = /Overall\s*[│|]\s*\d+\s*[│|]\s*mean:\s*([\d.]+)/;
 
@@ -77,6 +82,16 @@ const OVERALL_MEAN_REGEX = /Overall\s*[│|]\s*\d+\s*[│|]\s*mean:\s*([\d.]+)/;
  * deterministic so a tight regex is safe.
  */
 const EVAL_RUN_ID_REGEX = /\brun_id:"([^"]+)"/;
+
+/**
+ * Matches ANY ANSI CSI sequence including SGR color codes (ending in `m`).
+ * Used only for stripping lines before regex matching — the rendered
+ * output buffer keeps SGR codes so the frontend can colorize logs.
+ */
+const ANSI_CSI_REGEX = /\x1b\[[0-9;]*[a-zA-Z]/g;
+
+/** Strip every ANSI CSI sequence (including SGR colors) from a line. */
+const stripAnsiSgr = (line: string): string => line.replace(ANSI_CSI_REGEX, '');
 
 // Re-export so existing consumers (plugin.ts, routes) can still import the
 // error class from this module — the actual definition lives in a dedicated
@@ -325,8 +340,15 @@ export class SuiteRunner {
 
         if (internal) {
           for (const line of lines) {
+            // Strip ALL ANSI codes (including the SGR color codes that
+            // sanitizeLine() intentionally preserves for frontend rendering)
+            // before regex matching. kbn-evals colorizes the Overall row
+            // with `\x1b[1m\x1b[32m...` which interrupts `\s*` gaps in the
+            // pattern and breaks the match.
+            const plainLine = stripAnsiSgr(line);
+
             // Track eval scores from the Overall results row.
-            const meanMatch = line.match(OVERALL_MEAN_REGEX);
+            const meanMatch = plainLine.match(OVERALL_MEAN_REGEX);
             if (meanMatch) {
               const mean = parseFloat(meanMatch[1]);
               if (!Number.isNaN(mean)) {
@@ -339,7 +361,7 @@ export class SuiteRunner {
             // All experiments in a multi-project run share the same id,
             // so first-match-wins is correct.
             if (!run.evalRunId) {
-              const idMatch = line.match(EVAL_RUN_ID_REGEX);
+              const idMatch = plainLine.match(EVAL_RUN_ID_REGEX);
               if (idMatch) {
                 run.evalRunId = idMatch[1];
               }

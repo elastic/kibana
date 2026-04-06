@@ -285,6 +285,53 @@ describe('SuiteRunner', () => {
         expect(status?.error).toBeUndefined();
       });
 
+      it('downgrades exit-0 to failed when ANSI-colored Overall row reports mean: 0', () => {
+        // kbn-evals colorizes the Overall results row with SGR sequences
+        // (`\x1b[1m\x1b[32m...`) and sanitizeLine() intentionally preserves
+        // them for frontend rendering. The matcher must strip those codes
+        // before applying the regex or it misses the Overall row entirely
+        // and treats the run as completed. Captured verbatim from a real
+        // esql-generation run in dev.
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(
+          Buffer.from(
+            [
+              '\x1b[1m\x1b[34m═══ EVALUATION RESULTS ═══\x1b[39m\x1b[22m',
+              '║ Dataset                  │ # │ ES|QL Functional Equivalence ║',
+              '║ esql: analytical queries │ 3 │                      \x1b[36mmean: 0\x1b[39m ║',
+              '║                          │   │                       \x1b[36mstd: 0\x1b[39m ║',
+              '║ \x1b[1m\x1b[32mOverall\x1b[22m\x1b[39m                  │ \x1b[1m\x1b[32m3\x1b[22m\x1b[39m │                      \x1b[1m\x1b[32mmean: 0\x1b[22m\x1b[39m ║',
+              '║                          │   │                       \x1b[1m\x1b[32mstd: 0\x1b[22m\x1b[39m ║',
+            ].join('\n')
+          )
+        );
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.status).toBe('failed');
+        expect(status?.error).toBe('All evaluator scores were zero');
+      });
+
+      it('downgrades exit-0 to failed when ANSI-colored Overall row reports positive scores', () => {
+        // Sanity check the positive path with SGR codes too — otherwise
+        // the previous test could pass by accident if stripAnsiSgr is
+        // overzealous and eats the numeric value.
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(
+          Buffer.from(
+            [
+              '║ \x1b[1m\x1b[32mOverall\x1b[22m\x1b[39m                  │ \x1b[1m\x1b[32m3\x1b[22m\x1b[39m │                   \x1b[1m\x1b[32mmean: 0.67\x1b[22m\x1b[39m ║',
+            ].join('\n')
+          )
+        );
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.status).toBe('completed');
+      });
+
       it('keeps non-zero exit as failed regardless of positive scores', () => {
         // If the Playwright process crashes after emitting a successful
         // results table, we still want to surface the process failure.
@@ -352,6 +399,22 @@ describe('SuiteRunner', () => {
         const status = runner.getStatus(runId);
         expect(status?.evalRunId).toBe('d16e276a103b47a3');
         expect(status?.status).toBe('completed');
+      });
+
+      it('captures evalRunId from an ANSI-colored scout-worker log line', () => {
+        // Real scout-worker output wraps the "info [scout-worker]" prefix
+        // in SGR color codes — the regex must match after ANSI stripping.
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(
+          Buffer.from(
+            '\x1b[34minfo\x1b[39m [scout-worker] \x1b[90mYou can query the data using: environment.hostname:"mac.local" AND task.model.id:"gpt-5.2" AND run_id:"ab12cd34ef56"\x1b[39m'
+          )
+        );
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.evalRunId).toBe('ab12cd34ef56');
       });
     });
   });
