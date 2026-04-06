@@ -104,23 +104,14 @@ export const MetricsExperienceGridContent = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          responsive={false}
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                  defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                  values: { count: filteredFieldsCount },
-                })}
-              </strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s">
+          <strong>
+            {i18n.translate('metricsExperience.grid.metricsCount.label', {
+              defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+              values: { count: filteredFieldsCount },
+            })}
+          </strong>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow>
         {isDiscoverLoading && <MetricsGridLoadingProgress />}
