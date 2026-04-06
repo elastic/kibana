@@ -28,9 +28,7 @@ export const RecoveryPolicy = ({ recoveryPolicy }: RecoveryPolicyProps) => {
   if (!recoveryPolicy) return <>{EMPTY_VALUE}</>;
 
   const typeLabel = RECOVERY_TYPE_LABELS[recoveryPolicy.type] ?? recoveryPolicy.type;
-  const hasQuery =
-    recoveryPolicy.type === 'query' &&
-    (recoveryPolicy.query?.base || recoveryPolicy.query?.condition);
+  const hasQuery = recoveryPolicy.type === 'query' && recoveryPolicy.query?.base;
 
   if (!hasQuery) {
     return <>{typeLabel}</>;
@@ -40,26 +38,14 @@ export const RecoveryPolicy = ({ recoveryPolicy }: RecoveryPolicyProps) => {
     <>
       <EuiText size="s">{typeLabel}</EuiText>
       <EuiSpacer size="xs" />
-      {recoveryPolicy.query?.base && (
-        <EuiCodeBlock
-          language="esql"
-          isCopyable
-          paddingSize="m"
-          data-test-subj="alertingV2RuleDetailsRecoveryQueryBase"
-        >
-          {recoveryPolicy.query?.base}
-        </EuiCodeBlock>
-      )}
-      {recoveryPolicy.query?.condition && (
-        <EuiCodeBlock
-          language="esql"
-          isCopyable
-          paddingSize="m"
-          data-test-subj="alertingV2RuleDetailsRecoveryQueryCondition"
-        >
-          {recoveryPolicy.query.condition}
-        </EuiCodeBlock>
-      )}
+      <EuiCodeBlock
+        language="esql"
+        isCopyable
+        paddingSize="m"
+        data-test-subj="alertingV2RuleDetailsRecoveryQueryBase"
+      >
+        {recoveryPolicy.query?.base}
+      </EuiCodeBlock>
     </>
   );
 };

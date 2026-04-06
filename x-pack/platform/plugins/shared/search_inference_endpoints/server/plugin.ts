@@ -103,7 +103,11 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+        modelManagement: [
+          ELASTIC_INFERENCE_SERVICE_APP_ID,
+          INFERENCE_ENDPOINTS_APP_ID,
+          MODEL_SETTINGS_APP_ID,
+        ],
       },
       privileges: {
         all: {
@@ -111,7 +115,7 @@ export class SearchInferenceEndpointsPlugin
           api: [ApiPrivileges.manage(PLUGIN_ID)],
           catalogue: [],
           management: {
-            ml: [
+            modelManagement: [
               ELASTIC_INFERENCE_SERVICE_APP_ID,
               INFERENCE_ENDPOINTS_APP_ID,
               MODEL_SETTINGS_APP_ID,
