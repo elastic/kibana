@@ -8,18 +8,26 @@
 import {
   LEGACY_TO_UNIFIED_MAP,
   MIGRATED_ATTACHMENT_TYPES,
+  PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
+  PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
   UNIFIED_TO_LEGACY_MAP,
   OWNER_TO_PREFIX_MAP,
   LEGACY_EVENT_TYPE,
 } from '../../constants/attachments';
 
 export const isMigratedAttachmentType = (type: string, owner: string): boolean => {
-  return MIGRATED_ATTACHMENT_TYPES.has(toUnifiedAttachmentType(type, owner));
+  return (
+    MIGRATED_ATTACHMENT_TYPES.has(toUnifiedAttachmentType(type, owner)) ||
+    MIGRATED_ATTACHMENT_TYPES.has(toUnifiedPersistableStateAttachmentType(type))
+  );
 };
 
 export const toLegacyAttachmentType = (type?: string): string | undefined => {
   if (typeof type !== 'string') {
     return undefined;
+  }
+  if (Object.keys(PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP).includes(type)) {
+    return toLegacyPersistableStateAttachmentType(type);
   }
   return UNIFIED_TO_LEGACY_MAP[type] ?? type;
 };
@@ -33,4 +41,12 @@ export const toUnifiedAttachmentType = (type: string, owner: string): string => 
     return `${ownerPrefix}.event`;
   }
   return LEGACY_TO_UNIFIED_MAP[type] ?? type;
+};
+
+export const toUnifiedPersistableStateAttachmentType = (type: string): string => {
+  return PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP[type] ?? type;
+};
+
+export const toLegacyPersistableStateAttachmentType = (type: string): string => {
+  return PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP[type] ?? type;
 };

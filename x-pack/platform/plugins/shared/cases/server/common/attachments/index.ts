@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import {
   COMMENT_ATTACHMENT_TYPE,
-  SECURITY_EVENT_ATTACHMENT_TYPE,
+  PERSISTABLE_VISUALIZATION_ATTACHMENT_TYPES,
 } from '../../../common/constants/attachments';
+import {
+  toUnifiedAttachmentType,
+  toUnifiedPersistableStateAttachmentType,
+} from '../../../common/utils/attachments';
+import { AttachmentType } from '../../../common/types/domain';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../types/attachments_v2';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
+import { persistableStateAttachmentTransformer } from './persistable_state';
 import { eventAttachmentTransformer } from './event';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
@@ -33,9 +38,15 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
   if (attributes === null || typeof attributes !== 'object') {
     throw new Error('Invalid attributes: expected non-null object');
   }
-  const { type } = attributes as Record<string, unknown>;
+  const { type, persistableStateAttachmentTypeId } = attributes as Record<string, unknown>;
   if (typeof type !== 'string') {
     throw new Error('Invalid attributes: missing attachment type');
+  }
+  if (
+    type === AttachmentType.persistableState &&
+    typeof persistableStateAttachmentTypeId === 'string'
+  ) {
+    return persistableStateAttachmentTypeId;
   }
   return type;
 }
@@ -51,9 +62,13 @@ export function getAttachmentTypeTransformers(
   owner: string
 ): AttachmentTypeTransformer<AttachmentPersistedAttributes, UnifiedAttachmentAttributes> {
   const normalizedType = toUnifiedAttachmentType(type, owner);
+  const normalizedPersistableType = toUnifiedPersistableStateAttachmentType(type);
 
   if (normalizedType === COMMENT_ATTACHMENT_TYPE || normalizedType === 'comment') {
     return commentAttachmentTransformer;
+  }
+  if (PERSISTABLE_VISUALIZATION_ATTACHMENT_TYPES.has(normalizedPersistableType)) {
+    return persistableStateAttachmentTransformer;
   }
   if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
     return eventAttachmentTransformer;
