@@ -62,7 +62,6 @@ export const getFromPreloaded = async ({
       return {
         doc: {
           ...attributes,
-          type: LENS_EMBEDDABLE_TYPE,
           savedObjectId: initialInput.ref_id,
         },
         sharingSavedObjectProps: {
@@ -92,7 +91,6 @@ export const getFromPreloaded = async ({
     return {
       doc: {
         ...attributes,
-        type: LENS_EMBEDDABLE_TYPE,
         savedObjectId: initialInput.ref_id,
       },
       sharingSavedObjectProps: {

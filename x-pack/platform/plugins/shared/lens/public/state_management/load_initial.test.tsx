@@ -19,7 +19,6 @@ import type { InitialAppState } from './lens_slice';
 import { loadInitial } from './lens_slice';
 import type { Filter } from '@kbn/es-query';
 import { faker } from '@faker-js/faker';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const history = {
   location: {
@@ -241,7 +240,6 @@ describe('Initializing the store', () => {
         lens: expect.objectContaining({
           persistedDoc: expect.objectContaining({
             ...defaultDoc,
-            type: LENS_EMBEDDABLE_TYPE,
             state: {
               ...defaultDoc.state,
               visualization: 'testVis initial state',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LENS_DATASOURCE_ID, LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
@@ -351,14 +351,7 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
 }
 
 export function isLensAPIFormat(config: unknown): config is LensApiState {
-  // We need to check the type is not lens because embeddable logic sometimes add it for some reason.
-  // See https://github.com/elastic/kibana/issues/250115
-  return (
-    typeof config === 'object' &&
-    config !== null &&
-    'type' in config &&
-    config.type !== LENS_EMBEDDABLE_TYPE
-  );
+  return typeof config === 'object' && config !== null && 'type' in config;
 }
 
 export function isLensLegacyFormat(config: unknown): config is LensConfig {

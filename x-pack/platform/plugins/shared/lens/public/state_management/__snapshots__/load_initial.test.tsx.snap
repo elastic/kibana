@@ -89,7 +89,6 @@ Object {
         "visualization": "testVis initial state",
       },
       "title": "",
-      "type": "vis",
       "visualizationType": "testVis",
     },
     "projectRouting": undefined,

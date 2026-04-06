@@ -17,7 +17,8 @@ import {
   LENS_API_TAG,
 } from '../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
-import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
+import type { RegisterAPIRouteFn } from '../../types';
+import type { LensCreateResponseBody } from './types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
 import {
   lensCreateRequestBodySchema,
@@ -95,12 +96,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         const { references, ...data } = getLensRequestConfig(builder, req.body);
         const options: LensCreateIn['options'] = { ...req.query, references };
         const { result } = await client.create(data, options);
-
-        if (result.item.error) {
-          throw result.item.error;
-        }
-
         const responseItem = getLensResponseItem(builder, result.item);
+
         return res.created<LensCreateResponseBody>({
           body: responseItem,
         });

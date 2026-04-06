@@ -19,7 +19,6 @@ import {
   type Datasource,
   type LensDocument,
   type Visualization,
-  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { INDEX_PATTERN_TYPE } from '../../common/constants';
@@ -123,7 +122,6 @@ export function mergeToNewDoc(
     title: persistedDoc?.title || '',
     description: persistedDoc?.description,
     visualizationType: visualization.activeId!,
-    type: LENS_EMBEDDABLE_TYPE,
     references,
     state: {
       visualization: persistibleVisualizationState,
