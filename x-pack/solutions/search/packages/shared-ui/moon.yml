@@ -18,6 +18,10 @@ project:
   sourceRoot: x-pack/solutions/search/packages/shared-ui
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/licensing-types'
+  - '@kbn/licensing-plugin'
 tags:
   - shared-browser
   - package

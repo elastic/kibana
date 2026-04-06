@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/scout-search'
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod
