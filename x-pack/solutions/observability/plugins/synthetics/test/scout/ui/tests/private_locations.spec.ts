@@ -11,8 +11,7 @@ import { test } from '../fixtures';
 
 test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => {
   const NEW_LOCATION_LABEL = 'Updated Test Location';
-  const FLEET_POLICY_NAME = 'Test fleet policy';
-  let locationId: string;
+  const FLEET_POLICY_NAME = 'Test fleet policy';  
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.deletePrivateLocations();
@@ -65,8 +64,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     await test.step('verify and assign monitor', async () => {
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       const privateLocations = await syntheticsServices.getPrivateLocations();
-      expect(privateLocations).toHaveLength(1);
-      locationId = privateLocations[0].id;
+      expect(privateLocations).toHaveLength(1);      
       await syntheticsServices.addMonitorSimple('test-monitor', {
         locations: [privateLocations[0]],
         type: 'browser',
