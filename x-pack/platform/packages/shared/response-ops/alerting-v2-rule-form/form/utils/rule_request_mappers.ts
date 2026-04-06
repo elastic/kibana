@@ -44,7 +44,7 @@ const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
   description: metadata.description,
   owner: metadata.owner,
-  labels: metadata.labels,
+  tags: metadata.tags,
 });
 
 const mapSchedule = (schedule: FormValues['schedule']) => ({
@@ -137,7 +137,7 @@ const mapStateTransition = (formValues: FormValues) => {
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; description?: string; owner?: string; labels?: string[] };
+  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
   evaluation: { query: { base: string } };
@@ -255,7 +255,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       description: rule.metadata.description,
       enabled: rule.enabled,
       owner: rule.metadata.owner,
-      labels: rule.metadata.labels,
+      tags: rule.metadata.tags,
     },
     timeField: rule.time_field,
     schedule: {
