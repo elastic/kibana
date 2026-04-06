@@ -6,9 +6,15 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import type { DiscoverAppMenu } from './discover_app_menu';
 
 export class RuleFormPage {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
+  constructor(private readonly page: ScoutPage, private readonly discoverAppMenu: DiscoverAppMenu) {
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
 
   async gotoCreate() {
     await this.page.gotoApp('management/alertingV2/rules/create');
@@ -88,16 +94,27 @@ export class RuleFormPage {
     await this.page.testSubj.locator('select-text-based-language-btn').click();
   }
 
+  /**
+   * Alerts → Create ES|QL rule (v2). Uses the shared {@link DiscoverAppMenu} page object so selectors
+   * stay in sync with `discover_alerts_menu.spec.ts`.
+   */
   async openRulesFlyoutFromDiscover() {
-    const alertsButton = this.page.testSubj.locator('discoverAlertsButton');
+    await this.discoverAppMenu.openCreateEsqlRuleV2Flyout();
+  }
 
-    if (await alertsButton.isVisible()) {
-      await alertsButton.click();
-    } else {
-      await this.page.testSubj.locator('app-menu-overflow-button').click();
-      await alertsButton.click();
-    }
+  flyout() {
+    return this.page.locator('[aria-labelledby="ruleV2FormFlyoutTitle"]');
+  }
 
-    await this.page.testSubj.locator('discoverCreateEsqlRuleV2Button').click();
+  /**
+   * Sets the Discover ES|QL editor (model index 0) without overwriting
+   * the flyout's editor or submitting.
+   */
+  async setDiscoverQueryWithFlyoutOpen(query: string) {
+    await this.codeEditor.setCodeEditorValue(query, 0);
+  }
+
+  async submitDiscoverQuery() {
+    await this.page.testSubj.click('querySubmitButton');
   }
 }

@@ -127,12 +127,14 @@ export const getAlertsAppMenuItem = ({
   services,
   tabId,
   getState,
+  subscribe,
   showCreateRuleV2,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  subscribe: (listener: () => void) => () => void;
   showCreateRuleV2?: boolean;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
@@ -156,10 +158,10 @@ export const getAlertsAppMenuItem = ({
       run: ({ context: { onFinishAction } }) => {
         return (
           <CreateESQLRuleFlyout
-            discoverParams={discoverParams}
             services={services}
             tabId={tabId}
             getState={getState}
+            subscribe={subscribe}
             onClose={onFinishAction}
           />
         );

@@ -41,7 +41,7 @@ describe('TagsField', () => {
       metadata: {
         name: 'Test Rule',
         enabled: true,
-        labels: ['prod', 'critical'],
+        tags: ['prod', 'critical'],
       },
     });
 
