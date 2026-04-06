@@ -108,7 +108,7 @@ const getModelVersionsHashes = (soType: SavedObjectsType): string[] => {
         `Missing model version '${index}' (10.${index}.0) for SO type ${soType.name}. Please define versions in order and without skipping any version numbers.`
       );
     }
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha1');
     const modelVersionData = JSON.stringify(modelVersion);
     return `${soType.name}|10.${version}.0: ${hash.update(modelVersionData).digest('hex')}`;
   });
@@ -117,7 +117,7 @@ const getModelVersionsHashes = (soType: SavedObjectsType): string[] => {
 export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigrationHash => {
   const migInfo = extractMigrationInfo(soType);
 
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
 
   const hashParts = [
     migInfo.name,
