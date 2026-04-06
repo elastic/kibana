@@ -4090,6 +4090,7 @@ paths:
                         - variables
                         - created_at
                         - updated_at
+                    maxItems: 1000
                     type: array
                 required:
                   - results
