@@ -78,13 +78,12 @@ export const getReadinessPipelinesRoute = (
           });
 
           // nodes.stats ingest API is not available in serverless mode.
-          // Fall back to ingest.getPipeline() and return pipelines with their indices
-          // but without stats (docsCount/failedDocsCount) since those are unavailable.
+          // Use pipelineToIndices (built from logs-*/metrics-* index settings) to return
+          // only pipelines that are referenced by SIEM-related indices, without stats.
           if (isServerless) {
-            const pipelinesResponse = await esClient.ingest.getPipeline();
-            const pipelines: PipelinesResponse = Object.keys(pipelinesResponse).map((name) => ({
+            const pipelines: PipelinesResponse = Object.keys(pipelineToIndices).map((name) => ({
               name,
-              indices: Array.from(pipelineToIndices[name] || []),
+              indices: Array.from(pipelineToIndices[name]),
               docsCount: 0,
               failedDocsCount: 0,
               statsAvailable: false,
