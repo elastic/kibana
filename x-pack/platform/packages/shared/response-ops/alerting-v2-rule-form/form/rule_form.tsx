@@ -177,6 +177,7 @@ const RuleFormContent = ({
           onCancel={onCancel}
           submitLabel={submitLabel}
           cancelLabel={cancelLabel}
+          ruleId={ruleId}
         />
       )}
     </>
