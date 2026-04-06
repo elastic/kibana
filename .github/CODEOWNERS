@@ -2209,6 +2209,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 
 # Enterprise Search
 # search
