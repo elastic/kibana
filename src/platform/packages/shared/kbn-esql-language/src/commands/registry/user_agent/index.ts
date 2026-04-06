@@ -11,11 +11,13 @@ import { Commands } from '../../definitions/keywords';
 import type { ICommandMethods } from '../registry';
 import type { ICommandContext } from '../types';
 import { autocomplete } from './autocomplete';
+import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 
 const userAgentCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
+  columnsAfter,
 };
 
 export const userAgentCommand = {
