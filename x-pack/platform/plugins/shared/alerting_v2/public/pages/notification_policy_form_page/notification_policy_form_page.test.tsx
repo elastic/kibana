@@ -29,14 +29,30 @@ jest.mock('../../components/notification_policy/form/components/matcher_input', 
   ),
 }));
 
+jest.mock('../../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => jest.fn(),
+}));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: jest.fn((token: unknown) => {
     const tokenStr = String(token);
     if (tokenStr.includes('application')) {
-      return { navigateToUrl: mockNavigateToUrl };
+      return {
+        navigateToUrl: mockNavigateToUrl,
+        getUrlForApp: jest.fn(
+          (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path ? `/${options.path}` : ''}`
+        ),
+      };
+    }
+    if (tokenStr.includes('chrome')) {
+      return { docTitle: { change: jest.fn() } };
     }
     if (tokenStr.includes('http')) {
       return { basePath: mockBasePath };
+    }
+    if (tokenStr.includes('uiSettings')) {
+      return { get: () => true };
     }
     return {};
   }),
@@ -67,6 +83,10 @@ jest.mock('../../hooks/use_fetch_notification_policy', () => ({
 
 jest.mock('../../hooks/use_fetch_data_fields', () => ({
   useFetchDataFields: () => ({ data: undefined, isLoading: false }),
+}));
+
+jest.mock('../../hooks/use_fetch_tags', () => ({
+  useFetchTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_fetch_workflows', () => ({
@@ -105,6 +125,7 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   enabled: true,
   matcher: 'data.severity : "critical"',
   groupBy: ['host.name', 'service.name'],
+  tags: ['production'],
   groupingMode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
@@ -151,7 +172,7 @@ describe('NotificationPolicyFormPage', () => {
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent(
         'Create notification policy'
       );
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Save');
+      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
     });
 
     it('submits create payload on save', async () => {
@@ -215,7 +236,7 @@ describe('NotificationPolicyFormPage', () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit notification policy');
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update');
+      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
     });
 
     it('shows loading state while fetching', () => {
@@ -274,6 +295,7 @@ describe('NotificationPolicyFormPage', () => {
             name: 'Critical production alerts',
             description: 'Routes critical alerts',
             groupingMode: 'per_field',
+            tags: ['production'],
             matcher: 'data.severity : "critical"',
             groupBy: ['host.name', 'service.name'],
             throttle: { strategy: 'time_interval', interval: '5m' },

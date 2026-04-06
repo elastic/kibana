@@ -58,10 +58,12 @@ import {
   APP_UI_ID,
   CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
+import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -125,6 +127,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
+import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
@@ -326,6 +329,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
+        entityAnalyticsConfig: config.entityAnalytics,
+        telemetry: core.analytics,
       });
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
         registerWatchlistMaintainer({
@@ -404,6 +409,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     registerPrivilegeMonitoringTask({
+      getStartServices: core.getStartServices,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      telemetry: core.analytics,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
+      config: this.config,
+    });
+
+    registerLeadGenerationTask({
       getStartServices: core.getStartServices,
       taskManager: plugins.taskManager,
       logger: this.logger,
@@ -510,6 +525,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.usageCollection = plugins.usageCollection;
     plugins.cases.attachmentFramework.registerExternalReference({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+    });
+
+    plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
+      const [coreStart] = await core.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+      const customReasons =
+        (await uiSettingsClient.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY)) ?? [];
+      const allowedReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
+      return allowedReasons.has(closeReason);
     });
 
     const { ruleDataService } = plugins.ruleRegistry;
@@ -1070,6 +1095,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
         telemetryConfigProvider: this.telemetryConfigProvider,
+        packageService,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {

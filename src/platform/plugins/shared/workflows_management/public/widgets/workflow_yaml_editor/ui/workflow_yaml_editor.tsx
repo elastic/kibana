@@ -115,6 +115,8 @@ import {
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../styles/use_workflows_monaco_theme';
 
+const hiddenButtonStyles = css({ display: 'none' });
+
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   automaticLayout: true,
@@ -665,7 +667,7 @@ export const WorkflowYAMLEditor = ({
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
-        button={<EuiButton iconType="plusCircle" css={{ display: 'none' }} />}
+        button={<EuiButton iconType="plusCircle" css={hiddenButtonStyles} />}
         container={containerRef.current ?? undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
