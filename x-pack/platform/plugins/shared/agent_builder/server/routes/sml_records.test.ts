@@ -40,11 +40,11 @@ describe('SML Records Routes', () => {
 
   const mockEsClient = { mock: true };
 
-  const createMockContext = () => ({
+  const createMockContext = (featureFlagEnabled = true) => ({
     core: Promise.resolve({
       uiSettings: {
         client: {
-          get: mockUiSettingsGet.mockResolvedValue(false),
+          get: mockUiSettingsGet.mockResolvedValue(featureFlagEnabled),
         },
       },
     }),
@@ -172,6 +172,17 @@ describe('SML Records Routes', () => {
       });
       expect(result).toMatchObject({ type: 'ok', body: sampleRecord });
     });
+
+    it('returns 404 when experimental features flag is disabled', async () => {
+      const handler = getHandler('PUT', path)!;
+      const ctx = createMockContext(false);
+      const request = { params: { id: 'index::projects::0' }, body: {} };
+
+      const result = await handler(ctx, request, mockResponse);
+
+      expect(mockCreateOrUpdateRecord).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'notFound' });
+    });
   });
 
   describe('GET /sml/{id} (get by ID)', () => {
@@ -194,6 +205,17 @@ describe('SML Records Routes', () => {
       });
       expect(result).toMatchObject({ type: 'ok', body: sampleRecord });
     });
+
+    it('returns 404 when experimental features flag is disabled', async () => {
+      const handler = getHandler('GET', path)!;
+      const ctx = createMockContext(false);
+      const request = { params: { id: 'index::projects::0' } };
+
+      const result = await handler(ctx, request, mockResponse);
+
+      expect(mockGetRecord).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'notFound' });
+    });
   });
 
   describe('DELETE /sml/{id}', () => {
@@ -215,6 +237,17 @@ describe('SML Records Routes', () => {
         esClient: mockEsClient,
       });
       expect(result).toMatchObject({ type: 'ok', body: { success: true } });
+    });
+
+    it('returns 404 when experimental features flag is disabled', async () => {
+      const handler = getHandler('DELETE', path)!;
+      const ctx = createMockContext(false);
+      const request = { params: { id: 'index::projects::0' } };
+
+      const result = await handler(ctx, request, mockResponse);
+
+      expect(mockDeleteRecord).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'notFound' });
     });
   });
 });

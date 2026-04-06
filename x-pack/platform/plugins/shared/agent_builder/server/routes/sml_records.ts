@@ -7,6 +7,7 @@
 
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -106,17 +107,22 @@ export function registerSmlRecordsRoutes({
             path.join(__dirname, 'examples/sml_records_create_or_update.yaml'),
         },
       },
-      wrapHandler(async (ctx, request, response) => {
-        const { sml } = getInternalServices();
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const record = await sml.createOrUpdateRecord({
-          id: request.params.id,
-          document: request.body,
-          esClient,
-        });
-        return response.ok<CreateOrUpdateSmlRecordResponse>({ body: record });
-      })
+      wrapHandler(
+        async (ctx, request, response) => {
+          const { sml } = getInternalServices();
+          const [coreStart] = await coreSetup.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
+          const record = await sml.createOrUpdateRecord({
+            id: request.params.id,
+            document: request.body,
+            esClient,
+          });
+          return response.ok<CreateOrUpdateSmlRecordResponse>({ body: record });
+        },
+        {
+          featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        }
+      )
     );
 
   // Get an SML record by ID
@@ -144,13 +150,18 @@ export function registerSmlRecordsRoutes({
           oasOperationObject: () => path.join(__dirname, 'examples/sml_records_get_by_id.yaml'),
         },
       },
-      wrapHandler(async (ctx, request, response) => {
-        const { sml } = getInternalServices();
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const record = await sml.getRecord({ id: request.params.id, esClient });
-        return response.ok<GetSmlRecordResponse>({ body: record });
-      })
+      wrapHandler(
+        async (ctx, request, response) => {
+          const { sml } = getInternalServices();
+          const [coreStart] = await coreSetup.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
+          const record = await sml.getRecord({ id: request.params.id, esClient });
+          return response.ok<GetSmlRecordResponse>({ body: record });
+        },
+        {
+          featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        }
+      )
     );
 
   // Delete an SML record
@@ -178,12 +189,17 @@ export function registerSmlRecordsRoutes({
           oasOperationObject: () => path.join(__dirname, 'examples/sml_records_delete.yaml'),
         },
       },
-      wrapHandler(async (ctx, request, response) => {
-        const { sml } = getInternalServices();
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const success = await sml.deleteRecord({ id: request.params.id, esClient });
-        return response.ok<DeleteSmlRecordResponse>({ body: { success } });
-      })
+      wrapHandler(
+        async (ctx, request, response) => {
+          const { sml } = getInternalServices();
+          const [coreStart] = await coreSetup.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
+          const success = await sml.deleteRecord({ id: request.params.id, esClient });
+          return response.ok<DeleteSmlRecordResponse>({ body: { success } });
+        },
+        {
+          featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        }
+      )
     );
 }

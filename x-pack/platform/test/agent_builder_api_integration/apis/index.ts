@@ -26,5 +26,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./skills/skills_validation.ts'));
     loadTestFile(require.resolve('./plugins'));
     loadTestFile(require.resolve('./sml'));
+    loadTestFile(require.resolve('./sml_records'));
   });
 }
