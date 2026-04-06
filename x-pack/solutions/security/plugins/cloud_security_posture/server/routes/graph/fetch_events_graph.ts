@@ -391,8 +391,7 @@ const buildSourceFieldsJson = (fields: EuidSourceFields, euidColumn: string): st
     .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
   return `REPLACE(
     REPLACE(
-      REPLACE(
-        CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
+      REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
     "\\\\{,", ${JSON_OBJECT_START}),
   ",}", ${JSON_OBJECT_END})`;
 };

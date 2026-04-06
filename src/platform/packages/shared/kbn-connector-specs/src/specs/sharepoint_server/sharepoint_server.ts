@@ -24,9 +24,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import downloadWorkflow from './workflows/download.yaml';
-import listWorkflow from './workflows/list.yaml';
-import searchWorkflow from './workflows/search.yaml';
 import {
   CallRestApiInputSchema,
   DownloadFileInputSchema,
@@ -300,6 +297,4 @@ export const SharepointServer: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, searchWorkflow],
 };

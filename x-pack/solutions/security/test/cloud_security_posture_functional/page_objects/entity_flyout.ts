@@ -78,5 +78,7 @@ export class EntityFlyoutPageObject extends FtrService {
         return;
       }
     }
+
+    throw new Error(`Entity "${entityName}" not found`);
   }
 }

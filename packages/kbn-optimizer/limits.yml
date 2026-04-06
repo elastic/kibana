@@ -6,11 +6,10 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 157791
+  alertingVTwo: 176204
   apm: 25363
   apmSourcesAccess: 2278
-  automaticImport: 12162
-  automaticImportVTwo: 15269
+  automaticImport: 15269
   banners: 4006
   canvas: 14881
   cases: 177203
@@ -37,7 +36,6 @@ pageLoadAssetSize:
   data: 496646
   dataQuality: 11469
   datasetQuality: 49315
-  dataSources: 6748
   dataUsage: 8743
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -46,7 +44,7 @@ pageLoadAssetSize:
   dataVisualizer: 32727
   developerToolbar: 4467
   devTools: 8109
-  discover: 28240
+  discover: 31186
   discoverEnhanced: 5509
   discoverShared: 2322
   elasticAssistant: 301540
@@ -59,7 +57,7 @@ pageLoadAssetSize:
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 29638
+  evals: 34345
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -104,7 +102,7 @@ pageLoadAssetSize:
   kibanaUtils: 54161
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 85000
+  lens: 86000
   licenseManagement: 8265
   licensing: 10073
   links: 8620
@@ -113,7 +111,7 @@ pageLoadAssetSize:
   logsShared: 82701
   logstash: 15882
   maintenanceWindows: 8775
-  management: 12951
+  management: 14304
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
@@ -138,6 +136,7 @@ pageLoadAssetSize:
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
+  queryActivity: 4326
   reindexService: 3469
   remoteClusters: 10170
   reporting: 46602
@@ -157,7 +156,7 @@ pageLoadAssetSize:
   searchHomepage: 9005
   searchIndices: 9991
   searchInferenceEndpoints: 9400
-  searchNavigation: 8308
+  searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
   searchprofiler: 6509
@@ -178,14 +177,14 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 11422
+  streams: 12500
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
   timelines: 131503
   transform: 16515
-  triggersActionsUi: 114000
+  triggersActionsUi: 123512
   uiActions: 35278
   unifiedDocViewer: 15000
   unifiedSearch: 19500
