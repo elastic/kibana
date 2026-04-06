@@ -9,8 +9,7 @@ pageLoadAssetSize:
   alertingVTwo: 157791
   apm: 25363
   apmSourcesAccess: 2278
-  automaticImport: 12162
-  automaticImportVTwo: 15269
+  automaticImport: 15269
   banners: 4006
   canvas: 14881
   cases: 177203
@@ -178,7 +177,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 11422
+  streams: 12500
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
