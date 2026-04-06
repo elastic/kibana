@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { EMPTY, switchMap, type Observable } from 'rxjs';
+import { EMPTY, merge, Observable, switchMap } from 'rxjs';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { ChatEvent } from '@kbn/agent-builder-common';
+import { createAgentLiveUpdatesSubscription } from './dashboard_integration/agent_live_updates_subscription';
 import { createDashboardAttachmentMountSync$ } from './dashboard_integration/create_dashboard_attachment_mount_sync';
 
 export interface OnAttachmentMountParams extends AttachmentLifecycleParams<DashboardAttachment> {
+  agentBuilder: AgentBuilderPluginStart;
   dashboardPlugin: DashboardStart;
-  chat$: Observable<ChatEvent>;
   addAttachment: (attachment: AttachmentInput) => void;
 }
 
@@ -24,8 +25,8 @@ export interface OnAttachmentMountParams extends AttachmentLifecycleParams<Dashb
  * and cleans it up when the attachment unmounts.
  */
 export const onAttachmentMount = ({
+  agentBuilder,
   dashboardPlugin,
-  chat$,
   getAttachment,
   updateOrigin,
   addAttachment,
@@ -34,13 +35,15 @@ export const onAttachmentMount = ({
     .pipe(
       switchMap((api) =>
         api
-          ? createDashboardAttachmentMountSync$({
-              api,
-              chat$,
-              getAttachment,
-              updateOrigin,
-              addAttachment,
-            })
+          ? merge(
+              createDashboardAttachmentMountSync$({
+                api,
+                getAttachment,
+                updateOrigin,
+                addAttachment,
+              }),
+              new Observable<never>(() => createAgentLiveUpdatesSubscription({ agentBuilder, api }))
+            )
           : EMPTY
       )
     )

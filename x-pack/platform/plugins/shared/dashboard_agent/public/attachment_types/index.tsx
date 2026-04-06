@@ -23,11 +23,7 @@ import { previewAttachmentInDashboard } from './dashboard_integration/preview_at
 import { onAttachmentMount } from './on_attachment_mount';
 
 export const registerDashboardAttachmentUiDefinition = ({
-  agentBuilder: {
-    attachments,
-    addAttachment,
-    events: { chat$ },
-  },
+  agentBuilder,
   dashboardLocator,
   unifiedSearch,
   dashboardPlugin,
@@ -37,6 +33,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboardPlugin: DashboardStart;
 }): (() => void) => {
+  const { attachments, addAttachment } = agentBuilder;
   let dashboardApi: DashboardApi | undefined;
   // maintains a dashboardApi reference for access in getActionButtons
   const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
@@ -60,7 +57,7 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
     getIcon: () => 'productDashboard',
     onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
-      onAttachmentMount({ ...params, dashboardPlugin, chat$, addAttachment }),
+      onAttachmentMount({ ...params, agentBuilder, dashboardPlugin, addAttachment }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}

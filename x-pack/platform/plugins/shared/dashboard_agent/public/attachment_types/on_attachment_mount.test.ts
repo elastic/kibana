@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
@@ -125,11 +126,15 @@ describe('onAttachmentMount - manual changes sync', () => {
   });
 
   const mountHandler = () => {
+    const agentBuilder = {
+      events: { chat$ },
+    } as unknown as AgentBuilderPluginStart;
+
     cleanup = onAttachmentMount({
+      agentBuilder,
       dashboardPlugin: {
         dashboardAppClientApi$,
       },
-      chat$,
       getAttachment,
       updateOrigin,
       addAttachment,
