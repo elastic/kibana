@@ -12,7 +12,8 @@
 export const keywordSearchSkill = {
   id: 'keyword-search',
   name: 'keyword-search',
-  description: 'Guide for building keyword/full-text search with Elasticsearch. Use when a developer wants text matching, filters, faceted search, autocomplete, or traditional search functionality.',
+  description:
+    'Guide for building keyword/full-text search with Elasticsearch. Use when a developer wants text matching, filters, faceted search, autocomplete, or traditional search functionality.',
   content: `# Keyword Search Guide
 
 Guide developers through building full-text keyword search with Elasticsearch. Use this guide when they need text matching, filters, faceting, autocomplete, or traditional search-bar behavior.

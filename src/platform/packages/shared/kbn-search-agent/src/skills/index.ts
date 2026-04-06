@@ -15,6 +15,20 @@ import { keywordSearchSkill } from './keyword_search';
 import { ragChatbotSkill } from './rag_chatbot';
 import { semanticSearchSkill } from './semantic_search';
 import { vectorDatabaseSkill } from './vector_database';
-export { catalogEcommerceSkill, hybridSearchSkill, keywordSearchSkill, ragChatbotSkill, semanticSearchSkill, vectorDatabaseSkill };
+export {
+  catalogEcommerceSkill,
+  hybridSearchSkill,
+  keywordSearchSkill,
+  ragChatbotSkill,
+  semanticSearchSkill,
+  vectorDatabaseSkill,
+};
 
-export const skills = [catalogEcommerceSkill, hybridSearchSkill, keywordSearchSkill, ragChatbotSkill, semanticSearchSkill, vectorDatabaseSkill];
+export const skills = [
+  catalogEcommerceSkill,
+  hybridSearchSkill,
+  keywordSearchSkill,
+  ragChatbotSkill,
+  semanticSearchSkill,
+  vectorDatabaseSkill,
+];
