@@ -36,7 +36,7 @@ export const cleanupEntityStore = async ({
     logger.debug(`Deleted entity store engine for space: ${spaceId || 'default'}`);
   } catch (e) {
     // Ignore 404 errors if the engine doesn't exist
-    if (e.status !== 404) {
+    if (e.response?.status !== 404) {
       logger.debug(
         `Error deleting entity store for space ${spaceId || 'default'}: ${
           e && e.message ? e.message : JSON.stringify(e)
@@ -352,7 +352,7 @@ export const uninstallEntityStoreV2 = async ({
       .expect(200);
     logger.debug(`Entity Store V2 uninstalled for space: ${spaceLabel}`);
   } catch (e) {
-    if (e.status !== 404) {
+    if (e.response?.status !== 404) {
       logger.debug(
         `Error uninstalling Entity Store V2 for space ${spaceLabel}: ${
           e && e.message ? e.message : JSON.stringify(e)
