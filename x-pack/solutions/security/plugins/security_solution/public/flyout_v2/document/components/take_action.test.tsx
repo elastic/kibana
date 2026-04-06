@@ -33,6 +33,7 @@ const createMockHit = (raw: Partial<DataTableRecord['raw']> = {}): DataTableReco
 
 const mockEcsData: Ecs = { _id: 'test-event-id', _index: 'test-index' };
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
+const mockOnAlertUpdated = jest.fn();
 
 const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
   { field: 'host.name', values: ['test-host'], originalValue: ['test-host'], isObjectArray: false },
@@ -58,7 +59,9 @@ describe('<TakeAction />', () => {
       refetchFlyoutData: mockRefetchFlyoutData,
     });
 
-    const { getByTestId, queryByTestId } = render(<TakeAction hit={createMockHit()} />);
+    const { getByTestId, queryByTestId } = render(
+      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+    );
     const button = getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID);
 
     expect(button).toBeInTheDocument();
@@ -74,7 +77,9 @@ describe('<TakeAction />', () => {
       refetchFlyoutData: mockRefetchFlyoutData,
     });
 
-    const { getByTestId, queryByTestId } = render(<TakeAction hit={createMockHit()} />);
+    const { getByTestId, queryByTestId } = render(
+      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+    );
 
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeDisabled();
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toHaveTextContent('Take action');
@@ -89,7 +94,9 @@ describe('<TakeAction />', () => {
       refetchFlyoutData: mockRefetchFlyoutData,
     });
 
-    const { getByTestId, queryByTestId } = render(<TakeAction hit={createMockHit()} />);
+    const { getByTestId, queryByTestId } = render(
+      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+    );
 
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeDisabled();
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toHaveTextContent('Take action');
@@ -97,14 +104,16 @@ describe('<TakeAction />', () => {
   });
 
   it('should render TakeActionButton when data is available', () => {
-    const { getByTestId, queryByTestId } = render(<TakeAction hit={createMockHit()} />);
+    const { getByTestId, queryByTestId } = render(
+      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+    );
 
     expect(getByTestId('take-action-button-mock')).toBeInTheDocument();
     expect(queryByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should call useEventDetails with eventId and indexName from hit', () => {
-    render(<TakeAction hit={createMockHit()} />);
+    render(<TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />);
 
     expect(mockUseEventDetails).toHaveBeenCalledWith({
       eventId: 'test-event-id',
@@ -112,20 +121,24 @@ describe('<TakeAction />', () => {
     });
   });
 
-  it('should pass ecsData and refetchFlyoutData from useEventDetails to TakeActionButton', () => {
-    render(<TakeAction hit={createMockHit()} />);
+  it('should pass hit, ecsData and refetchFlyoutData from useEventDetails to TakeActionButton', () => {
+    const hit = createMockHit();
+    const onAlertUpdated = jest.fn();
+    render(<TakeAction hit={hit} onAlertUpdated={onAlertUpdated} />);
 
     expect(mockTakeActionButton).toHaveBeenCalledWith(
       expect.objectContaining({
+        hit,
         ecsData: mockEcsData,
         refetchFlyoutData: mockRefetchFlyoutData,
+        onAlertUpdated,
       }),
       expect.anything()
     );
   });
 
   it('should compute nonEcsData from dataFormattedForFieldBrowser and pass it to TakeActionButton', () => {
-    render(<TakeAction hit={createMockHit()} />);
+    render(<TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />);
 
     expect(mockTakeActionButton).toHaveBeenCalledWith(
       expect.objectContaining({
