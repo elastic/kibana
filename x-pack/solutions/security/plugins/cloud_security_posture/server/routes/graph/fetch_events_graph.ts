@@ -15,10 +15,6 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import {
-  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
-  GRAPH_TARGET_EUID_SOURCE_FIELDS,
-} from '@kbn/cloud-security-posture-common/constants';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import {
   getEuidEsqlEvaluation,
@@ -35,6 +31,7 @@ import {
   concatJsonObjectPropertyEsqlExprAsString,
   concatJsonObjectPropertyString,
 } from './utils';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
@@ -377,9 +374,7 @@ const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): s
   return `REPLACE(
     REPLACE(
       REPLACE(
-        REPLACE(
-          CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), ",,,", ""),
-        ",,", ","),
+        CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
     "\\\\{,", ${JSON_OBJECT_START}),
   ",}", ${JSON_OBJECT_END})`;
 };

@@ -18,9 +18,10 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
-  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
-  GRAPH_TARGET_EUID_SOURCE_FIELDS,
-} from '@kbn/cloud-security-posture-common/constants';
+  getGraphActorEuidSourceFields,
+  getGraphTargetEuidSourceFields,
+} from '@kbn/cloud-security-posture-common';
+import { type EntityStoreEuid, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { Graph, isEntityNode } from '../../..';
 import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
@@ -54,10 +55,12 @@ import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
   scopeId,
+  euid,
   onOpenEventPreview,
   onOpenNetworkPreview,
 }: {
   scopeId: string;
+  euid?: EntityStoreEuid;
   onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
@@ -67,7 +70,7 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, euid, onOpenEventPreview);
   const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
@@ -260,6 +263,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
     const emptyEntityIds = useMemo(() => [], []);
+    const euidApi = useEntityStoreEuidApi();
+    const euid = euidApi?.euid;
+    const GRAPH_ACTOR_EUID_SOURCE_FIELDS = useMemo(
+      () => (euid ? getGraphActorEuidSourceFields(euid) : []),
+      [euid]
+    );
+    const GRAPH_TARGET_EUID_SOURCE_FIELDS = useMemo(
+      () => (euid ? getGraphTargetEuidSourceFields(euid) : []),
+      [euid]
+    );
+
     const { searchFilters, setSearchFilters, entityIdsForApi } = useGraphFilters(
       scopeId,
       entityIds ?? emptyEntityIds,
@@ -327,7 +341,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         RELATED_ENTITY,
       ]).map(String);
       return filterValues;
-    }, [searchFilters]);
+    }, [GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS, searchFilters]);
 
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
@@ -367,6 +381,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createEventClickHandler,
     } = useGraphPopovers({
       scopeId,
+      euid,
       onOpenEventPreview,
       onOpenNetworkPreview,
     });
@@ -488,7 +503,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
-        .filter((filter) => !filter.meta.disabled)
+        .filter((filter) => filter.meta && !filter.meta.disabled)
         .reduce((sum, filter) => {
           if (isCombinedFilter(filter)) {
             return sum + filter.meta.params.length;
@@ -504,6 +519,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const searchWarningMessage =
       searchFilters.filter(
         (filter) =>
+          filter.meta &&
           !filter.meta.disabled &&
           filter.meta.negate &&
           filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER

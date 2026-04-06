@@ -259,21 +259,34 @@ const createEntityNode = (
   const resolvedType = resolveEntityType(entityType, idsCount);
   const label = generateEntityLabel(idsCount, nodeId, resolvedType, entityName, entitySubType);
 
-  const documentsData: NodeDocumentDataModel[] = deduplicateEntityDocuments(
-    docData
-      ? castArray(docData)
-          .filter((d): d is string => d != null)
-          .map((d) => {
-            try {
-              return JSON.parse(d);
-            } catch (e) {
-              logger?.error(`Failed to parse document data for node [${nodeId}]: ${e}`);
-              logger?.trace(d);
-              throw e;
-            }
-          })
-      : []
-  );
+  const documentsData: NodeDocumentDataModel[] | undefined = docData
+    ? parseDocumentsData(logger, docData)
+    : undefined;
+
+  documentsData?.forEach((doc) => {
+    if (doc.entity?.sourceFields) {
+      (doc as Writable<typeof doc>).entity = {
+        ...doc.entity,
+        sourceFields: expandDotNotation(doc.entity.sourceFields),
+      };
+    }
+  });
+
+  // const documentsData: NodeDocumentDataModel[] = deduplicateEntityDocuments(
+  //   docData
+  //     ? castArray(docData)
+  //         .filter((d): d is string => d != null)
+  //         .map((d) => {
+  //           try {
+  //             return JSON.parse(d);
+  //           } catch (e) {
+  //             logger?.error(`Failed to parse document data for node [${nodeId}]: ${e}`);
+  //             logger?.trace(d);
+  //             throw e;
+  //           }
+  //         })
+  //     : []
+  // );
 
   nodesMap[nodeId] = {
     id: nodeId,
@@ -293,7 +306,7 @@ const createGroupedActorAndTargetNodes = (
   actorId: string;
   targetId: string;
 } => {
-  const { nodesMap } = context;
+  const { nodesMap, logger } = context;
   const {
     actorNodeId,
     actorIdsCount,
@@ -323,7 +336,7 @@ const createGroupedActorAndTargetNodes = (
       docData: actorsDocData,
       hostIps: actorHostIps ? castArray(actorHostIps) : [],
     },
-    context.logger
+    logger
   );
 
   // Create target entity node (or unknown target)
@@ -341,7 +354,7 @@ const createGroupedActorAndTargetNodes = (
         docData: targetsDocData,
         hostIps: targetHostIps ? castArray(targetHostIps) : [],
       },
-      context.logger
+      logger
     );
   } else if (nodesMap[targetId] === undefined) {
     // Unknown target
@@ -360,7 +373,7 @@ const createGroupedActorAndTargetNodes = (
   };
 };
 
-const createLabelNode = (record: EventEdge): LabelNodeDataModel => {
+const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNodeDataModel => {
   const {
     labelNodeId,
     action,
@@ -390,7 +403,7 @@ const createLabelNode = (record: EventEdge): LabelNodeDataModel => {
     label: action,
     color,
     shape: 'label',
-    documentsData: parseDocumentsData(docs),
+    documentsData: parseDocumentsData(logger, docs),
     count: badge,
     ...(uniqueEventsCount > 0 ? { uniqueEventsCount } : {}),
     ...(uniqueAlertsCount > 0 ? { uniqueAlertsCount } : {}),
@@ -447,7 +460,7 @@ const emitAPINodesLimitMessage = (context: ParseContext) => {
 
 const processEventRecord = (record: EventEdge, context: ParseContext) => {
   const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
-  const labelNode = createLabelNode(record);
+  const labelNode = createLabelNode(context.logger, record);
 
   processConnectorNode(context, {
     sourceId: actorId,
@@ -737,10 +750,45 @@ const connectNodes = (
   };
 };
 
-const parseDocumentsData = (docs: string[] | string): NodeDocumentDataModel[] => {
+const parseDocumentsData = (
+  logger: Logger | undefined,
+  docs: Array<string | null> | string
+): NodeDocumentDataModel[] => {
   if (typeof docs === 'string') {
-    return [JSON.parse(docs)];
+    try {
+      return [JSON.parse(docs)];
+    } catch (e) {
+      logger?.error(`Failed to parse document data: ${e}`);
+      logger?.trace(docs);
+      throw e;
+    }
   }
 
-  return docs.map((doc) => JSON.parse(doc));
+  return docs
+    .filter((d): d is string => d != null)
+    .map((doc) => {
+      try {
+        return JSON.parse(doc);
+      } catch (e) {
+        logger?.error(`Failed to parse document data: ${e}`);
+        logger?.trace(doc);
+        throw e;
+      }
+    });
+};
+
+const expandDotNotation = (flat: Record<string, unknown>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [dotKey, value] of Object.entries(flat)) {
+    const parts = dotKey.split('.');
+    let cursor = result;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (cursor[parts[i]] == null || typeof cursor[parts[i]] !== 'object') {
+        cursor[parts[i]] = {};
+      }
+      cursor = cursor[parts[i]] as Record<string, unknown>;
+    }
+    cursor[parts[parts.length - 1]] = value;
+  }
+  return result;
 };

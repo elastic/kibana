@@ -25,6 +25,7 @@
     "@kbn/expandable-flyout",
     "@kbn/react-query",
     "@kbn/fleet-plugin",
+    "@kbn/entity-store",
     "@kbn/core-http-browser",
   ]
 }
