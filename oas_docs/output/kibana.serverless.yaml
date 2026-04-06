@@ -4180,6 +4180,7 @@ paths:
                 spaces:
                   description: Space IDs this record belongs to. Use ["*"] for all spaces.
                   items:
+                    minLength: 1
                     type: string
                   minItems: 1
                   type: array
