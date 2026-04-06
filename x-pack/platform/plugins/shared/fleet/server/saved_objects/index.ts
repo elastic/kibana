@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -35,6 +36,7 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  AgentPolicySchemaV4,
   AgentPolicySchemaV5,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
@@ -44,9 +46,6 @@ import {
   SettingsSchemaV7,
   SettingsSchemaV8,
   PackagePolicySchemaV22,
-  CloudConnectorSchemaV1,
-  CloudConnectorSchemaV2,
-  CloudConnectorSchemaV3,
   CloudConnectorSchemaV4,
 } from '../types';
 
@@ -463,9 +462,22 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                is_verifier: { type: 'boolean' },
                 min_agent_version: { type: 'keyword' },
                 package_agent_version_conditions: { dynamic: false, properties: {} },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
               },
             },
           ],
@@ -567,9 +579,22 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                is_verifier: { type: 'boolean' },
                 min_agent_version: { type: 'keyword' },
                 package_agent_version_conditions: { dynamic: false, properties: {} },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
               },
             },
           ],
@@ -1650,7 +1675,18 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: CloudConnectorSchemaV1.extends({}, { unknowns: 'ignore' }),
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                vars: schema.any(),
+                packagePolicyCount: schema.number(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
           },
         },
         2: {
@@ -1663,8 +1699,29 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: CloudConnectorSchemaV2.extends({}, { unknowns: 'ignore' }),
-            create: CloudConnectorSchemaV2,
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                accountType: schema.maybe(schema.string()),
+                vars: schema.any(),
+                packagePolicyCount: schema.number(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
+              cloudProvider: schema.string(),
+              accountType: schema.maybe(schema.string()),
+              vars: schema.any(),
+              packagePolicyCount: schema.number(),
+              created_at: schema.string(),
+              updated_at: schema.string(),
+            }),
           },
         },
         3: {
@@ -1675,8 +1732,27 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: CloudConnectorSchemaV3.extends({}, { unknowns: 'ignore' }),
-            create: CloudConnectorSchemaV3,
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                accountType: schema.maybe(schema.string()),
+                vars: schema.any(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
+              cloudProvider: schema.string(),
+              accountType: schema.maybe(schema.string()),
+              vars: schema.any(),
+              created_at: schema.string(),
+              updated_at: schema.string(),
+            }),
           },
         },
         4: {

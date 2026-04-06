@@ -3000,8 +3000,8 @@ describe('Agent policy', () => {
           ...baseConnector.attributes,
           cloudProvider: 'azure' as const,
           vars: {
-            tenant_id: { type: 'text' as const, value: 'azure-tenant-id' },
-            client_id: { type: 'text' as const, value: 'azure-client-id' },
+            tenant_id: { type: 'password' as const, value: 'azure-tenant-id' },
+            client_id: { type: 'password' as const, value: 'azure-client-id' },
           },
         },
       };
@@ -3016,8 +3016,8 @@ describe('Agent policy', () => {
       const { streams: azStreams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
       const vars = azStreams[0].vars!;
 
-      expect(vars.credentials_tenant_id).toEqual({ type: 'text', value: 'azure-tenant-id' });
-      expect(vars.credentials_client_id).toEqual({ type: 'text', value: 'azure-client-id' });
+      expect(vars.credentials_tenant_id).toEqual({ type: 'password', value: 'azure-tenant-id' });
+      expect(vars.credentials_client_id).toEqual({ type: 'password', value: 'azure-client-id' });
       expect(vars.credentials_role_arn).toBeUndefined();
     });
 
