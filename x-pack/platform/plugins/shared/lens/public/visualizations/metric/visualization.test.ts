@@ -1716,8 +1716,6 @@ describe('metric visualization', () => {
             type: 'static',
             color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });
@@ -1750,8 +1748,6 @@ describe('metric visualization', () => {
             paletteId: 'compare_to',
             baselineValue: 0,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });
