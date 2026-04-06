@@ -97,7 +97,9 @@ export const SharepointServer: ConnectorSpec = {
         const response = await ctx.client.get(`${siteUrl}/_api/web/lists`, {
           headers: ODATA_HEADERS,
           params: {
-            $select: 'Id,Title,ItemCount,Description,Created,LastItemModifiedDate',
+            $select:
+              'Id,Title,ItemCount,Description,Created,LastItemModifiedDate,RootFolder/ServerRelativeUrl',
+            $expand: 'RootFolder',
           },
         });
         return response.data;
