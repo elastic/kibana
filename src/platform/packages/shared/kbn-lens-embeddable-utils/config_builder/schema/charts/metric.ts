@@ -259,10 +259,12 @@ const metricStylingSchema = schema.object(
                * - 'center': Align value to the center
                * - 'right': Align value to the right
                */
-              alignment: horizontalAlignmentSchema({
-                meta: { description: 'Alignment for secondary values' },
-                defaultValue: DEFAULT_SECONDARY_VALUE_ALIGNMENT,
-              }),
+              alignment: schema.maybe(
+                horizontalAlignmentSchema({
+                  meta: { description: 'Alignment for secondary values' },
+                  defaultValue: DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+                })
+              ),
             },
             { meta: { description: 'Value configuration' } }
           )
