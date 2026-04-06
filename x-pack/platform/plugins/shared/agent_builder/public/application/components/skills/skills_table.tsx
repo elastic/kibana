@@ -16,6 +16,7 @@ import {
   EuiSkeletonText,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
@@ -42,7 +43,16 @@ export const AgentBuilderSkillsTable = memo(() => {
     deleteSkill,
     confirmDelete,
     cancelDelete,
+    usedByAgents,
+    isForceConfirmModalOpen,
+    confirmForceDelete,
+    cancelForceDelete,
   } = useDeleteSkill();
+
+  const deleteSkillTitleId = useGeneratedHtmlId({ prefix: 'deleteSkillTitle' });
+  const deleteSkillUsedByAgentsTitleId = useGeneratedHtmlId({
+    prefix: 'deleteSkillUsedByMultipleAgentsTitle',
+  });
 
   const columns = useSkillsTableColumns({ onDelete: deleteSkill });
 
@@ -125,6 +135,8 @@ export const AgentBuilderSkillsTable = memo(() => {
       {isDeleteModalOpen && deleteSkillId && (
         <EuiConfirmModal
           title={labels.skills.deleteSkillTitle(deleteSkillId)}
+          aria-labelledby={deleteSkillTitleId}
+          titleProps={{ id: deleteSkillTitleId }}
           onCancel={cancelDelete}
           onConfirm={confirmDelete}
           cancelButtonText={labels.skills.deleteSkillCancelButton}
@@ -133,6 +145,31 @@ export const AgentBuilderSkillsTable = memo(() => {
           isLoading={isDeleting}
         >
           <p>{labels.skills.deleteSkillConfirmationText}</p>
+        </EuiConfirmModal>
+      )}
+      {isForceConfirmModalOpen && usedByAgents && (
+        <EuiConfirmModal
+          title={labels.skills.deleteSkillUsedByAgentsTitle(usedByAgents.skillId)}
+          aria-labelledby={deleteSkillUsedByAgentsTitleId}
+          titleProps={{ id: deleteSkillUsedByAgentsTitleId }}
+          onCancel={cancelForceDelete}
+          onConfirm={confirmForceDelete}
+          isLoading={isDeleting}
+          cancelButtonText={labels.skills.deleteSkillUsedByAgentsCancelButton}
+          confirmButtonText={labels.skills.deleteSkillUsedByAgentsConfirmButton}
+          buttonColor="danger"
+        >
+          <EuiText>
+            <p>{labels.skills.deleteSkillUsedByAgentsDescription}</p>
+            {usedByAgents.agents.length > 0 && (
+              <p>
+                <strong>{labels.skills.deleteSkillUsedByAgentsAgentListLabel}:</strong>{' '}
+                {labels.skills.deleteSkillUsedByAgentsAgentList(
+                  usedByAgents.agents.map((a) => a.name ?? a.id)
+                )}
+              </p>
+            )}
+          </EuiText>
         </EuiConfirmModal>
       )}
     </>

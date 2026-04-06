@@ -10,24 +10,43 @@
 import type { Query } from '@kbn/es-query';
 import type { LensApiFilterType } from '../../schema/filter';
 
+type LensStateFilterLanguage = 'kuery' | 'lucene';
+type ApiFilterLanguage = LensApiFilterType['language'];
+
+export const toLensStateFilterLanguage = (
+  language: ApiFilterLanguage | string
+): LensStateFilterLanguage => (language === 'lucene' ? 'lucene' : 'kuery');
+
+export const toApiFilterLanguage = (
+  language: LensStateFilterLanguage | string
+): ApiFilterLanguage => (language === 'lucene' ? 'lucene' : 'kql');
+
 export function fromFilterAPIToLensState(filter: LensApiFilterType | undefined): Query | undefined {
   if (!filter) {
     return;
   }
-  return filter;
-}
 
-export function fromFilterLensStateToAPI(filter: Query): LensApiFilterType | undefined {
-  if (typeof filter.query !== 'string') {
-    return;
-  }
   return {
-    query: filter.query,
-    language: filter.language as 'kuery' | 'lucene',
+    language: toLensStateFilterLanguage(filter.language),
+    query: filter.expression,
   };
 }
 
+export function fromFilterLensStateToAPI({
+  query,
+  language,
+}: Query): LensApiFilterType | undefined {
+  if (typeof query !== 'string') {
+    return;
+  }
+  if (language !== 'kuery' && language !== 'lucene') {
+    return;
+  }
+
+  return { expression: query, language: toApiFilterLanguage(language) };
+}
+
 export const DEFAULT_FILTER = {
-  query: '*',
-  language: 'kuery' as 'kuery' | 'lucene',
-};
+  expression: '*',
+  language: toApiFilterLanguage('kuery'),
+} satisfies LensApiFilterType;
