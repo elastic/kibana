@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractTimeRange, isFilterPinned, isOfQueryType } from '@kbn/es-query';
+import { extractTimeRange, isFilterPinned, type Query } from '@kbn/es-query';
 import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
@@ -15,7 +15,6 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardDrilldownState } from '../../server/dashboard_drilldown/types';
 import { shareService } from '../services/kibana_services';
-import { toAsCodeQuery } from '../../common';
 
 export async function getLocation(
   drilldownState: DashboardDrilldownState,
@@ -29,10 +28,7 @@ export async function getLocation(
     >;
     const query = embeddableApi.parentApi?.query$?.value;
     if (query && drilldownState.use_filters) {
-      if (isOfQueryType(query)) {
-        const asCodeQuery = toAsCodeQuery(query);
-        if (asCodeQuery) params.query = asCodeQuery;
-      }
+      params.query = query as Query;
     }
     const timeRange = embeddableApi.timeRange$?.value ?? embeddableApi.parentApi?.timeRange$?.value;
     if (timeRange && drilldownState.use_time_range) {

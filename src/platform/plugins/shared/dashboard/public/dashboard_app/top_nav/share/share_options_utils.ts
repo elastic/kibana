@@ -16,7 +16,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { topNavStrings } from '../../_dashboard_app_strings';
-import type { DashboardLocatorParams } from '../../../../common';
+import { toStoredQuery, type DashboardLocatorParams } from '../../../../common';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import { dataService, shareService } from '../../../services/kibana_services';
@@ -41,13 +41,18 @@ export function buildDashboardShareOptions({
   hasPanelChanges: boolean;
 } {
   const unsavedDashboardState = getDashboardBackupService().getState(objectId);
-  const { filters: asCodeFilters, ...restUnsavedDashboardState } = unsavedDashboardState ?? {};
+  const {
+    filters: asCodeFilters,
+    query: asCodeQuery,
+    ...restUnsavedDashboardState
+  } = unsavedDashboardState ?? {};
 
   const hasPanelChanges = unsavedDashboardState?.panels !== undefined;
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...restUnsavedDashboardState,
     filters: toStoredFilters(asCodeFilters, logger),
+    query: toStoredQuery(asCodeQuery),
   };
 
   const locatorParams: DashboardLocatorParams = {

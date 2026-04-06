@@ -60,10 +60,12 @@ export function initializeUnifiedSearchManager(
   const query$ = new BehaviorSubject<Query | undefined>(
     initialState.query ? toStoredQuery(initialState.query) : undefined
   );
+  const asCodeQuery$ = new BehaviorSubject<DashboardState['query']>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
   function setQuery(query: Query | undefined) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
+      asCodeQuery$.next(query ? toAsCodeQuery(query) : undefined);
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
@@ -306,7 +308,7 @@ export function initializeUnifiedSearchManager(
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           asCodeFilters$,
-          query$,
+          asCodeQuery$,
           refreshInterval$,
           timeRange$,
           timeRestore$,
@@ -314,11 +316,9 @@ export function initializeUnifiedSearchManager(
           debounceTime(COMPARE_DEBOUNCE),
 
           map(([filters, query, refresh_interval, time_range]) => {
-            const latestQuery = query ? toAsCodeQuery(query) : undefined;
-
             return {
               filters,
-              ...(latestQuery && { query: latestQuery }),
+              query,
               refresh_interval,
               time_range,
             };

@@ -9,7 +9,7 @@
 
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { isOfQueryType } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
@@ -19,7 +19,6 @@ import { SEARCH_SESSION_ID } from '../../../common/page_bundle_constants';
 import type { DashboardLocatorParams } from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
-import { toAsCodeQuery } from '../../../common';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -84,15 +83,12 @@ function getLocatorParams({
     'panels' | 'pinned_panels'
   >;
 
-  const formattedQuery = dataService.query.queryString.formatQuery(dashboardApi.query$.value);
-  const asCodeQuery = isOfQueryType(formattedQuery) ? toAsCodeQuery(formattedQuery) : undefined;
-
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
     preserveSavedFilters: false,
     filters: dataService.query.filterManager.getFilters(),
-    query: asCodeQuery,
+    query: dataService.query.queryString.formatQuery(dashboardApi.query$.value) as Query,
     dashboardId: savedObjectId,
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()

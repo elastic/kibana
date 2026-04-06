@@ -84,7 +84,7 @@ describe('dashboard locator', () => {
           },
         },
       ],
-      query: { expression: 'bye', language: 'kql' },
+      query: { query: 'bye', language: 'kql' },
     });
 
     expect(location).toMatchObject({
@@ -117,7 +117,7 @@ describe('dashboard locator', () => {
           },
         ],
         query: {
-          expression: 'bye',
+          query: 'bye',
           language: 'kql',
         },
         refresh_interval: {
@@ -143,7 +143,7 @@ describe('dashboard locator', () => {
       refresh_interval: { pause: false, value: 300 },
       dashboardId: '123',
       filters: [],
-      query: { expression: 'bye', language: 'kql' },
+      query: { query: 'bye', language: 'kql' },
       searchSessionId: '__sessionSearchId__',
     });
 
@@ -153,7 +153,7 @@ describe('dashboard locator', () => {
       state: {
         filters: [],
         query: {
-          expression: 'bye',
+          query: 'bye',
           language: 'kql',
         },
         refresh_interval: {
