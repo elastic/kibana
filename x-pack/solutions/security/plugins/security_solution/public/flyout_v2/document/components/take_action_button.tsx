@@ -21,6 +21,7 @@ import { useAlertAssigneesActions } from '../../../detections/components/alerts_
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -144,12 +145,18 @@ export const TakeActionButton = memo(
       [closePopoverHandler, onShowNotes]
     );
 
+    const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
+      ecsRowData: ecsData,
+      closePopover: closePopoverHandler,
+    });
+
     const items = useMemo(
       () => [
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
         ...(isAlert ? alertAssigneesItems : []),
         ...(isAlert ? alertTagsItems : []),
+        ...(isAlert ? runWorkflowMenuItem : []),
         ...(isAlert ? [] : noteItems),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
       ],
@@ -160,6 +167,7 @@ export const TakeActionButton = memo(
         isAlert,
         isInSecurityApp,
         noteItems,
+        runWorkflowMenuItem,
         statusActionItems,
         alertAssigneesItems,
       ]
@@ -171,8 +179,16 @@ export const TakeActionButton = memo(
         ...(isAlert ? statusActionPanels : []),
         ...(isAlert ? alertAssigneesPanels : []),
         ...(isAlert ? alertTagsPanels : []),
+        ...(isAlert ? runAlertWorkflowPanel : []),
       ],
-      [alertTagsPanels, isAlert, items, statusActionPanels, alertAssigneesPanels]
+      [
+        alertAssigneesPanels,
+        alertTagsPanels,
+        isAlert,
+        items,
+        statusActionPanels,
+        runAlertWorkflowPanel,
+      ]
     );
 
     const takeActionButton = (
