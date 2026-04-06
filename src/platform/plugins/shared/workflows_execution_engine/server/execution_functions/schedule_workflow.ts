@@ -13,7 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { TASK_RECOVERY_ERROR_TYPE, taskRecoveryMessages } from '../lib/task_recovery';
+import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/task_recovery';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 /**
@@ -91,13 +91,8 @@ export async function checkAndSkipIfExistingScheduledExecution(
       logger.warn(
         `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) - marking as failed and proceeding`
       );
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: existingExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: TASK_RECOVERY_ERROR_TYPE,
-          message: taskRecoveryMessages.scheduledStale,
-        },
+      await markExecutionFailedTaskRecovery(workflowExecutionRepository, existingExecution.id, {
+        message: taskRecoveryMessages.scheduledStale,
       });
       return false;
     }
