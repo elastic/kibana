@@ -18,6 +18,10 @@ export interface UseFetchApmIndex {
   isError: boolean;
 }
 
+function splitCommaSeparatedIndexPatterns(pattern: string | undefined): string[] {
+  return pattern ? pattern.split(',') : [];
+}
+
 export function useFetchApmIndex(): UseFetchApmIndex {
   const { apmSourcesAccess } = useKibana().services;
 
@@ -49,13 +53,14 @@ export function useFetchApmTracesIndex(): UseFetchApmIndex {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchApmTracesIndices'],
     queryFn: async ({ signal }) => {
-      try {
-        const { transaction, span } = await apmSourcesAccess.getApmIndices({ signal });
-        const allIndices = [...new Set([transaction, span].flatMap((idx) => idx.split(',')))];
-        return allIndices.join(',');
-      } catch (error) {
-        // ignore error
-      }
+      const { transaction, span } = await apmSourcesAccess.getApmIndices({ signal });
+      const allIndices = [
+        ...new Set([
+          ...splitCommaSeparatedIndexPatterns(transaction),
+          ...splitCommaSeparatedIndexPatterns(span),
+        ]),
+      ];
+      return allIndices.join(',');
     },
     refetchOnWindowFocus: false,
   });
