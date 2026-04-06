@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { hasAgentWriteAccess, canChangeAgentVisibility } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
@@ -45,10 +44,6 @@ export const AgentOverview: React.FC = () => {
   const {
     services: { uiSettings },
   } = useKibana();
-  const isConnectorsEnabled = uiSettings.get<boolean>(
-    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
-    false
-  );
 
   const { manageAgents, isAdmin } = useUiPrivileges();
   const hasConnectorsPrivileges = useHasConnectorsAllPrivileges();
@@ -159,7 +154,6 @@ export const AgentOverview: React.FC = () => {
           connectorsCount={connectorsCount}
           enableElasticCapabilities={enableElasticCapabilities}
           isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
-          isConnectorsEnabled={isConnectorsEnabled}
           hasConnectorsPrivileges={hasConnectorsPrivileges}
           skillsHref={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
           pluginsHref={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}

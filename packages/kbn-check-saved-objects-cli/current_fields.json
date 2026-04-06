@@ -112,6 +112,7 @@
     "groupingMode",
     "name",
     "snoozedUntil",
+    "tags",
     "throttle",
     "throttle.strategy",
     "updatedAt",
