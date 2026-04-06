@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-
 export const DeleteLocationModal = ({
   locationId,
   loading,
@@ -23,13 +22,13 @@ export const DeleteLocationModal = ({
   onDelete: (id: string) => void;
   onCancel: () => void;
 }) => {
-  const confirmModalTitleId = useGeneratedHtmlId();  
-  
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const handleConfirmDelete = () => {
     if (locationId) {
       onDelete(locationId);
     }
-  }
+  };
 
   return (
     <>
