@@ -25,7 +25,7 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.parse(validCreateData);
 
       expect(result).toEqual({
-        kind: 'alert', 
+        kind: 'alert',
         metadata: { name: 'test rule' },
         time_field: '@timestamp',
         schedule: { every: '5m' },
