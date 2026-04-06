@@ -83,10 +83,11 @@ export const ExplorationDashboard = () => {
     },
   });
 
-  const activeExplorations = explorations?.explorations.filter((e) => e.status === 'running') || [];
+  const activeExplorations = explorations?.explorations?.filter((e) => e.status === 'running') ?? [];
   const completedExplorations =
-    explorations?.explorations.filter((e) => e.status === 'completed') || [];
-  const failedExplorations = explorations?.explorations.filter((e) => e.status === 'failed') || [];
+    explorations?.explorations?.filter((e) => e.status === 'completed') ?? [];
+  const failedExplorations =
+    explorations?.explorations?.filter((e) => e.status === 'failed') ?? [];
 
   const columns = [
     {

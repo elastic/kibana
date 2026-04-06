@@ -163,8 +163,8 @@ describe('Workflow Error Recovery', () => {
       await expect(
         retryHandler.executeWithRetry(operation, {
           maxRetries: 5,
-          initialDelayMs: 1000,
-          maxDelayMs: 3000,
+          initialDelayMs: 10,
+          maxDelayMs: 30,
           onRetry: (attempt, error, delayMs) => {
             delays.push(delayMs);
           },
@@ -173,7 +173,7 @@ describe('Workflow Error Recovery', () => {
 
       // All delays should be ≤ maxDelayMs
       delays.forEach((delay) => {
-        expect(delay).toBeLessThanOrEqual(3000);
+        expect(delay).toBeLessThanOrEqual(30);
       });
     });
 
@@ -478,7 +478,9 @@ describe('Workflow Error Recovery', () => {
       const mockAgentInvoker = jest.fn(async (agentId: string) => {
         invocationCount++;
         if (agentId === 'agent1') {
-          throw new Error('Agent1 failed');
+          const err: any = new Error('Agent1 failed');
+          err.statusCode = 503; // Retryable
+          throw err;
         }
         return { agentId, result: 'success' };
       });
@@ -532,7 +534,9 @@ describe('Workflow Error Recovery', () => {
     it('should provide agent health status', async () => {
       const mockAgentInvoker = jest.fn(async (agentId: string) => {
         if (agentId === 'agent1') {
-          throw new Error('Agent1 failed');
+          const err: any = new Error('Agent1 failed');
+          err.statusCode = 503; // Retryable
+          throw err;
         }
         return { agentId, result: 'success' };
       });

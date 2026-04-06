@@ -51,7 +51,7 @@ describe('AESOP Reject Skill Route', () => {
       addVersion: mockAddVersion,
     });
 
-    registerRejectSkillRoute(mockRouter);
+    registerRejectSkillRoute({ router: mockRouter, logger: mockContext.logger } as any);
   });
 
   it('should register POST route for /internal/aesop/skills/{skillId}/reject', () => {
