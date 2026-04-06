@@ -704,7 +704,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
-        "lineNumber": 22,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -720,7 +720,7 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
-            "lineNumber": 22,
+            "lineNumber": 31,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
