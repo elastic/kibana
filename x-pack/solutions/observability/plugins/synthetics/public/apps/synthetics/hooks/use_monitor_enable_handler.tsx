@@ -34,6 +34,10 @@ export function useMonitorEnableHandler({
   const [nextEnabled, setNextEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
+    setNextEnabled(null);
+  }, [configId]);
+
+  useEffect(() => {
     if (status === FETCH_STATUS.FAILURE) {
       setNextEnabled(null);
     }

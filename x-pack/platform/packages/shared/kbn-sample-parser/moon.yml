@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/sample-log-parser'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/sample-log-parser'
+  title: '@kbn/sample-log-parser'
   description: Moon project for @kbn/sample-log-parser
   channel: ''
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-sample-parser
+  sourceRoot: x-pack/platform/packages/shared/kbn-sample-parser
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
@@ -34,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

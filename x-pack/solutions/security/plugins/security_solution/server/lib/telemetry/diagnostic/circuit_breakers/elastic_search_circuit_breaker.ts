@@ -61,18 +61,19 @@ export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
       this.lastJvmStats = {};
       this.lastCpuStats = {};
 
-      for (const nodeId of Object.keys(nodesResp.nodes)) {
+      for (const [idx, nodeId] of Object.keys(nodesResp.nodes).entries()) {
+        const fakeNodeName = `node-${idx}`;
         const node = nodesResp.nodes[nodeId];
         const currentTimestamp = node.timestamp;
-        const lastReportedTimestamp = this.nodeTimestamps[nodeId];
+        const lastReportedTimestamp = this.nodeTimestamps[fakeNodeName];
 
         if (currentTimestamp === undefined || lastReportedTimestamp === currentTimestamp) {
           return this.failure(
-            `Node ${nodeId} is stale: no timestamp updates detected. Current timestamp=${currentTimestamp}, Last reported timestamp=${lastReportedTimestamp}`
+            `Node ${fakeNodeName} is stale: no timestamp updates detected. Current timestamp=${currentTimestamp}, Last reported timestamp=${lastReportedTimestamp}`
           );
         }
 
-        this.nodeTimestamps[nodeId] = currentTimestamp;
+        this.nodeTimestamps[fakeNodeName] = currentTimestamp;
 
         const jvm = node.jvm;
         const os = node.os;
@@ -81,20 +82,22 @@ export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
           const heapUsedPercent = jvm.mem.heap_used_percent;
           const cpuPercent = os.cpu.percent;
 
-          this.lastJvmStats[nodeId] = heapUsedPercent;
-          this.lastCpuStats[nodeId] = cpuPercent;
+          this.lastJvmStats[fakeNodeName] = heapUsedPercent;
+          this.lastCpuStats[fakeNodeName] = cpuPercent;
 
           if (heapUsedPercent > this.config.maxJvmHeapUsedPercent) {
             return this.failure(
-              `Node ${nodeId} JVM heap used ${heapUsedPercent}% exceeds threshold`
+              `Node ${fakeNodeName} JVM heap used ${heapUsedPercent}% exceeds threshold`
             );
           }
 
           if (cpuPercent > this.config.maxCpuPercent) {
-            return this.failure(`Node ${nodeId} CPU usage ${cpuPercent}% exceeds threshold`);
+            return this.failure(`Node ${fakeNodeName} CPU usage ${cpuPercent}% exceeds threshold`);
           }
         } else {
-          return this.failure(`Node ${nodeId} missing metrics. JVM: ${jvm?.mem}, OS: ${os?.cpu}`);
+          return this.failure(
+            `Node ${fakeNodeName} missing metrics. JVM: ${jvm?.mem}, OS: ${os?.cpu}`
+          );
         }
       }
 

@@ -43,7 +43,7 @@ actions:
         
         Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
       externalDocs:
-        description: Learn about working with Agent Builder programmatically
+        description: Agent Builder docs
         url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
       # externalDocs:
         # description: 

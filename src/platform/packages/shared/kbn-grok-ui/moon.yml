@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/grok-ui'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/grok-ui'
+  title: '@kbn/grok-ui'
   description: Moon project for @kbn/grok-ui
   channel: ''
   owner: '@elastic/obs-onboarding-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-grok-ui
+  sourceRoot: src/platform/packages/shared/kbn-grok-ui
 dependsOn:
   - '@kbn/monaco'
   - '@kbn/dev-cli-runner'
@@ -39,14 +38,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

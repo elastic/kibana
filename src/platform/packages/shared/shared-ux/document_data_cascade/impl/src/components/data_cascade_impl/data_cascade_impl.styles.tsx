@@ -32,6 +32,8 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     overflowYAuto,
     relativePosition,
     {
+      contain: 'layout style',
+      overflowAnchor: 'none',
       scrollbarGutter: 'auto',
       scrollbarWidth: 'thin',
       border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,

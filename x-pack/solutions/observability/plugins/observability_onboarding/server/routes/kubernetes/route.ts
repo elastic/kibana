@@ -19,6 +19,7 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
+import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
@@ -48,6 +49,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const { context, request, params, plugins, services, kibanaVersion, config } = resources;
     const {
       elasticsearch: { client },
+      featureFlags,
     } = await context.core;
 
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
@@ -70,8 +72,14 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     }
 
     const packageClient = fleetPluginStart.packageService.asScoped(request);
+    const managedOtlpServiceUrl = getManagedOtlpServiceUrl(plugins);
+    const isManagedOtlpServiceAvailable =
+      config.serverless.enabled ||
+      ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
+        Boolean(managedOtlpServiceUrl));
+
     const apiKeyPromise =
-      config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
+      isManagedOtlpServiceAvailable && params.body.pkgName === 'kubernetes_otel'
         ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
         : createShipperApiKey(
             client.asCurrentUser,

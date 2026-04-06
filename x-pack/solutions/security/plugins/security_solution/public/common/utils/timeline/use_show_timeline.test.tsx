@@ -115,11 +115,11 @@ describe('sourcererDataView', () => {
     expect(result.current).toEqual([true]);
   });
 
-  it('should not show timeline when dataViewId is not null and indices does not exist', () => {
+  it('should show timeline even when indices do not exist (data view state does not gate visibility)', () => {
     jest.mocked(useDataView).mockImplementation(defaultImplementation);
     mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
     const { result } = renderUseShowTimeline();
-    expect(result.current).toEqual([false]);
+    expect(result.current).toEqual([true]);
   });
 });
 

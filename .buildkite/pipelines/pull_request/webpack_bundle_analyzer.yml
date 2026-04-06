@@ -7,3 +7,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     key: webpack_bundle_analyzer
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

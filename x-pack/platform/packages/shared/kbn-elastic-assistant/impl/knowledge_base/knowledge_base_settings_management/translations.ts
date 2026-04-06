@@ -285,6 +285,13 @@ export const KNOWLEDGE_BASE_DOCUMENTATION = i18n.translate(
   }
 );
 
+export const KNOWLEDGE_BASE_TABLE_CAPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBaseTableCaption',
+  {
+    defaultMessage: 'Knowledge base entries',
+  }
+);
+
 export const GLOBAL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBaseGlobal',
   {

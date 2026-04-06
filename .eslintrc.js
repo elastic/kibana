@@ -2597,8 +2597,24 @@ module.exports = {
             ],
             patterns: [
               {
-                group: ['@kbn/scout-*', '@playwright/test/**', 'playwright/**'],
-                message: "Platform tests should import only from '@kbn/scout'.",
+                group: [
+                  '@kbn/scout-oblt',
+                  '@kbn/scout-oblt/**',
+                  '@kbn/scout-search',
+                  '@kbn/scout-search/**',
+                  '@kbn/scout-security',
+                  '@kbn/scout-security/**',
+                  '@kbn/scout-info',
+                  '@kbn/scout-info/**',
+                  '@kbn/scout-reporting',
+                  '@kbn/scout-reporting/**',
+                  '@kbn/scout-release-testing',
+                  '@kbn/scout-release-testing/**',
+                  '@playwright/test/**',
+                  'playwright/**',
+                ],
+                message:
+                  "Platform tests should import from '@kbn/scout' (and '@kbn/scout-synthtrace' if you need synthtrace).",
               },
             ],
           },
@@ -2703,28 +2719,40 @@ module.exports = {
         ],
       },
     },
+    // Custom rules for scout tests
     {
-      // Custom rules for scout tests
+      // Platform & Solutions (plugins and packages, excluding Scout framework's own tests)
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
-        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
+        '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/scout_no_deprecated_tags': 'error',
+        '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
-      // Ensure correct expect import path in solutions scout API tests
-      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
+      // Platform & Solutions API Tests
+      files: [
+        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+      ],
       rules: {
-        '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          { alternativeFixtures: ['esClient'] },
+        ],
       },
     },
     {

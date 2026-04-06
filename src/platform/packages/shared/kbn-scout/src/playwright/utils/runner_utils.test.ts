@@ -9,6 +9,7 @@
 
 import { isValidUTCDate, formatTime, getPlaywrightGrepTag } from './runner_utils';
 import moment from 'moment';
+import { ScoutTestTarget } from '@kbn/scout-info';
 jest.mock('moment', () => {
   const actualMoment = jest.requireActual('moment');
   return {
@@ -58,12 +59,14 @@ describe('formatTime', () => {
 
 describe('getPlaywrightGrepTag', () => {
   it('should return the correct tag for serverless mode', () => {
-    const result = getPlaywrightGrepTag('serverless=oblt');
-    expect(result).toBe('@svlOblt');
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'observability_complete');
+    const result = getPlaywrightGrepTag(testTarget);
+    expect(result).toBe('@local-serverless-observability_complete');
   });
 
   it('should return the correct tag for stateful mode', () => {
-    const result = getPlaywrightGrepTag('stateful');
-    expect(result).toBe('@ess');
+    const testTarget = new ScoutTestTarget('cloud', 'stateful', 'classic');
+    const result = getPlaywrightGrepTag(testTarget);
+    expect(result).toBe('@cloud-stateful-classic');
   });
 });

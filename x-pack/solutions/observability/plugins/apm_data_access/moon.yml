@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-data-access-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/apm-data-access-plugin'
+  title: '@kbn/apm-data-access-plugin'
   description: Moon project for @kbn/apm-data-access-plugin
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/apm_data_access
+  sourceRoot: x-pack/solutions/observability/plugins/apm_data_access
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
@@ -51,14 +50,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

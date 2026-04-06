@@ -42,6 +42,7 @@ import {
   SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
+import { LogoutReason } from '../../common/types';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -908,12 +909,16 @@ export class Authenticator {
     if (!existingSessionValue) {
       const startTime = performance.now();
 
-      newSessionValue = await this.session.create(request, {
-        username: authenticationResult.user?.username,
-        userProfileId,
-        provider,
-        state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-      });
+      newSessionValue = await this.session.create(
+        request,
+        {
+          username: authenticationResult.user?.username,
+          userProfileId,
+          provider,
+          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        },
+        authenticationResult.stateCookieOptions
+      );
 
       const duration = performance.now() - startTime;
 
@@ -1094,7 +1099,16 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
-    if (this.options.customLogoutURL) {
+    const sessionExpiredReasons: string[] = [
+      LogoutReason.SESSION_EXPIRED,
+      LogoutReason.SESSION_IDLE_TIMEOUT,
+      LogoutReason.SESSION_LIFESPAN_TIMEOUT,
+    ];
+    const sessionExpired = sessionExpiredReasons.includes(
+      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ?? ''
+    );
+
+    if (this.options.customLogoutURL && !sessionExpired) {
       return this.options.customLogoutURL;
     }
 
@@ -1103,7 +1117,7 @@ export class Authenticator {
     const searchParams = new URLSearchParams();
     for (const [key, defaultValue] of [
       [NEXT_URL_QUERY_STRING_PARAMETER, null],
-      [LOGOUT_REASON_QUERY_STRING_PARAMETER, 'LOGGED_OUT'],
+      [LOGOUT_REASON_QUERY_STRING_PARAMETER, LogoutReason.LOGGED_OUT],
     ] as Array<[string, string | null]>) {
       const value = request.url.searchParams.get(key) || defaultValue;
       if (value) {

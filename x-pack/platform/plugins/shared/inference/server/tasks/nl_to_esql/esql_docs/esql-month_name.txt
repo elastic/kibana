@@ -1,0 +1,23 @@
+# MONTH_NAME
+
+Returns the month name for the provided date, using the configured Locale.
+
+## Syntax
+
+`MONTH_NAME(date)`
+
+### Parameters
+
+#### date
+
+Date expression to extract the month name from. If `null`, the function returns `null`.
+
+## Examples
+
+Extracts the month name from the provided date value.
+
+```esql
+ROW dt = to_datetime("1996-03-21T00:00:00.000Z")
+| EVAL monthName = MONTH_NAME(dt);
+```
+This example returns "March" for the given date.

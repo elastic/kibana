@@ -43,3 +43,12 @@ responses:
                 - "text/plain"
                 - "application/json"
               supportsAuthenticatedExtendedCard: false
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "${KIBANA_URL}/api/agent_builder/a2a/{agentId}.json" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn://api/agent_builder/a2a/{agentId}.json

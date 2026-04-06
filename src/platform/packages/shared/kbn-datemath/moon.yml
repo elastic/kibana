@@ -4,19 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/datemath'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
-  name: '@kbn/datemath'
+  title: '@kbn/datemath'
   description: Moon project for @kbn/datemath
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-datemath
+  sourceRoot: src/platform/packages/shared/kbn-datemath
 tags:
   - shared-common
   - package
@@ -30,14 +31,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

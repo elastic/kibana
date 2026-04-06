@@ -131,7 +131,7 @@ export abstract class SiemMigrationTaskRunner<
     try {
       do {
         const { data: migrationItems } = await this.data.items.get(migrationId, {
-          filters: { status: SiemMigrationStatus.PENDING },
+          filters: { status: SiemMigrationStatus.PENDING, isEligibleForTranslation: true },
           size: TASK_BATCH_SIZE, // keep these items in memory and process them in the promise pool with concurrency limit
         });
         if (migrationItems.length === 0) {

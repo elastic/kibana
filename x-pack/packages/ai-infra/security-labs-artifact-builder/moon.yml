@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-labs-artifact-builder'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-generative-ai'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-labs-artifact-builder'
+  title: '@kbn/security-labs-artifact-builder'
   description: Moon project for @kbn/security-labs-artifact-builder
   channel: ''
   owner: '@elastic/security-generative-ai'
-  metadata:
-    sourceRoot: x-pack/packages/ai-infra/security-labs-artifact-builder
+  sourceRoot: x-pack/packages/ai-infra/security-labs-artifact-builder
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
@@ -34,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

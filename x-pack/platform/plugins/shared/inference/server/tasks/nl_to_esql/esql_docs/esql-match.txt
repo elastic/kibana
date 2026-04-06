@@ -1,59 +1,84 @@
 # MATCH
 
-The `MATCH` function performs a match query on the specified field. It is equivalent to the `match` query in the Elasticsearch Query DSL and can be used to search for values in various field types, including text, semantic_text, keyword, boolean, dates, and numeric types.
-
-`MATCH` supports function named parameters to specify additional options for the match query. For a simplified syntax, the match operator `:` can be used instead of `MATCH`. The function returns `true` if the provided query matches the row.
+The MATCH function performs a match query on a specified field, similar to the `match` query in the Elasticsearch Query DSL. It can be used on fields such as text, semantic_text, keyword, boolean, dates, and numeric types. When used on a semantic_text field, it performs a semantic query. MATCH supports function named parameters for additional query options, and all match query parameters are supported. The function returns true if the provided query matches the row. For a simplified syntax, you can use the match operator `:` instead of MATCH.
 
 ## Syntax
 
-`MATCH(field, query, options)`
+`MATCH(field, query, options, fuzziness, auto_generate_synonyms_phrase_query, analyzer, minimum_should_match, zero_terms_query, boost, fuzzy_transpositions, fuzzy_rewrite, prefix_length, lenient, operator, max_expansions)`
 
 ### Parameters
 
-#### `field`
+#### field
 
 The field that the query will target.
 
-#### `query`
+#### query
 
-The value to find in the specified field.
+The value to find in the provided field.
 
-#### `options`
+#### options
 
-(Optional) Additional match query options provided as function named parameters. Refer to the match query documentation for more details.
+Optional. Additional match options specified as function named parameters.
+
+#### fuzziness
+
+Maximum edit distance allowed for matching.
+
+#### auto_generate_synonyms_phrase_query
+
+Optional. If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.
+
+#### analyzer
+
+Optional. Analyzer used to convert the text in the query value into tokens. Defaults to the index-time analyzer mapped for the field, or the index’s default analyzer if none is mapped.
+
+#### minimum_should_match
+
+Optional. Minimum number of clauses that must match for a document to be returned.
+
+#### zero_terms_query
+
+Optional. Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.
+
+#### boost
+
+Optional. Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+
+#### fuzzy_transpositions
+
+Optional. If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.
+
+#### fuzzy_rewrite
+
+Optional. Method used to rewrite the query. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.
+
+#### prefix_length
+
+Optional. Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.
+
+#### lenient
+
+Optional. If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.
+
+#### operator
+
+Optional. Boolean logic used to interpret text in the query value. Defaults to OR.
+
+#### max_expansions
+
+Optional. Maximum number of terms to which the query will expand. Defaults to 50.
 
 ## Examples
 
-Match on a specific field
-
+Finds all books where the author field matches "Faulkner".
 ```esql
 FROM books
 | WHERE MATCH(author, "Faulkner")
-| KEEP book_no, author
-| SORT book_no
-| LIMIT 5
 ```
 
-This example retrieves books where the `author` field matches "Faulkner," keeping only the `book_no` and `author` fields, sorting by `book_no`, and limiting the results to 5 rows.
-
-Match with additional options
-
+Finds books whose title matches the phrase "Hobbit Back Again" using the AND operator, and returns only the title column.
 ```esql
 FROM books
 | WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})
-| KEEP title
-```
-
-This example searches for books where the `title` field matches "Hobbit Back Again" using the `AND` operator, and keeps only the `title` field in the results.
-
-Match with sorting on score
-
-Match on a specific field
-
-```esql
-FROM books METADATA _score
-| WHERE MATCH(author, "Faulkner")
-| SORT _score DESC
-| KEEP book_no, author
-| LIMIT 5
+| KEEP title;
 ```

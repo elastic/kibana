@@ -6,9 +6,10 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
+test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
 
   test.beforeEach(async ({ browserAuth }) => {

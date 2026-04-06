@@ -21,6 +21,12 @@ jest.mock('../app_navigation_handler', () => {
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     trackUiMetric: jest.fn(),
+    addDataService: {
+      getCloudConnectStatusHook: jest.fn(() => () => ({
+        isLoading: false,
+        isCloudConnected: false,
+      })),
+    },
   }),
 }));
 

@@ -4,23 +4,23 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/indices-metadata-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-solution'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/indices-metadata-plugin'
+  title: '@kbn/indices-metadata-plugin'
   description: Moon project for @kbn/indices-metadata-plugin
   channel: ''
   owner: '@elastic/security-solution'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/indices_metadata
+  sourceRoot: x-pack/platform/plugins/private/indices_metadata
 dependsOn:
   - '@kbn/core'
   - '@kbn/task-manager-plugin'
   - '@kbn/config-schema'
+  - '@kbn/telemetry-plugin'
 tags:
   - plugin
   - prod
@@ -33,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

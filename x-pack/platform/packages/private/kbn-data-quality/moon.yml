@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-quality'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-quality'
+  title: '@kbn/data-quality'
   description: Moon project for @kbn/data-quality
   channel: ''
   owner: '@elastic/obs-onboarding-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/kbn-data-quality
+  sourceRoot: x-pack/platform/packages/private/kbn-data-quality
 dependsOn:
   - '@kbn/dataset-quality-plugin'
 tags:
@@ -32,14 +31,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

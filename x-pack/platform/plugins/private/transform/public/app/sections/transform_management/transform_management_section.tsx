@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  type FC,
+  type MouseEventHandler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   EuiButtonEmpty,
@@ -199,8 +207,37 @@ export const TransformManagement: FC = () => {
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
 
-  const onCloseModal = useCallback(() => setIsSearchSelectionVisible(false), []);
-  const onOpenModal = () => setIsSearchSelectionVisible(true);
+  const createTransformTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const setTriggerFromEvent = useCallback<MouseEventHandler<HTMLButtonElement>>((event) => {
+    createTransformTriggerRef.current = event.currentTarget;
+  }, []);
+  const focusTrigger = useCallback(() => {
+    const trigger = createTransformTriggerRef.current;
+    if (!trigger || !trigger.isConnected) {
+      return;
+    }
+
+    requestAnimationFrame(() => trigger.focus());
+  }, []);
+
+  const closeModal = useCallback(
+    ({ restoreFocus }: { restoreFocus: boolean }) => {
+      setIsSearchSelectionVisible(false);
+      if (restoreFocus) {
+        focusTrigger();
+      }
+    },
+    [focusTrigger]
+  );
+
+  const onCloseModal = useCallback(() => closeModal({ restoreFocus: true }), [closeModal]);
+  const onOpenModal: MouseEventHandler<HTMLButtonElement> = useCallback(
+    (event) => {
+      setTriggerFromEvent(event);
+      setIsSearchSelectionVisible(true);
+    },
+    [setTriggerFromEvent]
+  );
 
   const onSearchSelected = useCallback((id: string, type: string) => {
     setSavedObjectId(id);
@@ -211,17 +248,20 @@ export const TransformManagement: FC = () => {
   const closeDataViewEditorRef = useRef<() => void | undefined>();
 
   const createNewDataView = useCallback(() => {
-    onCloseModal();
+    closeModal({ restoreFocus: false });
     closeDataViewEditorRef.current = dataViewEditor?.openEditor({
       onSave: async (dataView) => {
         if (dataView.id) {
           onSearchSelected(dataView.id, 'index-pattern');
+        } else {
+          focusTrigger();
         }
       },
+      onCancel: focusTrigger,
 
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, onCloseModal, onSearchSelected]);
+  }, [closeModal, dataViewEditor, focusTrigger, onSearchSelected]);
 
   useEffect(function cleanUpDataViewEditorFlyout() {
     return () => {

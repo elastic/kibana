@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lock-manager'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lock-manager'
+  title: '@kbn/lock-manager'
   description: Moon project for @kbn/lock-manager
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-lock-manager
+  sourceRoot: src/platform/packages/shared/kbn-lock-manager
 dependsOn:
   - '@kbn/logging'
   - '@kbn/core'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

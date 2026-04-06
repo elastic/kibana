@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/performance-testing-dataset-extractor'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-performance-testing'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/performance-testing-dataset-extractor'
+  title: '@kbn/performance-testing-dataset-extractor'
   description: Moon project for @kbn/performance-testing-dataset-extractor
   channel: ''
   owner: '@elastic/kibana-performance-testing'
-  metadata:
-    sourceRoot: packages/kbn-performance-testing-dataset-extractor
+  sourceRoot: packages/kbn-performance-testing-dataset-extractor
 dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/dev-cli-runner'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

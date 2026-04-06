@@ -1,0 +1,22 @@
+# DAY_NAME
+
+Returns the name of the weekday for a given date, using the configured Locale.
+
+## Syntax
+
+`DAY_NAME(date)`
+
+### Parameters
+
+#### date
+
+Date expression to extract the weekday name from. If `null`, the function returns `null`.
+
+## Examples
+
+Extracts the weekday name from a specific date value.
+
+```esql
+ROW dt = to_datetime("1953-09-02T00:00:00.000Z")
+| EVAL weekday = DAY_NAME(dt);
+```

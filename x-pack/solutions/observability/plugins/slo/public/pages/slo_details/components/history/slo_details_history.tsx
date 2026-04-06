@@ -10,7 +10,7 @@ import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useUrlAppState } from './hooks/use_url_app_state';
+import { getDefaultRangeFromSlo, useUrlAppState } from './hooks/use_url_app_state';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { toDuration } from '../../../../utils/slo/duration';
@@ -27,6 +27,10 @@ export function SloDetailsHistory({ slo }: Props) {
   const { uiSettings } = useKibana().services;
 
   const { state, updateState } = useUrlAppState(slo);
+  const defaultRange = getDefaultRangeFromSlo(slo);
+  const isCalendarRangeModified =
+    state.range.from.getTime() !== defaultRange.from.getTime() ||
+    state.range.to.getTime() !== defaultRange.to.getTime();
 
   const onBrushed = ({ from, to }: TimeBounds) => {
     updateState({ range: { from, to } });
@@ -43,6 +47,10 @@ export function SloDetailsHistory({ slo }: Props) {
               onChange={(updatedRange: TimeBounds) => {
                 updateState({ range: updatedRange });
               }}
+              onReset={() => {
+                updateState({ range: defaultRange });
+              }}
+              isResetDisabled={!isCalendarRangeModified}
             />
           ) : (
             <EuiSuperDatePicker

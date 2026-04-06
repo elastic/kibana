@@ -18,6 +18,8 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { omit } from 'lodash';
 import React, { useCallback } from 'react';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -29,25 +31,37 @@ import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mu
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
+const ADAPTIVE_ALLOCATIONS_FLAT_KEYS = [
+  'adaptive_allocations.max_number_of_allocations',
+  'adaptive_allocations.enabled',
+  'adaptive_allocations.min_number_of_allocations',
+];
+
 const formDeserializer = (data: InferenceEndpoint) => {
-  if (
+  const maxAllocations =
     data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
-    data.config?.headers
-  ) {
+    data.config?.providerConfig?.['adaptive_allocations.max_number_of_allocations'];
+
+  if (maxAllocations || data.config?.headers) {
     const { headers, ...restConfig } = data.config;
-    const maxAllocations =
-      data.config.providerConfig?.adaptive_allocations?.max_number_of_allocations;
+    const restProviderConfig = omit(
+      data.config.providerConfig || {},
+      ADAPTIVE_ALLOCATIONS_FLAT_KEYS
+    );
 
     return {
       ...data,
       config: {
         ...restConfig,
         providerConfig: {
-          ...(data.config.providerConfig as InferenceEndpoint['config']['providerConfig']),
+          ...restProviderConfig,
           ...(headers ? { headers } : {}),
           ...(maxAllocations
             ? // remove the adaptive_allocations from the data config as form does not expect it
-              { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
+              {
+                max_number_of_allocations: maxAllocations as number,
+                adaptive_allocations: undefined,
+              }
             : {}),
         },
       },
@@ -66,6 +80,7 @@ export const formSerializer = (formData: InferenceEndpoint) => {
     const {
       max_number_of_allocations: maxAllocations,
       headers,
+      num_allocations: numAllocations,
       ...restProviderConfig
     } = providerConfig || {};
 
@@ -85,7 +100,7 @@ export const formSerializer = (formData: InferenceEndpoint) => {
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
               }
-            : {}),
+            : { ...(numAllocations != null && { num_allocations: numAllocations }) }),
         },
         ...(headers ? { headers } : {}),
       },
@@ -103,6 +118,8 @@ interface InferenceFlyoutWrapperProps {
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
   enableEisPromoTour?: boolean;
+  /** When set, only these task types will be available for selection in the form. */
+  allowedTaskTypes?: InferenceTaskType[];
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -114,6 +131,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   onSubmitSuccess,
   inferenceEndpoint,
   enableEisPromoTour,
+  allowedTaskTypes,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -179,6 +197,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               isPreconfigured,
               reenterSecretsOnEdit: false,
               enableEisPromoTour,
+              allowedTaskTypes,
             }}
           />
           <EuiSpacer size="m" />

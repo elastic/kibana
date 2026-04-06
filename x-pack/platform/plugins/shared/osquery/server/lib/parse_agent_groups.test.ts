@@ -19,6 +19,7 @@ function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
   return jest.fn(
     ({
       searchAfter,
+      pitId,
     }: {
       searchAfter?: SortResults;
       kuery?: string;
@@ -26,7 +27,7 @@ function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
       pitId?: string;
       perPage?: number;
       page?: number;
-    }): Promise<{ agents: Agent[]; total: number }> => {
+    }): Promise<{ agents: Agent[]; total: number; pit?: string }> => {
       const start = searchAfter ? (searchAfter[0] as number) + 1 : 0;
       const end = Math.min(start + chunkSize, agentIds.length);
       const chunk = agentIds.slice(start, end);
@@ -37,6 +38,7 @@ function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
           sort: [start + index],
         })) as Agent[],
         total: agentIds.length,
+        ...(pitId ? { pit: `${pitId}-next` } : {}),
       });
     }
   );
@@ -137,31 +139,39 @@ describe('aggregateResults', () => {
         results: generateResults(),
         total: 18001,
         searchAfter: ['firstSort'],
+        pitId: 'refreshedPit-1',
       })
       .mockResolvedValueOnce({
         results: generateResults(2),
         total: 18001,
         searchAfter: ['secondSort'],
+        pitId: 'refreshedPit-2',
       })
       .mockResolvedValueOnce({
         results: ['result_18001'],
         total: 18001,
         searchAfter: ['thirdSort'],
+        pitId: 'refreshedPit-3',
       });
 
     const result = await aggregateResults(generatorMock, mockElasticsearchClient, mockContext);
     expect(generatorMock).toHaveBeenCalledWith(1, expect.any(Number));
     expect(generatorMock).toHaveBeenCalledWith(1, expect.any(Number), undefined, 'mockedPitId');
-    expect(generatorMock).toHaveBeenCalledWith(2, expect.any(Number), ['firstSort'], 'mockedPitId');
+    expect(generatorMock).toHaveBeenCalledWith(
+      2,
+      expect.any(Number),
+      ['firstSort'],
+      'refreshedPit-1'
+    );
     expect(generatorMock).toHaveBeenCalledWith(
       3,
       expect.any(Number),
       ['secondSort'],
-      'mockedPitId'
+      'refreshedPit-2'
     );
     expect(mockOpenPointInTime).toHaveBeenCalledTimes(1);
     expect(mockClosePointInTime).toHaveBeenCalledTimes(1);
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mockedPitId' });
+    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'refreshedPit-3' });
     expect(result.length).toEqual(18001);
   });
 });
@@ -249,11 +259,11 @@ describe('parseAgentSelection', () => {
         index: '.fleet-agents',
         keep_alive: '10m',
       });
-      expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mockedPitId' });
+      expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mockedPitId-next-next' });
 
       const thirdCall = mockAgentService.listAgents.mock.calls[2][0];
       expect(thirdCall.searchAfter).toBeDefined();
-      expect(thirdCall.pitId).toBe('mockedPitId');
+      expect(thirdCall.pitId).toBe('mockedPitId-next');
     });
 
     it('should continue even if PIT close fails', async () => {

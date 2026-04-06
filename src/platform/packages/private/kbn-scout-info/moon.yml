@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/scout-info'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/scout-info'
+  title: '@kbn/scout-info'
   description: Moon project for @kbn/scout-info
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-scout-info
+  sourceRoot: src/platform/packages/private/kbn-scout-info
 dependsOn:
   - '@kbn/repo-info'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package
@@ -32,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

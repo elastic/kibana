@@ -24,6 +24,7 @@ export interface SiemMigrationFilters {
   partiallyTranslated?: boolean;
   untranslatable?: boolean;
   searchTerm?: string;
+  isEligibleForTranslation?: boolean;
 }
 
 export interface SiemMigrationSort {

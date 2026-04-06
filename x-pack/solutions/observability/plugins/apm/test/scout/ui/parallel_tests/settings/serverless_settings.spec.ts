@@ -6,9 +6,10 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('Settings - Serverless', { tag: ['@svlOblt'] }, () => {
+test.describe('Settings - Serverless', { tag: tags.serverless.observability.complete }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });

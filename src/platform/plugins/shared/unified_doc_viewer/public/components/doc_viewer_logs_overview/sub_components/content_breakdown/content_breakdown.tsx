@@ -15,12 +15,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { escape } from 'lodash';
 
 import {
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
+  getHighlightedFieldValue,
 } from '@kbn/discover-utils';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -43,10 +43,16 @@ export const ContentBreakdown = ({
   });
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
+  const highlights = field ? hit.raw.highlight?.[field] : undefined;
 
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
-    : { language: 'txt', dangerouslySetInnerHTML: { __html: escape(value ?? '') } };
+    : {
+        language: 'txt',
+        dangerouslySetInnerHTML: {
+          __html: getHighlightedFieldValue(value ?? '', highlights),
+        },
+      };
   const hasMessageField = field && value;
 
   return (

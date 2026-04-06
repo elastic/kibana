@@ -1,6 +1,6 @@
 # ST_YMIN
 
-Extracts the minimum value of the `y` coordinates from the supplied geometry. For geometries of type `geo_point` or `geo_shape`, this corresponds to the minimum `latitude` value.
+Extracts the minimum value of the `y` coordinates from the supplied geometry. For geometries of type `geo_point` or `geo_shape`, this is equivalent to extracting the minimum `latitude` value.
 
 ## Syntax
 
@@ -8,13 +8,13 @@ Extracts the minimum value of the `y` coordinates from the supplied geometry. Fo
 
 ### Parameters
 
-#### `point`
+#### point
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-Extracting the minimum `y` coordinate from a geometry
+Extract the minimum latitude and other envelope coordinates for the city boundary of the airport with abbreviation "CPH":
 
 ```esql
 FROM airport_city_boundaries
@@ -23,5 +23,4 @@ FROM airport_city_boundaries
 | EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
-
-This example calculates the bounding box of a city boundary for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates, keeping only the relevant fields in the output.
+This example calculates the minimum and maximum x and y coordinates for the city boundary geometry of the specified airport.

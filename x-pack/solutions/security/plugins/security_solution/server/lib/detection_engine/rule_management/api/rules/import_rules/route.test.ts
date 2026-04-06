@@ -31,6 +31,7 @@ import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -66,6 +67,9 @@ describe.skip('Import rules route', () => {
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
+    );
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
     );
     mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
     importRulesRoute(server.router, config, clients.logger);

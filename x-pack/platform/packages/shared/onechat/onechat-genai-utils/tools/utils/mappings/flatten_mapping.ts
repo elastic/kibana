@@ -12,6 +12,7 @@ interface MappingProperties {
   [key: string]: {
     type?: string; // Leaf field (e.g., "text", "keyword", etc.)
     properties?: MappingProperties; // Nested object fields
+    fields?: MappingProperties; // Multi-fields (alternative analyzers/types)
     meta?: Record<string, string>; // meta
   };
 }
@@ -37,8 +38,10 @@ export const flattenMapping = (mapping: MappingTypeMapping): MappingField[] => {
         });
       }
       if (value.properties) {
-        // If it's an object or has nested props, go deeper
         fields = fields.concat(extractFields(value.properties, fieldPath));
+      }
+      if (value.fields) {
+        fields = fields.concat(extractFields(value.fields, fieldPath));
       }
     }
 

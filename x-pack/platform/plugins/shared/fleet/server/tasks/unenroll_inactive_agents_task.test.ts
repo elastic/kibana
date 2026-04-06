@@ -93,6 +93,7 @@ describe('UnenrollInactiveAgentsTask', () => {
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
       unenrollBatchSize,
+      config: { taskInterval: '10m' },
     });
   });
 

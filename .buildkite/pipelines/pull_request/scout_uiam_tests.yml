@@ -8,12 +8,6 @@ steps:
     timeout_in_minutes: 15
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     retry:
       automatic:
         - exit_status: '*'

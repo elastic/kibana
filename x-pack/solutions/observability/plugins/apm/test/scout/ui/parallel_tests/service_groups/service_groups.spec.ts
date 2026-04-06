@@ -5,74 +5,79 @@
  * 2.0.
  */
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
-test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects: { serviceGroupsPage } }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await serviceGroupsPage.gotoServiceGroupsPageWithDateSelected(
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
-  });
-
-  test('When navigating to service groups', async ({
-    page,
-    pageObjects: { serviceGroupsPage },
-  }) => {
-    const GO_SERVICE_GROUP_NAME = 'go services';
-
-    await test.step('shows no service groups initially', async () => {
-      // If there are no service groups, the page shows this heading
-      await expect(
-        page.getByRole('heading', { name: 'No service groups', level: 2 })
-      ).toBeVisible();
+test.describe(
+  'Service Groups',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { serviceGroupsPage } }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await serviceGroupsPage.gotoServiceGroupsPageWithDateSelected(
+        testData.OPBEANS_START_DATE,
+        testData.OPBEANS_END_DATE
+      );
     });
 
-    await test.step('creates a service group', async () => {
-      await serviceGroupsPage.createNewServiceGroup(GO_SERVICE_GROUP_NAME);
+    test('When navigating to service groups', async ({
+      page,
+      pageObjects: { serviceGroupsPage },
+    }) => {
+      const GO_SERVICE_GROUP_NAME = 'go services';
 
-      // open the service picker and filter by agent name
-      await serviceGroupsPage.typeInTheSearchBar('agent.name:"go"');
+      await test.step('shows no service groups initially', async () => {
+        // If there are no service groups, the page shows this heading
+        await expect(
+          page.getByRole('heading', { name: 'No service groups', level: 2 })
+        ).toBeVisible();
+      });
 
-      // verify expected synthetic services are listed and save
-      await serviceGroupsPage.expectByText(['synth-go-1', 'synth-go-2']);
-      await page.getByText('Save group').click();
+      await test.step('creates a service group', async () => {
+        await serviceGroupsPage.createNewServiceGroup(GO_SERVICE_GROUP_NAME);
 
-      // Make sure the toast is visible and contains the correct text and then close it
-      await expect(page.getByTestId('euiToastHeader')).toBeVisible();
-      await expect(
-        page.getByTestId('euiToastHeader').getByText(`Created "${GO_SERVICE_GROUP_NAME}" group`)
-      ).toBeVisible();
-      await page.getByTestId('toastCloseButton').click();
+        // open the service picker and filter by agent name
+        await serviceGroupsPage.typeInTheSearchBar('agent.name:"go"');
 
-      // wait for UI to reflect the created group
-      await expect(page.getByText('1 group')).toBeVisible();
+        // verify expected synthetic services are listed and save
+        await serviceGroupsPage.expectByText(['synth-go-1', 'synth-go-2']);
+        await page.getByText('Save group').click();
+
+        // Make sure the toast is visible and contains the correct text and then close it
+        await expect(page.getByTestId('euiToastHeader')).toBeVisible();
+        await expect(
+          page.getByTestId('euiToastHeader').getByText(`Created "${GO_SERVICE_GROUP_NAME}" group`)
+        ).toBeVisible();
+        await page.getByTestId('toastCloseButton').click();
+
+        // wait for UI to reflect the created group
+        await expect(page.getByText('1 group')).toBeVisible();
+      });
+
+      await test.step('shows created group in the list', async () => {
+        const card = page.getByTestId('serviceGroupCard');
+        await expect(card).toContainText(GO_SERVICE_GROUP_NAME);
+        await expect(card).toContainText('2 services');
+      });
+
+      await test.step('opens service list when clicking on service group card', async () => {
+        await page.getByTestId('serviceGroupCard').click();
+        await expect(page.getByTestId('apmEditButtonEditGroupButton')).toBeVisible();
+        await serviceGroupsPage.expectByText(['synth-go-1', 'synth-go-2']);
+      });
+
+      await test.step('deletes the service group', async () => {
+        // open edit flow and delete
+        await page.getByRole('button', { name: 'Edit group' }).click();
+        await page.getByTestId('apmDeleteGroupButton').click();
+
+        // after deletion there should be no service groups
+        await waitForApmSettingsHeaderLink(page);
+        await expect(
+          page.getByRole('heading', { name: 'No service groups', level: 2 })
+        ).toBeVisible();
+      });
     });
-
-    await test.step('shows created group in the list', async () => {
-      const card = page.getByTestId('serviceGroupCard');
-      await expect(card).toContainText(GO_SERVICE_GROUP_NAME);
-      await expect(card).toContainText('2 services');
-    });
-
-    await test.step('opens service list when clicking on service group card', async () => {
-      await page.getByTestId('serviceGroupCard').click();
-      await expect(page.getByTestId('apmEditButtonEditGroupButton')).toBeVisible();
-      await serviceGroupsPage.expectByText(['synth-go-1', 'synth-go-2']);
-    });
-
-    await test.step('deletes the service group', async () => {
-      // open edit flow and delete
-      await page.getByRole('button', { name: 'Edit group' }).click();
-      await page.getByTestId('apmDeleteGroupButton').click();
-
-      // after deletion there should be no service groups
-      await waitForApmSettingsHeaderLink(page);
-      await expect(
-        page.getByRole('heading', { name: 'No service groups', level: 2 })
-      ).toBeVisible();
-    });
-  });
-});
+  }
+);

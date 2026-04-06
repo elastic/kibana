@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import {
   BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
@@ -25,7 +26,7 @@ const CONTAINER_ID = CONTAINER_IDS[CONTAINER_COUNT - 1];
 
 test.describe(
   'Infrastructure Inventory - Container Asset Details Flyout',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let savedViewId: string = '';
 

@@ -54,7 +54,8 @@ export const registerBulkResolveRoute = (
           schema.object({
             type: schema.string(),
             id: schema.string(),
-          })
+          }),
+          { maxSize: 10_000 }
         ),
       },
     },

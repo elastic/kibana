@@ -33,16 +33,16 @@ export const FindExceptionListItemsRequestQuery = z.object({
    * The `list_id`s of the items to fetch.
    */
   list_id: ArrayFromString(ExceptionListHumanId),
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the `<field name>:<field value>` syntax.
- 
+
       */
   filter: ArrayFromString(FindExceptionListItemsFilter).optional().default([]),
-  /** 
+  /**
       * Determines whether the returned containers are Kibana associated with a Kibana space
 or available in all spaces (`agnostic` or `single`)
- 
+
       */
   namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
   search: z.string().optional(),

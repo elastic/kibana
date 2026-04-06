@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import dateMath from '@kbn/datemath';
 import { evaluateKql } from './eval_kql';
+
+const FAKE_NOW = new Date('2025-01-15T12:00:00.000Z');
 
 describe('evaluateKql', () => {
   it('should throw an error for invalid KQL', () => {
@@ -152,6 +155,97 @@ describe('evaluateKql', () => {
         const kql = 'user.name: J*n D*';
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
+      });
+    });
+  });
+
+  describe('datemath expressions', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(FAKE_NOW);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    describe('"is" expressions with datemath', () => {
+      it('should match when context value equals "now" resolved to ISO string', () => {
+        const kql = 'timestamp: now';
+        const nowIso = dateMath.parse('now')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: nowIso })).toBe(true);
+      });
+
+      it('should match "now-1d" against the resolved date', () => {
+        const kql = 'timestamp: now-1d';
+        const resolved = dateMath.parse('now-1d')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2020-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match datemath with || anchor syntax', () => {
+        const kql = 'timestamp: "2025-01-01T00:00:00.000Z||+1d"';
+        const resolved = dateMath.parse('2025-01-01T00:00:00.000Z||+1d')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-01T00:00:00.000Z' })).toBe(false);
+      });
+    });
+
+    describe('range expressions with datemath', () => {
+      it('should evaluate >= with datemath on the right side', () => {
+        const kql = 'timestamp >= now-7d';
+        // now is 2025-01-15T12:00:00Z, so now-7d is 2025-01-08T12:00:00Z
+        expect(evaluateKql(kql, { timestamp: '2025-01-10T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should not evaluate >= with datemath on the left side', () => {
+        const kql = 'now-7d >= timestamp';
+        // now is 2025-01-15T12:00:00Z, so now-7d is 2025-01-08T12:00:00Z
+        expect(evaluateKql(kql, { timestamp: '2025-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should evaluate < with datemath on the right side', () => {
+        const kql = 'timestamp < now';
+        expect(evaluateKql(kql, { timestamp: '2025-01-14T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-16T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should evaluate range between two datemath expressions', () => {
+        const kql = 'timestamp >= now-7d and timestamp <= now';
+        expect(evaluateKql(kql, { timestamp: '2025-01-10T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-01T00:00:00.000Z' })).toBe(false);
+        expect(evaluateKql(kql, { timestamp: '2025-01-16T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should evaluate range with datemath expressions with rounding', () => {
+        const baseKql = 'timestamp >= now';
+        expect(evaluateKql(`${baseKql}/d`, { timestamp: '2025-01-20T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(`${baseKql}-7d/d`, { timestamp: '2025-01-10T00:00:00.000Z' })).toBe(
+          true
+        );
+      });
+    });
+
+    describe('fallback for non-datemath strings', () => {
+      it('should still compare plain strings normally', () => {
+        const kql = 'status: active';
+        expect(evaluateKql(kql, { status: 'active' })).toBe(true);
+        expect(evaluateKql(kql, { status: 'inactive' })).toBe(false);
+      });
+
+      it('should treat invalid datemath starting with "now" as raw string', () => {
+        // "now-invalidunit" is not a valid datemath expression, should fall back to raw string
+        const kql = 'label: now-invalidunit';
+        expect(evaluateKql(kql, { label: 'now-invalidunit' })).toBe(true);
+        expect(evaluateKql(kql, { label: 'something-else' })).toBe(false);
+      });
+
+      it('should not parse ISO date strings as datemath', () => {
+        // Plain ISO strings without || should remain as raw strings
+        const kql = 'date: "2025-01-15T12:00:00.000Z"';
+        expect(evaluateKql(kql, { date: '2025-01-15T12:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { date: '2025-01-16T00:00:00.000Z' })).toBe(false);
       });
     });
   });
