@@ -137,6 +137,7 @@ pageLoadAssetSize:
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
+  queryActivity: 4326
   reindexService: 3469
   remoteClusters: 10170
   reporting: 46602

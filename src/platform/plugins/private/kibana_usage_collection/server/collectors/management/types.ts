@@ -198,5 +198,6 @@ export interface UsageStats {
   'observability:streamsEnableOverviewPage': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'securitySolution:entityStoreEnableV2': boolean;
+  'query_activity:minRunningTime': number;
   'elasticConsole:enabled': boolean;
 }
