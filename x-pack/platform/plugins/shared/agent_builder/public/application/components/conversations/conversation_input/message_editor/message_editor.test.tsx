@@ -16,11 +16,6 @@ import type {
   CommandBadgeData,
 } from './command_menu';
 
-// TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
-jest.mock('../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => true,
-}));
-
 jest.mock('./command_menu/cursor_rect', () => ({
   getRectAtOffset: () => ({
     left: 100,

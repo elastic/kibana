@@ -90,6 +90,7 @@ export const createContextAwarenessMocks = ({
         rowHeight: 3,
         breakdownField: 'extension',
         hideChart: true,
+        hideTable: false,
       })),
       getAdditionalCellActions: jest.fn((prev) => (params) => [
         ...prev(params),

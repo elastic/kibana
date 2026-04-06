@@ -8,3 +8,4 @@
  */
 
 export { createMockWorkflowApi, type MockWorkflowApi } from './src/api/workflows_api.mock';
+export { createMockWorkflowsCapabilities } from './src/hooks/use_workflows_capabilities.mock';

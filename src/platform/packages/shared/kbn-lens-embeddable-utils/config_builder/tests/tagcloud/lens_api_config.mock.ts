@@ -71,11 +71,9 @@ export const basicEsqlTagcloud = {
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   tag_by: {
-    operation: 'value',
     column: 'geo.dest',
   },
   sampling: 1,
@@ -225,11 +223,9 @@ export const comprehensiveEsqlTagcloud = {
   },
   caption: { visible: false },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   tag_by: {
-    operation: 'value',
     column: 'geo.dest',
     color: {
       mode: 'categorical',
