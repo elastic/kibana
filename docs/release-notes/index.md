@@ -475,12 +475,6 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 % ::::{NOTE}
 % ::::
 
-
-### Features and enhancements [kibana-9.2.8-features-enhancements]
-
-**Elastic Observability solution**:
-For the Elastic Observability 9.2.8 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
-
 ### Fixes [kibana-9.2.8-fixes]
 
 **Alerting**:
