@@ -24,6 +24,7 @@ function CalleeFunctionText({ calleeFunctionName }: { calleeFunctionName: string
 
 export function StackFrameSummary({ frame, onFrameClick }: Props) {
   const calleeFunctionName = getCalleeFunction(frame);
+  const calleeSource = getCalleeSource(frame);
 
   function handleOnClick() {
     if (onFrameClick) {
@@ -45,7 +46,9 @@ export function StackFrameSummary({ frame, onFrameClick }: Props) {
         </div>
       </EuiFlexItem>
       <EuiFlexItem style={{ overflowWrap: 'anywhere' }}>
-        <EuiText size="s">{getCalleeSource(frame) || '‎'}</EuiText>
+        <EuiText size="s" aria-hidden={!calleeSource}>
+          {calleeSource || '\u200E'}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
