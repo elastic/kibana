@@ -25,7 +25,7 @@ export type {
 
 export {
   dashboardStateToAttachment,
-  attachmentToDashboardState,
+  attachmentDataToDashboardState,
   toEmbeddablePanel,
   fromEmbeddablePanel,
   DEFAULT_TIME_RANGE,

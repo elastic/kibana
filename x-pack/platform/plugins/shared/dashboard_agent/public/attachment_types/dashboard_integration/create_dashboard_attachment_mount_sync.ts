@@ -10,7 +10,10 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { DASHBOARD_ATTACHMENT_TYPE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  attachmentDataToDashboardState,
+} from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { createManualChanges$ } from './manual_changes_tracker';
@@ -91,7 +94,7 @@ export const createDashboardAttachmentMountSync$ = ({
         data: latestVersion.data as DashboardAttachment['data'], // TODO: fix type
         origin: updatedVersionedAttachment.origin,
       };
-      api.setState(attachmentToDashboardState(attachment));
+      api.setState(attachmentDataToDashboardState(attachment.data));
     }),
     ignoreElements()
   );

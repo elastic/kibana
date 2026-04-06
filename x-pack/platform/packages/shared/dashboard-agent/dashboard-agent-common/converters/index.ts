@@ -7,7 +7,7 @@
 
 export { isLensAttributes, dashboardStateToAttachment } from './to_attachment';
 
-export { attachmentToDashboardState, DEFAULT_TIME_RANGE } from './from_attachment';
+export { attachmentDataToDashboardState, DEFAULT_TIME_RANGE } from './from_attachment';
 
 export {
   toEmbeddablePanel,
