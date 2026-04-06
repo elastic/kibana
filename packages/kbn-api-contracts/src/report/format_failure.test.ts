@@ -119,7 +119,13 @@ describe('formatFailure', () => {
       const changes = [pathRemovedBreaking('/api/spaces/space')];
       const terraformImpact: TerraformImpactResult = {
         hasImpact: true,
-        impactedChanges: [{ change: changes[0], terraformResource: 'elasticstack_kibana_space' }],
+        impactedChanges: [
+          {
+            change: changes[0],
+            terraformResource: 'elasticstack_kibana_space',
+            owners: ['@elastic/kibana-security'],
+          },
+        ],
       };
       const output = formatFailure(changes, terraformImpact);
 
@@ -128,6 +134,7 @@ describe('formatFailure', () => {
         'TERRAFORM PROVIDER IMPACT',
         'elasticstack_kibana_space',
         '/api/spaces/space',
+        'Owners: @elastic/kibana-security',
         'Coordinate with @elastic/terraform-provider'
       );
     });
@@ -140,8 +147,16 @@ describe('formatFailure', () => {
       const terraformImpact: TerraformImpactResult = {
         hasImpact: true,
         impactedChanges: [
-          { change: changes[0], terraformResource: 'elasticstack_kibana_space' },
-          { change: changes[1], terraformResource: 'elasticstack_fleet_agent_policy' },
+          {
+            change: changes[0],
+            terraformResource: 'elasticstack_kibana_space',
+            owners: ['@elastic/kibana-security'],
+          },
+          {
+            change: changes[1],
+            terraformResource: 'elasticstack_fleet_agent_policy',
+            owners: ['@elastic/fleet'],
+          },
         ],
       };
       const output = formatFailure(changes, terraformImpact);

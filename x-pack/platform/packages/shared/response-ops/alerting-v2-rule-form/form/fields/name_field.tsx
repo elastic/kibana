@@ -11,10 +11,7 @@ import { EuiInlineEditTitle, EuiFormRow, useEuiTheme, useGeneratedHtmlId } from 
 import { css } from '@emotion/react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
-
-const DEFAULT_NAME = i18n.translate('xpack.alertingV2.ruleForm.defaultRuleName', {
-  defaultMessage: 'Untitled rule',
-});
+import { DEFAULT_RULE_NAME } from '../constants';
 
 export const NameField = () => {
   const { control } = useFormContext<FormValues>();
@@ -37,12 +34,22 @@ export const NameField = () => {
       name="metadata.name"
       control={control}
       rules={{
-        required: i18n.translate('xpack.alertingV2.ruleForm.nameRequiredError', {
-          defaultMessage: 'Name is required.',
-        }),
+        validate: (value) => {
+          if (!value || !value.trim()) {
+            return i18n.translate('xpack.alertingV2.ruleForm.nameRequiredError', {
+              defaultMessage: 'Name is required.',
+            });
+          }
+          if (value.trim() === DEFAULT_RULE_NAME) {
+            return i18n.translate('xpack.alertingV2.ruleForm.nameCannotBeDefaultError', {
+              defaultMessage: 'Please provide a unique rule name.',
+            });
+          }
+          return true;
+        },
       }}
       render={({ field: { value, onChange }, fieldState: { error } }) => {
-        const displayValue = value || DEFAULT_NAME;
+        const displayValue = value || DEFAULT_RULE_NAME;
 
         return (
           <EuiFormRow isInvalid={!!error} error={error?.message} fullWidth>
