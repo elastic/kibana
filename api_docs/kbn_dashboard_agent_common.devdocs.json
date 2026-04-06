@@ -90,10 +90,10 @@
       },
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.dashboardStateToAttachment",
+        "id": "def-common.dashboardStateToAttachmentData",
         "type": "Function",
         "tags": [],
-        "label": "dashboardStateToAttachment",
+        "label": "dashboardStateToAttachmentData",
         "description": [
           "\nConverts a DashboardState to DashboardAttachmentData.\nPreserves all dashboard state fields for full round-trip support."
         ],
@@ -124,7 +124,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.dashboardStateToAttachment.$1",
+            "id": "def-common.dashboardStateToAttachmentData.$1",
             "type": "Object",
             "tags": [],
             "label": "state",

@@ -24,7 +24,7 @@ export type {
 } from './types';
 
 export {
-  dashboardStateToAttachment,
+  dashboardStateToAttachmentData,
   attachmentDataToDashboardState,
   toEmbeddablePanel,
   fromEmbeddablePanel,

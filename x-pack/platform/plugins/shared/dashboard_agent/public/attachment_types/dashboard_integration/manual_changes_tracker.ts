@@ -9,7 +9,10 @@ import { debounceTime, filter, map, merge, skip, type Observable } from 'rxjs';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  dashboardStateToAttachmentData,
+} from '@kbn/dashboard-agent-common';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-publishing';
 
 export interface ManualChangesTrackerParams {
@@ -72,7 +75,7 @@ export const createManualChanges$ = ({
       return {
         id: currentAttachment.id,
         type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardStateToAttachment(currentDashboardState),
+        data: dashboardStateToAttachmentData(currentDashboardState),
         origin: currentAttachment.origin,
       };
     }),
