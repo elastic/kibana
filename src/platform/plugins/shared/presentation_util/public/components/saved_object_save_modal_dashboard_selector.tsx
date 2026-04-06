@@ -117,49 +117,58 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                 />
                 <EuiSpacer size="s" />
               </>
-              <EuiRadio
-                checked={dashboardOption === null}
-                id="add-to-library-option"
-                name="dashboard-option"
-                label={i18n.translate(
-                  'presentationUtil.saveModalDashboard.noDashboardOptionLabel',
-                  {
-                    defaultMessage: 'None',
-                  }
-                )}
-                onChange={() => {
-                  setAddToLibrary(true);
-                  onChange(null);
-                }}
-                disabled={isDisabled || !canSaveByReference}
-              />
+              {canSaveByReference ? (
+                <EuiRadio
+                  checked={dashboardOption === null}
+                  id="add-to-library-option"
+                  name="dashboard-option"
+                  label={i18n.translate(
+                    'presentationUtil.saveModalDashboard.noDashboardOptionLabel',
+                    {
+                      defaultMessage: 'None',
+                    }
+                  )}
+                  onChange={() => {
+                    setAddToLibrary(true);
+                    onChange(null);
+                  }}
+                  disabled={isDisabled}
+                />
+              ) : null}
             </div>
           </EuiPanel>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} data-test-subj="add-to-library-checkbox">
-              <EuiCheckbox
-                id="add-to-library-checkbox"
-                label={i18n.translate('presentationUtil.saveModalDashboard.libraryOptionLabel', {
-                  defaultMessage: 'Add to library',
-                })}
-                checked={isAddToLibrarySelected}
-                disabled={dashboardOption === null || isDisabled || !canSaveByReference}
-                onChange={(event) => setAddToLibrary(event.target.checked)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="info"
-                content={
-                  <FormattedMessage
-                    id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
-                    defaultMessage="Items added to the Visualize library are available to all dashboards. Edits to a library item appear everywhere it is used."
+          {canSaveByReference ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false} data-test-subj="add-to-library-checkbox">
+                  <EuiCheckbox
+                    id="add-to-library-checkbox"
+                    label={i18n.translate(
+                      'presentationUtil.saveModalDashboard.libraryOptionLabel',
+                      {
+                        defaultMessage: 'Add to library',
+                      }
+                    )}
+                    checked={isAddToLibrarySelected}
+                    disabled={dashboardOption === null || isDisabled}
+                    onChange={(event) => setAddToLibrary(event.target.checked)}
                   />
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="info"
+                    content={
+                      <FormattedMessage
+                        id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
+                        defaultMessage="Items added to the Visualize library are available to all dashboards. Edits to a library item appear everywhere it is used."
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
         </>
       </EuiFormRow>
     </>

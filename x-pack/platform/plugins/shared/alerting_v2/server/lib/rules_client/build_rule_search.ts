@@ -8,6 +8,11 @@
 import { escapeKuery } from '@kbn/es-query';
 import { buildRuleSoFilter } from './build_rule_filter';
 
+const normalizeSearchTerm = (term: string): string => {
+  const normalized = term.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '');
+  return normalized || term;
+};
+
 export const buildRuleSearchQuery = (search?: string): string | undefined => {
   if (!search?.trim()) {
     return undefined;

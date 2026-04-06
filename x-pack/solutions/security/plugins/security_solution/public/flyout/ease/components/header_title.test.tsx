@@ -22,8 +22,10 @@ import {
   HeaderTitle,
 } from './header_title';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
-import { SEVERITY_VALUE_TEST_ID } from '../../../flyout_v2/document/components/test_ids';
-import { RISK_SCORE_VALUE_TEST_ID } from '../../../flyout_v2/shared/components/test_ids';
+import {
+  RISK_SCORE_VALUE_TEST_ID,
+  SEVERITY_VALUE_TEST_ID,
+} from '../../../flyout_v2/document/components/test_ids';
 
 jest.mock('../../../common/lib/kibana');
 

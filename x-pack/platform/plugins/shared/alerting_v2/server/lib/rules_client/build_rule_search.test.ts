@@ -31,6 +31,10 @@ describe('buildRuleSearchQuery', () => {
       '(metadata.name: prod\\:alerts* OR metadata.description: prod\\:alerts* OR metadata.labels: prod\\:alerts* OR grouping.fields: prod\\:alerts*)'
     );
   });
+
+  it('normalizes leading punctuation so name searches can still match analyzed text', () => {
+    expect(buildRuleSearchQuery('#1')).toBe('(metadata.name: 1* OR metadata.labels: 1*)');
+  });
 });
 
 describe('buildFindRulesSearch', () => {
