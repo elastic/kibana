@@ -79,7 +79,8 @@ describe('SharepointServer', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${SITE_URL}/_api/web/lists`, {
         headers: ODATA_HEADERS,
         params: {
-          $select: 'Id,Title,ItemCount,Description,Created,LastItemModifiedDate,RootFolder/ServerRelativeUrl',
+          $select:
+            'Id,Title,ItemCount,Description,Created,LastItemModifiedDate,RootFolder/ServerRelativeUrl',
           $expand: 'RootFolder',
         },
       });
