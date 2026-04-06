@@ -11,7 +11,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { createAgentLiveUpdatesSubscription } from './dashboard_integration/agent_live_updates_subscription';
-import { createDashboardAttachmentMountSync$ } from './dashboard_integration/create_dashboard_attachment_mount_sync';
+import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
 
 export interface OnAttachmentMountParams extends AttachmentLifecycleParams<DashboardAttachment> {
   agentBuilder: AgentBuilderPluginStart;
@@ -35,7 +35,7 @@ export const onAttachmentMount = ({
       switchMap((api) =>
         api
           ? merge(
-              createDashboardAttachmentMountSync$({
+              createDashboardAppIntegration$({
                 agentBuilder,
                 api,
                 getAttachment,
