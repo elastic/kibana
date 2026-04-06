@@ -70,7 +70,7 @@ import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './workflow_ta
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
-/** Must match `maxAttempts` on `WORKFLOW_RUN_TASK_TYPE` (Task Manager retries after interrupt). */
+/** Max retry attempts for workflow run tasks, including final-attempt recovery handling after interrupts. */
 const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
