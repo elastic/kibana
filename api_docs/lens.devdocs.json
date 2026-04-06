@@ -176,7 +176,23 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; applySerializedState: (state?: ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -322,15 +338,7 @@
           },
           "<string | undefined>; hasUnsavedChanges$: ",
           "Observable",
-          "<boolean>; resetUnsavedChanges: () => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
-          },
-          "<void>; projectRoutingOverrides$: ",
+          "<boolean>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -8508,7 +8516,7 @@
             "label": "primaryPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | undefined"
+              "\"top\" | \"bottom\" | \"middle\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
             "lineNumber": 67,
@@ -17322,7 +17330,23 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; applySerializedState: (state?: ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -17468,15 +17492,7 @@
           },
           "<string | undefined>; hasUnsavedChanges$: ",
           "Observable",
-          "<boolean>; resetUnsavedChanges: () => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
-          },
-          "<void>; projectRoutingOverrides$: ",
+          "<boolean>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -19194,7 +19210,23 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; applySerializedState: (state?: ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -19340,15 +19372,7 @@
           },
           "<string | undefined>; hasUnsavedChanges$: ",
           "Observable",
-          "<boolean>; resetUnsavedChanges: () => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
-          },
-          "<void>; projectRoutingOverrides$: ",
+          "<boolean>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -24229,7 +24253,7 @@
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ version?: 1 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ description?: string | null | undefined; state?: any; visualizationType?: string | null | undefined; uiStateJSON?: string | undefined; visState?: string | undefined; savedSearchRefName?: string | undefined; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>>"
         ],
         "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/create.ts",
-        "lineNumber": 35,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -24341,7 +24365,7 @@
           "<string | undefined>; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/create.ts",
-        "lineNumber": 42,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
