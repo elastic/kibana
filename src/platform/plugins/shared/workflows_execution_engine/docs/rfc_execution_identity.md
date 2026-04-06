@@ -14,9 +14,9 @@ Background execution identity in Kibana (workflows, alerting, agent builder) is 
 
 **Recommendation:** A platform-level Execution Identity service (new shared Kibana plugin) providing named service accounts with scoped permissions, access lists, and lifecycle management. Under the hood, backed by ES API keys. The Kibana-side architecture is validated by a working PoC.
 
-**Key finding:** ES cannot create truly independent service accounts today. Every API key is limited by its creator's privileges (`limited_by`). We have workarounds (create keys on behalf of a superuser), but the long-term fix is a small ES change: allow API key creation without `limited_by` for authorized platform services. ES already has this concept for built-in service accounts -- we just need it exposed for user-defined ones.
+**Key finding:** ES API keys are always limited by the creator's privileges (`limited_by`). For the interim, `grantAsInternalUser` with an admin session works. For the long term, the ES service account infrastructure already supports what we need -- independent principals with their own role descriptors, no `limited_by`. The [ES Service Account spec](https://docs.google.com/document/d/17V5lN-Ao7LZh-H6PDr9Dgw4CDCVd6pFcpBgV9ngz410) was explicitly designed for user-defined accounts; what's missing is the CRUD APIs to create them.
 
-**Open topics:** Plugin ownership (platform IAM vs workflows team), Cloud vs Project scope, cross-team adoption (alerting, agent builder), migration path for existing resources.
+**Open topics:** Plugin ownership (platform IAM vs workflows team), UIAM compatibility for serverless, cross-team adoption (alerting, agent builder), migration path for existing resources.
 
 ---
 
@@ -28,7 +28,11 @@ This creates three distinct problems:
 
 ### Problem 1: Identity Fragility
 
-If User A creates a workflow and User B edits a typo, scheduled runs silently switch to User B's permissions. If User B leaves the company, the workflow breaks. In alerting, when a rule creator is deleted: alerting does NOT listen for user deletion, ES does NOT automatically invalidate the API key, and the rule may keep running or silently fail with 401 errors. Recovery is manual ("Update API key" in the UI), which couples the rule to yet another human.
+If User A creates a workflow and User B edits a typo, scheduled runs silently switch to User B's permissions. The core issue is that workflows and alerting rules **regenerate API keys on every save**, tying execution identity to whoever last saved the resource.
+
+Note: ES API keys themselves are resilient -- they capture a **snapshot** of the creator's privileges at creation time and continue to work even if the creator's roles change or the user is deleted. The fragility is in how Kibana features use them (regenerating on save), not in the ES primitive itself.
+
+In alerting, when a rule creator is deleted: alerting does NOT listen for user deletion, and the API key continues to work with its snapshot of the deleted user's privileges. If someone then re-saves the rule, a new key is generated from the saver's session -- coupling the rule to yet another human.
 
 ### Problem 2: No Permission Scoping
 
@@ -78,19 +82,11 @@ The service provides a **Kibana-layer abstraction** over ES API keys: named iden
 
 ES API keys always intersect permissions with the creator's privileges (`limited_by`). Since Kibana connects to ES as `kibana_system`, and `kibana_system` does not have access to arbitrary user indices (e.g. `logs-*`, custom indices), creating keys via `asInternalUser` produces keys that cannot access those indices -- even if the `role_descriptors` request it.
 
-This means the **creator's identity matters** when creating an API key. Three implementation options exist, all using ES API keys, differing only in who the creator is:
+This means the **creator's identity matters** when creating an API key.
 
-| Implementation | Creator | Works for all indices? | ES audit identity | Extra config? |
-|---|---|---|---|---|
-| `grantAsInternalUser(adminRequest)` | The UI admin | Yes (if admin is superuser) | Admin user | No |
-| Dedicated `kibana_sa_manager` user | A system superuser in `kibana.yml` | Yes | `kibana_sa_manager` | Yes (credential) |
-| Extended `kibana_system` role | `kibana_system` with broader privileges | Yes | `kibana_system` | Yes (role change) |
+**Interim approach:** `grantAsInternalUser` with the admin's session. Since SA creation is restricted to admins (typically superusers), the intersection is a no-op -- the SA gets exactly the `role_descriptors`. This works across all deployment types (on-prem, ECH, serverless). The key captures a snapshot of the admin's privileges at creation time, so it remains stable even if the admin's roles later change.
 
-**PoC uses** option 1 (`grantAsInternalUser` with admin session) -- simplest, no config changes.
-
-**Recommended for production:** option 2 (dedicated `kibana_sa_manager`) -- fully decouples from human admins, consistent audit identity.
-
-**Long-term:** ES feature for user-creatable service accounts (solution #1 from "Solutions Considered") eliminates all workarounds.
+**Long-term:** User-creatable ES service accounts (solution #1 from "Solutions Considered"). Service accounts have their own role descriptors with no `limited_by` -- eliminating the intersection problem entirely. The [ES Service Account Technical Specification](https://docs.google.com/document/d/17V5lN-Ao7LZh-H6PDr9Dgw4CDCVd6pFcpBgV9ngz410) explicitly designed the architecture to support user-defined accounts in the future, and the namespace model (`{namespace}/{service}`) already accommodates this. What's needed is the CRUD APIs for user-defined namespaces and index storage for SA definitions.
 
 ### Architecture
 
@@ -160,21 +156,23 @@ ES API key creation always intersects with the creator's privileges. There is no
 | `grantAsInternalUser(adminRequest)` | The admin | Admin's role snapshot | Yes, if admin is superuser |
 | ES native service accounts | Platform | None | Yes, but not user-creatable |
 
-### PoC Workaround
+### Interim Approach
 
-Use `grantAsInternalUser` with the admin's session. Since SA creation is restricted to admins (typically superusers), the intersection is a no-op. The SA's effective permissions equal the `role_descriptors`.
+Use `grantAsInternalUser` with the admin's session. Since SA creation is restricted to admins (typically superusers), the intersection is a no-op. The SA's effective permissions equal the `role_descriptors`. The key captures a snapshot of the admin's privileges, so it remains stable regardless of future role changes or user deletion.
 
-**Downsides:**
-- ES audit shows the admin as the key owner, not a system identity
-- The key is technically "owned by" the admin (snapshot at creation time)
+**Trade-off:** ES audit shows the admin as the key owner, not a system identity. Kibana-level audit compensates for this (see Audit Gap section).
 
 ### What We Need From ES (Long-Term)
 
-Either:
-1. **User-creatable service accounts** extending `_security/service_account` -- first-class independent identities with no `limited_by`
-2. **A new `createApiKey` mode** without `limited_by` for platform-level credentials (e.g., a `grant_type: "platform"` flag)
+**User-creatable service accounts** extending `_security/service_account`. The [ES Service Account spec](https://docs.google.com/document/d/17V5lN-Ao7LZh-H6PDr9Dgw4CDCVd6pFcpBgV9ngz410) already designed for this: the namespace model (`{namespace}/{service}`) separates built-in (`elastic/`) from user-defined accounts, the authentication and token infrastructure is in place, and SA authorization uses role descriptors with no `limited_by`. What's needed is the CRUD APIs for user-defined accounts and index storage for their definitions.
 
-This is the most important cross-team discussion item. Without an ES-level primitive for independent identities, the SA abstraction is a Kibana-layer construct over user-bound API keys.
+### What We Need From UIAM
+
+For serverless parity, UIAM needs to either:
+1. Recognize ES service account tokens directly, or
+2. Support creating UIAM API keys with arbitrary `role_descriptors` (currently UIAM keys are role-scoped, not privilege-scoped)
+
+This is an open question for the cross-team discussion.
 
 ---
 
@@ -237,10 +235,11 @@ The PoC branch (`feature/poc-execution-identity`) validates the Kibana-side arch
 | Runtime resolution (`setup_dependencies.ts`) | Working | Resolves SA name -> decrypt key -> build `fakeRequest` |
 | Fail-secure behavior | Working | If resolution fails, workflow fails (no fallback to user identity) |
 
-### What Doesn't Work (ES Limitation)
+### ES Limitation and Interim Approach
 
 - `createApiKey` via `asInternalUser` creates keys limited to `kibana_system`'s privileges -- cannot access arbitrary user indices
-- Workaround: `grantAsInternalUser` with admin session (works for superuser admins)
+- Interim: `grantAsInternalUser` with admin session -- works across all deployment types, key captures admin's privilege snapshot at creation time
+- Long-term: user-creatable ES service accounts (infrastructure already exists, CRUD APIs needed)
 
 ### Files Changed (PoC)
 
@@ -285,7 +284,7 @@ The PoC branch (`feature/poc-execution-identity`) validates the Kibana-side arch
 | Alerting / RNA adoption | Medium | Requires cross-team alignment |
 | Agent Builder integration | Medium | Honor workflow identity when invoking |
 | Space scoping in access lists | Medium | Space-aware binding checks |
-| UIAM compatibility | Low | Serverless parity |
+| UIAM compatibility | High | Serverless parity -- UIAM needs to either recognize ES SA tokens or support arbitrary `role_descriptors` on UIAM keys |
 | Migration for existing workflows | Medium | Backfill creator identity on existing resources. Grafana's approach -- auto-migrating all API keys to SAs at startup with server-level locking -- is a useful reference. |
 
 ---
@@ -294,7 +293,8 @@ The PoC branch (`feature/poc-execution-identity`) validates the Kibana-side arch
 
 | Team | Ask | Priority |
 |---|---|---|
-| **ES Security** | User-creatable service accounts or `limited_by`-free API key creation | Critical |
+| **ES Security** | Expose user-creatable service accounts (infrastructure exists, CRUD APIs needed) | Critical |
+| **UIAM** | Support for ES SA tokens in serverless, or arbitrary `role_descriptors` on UIAM keys | High |
 | **Platform IAM** | Ownership of the `execution_identity` plugin; Cloud vs Project scope | High |
 | **ResponseOps (RNA)** | Would alerting adopt this for rule execution identity? | High |
 | **Agent Builder** | Would agents use SA identity when invoking workflows? | Medium |
@@ -304,7 +304,7 @@ The PoC branch (`feature/poc-execution-identity`) validates the Kibana-side arch
 
 ## Known Limitations
 
-1. **SA is not a true independent identity.** Until ES supports user-creatable service accounts, every SA is backed by an API key tied to a user via `limited_by`. The Kibana abstraction hides this, but ES audit and privilege scoping are affected.
+1. **SA is not a true independent identity (yet).** Until ES exposes user-creatable service accounts, every SA is backed by an API key tied to a user via `limited_by`. The Kibana abstraction hides this, and the interim approach (`grantAsInternalUser` with superuser admin) makes it functionally equivalent. The ES service account infrastructure already exists for built-in accounts and was designed for extensibility.
 
 2. **`fakeRequest` limitations are inherited.** The SA resolves to a `fakeRequest`, which has known issues: `auth.isAuthenticated` is false, space derivation is fragile, UIAM can break. A long-term `ExecutionContext` type would be cleaner but requires platform-wide changes.
 
