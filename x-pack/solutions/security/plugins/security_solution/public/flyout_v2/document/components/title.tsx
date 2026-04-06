@@ -11,11 +11,12 @@ import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { EventKind } from '../constants/event_kinds';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { getDocumentTitle } from '../utils/get_header_title';
-import { HEADER_TITLE_TEST_ID, HEADER_TITLE_LINK_TEST_ID } from './test_ids';
+import { TITLE_LINK_TEST_ID, TITLE_TEST_ID } from './test_ids';
 
-export interface HeaderTitleProps {
+export interface TitleProps {
   /**
    * The document to display
    */
@@ -32,8 +33,11 @@ export interface HeaderTitleProps {
  * For alerts: shows the rule name with a warning icon.
  * For events: shows the event title with an analyzeEvent icon.
  */
-export const HeaderTitle: FC<HeaderTitleProps> = memo(({ hit, titleHref }) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
+export const Title: FC<TitleProps> = memo(({ hit, titleHref }) => {
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
   const title = useMemo(() => getDocumentTitle(hit), [hit]);
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
@@ -43,19 +47,14 @@ export const HeaderTitle: FC<HeaderTitleProps> = memo(({ hit, titleHref }) => {
         href={titleHref}
         target="_blank"
         external={false}
-        data-test-subj={HEADER_TITLE_LINK_TEST_ID}
+        data-test-subj={TITLE_LINK_TEST_ID}
       >
-        <FlyoutTitle
-          title={title}
-          iconType={iconType}
-          isLink
-          data-test-subj={HEADER_TITLE_TEST_ID}
-        />
+        <FlyoutTitle title={title} iconType={iconType} isLink data-test-subj={TITLE_TEST_ID} />
       </EuiLink>
     );
   }
 
-  return <FlyoutTitle title={title} iconType={iconType} data-test-subj={HEADER_TITLE_TEST_ID} />;
+  return <FlyoutTitle title={title} iconType={iconType} data-test-subj={TITLE_TEST_ID} />;
 });
 
-HeaderTitle.displayName = 'HeaderTitle';
+Title.displayName = 'Title';
