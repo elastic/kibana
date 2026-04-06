@@ -389,13 +389,6 @@
     "title",
     "version"
   ],
-  "data_connector": [
-    "kscIds",
-    "name",
-    "toolIds",
-    "type",
-    "workflowIds"
-  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
