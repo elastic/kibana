@@ -15,7 +15,7 @@ import {
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(
   slo: SLOWithSummaryResponse,
-  timeRange?: { from: string; to: string }
+  timeRangeOverride?: { from: string; to: string }
 ): string | undefined {
   if (
     !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
@@ -41,9 +41,9 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     qs.append('transactionType', transactionType === ALL_VALUE ? '' : transactionType);
   }
 
-  if (timeRange) {
-    qs.append('rangeFrom', timeRange.from);
-    qs.append('rangeTo', timeRange.to);
+  if (timeRangeOverride) {
+    qs.append('rangeFrom', timeRangeOverride.from);
+    qs.append('rangeTo', timeRangeOverride.to);
   } else if (duration) {
     qs.append('rangeFrom', `now-${duration}`);
     qs.append('rangeTo', 'now');

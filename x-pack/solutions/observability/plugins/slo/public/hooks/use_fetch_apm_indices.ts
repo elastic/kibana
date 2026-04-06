@@ -50,11 +50,8 @@ export function useFetchApmTracesIndex(): UseFetchApmIndex {
     queryKey: ['fetchApmTracesIndices'],
     queryFn: async ({ signal }) => {
       try {
-        const response = await apmSourcesAccess.getApmIndices({ signal });
-        const { transaction, span } = response;
-        const allIndices = Array.from(
-          new Set([transaction, span].flatMap((idx) => idx.split(',')))
-        );
+        const { transaction, span } = await apmSourcesAccess.getApmIndices({ signal });
+        const allIndices = [...new Set([transaction, span].flatMap((idx) => idx.split(',')))];
         return allIndices.join(',');
       } catch (error) {
         // ignore error

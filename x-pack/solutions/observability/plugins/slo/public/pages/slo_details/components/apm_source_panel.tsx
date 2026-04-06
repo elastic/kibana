@@ -16,10 +16,9 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 
-type APMIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
-
 const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
+type APMIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
 interface ApmSourcePanelProps {
   slo: SLOWithSummaryResponse;
   timeRange?: { from: string; to: string };
@@ -27,9 +26,11 @@ interface ApmSourcePanelProps {
 
 export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
   const {
-    application: { capabilities },
-    share,
-  } = useKibana().services;
+    services: {
+      application: { capabilities },
+      share,
+    },
+  } = useKibana();
 
   const indicator = slo.indicator as APMIndicator;
 
@@ -37,17 +38,18 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
     params: { service, environment, transactionType, transactionName },
   } = indicator;
 
-  const hasApmReadCapabilities = !!capabilities.apm.show;
-  const isRemote = !!slo.remote;
-
-  const serviceName = String(slo.groupings?.['service.name'] ?? service);
-  const envValue = String(slo.groupings?.['service.environment'] ?? environment);
-  const transactionTypeValue = String(slo.groupings?.['transaction.type'] ?? transactionType);
-  const transactionNameValue = String(slo.groupings?.['transaction.name'] ?? transactionName);
+  const serviceName = (slo.groupings?.['service.name'] as string | undefined) ?? service;
+  const envValue = (slo.groupings?.['service.environment'] as string | undefined) ?? environment;
+  const transactionTypeValue =
+    (slo.groupings?.['transaction.type'] as string | undefined) ?? transactionType;
+  const transactionNameValue =
+    (slo.groupings?.['transaction.name'] as string | undefined) ?? transactionName;
 
   const defaultTimeRange = { from: `now-${slo.timeWindow.duration}`, to: 'now' };
   const effectiveTimeRange = timeRange ?? defaultTimeRange;
 
+  const hasApmReadCapabilities = !!capabilities.apm.show;
+  const isRemote = !!slo.remote;
   const canNavigateToApm = hasApmReadCapabilities && !isRemote;
 
   const locator = canNavigateToApm ? share.url.locators.get(APM_APP_LOCATOR_ID) : undefined;

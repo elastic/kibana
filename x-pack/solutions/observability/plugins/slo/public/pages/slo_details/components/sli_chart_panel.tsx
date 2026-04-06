@@ -37,6 +37,7 @@ import { getApmTracesDiscoverUrl } from '../utils/discover_links/get_discover_li
 import type { TimeBounds } from '../types';
 import { WideChart } from './wide_chart';
 
+type APMIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
 export interface Props {
   slo: SLOWithSummaryResponse;
   data: ChartData[];
@@ -68,11 +69,14 @@ export function SliChartPanel({
   onBrushed,
 }: Props) {
   const {
-    uiSettings,
-    share,
-    http: { basePath },
-    application: { capabilities },
-  } = useKibana().services;
+    services: {
+      uiSettings,
+      share,
+      http: { basePath },
+      application: { capabilities },
+    },
+  } = useKibana();
+
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
@@ -86,12 +90,7 @@ export function SliChartPanel({
   const isRemote = !!slo.remote;
   const canNavigateToApm = isApm && hasApmReadCapabilities && !isRemote;
 
-  const defaultTimeRange = { from: `now-${slo.timeWindow.duration}`, to: 'now' };
-  const effectiveTimeRange = timeRange ?? defaultTimeRange;
-
-  const apmUrl = isApm
-    ? convertSliApmParamsToApmAppDeeplinkUrl(slo, effectiveTimeRange)
-    : undefined;
+  const apmUrl = isApm ? convertSliApmParamsToApmAppDeeplinkUrl(slo, timeRange) : undefined;
   const apmLink = apmUrl ? basePath.prepend(apmUrl) : undefined;
 
   const { data: tracesIndex } = useFetchApmTracesIndex();
@@ -99,21 +98,21 @@ export function SliChartPanel({
   const discoverLink = (() => {
     if (!isApm || !tracesIndex) return undefined;
 
-    const indicator = slo.indicator as
-      | APMTransactionDurationIndicator
-      | APMTransactionErrorRateIndicator;
-    const { params } = indicator;
+    const { params } = slo.indicator as APMIndicator;
 
     return getApmTracesDiscoverUrl({
       params: {
         index: tracesIndex,
-        serviceName: String(slo.groupings?.['service.name'] ?? params.service),
-        environment: String(slo.groupings?.['service.environment'] ?? params.environment),
-        transactionType: String(slo.groupings?.['transaction.type'] ?? params.transactionType),
-        transactionName: String(slo.groupings?.['transaction.name'] ?? params.transactionName),
+        serviceName: (slo.groupings?.['service.name'] as string | undefined) ?? params.service,
+        environment:
+          (slo.groupings?.['service.environment'] as string | undefined) ?? params.environment,
+        transactionType:
+          (slo.groupings?.['transaction.type'] as string | undefined) ?? params.transactionType,
+        transactionName:
+          (slo.groupings?.['transaction.name'] as string | undefined) ?? params.transactionName,
       },
       share,
-      timeRange: effectiveTimeRange,
+      timeRange: timeRange ?? { from: `now-${slo.timeWindow.duration}`, to: 'now' },
     });
   })();
 

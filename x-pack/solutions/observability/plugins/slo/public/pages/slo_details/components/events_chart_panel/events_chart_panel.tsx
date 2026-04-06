@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
@@ -24,12 +23,6 @@ import type { TimeBounds } from '../../types';
 import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
 import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
-
-const linkStyle = css`
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-`;
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -114,7 +107,6 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
 
           <EuiFlexItem grow={0}>
             <EuiLink
-              css={linkStyle}
               href={getDiscoverLink({
                 slo,
                 timeRange: {
