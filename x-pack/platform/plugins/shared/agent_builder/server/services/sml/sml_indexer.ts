@@ -142,6 +142,9 @@ class SmlIndexerImpl implements SmlIndexer {
             updated_at: now,
             spaces,
             permissions: chunk.permissions ?? [],
+            user_defined: false,
+            semantic_title: chunk.title,
+            semantic_content: chunk.content,
           },
         },
       };

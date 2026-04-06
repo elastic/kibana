@@ -28,6 +28,9 @@ const getSmlService = jest.fn(() => ({
   getTypeDefinition: mockGetTypeDefinition,
   listTypeDefinitions: jest.fn(),
   getCrawler: jest.fn(),
+  getRecord: jest.fn(),
+  createOrUpdateRecord: jest.fn(),
+  deleteRecord: jest.fn(),
 }));
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };

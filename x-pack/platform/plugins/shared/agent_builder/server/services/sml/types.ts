@@ -112,11 +112,11 @@ export interface SmlTypeDefinition {
 export interface SmlDocument {
   /** Unique id of the chunk */
   id: string;
-  /** SML type (e.g., 'visualization', 'dashboard') */
+  /** SML type (e.g., 'visualization', 'dashboard', 'index') */
   type: string;
   /** Display title */
   title: string;
-  /** Origin ID (e.g., saved object ID) */
+  /** Origin ID (e.g., saved object ID, index name) */
   origin_id: string;
   /** Searchable content */
   content: string;
@@ -128,6 +128,16 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
+  /** Optional tags for categorization and filtering */
+  tags?: string[];
+  /** When true, this record was created or modified via the public API and should not be overwritten by crawl events */
+  user_defined?: boolean;
+  /** Type-specific parameters (e.g., `index_pattern` for type 'index') */
+  params?: Record<string, unknown>;
+  /** Semantic search field for title — populated at write time from `title` */
+  semantic_title?: string;
+  /** Semantic search field for content — populated at write time from `content` */
+  semantic_content?: string;
 }
 
 /**
@@ -239,4 +249,31 @@ export interface SmlService {
 
   /** List all registered type definitions */
   listTypeDefinitions: () => SmlTypeDefinition[];
+
+  /** Get a single SML record by its document ID. Throws if not found. */
+  getRecord: (params: { id: string; esClient: ElasticsearchClient }) => Promise<SmlDocument>;
+
+  /** Create or update an SML record. Always marks records as `user_defined: true`. */
+  createOrUpdateRecord: (params: {
+    id: string;
+    document: SmlRecordCreateBody;
+    esClient: ElasticsearchClient;
+  }) => Promise<SmlDocument>;
+
+  /** Delete a single SML record by its document ID. Throws if not found. */
+  deleteRecord: (params: { id: string; esClient: ElasticsearchClient }) => Promise<boolean>;
+}
+
+/**
+ * The body payload for creating or updating an SML record via the public API.
+ */
+export interface SmlRecordCreateBody {
+  type: string;
+  title: string;
+  origin_id: string;
+  content: string;
+  spaces: string[];
+  permissions?: string[];
+  tags?: string[];
+  params?: Record<string, unknown>;
 }

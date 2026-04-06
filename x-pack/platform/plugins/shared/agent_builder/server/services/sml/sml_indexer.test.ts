@@ -163,6 +163,9 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
         permissions: ['perm1'],
+        user_defined: false,
+        semantic_title: 'My Viz',
+        semantic_content: 'content',
       });
     });
 

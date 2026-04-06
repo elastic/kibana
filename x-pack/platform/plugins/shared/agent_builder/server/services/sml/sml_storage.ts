@@ -30,6 +30,11 @@ const smlStorageSchemaProperties = {
   updated_at: types.date({}),
   spaces: types.keyword({}),
   permissions: types.keyword({}),
+  tags: types.keyword({}),
+  user_defined: types.boolean({}),
+  params: types.object({ dynamic: false, properties: {} }),
+  semantic_title: types.semantic_text({}),
+  semantic_content: types.semantic_text({}),
 };
 
 const storageSettings = {

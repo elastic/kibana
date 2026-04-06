@@ -10,12 +10,19 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
-import type { SmlService, SmlSearchResult, SmlDocument, SmlTypeDefinition } from './types';
+import { AgentBuilderErrorCode, createAgentBuilderError } from '@kbn/agent-builder-common';
+import type {
+  SmlService,
+  SmlSearchResult,
+  SmlDocument,
+  SmlTypeDefinition,
+  SmlRecordCreateBody,
+} from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
-import { smlIndexName } from './sml_storage';
+import { createSmlStorage, smlIndexName } from './sml_storage';
 
 export interface SmlServiceSetup {
   /**
@@ -112,6 +119,15 @@ class SmlServiceImpl implements SmlServiceInstance {
       },
       listTypeDefinitions: () => {
         return this.registry.list();
+      },
+      getRecord: async ({ id, esClient }) => {
+        return getRecordById({ id, esClient, logger });
+      },
+      createOrUpdateRecord: async ({ id, document, esClient }) => {
+        return upsertRecord({ id, document, esClient, logger });
+      },
+      deleteRecord: async ({ id, esClient }) => {
+        return deleteRecordById({ id, esClient, logger });
       },
     };
   }
@@ -392,15 +408,8 @@ const searchSml = async ({
       .map((hit) => {
         const source = hit._source!;
         return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: source.origin_id ?? '',
+          ...mapSourceToDocument(source),
           content: source.content,
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
           score: hit._score ?? 0,
         };
       });
@@ -459,17 +468,7 @@ const getDocumentsByIds = async ({
     for (const hit of response.hits.hits) {
       if (!hit._source) continue;
       const source = hit._source;
-      const doc: SmlDocument = {
-        id: source.id ?? '',
-        type: source.type ?? '',
-        title: source.title ?? '',
-        origin_id: source.origin_id ?? '',
-        content: source.content ?? '',
-        created_at: source.created_at ?? '',
-        updated_at: source.updated_at ?? '',
-        spaces: source.spaces ?? [],
-        permissions: source.permissions ?? [],
-      };
+      const doc = mapSourceToDocument(source);
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -480,3 +479,144 @@ const getDocumentsByIds = async ({
 
   return docMap;
 };
+
+/**
+ * Get a single SML record by its document ID.
+ */
+const getRecordById = async ({
+  id,
+  esClient,
+  logger,
+}: {
+  id: string;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<SmlDocument> => {
+  try {
+    const response = await esClient.search<SmlDocument>({
+      index: smlIndexName,
+      size: 1,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: { term: { id } },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source) {
+      throw createAgentBuilderError(
+        AgentBuilderErrorCode.internalError,
+        `SML record ${id} not found`,
+        { statusCode: 404 }
+      );
+    }
+
+    return mapSourceToDocument(hit._source);
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      throw createAgentBuilderError(
+        AgentBuilderErrorCode.internalError,
+        `SML record ${id} not found`,
+        { statusCode: 404 }
+      );
+    }
+    throw error;
+  }
+};
+
+/**
+ * Create or update an SML record. Always marks records as `user_defined: true`.
+ * Preserves `created_at` on updates. Copies title → semantic_title and content → semantic_content.
+ */
+const upsertRecord = async ({
+  id,
+  document,
+  esClient,
+  logger,
+}: {
+  id: string;
+  document: SmlRecordCreateBody;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<SmlDocument> => {
+  const storage = createSmlStorage({ logger, esClient });
+  const now = new Date().toISOString();
+
+  let createdAt = now;
+  try {
+    const existing = await storage.getClient().get({ id });
+    if (existing._source?.created_at) {
+      createdAt = existing._source.created_at;
+    }
+  } catch (error) {
+    if (!isNotFoundError(error)) {
+      throw error;
+    }
+  }
+
+  const smlDocument: SmlDocument = {
+    id,
+    type: document.type,
+    title: document.title,
+    origin_id: document.origin_id,
+    content: document.content,
+    spaces: document.spaces,
+    permissions: document.permissions ?? [],
+    tags: document.tags ?? [],
+    params: document.params,
+    user_defined: true,
+    semantic_title: document.title,
+    semantic_content: document.content,
+    created_at: createdAt,
+    updated_at: now,
+  };
+
+  await storage.getClient().index({ id, document: smlDocument });
+
+  return smlDocument;
+};
+
+/**
+ * Delete a single SML record by its document ID.
+ */
+const deleteRecordById = async ({
+  id,
+  esClient,
+  logger,
+}: {
+  id: string;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<boolean> => {
+  const storage = createSmlStorage({ logger, esClient });
+  try {
+    const { result } = await storage.getClient().delete({ id });
+    return result === 'deleted';
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      throw createAgentBuilderError(
+        AgentBuilderErrorCode.internalError,
+        `SML record ${id} not found`,
+        { statusCode: 404 }
+      );
+    }
+    throw error;
+  }
+};
+
+/**
+ * Map an Elasticsearch _source to an SmlDocument, including optional fields.
+ */
+const mapSourceToDocument = (source: SmlDocument): SmlDocument => ({
+  id: source.id ?? '',
+  type: source.type ?? '',
+  title: source.title ?? '',
+  origin_id: source.origin_id ?? '',
+  content: source.content ?? '',
+  created_at: source.created_at ?? '',
+  updated_at: source.updated_at ?? '',
+  spaces: source.spaces ?? [],
+  permissions: source.permissions ?? [],
+  tags: source.tags,
+  user_defined: source.user_defined,
+  params: source.params,
+});
