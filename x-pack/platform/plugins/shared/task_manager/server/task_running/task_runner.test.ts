@@ -2739,7 +2739,7 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-run',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             outcome: 'success',
             start: expect.stringMatching(dateRegExp),
@@ -2748,7 +2748,7 @@ describe('TaskManagerRunner', () => {
             task: {
               id,
               type: 'bar',
-              schedule_delay: expect.any(Number),
+              schedule_delay: expect.any(String),
               scheduled: expect.any(String),
             },
           },
@@ -2788,7 +2788,7 @@ describe('TaskManagerRunner', () => {
           error: expect.any(Object),
           event: {
             action: 'task-run',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
             start: expect.stringMatching(dateRegExp),
@@ -2797,7 +2797,7 @@ describe('TaskManagerRunner', () => {
             task: {
               id,
               type: 'bar',
-              schedule_delay: expect.any(Number),
+              schedule_delay: expect.any(String),
               scheduled: expect.any(String),
             },
           },
@@ -2831,7 +2831,7 @@ describe('TaskManagerRunner', () => {
           error: expect.any(Object),
           event: {
             action: 'task-run',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
             start: expect.stringMatching(dateRegExp),
@@ -2840,7 +2840,7 @@ describe('TaskManagerRunner', () => {
             task: {
               id,
               type: 'bar',
-              schedule_delay: expect.any(Number),
+              schedule_delay: expect.any(String),
               scheduled: expect.any(String),
             },
           },
@@ -2890,7 +2890,7 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-cancel',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             start: expect.stringMatching(dateRegExp),
           },
@@ -2904,7 +2904,7 @@ describe('TaskManagerRunner', () => {
           error: expect.any(Object),
           event: {
             action: 'task-run',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
             start: expect.stringMatching(dateRegExp),
@@ -2914,7 +2914,7 @@ describe('TaskManagerRunner', () => {
             task: {
               id,
               type: 'bar',
-              schedule_delay: expect.any(Number),
+              schedule_delay: expect.any(String),
               scheduled: expect.any(String),
             },
           },
@@ -2962,7 +2962,7 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-cancel',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             start: expect.stringMatching(dateRegExp),
           },
@@ -2975,7 +2975,7 @@ describe('TaskManagerRunner', () => {
           error: expect.any(Object),
           event: {
             action: 'task-run',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
             start: expect.stringMatching(dateRegExp),
@@ -2985,7 +2985,7 @@ describe('TaskManagerRunner', () => {
             task: {
               id,
               type: 'bar',
-              schedule_delay: expect.any(Number),
+              schedule_delay: expect.any(String),
               scheduled: expect.any(String),
             },
           },
@@ -3028,7 +3028,7 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-cancel',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             start: expect.stringMatching(dateRegExp),
           },
@@ -3040,7 +3040,7 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-run',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             outcome: 'success',
             start: expect.stringMatching(dateRegExp),
@@ -3049,7 +3049,7 @@ describe('TaskManagerRunner', () => {
             task: {
               id,
               type: 'bar',
-              schedule_delay: expect.any(Number),
+              schedule_delay: expect.any(String),
               scheduled: expect.any(String),
             },
           },
@@ -3089,7 +3089,7 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-cancel',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             start: expect.stringMatching(dateRegExp),
           },
@@ -3101,7 +3101,7 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-run',
-            duration: expect.any(Number),
+            duration: expect.any(String),
             end: expect.stringMatching(dateRegExp),
             outcome: 'success',
             start: expect.stringMatching(dateRegExp),
@@ -3110,7 +3110,7 @@ describe('TaskManagerRunner', () => {
             task: {
               id,
               type: 'bar',
-              schedule_delay: expect.any(Number),
+              schedule_delay: expect.any(String),
               scheduled: expect.any(String),
             },
           },

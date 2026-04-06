@@ -114,7 +114,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
       <EuiButtonEmpty
         aria-label={getAriaLabel(selectedLanguage.name)}
         color="text"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="left"
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       >
@@ -158,7 +158,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
                   {(copy) => (
                     <EuiButtonEmpty
                       color="text"
-                      iconType="copyClipboard"
+                      iconType="copy"
                       size="s"
                       onClick={copy}
                       aria-label={getCopyButtonAriaLabel}

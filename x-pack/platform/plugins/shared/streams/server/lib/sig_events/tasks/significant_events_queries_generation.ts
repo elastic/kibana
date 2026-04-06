@@ -9,12 +9,13 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import {
   getStreamTypeFromDefinition,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 import type { TaskContext } from '../../tasks/task_definitions';
 import type { TaskParams } from '../../tasks/types';
 import { PromptsConfigService } from '../saved_objects/prompts_config_service';
@@ -46,6 +47,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
               const { start, end, sampleDocsSize, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
@@ -57,18 +59,16 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 soClient,
                 featureClient,
                 scopedClusterClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdRuleGeneration,
-                uiSettingsClient,
-                logger: taskLogger,
+              const connectorId = await resolveConnectorForFeature({
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                featureName: 'query generation',
+                request: fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for rule generation`);
 
@@ -122,12 +122,16 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   return getDeleteTaskRunResult();
                 }
 
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                // Get connector info for error enrichment, preserving the original error if lookup fails
+                let errorMessage = parseError(error).message;
+                try {
+                  const connector = await inferenceClient.getConnectorById(connectorId);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Connector lookup failed — use the original error message
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

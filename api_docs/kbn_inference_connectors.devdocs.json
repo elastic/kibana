@@ -28,7 +28,7 @@
           "[]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -41,7 +41,7 @@
             "label": "{\n  http,\n  featureId,\n  settings,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -57,7 +57,7 @@
                   "HttpSetup"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -70,7 +70,7 @@
                 "label": "featureId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-                "lineNumber": 68,
+                "lineNumber": 69,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -86,7 +86,7 @@
                   "SettingsStart"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-                "lineNumber": 69,
+                "lineNumber": 70,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -259,7 +259,7 @@
           },
           "<Record<string, unknown>, Record<string, unknown>> & { apiProvider?: ",
           "OpenAiProviderType",
-          " | undefined; isRecommended?: boolean | undefined; }"
+          " | undefined; isRecommended?: boolean | undefined; isEis?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/types.ts",
         "lineNumber": 11,

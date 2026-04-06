@@ -12311,7 +12311,7 @@
         "label": "IndexPatternsFetcher",
         "description": [],
         "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-        "lineNumber": 51,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12327,7 +12327,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-            "lineNumber": 56,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12343,7 +12343,7 @@
                   "ElasticsearchClient"
                 ],
                 "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "lineNumber": 57,
+                "lineNumber": 63,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12360,7 +12360,7 @@
                   "IndexPatternsFetcherOptionalParams | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "lineNumber": 58,
+                "lineNumber": 64,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12398,7 +12398,7 @@
               "[]; indices: string[]; }>"
             ],
             "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-            "lineNumber": 65,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12411,7 +12411,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "lineNumber": 74,
+                "lineNumber": 80,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12427,7 +12427,7 @@
                       "string | string[]"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 75,
+                    "lineNumber": 81,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12443,7 +12443,7 @@
                       "string[] | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 76,
+                    "lineNumber": 82,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12459,7 +12459,7 @@
                       "{ allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 77,
+                    "lineNumber": 83,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12475,7 +12475,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 78,
+                    "lineNumber": 84,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12491,7 +12491,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 79,
+                    "lineNumber": 85,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12635,7 +12635,7 @@
                       " | undefined; } & { prefix?: undefined; type?: undefined; exists?: undefined; bool?: undefined; boosting?: undefined; common?: undefined; combined_fields?: undefined; constant_score?: undefined; dis_max?: undefined; distance_feature?: undefined; function_score?: undefined; fuzzy?: undefined; geo_bounding_box?: undefined; geo_distance?: undefined; geo_grid?: undefined; geo_polygon?: undefined; geo_shape?: undefined; has_child?: undefined; has_parent?: undefined; ids?: undefined; intervals?: undefined; knn?: undefined; match?: undefined; match_all?: undefined; match_bool_prefix?: undefined; match_none?: undefined; match_phrase?: undefined; match_phrase_prefix?: undefined; more_like_this?: undefined; multi_match?: undefined; nested?: undefined; parent_id?: undefined; percolate?: undefined; pinned?: undefined; query_string?: undefined; range?: undefined; rank_feature?: undefined; regexp?: undefined; rule?: undefined; script?: undefined; script_score?: undefined; semantic?: undefined; shape?: undefined; simple_query_string?: undefined; span_containing?: undefined; span_field_masking?: undefined; span_first?: undefined; span_multi?: undefined; span_near?: undefined; span_not?: undefined; span_or?: undefined; span_term?: undefined; span_within?: undefined; sparse_vector?: undefined; term?: undefined; terms?: undefined; terms_set?: undefined; text_expansion?: undefined; weighted_tokens?: undefined; wildcard?: undefined; }) | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 80,
+                    "lineNumber": 86,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12651,7 +12651,7 @@
                       "string[] | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 81,
+                    "lineNumber": 87,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12667,7 +12667,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 82,
+                    "lineNumber": 88,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12683,7 +12683,7 @@
                       "string[] | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 83,
+                    "lineNumber": 89,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12699,7 +12699,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 84,
+                    "lineNumber": 90,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12715,7 +12715,7 @@
                       "AbortSignal | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 85,
+                    "lineNumber": 91,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12732,7 +12732,7 @@
                       " | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 86,
+                    "lineNumber": 92,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12748,7 +12748,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                    "lineNumber": 87,
+                    "lineNumber": 93,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12760,44 +12760,88 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-server.IndexPatternsFetcher.getIndexPatternsWithMatches",
+            "id": "def-server.IndexPatternsFetcher.isExcludingIndexPattern",
             "type": "Function",
             "tags": [],
-            "label": "getIndexPatternsWithMatches",
+            "label": "isExcludingIndexPattern",
             "description": [
-              "\nGet existing index pattern list by providing string array index pattern list."
+              "\nChecks whether the passed index pattern is an excluding one.\nThe excluding index pattern starts with a dash, e.g. \"-logs-excluded-*\"\nmeaning all indices matching \"logs-excluded-*\" will be excluded from search\n"
             ],
             "signature": [
-              "(indexPatterns: string[]) => Promise<string[]>"
+              "(indexPattern: string) => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-            "lineNumber": 161,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViews",
-                "id": "def-server.IndexPatternsFetcher.getIndexPatternsWithMatches.$1",
-                "type": "Array",
+                "id": "def-server.IndexPatternsFetcher.isExcludingIndexPattern.$1",
+                "type": "string",
                 "tags": [],
-                "label": "indexPatterns",
+                "label": "indexPattern",
                 "description": [
-                  "- index pattern list"
+                  "- Index pattern to check"
                 ],
                 "signature": [
-                  "string[]"
+                  "string"
                 ],
                 "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "lineNumber": 166,
-                "columnNumber": 37,
+                "lineNumber": 175,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "index pattern list of index patterns that match indices"
+              "Whether the passed index pattern is a negated one"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.IndexPatternsFetcher.getIndexPatternMatches",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexPatternMatches",
+            "description": [
+              "\nFor each input pattern, checks whether it resolves to at least one backing index.\n\nIncluding index patterns (not starting with `-`) are checked with field caps using that pattern\ntogether with every excluding index pattern (starting with `-`) in the list, so resolution matches\nElasticsearch multi-target syntax.\n"
+            ],
+            "signature": [
+              "(indexPatterns: string[]) => Promise<",
+              "GetIndexPatternMatchesResult",
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.IndexPatternsFetcher.getIndexPatternMatches.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indexPatterns",
+                "description": [
+                  "- Index patterns to check (may include wildcards and excluded entries)."
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/plugins/shared/data_views/server/fetcher/index_patterns_fetcher.ts",
+                "lineNumber": 192,
+                "columnNumber": 32,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "Resolves to {@link GetIndexPatternMatchesResult }:\n- `matchedIndexPatterns`: input patterns that matched at least one index.\n- `matchedIndices`: deduplicated concrete index names matching index patterns (omitted on failure).\n- `matchesByIndexPattern`: per-input-pattern matched indices (omitted on failure)."
             ]
           }
         ],
@@ -15158,6 +15202,14 @@
                 "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
               },
               {
+                "plugin": "unifiedSearch",
+                "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_editor/filter_editor.tsx"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_editor/filter_editor.tsx"
+              },
+              {
                 "plugin": "@kbn/unified-field-list",
                 "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
@@ -15383,34 +15435,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/modules/indicators/hooks/use_ti_data_view.ts"
               },
               {
@@ -15424,6 +15448,38 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts"
               },
               {
                 "plugin": "timelines",
@@ -24371,7 +24427,7 @@
                 "signature": [
                   "Pick<",
                   "Toast",
-                  ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"children\" | \"hidden\" | \"onClose\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
+                  ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"children\" | \"content\" | \"onClose\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
                   "MountPoint",
                   "<HTMLElement> | undefined; text?: string | ",
                   "MountPoint",
@@ -30062,7 +30118,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"children\" | \"hidden\" | \"onClose\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
+              ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"children\" | \"content\" | \"onClose\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
               "MountPoint",
               "<HTMLElement> | undefined; text?: string | ",
               "MountPoint",

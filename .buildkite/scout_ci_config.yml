@@ -5,7 +5,7 @@ plugins:
     - alerting
     - alerting_v2
     - apm
-    - automatic_import_v2
+    - automatic_import
     - banners
     - cloud_security_posture
     - console
@@ -18,6 +18,7 @@ plugins:
     - entity_store
     - exploratory_view
     - fleet
+    - flyoutSystemExamples
     - gen_ai_settings
     - global_search
     - index_management

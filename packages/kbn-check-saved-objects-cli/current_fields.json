@@ -109,8 +109,12 @@
     "destinations.type",
     "enabled",
     "groupBy",
+    "groupingMode",
     "name",
     "snoozedUntil",
+    "tags",
+    "throttle",
+    "throttle.strategy",
     "updatedAt",
     "updatedBy",
     "updatedByUsername"
@@ -128,9 +132,9 @@
     "kind",
     "metadata",
     "metadata.description",
-    "metadata.labels",
     "metadata.name",
     "metadata.owner",
+    "metadata.tags",
     "no_data",
     "no_data.behavior",
     "no_data.timeframe",
@@ -385,13 +389,6 @@
     "title",
     "version"
   ],
-  "data_connector": [
-    "kscIds",
-    "name",
-    "toolIds",
-    "type",
-    "workflowIds"
-  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
@@ -401,7 +398,8 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "result"
+    "result",
+    "title"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -1338,7 +1336,6 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
-  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",

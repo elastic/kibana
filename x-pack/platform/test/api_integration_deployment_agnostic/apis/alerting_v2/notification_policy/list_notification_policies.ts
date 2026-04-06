@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { RoleCredentials } from '../../../services';
 
-const NOTIFICATION_POLICY_API_PATH = '/internal/alerting/v2/notification_policies';
+const NOTIFICATION_POLICY_API_PATH = '/api/alerting/v2/notification_policies';
 const NOTIFICATION_POLICY_SO_TYPE = 'alerting_notification_policy';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -23,6 +23,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     overrides?: {
       description?: string;
       destinations?: Array<{ type: string; id: string }>;
+      tags?: string[];
     }
   ) {
     return supertestWithoutAuth
@@ -33,10 +34,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name,
         description: overrides?.description ?? `${name} description`,
         destinations: overrides?.destinations ?? [{ type: 'workflow', id: `${name}-workflow-id` }],
+        ...(overrides?.tags ? { tags: overrides.tags } : {}),
       });
   }
 
-  async function listPolicies(roleAuthc: RoleCredentials, query?: Record<string, string | number>) {
+  async function listPolicies(
+    roleAuthc: RoleCredentials,
+    query?: Record<string, string | number | string[]>
+  ) {
     const req = supertestWithoutAuth
       .get(NOTIFICATION_POLICY_API_PATH)
       .set(roleAuthc.apiKeyHeader)
@@ -143,6 +148,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const alphaResp = await createPolicy(roleAuthc, 'Alpha Policy', {
           description: 'Monitors CPU usage',
           destinations: [{ type: 'workflow', id: 'wf-alpha-001' }],
+          tags: ['production', 'critical'],
         });
         expect(alphaResp.status).to.be(200);
         seedCreatedBy = alphaResp.body.createdBy;
@@ -150,6 +156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const betaResp = await createPolicy(roleAuthc, 'Beta Policy', {
           description: 'Tracks memory alerts',
           destinations: [{ type: 'workflow', id: 'wf-beta-002' }],
+          tags: ['staging'],
         });
         expect(betaResp.status).to.be(200);
 
@@ -262,6 +269,50 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             .set(roleAuthc.apiKeyHeader)
             .set(samlAuth.getInternalRequestHeader())
             .expect(200);
+        });
+      });
+
+      describe('filter by tags', () => {
+        it('should filter by a single tag', async () => {
+          const response = await listPolicies(roleAuthc, { tags: 'production' });
+
+          expect(response.status).to.be(200);
+          expect(response.body.total).to.be(1);
+          expect(response.body.items[0].name).to.be('Alpha Policy');
+          expect(response.body.items[0].tags).to.eql(['production', 'critical']);
+        });
+
+        it('should filter by multiple tags', async () => {
+          const response = await listPolicies(roleAuthc, { tags: ['production', 'staging'] });
+
+          expect(response.status).to.be(200);
+          expect(response.body.total).to.be(2);
+          const names = response.body.items.map((item: { name: string }) => item.name);
+          expect(names).to.contain('Alpha Policy');
+          expect(names).to.contain('Beta Policy');
+        });
+
+        it('should return empty results when no policies match the tag', async () => {
+          const response = await listPolicies(roleAuthc, { tags: 'nonexistent' });
+
+          expect(response.status).to.be(200);
+          expect(response.body.total).to.be(0);
+          expect(response.body.items.length).to.be(0);
+        });
+
+        it('should return all policies when tags param is not provided', async () => {
+          const response = await listPolicies(roleAuthc);
+
+          expect(response.status).to.be(200);
+          expect(response.body.total).to.be(3);
+        });
+
+        it('should accept a single tag as array', async () => {
+          const response = await listPolicies(roleAuthc, { tags: ['staging'] });
+
+          expect(response.status).to.be(200);
+          expect(response.body.total).to.be(1);
+          expect(response.body.items[0].name).to.be('Beta Policy');
         });
       });
 

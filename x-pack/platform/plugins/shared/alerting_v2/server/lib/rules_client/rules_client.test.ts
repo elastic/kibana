@@ -41,7 +41,6 @@ const baseCreateData: CreateRuleParams['data'] = {
   evaluation: {
     query: {
       base: 'FROM logs-* | LIMIT 1',
-      condition: 'WHERE true',
     },
   },
 };
@@ -51,7 +50,7 @@ const baseSoAttrs = createRuleSoAttributes({
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
   evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1', condition: 'WHERE true' },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 });
 
@@ -238,7 +237,7 @@ describe('RulesClient', () => {
           data: {
             ...baseCreateData,
             evaluation: {
-              query: { base: 'FROM |', condition: 'WHERE true' },
+              query: { base: 'FROM |' },
             },
           },
           options: { id: 'rule-id-5' },
@@ -291,7 +290,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           schedule: expect.objectContaining({ every: '5m' }),
         }),
-        { version: 'WzEsMV0=' }
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
     });
 
@@ -317,7 +316,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           metadata: expect.objectContaining({ description: 'New description' }),
         }),
-        { version: 'WzEsMV0=' }
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
 
       expect(res.metadata.description).toBe('New description');
@@ -420,6 +419,36 @@ describe('RulesClient', () => {
       });
     });
 
+    it('replaces state_transition entirely without preserving stale sub-fields', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+        state_transition: { pending_count: 2, recovering_count: 3 },
+      };
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-partial-st',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-partial-st',
+        data: { state_transition: { recovering_count: 3 } },
+      });
+
+      const savedAttrs = mockSavedObjectsClient.update.mock
+        .calls[0][2] as RuleSavedObjectAttributes;
+      expect(savedAttrs.state_transition).toEqual({ recovering_count: 3 });
+      expect(
+        (savedAttrs.state_transition as Record<string, unknown>)?.pending_count
+      ).toBeUndefined();
+    });
+
     it('clears artifacts when update payload sets artifacts to null', async () => {
       const client = createClient();
 
@@ -447,7 +476,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           artifacts: [],
         }),
-        { version: 'WzEsMV0=' }
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
     });
   });
@@ -544,10 +573,13 @@ describe('RulesClient', () => {
 
       const res = await client.getRules(['rule-id-get-many-1', 'rule-id-get-many-2']);
 
-      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
-        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-1' },
-        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-2' },
-      ]);
+      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [
+          { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-1' },
+          { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-2' },
+        ],
+        undefined
+      );
       expect(res).toHaveLength(2);
       expect(res[0]).toEqual(
         expect.objectContaining({
@@ -799,7 +831,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('translates search into name and label prefix query', async () => {
+    it('translates search into name and tag prefix query', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -823,13 +855,34 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.labels: alerts*'
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
           ),
         })
       );
     });
 
-    it('combines explicit filters with the search query', async () => {
+    it('trims search before passing it to the saved objects client', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ search: '  prod alerts  ' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
+          ),
+        })
+      );
+    });
+
+    it('passes filters and search together', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -843,13 +896,13 @@ describe('RulesClient', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: expect.stringContaining('alerting_rule.attributes.enabled: true'),
+          filter: expect.stringContaining(`${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`),
         })
       );
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.labels: prod*'
+            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.tags: prod*'
           ),
         })
       );
@@ -874,6 +927,46 @@ describe('RulesClient', () => {
         sortField: 'updatedAt',
         sortOrder: 'desc',
       });
+    });
+
+    it('maps kind sorting without transformation', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'kind', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'kind',
+          sortOrder: 'desc',
+        })
+      );
+    });
+
+    it('maps enabled sorting without transformation', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'enabled', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'enabled',
+          sortOrder: 'desc',
+        })
+      );
     });
   });
 

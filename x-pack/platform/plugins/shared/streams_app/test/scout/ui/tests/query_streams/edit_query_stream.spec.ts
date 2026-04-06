@@ -21,8 +21,7 @@ const QUERY_STREAM_NAME = 'logs.ecs.test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
-// Failing: See https://github.com/elastic/kibana/issues/256968
-test.describe.skip('Query streams - Edit query stream', { tag: tags.stateful.classic }, () => {
+test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
     await browserAuth.loginAsAdmin();
     await enableQueryStreams(kbnClient);
@@ -55,6 +54,12 @@ test.describe.skip('Query streams - Edit query stream', { tag: tags.stateful.cla
     await pageObjects.streams.clickQueryStreamLink(QUERY_STREAM_NAME);
     await pageObjects.streams.clickQueryStreamDetailsTab('advanced');
     await pageObjects.streams.clickQueryStreamDetailsEditQueryButton();
+    await expect(pageObjects.streams.queryStreamFlyout).toBeVisible();
+    await expect(
+      pageObjects.streams.queryStreamFlyout
+        .getByTestId('streamsEsqlEditor')
+        .getByTestId('kibanaCodeEditor')
+    ).toBeVisible();
     const editorValue = await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
     expect(editorValue).toBe(INITIAL_ESQL_QUERY);
     const UPDATED_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-2"';

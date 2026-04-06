@@ -100,7 +100,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         aria-hidden="true"
                         class="euiButtonIcon__icon"
                         color="inherit"
-                        data-euiicon-type="arrowDown"
+                        data-euiicon-type="chevronSingleDown"
                       />
                     </button>
                   </div>

@@ -74,6 +74,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/saved-search-plugin'
   - '@kbn/lens-common'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
