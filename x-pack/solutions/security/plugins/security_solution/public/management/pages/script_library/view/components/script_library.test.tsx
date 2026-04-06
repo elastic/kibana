@@ -19,7 +19,7 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/c
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { SCRIPT_LIBRARY_PAGE_STORAGE_KEY, ScriptLibrary } from './script_library';
-import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
+import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
@@ -27,10 +27,10 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useToasts: jest.fn(),
   useStorage: jest.fn(),
 }));
-jest.mock('../../../../hooks/script_library/use_get_scripts_list');
+jest.mock('../../../../hooks/script_library/use_with_script_library_data');
 jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
-const useGetEndpointScriptsListMock = useGetEndpointScriptsList as jest.Mock;
+const useWithScriptLibraryDataMock = useWithScriptLibraryData as jest.Mock;
 const useToastsMock = useToasts as jest.Mock;
 
 describe('ScriptLibrary', () => {
@@ -40,14 +40,15 @@ describe('ScriptLibrary', () => {
   let storage: AppContextTestRender['startServices']['storage'];
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
-  let defaultMockGetScriptsResponse: ReturnType<typeof useGetEndpointScriptsListMock>;
+  let defaultMockGetScriptsResponse: ReturnType<typeof useWithScriptLibraryDataMock>;
   let mockStorageGet: jest.Mock;
   let mockStorageSet: jest.Mock;
   let mockAddDanger: jest.Mock;
 
   const getScriptsListMock = (scriptsList: EndpointScript[]) => {
-    (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
+    (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
       ...defaultMockGetScriptsResponse,
+      doesDataExist: scriptsList.length > 0,
       data: {
         data: scriptsList,
         page: 1,
@@ -84,6 +85,8 @@ describe('ScriptLibrary', () => {
     });
 
     defaultMockGetScriptsResponse = {
+      doesDataExist: false,
+      isLoadingHasData: false,
       data: {
         data: [],
         page: 1,
@@ -95,9 +98,10 @@ describe('ScriptLibrary', () => {
       isFetching: false,
       isFetched: true,
       refetch: jest.fn(),
+      refetchHasData: jest.fn(),
     };
 
-    (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue(defaultMockGetScriptsResponse);
+    (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue(defaultMockGetScriptsResponse);
 
     // navigate to scripts lib. page before each test
     history.push(SCRIPT_LIBRARY_PATH);
@@ -244,8 +248,10 @@ describe('ScriptLibrary', () => {
     });
 
     it('should show an error message when there is an error with fetching scripts', () => {
-      (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
+        doesDataExist: false,
+        isLoadingHasData: false,
         isFetching: false,
         isFetched: true,
         error: {
@@ -440,8 +446,9 @@ describe('ScriptLibrary', () => {
       const script = scriptsGenerator.generate({ id: scriptId });
       const mockRefetch = jest.fn();
 
-      (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
+        doesDataExist: true,
         data: {
           data: [script],
           page: 1,
@@ -479,8 +486,9 @@ describe('ScriptLibrary', () => {
       const script = scriptsGenerator.generate({ id: scriptId });
       const mockRefetch = jest.fn();
 
-      (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
+        doesDataExist: true,
         data: {
           data: [script],
           page: 1,
@@ -570,7 +578,7 @@ describe('ScriptLibrary', () => {
       render();
 
       // Should use page 1 instead of -1
-      expect(useGetEndpointScriptsListMock).toHaveBeenCalledWith(
+      expect(useWithScriptLibraryDataMock).toHaveBeenCalledWith(
         expect.objectContaining({
           page: 1,
           pageSize: 10,
@@ -584,7 +592,7 @@ describe('ScriptLibrary', () => {
       render();
 
       // Should use page 1 instead of 1500
-      expect(useGetEndpointScriptsListMock).toHaveBeenCalledWith(
+      expect(useWithScriptLibraryDataMock).toHaveBeenCalledWith(
         expect.objectContaining({
           page: 1,
           pageSize: 10,
@@ -624,7 +632,7 @@ describe('ScriptLibrary', () => {
 
   describe('Table conditional rendering', () => {
     it('should NOT render table before isFetched is true', () => {
-      (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
         isFetching: true,
         isFetched: false,
@@ -639,8 +647,9 @@ describe('ScriptLibrary', () => {
     it('should render table with loading state when isFetching is true', () => {
       const script = scriptsGenerator.generate();
       getScriptsListMock([script]);
-      (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
+        doesDataExist: true,
         data: {
           data: [script],
           page: 1,
@@ -674,7 +683,7 @@ describe('ScriptLibrary', () => {
       render();
 
       // API should be called with enabled: false
-      expect(useGetEndpointScriptsListMock).toHaveBeenCalledWith(
+      expect(useWithScriptLibraryDataMock).toHaveBeenCalledWith(
         expect.any(Object),
         expect.objectContaining({
           enabled: false,
@@ -693,7 +702,7 @@ describe('ScriptLibrary', () => {
       render();
 
       // API should be called with enabled: true
-      expect(useGetEndpointScriptsListMock).toHaveBeenCalledWith(
+      expect(useWithScriptLibraryDataMock).toHaveBeenCalledWith(
         expect.any(Object),
         expect.objectContaining({
           enabled: true,

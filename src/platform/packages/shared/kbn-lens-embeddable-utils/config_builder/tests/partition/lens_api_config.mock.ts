@@ -63,15 +63,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'basic donut',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -116,8 +116,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -164,8 +164,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -210,8 +210,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -257,8 +257,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -322,15 +322,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'donut with multiple groups',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -388,8 +388,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -449,8 +449,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -509,8 +509,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -586,15 +586,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'donut with multiple metrics',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -663,8 +663,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -722,8 +722,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -782,8 +782,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -859,8 +859,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -969,8 +969,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1041,15 +1041,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'donut with color mapping',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -1152,8 +1152,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1246,8 +1246,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1340,8 +1340,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1420,8 +1420,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1431,13 +1431,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'pie',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1469,13 +1467,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'treemap',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1502,12 +1498,10 @@ export const esqlCharts: Array<PartitionConfig> = [
     ignore_global_filters: false,
     type: 'mosaic',
     metric: {
-      operation: 'value',
       column: 'count',
     },
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1584,8 +1578,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1595,13 +1589,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'waffle',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',

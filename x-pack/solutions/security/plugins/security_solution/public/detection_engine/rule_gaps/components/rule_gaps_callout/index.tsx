@@ -21,7 +21,7 @@ import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gap
 import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { GapRangeValue } from '../../constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SecurityPageName } from '../../../../../common/constants';
+import { SecurityPageName, EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { AllRulesTabs } from '../../../rule_management_ui/components/rules_table/rules_table_toolbar';
 import {
@@ -33,8 +33,9 @@ import {
 const DISMISSAL_STORAGE_KEY = 'rule-gaps-callout-dismissed';
 
 export const RuleGapsCallout = () => {
-  const { docLinks, spaces } = useKibana().services;
+  const { docLinks, spaces, uiSettings } = useKibana().services;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const excludedReasons = uiSettings?.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const { scheduler } = useGapAutoFillSchedulerContext();
   const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
 
@@ -49,6 +50,7 @@ export const RuleGapsCallout = () => {
   const { data } = useGetRuleIdsWithGaps({
     gapRange: GapRangeValue.LAST_24_H,
     gapFillStatuses: [gapFillStatus.UNFILLED],
+    excludedReasons,
     schedulerId: activeSchedulerId,
   });
 
