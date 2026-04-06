@@ -281,35 +281,190 @@ export class ConnectorNotConfiguredError extends AESOPError {
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Wraps async operations with error handling and retry logic
+ * Default patterns for retryable errors (network/transient errors)
  */
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: {
-    maxRetries?: number;
-    retryDelay?: number;
-    operation: string;
+const DEFAULT_RETRYABLE_PATTERNS = [
+  'ECONNREFUSED',
+  'ETIMEDOUT',
+  'ENOTFOUND',
+  'socket hang up',
+  '429',
+  'rate limit',
+  'Rate limit',
+];
+
+interface WithRetryOptions {
+  /** Maximum number of retry attempts (not counting the initial attempt) */
+  maxRetries: number;
+  /** Base delay in milliseconds between retries (default: 1000) */
+  retryDelay?: number;
+  /** Apply exponential backoff (retryDelay * 2^attempt) */
+  exponentialBackoff?: boolean;
+  /** Maximum delay cap when using exponential backoff */
+  maxRetryDelay?: number;
+  /** Add random jitter to retry delays to prevent thundering herd */
+  jitter?: boolean;
+  /** Overall timeout for all attempts combined (ms) */
+  overallTimeout?: number;
+  /** Timeout per individual operation invocation (ms) */
+  operationTimeout?: number;
+  /** Custom retryable error message patterns (substring match) */
+  retryableErrors?: string[];
+  /** Called before each retry with attempt number, error, and delay */
+  onRetry?: (attempt: number, error: Error, delayMs: number) => void;
+  /** Called when max retries is exceeded */
+  onMaxRetriesExceeded?: (maxRetries: number, error: Error) => void;
+  /** Logger for retry events */
+  logger?: {
+    info?: (msg: string, meta?: Record<string, unknown>) => void;
+    warn?: (msg: string, meta?: Record<string, unknown>) => void;
+    error?: (msg: string, meta?: Record<string, unknown>) => void;
+    debug?: (msg: string, meta?: Record<string, unknown>) => void;
+  };
+  /** Operation name for logging */
+  operation: string;
+}
+
+/**
+ * Determines if an error is retryable given the configuration
+ */
+function shouldRetryError(error: unknown, options: WithRetryOptions): boolean {
+  // AESOPError with explicit retryable=false → never retry
+  if (error instanceof AESOPError && !error.retryable) {
+    return false;
   }
-): Promise<T> {
-  const { maxRetries = 3, retryDelay = 1000, operation } = options;
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      const isRetryable = error instanceof AESOPError && error.retryable;
-      const isLastAttempt = attempt === maxRetries;
+  // AESOPError with retryable=true → always retry
+  if (error instanceof AESOPError && error.retryable) {
+    return true;
+  }
 
-      if (!isRetryable || isLastAttempt) {
-        throw error;
-      }
+  // If custom retryable patterns are provided, ONLY retry if the error matches one
+  if (options.retryableErrors && options.retryableErrors.length > 0) {
+    const message = getErrorMessage(error);
+    return options.retryableErrors.some((pattern) => message.includes(pattern));
+  }
 
-      // Wait before retry (exponential backoff)
-      await new Promise((r) => setTimeout(r, retryDelay * (attempt + 1)));
+  // Default: retry all generic (non-AESOPError) errors unless explicitly filtered
+  return true;
+}
+
+/**
+ * Wraps async operations with error handling and retry logic.
+ *
+ * Supports exponential backoff, jitter, per-operation timeouts, overall timeouts,
+ * custom retryable error patterns, and retry callbacks.
+ *
+ * Note on fake timers: this implementation uses Promise chaining (not async/await loops)
+ * for the retry delay so that `jest.advanceTimersByTime()` works correctly — the setTimeout
+ * is always scheduled synchronously in the `.catch()` handler before control returns.
+ */
+export function withRetry<T>(fn: () => Promise<T>, options: WithRetryOptions): Promise<T> {
+  const {
+    maxRetries,
+    retryDelay = 1000,
+    exponentialBackoff = false,
+    maxRetryDelay,
+    jitter = false,
+    overallTimeout,
+    operationTimeout,
+    onRetry,
+    onMaxRetriesExceeded,
+    logger,
+    operation,
+  } = options;
+
+  const startTime = Date.now();
+
+  function attempt(attemptNumber: number): Promise<T> {
+    // Check overall timeout
+    if (overallTimeout !== undefined && Date.now() - startTime >= overallTimeout) {
+      return Promise.reject(
+        new Error(`Operation '${operation}' timed out after ${overallTimeout}ms`)
+      );
     }
+
+    let operationPromise: Promise<T>;
+    try {
+      operationPromise = Promise.resolve(fn());
+    } catch (syncError) {
+      operationPromise = Promise.reject(syncError);
+    }
+
+    // Apply per-operation timeout if configured
+    if (operationTimeout !== undefined) {
+      operationPromise = Promise.race([
+        operationPromise,
+        new Promise<T>(
+          (_, reject) =>
+            setTimeout(
+              () =>
+                reject(
+                  new Error(`Operation '${operation}' timed out after ${operationTimeout}ms`)
+                ),
+              operationTimeout
+            )
+        ),
+      ]);
+    }
+
+    return operationPromise.then(
+      (result) => {
+        if (attemptNumber > 1) {
+          logger?.info?.(`Operation succeeded after retry`, { operation, attempt: attemptNumber });
+        }
+        return result;
+      },
+      (error: unknown) => {
+        const isLastAttempt = attemptNumber > maxRetries;
+
+        if (isLastAttempt || !shouldRetryError(error, options)) {
+          if (isLastAttempt && maxRetries > 0) {
+            const err = error instanceof Error ? error : new Error(String(error));
+            logger?.error?.(`Max retries exceeded for operation`, {
+              operation,
+              maxRetries,
+              lastError: err.message,
+            });
+            onMaxRetriesExceeded?.(maxRetries, err);
+          }
+          return Promise.reject(error);
+        }
+
+        // Calculate delay for this retry
+        let delay = retryDelay;
+        if (exponentialBackoff) {
+          delay = retryDelay * Math.pow(2, attemptNumber - 1);
+        }
+        if (maxRetryDelay !== undefined) {
+          delay = Math.min(delay, maxRetryDelay);
+        }
+        if (jitter) {
+          delay = delay * (0.5 + Math.random() * 0.5);
+        }
+
+        const err = error instanceof Error ? error : new Error(String(error));
+        logger?.warn?.(`Retrying operation after failure`, {
+          operation,
+          attempt: attemptNumber,
+          maxRetries,
+          delayMs: delay,
+          error: err.message,
+        });
+        onRetry?.(attemptNumber, err, delay);
+
+        // Schedule next attempt after delay — this setTimeout is registered synchronously
+        // in the .catch() handler, making it compatible with jest.advanceTimersByTime()
+        return new Promise<T>((resolve, reject) => {
+          setTimeout(() => {
+            attempt(attemptNumber + 1).then(resolve, reject);
+          }, delay);
+        });
+      }
+    );
   }
 
-  throw new Error(`Operation '${operation}' failed after ${maxRetries} attempts`);
+  return attempt(1);
 }
 
 /**

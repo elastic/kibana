@@ -88,20 +88,164 @@ interface CircuitInfo {
   failureHistory: Array<{ timestamp: number; error: string }>;
 }
 
+export interface ExecutionSummary {
+  totalExecutions: number;
+  successes: number;
+  failures: number;
+  circuitBreakerTrips: number;
+}
+
+/**
+ * Options for the high-level execute() API
+ */
+export interface CircuitBreakerConstructorOptions {
+  failureThreshold: number;
+  resetTimeout: number;
+  monitorInterval?: number;
+  logger: Pick<Logger, 'info' | 'warn' | 'error' | 'debug'>;
+}
+
 /**
  * Circuit Breaker
  *
  * Prevents cascading failures by tracking agent failure rates
  * and temporarily disabling agents that exceed thresholds.
+ *
+ * Supports two constructor forms:
+ *  - Low-level: `new CircuitBreaker(logger, options)` — use shouldSkipAgent/recordSuccess/recordFailure
+ *  - High-level: `new CircuitBreaker({ failureThreshold, resetTimeout, logger })` — use execute()
  */
 export class CircuitBreaker {
   private circuits: Map<string, CircuitInfo> = new Map();
   private options: CircuitBreakerOptions;
+  private readonly logger: Pick<Logger, 'info' | 'warn' | 'error' | 'debug'>;
 
-  constructor(private readonly logger: Logger, options: Partial<CircuitBreakerOptions> = {}) {
-    this.options = {
-      ...DEFAULT_CIRCUIT_BREAKER_OPTIONS,
-      ...options,
+  // High-level API tracking (populated when using execute())
+  private executionSummary: ExecutionSummary = {
+    totalExecutions: 0,
+    successes: 0,
+    failures: 0,
+    circuitBreakerTrips: 0,
+  };
+  private monitorIntervalId?: ReturnType<typeof setInterval>;
+
+  constructor(
+    loggerOrConfig:
+      | Pick<Logger, 'info' | 'warn' | 'error' | 'debug'>
+      | CircuitBreakerConstructorOptions,
+    options: Partial<CircuitBreakerOptions> = {}
+  ) {
+    if (
+      loggerOrConfig !== null &&
+      typeof loggerOrConfig === 'object' &&
+      'logger' in loggerOrConfig
+    ) {
+      // Config-object form: { failureThreshold, resetTimeout, monitorInterval, logger }
+      const config = loggerOrConfig as CircuitBreakerConstructorOptions;
+      this.logger = config.logger;
+      this.options = {
+        failureThreshold: config.failureThreshold,
+        resetTimeoutMs: config.resetTimeout,
+        // High-level execute() API: single success in HALF_OPEN closes the circuit
+        successThreshold: 1,
+        failureWindowMs: DEFAULT_CIRCUIT_BREAKER_OPTIONS.failureWindowMs,
+      };
+      if (config.monitorInterval) {
+        this.monitorIntervalId = setInterval(() => {
+          // Periodic state check — no-op but keeps interval reference for shutdown
+        }, config.monitorInterval);
+      }
+    } else {
+      // Logger-first form: new CircuitBreaker(logger, options?)
+      this.logger = loggerOrConfig as Pick<Logger, 'info' | 'warn' | 'error' | 'debug'>;
+      this.options = {
+        ...DEFAULT_CIRCUIT_BREAKER_OPTIONS,
+        ...options,
+      };
+    }
+  }
+
+  /**
+   * High-level execute API: runs fn() through circuit breaker logic.
+   * Automatically tracks failures and successes. Per-agent circuit state.
+   *
+   * @param agentName - Identifies which circuit to use
+   * @param fn - Async function to execute
+   * @returns Result of fn()
+   * @throws CircuitOpenError when circuit is OPEN, or rethrows fn() errors
+   */
+  async execute<T>(agentName: string, fn: () => Promise<T>): Promise<T> {
+    const circuit = this.getOrCreateCircuit(agentName);
+    this.updateCircuitState(circuit);
+
+    if (circuit.state === CircuitState.OPEN) {
+      this.logger.warn(`[CircuitBreaker] Circuit breaker rejected execution for agent: ${agentName}`, {
+        agent: agentName,
+        state: circuit.state,
+      });
+      const err = new Error('Circuit breaker is OPEN');
+      (err as any).circuitOpen = true;
+      throw err;
+    }
+
+    this.executionSummary.totalExecutions++;
+
+    try {
+      const result = await fn();
+      this.recordSuccess(agentName);
+      this.executionSummary.successes++;
+      return result;
+    } catch (error: any) {
+      this.logger.debug(`[CircuitBreaker] Agent execution failed: ${agentName}`, {
+        agent: agentName,
+        error: error?.message,
+      });
+      this.recordFailure(agentName, error);
+      this.executionSummary.failures++;
+      throw error;
+    }
+  }
+
+  /**
+   * Returns the overall circuit state (CLOSED/OPEN/HALF_OPEN).
+   * When called with no arguments, returns the global worst-case state.
+   * When called with an agentName, returns that agent's state.
+   */
+  getState(agentName?: string): CircuitState {
+    if (agentName !== undefined) {
+      return this.getCircuitState(agentName);
+    }
+    // Return global worst-case state across all circuits
+    let worstState = CircuitState.CLOSED;
+    for (const circuit of this.circuits.values()) {
+      this.updateCircuitState(circuit);
+      if (circuit.state === CircuitState.OPEN) return CircuitState.OPEN;
+      if (circuit.state === CircuitState.HALF_OPEN) worstState = CircuitState.HALF_OPEN;
+    }
+    return worstState;
+  }
+
+  /**
+   * Returns summary of all executions since last shutdown
+   */
+  getExecutionSummary(): ExecutionSummary {
+    return { ...this.executionSummary };
+  }
+
+  /**
+   * Shuts down the circuit breaker, clearing all state and intervals
+   */
+  shutdown(): void {
+    if (this.monitorIntervalId !== undefined) {
+      clearInterval(this.monitorIntervalId);
+      this.monitorIntervalId = undefined;
+    }
+    this.circuits.clear();
+    this.executionSummary = {
+      totalExecutions: 0,
+      successes: 0,
+      failures: 0,
+      circuitBreakerTrips: 0,
     };
   }
 
@@ -238,6 +382,14 @@ export class CircuitBreaker {
   }
 
   /**
+   * Dynamically update failure threshold without resetting circuit state.
+   * Useful for per-workflow configuration of circuit breaker sensitivity.
+   */
+  setFailureThreshold(threshold: number): void {
+    this.options = { ...this.options, failureThreshold: threshold };
+  }
+
+  /**
    * Manually reset circuit for an agent
    *
    * Useful for administrative intervention
@@ -292,15 +444,16 @@ export class CircuitBreaker {
 
     circuit.state = CircuitState.OPEN;
     circuit.openedAt = now;
+    this.executionSummary.circuitBreakerTrips++;
 
-    this.logger.error(
-      `[CircuitBreaker] Circuit OPENED for agent: ${circuit.agentId} consecutive_failures=${
-        circuit.consecutiveFailures
-      } failure_threshold=${this.options.failureThreshold} recent_failures=${circuit.failureHistory
+    this.logger.warn(`[CircuitBreaker] Circuit breaker OPEN for agent: ${circuit.agentId}`, {
+      agent: circuit.agentId,
+      failures: circuit.consecutiveFailures,
+      failureThreshold: this.options.failureThreshold,
+      recentErrors: circuit.failureHistory
         .slice(-3)
-        .map((f) => f.error)
-        .join('|')}`
-    );
+        .map((f) => f.error),
+    });
   }
 
   /**
@@ -312,9 +465,9 @@ export class CircuitBreaker {
     circuit.consecutiveSuccesses = 0;
     circuit.openedAt = undefined;
 
-    this.logger.info(
-      `[CircuitBreaker] Circuit CLOSED for agent: ${circuit.agentId} - Agent recovered, circuit restored to normal operation`
-    );
+    this.logger.info(`[CircuitBreaker] Circuit breaker CLOSED for agent: ${circuit.agentId}`, {
+      agent: circuit.agentId,
+    });
   }
 
   /**

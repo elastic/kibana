@@ -30,6 +30,7 @@ describe('AESOP Feedback Learning Integration', () => {
       search: jest.fn(),
       index: jest.fn(),
       delete: jest.fn(),
+      deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     } as unknown as ElasticsearchClient;
 
     feedbackLoader = new FeedbackLoaderService(esClient);

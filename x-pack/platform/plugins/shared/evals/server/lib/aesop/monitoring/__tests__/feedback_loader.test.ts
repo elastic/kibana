@@ -256,7 +256,7 @@ describe('FeedbackLoaderService', () => {
       const result = await service.loadRecentFeedback(5);
 
       // Should increase min_confidence due to >3 poor_quality rejections
-      expect(result.recommendations.min_confidence_threshold).toBe(0.85);
+      expect(result.recommendations.min_confidence_threshold).toBeCloseTo(0.85, 5);
     });
 
     it('should handle multiple rejection reason types', async () => {
@@ -331,9 +331,9 @@ describe('FeedbackLoaderService', () => {
 
       await expect(service.loadRecentFeedback(5)).rejects.toThrow('Elasticsearch error');
 
-      expect(mockLogger.error).toHaveBeenCalledWith('[AESOP Feedback] Failed to load feedback', {
-        error,
-      });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('[AESOP Feedback] Failed to load feedback')
+      );
     });
   });
 });

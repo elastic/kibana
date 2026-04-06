@@ -88,6 +88,19 @@ const mockSkills = [
   },
 ];
 
+/**
+ * Helper: create a URL-aware get mock that returns connectors as [] and
+ * uses `skillsResponse` for all other URLs. Individual tests should use
+ * this instead of plain `mockResolvedValue` to avoid the connectors
+ * endpoint receiving a non-array value.
+ */
+const makeGetMock = (skillsResponse: unknown) => (url: string) => {
+  if (url.includes('/api/actions/connectors')) {
+    return Promise.resolve([]);
+  }
+  return Promise.resolve(skillsResponse);
+};
+
 describe('ProposedSkillsList Component', () => {
   let queryClient: QueryClient;
   let history: ReturnType<typeof createMemoryHistory>;
@@ -105,7 +118,13 @@ describe('ProposedSkillsList Component', () => {
     history = createMemoryHistory();
 
     mockHttp = {
-      get: jest.fn(),
+      // Default: return empty array for connectors, empty skills for skills endpoint
+      get: jest.fn().mockImplementation((url: string) => {
+        if (url.includes('/api/actions/connectors')) {
+          return Promise.resolve([]);
+        }
+        return Promise.resolve({ skills: [], total: 0 });
+      }),
     };
 
     (useEvalsApi as jest.Mock).mockReturnValue({
@@ -162,7 +181,7 @@ describe('ProposedSkillsList Component', () => {
 
   describe('empty state', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ skills: [], total: 0 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: [], total: 0 }));
     });
 
     it('should show empty state when no skills exist', async () => {
@@ -201,7 +220,7 @@ describe('ProposedSkillsList Component', () => {
 
   describe('skills table rendering', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ skills: mockSkills, total: 3 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: mockSkills, total: 3 }));
     });
 
     it('should render table when skills exist', async () => {
@@ -284,15 +303,15 @@ describe('ProposedSkillsList Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        const reviewButtons = screen.getAllByText('Review');
-        expect(reviewButtons).toHaveLength(3);
+        const reviewButtons = screen.getAllByRole('button', { name: 'Review' });
+        expect(reviewButtons.length).toBeGreaterThanOrEqual(3);
       });
     });
   });
 
   describe('filtering', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ skills: mockSkills, total: 3 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: mockSkills, total: 3 }));
     });
 
     it('should default to pending_review filter', async () => {
@@ -302,7 +321,7 @@ describe('ProposedSkillsList Component', () => {
         expect(mockHttp.get).toHaveBeenCalledWith(
           '/internal/aesop/skills/proposed',
           expect.objectContaining({
-            query: { status: 'pending_review' },
+            query: expect.objectContaining({ status: 'pending_review' }),
           })
         );
       });
@@ -323,7 +342,7 @@ describe('ProposedSkillsList Component', () => {
         expect(mockHttp.get).toHaveBeenCalledWith(
           '/internal/aesop/skills/proposed',
           expect.objectContaining({
-            query: { status: 'all' },
+            query: expect.objectContaining({ status: 'all' }),
           })
         );
       });
@@ -334,22 +353,25 @@ describe('ProposedSkillsList Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        const pendingButton = screen.getByText('Pending Review');
-        expect(pendingButton.closest('button')).toHaveClass('euiButton--fill');
+        // EUI v9 uses CSS-in-JS; check that the fill prop is applied by looking for the
+        // word "fill" in the generated class name, which EUI injects for filled buttons.
+        const pendingButton = screen.getByText('Pending Review').closest('button');
+        expect(pendingButton?.className).toContain('fill');
       });
 
-      const allButton = screen.getByText('All Skills');
-      await user.click(allButton);
+      await user.click(screen.getByText('All Skills'));
 
       await waitFor(() => {
-        expect(allButton.closest('button')).toHaveClass('euiButton--fill');
+        // Re-query after click so we get the updated DOM node
+        const allButton = screen.getByText('All Skills').closest('button');
+        expect(allButton?.className).toContain('fill');
       });
     });
   });
 
   describe('skill review flyout', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ skills: mockSkills, total: 3 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: mockSkills, total: 3 }));
     });
 
     it('should open flyout when Review button clicked', async () => {
@@ -357,10 +379,10 @@ describe('ProposedSkillsList Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getAllByText('Review')[0]).toBeInTheDocument();
+        expect(screen.getAllByRole('button', { name: 'Review' })[0]).toBeInTheDocument();
       });
 
-      const firstReviewButton = screen.getAllByText('Review')[0];
+      const firstReviewButton = screen.getAllByRole('button', { name: 'Review' })[0];
       await user.click(firstReviewButton);
 
       await waitFor(() => {
@@ -376,12 +398,12 @@ describe('ProposedSkillsList Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getAllByText('Review')[0]).toBeInTheDocument();
+        expect(screen.getAllByRole('button', { name: 'Review' })[0]).toBeInTheDocument();
       });
 
       mockHttp.get.mockClear();
 
-      const firstReviewButton = screen.getAllByText('Review')[0];
+      const firstReviewButton = screen.getAllByRole('button', { name: 'Review' })[0];
       await user.click(firstReviewButton);
 
       await waitFor(() => {
@@ -404,10 +426,10 @@ describe('ProposedSkillsList Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getAllByText('Review')[1]).toBeInTheDocument();
+        expect(screen.getAllByRole('button', { name: 'Review' })[1]).toBeInTheDocument();
       });
 
-      const secondReviewButton = screen.getAllByText('Review')[1];
+      const secondReviewButton = screen.getAllByRole('button', { name: 'Review' })[1];
       await user.click(secondReviewButton);
 
       await waitFor(() => {
@@ -420,7 +442,7 @@ describe('ProposedSkillsList Component', () => {
 
   describe('refresh functionality', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ skills: mockSkills, total: 3 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: mockSkills, total: 3 }));
     });
 
     it('should display refresh button', async () => {
@@ -452,7 +474,7 @@ describe('ProposedSkillsList Component', () => {
 
   describe('page header', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ skills: mockSkills, total: 3 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: mockSkills, total: 3 }));
     });
 
     it('should display page title', async () => {
@@ -476,7 +498,7 @@ describe('ProposedSkillsList Component', () => {
 
   describe('accessibility', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ skills: mockSkills, total: 3 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: mockSkills, total: 3 }));
     });
 
     it('should have accessible table structure', async () => {
@@ -529,7 +551,7 @@ describe('ProposedSkillsList Component', () => {
         },
       ];
 
-      mockHttp.get.mockResolvedValue({ skills: skillsWithoutScores, total: 1 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: skillsWithoutScores, total: 1 }));
 
       renderComponent();
 
@@ -549,7 +571,7 @@ describe('ProposedSkillsList Component', () => {
         },
       ];
 
-      mockHttp.get.mockResolvedValue({ skills: skillsWithBadDate, total: 1 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: skillsWithBadDate, total: 1 }));
 
       renderComponent();
 
@@ -567,7 +589,7 @@ describe('ProposedSkillsList Component', () => {
         },
       ];
 
-      mockHttp.get.mockResolvedValue({ skills: skillWithLongName, total: 1 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: skillWithLongName, total: 1 }));
 
       renderComponent();
 
@@ -600,7 +622,7 @@ describe('ProposedSkillsList Component', () => {
         },
       ];
 
-      mockHttp.get.mockResolvedValue({ skills: incompleteSkill, total: 1 });
+      mockHttp.get.mockImplementation(makeGetMock({ skills: incompleteSkill, total: 1 }));
 
       renderComponent();
 

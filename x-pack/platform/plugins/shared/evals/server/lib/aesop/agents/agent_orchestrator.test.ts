@@ -185,6 +185,9 @@ describe('AgentOrchestrator', () => {
     });
 
     it('returns empty array when pattern miner fails', async () => {
+      // When pattern miner returns no content but schema explorer succeeded,
+      // the pipeline still runs skill-generator with schema context.
+      // Skill-generator returning empty events → empty skills list.
       const agentBuilder = {
         execution: {
           executeAgent: jest
@@ -197,7 +200,13 @@ describe('AgentOrchestrator', () => {
               }),
             })
             .mockResolvedValueOnce({
+              // pattern miner fails (EMPTY observable → '' response)
               executionId: 'e2',
+              events$: EMPTY,
+            })
+            .mockResolvedValueOnce({
+              // skill-generator also returns empty → no skills
+              executionId: 'e3',
               events$: EMPTY,
             }),
         },
@@ -216,7 +225,7 @@ describe('AgentOrchestrator', () => {
       });
 
       expect(result).toEqual([]);
-      expect(agentBuilder.execution.executeAgent).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.execution.executeAgent).toHaveBeenCalledTimes(3);
     });
   });
 

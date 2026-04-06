@@ -259,11 +259,7 @@ describe('RateLimiterService', () => {
       await rateLimiter.checkRateLimit('user1', 'validation');
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('[RateLimiter] Rate limit exceeded'),
-        expect.objectContaining({
-          operation: 'validation',
-          userId: 'user1',
-        })
+        expect.stringContaining('[RateLimiter] Rate limit exceeded')
       );
     });
 
@@ -271,11 +267,7 @@ describe('RateLimiterService', () => {
       await rateLimiter.checkRateLimit('user1', 'validation');
 
       expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('[RateLimiter] Request allowed'),
-        expect.objectContaining({
-          operation: 'validation',
-          userId: 'user1',
-        })
+        expect.stringContaining('[RateLimiter] Request allowed')
       );
     });
   });

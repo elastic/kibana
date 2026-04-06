@@ -17,24 +17,43 @@
  * From paper Section 8: Threat Model - read-path data exposure and prompt injection risks
  */
 
+/** Maximum allowed length for an index pattern */
+const MAX_INDEX_PATTERN_LENGTH = 512;
+
 /**
- * Sanitizes index pattern to prevent injection
+ * Sanitizes index pattern to prevent injection.
+ * Throws on any dangerous pattern — reject rather than silently sanitize.
  */
 export function sanitizeIndexPattern(pattern: string): string {
-  // Remove dangerous characters
-  const sanitized = pattern
-    .replace(/[;&|`$()]/g, '') // Shell injection
-    .replace(/<script>/gi, '') // XSS
-    .replace(/\.\.\//g, ''); // Path traversal
-
-  // Validate format (alphanumeric, dots, hyphens, asterisks, underscores only)
-  if (!/^[a-zA-Z0-9.*_-]+$/.test(sanitized)) {
+  // Reject excessively long patterns (potential DoS / obfuscation)
+  if (pattern.length > MAX_INDEX_PATTERN_LENGTH) {
     throw new Error(
-      `Invalid index pattern: ${pattern}. Only alphanumeric, dots, hyphens, asterisks, and underscores allowed.`
+      `Invalid index pattern: exceeds maximum length of ${MAX_INDEX_PATTERN_LENGTH} characters.`
     );
   }
 
-  return sanitized;
+  // Reject immediately if dangerous shell/injection characters are present
+  if (/[;&|`$()<>{}!#@%^=+\\'"~]/.test(pattern)) {
+    throw new Error(
+      `Invalid index pattern: "${pattern}" contains unsafe characters. Only alphanumeric, dots, hyphens, asterisks, and underscores are allowed.`
+    );
+  }
+
+  // Reject path traversal attempts
+  if (/\.\.\//.test(pattern)) {
+    throw new Error(
+      `Invalid index pattern: "${pattern}" contains path traversal sequence.`
+    );
+  }
+
+  // Validate format (alphanumeric, dots, hyphens, asterisks, underscores only)
+  if (!/^[a-zA-Z0-9.*_-]+$/.test(pattern)) {
+    throw new Error(
+      `Invalid index pattern: "${pattern}". Only alphanumeric, dots, hyphens, asterisks, and underscores allowed.`
+    );
+  }
+
+  return pattern;
 }
 
 /**
@@ -80,13 +99,15 @@ export function sanitizeSkillMarkdown(markdown: string): string {
 
   // Validate YAML frontmatter if present
   if (sanitized.startsWith('---')) {
-    const parts = sanitized.split('---');
-    if (parts.length < 3) {
+    // Valid frontmatter requires a closing '---' on its own line
+    const closingDelimiter = /\n---(\s*\n|$)/;
+    if (!closingDelimiter.test(sanitized)) {
       throw new Error('Invalid skill markdown: Missing closing --- for frontmatter');
     }
 
-    // Validate frontmatter fields
-    const frontmatter = parts[1];
+    // Extract frontmatter content between the two '---' delimiters
+    const frontmatterMatch = sanitized.match(/^---\n([\s\S]*?)\n---/);
+    const frontmatter = frontmatterMatch ? frontmatterMatch[1] : '';
     if (frontmatter.includes('eval(') || frontmatter.includes('require(')) {
       throw new Error('Invalid skill markdown: Frontmatter contains dangerous code');
     }

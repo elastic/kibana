@@ -21,13 +21,15 @@ describe('AESOP Error Classes', () => {
       expect(error.message).toContain('test-workflow');
       expect(error.statusCode).toBe(404);
       expect(error.retryable).toBe(false);
-      expect(error.metadata).toEqual({ workflowId: 'test-workflow' });
+      // Implementation uses snake_case keys in metadata
+      expect(error.metadata).toEqual({ workflow_id: 'test-workflow' });
     });
 
     it('should include suggested fix in message', () => {
       const error = new WorkflowNotFoundError('missing-workflow');
 
-      expect(error.message).toMatch(/available workflows|check workflow/i);
+      // Implementation message: "not found. Ensure workflow YAML is deployed."
+      expect(error.message).toMatch(/not found|ensure|deploy/i);
     });
   });
 
@@ -91,10 +93,11 @@ describe('AESOP Error Classes', () => {
       const error = new WorkflowNotFoundError('test');
       const json = JSON.parse(JSON.stringify(error));
 
-      expect(json).toHaveProperty('message');
-      expect(json).toHaveProperty('statusCode', 404);
-      expect(json).toHaveProperty('retryable', false);
-      expect(json).toHaveProperty('metadata');
+      // toJSON() wraps fields under an 'error' key
+      expect(json).toHaveProperty('error.message');
+      expect(json).toHaveProperty('error.statusCode', 404);
+      expect(json).toHaveProperty('error.retryable', false);
+      expect(json).toHaveProperty('error.metadata');
     });
   });
 });

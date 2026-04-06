@@ -9,43 +9,55 @@
  * Tests for AESOP Alerting Rules Deployment Route
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerDeployAlertingRulesRoute } from './deploy_alerting_rules';
 import { ALERTING_RULES } from '../../lib/aesop/monitoring/alerting_rules';
 
 describe('Deploy Alerting Rules Route', () => {
   let mockRouter: any;
-  let mockContext: any;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let mockEsClient: any;
+  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let routeHandler: Function;
 
-  beforeEach(() => {
-    mockRouter = (httpServerMock as any).createRouter?.() ?? {
-      versioned: { post: jest.fn().mockReturnValue({ addVersion: jest.fn() }) },
-      post: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
-    };
-    mockContext = {
-      core: {
+  const createMockContext = () =>
+    ({
+      core: Promise.resolve({
         elasticsearch: {
           client: {
-            asCurrentUser: {
-              index: jest.fn().mockResolvedValue({ _id: 'test' }),
-              exists: jest.fn().mockResolvedValue(false),
-              indices: {
-                exists: jest.fn().mockResolvedValue(false),
-                existsIndexTemplate: jest.fn().mockResolvedValue(false),
-                putIndexTemplate: jest.fn().mockResolvedValue({}),
-              },
-            },
+            asCurrentUser: mockEsClient,
           },
         },
+      }),
+    } as any);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockLogger = loggingSystemMock.createLogger();
+    mockResponse = httpServerMock.createResponseFactory();
+
+    mockEsClient = {
+      index: jest.fn().mockResolvedValue({ _id: 'test' }),
+      exists: jest.fn().mockResolvedValue(false),
+      indices: {
+        exists: jest.fn().mockResolvedValue(false),
+        existsIndexTemplate: jest.fn().mockResolvedValue(false),
+        putIndexTemplate: jest.fn().mockResolvedValue({}),
       },
-      logger: {
-        info: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
+    };
+
+    mockRouter = {
+      versioned: {
+        post: jest.fn().mockReturnValue({
+          addVersion: jest.fn((_config: any, handler: Function) => {
+            routeHandler = handler;
+          }),
+        }),
       },
     } as any;
 
-    registerDeployAlertingRulesRoute(mockRouter);
+    registerDeployAlertingRulesRoute({ router: mockRouter, logger: mockLogger });
   });
 
   describe('POST /internal/aesop/monitoring/alerts/deploy', () => {
@@ -54,21 +66,20 @@ describe('Deploy Alerting Rules Route', () => {
         body: {},
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(200);
-      expect(response.payload).toMatchObject({
-        success: true,
-        dry_run: false,
-        rule_ids: expect.arrayContaining(ALERTING_RULES.map((r) => r.id)),
-      });
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            success: true,
+            dry_run: false,
+            rule_ids: expect.arrayContaining(ALERTING_RULES.map((r) => r.id)),
+          }),
+        })
+      );
 
       // Should have called index template creation
-      expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate
-      ).toHaveBeenCalledWith(
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'aesop-alert-rules-template',
           index_patterns: ['.aesop-alert-rules'],
@@ -76,30 +87,32 @@ describe('Deploy Alerting Rules Route', () => {
       );
 
       // Should have indexed each rule
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).toHaveBeenCalledTimes(
-        ALERTING_RULES.length
-      );
+      expect(mockEsClient.index).toHaveBeenCalledTimes(ALERTING_RULES.length);
     });
 
     it('should deploy only specified rules', async () => {
       const request = httpServerMock.createKibanaRequest({
         body: {
-          rule_ids: ['aesop-exploration-failure-rate', 'aesop-workflow-timeout'],
+          rule_ids: ['aesop.exploration.failure_rate_high', 'aesop.exploration.duration_excessive'],
         },
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(200);
-      expect(response.payload).toMatchObject({
-        success: true,
-        rule_ids: ['aesop-exploration-failure-rate', 'aesop-workflow-timeout'],
-      });
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            success: true,
+            rule_ids: [
+              'aesop.exploration.failure_rate_high',
+              'aesop.exploration.duration_excessive',
+            ],
+          }),
+        })
+      );
 
       // Should have indexed only 2 rules
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
     });
 
     it('should return preview in dry run mode', async () => {
@@ -109,83 +122,86 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(200);
-      expect(response.payload).toMatchObject({
-        success: true,
-        dry_run: true,
-        rules_created: 0,
-        rules_updated: 0,
-        rules_skipped: 0,
-        preview: expect.arrayContaining([
-          expect.objectContaining({
-            id: expect.any(String),
-            name: expect.any(String),
-            description: expect.any(String),
-            rule_type: expect.stringMatching(/threshold|anomaly/),
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            success: true,
+            dry_run: true,
+            rules_created: 0,
+            rules_updated: 0,
+            rules_skipped: 0,
+            preview: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(String),
+                name: expect.any(String),
+                description: expect.any(String),
+                rule_type: expect.stringMatching(/esql|threshold|kuery/),
+              }),
+            ]),
           }),
-        ]),
-      });
+        })
+      );
 
       // Should not have called index
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).not.toHaveBeenCalled();
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('should skip existing rules when overwrite is false', async () => {
       // Mock existing rule
-      mockContext.core.elasticsearch.client.asCurrentUser.exists.mockResolvedValue(true);
+      mockEsClient.exists.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest({
         body: {
           overwrite: false,
-          rule_ids: ['aesop-exploration-failure-rate'],
+          rule_ids: ['aesop.exploration.failure_rate_high'],
         },
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(200);
-      expect(response.payload).toMatchObject({
-        success: true,
-        rules_created: 0,
-        rules_updated: 0,
-        rules_skipped: 1,
-      });
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            success: true,
+            rules_created: 0,
+            rules_updated: 0,
+            rules_skipped: 1,
+          }),
+        })
+      );
 
       // Should not have indexed (rule was skipped)
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).not.toHaveBeenCalled();
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('should update existing rules when overwrite is true', async () => {
       // Mock existing rule
-      mockContext.core.elasticsearch.client.asCurrentUser.exists.mockResolvedValue(true);
+      mockEsClient.exists.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest({
         body: {
           overwrite: true,
-          rule_ids: ['aesop-exploration-failure-rate'],
+          rule_ids: ['aesop.exploration.failure_rate_high'],
         },
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(200);
-      expect(response.payload).toMatchObject({
-        success: true,
-        rules_created: 0,
-        rules_updated: 1,
-        rules_skipped: 0,
-      });
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            success: true,
+            rules_created: 0,
+            rules_updated: 1,
+            rules_skipped: 0,
+          }),
+        })
+      );
 
       // Should have indexed (updated rule)
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
     it('should return bad request for invalid rule IDs', async () => {
@@ -195,63 +211,62 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(400);
-      expect(response.payload).toMatchObject({
-        message: expect.stringContaining('No matching rules found'),
-      });
+      expect(mockResponse.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('No matching rules found'),
+          }),
+        })
+      );
     });
 
     it('should handle partial failures gracefully', async () => {
       // First rule succeeds, second fails
-      mockContext.core.elasticsearch.client.asCurrentUser.index
+      mockEsClient.index
         .mockResolvedValueOnce({ _id: 'success' } as any)
         .mockRejectedValueOnce(new Error('Index failure'));
 
       const request = httpServerMock.createKibanaRequest({
         body: {
-          rule_ids: ['aesop-exploration-failure-rate', 'aesop-workflow-timeout'],
+          rule_ids: [
+            'aesop.exploration.failure_rate_high',
+            'aesop.exploration.duration_excessive',
+          ],
         },
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(200);
-      expect(response.payload).toMatchObject({
-        success: false, // Has errors
-        rules_created: 1,
-        errors: expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: 'aesop-workflow-timeout',
-            error: 'Index failure',
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            success: false, // Has errors
+            rules_created: 1,
+            errors: expect.arrayContaining([
+              expect.objectContaining({
+                rule_id: 'aesop.exploration.duration_excessive',
+                error: 'Index failure',
+              }),
+            ]),
           }),
-        ]),
-      });
+        })
+      );
     });
 
     it('should create index template if it does not exist', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.indices.existsIndexTemplate.mockResolvedValue(
-        false
-      );
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(false);
 
       const request = httpServerMock.createKibanaRequest({
         body: {
-          rule_ids: ['aesop-exploration-failure-rate'],
+          rule_ids: ['aesop.exploration.failure_rate_high'],
         },
       });
 
-      await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate
-      ).toHaveBeenCalledWith(
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'aesop-alert-rules-template',
           index_patterns: ['.aesop-alert-rules'],
@@ -273,42 +288,34 @@ describe('Deploy Alerting Rules Route', () => {
     });
 
     it('should skip template creation if it already exists', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.indices.existsIndexTemplate.mockResolvedValue(
-        true
-      );
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest({
         body: {
-          rule_ids: ['aesop-exploration-failure-rate'],
+          rule_ids: ['aesop.exploration.failure_rate_high'],
         },
       });
 
-      await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate
-      ).not.toHaveBeenCalled();
+      expect(mockEsClient.indices.putIndexTemplate).not.toHaveBeenCalled();
     });
 
     it('should include deployment metadata in indexed rules', async () => {
       const request = httpServerMock.createKibanaRequest({
         body: {
-          rule_ids: ['aesop-exploration-failure-rate'],
+          rule_ids: ['aesop.exploration.failure_rate_high'],
         },
       });
 
-      await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).toHaveBeenCalledWith(
+      expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           index: '.aesop-alert-rules',
-          id: 'aesop-exploration-failure-rate',
+          id: 'aesop.exploration.failure_rate_high',
           document: expect.objectContaining({
-            id: 'aesop-exploration-failure-rate',
+            id: 'aesop.exploration.failure_rate_high',
             deployed_at: expect.any(String),
             deployed_by: 'system',
           }),
@@ -317,7 +324,7 @@ describe('Deploy Alerting Rules Route', () => {
     });
 
     it('should handle Elasticsearch errors gracefully', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.indices.existsIndexTemplate.mockRejectedValue(
+      mockEsClient.indices.existsIndexTemplate.mockRejectedValue(
         new Error('Elasticsearch unavailable')
       );
 
@@ -325,17 +332,19 @@ describe('Deploy Alerting Rules Route', () => {
         body: {},
       });
 
-      const response = await mockRouter
-        .getRoutes()[0]
-        .handler(mockContext, request, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), request, mockResponse);
 
-      expect(response.status).toBe(500);
-      expect(response.payload).toMatchObject({
-        message: expect.stringContaining('Failed to deploy alerting rules'),
-      });
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 500,
+          body: expect.objectContaining({
+            message: expect.stringContaining('Failed to deploy alerting rules'),
+          }),
+        })
+      );
 
-      expect(mockContext.logger.error).toHaveBeenCalledWith(
-        '[AESOP Alerting] Failed to deploy alerting rules',
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('[AESOP Alerting] Failed to deploy alerting rules'),
         expect.anything()
       );
     });

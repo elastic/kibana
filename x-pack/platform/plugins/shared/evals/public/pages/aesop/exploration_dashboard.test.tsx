@@ -94,7 +94,7 @@ describe('ExplorationDashboard Component', () => {
 
   describe('initialization', () => {
     it('should render page header', async () => {
-      mockHttp.get.mockResolvedValue({ active: null, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [] });
 
       renderComponent();
 
@@ -112,7 +112,7 @@ describe('ExplorationDashboard Component', () => {
             },
           });
         }
-        return Promise.resolve({ active: null, history: [] });
+        return Promise.resolve({ explorations: [] });
       });
 
       renderComponent();
@@ -128,7 +128,7 @@ describe('ExplorationDashboard Component', () => {
         if (url === '/.aesop-exploration-state/_doc/latest') {
           return Promise.reject(new Error('Not found'));
         }
-        return Promise.resolve({ active: null, history: [] });
+        return Promise.resolve({ explorations: [] });
       });
 
       renderComponent();
@@ -140,8 +140,13 @@ describe('ExplorationDashboard Component', () => {
   });
 
   describe('active exploration', () => {
+    afterEach(() => {
+      // Always restore real timers to prevent test pollution
+      jest.useRealTimers();
+    });
+
     it('should display active exploration when running', async () => {
-      mockHttp.get.mockResolvedValue({ active: mockActiveRun, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [mockActiveRun] });
 
       renderComponent();
 
@@ -153,7 +158,7 @@ describe('ExplorationDashboard Component', () => {
     });
 
     it('should hide start exploration form when exploration running', async () => {
-      mockHttp.get.mockResolvedValue({ active: mockActiveRun, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [mockActiveRun] });
 
       renderComponent();
 
@@ -165,7 +170,7 @@ describe('ExplorationDashboard Component', () => {
     it('should poll for updates when exploration active', async () => {
       jest.useFakeTimers();
 
-      mockHttp.get.mockResolvedValue({ active: mockActiveRun, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [mockActiveRun] });
 
       renderComponent();
 
@@ -181,14 +186,24 @@ describe('ExplorationDashboard Component', () => {
       await waitFor(() => {
         expect(mockHttp.get).toHaveBeenCalled();
       });
-
-      jest.useRealTimers();
     });
 
     it('should stop polling when exploration completes', async () => {
       jest.useFakeTimers();
 
-      mockHttp.get.mockResolvedValueOnce({ active: mockActiveRun, history: [] });
+      // Use URL-aware mock so the useEffect state loader call doesn't consume
+      // the history mock value
+      let callCount = 0;
+      mockHttp.get.mockImplementation((url: string) => {
+        if (url.includes('aesop-exploration-state')) {
+          return Promise.reject(new Error('Not found'));
+        }
+        callCount += 1;
+        if (callCount === 1) {
+          return Promise.resolve({ explorations: [mockActiveRun] });
+        }
+        return Promise.resolve({ explorations: [mockCompletedRuns[0]] });
+      });
 
       renderComponent();
 
@@ -196,22 +211,17 @@ describe('ExplorationDashboard Component', () => {
         expect(screen.getByTestId('exploration-progress')).toBeInTheDocument();
       });
 
-      // Next poll returns completed
-      mockHttp.get.mockResolvedValueOnce({ active: null, history: [mockCompletedRuns[0]] });
-
       jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
         expect(screen.queryByTestId('exploration-progress')).not.toBeInTheDocument();
       });
-
-      jest.useRealTimers();
     });
   });
 
   describe('exploration history', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ active: null, history: mockCompletedRuns });
+      mockHttp.get.mockResolvedValue({ explorations: mockCompletedRuns });
     });
 
     it('should display exploration history table', async () => {
@@ -227,9 +237,10 @@ describe('ExplorationDashboard Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('exec-100')).toBeInTheDocument();
-        expect(screen.getByText(/15/)).toBeInTheDocument(); // indices
-        expect(screen.getByText(/47/)).toBeInTheDocument(); // relationships
-        expect(screen.getByText(/5/)).toBeInTheDocument(); // skills
+        // Use getAllByText since the duration column may also render "15m"
+        expect(screen.getAllByText(/\b15\b/).length).toBeGreaterThan(0); // indices
+        expect(screen.getAllByText(/\b47\b/).length).toBeGreaterThan(0); // relationships
+        expect(screen.getAllByText(/\b5\b/).length).toBeGreaterThan(0); // skills
       });
     });
 
@@ -270,7 +281,7 @@ describe('ExplorationDashboard Component', () => {
 
   describe('start exploration form', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ active: null, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [] });
       mockHttp.post.mockResolvedValue({
         success: true,
         execution_id: 'new-exec-123',
@@ -338,10 +349,10 @@ describe('ExplorationDashboard Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText(/Start Exploration/)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Start Exploration/ })).toBeInTheDocument();
       });
 
-      const startButton = screen.getByText(/Start Exploration/);
+      const startButton = screen.getByRole('button', { name: /Start Exploration/ });
       await user.click(startButton);
 
       await waitFor(() => {
@@ -363,10 +374,10 @@ describe('ExplorationDashboard Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText(/Start Exploration/)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Start Exploration/ })).toBeInTheDocument();
       });
 
-      const startButton = screen.getByText(/Start Exploration/);
+      const startButton = screen.getByRole('button', { name: /Start Exploration/ });
       await user.click(startButton);
 
       await waitFor(() => {
@@ -381,10 +392,10 @@ describe('ExplorationDashboard Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText(/Start Exploration/)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Start Exploration/ })).toBeInTheDocument();
       });
 
-      const startButton = screen.getByText(/Start Exploration/);
+      const startButton = screen.getByRole('button', { name: /Start Exploration/ });
       await user.click(startButton);
 
       await waitFor(() => {
@@ -399,10 +410,10 @@ describe('ExplorationDashboard Component', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText(/Start Exploration/)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Start Exploration/ })).toBeInTheDocument();
       });
 
-      const startButton = screen.getByText(/Start Exploration/).closest('button')!;
+      const startButton = screen.getByRole('button', { name: /Start Exploration/ });
       await user.click(startButton);
 
       await waitFor(() => {
@@ -413,7 +424,7 @@ describe('ExplorationDashboard Component', () => {
 
   describe('exploration mode selection', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ active: null, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [] });
     });
 
     it('should display mode selection radio buttons', async () => {
@@ -461,7 +472,7 @@ describe('ExplorationDashboard Component', () => {
       const incrementalRadio = screen.getByLabelText(/Incremental/);
       await user.click(incrementalRadio);
 
-      const startButton = screen.getByText(/Start Exploration/);
+      const startButton = screen.getByRole('button', { name: /Start Exploration/ });
       await user.click(startButton);
 
       await waitFor(() => {
@@ -479,7 +490,7 @@ describe('ExplorationDashboard Component', () => {
 
   describe('metrics display', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ active: null, history: mockCompletedRuns });
+      mockHttp.get.mockResolvedValue({ explorations: mockCompletedRuns });
     });
 
     it('should display summary statistics', async () => {
@@ -515,7 +526,7 @@ describe('ExplorationDashboard Component', () => {
 
   describe('empty state', () => {
     it('should show empty state when no explorations', async () => {
-      mockHttp.get.mockResolvedValue({ active: null, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [] });
 
       renderComponent();
 
@@ -525,7 +536,7 @@ describe('ExplorationDashboard Component', () => {
     });
 
     it('should show onboarding guide in empty state', async () => {
-      mockHttp.get.mockResolvedValue({ active: null, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [] });
 
       renderComponent();
 
@@ -538,7 +549,14 @@ describe('ExplorationDashboard Component', () => {
 
   describe('error handling', () => {
     it('should show error message if fetch fails', async () => {
-      mockHttp.get.mockRejectedValue(new Error('ES connection failed'));
+      // Use URL-aware mock: state loader call (aesop-exploration-state) can fail silently;
+      // the history query failure is what triggers the error UI
+      mockHttp.get.mockImplementation((url: string) => {
+        if (url.includes('aesop-exploration-state')) {
+          return Promise.reject(new Error('Not found'));
+        }
+        return Promise.reject(new Error('ES connection failed'));
+      });
 
       renderComponent();
 
@@ -548,8 +566,18 @@ describe('ExplorationDashboard Component', () => {
     });
 
     it('should allow retry after error', async () => {
-      mockHttp.get.mockRejectedValueOnce(new Error('Network error'));
-      mockHttp.get.mockResolvedValue({ active: null, history: [] });
+      // Use URL-aware mock: history query fails first, then succeeds on retry
+      let historyCallCount = 0;
+      mockHttp.get.mockImplementation((url: string) => {
+        if (url.includes('aesop-exploration-state')) {
+          return Promise.reject(new Error('Not found'));
+        }
+        historyCallCount += 1;
+        if (historyCallCount === 1) {
+          return Promise.reject(new Error('Network error'));
+        }
+        return Promise.resolve({ explorations: [] });
+      });
 
       const user = userEvent.setup();
       renderComponent();
@@ -569,7 +597,7 @@ describe('ExplorationDashboard Component', () => {
 
   describe('accessibility', () => {
     beforeEach(() => {
-      mockHttp.get.mockResolvedValue({ active: null, history: [] });
+      mockHttp.get.mockResolvedValue({ explorations: [] });
     });
 
     it('should have accessible form labels', async () => {
@@ -582,7 +610,7 @@ describe('ExplorationDashboard Component', () => {
     });
 
     it('should have accessible table headers', async () => {
-      mockHttp.get.mockResolvedValue({ active: null, history: mockCompletedRuns });
+      mockHttp.get.mockResolvedValue({ explorations: mockCompletedRuns });
 
       renderComponent();
 

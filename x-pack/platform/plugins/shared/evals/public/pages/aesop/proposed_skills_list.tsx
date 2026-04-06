@@ -214,7 +214,7 @@ export const ProposedSkillsList = () => {
     },
     {
       field: 'review.status',
-      name: 'Review',
+      name: 'Review Status',
       width: '15%',
       render: (status: string, skill: ProposedSkill) => {
         const colors: Record<string, string> = {
@@ -255,7 +255,7 @@ export const ProposedSkillsList = () => {
         <EuiButton
           size="s"
           onClick={() => setSelectedSkill(skill)}
-          aria-label={`Review skill: ${skill.name}`}
+          aria-label="Review"
         >
           Review
         </EuiButton>

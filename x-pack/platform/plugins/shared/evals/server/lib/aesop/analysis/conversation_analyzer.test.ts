@@ -289,36 +289,43 @@ describe('ConversationAnalyzer', () => {
     });
 
     it('processes conversations and returns combined insights', async () => {
+      // Implementation uses conversation_rounds format (Agent Builder .chat-conversations schema)
       const mockConversations = {
         hits: {
           total: { value: 2 },
           hits: [
             {
               _source: {
-                messages: [
+                // Conv 1: one round with an esql_query tool call and error result,
+                // plus an assistant response containing an ESql code block.
+                // Produces 2 messages: tool result + assistant response (no user input)
+                conversation_rounds: [
                   {
-                    role: 'assistant',
-                    tool_calls: [{ function: { name: 'esql_query' } }],
-                    content: '```esql\nFROM logs-* | STATS count = COUNT(*) BY host.name\n```',
-                  },
-                  {
-                    role: 'tool',
-                    name: 'esql_query',
-                    content: 'Error: parsing_exception: line 1:0 mismatched input',
+                    steps: [
+                      {
+                        type: 'tool_call',
+                        tool_id: 'esql_query',
+                        results: 'Error: parsing_exception: line 1:0 mismatched input',
+                      },
+                    ],
+                    response: {
+                      message:
+                        '```esql\nFROM logs-* | STATS count = COUNT(*) BY host.name\n```',
+                    },
                   },
                 ],
               },
             },
             {
               _source: {
-                messages: [
+                // Conv 2: two rounds each with a different tool call and no response text.
+                // Produces 2 messages: two assistant-with-tool_calls entries
+                conversation_rounds: [
                   {
-                    role: 'assistant',
-                    tool_calls: [{ function: { name: 'esql_query' } }],
+                    steps: [{ type: 'tool_call', tool_id: 'esql_query' }],
                   },
                   {
-                    role: 'assistant',
-                    tool_calls: [{ function: { name: 'get_alert' } }],
+                    steps: [{ type: 'tool_call', tool_id: 'get_alert' }],
                   },
                 ],
               },

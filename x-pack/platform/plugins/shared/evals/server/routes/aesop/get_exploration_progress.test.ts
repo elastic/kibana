@@ -5,18 +5,29 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerGetExplorationProgressRoute } from './get_exploration_progress';
 
 describe('GET /internal/aesop/exploration/{executionId}/progress', () => {
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    mockLogger = loggingSystemMock.createLogger();
+  });
+
   it('registers the route with correct path and version', () => {
+    let versionConfig: any;
     const mockRouter = {
       versioned: {
-        get: jest.fn().mockReturnThis(),
-        addVersion: jest.fn(),
+        get: jest.fn().mockReturnValue({
+          addVersion: jest.fn((_config: any) => {
+            versionConfig = _config;
+          }),
+        }),
       },
     } as any;
 
-    registerGetExplorationProgressRoute(mockRouter);
+    registerGetExplorationProgressRoute({ router: mockRouter, logger: mockLogger });
 
     expect(mockRouter.versioned.get).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -27,17 +38,20 @@ describe('GET /internal/aesop/exploration/{executionId}/progress', () => {
   });
 
   it('validates executionId parameter', () => {
+    let capturedVersionConfig: any;
     const mockRouter = {
       versioned: {
-        get: jest.fn().mockReturnThis(),
-        addVersion: jest.fn(),
+        get: jest.fn().mockReturnValue({
+          addVersion: jest.fn((config: any) => {
+            capturedVersionConfig = config;
+          }),
+        }),
       },
     } as any;
 
-    registerGetExplorationProgressRoute(mockRouter);
+    registerGetExplorationProgressRoute({ router: mockRouter, logger: mockLogger });
 
-    const versionConfig = mockRouter.versioned.addVersion.mock.calls[0][0];
-    expect(versionConfig.version).toBe('1');
-    expect(versionConfig.validate.request.params).toBeDefined();
+    expect(capturedVersionConfig.version).toBe('1');
+    expect(capturedVersionConfig.validate.request.params).toBeDefined();
   });
 });

@@ -5,82 +5,71 @@
  * 2.0.
  */
 
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerDeployMonitoringDashboardRoute } from './deploy_monitoring_dashboard';
-import type { IRouter } from '@kbn/core/server';
-import type { EvalsRequestHandlerContext } from '../../types';
 
 describe('registerDeployMonitoringDashboardRoute', () => {
-  let mockRouter: jest.Mocked<IRouter<EvalsRequestHandlerContext>>;
-  let mockVersionedRouter: any;
-  let routeHandler: any;
+  let mockRouter: any;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let mockSavedObjectsClient: any;
+  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let routeHandler: Function;
+
+  const createMockContext = () =>
+    ({
+      core: Promise.resolve({
+        savedObjects: {
+          client: mockSavedObjectsClient,
+        },
+      }),
+    } as any);
 
   beforeEach(() => {
-    mockVersionedRouter = {
-      addVersion: jest.fn(),
+    jest.clearAllMocks();
+
+    mockLogger = loggingSystemMock.createLogger();
+    mockResponse = httpServerMock.createResponseFactory();
+
+    mockSavedObjectsClient = {
+      create: jest.fn().mockResolvedValue({
+        type: 'dashboard',
+        id: 'aesop-performance-monitoring',
+        attributes: {},
+        references: [],
+      }),
     };
 
     mockRouter = {
       versioned: {
-        post: jest.fn().mockReturnValue(mockVersionedRouter),
+        post: jest.fn().mockReturnValue({
+          addVersion: jest.fn((_config: any, handler: Function) => {
+            routeHandler = handler;
+          }),
+        }),
       },
-    } as unknown as jest.Mocked<IRouter<EvalsRequestHandlerContext>>;
+    } as any;
 
-    registerDeployMonitoringDashboardRoute({
-      router: mockRouter,
-      logger: {
-        info: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-        warn: jest.fn(),
-      } as any,
-    });
+    registerDeployMonitoringDashboardRoute({ router: mockRouter, logger: mockLogger });
+  });
 
-    expect(mockRouter.versioned.post).toHaveBeenCalledWith({
-      path: '/internal/aesop/monitoring/dashboard/deploy',
-      access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: ['evals'],
+  it('registers the route with correct path and access', () => {
+    expect(mockRouter.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/internal/aesop/monitoring/dashboard/deploy',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['evals'],
+          },
         },
-      },
-      options: {
-        tags: ['access:evals'],
-      },
-    });
-
-    routeHandler = mockVersionedRouter.addVersion.mock.calls[0][1];
+      })
+    );
   });
 
   it('should deploy dashboard successfully', async () => {
-    const mockContext = {
-      resolve: jest.fn().mockResolvedValue({
-        core: {
-          savedObjects: {
-            client: {
-              create: jest.fn().mockResolvedValue({
-                type: 'dashboard',
-                id: 'aesop-performance-monitoring',
-                attributes: {},
-                references: [],
-              }),
-            },
-          },
-        },
-        logger: {
-          info: jest.fn(),
-          debug: jest.fn(),
-          error: jest.fn(),
-        },
-      }),
-    };
+    const mockRequest = httpServerMock.createKibanaRequest({});
 
-    const mockRequest = {};
-    const mockResponse = {
-      ok: jest.fn().mockReturnValue({ status: 200 }),
-      customError: jest.fn(),
-    };
-
-    await routeHandler(mockContext, mockRequest, mockResponse);
+    await routeHandler(createMockContext(), mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
       body: {
@@ -95,31 +84,11 @@ describe('registerDeployMonitoringDashboardRoute', () => {
 
   it('should handle deployment errors', async () => {
     const error = new Error('Failed to create dashboard');
+    mockSavedObjectsClient.create.mockRejectedValue(error);
 
-    const mockContext = {
-      resolve: jest.fn().mockResolvedValue({
-        core: {
-          savedObjects: {
-            client: {
-              create: jest.fn().mockRejectedValue(error),
-            },
-          },
-        },
-        logger: {
-          info: jest.fn(),
-          debug: jest.fn(),
-          error: jest.fn(),
-        },
-      }),
-    };
+    const mockRequest = httpServerMock.createKibanaRequest({});
 
-    const mockRequest = {};
-    const mockResponse = {
-      ok: jest.fn(),
-      customError: jest.fn().mockReturnValue({ status: 500 }),
-    };
-
-    await routeHandler(mockContext, mockRequest, mockResponse);
+    await routeHandler(createMockContext(), mockRequest, mockResponse);
 
     expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 500,
@@ -130,37 +99,9 @@ describe('registerDeployMonitoringDashboardRoute', () => {
   });
 
   it('should log deployment success', async () => {
-    const mockLogger = {
-      info: jest.fn(),
-      debug: jest.fn(),
-      error: jest.fn(),
-    };
+    const mockRequest = httpServerMock.createKibanaRequest({});
 
-    const mockContext = {
-      resolve: jest.fn().mockResolvedValue({
-        core: {
-          savedObjects: {
-            client: {
-              create: jest.fn().mockResolvedValue({
-                type: 'dashboard',
-                id: 'aesop-performance-monitoring',
-                attributes: {},
-                references: [],
-              }),
-            },
-          },
-        },
-        logger: mockLogger,
-      }),
-    };
-
-    const mockRequest = {};
-    const mockResponse = {
-      ok: jest.fn().mockReturnValue({ status: 200 }),
-      customError: jest.fn(),
-    };
-
-    await routeHandler(mockContext, mockRequest, mockResponse);
+    await routeHandler(createMockContext(), mockRequest, mockResponse);
 
     expect(mockLogger.info).toHaveBeenCalledWith(
       '[AESOP] Deploying performance monitoring dashboard'

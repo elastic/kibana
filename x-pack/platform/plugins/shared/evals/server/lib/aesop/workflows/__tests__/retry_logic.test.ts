@@ -50,6 +50,23 @@ describe('Workflow Retry Logic', () => {
     jest.useRealTimers();
   });
 
+  /**
+   * Advances fake timers and flushes microtasks (Promise resolutions) in lockstep.
+   * Required because jest.advanceTimersByTime() is synchronous but Promise .then/.catch
+   * handlers are microtasks that don't run during the synchronous timer advance.
+   * This helper interleaves timer advances with microtask flushes so that:
+   *   setTimeout callbacks fire → async chains continue → new setTimeouts are registered → repeat.
+   */
+  async function advanceTimersAndFlush(ms: number, step = 100): Promise<void> {
+    const steps = Math.ceil(ms / step);
+    for (let i = 0; i < steps; i++) {
+      jest.advanceTimersByTime(step);
+      // Flush microtask queue (awaiting resolved Promises, .then callbacks, etc.)
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+  }
+
   describe('basic retry behavior', () => {
     it('should succeed on first attempt if operation succeeds', async () => {
       const operation = jest.fn().mockResolvedValue('success');
@@ -77,8 +94,8 @@ describe('Workflow Retry Logic', () => {
         retryableErrors: ['Transient'],
       });
 
-      // Fast-forward past retry delay
-      jest.advanceTimersByTime(1000);
+      // Fast-forward past retry delay (flush microtasks between timer advances)
+      await advanceTimersAndFlush(1100);
 
       const result = await promise;
 
@@ -96,11 +113,12 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      // Advance timers for all retry attempts
-      jest.advanceTimersByTime(1000);
+      // Advance timers for all retry attempts (flush microtasks between advances)
+      // maxRetries=3 means 3 retries after initial attempt = 4 total calls
+      await advanceTimersAndFlush(1000);
 
       await expect(promise).rejects.toThrow('Persistent failure');
-      expect(operation).toHaveBeenCalledTimes(3);
+      expect(operation).toHaveBeenCalledTimes(4);
     });
 
     it('should not retry non-retryable errors', async () => {
@@ -135,13 +153,11 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      // First retry: 1000ms
-      jest.advanceTimersByTime(1000);
-      await Promise.resolve(); // Let promise resolve
+      // First retry: 1000ms — advance and flush microtasks
+      await advanceTimersAndFlush(1100);
 
       // Second retry: 2000ms (exponential)
-      jest.advanceTimersByTime(2000);
-      await Promise.resolve();
+      await advanceTimersAndFlush(2100);
 
       await promise;
 
@@ -161,8 +177,8 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      // Fast-forward to max retries
-      jest.advanceTimersByTime(100000);
+      // Fast-forward to max retries (flush microtasks between advances)
+      await advanceTimersAndFlush(100000, 5000);
 
       await expect(promise).rejects.toThrow();
 
@@ -184,7 +200,7 @@ describe('Workflow Retry Logic', () => {
       const promise1 = withRetry(operation, config);
       const promise2 = withRetry(operation, config);
 
-      jest.advanceTimersByTime(10000);
+      await advanceTimersAndFlush(10000, 500);
 
       await Promise.allSettled([promise1, promise2]);
 
@@ -207,7 +223,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(200);
+      await advanceTimersAndFlush(200);
 
       const result = await promise;
 
@@ -243,7 +259,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(200);
+      await advanceTimersAndFlush(200);
 
       const result = await promise;
 
@@ -270,7 +286,7 @@ describe('Workflow Retry Logic', () => {
           operation: 'test-operation',
         });
 
-        jest.advanceTimersByTime(200);
+        await advanceTimersAndFlush(200);
 
         const result = await promise;
         expect(result).toBe('success');
@@ -289,7 +305,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(200);
+      await advanceTimersAndFlush(200);
 
       const result = await promise;
 
@@ -309,7 +325,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(200);
+      await advanceTimersAndFlush(200);
 
       const result = await promise;
 
@@ -349,7 +365,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(500);
+      await advanceTimersAndFlush(500);
 
       await promise;
 
@@ -370,7 +386,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(1000);
+      await advanceTimersAndFlush(1000);
 
       await expect(promise).rejects.toThrow();
 
@@ -390,8 +406,8 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      // Fast-forward past overall timeout
-      jest.advanceTimersByTime(4000);
+      // Fast-forward past overall timeout (flush microtasks between advances)
+      await advanceTimersAndFlush(4000, 500);
 
       await expect(promise).rejects.toThrow();
 
@@ -406,14 +422,17 @@ describe('Workflow Retry Logic', () => {
         });
       });
 
+      // maxRetries: 1 to keep the test fast (operationTimeout: 1000 per attempt)
       const promise = withRetry(slowOperation, {
-        maxRetries: 3,
+        maxRetries: 1,
         operationTimeout: 1000, // 1 second per operation
+        retryDelay: 100,
         logger: mockLogger,
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(2000);
+      // Advance past first operationTimeout (1000ms) + retryDelay (100ms) + second operationTimeout (1000ms)
+      await advanceTimersAndFlush(2500, 200);
 
       await expect(promise).rejects.toThrow();
     });
@@ -432,7 +451,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(200);
+      await advanceTimersAndFlush(200);
 
       await promise;
 
@@ -456,7 +475,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(1000);
+      await advanceTimersAndFlush(1000);
 
       await expect(promise).rejects.toThrow();
 
@@ -481,7 +500,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(200);
+      await advanceTimersAndFlush(200);
 
       await promise;
 
@@ -522,7 +541,7 @@ describe('Workflow Retry Logic', () => {
         operation: 'test-operation',
       });
 
-      jest.advanceTimersByTime(200);
+      await advanceTimersAndFlush(200);
 
       const result = await promise;
 
@@ -533,25 +552,31 @@ describe('Workflow Retry Logic', () => {
     it('should handle errors without message', async () => {
       const operation = jest.fn().mockRejectedValue(new Error());
 
-      await expect(
-        withRetry(operation, {
-          maxRetries: 1,
-          logger: mockLogger,
-          operation: 'test-operation',
-        })
-      ).rejects.toThrow();
+      const promise = withRetry(operation, {
+        maxRetries: 1,
+        retryDelay: 100,
+        logger: mockLogger,
+        operation: 'test-operation',
+      });
+
+      await advanceTimersAndFlush(200);
+
+      await expect(promise).rejects.toThrow();
     });
 
     it('should handle non-Error rejections', async () => {
       const operation = jest.fn().mockRejectedValue('string error');
 
-      await expect(
-        withRetry(operation, {
-          maxRetries: 1,
-          logger: mockLogger,
-          operation: 'test-operation',
-        })
-      ).rejects.toBe('string error');
+      const promise = withRetry(operation, {
+        maxRetries: 1,
+        retryDelay: 100,
+        logger: mockLogger,
+        operation: 'test-operation',
+      });
+
+      await advanceTimersAndFlush(200);
+
+      await expect(promise).rejects.toBe('string error');
     });
 
     it('should handle operation that throws synchronously', async () => {
@@ -559,14 +584,16 @@ describe('Workflow Retry Logic', () => {
         throw new Error('Sync error');
       });
 
-      await expect(
-        withRetry(operation, {
-          maxRetries: 3,
-          retryDelay: 100,
-          logger: mockLogger,
-          operation: 'test-operation',
-        })
-      ).rejects.toThrow('Sync error');
+      const promise = withRetry(operation, {
+        maxRetries: 3,
+        retryDelay: 100,
+        logger: mockLogger,
+        operation: 'test-operation',
+      });
+
+      await advanceTimersAndFlush(1000);
+
+      await expect(promise).rejects.toThrow('Sync error');
     });
   });
 });

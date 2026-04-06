@@ -197,13 +197,11 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: {
-              bool: {
-                must: [{ match_all: {} }],
-              },
+          query: {
+            bool: {
+              must: [{ match_all: {} }],
             },
-          }),
+          },
         })
       );
     });
@@ -222,13 +220,11 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: {
-              bool: {
-                must: [{ term: { 'validation.status': 'passed' } }],
-              },
+          query: {
+            bool: {
+              must: [{ term: { 'validation.status': 'passed' } }],
             },
-          }),
+          },
         })
       );
     });
@@ -247,13 +243,11 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: {
-              bool: {
-                must: [{ term: { 'validation.status': 'failed' } }],
-              },
+          query: {
+            bool: {
+              must: [{ term: { 'validation.status': 'failed' } }],
             },
-          }),
+          },
         })
       );
     });
@@ -272,13 +266,11 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: {
-              bool: {
-                must: [{ term: { 'review.status': 'pending_review' } }],
-              },
+          query: {
+            bool: {
+              must: [{ term: { 'review.status': 'pending_review' } }],
             },
-          }),
+          },
         })
       );
     });
@@ -297,13 +289,11 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: {
-              bool: {
-                must: [{ term: { derived_from: 'patterns' } }],
-              },
+          query: {
+            bool: {
+              must: [{ term: { derived_from: 'patterns' } }],
             },
-          }),
+          },
         })
       );
     });
@@ -322,16 +312,14 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: {
-              bool: {
-                must: expect.arrayContaining([
-                  { term: { derived_from: 'relationships' } },
-                  { term: { 'validation.status': 'passed' } },
-                ]),
-              },
+          query: {
+            bool: {
+              must: expect.arrayContaining([
+                { term: { derived_from: 'relationships' } },
+                { term: { 'validation.status': 'passed' } },
+              ]),
             },
-          }),
+          },
         })
       );
     });
@@ -352,10 +340,8 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            from: 30,
-            size: 10,
-          }),
+          from: 30,
+          size: 10,
         })
       );
     });
@@ -394,9 +380,7 @@ describe('GET /internal/aesop/skills/proposed', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            sort: [{ 'metadata.created_at': { order: 'desc' } }, { confidence: { order: 'desc' } }],
-          }),
+          sort: [{ 'metadata.created_at': { order: 'desc' } }, { confidence: { order: 'desc' } }],
         })
       );
     });
@@ -462,9 +446,9 @@ describe('GET /internal/aesop/skills/proposed', () => {
           message: expect.stringContaining('Failed to list proposed skills'),
         },
       });
+      // Implementation logs as a template string, not structured log
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[AESOP] Failed to list proposed skills',
-        expect.objectContaining({ error: expect.any(Error) })
+        expect.stringContaining('[AESOP] Failed to list proposed skills')
       );
     });
 

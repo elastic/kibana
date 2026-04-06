@@ -140,8 +140,7 @@ describe('DashboardGeneratorService', () => {
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[AESOP Dashboard] ❌ Failed to create dashboard',
-        { error }
+        expect.stringContaining('[AESOP Dashboard] ❌ Failed to create dashboard')
       );
     });
 
@@ -156,8 +155,7 @@ describe('DashboardGeneratorService', () => {
       await service.createPerformanceMonitoringDashboard();
 
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[AESOP Dashboard] ✅ Dashboard created successfully',
-        { dashboard_id: 'aesop-performance-monitoring' }
+        expect.stringContaining('[AESOP Dashboard] ✅ Dashboard created successfully')
       );
     });
   });

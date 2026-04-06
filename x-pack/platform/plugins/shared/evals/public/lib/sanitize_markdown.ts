@@ -152,7 +152,8 @@ function sanitizeTagAttributes(tag: string, allowedAttributes: string[]): string
       // Additional validation for href and src
       if (attrName.toLowerCase() === 'href' || attrName.toLowerCase() === 'src') {
         if (isSafeUrl(attrValue)) {
-          attributes.push(`${attrName}="${escapeHtml(attrValue)}"`);
+          // Don't escape '/' in URLs — only escape truly dangerous chars
+          attributes.push(`${attrName}="${escapeUrlAttr(attrValue)}"`);
         }
       } else {
         attributes.push(`${attrName}="${escapeHtml(attrValue)}"`);
@@ -185,6 +186,21 @@ function isSafeUrl(url: string): boolean {
 
   // Allow http, https, mailto, relative URLs
   return true;
+}
+
+/**
+ * Escape URL attribute values — only escapes chars that break HTML attribute parsing,
+ * but preserves forward slashes so URLs remain valid.
+ */
+function escapeUrlAttr(url: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+  };
+  return url.replace(/[&<>"']/g, (char) => map[char]);
 }
 
 /**

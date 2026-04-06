@@ -131,6 +131,11 @@ export class WorkflowExecutorWithRecovery {
     const results: AgentResult[] = [];
     const errorSummary: Array<{ agentId: string; error: string; circuitState?: CircuitState }> = [];
 
+    // Apply per-workflow circuit breaker configuration if provided
+    if (options.failureThreshold !== undefined) {
+      this.circuitBreaker.setFailureThreshold(options.failureThreshold);
+    }
+
     this.logger.info(
       `[WorkflowExecutor] Starting workflow execution total_agents=${options.agents.length} continue_on_failure=${options.continueOnFailure}`
     );
@@ -236,6 +241,9 @@ export class WorkflowExecutorWithRecovery {
             this.logger.warn(
               `[WorkflowExecutor] Retrying agent ${agentId} attempt=${attempt} error=${err?.message} delay_ms=${delayMs}`
             );
+            // Record each failed attempt in the circuit breaker so the threshold
+            // can be reached across retry attempts within a single executeWorkflow call
+            this.circuitBreaker.recordFailure(agentId, err);
           },
         }
       );

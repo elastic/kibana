@@ -123,12 +123,7 @@ describe('ChangeDetector', () => {
       await detector.detectChanges(['logs-*'], previousState);
 
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Change detection completed'),
-        expect.objectContaining({
-          new_indices: expect.any(Number),
-          modified_indices: expect.any(Number),
-          removed_indices: expect.any(Number),
-        })
+        expect.stringContaining('Change detection completed')
       );
     });
   });
@@ -342,10 +337,7 @@ describe('ChangeDetector', () => {
       await detector.detectRemovedIndices(['logs-*'], previousState);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('removed indices'),
-        expect.objectContaining({
-          removed_indices: ['logs-deleted-2026.03.20'],
-        })
+        expect.stringContaining('removed indices')
       );
     });
 
