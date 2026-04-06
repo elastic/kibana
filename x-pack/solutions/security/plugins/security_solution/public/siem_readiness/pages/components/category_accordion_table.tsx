@@ -409,7 +409,6 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
                           border: euiTheme.border.thin,
                           padding: euiTheme.size.xl,
                           borderRadius: euiTheme.border.radius.medium,
-                          // overflow: 'hidden',
                         }}
                         items={category.items}
                         columns={columns}
