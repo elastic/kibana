@@ -299,8 +299,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]document_details[\/\\]left[\/\\]components[\/\\]response_details.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]document_details[\/\\]left[\/\\]components[\/\\]threat_details_view_enrichment_button_content.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]document_details[\/\\]left[\/\\]components[\/\\]threat_details_view_enrichment_section.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]rule_details[\/\\]right[\/\\]content.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]rule_details[\/\\]right[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_card_grid[\/\\]components[\/\\]grid_header.tsx/,

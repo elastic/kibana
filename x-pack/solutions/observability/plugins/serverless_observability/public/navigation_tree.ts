@@ -495,6 +495,24 @@ export const createNavigationTree = ({
               },
             ],
           },
+          ...filterForFeatureAvailability(
+            {
+              id: 'v2_alerting_preview',
+              title: i18n.translate(
+                'xpack.serverlessObservability.nav.projectSettings.v2AlertingPreview',
+                {
+                  defaultMessage: 'V2 Alerting Preview',
+                }
+              ),
+              renderAs: 'panelOpener' as const,
+              breadcrumbStatus: 'hidden',
+              children: [
+                { link: 'management:rules', breadcrumbStatus: 'hidden' },
+                { link: 'management:notification_policies', breadcrumbStatus: 'hidden' },
+              ],
+            },
+            showAlertingV2
+          ),
           {
             id: 'alerts_and_insights',
             title: i18n.translate(
@@ -531,6 +549,20 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
+          {
+            id: 'model_management',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.projectSettings.modelManagement',
+              {
+                defaultMessage: 'Model Management',
+              }
+            ),
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
+            ],
+          },
           {
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
               defaultMessage: 'AI',

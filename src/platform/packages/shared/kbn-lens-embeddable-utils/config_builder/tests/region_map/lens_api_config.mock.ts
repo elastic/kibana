@@ -27,7 +27,7 @@ export const basicRegionMapWithAdHocDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -59,7 +59,7 @@ export const basicRegionMapWithDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -88,11 +88,9 @@ export const basicEsqlRegionMap = {
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   region: {
-    operation: 'value',
     column: 'geo.dest',
     ems: {
       boundaries: 'world_countries',
@@ -123,8 +121,8 @@ export const comprehensiveRegionMapWithAdHocDataView = {
     filters: [
       {
         filter: {
-          query: 'geo.dest : "US"',
-          language: 'kuery',
+          expression: 'geo.dest : "US"',
+          language: 'kql',
         },
         label: 'US',
       },
@@ -157,8 +155,8 @@ export const comprehensiveRegionMapWithDataView = {
     filters: [
       {
         filter: {
-          query: 'geo.dest : "US"',
-          language: 'kuery',
+          expression: 'geo.dest : "US"',
+          language: 'kql',
         },
         label: 'US',
       },
@@ -183,11 +181,9 @@ export const comprehensiveEsqlRegionMap = {
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   region: {
-    operation: 'value',
     column: 'geo.dest',
     ems: {
       boundaries: 'world_countries',

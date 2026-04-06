@@ -18,7 +18,10 @@ import {
 import type { ListRowRenderer, ListRowProps } from 'react-virtualized';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Error } from '@kbn/apm-types';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
+import type {
+  IWaterfallGetRelatedErrorsHref,
+  WaterfallGetServiceBadgeHref,
+} from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
@@ -40,6 +43,7 @@ interface BaseTraceWaterfallProps {
   onErrorClick?: OnErrorClick;
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   isEmbeddable?: boolean;
   showLegend?: boolean;
   serviceName?: string;
@@ -72,6 +76,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     onErrorClick,
     scrollElement,
     getRelatedErrorsHref,
+    getServiceBadgeHref,
     isEmbeddable = false,
     showLegend = false,
     serviceName,
@@ -102,6 +107,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       onErrorClick={onErrorClick}
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}
+      getServiceBadgeHref={getServiceBadgeHref}
       isEmbeddable={isEmbeddable}
       showLegend={showLegend}
       serviceName={serviceName}
