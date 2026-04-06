@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -93,6 +94,42 @@ const RULE_ID_PARAMS_SCHEMA = schema.object({
   }),
 });
 
+/**
+ * Validation schema for a single variable in the response.
+ */
+const VARIABLE_RESPONSE_SCHEMA = schema.object({
+  type: schema.string({ meta: { description: 'The type of variable.' } }),
+  input: schema.oneOf([schema.string()], {
+    meta: { description: 'The variable input value.' },
+  }),
+  params: schema.maybe(
+    schema.recordOf(schema.string(), schema.string(), {
+      meta: { description: 'Optional parameters.' },
+    })
+  ),
+});
+
+/**
+ * Response schema for a single SML rule.
+ */
+const SML_RULE_RESPONSE_SCHEMA = schema.object({
+  id: schema.string({ meta: { description: 'The unique identifier of the SML rule.' } }),
+  name: schema.string({ meta: { description: 'Display name for the rule.' } }),
+  type: schema.string({ meta: { description: 'The type of SML rule.' } }),
+  index_pattern: schema.string({
+    meta: { description: 'Elasticsearch index pattern this rule applies to.' },
+  }),
+  inference_id: schema.string({
+    meta: { description: 'ID of the configured chat completion inference endpoint.' },
+  }),
+  prompt: schema.string({ meta: { description: 'Prompt template.' } }),
+  variables: schema.recordOf(schema.string(), VARIABLE_RESPONSE_SCHEMA, {
+    meta: { description: 'Map of named variable definitions.' },
+  }),
+  created_at: schema.string({ meta: { description: 'ISO 8601 creation timestamp.' } }),
+  updated_at: schema.string({ meta: { description: 'ISO 8601 last update timestamp.' } }),
+});
+
 export function registerSmlRulesRoutes({
   router,
   coreSetup,
@@ -123,6 +160,16 @@ export function registerSmlRulesRoutes({
             params: RULE_ID_PARAMS_SCHEMA,
             body: RULE_BODY_SCHEMA,
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () => SML_RULE_RESPONSE_SCHEMA,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/sml_rules_create_or_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -150,7 +197,22 @@ export function registerSmlRulesRoutes({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () =>
+                schema.object({
+                  results: schema.arrayOf(SML_RULE_RESPONSE_SCHEMA, {
+                    meta: { description: 'List of SML rules.' },
+                  }),
+                }),
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/sml_rules_list.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { smlRules } = getInternalServices();
@@ -181,6 +243,15 @@ export function registerSmlRulesRoutes({
           request: {
             params: RULE_ID_PARAMS_SCHEMA,
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () => SML_RULE_RESPONSE_SCHEMA,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/sml_rules_get_by_id.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -212,6 +283,20 @@ export function registerSmlRulesRoutes({
           request: {
             params: RULE_ID_PARAMS_SCHEMA,
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () =>
+                schema.object({
+                  success: schema.boolean({
+                    meta: { description: 'Whether the rule was successfully deleted.' },
+                  }),
+                }),
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/sml_rules_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

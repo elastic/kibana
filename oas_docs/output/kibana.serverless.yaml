@@ -4002,10 +4002,110 @@ paths:
         Retrieve all registered SML rules.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-sml-rule
       parameters: []
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listSmlRulesResponseExample:
+                  description: Example response returning a list of SML rules
+                  value:
+                    results:
+                      - created_at: '2026-04-06T12:00:00.000Z'
+                        id: my-rule-id
+                        index_pattern: logs-*
+                        inference_id: my-chat-completion-endpoint
+                        name: Summarize logs index
+                        prompt: |-
+                          Summarize the following index metadata:
+                          ${variables.mapping}
+                        type: index
+                        updated_at: '2026-04-06T12:00:00.000Z'
+                        variables:
+                          mapping:
+                            input: _mapping
+                            type: index
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  results:
+                    description: List of SML rules.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        created_at:
+                          description: ISO 8601 creation timestamp.
+                          type: string
+                        id:
+                          description: The unique identifier of the SML rule.
+                          type: string
+                        index_pattern:
+                          description: Elasticsearch index pattern this rule applies to.
+                          type: string
+                        inference_id:
+                          description: ID of the configured chat completion inference endpoint.
+                          type: string
+                        name:
+                          description: Display name for the rule.
+                          type: string
+                        prompt:
+                          description: Prompt template.
+                          type: string
+                        type:
+                          description: The type of SML rule.
+                          type: string
+                        updated_at:
+                          description: ISO 8601 last update timestamp.
+                          type: string
+                        variables:
+                          additionalProperties:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              input:
+                                description: The variable input value.
+                                type: string
+                              params:
+                                additionalProperties:
+                                  type: string
+                                description: Optional parameters.
+                                type: object
+                              type:
+                                description: The type of variable.
+                                type: string
+                            required:
+                              - type
+                              - input
+                          description: Map of named variable definitions.
+                          type: object
+                      required:
+                        - id
+                        - name
+                        - type
+                        - index_pattern
+                        - inference_id
+                        - prompt
+                        - variables
+                        - created_at
+                        - updated_at
+                    type: array
+                required:
+                  - results
+          description: Indicates a successful response
       summary: List all SML rules
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/sml/rule" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/sml/rule
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -4035,10 +4135,38 @@ paths:
           required: true
           schema:
             type: string
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSmlRuleResponseExample:
+                  description: Example response showing that the deletion operation was successful
+                  value:
+                    success: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    description: Whether the rule was successfully deleted.
+                    type: boolean
+                required:
+                  - success
+          description: Indicates a successful response
       summary: Delete an SML rule
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/sml/rule/{ruleId}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/agent_builder/sml/rule/{ruleId}
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -4060,10 +4188,100 @@ paths:
           required: true
           schema:
             type: string
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSmlRuleByIdResponseExample:
+                  description: Example response returning a single SML rule
+                  value:
+                    created_at: '2026-04-06T12:00:00.000Z'
+                    id: my-rule-id
+                    index_pattern: logs-*
+                    inference_id: my-chat-completion-endpoint
+                    name: Summarize logs index
+                    prompt: |-
+                      Summarize the following index metadata:
+                      ${variables.mapping}
+                    type: index
+                    updated_at: '2026-04-06T12:00:00.000Z'
+                    variables:
+                      mapping:
+                        input: _mapping
+                        type: index
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    description: ISO 8601 creation timestamp.
+                    type: string
+                  id:
+                    description: The unique identifier of the SML rule.
+                    type: string
+                  index_pattern:
+                    description: Elasticsearch index pattern this rule applies to.
+                    type: string
+                  inference_id:
+                    description: ID of the configured chat completion inference endpoint.
+                    type: string
+                  name:
+                    description: Display name for the rule.
+                    type: string
+                  prompt:
+                    description: Prompt template.
+                    type: string
+                  type:
+                    description: The type of SML rule.
+                    type: string
+                  updated_at:
+                    description: ISO 8601 last update timestamp.
+                    type: string
+                  variables:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        input:
+                          description: The variable input value.
+                          type: string
+                        params:
+                          additionalProperties:
+                            type: string
+                          description: Optional parameters.
+                          type: object
+                        type:
+                          description: The type of variable.
+                          type: string
+                      required:
+                        - type
+                        - input
+                    description: Map of named variable definitions.
+                    type: object
+                required:
+                  - id
+                  - name
+                  - type
+                  - index_pattern
+                  - inference_id
+                  - prompt
+                  - variables
+                  - created_at
+                  - updated_at
+          description: Indicates a successful response
       summary: Get an SML rule by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/sml/rule/{ruleId}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/sml/rule/{ruleId}
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -4095,6 +4313,21 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createOrUpdateSmlRuleRequestExample:
+                description: Example request for creating or updating an SML rule
+                value:
+                  index_pattern: logs-*
+                  inference_id: my-chat-completion-endpoint
+                  name: Summarize logs index
+                  prompt: |-
+                    Summarize the following index metadata:
+                    ${variables.mapping}
+                  type: index
+                  variables:
+                    mapping:
+                      input: _mapping
+                      type: index
             schema:
               additionalProperties: false
               type: object
@@ -4172,10 +4405,128 @@ paths:
                 - inference_id
                 - prompt
                 - variables
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createOrUpdateSmlRuleResponseExample:
+                  description: Example response returning the created or updated SML rule
+                  value:
+                    created_at: '2026-04-06T12:00:00.000Z'
+                    id: my-rule-id
+                    index_pattern: logs-*
+                    inference_id: my-chat-completion-endpoint
+                    name: Summarize logs index
+                    prompt: |-
+                      Summarize the following index metadata:
+                      ${variables.mapping}
+                    type: index
+                    updated_at: '2026-04-06T12:00:00.000Z'
+                    variables:
+                      mapping:
+                        input: _mapping
+                        type: index
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    description: ISO 8601 creation timestamp.
+                    type: string
+                  id:
+                    description: The unique identifier of the SML rule.
+                    type: string
+                  index_pattern:
+                    description: Elasticsearch index pattern this rule applies to.
+                    type: string
+                  inference_id:
+                    description: ID of the configured chat completion inference endpoint.
+                    type: string
+                  name:
+                    description: Display name for the rule.
+                    type: string
+                  prompt:
+                    description: Prompt template.
+                    type: string
+                  type:
+                    description: The type of SML rule.
+                    type: string
+                  updated_at:
+                    description: ISO 8601 last update timestamp.
+                    type: string
+                  variables:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        input:
+                          description: The variable input value.
+                          type: string
+                        params:
+                          additionalProperties:
+                            type: string
+                          description: Optional parameters.
+                          type: object
+                        type:
+                          description: The type of variable.
+                          type: string
+                      required:
+                        - type
+                        - input
+                    description: Map of named variable definitions.
+                    type: object
+                required:
+                  - id
+                  - name
+                  - type
+                  - index_pattern
+                  - inference_id
+                  - prompt
+                  - variables
+                  - created_at
+                  - updated_at
+          description: Indicates a successful response
       summary: Create or update an SML rule
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/sml/rule/{ruleId}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "name": "Summarize logs index",
+                "type": "index",
+                "index_pattern": "logs-*",
+                "inference_id": "my-chat-completion-endpoint",
+                "prompt": "Summarize the following index metadata:\n${variables.mapping}",
+                "variables": {
+                  "mapping": {
+                    "type": "index",
+                    "input": "_mapping"
+                  }
+                }
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/agent_builder/sml/rule/{ruleId}
+            {
+              "name": "Summarize logs index",
+              "type": "index",
+              "index_pattern": "logs-*",
+              "inference_id": "my-chat-completion-endpoint",
+              "prompt": "Summarize the following index metadata:\n${variables.mapping}",
+              "variables": {
+                "mapping": {
+                  "type": "index",
+                  "input": "_mapping"
+                }
+              }
+            }
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
