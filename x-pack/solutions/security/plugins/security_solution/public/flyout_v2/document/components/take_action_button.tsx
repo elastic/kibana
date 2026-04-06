@@ -8,9 +8,14 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
+import type { Status } from '../../../../common/api/detection_engine';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -18,6 +23,10 @@ const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeA
 });
 
 export interface TakeActionButtonProps {
+  /**
+   * The raw document record, used to extract alert metadata
+   */
+  hit: DataTableRecord;
   /**
    * ECS data for the document
    */
@@ -30,6 +39,10 @@ export interface TakeActionButtonProps {
    * Callback to refetch flyout data
    */
   refetchFlyoutData: () => Promise<void>;
+  /**
+   * Callback invoked after alert mutations to refresh flyout data.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -37,7 +50,7 @@ export interface TakeActionButtonProps {
  * // TODO: refactor all actions to take a DataTableRecord as input.
  */
 export const TakeActionButton = memo(
-  ({ ecsData, nonEcsData, refetchFlyoutData }: TakeActionButtonProps) => {
+  ({ hit, ecsData, nonEcsData, refetchFlyoutData, onAlertUpdated }: TakeActionButtonProps) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen((open) => !open);
@@ -46,6 +59,10 @@ export const TakeActionButton = memo(
       setIsPopoverOpen(false);
     }, []);
 
+    const eventId = hit.raw._id as string;
+    const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
+    const alertStatus = (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status | undefined;
+
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
       nonEcsData,
@@ -53,7 +70,18 @@ export const TakeActionButton = memo(
       onSuccess: refetchFlyoutData,
     });
 
-    const items = useMemo(() => [...addToCaseActionItems], [addToCaseActionItems]);
+    const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
+      alertStatus,
+      closePopover: closePopoverHandler,
+      eventId,
+      scopeId: '',
+      refetch: onAlertUpdated,
+    });
+
+    const items = useMemo(
+      () => [...addToCaseActionItems, ...(alertStatus !== undefined ? statusActionItems : [])],
+      [addToCaseActionItems, alertStatus, statusActionItems]
+    );
 
     const takeActionButton = (
       <EuiButton
@@ -80,7 +108,7 @@ export const TakeActionButton = memo(
         <EuiContextMenu
           size="s"
           initialPanelId={0}
-          panels={[{ id: 0, items }]}
+          panels={[{ id: 0, items }, ...statusActionPanels]}
           data-test-subj="takeActionPanelMenu"
         />
       </EuiPopover>
