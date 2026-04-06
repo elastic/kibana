@@ -211,7 +211,7 @@ function convertStylingToAPIFormat(
       ? {
           label: {
             visible:
-              (visualization.secondaryLabel ?? visualization.secondaryPrefix) === ''
+              visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
                 ? false
                 : DEFAULT_SECONDARY_LABEL_VISIBLE,
             placement: visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
