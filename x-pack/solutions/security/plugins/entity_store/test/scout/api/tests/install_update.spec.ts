@@ -7,7 +7,7 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_TAGS }, () => {
@@ -17,7 +17,7 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
   });
 
@@ -28,14 +28,14 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
         [FF_ENABLE_ENTITY_STORE_V2]: true,
       });
 
-      const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
       });
       expect(install.statusCode).toBe(201);
 
-      const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
@@ -49,7 +49,7 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       [FF_ENABLE_ENTITY_STORE_V2]: false,
     });
 
-    const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -62,14 +62,14 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
-    const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(install.statusCode).toBe(201);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -81,20 +81,20 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
-    await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
 
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(update.statusCode).toBe(400);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -108,20 +108,20 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
         [FF_ENABLE_ENTITY_STORE_V2]: true,
       });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { logExtraction: { delay: '2m' } },
       });
 
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { logExtraction: { delay: '5m' } },
       });
       expect(update.statusCode).toBe(200);
 
-      const status = await apiClient.get(ENTITY_STORE_ROUTES.STATUS, {
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
         headers: defaultHeaders,
         responseType: 'json',
       });
@@ -130,7 +130,7 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       expect(engines.length).toBeGreaterThan(0);
       expect(engines[0].delay).toBe('5m');
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
@@ -145,20 +145,20 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
         [FF_ENABLE_ENTITY_STORE_V2]: true,
       });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { logExtraction: { delay: '2m', frequency: '1m' } },
       });
 
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { logExtraction: { delay: '5m' } },
       });
       expect(update.statusCode).toBe(200);
 
-      const status = await apiClient.get(ENTITY_STORE_ROUTES.STATUS, {
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
         headers: defaultHeaders,
         responseType: 'json',
       });
@@ -169,7 +169,7 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       expect(engines[0].delay).toBe('5m');
       expect(engines[0].frequency).toBe('1m');
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},

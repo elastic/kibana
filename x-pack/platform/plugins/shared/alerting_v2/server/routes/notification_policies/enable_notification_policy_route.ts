@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Logger } from '@kbn/core-di';
-import type { RouteHandler } from '@kbn/core-di-server';
-import { Request, Response } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
-import type { Logger as KibanaLogger } from '@kbn/logging';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
@@ -23,7 +21,7 @@ const enableNotificationPolicyParamsSchema = z.object({
 });
 
 @injectable()
-export class EnableNotificationPolicyRoute implements RouteHandler {
+export class EnableNotificationPolicyRoute extends BaseAlertingRoute {
   static method = 'post' as const;
   static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}/_enable`;
   static security: RouteSecurity = {
@@ -31,12 +29,9 @@ export class EnableNotificationPolicyRoute implements RouteHandler {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Enable a notification policy',
     description: 'Enable a notification policy by identifier.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {
@@ -44,33 +39,27 @@ export class EnableNotificationPolicyRoute implements RouteHandler {
     },
   } as const;
 
+  protected readonly routeName = 'enable notification policy';
+
   constructor(
-    @inject(Logger) private readonly logger: KibanaLogger,
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       z.infer<typeof enableNotificationPolicyParamsSchema>,
       unknown,
       unknown
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
     private readonly notificationPolicyClient: NotificationPolicyClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const result = await this.notificationPolicyClient.enableNotificationPolicy({
-        id: this.request.params.id,
-      });
+  protected async execute() {
+    const result = await this.notificationPolicyClient.enableNotificationPolicy({
+      id: this.request.params.id,
+    });
 
-      return this.response.ok({ body: result });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      this.logger.debug(`enable notification policy route error: ${boom.message}`);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    return this.ctx.response.ok({ body: result });
   }
 }
