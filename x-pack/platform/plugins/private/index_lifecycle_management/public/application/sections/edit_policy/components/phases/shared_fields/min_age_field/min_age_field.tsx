@@ -113,6 +113,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                               type="info"
                               aria-label={i18nTexts.editPolicy.rolloverToolTipDescription}
                               content={i18nTexts.editPolicy.rolloverToolTipDescription}
+                              disableScreenReaderOutput
                             />
                           </>
                         );
