@@ -10,20 +10,24 @@ import type {
   FindRulesResponse,
   UpdateRuleData,
   RuleResponse,
+  FindRulesSortField,
 } from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
-export type { CreateRuleData, FindRulesResponse, UpdateRuleData, RuleResponse };
+export type { CreateRuleData, FindRulesResponse, UpdateRuleData, RuleResponse, FindRulesSortField };
 
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
+
 export interface FindRulesParams {
   page?: number;
   perPage?: number;
   filter?: string;
   search?: string;
+  sortField?: FindRulesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type BulkRulesParams =

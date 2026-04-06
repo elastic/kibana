@@ -15,11 +15,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  mountAlertingV2App,
-  mountEpisodesApp,
-  mountNotificationPoliciesApp,
-} from './application/mount';
+import { mountEpisodesApp } from './application/mount';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -74,6 +70,7 @@ export const module = new ContainerModule(({ bind }) => {
       order: 1,
       async mount(params) {
         const [coreStart] = await getStartServices();
+        const { mountAlertingV2App } = await import('./application/mount');
         return mountAlertingV2App({ params, container: coreStart.injection.getContainer() });
       },
     });
@@ -99,6 +96,7 @@ export const module = new ContainerModule(({ bind }) => {
       order: 3,
       async mount(params) {
         const [coreStart] = await getStartServices();
+        const { mountNotificationPoliciesApp } = await import('./application/mount');
         return mountNotificationPoliciesApp({
           params,
           container: coreStart.injection.getContainer(),
