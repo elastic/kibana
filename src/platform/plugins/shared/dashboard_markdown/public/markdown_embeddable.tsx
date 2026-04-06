@@ -113,7 +113,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         // There are no unsaved changes to reset for
         // by reference 'content' since by reference 'content' is saved on apply.
         if (!isByReference) {
-          content$.next((initialState as MarkdownByValueState).content);
+          content$.next((nextState as MarkdownByValueState).content);
         }
       },
     });

@@ -226,6 +226,7 @@ export const getSearchEmbeddableFactory = ({
 
       const editApi = initializeEditApi({
         uuid,
+        parentApi,
         partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$, getSelectedTabId },
         discoverServices,
         isEditable: startServices.isEditable,

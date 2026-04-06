@@ -28,6 +28,8 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
     buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
       const state = initialState;
       const titleManager = initializeTitleManager(state);
+
+      // TODO, these behaviourSubjects should be replaced with a state manager.
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const transactionType$ = new BehaviorSubject(state.transactionType);
       const transactionName$ = new BehaviorSubject(state.transactionName);
@@ -94,10 +96,10 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
           latencyThresholdInMicroseconds$.next(nextState?.latencyThresholdInMicroseconds);
           rangeFrom$.next(nextState?.rangeFrom);
           rangeTo$.next(nextState?.rangeTo);
-          rule$.next(nextState?.rule as EmbeddableApmAlertingLatencyVizProps['rule']);
-          alert$.next(nextState?.alert as EmbeddableApmAlertingLatencyVizProps['alert']);
           kuery$.next(nextState?.kuery);
           filters$.next(nextState?.filters);
+          if (nextState?.rule) rule$.next(nextState.rule);
+          if (nextState?.alert) alert$.next(nextState.alert);
         },
       });
 

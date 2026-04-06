@@ -84,7 +84,11 @@ export function getAlertsEmbeddableFactory({
       const reload$ = new Subject<FetchContext>();
 
       const containerStateApi = linkToContainerState({
-        anyStateChange$: merge(titleManager.anyStateChange$, sloAlertsStateManager.anyStateChange$),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          drilldownsManager.anyStateChange$,
+          sloAlertsStateManager.anyStateChange$
+        ),
         getComparators: () => ({
           ...titleComparators,
           ...drilldownsManager.comparators,

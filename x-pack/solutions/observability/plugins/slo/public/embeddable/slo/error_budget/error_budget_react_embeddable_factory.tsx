@@ -47,9 +47,10 @@ export const getErrorBudgetEmbeddableFactory = ({
     type: SLO_ERROR_BUDGET_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
+      linkToContainerState,
       initialState,
       finalizeApi,
-      linkToContainerState,
+      uuid,
     }) => {
       const deps = { ...coreStart, ...pluginsStart };
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
