@@ -211,7 +211,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
                 { defaultMessage: 'Status' }
               ),
               render: (failureRate: string) => {
-                const isCritical = Number(failureRate) > 1;
+                const isCritical = isCriticalFailureRateFromString(failureRate);
                 return (
                   <EuiBadge color={isCritical ? 'danger' : 'success'}>
                     {isCritical
