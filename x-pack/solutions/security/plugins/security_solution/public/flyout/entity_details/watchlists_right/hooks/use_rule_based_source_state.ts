@@ -92,8 +92,6 @@ export const useRuleBasedSourceState = ({
     [byType, activeToggle, isManaged, watchlistName, onFieldChange]
   );
 
-
-
   const onToggleChange = useCallback(
     (id: string) => {
       setActiveToggle(id as ToggleId);
