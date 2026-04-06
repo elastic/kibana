@@ -208,6 +208,7 @@ export function registerSmlRulesRoutes({
               body: () =>
                 schema.object({
                   results: schema.arrayOf(SML_RULE_RESPONSE_SCHEMA, {
+                    maxSize: 1000,
                     meta: { description: 'List of SML rules.' },
                   }),
                 }),
