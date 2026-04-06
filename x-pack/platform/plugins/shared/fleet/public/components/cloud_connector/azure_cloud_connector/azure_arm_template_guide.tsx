@@ -72,9 +72,7 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
               defaultMessage="Once the deployment is complete, go to the {outputs} tab and copy the {outputValues} fields and paste them into Kibana, below."
               values={{
                 outputs: <strong>{'Outputs'}</strong>,
-                outputValues: (
-                  <strong>{'ClientID, TenantID, and Federated Identity ID'}</strong>
-                ),
+                outputValues: <strong>{'ClientID, TenantID, and Federated Identity ID'}</strong>,
               }}
             />
           </li>

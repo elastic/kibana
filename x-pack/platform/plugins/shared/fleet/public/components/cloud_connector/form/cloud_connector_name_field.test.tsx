@@ -69,7 +69,11 @@ describe('CloudConnectorNameField', () => {
       const input = screen.getByRole('textbox');
       await user.clear(input);
 
-      expect(mockOnChange).toHaveBeenLastCalledWith('', false, 'Federated Identity Name is required');
+      expect(mockOnChange).toHaveBeenLastCalledWith(
+        '',
+        false,
+        'Federated Identity Name is required'
+      );
     });
   });
 
