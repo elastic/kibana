@@ -38,7 +38,6 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     before(() => {
-      cleanMigrationData();
       role.setup();
     });
 
