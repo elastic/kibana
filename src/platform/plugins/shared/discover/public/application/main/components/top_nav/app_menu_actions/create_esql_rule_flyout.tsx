@@ -9,9 +9,6 @@
 
 import React, { useEffect, useRef } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
-import { AppMenuActionId } from '@kbn/discover-utils';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { AppMenuDiscoverParams } from './types';
@@ -61,63 +58,3 @@ export function CreateESQLRuleFlyout({
 
   return <RuleFormFlyout query={query} onClose={onClose} />;
 }
-
-export const getCreateRuleMenuItem = ({
-  discoverParams,
-  services,
-  tabId,
-  getState,
-}: {
-  discoverParams: AppMenuDiscoverParams;
-  services: DiscoverServices;
-  tabId: string;
-  getState: () => DiscoverInternalState;
-}): DiscoverAppMenuItemType => {
-  const createRuleItem: DiscoverAppMenuPopoverItem = {
-    id: 'create-rule',
-    order: 1,
-    label: i18n.translate('discover.localMenu.createRuleTitle', {
-      defaultMessage: 'Create v2 ES|QL rule',
-    }),
-    iconType: 'bell',
-    testId: 'discoverCreateRuleButton',
-    run: ({ context: { onFinishAction } }) => {
-      return (
-        <CreateESQLRuleFlyout
-          discoverParams={discoverParams}
-          services={services}
-          tabId={tabId}
-          getState={getState}
-          onClose={onFinishAction}
-        />
-      );
-    },
-  };
-
-  const legacyRulesItem: DiscoverAppMenuPopoverItem = {
-    id: 'legacy-rules',
-    order: 2,
-    label: i18n.translate('discover.localMenu.legacyRulesTitle', {
-      defaultMessage: 'Create v1 rules',
-    }),
-    testId: 'discoverLegacyRulesButton',
-    items: [],
-  };
-
-  const items: DiscoverAppMenuPopoverItem[] = [createRuleItem, legacyRulesItem];
-
-  return {
-    id: AppMenuActionId.createRule,
-    order: 3,
-    label: i18n.translate('discover.localMenu.ruleTitle', {
-      defaultMessage: 'Rules',
-    }),
-    iconType: 'bell',
-    testId: 'discoverRulesMenuButton',
-    tooltipContent: i18n.translate('discover.localMenu.ruleDescription', {
-      defaultMessage: 'Create alerting rules from this query',
-    }),
-    items,
-    popoverTestId: 'discoverRulesPopover',
-  };
-};
