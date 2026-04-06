@@ -391,6 +391,120 @@ export default function ({ getService }: FtrProviderContext) {
       ).to.be(singleLineQuery);
     });
 
+    describe('created_by attribution', () => {
+      it('user-created pack records the creating user', async () => {
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `Attribution-UserPack-${Date.now()}`,
+            description: 'Test user attribution',
+            enabled: false,
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        const { data } = createResponse.body;
+        expect(data.created_by).to.be.ok();
+        expect(data.created_by).to.be('elastic');
+        expect(data.updated_by).to.be('elastic');
+
+        // Duplicate the user-created pack
+        const copyResponse = await withOsqueryHeaders(
+          supertest.post(`/api/osquery/packs/${data.saved_object_id}/copy`)
+        ).expect(200);
+
+        const copy = copyResponse.body.data;
+        expect(copy.created_by).to.be('elastic');
+        expect(copy.updated_by).to.be('elastic');
+        expect(copy.name).to.contain('Attribution-UserPack');
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
+        ).expect(200);
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${data.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('prebuilt packs have "elastic" as created_by after asset install', async () => {
+        // Trigger asset install/update
+        await supertest
+          .post('/internal/osquery/assets/update')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        // Find all packs and look for prebuilt ones
+        const findResponse = await withOsqueryHeaders(
+          supertest.get('/api/osquery/packs?pageSize=100')
+        ).expect(200);
+
+        // Prebuilt packs should have created_by = 'elastic'
+        const prebuiltPacks = findResponse.body.data.filter(
+          (p: { read_only: boolean }) => p.read_only
+        );
+
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        for (const pack of prebuiltPacks) {
+          expect(pack.created_by).to.be('elastic');
+          expect(pack.updated_by).to.be('elastic');
+        }
+      });
+
+      it('duplicating a prebuilt pack produces a mutable copy with valid attribution', async () => {
+        // Trigger asset install
+        await supertest
+          .post('/internal/osquery/assets/update')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        // Find a prebuilt pack
+        const findResponse = await withOsqueryHeaders(
+          supertest.get('/api/osquery/packs?pageSize=100')
+        ).expect(200);
+
+        const prebuiltPacks = findResponse.body.data.filter(
+          (p: { read_only: boolean }) => p.read_only
+        );
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        const prebuiltPack = prebuiltPacks[0];
+
+        // Copy the prebuilt pack
+        const copyResponse = await withOsqueryHeaders(
+          supertest.post(`/api/osquery/packs/${prebuiltPack.saved_object_id}/copy`)
+        ).expect(200);
+
+        const copy = copyResponse.body.data;
+
+        // The copy uses getUserInfo() (dynamic resolution), not hardcoded 'elastic'.
+        // In FTR the test user is 'elastic', so we can only verify attribution is present.
+        expect(copy.created_by).to.be.a('string');
+        expect(copy.updated_by).to.be.a('string');
+        expect(copy.created_by).to.not.be.empty();
+
+        // The copy should NOT be read_only
+        expect(copy.read_only).to.not.be(true);
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('users endpoint does not produce duplicate entries', async () => {
+        const response = await supertest
+          .get('/internal/osquery/packs/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        const usernames = response.body.data.map((c: { created_by: string }) => c.created_by);
+        const uniqueUsernames = [...new Set(usernames)];
+        expect(uniqueUsernames.length).to.be(usernames.length);
+      });
+    });
+
     describe('404 for non-existent resources', () => {
       it('returns 404 when reading a non-existent pack', async () => {
         await withOsqueryHeaders(supertest.get('/api/osquery/packs/non-existent-id')).expect(404);

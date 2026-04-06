@@ -370,6 +370,9 @@
       "groupingMode": {
         "type": "keyword"
       },
+      "tags": {
+        "type": "keyword"
+      },
       "throttle": {
         "type": "object",
         "properties": {
@@ -446,6 +449,11 @@
             "type": "keyword"
           },
           "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            },
             "type": "text"
           },
           "owner": {
@@ -1370,6 +1378,9 @@
       },
       "integration_id": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       },
       "job_info": {
         "properties": {

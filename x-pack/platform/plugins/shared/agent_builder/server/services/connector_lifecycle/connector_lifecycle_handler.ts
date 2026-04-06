@@ -14,7 +14,7 @@ import { AttachmentType, CONNECTOR_TAG_PREFIX } from '@kbn/agent-builder-common/
 import { toolIdMaxLength } from '@kbn/agent-builder-common/tools';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
@@ -82,10 +82,10 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const request = params.request;
         const soClient = internalServices.savedObjects.getScopedClient(request);
         const uiSettingsClient = internalServices.uiSettings.asScopedToClient(soClient);
-        const isConnectorsEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID
+        const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
-        if (!isConnectorsEnabled) return;
+        if (!isExperimentalFeaturesEnabled) return;
 
         if (!workflowsManagement) {
           logger.warn('Connector lifecycle: workflows management plugin is not available');

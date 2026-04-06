@@ -32,6 +32,7 @@ import { getLensBuilder } from '../lazy_builder';
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
   item: LensItem;
+  // TODO: align meta with public routes when internal routes are removed
   meta: LensItemMeta & M;
 }
 
