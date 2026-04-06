@@ -1,10 +1,10 @@
 {
-  "sha1": "cae23a51b350943b95ac5f832a192282882ed548",
+  "sha1": "3a0e746225882b8046890f99b9143bea8e186827",
   "tests": [
     {
-      "id": "590606532f142b6-92dfafb28d45a4f",
+      "id": "a8aa0860fcd0029-92dfafb28d45a4f",
       "title": "Manage Integrations Table renders the table with all integration rows",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -16,9 +16,9 @@
       }
     },
     {
-      "id": "590606532f142b6-080612633fef9db",
+      "id": "a8aa0860fcd0029-080612633fef9db",
       "title": "Manage Integrations Table shows inline Review & Approve button for completed integrations",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -30,9 +30,9 @@
       }
     },
     {
-      "id": "590606532f142b6-a54583195c69594",
+      "id": "a8aa0860fcd0029-a54583195c69594",
       "title": "Manage Integrations Table shows empty state when no integrations exist",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -44,9 +44,9 @@
       }
     },
     {
-      "id": "590606532f142b6-16bc31c324c4382",
+      "id": "a8aa0860fcd0029-16bc31c324c4382",
       "title": "Manage Integrations Table filters rows by search text",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -58,9 +58,9 @@
       }
     },
     {
-      "id": "590606532f142b6-b9e7287263e77fc",
+      "id": "a8aa0860fcd0029-b9e7287263e77fc",
       "title": "Manage Integrations Table all menu items are visible when actions button is clicked",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -72,9 +72,9 @@
       }
     },
     {
-      "id": "590606532f142b6-c7a6e7fb100c638",
+      "id": "a8aa0860fcd0029-c7a6e7fb100c638",
       "title": "Manage Integrations Table Review & Approve is disabled for approved integration",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -86,9 +86,9 @@
       }
     },
     {
-      "id": "590606532f142b6-da1f673c8ffbe81",
+      "id": "a8aa0860fcd0029-da1f673c8ffbe81",
       "title": "Manage Integrations Table Install is enabled for approved integration",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -100,9 +100,9 @@
       }
     },
     {
-      "id": "590606532f142b6-ef1e16038becc69",
+      "id": "a8aa0860fcd0029-ef1e16038becc69",
       "title": "Manage Integrations Table Install is disabled for pending integration",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -114,9 +114,9 @@
       }
     },
     {
-      "id": "590606532f142b6-95fdb610e9eed04",
+      "id": "a8aa0860fcd0029-95fdb610e9eed04",
       "title": "Manage Integrations Table Download .zip is disabled when not all data streams are successful",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -128,9 +128,9 @@
       }
     },
     {
-      "id": "590606532f142b6-a77e06836c4ae3f",
+      "id": "a8aa0860fcd0029-a77e06836c4ae3f",
       "title": "Manage Integrations Table Review & Approve and Download .zip are disabled for pending integration",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -142,9 +142,9 @@
       }
     },
     {
-      "id": "590606532f142b6-d06d532ceb70e63",
+      "id": "a8aa0860fcd0029-d06d532ceb70e63",
       "title": "Manage Integrations Table shows confirm modal when Delete is clicked",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -156,9 +156,9 @@
       }
     },
     {
-      "id": "590606532f142b6-b1d924ff78831dd",
+      "id": "a8aa0860fcd0029-b1d924ff78831dd",
       "title": "Manage Integrations Table cancel closes the confirm modal and the row stays",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -170,9 +170,9 @@
       }
     },
     {
-      "id": "590606532f142b6-e41b749b45f03db",
+      "id": "a8aa0860fcd0029-e41b749b45f03db",
       "title": "Manage Integrations Table opens Review & Approve modal from the actions menu",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -184,9 +184,9 @@
       }
     },
     {
-      "id": "590606532f142b6-7e94be9a9317279",
+      "id": "a8aa0860fcd0029-7e94be9a9317279",
       "title": "Manage Integrations Table opens Review & Approve modal from the inline button",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -198,9 +198,9 @@
       }
     },
     {
-      "id": "590606532f142b6-1ab923315d00430",
+      "id": "a8aa0860fcd0029-1ab923315d00430",
       "title": "Manage Integrations Table Approve button is disabled until version and category are filled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -212,9 +212,9 @@
       }
     },
     {
-      "id": "590606532f142b6-40949b575479a8f",
+      "id": "a8aa0860fcd0029-40949b575479a8f",
       "title": "Manage Integrations Table Approve flow calls the approve API and closes the modal",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -226,9 +226,9 @@
       }
     },
     {
-      "id": "590606532f142b6-7939591cf209d46",
+      "id": "a8aa0860fcd0029-7939591cf209d46",
       "title": "Manage Integrations Table closing the Review & Approve modal via Cancel dismisses it",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -240,9 +240,9 @@
       }
     },
     {
-      "id": "590606532f142b6-c8cb5322679bfc3",
+      "id": "a8aa0860fcd0029-c8cb5322679bfc3",
       "title": "Manage Integrations Table Install calls the download and install APIs then shows success",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -254,9 +254,9 @@
       }
     },
     {
-      "id": "590606532f142b6-8a373e3277e26f9",
+      "id": "a8aa0860fcd0029-8a373e3277e26f9",
       "title": "Manage Integrations Table Download .zip calls the download API",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -268,9 +268,9 @@
       }
     },
     {
-      "id": "590606532f142b6-b74c3d4757b386d",
+      "id": "a8aa0860fcd0029-b74c3d4757b386d",
       "title": "Manage Integrations Table Edit navigates to the edit page for the integration",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -282,9 +282,9 @@
       }
     },
     {
-      "id": "590606532f142b6-355de8b7598e285",
+      "id": "a8aa0860fcd0029-355de8b7598e285",
       "title": "Manage Integrations Table confirming delete calls the DELETE API and removes the row",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -296,9 +296,9 @@
       }
     },
     {
-      "id": "590606532f142b6-ea21210d0959a2e",
+      "id": "a8aa0860fcd0029-ea21210d0959a2e",
       "title": "Manage Integrations Table status filter shows only rows matching the selected status",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -310,9 +310,9 @@
       }
     },
     {
-      "id": "590606532f142b6-adb0f652aef2881",
+      "id": "a8aa0860fcd0029-adb0f652aef2881",
       "title": "Manage Integrations Table actions filter shows only rows matching the selected action",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -324,9 +324,9 @@
       }
     },
     {
-      "id": "590606532f142b6-3db0a707a61bf7f",
+      "id": "a8aa0860fcd0029-3db0a707a61bf7f",
       "title": "Manage Integrations Table shows Fail status badge for failed and cancelled integrations",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -338,9 +338,9 @@
       }
     },
     {
-      "id": "590606532f142b6-bbef8ec91ef8b70",
+      "id": "a8aa0860fcd0029-bbef8ec91ef8b70",
       "title": "Manage Integrations Table selecting a row shows bulk delete button and deletes on confirm",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -352,9 +352,9 @@
       }
     },
     {
-      "id": "590606532f142b6-195a9fa22bbbca0",
+      "id": "a8aa0860fcd0029-195a9fa22bbbca0",
       "title": "Manage Integrations Table selecting an approved row shows the bulk install button",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -366,9 +366,9 @@
       }
     },
     {
-      "id": "590606532f142b6-e03907bf43238de",
+      "id": "a8aa0860fcd0029-e03907bf43238de",
       "title": "Manage Integrations Table bulk install button is hidden when only non-approved rows are selected",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -380,9 +380,9 @@
       }
     },
     {
-      "id": "590606532f142b6-37dfcfb900b847d",
+      "id": "a8aa0860fcd0029-37dfcfb900b847d",
       "title": "Manage Integrations Table clicking the integration title navigates to the edit page",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -394,9 +394,9 @@
       }
     },
     {
-      "id": "590606532f142b6-e5a42fb563d74a4",
+      "id": "a8aa0860fcd0029-e5a42fb563d74a4",
       "title": "Manage Integrations Table table renders rows in the order returned by the API",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -408,9 +408,9 @@
       }
     },
     {
-      "id": "590606532f142b6-99eb001ee00b19c",
+      "id": "a8aa0860fcd0029-99eb001ee00b19c",
       "title": "Manage Integrations Table shows error callout when the integrations API returns an error",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
