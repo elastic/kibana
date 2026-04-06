@@ -9,8 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { OnboardingHeaderCardId } from '../../constants';
 import { OnboardingHeaderVideoModal } from './video_modal';
 import * as i18n from './translations';
-import videoImage from './images/video_card.png';
-import darkVideoImage from './images/video_card_dark.png';
+import { WebinarVideoIllustration } from './webinar_video_illustration';
 import { LinkCard } from '../common/link_card';
 
 export const VideoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) => {
@@ -28,7 +27,7 @@ export const VideoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) =>
       <LinkCard
         id={OnboardingHeaderCardId.video}
         onClick={showVideoModal}
-        icon={isDarkMode ? darkVideoImage : videoImage}
+        icon={<WebinarVideoIllustration size={64} alt={i18n.ONBOARDING_HEADER_VIDEO_TITLE} />}
         title={i18n.ONBOARDING_HEADER_VIDEO_TITLE}
         description={i18n.ONBOARDING_HEADER_VIDEO_DESCRIPTION}
         linkText={i18n.ONBOARDING_HEADER_VIDEO_LINK_TITLE}

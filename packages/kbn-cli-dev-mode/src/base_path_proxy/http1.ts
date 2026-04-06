@@ -190,24 +190,32 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
     // It may happen that basepath has changed, but user still uses the old one,
     // so we can try to check if that's the case and just redirect user to the
     // same URL, but with valid basepath.
-    this.server.route({
-      handler: (request, responseToolkit) => {
-        const { oldBasePath, kbnPath = '' } = request.params;
+    // Skip this route when basePath is empty or root to avoid conflicting with
+    // the main proxy route which becomes /{kbnPath*} when basePath is "".
+    const hasBasePath =
+      this.httpConfig.basePath !== undefined &&
+      this.httpConfig.basePath !== '' &&
+      this.httpConfig.basePath !== '/';
+    if (hasBasePath) {
+      this.server.route({
+        handler: (request, responseToolkit) => {
+          const { oldBasePath, kbnPath = '' } = request.params;
 
-        const isGet = request.method === 'get';
-        const isBasepathLike = oldBasePath.length === 3;
+          const isGet = request.method === 'get';
+          const isBasepathLike = oldBasePath.length === 3;
 
-        const newUrl = Url.format({
-          pathname: `${this.httpConfig.basePath}/${kbnPath}`,
-          query: request.query,
-        });
+          const newUrl = Url.format({
+            pathname: `${this.httpConfig.basePath}/${kbnPath}`,
+            query: request.query,
+          });
 
-        return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(newUrl)
-          : responseToolkit.response('Not Found').code(404);
-      },
-      method: '*',
-      path: `/{oldBasePath}/{kbnPath*}`,
-    });
+          return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
+            ? responseToolkit.redirect(newUrl)
+            : responseToolkit.response('Not Found').code(404);
+        },
+        method: '*',
+        path: `/{oldBasePath}/{kbnPath*}`,
+      });
+    }
   }
 }

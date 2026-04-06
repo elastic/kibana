@@ -24,7 +24,7 @@ import { useOnboardingContext } from '../../../onboarding_context';
 
 interface LinkCardProps {
   id: OnboardingHeaderCardId;
-  icon: string;
+  icon: string | React.ReactNode;
   title: string;
   description: string;
   linkText: string;
@@ -57,12 +57,16 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
         layout="horizontal"
         aria-labelledby={panelTitleId}
         icon={
-          <EuiImage
-            data-test-subj="data-ingestion-header-card-icon"
-            src={icon}
-            alt={title}
-            size={64}
-          />
+          typeof icon === 'string' ? (
+            <EuiImage
+              data-test-subj="data-ingestion-header-card-icon"
+              src={icon}
+              alt={title}
+              size={64}
+            />
+          ) : (
+            <span data-test-subj="data-ingestion-header-card-icon">{icon}</span>
+          )
         }
         title={
           <span id={panelTitleId} className="headerCardTitle">
