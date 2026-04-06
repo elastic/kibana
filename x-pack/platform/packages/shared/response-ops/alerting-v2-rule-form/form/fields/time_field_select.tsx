@@ -90,6 +90,8 @@ export const TimeFieldSelect = () => {
             error={error?.message}
             fullWidth
           >
+            {/* used eslint-disable-next-line to bypass EUI's isInvalid prop check since we're handling validation via 
+            react-hook-form to keep the scroll to error and to not disply additional error messages */}
             {/* eslint-disable-next-line @elastic/eui/consistent-is-invalid-props */}
             <EuiSelect
               options={timeFieldOptions}
