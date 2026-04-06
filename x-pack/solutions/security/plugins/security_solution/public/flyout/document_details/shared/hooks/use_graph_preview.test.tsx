@@ -21,9 +21,9 @@ import {
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
-jest.mock('../../../shared/hooks/use_is_entity_store_v2_available');
-import { useIsEntityStoreV2Available } from '../../../shared/hooks/use_is_entity_store_v2_available';
-const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as jest.Mock;
+jest.mock('../../../shared/hooks/use_should_show_graph');
+import { useShouldShowGraph } from '../../../shared/hooks/use_should_show_graph';
+const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
 // All EUID source fields (must explicitly handle to avoid mockFieldData bleed-through)
 const ALL_EUID_SOURCE_FIELDS: readonly string[] = [
@@ -79,8 +79,8 @@ describe('useGraphPreview', () => {
     jest.clearAllMocks();
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
-    // Default mock: entity store v2 entities index exists
-    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: true } });
+    // Default mock: graph should be shown (license + entity store available)
+    mockUseShouldShowGraph.mockReturnValue(true);
   });
 
   it(`should return false when missing actor and target`, () => {
@@ -618,7 +618,7 @@ describe('useGraphPreview', () => {
   });
 
   it('should return false when all conditions are met but env does not have required license', () => {
-    mockUseHasGraphVisualizationLicense.mockReturnValue(false);
+    mockUseShouldShowGraph.mockReturnValue(false);
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
@@ -646,8 +646,8 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it('should return false for shouldShowGraph when entity store v2 index does not exist', () => {
-    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: false } });
+  it('should return false for shouldShowGraph when entity store is not available', () => {
+    mockUseShouldShowGraph.mockReturnValue(false);
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
