@@ -48,7 +48,7 @@ const RECORD_BODY_SCHEMA = schema.object({
     minLength: 1,
     meta: { description: 'The searchable content / LLM-generated summary.' },
   }),
-  spaces: schema.arrayOf(schema.string(), {
+  spaces: schema.arrayOf(schema.string({ minLength: 1 }), {
     minSize: 1,
     meta: { description: 'Space IDs this record belongs to. Use ["*"] for all spaces.' },
   }),
