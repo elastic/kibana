@@ -8,7 +8,7 @@
  */
 
 import type { MetricState } from '../../schema';
-import { DEFAULT_PRIMARY_VALUE_ALIGNMENT } from '../../transforms/charts/metric_defaults';
+import { DEFAULT_PRIMARY_VALUE_ALIGNMENT } from '../../transforms/charts/metric/defaults';
 
 export const breakdownMetricAPIAttributes = {
   type: 'metric',

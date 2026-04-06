@@ -20,7 +20,7 @@ import {
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
-} from '../../transforms/charts/metric_defaults';
+} from '../../transforms/charts/metric/defaults';
 import {
   metricOperationDefinitionSchema,
   esqlColumnSchema,
@@ -475,6 +475,8 @@ export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetr
 export type MetricState = TypeOf<typeof metricStateSchema>;
 export type MetricStateNoESQL = TypeOf<typeof metricStateSchemaNoESQL>;
 export type MetricStateESQL = TypeOf<typeof esqlMetricState>;
+
+export type MetricStyling = TypeOf<typeof metricStylingSchema>;
 
 export type PrimaryMetricType =
   | TypeOf<typeof primaryMetricSchemaNoESQL>
