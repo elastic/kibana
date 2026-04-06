@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
     });
 
-    describe('dashboard without stored timed', () => {
+    describe('dashboard without stored time', () => {
       it('is saved', async () => {
         await dashboard.clickNewDashboard();
         await dashboard.addVisualizations([dashboard.getTestVisualizationNames()[0]]);
@@ -49,8 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/241757
-    describe.skip('dashboard with stored timed', function () {
+    describe('dashboard with stored time', function () {
       it('is saved with time', async function () {
         await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();
