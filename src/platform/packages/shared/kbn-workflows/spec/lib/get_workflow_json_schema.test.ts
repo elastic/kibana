@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { stringify } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
+import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
 
 describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {
@@ -194,7 +196,7 @@ describe('setMarkdownDescriptionIfSyntaxDetected', () => {
 });
 
 describe('ZodPipe unwrapping for Monaco YAML', () => {
-  it('should unwrap ZodPipe to generate JSON Schema with properties for autocompletion and validation', () => {
+  it('should unwrap ZodPipe to generate JSON Schema with properties for autocompletion and validation', async () => {
     // This test verifies that ZodPipe schemas (returned by generateYamlSchemaFromConnectors)
     // are correctly unwrapped to generate a JSON Schema with properties at the root level.
     // This is critical for Monaco YAML autocompletion and validation to work.
@@ -246,7 +248,12 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
     expect(actualSchema.properties.name.type).toBe('string');
     expect(actualSchema.properties.enabled.type).toBe('boolean');
 
-    // Verify validation against the same Zod schema used to produce the JSON Schema (Monaco uses JSON Schema; runtime validation uses Zod)
+    const validateWithYamlLsp = getValidateWithYamlLsp(jsonSchema as z.core.JSONSchema.JSONSchema);
+
+    // Runtime: Zod. Editor / yaml-language-server: generated JSON Schema (same split as production).
+    // Asserting a well-formed document produces no LSP schema diagnostics exercises z.toJSONSchema
+    // output on the same path as Monaco; invalid cases stay on Zod because draft-7 output does not
+    // always surface required/type rules the same way for yaml-language-server.
     const validWorkflow = {
       name: 'Test Workflow',
       enabled: true,
@@ -255,6 +262,11 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
       steps: [{ name: 'step1', type: 'console' }],
     };
     expect(pipeSchema.safeParse(validWorkflow).success).toBe(true);
+    const validYamlDiagnostics = await validateWithYamlLsp(
+      'workflow.yaml',
+      stringify(validWorkflow)
+    );
+    expect(validYamlDiagnostics).toEqual([]);
 
     const invalidWorkflow = {
       name: 'Test Workflow',
