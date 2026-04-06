@@ -149,7 +149,19 @@ export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
         .refine(uniqueStrings, { message: i18n.FIELD_DEFAULT_VALUES_MUST_BE_UNIQUE })
         .optional(),
     })
-    .catchall(z.unknown()),
+    .catchall(z.unknown())
+    .superRefine((meta, ctx) => {
+      if (meta.default === undefined) return;
+      const invalidValues = (meta.default as string[]).filter(
+        (v) => !(meta.options as string[]).includes(v)
+      );
+      if (invalidValues.length > 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.FIELD_DEFAULT_VALUES_NOT_IN_OPTIONS(invalidValues),
+        });
+      }
+    }),
 });
 
 export const RadioGroupFieldSchema = BaseFieldSchema.extend({
@@ -164,8 +176,16 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
       default: z.string().optional(),
     })
     .catchall(z.unknown())
-    .refine((meta) => meta.default === undefined || meta.options.includes(meta.default), {
-      message: i18n.FIELD_DEFAULT_NOT_IN_OPTIONS,
+    .superRefine((meta, ctx) => {
+      if (
+        meta.default !== undefined &&
+        !(meta.options as string[]).includes(meta.default as string)
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.FIELD_DEFAULT_NOT_IN_OPTIONS(meta.default as string),
+        });
+      }
     }),
 });
 

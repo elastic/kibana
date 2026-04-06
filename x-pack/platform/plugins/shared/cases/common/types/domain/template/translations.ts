@@ -33,9 +33,14 @@ export const FIELD_OPTIONS_MIN_ITEMS = (min: number) =>
     defaultMessage: 'Options must have at least {min, plural, one {# item} other {# items}}.',
   });
 
-export const FIELD_DEFAULT_NOT_IN_OPTIONS = i18n.translate(
-  'xpack.cases.templates.fieldSchema.defaultNotInOptions',
-  {
-    defaultMessage: 'Default must be one of the options.',
-  }
-);
+export const FIELD_DEFAULT_NOT_IN_OPTIONS = (invalidValue: string) =>
+  i18n.translate('xpack.cases.templates.fieldSchema.defaultNotInOptions', {
+    values: { value: invalidValue },
+    defaultMessage: 'Default value {value} is not a valid option.',
+  });
+
+export const FIELD_DEFAULT_VALUES_NOT_IN_OPTIONS = (invalidValues: string[]) =>
+  i18n.translate('xpack.cases.templates.fieldSchema.defaultValuesNotInOptions', {
+    values: { values: invalidValues.join(', ') },
+    defaultMessage: 'Default values {values} are not valid options.',
+  });

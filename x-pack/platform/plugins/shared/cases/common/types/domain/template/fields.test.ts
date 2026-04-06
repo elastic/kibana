@@ -79,7 +79,9 @@ describe('RadioGroupFieldSchema', () => {
         metadata: { options: ['staging', 'production'], default: 'development' },
       });
       expect(result.success).toBe(false);
-      expect(result.error?.issues[0].message).toBe('Default must be one of the options.');
+      expect(result.error?.issues[0].message).toBe(
+        'Default value development is not a valid option.'
+      );
     });
   });
 });
