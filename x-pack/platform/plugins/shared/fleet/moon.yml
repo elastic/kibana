@@ -117,6 +117,7 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
+  - '@kbn/doc-links'
 tags:
   - plugin
   - prod
