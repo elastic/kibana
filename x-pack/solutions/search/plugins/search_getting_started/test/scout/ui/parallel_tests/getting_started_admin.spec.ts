@@ -190,7 +190,6 @@ test.describe(
         await expect(cloudHomeLink).toBeVisible();
         await expect(cloudHomeLink).toHaveAttribute('href', /cloud\.elastic\.co/);
       });
-
     });
 
     test('Top navigation links respond to screen size', async ({ pageObjects, page }) => {
@@ -206,8 +205,7 @@ test.describe(
         await expect(orgLink).toBeVisible();
         await expect(orgLink).toHaveAttribute('href', /account\/members/);
 
-        const manageSubscriptionLink =
-          await pageObjects.gettingStarted.getManageSubscriptionLink();
+        const manageSubscriptionLink = await pageObjects.gettingStarted.getManageSubscriptionLink();
         await expect(manageSubscriptionLink).toBeVisible();
         await expect(manageSubscriptionLink).toHaveAttribute('href', /billing\/overview/);
       });
@@ -222,8 +220,7 @@ test.describe(
         const orgLink = await pageObjects.gettingStarted.getCloudOrganizationLink();
         await expect(orgLink).toBeHidden();
 
-        const manageSubscriptionLink =
-          await pageObjects.gettingStarted.getManageSubscriptionLink();
+        const manageSubscriptionLink = await pageObjects.gettingStarted.getManageSubscriptionLink();
         await expect(manageSubscriptionLink).toBeHidden();
       });
 
