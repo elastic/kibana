@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, type ChangeEvent } from 'react';
+import React, { useCallback, useState, type ChangeEvent, type SetStateAction } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +23,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 
 export interface EpisodesFilterBarProps {
   filterState: EpisodesFilterState;
-  onFilterChange: (state: EpisodesFilterState) => void;
+  onFilterChange: (update: SetStateAction<EpisodesFilterState>) => void;
   timeRange: TimeRange;
   onTimeChange: (range: TimeRange) => void;
   ruleOptions: Array<{ label: string; value: string }>;
@@ -47,9 +47,9 @@ export const EpisodesFilterBar = ({
   useDebounce(
     () => {
       const trimmedValue = queryStringInput.trim() || undefined;
-      if (trimmedValue !== filterState.queryString) {
-        onFilterChange({ ...filterState, queryString: trimmedValue });
-      }
+      onFilterChange((prev) =>
+        trimmedValue !== prev.queryString ? { ...prev, queryString: trimmedValue } : prev
+      );
     },
     300,
     [queryStringInput]
@@ -57,22 +57,16 @@ export const EpisodesFilterBar = ({
 
   const onStatusChange = useCallback(
     (status: string | undefined) => {
-      onFilterChange({
-        ...filterState,
-        status,
-      });
+      onFilterChange((prev) => ({ ...prev, status }));
     },
-    [filterState, onFilterChange]
+    [onFilterChange]
   );
 
   const onRuleChange = useCallback(
     (ruleId: string | undefined) => {
-      onFilterChange({
-        ...filterState,
-        ruleId,
-      });
+      onFilterChange((prev) => ({ ...prev, ruleId }));
     },
-    [filterState, onFilterChange]
+    [onFilterChange]
   );
 
   const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
