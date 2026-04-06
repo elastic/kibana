@@ -223,6 +223,6 @@ export const buildIntegrationPackage = async (
     addLogoToZip(zip, packageName, integration.metadata.logo);
   }
 
-  const buffer = zip.toBuffer();
+  const buffer = await zip.toBufferPromise();
   return { buffer, packageName };
 };
