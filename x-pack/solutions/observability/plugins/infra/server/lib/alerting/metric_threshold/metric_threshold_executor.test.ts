@@ -3534,6 +3534,7 @@ const mockLibs: any = {
       return Promise.resolve({
         id: sourceId,
         configuration: {
+          metricAlias: 'metrics-*,metricbeat-*',
           logIndices: {
             type: 'index_pattern',
             indexPatternId: 'some-id',
