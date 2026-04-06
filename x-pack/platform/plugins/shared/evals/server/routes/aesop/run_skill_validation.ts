@@ -116,7 +116,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
 
                 // Fire-and-forget agent-based validation
                 const agentStartTime = Date.now();
-                (async () => {
+                void (async () => {
                   try {
                     const result = await orchestrator.validateSkill(skill.markdown || '');
                     if (result) {

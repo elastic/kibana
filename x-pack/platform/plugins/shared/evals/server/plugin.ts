@@ -211,7 +211,7 @@ export class EvalsPlugin
         }
       };
 
-      loadCustomEvaluators();
+      void loadCustomEvaluators();
     }
 
     // ═══════════════════════════════════════════════════════════════
