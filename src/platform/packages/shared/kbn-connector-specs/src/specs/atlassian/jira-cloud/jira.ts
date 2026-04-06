@@ -101,7 +101,8 @@ export const JiraConnector: ConnectorSpec = {
           defaultMessage: 'Cloud ID',
         }),
         helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.helpText', {
-          defaultMessage: 'Required for OAuth. Ignored when using an API token.',
+          defaultMessage:
+            'Required for OAuth. To find your Cloud ID, visit https://your-subdomain.atlassian.net/_edge/tenant_info (replace your-subdomain with your Atlassian subdomain) and use the cloudId value from the response.',
         }),
       }),
   }),
