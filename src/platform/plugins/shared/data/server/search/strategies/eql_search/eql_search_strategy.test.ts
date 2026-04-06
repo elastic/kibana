@@ -79,6 +79,10 @@ describe('EQL search strategy', () => {
             },
           },
         },
+        getSearchSettings: jest.fn(() => ({
+          includeFrozen: false,
+          maxConcurrentShardRequests: 0,
+        })),
       } as unknown as SearchStrategyDependencies;
       params = {
         index: 'logstash-*',

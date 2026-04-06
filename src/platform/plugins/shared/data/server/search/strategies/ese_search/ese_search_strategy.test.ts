@@ -100,6 +100,10 @@ describe('ES search strategy', () => {
     },
     searchSessionsClient: createSearchSessionsClientMock(),
     rollupsEnabled: true,
+    getSearchSettings: jest.fn(() => ({
+      includeFrozen: false,
+      maxConcurrentShardRequests: 0,
+    })),
   } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
