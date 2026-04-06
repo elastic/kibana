@@ -190,10 +190,11 @@ test.describe(
         await expect(cloudHomeLink).toBeVisible();
         await expect(cloudHomeLink).toHaveAttribute('href', /cloud\.elastic\.co/);
       });
+
     });
 
     test('Top navigation links respond to screen size', async ({ pageObjects, page }) => {
-      await test.step('shows Usage and Organization links on large screens', async () => {
+      await test.step('shows Usage, Organization and Manage subscription links on large screens', async () => {
         await page.setViewportSize({ width: 1440, height: 900 });
         await pageObjects.gettingStarted.goto();
 
@@ -204,9 +205,14 @@ test.describe(
         const orgLink = await pageObjects.gettingStarted.getCloudOrganizationLink();
         await expect(orgLink).toBeVisible();
         await expect(orgLink).toHaveAttribute('href', /account\/members/);
+
+        const manageSubscriptionLink =
+          await pageObjects.gettingStarted.getManageSubscriptionLink();
+        await expect(manageSubscriptionLink).toBeVisible();
+        await expect(manageSubscriptionLink).toHaveAttribute('href', /billing\/overview/);
       });
 
-      await test.step('hides Usage and Organization links on small screens', async () => {
+      await test.step('hides Usage, Organization and Manage subscription links on small screens', async () => {
         await page.setViewportSize({ width: 768, height: 900 });
         await pageObjects.gettingStarted.goto();
 
@@ -215,6 +221,10 @@ test.describe(
 
         const orgLink = await pageObjects.gettingStarted.getCloudOrganizationLink();
         await expect(orgLink).toBeHidden();
+
+        const manageSubscriptionLink =
+          await pageObjects.gettingStarted.getManageSubscriptionLink();
+        await expect(manageSubscriptionLink).toBeHidden();
       });
 
       await test.step('hides ask expert link on extra small screens', async () => {

@@ -185,4 +185,8 @@ export class GettingStarted {
   async getCloudOrganizationLink() {
     return this.page.testSubj.locator('gettingStartedCloudOrganizationMembers');
   }
+
+  async getManageSubscriptionLink() {
+    return this.page.testSubj.locator('gettingStartedManageSubscription');
+  }
 }

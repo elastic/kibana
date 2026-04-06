@@ -19,6 +19,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { docLinks } from '../../common/doc_links';
 import { TopNavLinks } from './top_nav_links';
 import { AskExpert } from './ask_expert';
+import { ManageSubscription } from './manage_subscription';
 import { WelcomeMessage } from './welcome';
 
 interface TopNavLinkItem {
@@ -77,6 +78,9 @@ export const SearchGettingStartedSectionTopNavigation = () => {
           <span>
             <LicenseBadge licensing={licensing} />
           </span>
+          {!shouldReduceLinks && (
+            <ManageSubscription manageSubscriptionLink={docLinks.cloudManageSubscription} />
+          )}
         </EuiFlexGroup>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" alignItems="baseline">
           {!isSmallScreen && <AskExpert askExpertLink={docLinks.askAnExpert} />}
