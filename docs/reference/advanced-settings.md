@@ -587,7 +587,7 @@ $$$security-solution-alert-tags$$$`securitySolution:alertTags` {applies_to}`stac
 $$$security-solution-excluded-data-tiers-for-rule-execution$$$`securitySolution:excludedDataTiersForRuleExecution` {applies_to}`stack: ga` {applies_to}`security: ga`
 :   Specifies data tiers to exclude from searching during rule execution. Excludes events from the specified data tiers, which might help improve rule performance or reduce execution time. For example: `data_frozen,data_cold`. Empty by default.
 
-$$$securitySolution:includedDataStreamNamespacesForRuleExecution$$`securitySolution:includedDataStreamNamespacesForRuleExecution` {applies_to}`stack: ga 9.4+` {applies_to}`security: ga`
+$$$securitySolution:includedDataStreamNamespacesForRuleExecution$$$`securitySolution:includedDataStreamNamespacesForRuleExecution` {applies_to}`stack: ga 9.4+` {applies_to}`security: ga`
 :   When configured, the setting restricts which documents detection rules search. Only events whose `data_stream.namespace` field matches one of the specified namespaces are queried. This applies to all detection rules in the {{kib}} space and acts like a global filter on `data_stream.namespace`. Specify an array of namespace strings (for example, `namespace1`, `namespace2`). You can configure up to 50 namespaces. Empty by default (searches all namespaces).
 
 $$$security-solution-enable-privileged-user-monitoring$$$`securitySolution:enablePrivilegedUserMonitoring` {applies_to}`stack: preview 9.1, removed 9.3` {applies_to}`serverless: unavailable`
