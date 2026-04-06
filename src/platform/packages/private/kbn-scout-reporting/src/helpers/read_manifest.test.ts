@@ -43,6 +43,19 @@ describe('read_manifest', () => {
     const pluginFilePath = '/plugins/my_plugin/kibana.jsonc';
     const packageFilePath = '/packages/my_package/kibana.jsonc';
 
+    let existsSyncSpy: jest.SpyInstance;
+    let readFileSyncSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      existsSyncSpy = jest.spyOn(fs, 'existsSync');
+      readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
+    });
+
+    afterEach(() => {
+      existsSyncSpy.mockRestore();
+      readFileSyncSpy.mockRestore();
+    });
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
