@@ -18,5 +18,9 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/security-plugin",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
   ],
 }
