@@ -12,8 +12,7 @@
 export const catalogEcommerceSkill = {
   id: 'catalog-ecommerce',
   name: 'catalog-ecommerce',
-  description:
-    'Guide for building catalog and e-commerce search with Elasticsearch. Use when a developer wants product search, faceted navigation, autocomplete, "did you mean" suggestions, or shopping-oriented search experiences.',
+  description: 'Guide for building catalog and e-commerce search with Elasticsearch. Use when a developer wants product search, faceted navigation, autocomplete, "did you mean" suggestions, or shopping-oriented search experiences.',
   content: `# Catalog / E-Commerce Search Guide
 
 Guide developers through building product catalog and e-commerce search with Elasticsearch. Use this guide when they need product search with filtering, faceting, autocomplete, boosting by attributes, and shopping-oriented relevance.
