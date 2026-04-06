@@ -121,6 +121,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             : undefined
         }
         hasCreatedIntegrations={hasCreatedIntegrations}
+        isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>
