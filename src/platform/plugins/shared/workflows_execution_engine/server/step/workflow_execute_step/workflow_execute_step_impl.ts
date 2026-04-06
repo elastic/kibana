@@ -82,7 +82,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
   /**
    * Applies strategy result to step and workflow runtime (completed/failed → finish or fail step
-   * and navigate; waiting/cancelled → no navigation). Caller is responsible for flushEventLogs.
+   * and navigate; waiting/cancelled → no navigation).
    */
   private handleResult(result: StrategyResult): void {
     const { stepExecutionRuntime, workflowExecutionRuntime } = this.init;
@@ -108,8 +108,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       } catch (error) {
         stepExecutionRuntime.failStep(error as Error);
         workflowExecutionRuntime.navigateToNextNode();
-      } finally {
-        await stepExecutionRuntime.flushEventLogs();
       }
       return;
     }
@@ -121,7 +119,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
     // Persist resolved inputs for observability in the execution UI
     stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
-    await stepExecutionRuntime.flushEventLogs();
 
     // Select executor based on step type
     const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
@@ -136,7 +133,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         );
         stepExecutionRuntime.failStep(error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -147,7 +143,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         );
         stepExecutionRuntime.failStep(error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -156,7 +151,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       } catch (error) {
         stepExecutionRuntime.failStep(error as Error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -172,8 +166,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);
       workflowExecutionRuntime.navigateToNextNode();
-    } finally {
-      await stepExecutionRuntime.flushEventLogs();
     }
   }
 
