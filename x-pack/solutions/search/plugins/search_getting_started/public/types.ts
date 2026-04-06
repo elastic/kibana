@@ -12,6 +12,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -20,6 +21,7 @@ export interface SearchGettingStartedPluginSetup {}
 export interface SearchGettingStartedPluginStart {}
 
 export interface SearchGettingStartedAppPluginStartDependencies {
+  agentBuilder?: AgentBuilderPluginStart;
   console?: ConsolePluginStart;
   usageCollection?: UsageCollectionStart;
   cloud?: CloudStart;

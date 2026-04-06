@@ -46,7 +46,7 @@ export interface EsqlEditorFieldProps {
   rules?: {
     required?: string;
     /** Validation function - can be sync or async. Return true for valid, or error string for invalid. */
-    validate?: (value: string | undefined) => string | boolean | Promise<string | boolean>;
+    validate?: (value: string | null | undefined) => string | boolean | Promise<string | boolean>;
   };
   /** Server-side errors to display in the editor */
   errors?: Error[];
