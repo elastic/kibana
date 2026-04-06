@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { LogsManifest } from '@kbn/synthtrace/src/lib/service_graph_logs/types';
 import type { SeedContext, SeedScenario, SeededQuery } from '../types';
-import { buildFeaturePayloads } from './seed_features';
-import { buildInsightPayloads } from './seed_insights';
+import { buildFeaturePayloads, buildInsightPayloads } from '../lib/builders';
 
 const FEATURES_TASK_TYPE = 'streams_features_identification';
 const QUERIES_TASK_TYPE = 'streams_significant_events_queries_generation';
@@ -46,8 +45,6 @@ async function withTempSuperuser<T>(
   log: ToolingLog,
   fn: (sysClient: Client) => Promise<T>
 ): Promise<T> {
-  const { Client: EsClient } = await import('@elastic/elasticsearch');
-
   // Pre-flight: remove any stale user left by a previous crashed run.
   try {
     await esClient.security.deleteUser({ username: TEMP_SEED_USER });
@@ -68,7 +65,7 @@ async function withTempSuperuser<T>(
     log.info(
       `withTempSuperuser: created temp user "${TEMP_SEED_USER}" with system_indices_superuser role`
     );
-    const sysClient = new EsClient({
+    const sysClient = new Client({
       node: ctx.esUrl,
       auth: { username: TEMP_SEED_USER, password: TEMP_SEED_PASSWORD },
     });
@@ -110,7 +107,6 @@ function buildTaskDocs(
 
   const insights = buildInsightPayloads(ctx, scenario, seededQueries);
 
-  // --- task doc builders -------------------------------------------------------
   const baseTask = (
     id: string,
     type: string,

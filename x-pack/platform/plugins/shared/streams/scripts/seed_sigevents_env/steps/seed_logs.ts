@@ -7,14 +7,14 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { sigEvents } from '@kbn/synthtrace';
+import { LogLevel, SynthtraceClientsManager, createLogger, sigEvents } from '@kbn/synthtrace';
 import type { LogsManifest } from '@kbn/synthtrace/src/lib/service_graph_logs/types';
 import { CLAIMS_APP } from '@kbn/synthtrace/src/scenarios/sigevents/mock_apps/claims';
 import { incidentAt, makePhaseContext } from '@kbn/synthtrace/src/scenarios/sigevents/utils';
+import { timerange } from '@kbn/synthtrace-client';
 import type { SeedContext } from '../types';
 
 const TICK_MS = 60_000;
-const BULK_FLUSH_DOCS = 500;
 /** Baseline window before the failure injection phase, in minutes. */
 const BASELINE_MINUTES = 30;
 
@@ -63,54 +63,26 @@ export async function seedLogs(
     noise,
   });
 
-  const operations: Array<Record<string, unknown>> = [];
-  let pendingDocs = 0;
-  let tickIndex = 0;
+  const manager = new SynthtraceClientsManager({
+    client: esClient,
+    logger: createLogger(LogLevel.info),
+    refreshAfterIndex: false,
+  });
 
-  const flushBulk = async () => {
-    if (operations.length === 0) {
-      return;
-    }
-    const res = await esClient.bulk({ operations: operations as never, refresh: false });
-    if (res.errors) {
-      const failed = res.items?.find(
-        (item) =>
-          (item as { index?: { error?: unknown } }).index?.error ||
-          (item as { create?: { error?: unknown } }).create?.error
-      );
-      log.error(
-        `Bulk indexing reported errors: ${JSON.stringify(failed ?? res.items?.slice(0, 3))}`
-      );
-      throw new Error('Elasticsearch bulk indexing failed while seeding logs');
-    }
-    operations.length = 0;
-    pendingDocs = 0;
-  };
+  const { logsEsClient } = manager.getClients({ clients: ['logsEsClient'] });
 
-  for (let ts = from; ts <= to; ts += TICK_MS) {
-    const entries = generator(ts, tickIndex) as Array<{
-      serialize(): Array<Record<string, unknown>>;
-    }>;
-    tickIndex += 1;
+  await logsEsClient.index(
+    timerange(new Date(from), new Date(to)).interval('1m').generator(generator)
+  );
 
-    for (const entry of entries) {
-      // serialize() returns all documents the entry produces; iterate all, not just [0].
-      for (const fields of entry.serialize() as Array<Record<string, unknown>>) {
-        // Data streams require 'create' op type (not 'index').
-        operations.push({ create: { _index: ctx.streamName } });
-        operations.push(fields);
-        pendingDocs += 1;
+  await esClient.indices.refresh({ index: `${ctx.streamName}*` });
 
-        if (pendingDocs >= BULK_FLUSH_DOCS) {
-          await flushBulk();
-        }
-      }
-    }
-  }
-
-  await flushBulk();
   log.info(
-    `Seeded logs into "${ctx.streamName}" (ticks: ${tickIndex}, window: ${from} → ${to}, failure window: ${failureStartMs} → ${failureEndMs})`
+    `Seeded logs into "${ctx.streamName}" (window: ${new Date(from).toISOString()} → ${new Date(
+      to
+    ).toISOString()}, failure: ${new Date(failureStartMs).toISOString()} → ${new Date(
+      failureEndMs
+    ).toISOString()})`
   );
 
   return { failureStartMs, failureEndMs, manifest };

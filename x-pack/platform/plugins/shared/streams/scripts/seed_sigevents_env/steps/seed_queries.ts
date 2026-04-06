@@ -12,7 +12,6 @@ import { deterministicId } from '../types';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { kibanaRequest } from '../lib/kibana';
 
-// Safely above any realistic number of queries per stream across all seed runs.
 const ASSET_FETCH_SIZE = 1000;
 const PROMOTE_POLL_INTERVAL_MS = 500;
 const PROMOTE_TIMEOUT_MS = 15_000;
@@ -24,7 +23,6 @@ export async function seedQueries(
   esClient: Client,
   log: ToolingLog
 ): Promise<SeededQuery[]> {
-  // Single-pass preparation — compute queryId and esql once, reuse for upsert and return value.
   const prepared = scenario.queries.map((q: SeedQuery) => ({
     q,
     queryId: deterministicId(ctx.scenarioName, q.title, 'query'),
@@ -49,11 +47,7 @@ export async function seedQueries(
   }
 
   const promoteRes = await kibanaRequest(config, 'POST', '/internal/streams/queries/_promote');
-  log.info(
-    `POST /internal/streams/queries/_promote → ${promoteRes.status} ${JSON.stringify(
-      promoteRes.data
-    )}`
-  );
+
   if (promoteRes.status >= 300) {
     throw new Error(`Query promotion failed (HTTP ${promoteRes.status})`);
   }
@@ -103,14 +97,28 @@ export async function seedQueries(
         }`
       );
     }
-    if ([...expectedQueryIds].every((id) => ruleIdByAssetId.has(id))) break;
+
+    if (
+      ruleIdByAssetId.size >= expectedQueryIds.size &&
+      [...expectedQueryIds].every((id) => ruleIdByAssetId.has(id))
+    ) {
+      break;
+    }
+
     if (Date.now() >= deadline) {
-      const missing = [...expectedQueryIds].filter((id) => !ruleIdByAssetId.has(id));
+      const missing = [];
+      for (const id of expectedQueryIds) {
+        if (!ruleIdByAssetId.has(id)) {
+          missing.push(id);
+        }
+      }
+
       throw new Error(
         `seedQueries: timed out after ${PROMOTE_TIMEOUT_MS}ms waiting for rule_ids. ` +
           `Promotion may not have completed. Missing query IDs: ${missing.join(', ')}`
       );
     }
+
     await new Promise((resolve) => setTimeout(resolve, PROMOTE_POLL_INTERVAL_MS));
   }
 

@@ -18,9 +18,11 @@ async function deleteByMatchAll(esClient: Client, index: string, log: ToolingLog
     await esClient.deleteByQuery({ index, conflicts: 'proceed', query: { match_all: {} } });
     log.info(`clean: wiped ${index}`);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (!msg.includes('index_not_found_exception')) throw err;
-    log.info(`clean: ${index} not found, skipping`);
+    if (err instanceof errors.ResponseError && err.meta.statusCode === 404) {
+      log.info(`clean: ${index} not found, skipping`);
+      return;
+    }
+    throw err;
   }
 }
 

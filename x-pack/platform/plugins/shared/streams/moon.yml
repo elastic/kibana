@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/setup-node-env'
   - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
   - '@kbn/workflows-management-plugin'

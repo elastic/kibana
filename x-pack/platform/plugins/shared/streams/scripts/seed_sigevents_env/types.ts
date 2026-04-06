@@ -6,10 +6,25 @@
  */
 
 import { v5 as uuidv5 } from 'uuid';
+import { log as synthLog } from '@kbn/synthtrace-client';
 
 /** RFC 4122 v5 DNS namespace UUID — used as the namespace for all deterministic IDs in this seeder. */
 export const UUID_V5_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 export const deterministicId = (...parts: string[]) => uuidv5(parts.join(':'), UUID_V5_NAMESPACE);
+
+/**
+ * Returns the data stream name that synthtrace's log.createMinimal() routes to.
+ * Derived from the same fields the routing transform uses:
+ * `${data_stream.type}-${data_stream.dataset}-${data_stream.namespace}`
+ */
+export function getSynthtraceDefaultStream(): string {
+  const {
+    'data_stream.type': dsType,
+    'data_stream.dataset': dsDataset,
+    'data_stream.namespace': dsNamespace,
+  } = synthLog.createMinimal().fields;
+  return `${dsType}-${dsDataset}-${dsNamespace}`;
+}
 
 /**
  * Builds the required ESQL FROM preamble for wired streams.

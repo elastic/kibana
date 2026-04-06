@@ -6,52 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { ensureMetadata } from '@kbn/streams-schema';
 import type { SeedContext, SeededQuery } from '../types';
 import { deterministicId } from '../types';
-
-interface EsqlJsonResult {
-  columns: Array<{ name: string; type: string }>;
-  values: unknown[][];
-}
-
-/**
- * Ensures `METADATA _id, _source` is present in the FROM clause.
- * Queries stored via the streams API already include this (it's required by the validator),
- * so in practice this is a no-op guard — it only injects if somehow absent.
- */
-function ensureMetadataInFrom(esql: string): string {
-  const trimmed = esql.trimStart();
-  if (/METADATA\s+_id/i.test(trimmed)) {
-    return trimmed;
-  }
-  const match = /^FROM\s+[^\n|]+/i.exec(trimmed);
-  if (!match) {
-    throw new Error(
-      `seedAlerts: cannot inject METADATA — missing FROM clause in ESQL (prefix: ${esql.slice(
-        0,
-        120
-      )})`
-    );
-  }
-  return trimmed.replace(match[0], `${match[0]} METADATA _id, _source`);
-}
-
-function esqlRowsToObjects(
-  columns: Array<{ name: string }> | undefined,
-  values: unknown[][] | undefined
-): Array<Record<string, unknown>> {
-  if (!columns?.length || !values?.length) {
-    return [];
-  }
-  return values.map((row) => {
-    const obj: Record<string, unknown> = {};
-    columns.forEach((col, i) => {
-      obj[col.name] = row[i];
-    });
-    return obj;
-  });
-}
 
 export async function seedAlerts(
   ctx: SeedContext,
@@ -70,21 +29,23 @@ export async function seedAlerts(
     },
   };
 
-  const bulkOps: Array<Record<string, unknown>> = [];
+  const bulkOps: Array<BulkOperationContainer | Record<string, unknown>> = [];
 
   // Single refresh before the loop — ensures all seedLogs documents are visible.
   // Use wildcard to cover all backing data stream indices, not just the write alias.
   await esClient.indices.refresh({ index: `${ctx.streamName}*` });
 
   for (const seededQuery of seededQueries) {
-    const queryText = ensureMetadataInFrom(seededQuery.esql);
+    const queryText = ensureMetadata(seededQuery.esql);
 
-    const esqlResult = (await esClient.esql.query({
+    const esqlResult = await esClient.esql.query({
       query: queryText,
       filter: timeFilter,
-    })) as unknown as EsqlJsonResult;
+    });
 
-    const rows = esqlRowsToObjects(esqlResult.columns, esqlResult.values);
+    const rows = esqlResult.values.map((row) =>
+      Object.fromEntries(esqlResult.columns.map((col, i) => [col.name, row[i]]))
+    );
 
     if (rows.length === 0) {
       log.warning(
@@ -108,21 +69,14 @@ export async function seedAlerts(
       indexedForQuery += 1;
 
       const alertDocId = deterministicId(logDocId, seededQuery.ruleId, ctx.space);
-      const ts = row['@timestamp'];
-      const timestamp =
-        typeof ts === 'string'
-          ? ts
-          : ts instanceof Date
-          ? ts.toISOString()
-          : new Date(failureStartMs).toISOString();
+      const timestamp = row['@timestamp'] || new Date(failureStartMs).toISOString();
 
-      const srcObject =
-        row._source && typeof row._source === 'object'
-          ? (row._source as Record<string, unknown>)
-          : {};
-      const originalSource: Record<string, unknown> = { _id: logDocId, ...srcObject };
+      const originalSource = {
+        _id: logDocId,
+        ...(typeof row._source === 'object' && row._source !== null ? row._source : {}),
+      };
 
-      const doc: Record<string, unknown> = {
+      const doc = {
         '@timestamp': timestamp,
         'kibana.alert.rule.uuid': seededQuery.ruleId,
         'kibana.alert.uuid': deterministicId(String(logDocId), seededQuery.ruleId),

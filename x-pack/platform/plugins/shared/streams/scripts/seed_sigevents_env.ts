@@ -23,6 +23,7 @@ import {
   cleanSeedData,
 } from './seed_sigevents_env/steps';
 import type { SeedContext } from './seed_sigevents_env/types';
+import { getSynthtraceDefaultStream } from './seed_sigevents_env/types';
 
 /** Fixed RNG seed — changing this invalidates all deterministic IDs (alerts, tasks, features) across re-runs. */
 const FIXED_SEED = 42;
@@ -53,7 +54,7 @@ run(
     const config = await getConnectionConfig(flags, log);
 
     const scenarioName = String(flags.scenario || 'fraud_check_redis_herring');
-    const streamName = String(flags.stream || 'logs.ecs');
+    const streamName = getSynthtraceDefaultStream();
     const space = String(flags.space || 'default');
 
     // Validate CLAIMS_SEED ↔ CLAIMS_APP.scenarios alignment — catches drift at startup.
@@ -127,12 +128,11 @@ run(
   {
     description: 'Synthetic sigevents seed for local Kibana + Elasticsearch.',
     flags: {
-      string: ['scenario', 'stream', 'space', 'es-url', 'es-username', 'es-password', 'kibana-url'],
+      string: ['scenario', 'space', 'es-url', 'es-username', 'es-password', 'kibana-url'],
       boolean: ['clean'],
       help: `
         --scenario <name>        Scenario key in CLAIMS_SEED (default: fraud_check_redis_herring)
                                  Available: fraud_check_redis_herring, healthy_baseline
-        --stream <name>          Target data stream (default: logs.ecs)
         --space <name>           Kibana space for seeded assets (default: default)
         --clean                  Delete all previously seeded data (features, alerts, queries, insights,
                                  tasks, and the data stream) before re-seeding
