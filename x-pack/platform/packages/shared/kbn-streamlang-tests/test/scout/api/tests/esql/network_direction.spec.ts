@@ -98,9 +98,9 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
-        expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.['network.direction']).toBe('inbound');
+        expect(esqlResult.documentsOrdered[1]?.['network.direction']).toBeNull();
       }
     );
 
@@ -135,9 +135,9 @@ apiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
-      expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.['network.direction']).toBe('inbound');
+      expect(esqlResult.documentsOrdered[1]?.['network.direction']).toBeNull();
     });
   }
 );

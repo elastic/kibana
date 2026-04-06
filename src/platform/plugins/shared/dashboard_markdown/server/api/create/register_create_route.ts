@@ -11,18 +11,14 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import {
-  createRequestBodySchema,
-  createRequestParamsSchema,
-  createResponseBodySchema,
-} from './schemas';
+import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 import { create } from './create';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: `${MARKDOWN_API_PATH}/{id?}`,
-    summary: 'Create a markdown panel',
+    path: MARKDOWN_API_PATH,
+    summary: 'Create a markdown library item',
     ...commonRouteConfig,
   });
 
@@ -31,39 +27,27 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: createRequestParamsSchema,
           body: createRequestBodySchema,
         },
         response: {
           201: {
             body: () => createResponseBodySchema,
-            description: 'Indicates that a markdown panel is created successfully.',
+            description: 'created',
           },
           400: {
-            description: 'Indicates an invalid schema or parameters.',
+            description: 'invalid request',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
-          },
-          409: {
-            description: 'Indicates that a markdown panel with the given ID already exists.',
+            description: 'forbidden',
           },
         },
       },
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.body, req.params);
+        const result = await create(ctx, req.body);
         return res.created({ body: result });
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
-            body: {
-              message: `A markdown panel with ID ${req?.params?.id} already exists.`,
-            },
-          });
-        }
-
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
         }

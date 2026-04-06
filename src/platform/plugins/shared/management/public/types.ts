@@ -15,6 +15,7 @@ import type {
   CoreStart,
   ChromeBreadcrumb,
   CoreTheme,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
@@ -46,6 +47,7 @@ export interface DefinedSections {
   data: ManagementSection;
   insightsAndAlerting: ManagementSection;
   machineLearning: ManagementSection;
+  modelManagement: ManagementSection;
   security: ManagementSection;
   kibana: ManagementSection;
   stack: ManagementSection;
@@ -82,6 +84,7 @@ export enum ManagementSectionId {
   Data = 'data',
   InsightsAndAlerting = 'insightsAndAlerting',
   MachineLearning = 'ml',
+  ModelManagement = 'modelManagement',
   Security = 'security',
   Kibana = 'kibana',
   Stack = 'stack',
@@ -110,6 +113,7 @@ export interface CreateManagementItemArgs {
   icon?: string; // URL to image file; fallback if no `euiIconType`
   hideFromSidebar?: boolean;
   hideFromGlobalSearch?: boolean; // Hide from global search results
+  visibleIn?: AppDeepLinkLocations[]; // Controls deep link visibility; takes precedence over hideFromGlobalSearch
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
 }

@@ -43,7 +43,7 @@ interface WorkflowYamlValidationAccordionProps {
   extraAction?: React.ReactNode;
 }
 
-export function WorkflowYamlValidationAccordion({
+export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlValidationAccordion({
   isMounted,
   isLoading,
   error: errorValidating,
@@ -129,17 +129,13 @@ export function WorkflowYamlValidationAccordion({
     buttonContent = 'Initializing validation...';
   } else if (allValidationErrors?.length === 0) {
     icon = (
-      <EuiIcon
-        type="checkInCircleFilled"
-        color={euiTheme.colors.vis.euiColorVisSuccess0}
-        size="m"
-      />
+      <EuiIcon type="checkCircleFill" color={euiTheme.colors.vis.euiColorVisSuccess0} size="m" />
     );
     buttonContent = 'No validation errors';
   } else {
     icon = (
       <EuiIcon
-        type={highestSeverity === 'error' ? 'errorFilled' : 'warningFilled'}
+        type={highestSeverity === 'error' ? 'errorFill' : 'warningFill'}
         color={highestSeverity === 'error' ? 'danger' : euiTheme.colors.vis.euiColorVis8}
         size="m"
       />
@@ -223,9 +219,9 @@ export function WorkflowYamlValidationAccordion({
                 <EuiIcon
                   type={
                     error.severity === 'error'
-                      ? 'errorFilled'
+                      ? 'errorFill'
                       : error.severity === 'warning'
-                      ? 'warningFilled'
+                      ? 'warningFill'
                       : 'iInCircle'
                   }
                   color={
@@ -267,7 +263,7 @@ export function WorkflowYamlValidationAccordion({
       </div>
     </EuiAccordion>
   );
-}
+});
 
 const componentStyles = {
   accordion: ({ euiTheme }: UseEuiTheme) =>

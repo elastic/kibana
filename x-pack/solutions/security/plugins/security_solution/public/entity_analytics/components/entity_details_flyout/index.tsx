@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/public';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
@@ -16,6 +17,8 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
 import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
+import { ResolutionGroupTab } from '../entity_resolution/resolution_group_tab';
+import { RESOLUTION_GROUP_TAB_TEST_ID } from '../entity_resolution/test_ids';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
@@ -84,3 +87,21 @@ export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProp
     'data-test-subj': FIELDS_TABLE_TAB_TEST_ID,
   };
 };
+
+export const getResolutionGroupTab = ({
+  entityId,
+  entityType,
+}: {
+  entityId: string;
+  entityType: EntityStoreEntityType;
+}) => ({
+  id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
+  'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.resolutionGroupTab.tabLabel"
+      defaultMessage="Resolution group"
+    />
+  ),
+  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} />,
+});

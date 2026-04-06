@@ -14,7 +14,11 @@ import type {
 } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type AggregateQuery } from '@kbn/es-query';
-import { appendFilteringWhereClauseForCascadeLayout, constructCascadeQuery } from '@kbn/esql-utils';
+import {
+  appendFilteringWhereClauseForCascadeLayout,
+  constructCascadeQuery,
+  GROUP_NOT_SET_VALUE,
+} from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -91,7 +95,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.filterIn', {
       defaultMessage: 'Filter in',
     }),
-    icon: 'plusInCircle',
+    icon: 'plusCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterIn',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
@@ -100,7 +104,7 @@ const contextRowActions: Array<
         this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue,
-        '+'
+        this.rowContext.groupValue === GROUP_NOT_SET_VALUE ? 'is_null' : '+'
       );
 
       if (!updatedQuery) {
@@ -117,7 +121,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.filterOut', {
       defaultMessage: 'Filter out',
     }),
-    icon: 'minusInCircle',
+    icon: 'minusCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterOut',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
@@ -126,7 +130,7 @@ const contextRowActions: Array<
         this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue,
-        '-'
+        this.rowContext.groupValue === GROUP_NOT_SET_VALUE ? 'is_not_null' : '-'
       );
 
       if (!updatedQuery) {
@@ -377,6 +381,10 @@ const textSlotStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noValue', {
+  defaultMessage: '(blank)',
+});
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
@@ -457,13 +465,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
                           <EuiBadge color="hollow" css={textSlotStyles}>
                             {Array.isArray(aggregatedValue)
                               ? aggregatedValue
-                                  .map(
-                                    (value) =>
-                                      value ||
-                                      i18n.translate('discover.dataCascade.row.action.noValue', {
-                                        defaultMessage: '(blank)',
-                                      })
-                                  )
+                                  .map((value) => value || NO_VALUE_PLACEHOLDER)
                                   .join(', ')
                               : '-'}
                           </EuiBadge>

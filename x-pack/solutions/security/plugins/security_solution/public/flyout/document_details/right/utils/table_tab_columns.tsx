@@ -87,7 +87,7 @@ export const getTableTabColumns: ColumnsProvider = ({
         <EuiButtonIcon
           aria-label={isPinned ? UNPIN : PIN}
           className={isPinned ? 'flyout_table__unPinAction' : 'flyout_table__pinAction'}
-          iconType={isPinned ? 'pinFilled' : 'pin'}
+          iconType={isPinned ? 'pinFill' : 'pin'}
           color="text"
           iconSize="m"
           onClick={() => {

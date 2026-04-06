@@ -12,6 +12,7 @@ const AutomatedActionListRequestSchema = {
   query: schema.object({
     alertIds: schema.arrayOf(schema.string({ minLength: 1 }), {
       minSize: 1,
+      maxSize: 50,
       validate: (alertIds) => {
         if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
           return 'alertIds cannot contain empty strings';
@@ -30,7 +31,7 @@ const AutomatedActionResponseRequestSchema = {
     expiration: schema.string(),
     actionId: schema.string(),
     agent: schema.object({
-      id: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+      id: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 50 })]),
     }),
   }),
 };

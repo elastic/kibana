@@ -405,6 +405,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               },
             }}
             {...tableProps}
+            tableLayout="auto"
+            scrollableInline
+            responsiveBreakpoint={false}
           />
         </>
       )}

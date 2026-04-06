@@ -249,6 +249,7 @@ export enum CasesSubFeatureId {
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
   assignUsers = 'assignUsersSubFeature',
+  manageTemplates = 'manageTemplatesSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */
