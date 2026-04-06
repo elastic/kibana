@@ -358,8 +358,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     const query = querySubscriberResult.query;
     if (isOfAggregateQueryType(query)) {
       const indexPattern = getIndexPatternFromESQLQuery(query.esql);
-      // Return the first source from the query (stream name)
-      // Don't return if it contains wildcards or commas (multiple sources)
+      // Don't return if it contains wildcards
       if (indexPattern && !indexPattern.includes('*')) {
         return indexPattern.split(',');
       }
