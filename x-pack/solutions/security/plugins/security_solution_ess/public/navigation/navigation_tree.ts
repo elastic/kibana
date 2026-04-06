@@ -221,6 +221,13 @@ export const createNavigationTree = (
             ],
           },
           {
+            title: i18nStrings.clusterPerformance.title,
+            children: [
+              { link: 'monitoring' },
+              { link: 'management:queryActivity', badgeType: 'new' },
+            ],
+          },
+          {
             title: i18nStrings.ml.title,
             children: [
               { link: 'management:overview' },
@@ -228,6 +235,14 @@ export const createNavigationTree = (
               { link: 'management:analytics' },
               { link: 'management:trained_models' },
               { link: 'management:supplied_configurations' },
+            ],
+          },
+          {
+            title: i18nStrings.modelManagement.title,
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
             ],
           },
           {

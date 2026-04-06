@@ -15,7 +15,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -23,9 +23,37 @@ const mockRules = [
     id: 'rule-2',
     kind: 'signal',
     enabled: false,
-    metadata: { name: 'Rule Two', labels: [] },
+    metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM metrics-*' } },
+  },
+];
+
+const mockRulesWithManyTags = [
+  {
+    id: 'rule-many-tags',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Many Tags',
+      tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
+    },
+    schedule: { every: '1m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  },
+];
+
+const mockRulesWithLongTags = [
+  {
+    id: 'rule-long-tags',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Long Tags',
+      tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
+    },
+    schedule: { every: '1m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
@@ -35,6 +63,9 @@ const defaultProps: RulesListTableProps = {
   page: 1,
   perPage: 20,
   search: '',
+  hasActiveFilters: false,
+  sortField: undefined,
+  sortDirection: undefined,
   isLoading: false,
   selectedCount: 0,
   isAllSelected: false,
@@ -92,7 +123,7 @@ describe('RulesListTable', () => {
     });
 
     it('renders a generic empty state when there are no rules', () => {
-      renderTable({ items: [], totalItemCount: 0, search: '' });
+      renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
       expect(screen.getByText('No rules found.')).toBeInTheDocument();
     });
@@ -100,7 +131,13 @@ describe('RulesListTable', () => {
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search.')).toBeInTheDocument();
+      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+    });
+
+    it('renders a filter-specific empty state when no rules match', () => {
+      renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
+
+      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {
@@ -124,10 +161,38 @@ describe('RulesListTable', () => {
       expect(screen.getByText('Detect only')).toBeInTheDocument();
     });
 
-    it('renders label badges for rules with labels', () => {
+    it('renders tag badges for rules with tags', () => {
       renderTable();
 
       expect(screen.getByText('prod')).toBeInTheDocument();
+    });
+
+    it('truncates tags to show only the first 1 and a +N badge for overflow', () => {
+      renderTable({
+        items: mockRulesWithManyTags as any,
+        totalItemCount: 1,
+      });
+
+      // First tag should be visible
+      expect(screen.getByText('new')).toBeInTheDocument();
+
+      // Remaining 8 tags should be hidden behind +8 badge
+      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+8');
+
+      // Overflow tags should not be directly visible
+      expect(screen.queryByText('rna')).not.toBeInTheDocument();
+    });
+
+    it('renders long tag text with native EuiBadge truncation', () => {
+      renderTable({
+        items: mockRulesWithLongTags as any,
+        totalItemCount: 1,
+      });
+
+      // The full tag text is in the DOM; CSS handles visual truncation
+      expect(
+        screen.getByText('this-is-a-very-long-tag-name-that-should-be-truncated')
+      ).toBeInTheDocument();
     });
   });
 

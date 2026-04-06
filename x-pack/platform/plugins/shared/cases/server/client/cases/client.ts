@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
+import type { Case, CaseCustomField, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -26,6 +26,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   BulkAddObservablesRequest,
+  CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -95,7 +96,7 @@ export interface CasesSubClient {
   /**
    * Update the specified cases with the passed in values.
    */
-  bulkUpdate(cases: CasesPatchRequest): Promise<Cases>;
+  bulkUpdate(cases: CasesPatchRequest): Promise<CasesPatchResponse>;
   /**
    * Delete a case and all its comments.
    *
