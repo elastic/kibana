@@ -286,6 +286,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
+/** Sort field for find rules API. */
+export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
+
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z
   .object({
@@ -295,6 +299,13 @@ export const findRulesResponseSchema = z
     perPage: z.number().describe('The number of rules per page.'),
   })
   .describe('Paginated list of rules.');
+
+/** Rule tags response schema. */
+export const ruleTagsResponseSchema = z
+  .object({
+    tags: z.array(z.string()).describe('The list of unique rule tags.'),
+  })
+  .describe('All unique tags across rules.');
 
 /** Bulk operation response schema. */
 export const bulkOperationResponseSchema = z
