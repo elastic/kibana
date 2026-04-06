@@ -457,7 +457,6 @@ src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentat
 src/platform/packages/shared/dashboards/dashboards-selector @elastic/actionable-obs-team
 src/platform/packages/shared/deeplinks/agent_builder @elastic/search-kibana
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
-src/platform/packages/shared/deeplinks/data_sources @elastic/search-kibana
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
@@ -1050,6 +1049,7 @@ x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/detections-close-reason @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/form-generator @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/oauth-hooks @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
@@ -1122,9 +1122,7 @@ x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_agent @elastic/appex-ai-infra
-x-pack/platform/plugins/shared/data_catalog @elastic/workchat-eng
 x-pack/platform/plugins/shared/data_quality @elastic/obs-onboarding-team
-x-pack/platform/plugins/shared/data_sources @elastic/workchat-eng
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
@@ -1154,6 +1152,7 @@ x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/osquery/cypress @elastic/security-defend-workflows
+x-pack/platform/plugins/shared/query_activity @elastic/kibana-management
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/actionable-obs-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-kibana
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
@@ -2280,6 +2279,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 /x-pack/platform/test/api_integration/apis/features  @elastic/kibana-security
 
 # Kibana Platform Security
+packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-security
 /src/setup_node_env/harden @elastic/kibana-security
 
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security

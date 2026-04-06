@@ -101,7 +101,7 @@ export const DocumentFlyout = memo(
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <Footer hit={hit} />
+          <Footer hit={hit} onAlertUpdated={onAlertUpdated} />
         </EuiFlyoutFooter>
       </>
     );

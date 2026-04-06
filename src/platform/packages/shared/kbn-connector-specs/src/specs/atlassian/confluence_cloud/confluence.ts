@@ -17,9 +17,6 @@ import {
   GetSpaceInputSchema,
 } from './types';
 import type { ListPagesInput, GetPageInput, ListSpacesInput, GetSpaceInput } from './types';
-import getResourceWorkflow from './workflows/get_resource.yaml';
-import listResourceWorkflow from './workflows/list_resource.yaml';
-
 /** Bare subdomain: alphanumeric and hyphens only (no dots, no .atlassian.net suffix). */
 const BARE_SUBDOMAIN_REGEX = /^[a-z0-9-]+$/i;
 const ATLASSIAN_NET_SUFFIX = '.atlassian.net';
@@ -219,6 +216,4 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [getResourceWorkflow, listResourceWorkflow],
 };
