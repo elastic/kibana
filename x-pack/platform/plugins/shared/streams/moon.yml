@@ -86,6 +86,8 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/datemath'
   - '@kbn/setup-node-env'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod
@@ -95,6 +97,7 @@ tags:
 fileGroups:
   src:
     - common/**/*
+    - docs/**/*
     - scripts/**/*
     - server/**/*
     - public/**/*

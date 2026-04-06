@@ -134,7 +134,9 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
               <EuiButtonEmpty
                 disabled={!bookApi}
                 onClick={() => {
-                  bookApi?.resetUnsavedChanges();
+                  bookApi?.applySerializedState(
+                    parentApi.getLastSavedStateForChild(BOOK_EMBEDDABLE_ID) as BookEmbeddableState
+                  );
                 }}
               >
                 Reset
