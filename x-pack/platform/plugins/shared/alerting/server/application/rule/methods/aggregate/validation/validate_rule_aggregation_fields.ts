@@ -17,6 +17,10 @@ const ALLOW_FIELDS = [
   'alert.attributes.snoozeSchedule.duration',
   'alert.attributes.alertTypeId',
   'alert.attributes.enabled',
+  'alert.attributes.name.keyword',
+  'alert.attributes.mapped_params.severity',
+  'alert.attributes.mapped_params.risk_score',
+  'alert.attributes.params.ruleSource.isCustomized',
   'alert.attributes.params.*', // TODO: https://github.com/elastic/kibana/issues/159602
   'alert.attributes.params.immutable', // TODO: Remove after addressing https://github.com/elastic/kibana/issues/159602
 ];

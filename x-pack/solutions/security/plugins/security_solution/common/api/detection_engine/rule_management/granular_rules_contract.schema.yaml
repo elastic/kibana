@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Granular rules API shared contract
+  version: '2026-04-01'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    GranularRulesSearchMode:
+      type: string
+      description: |
+        Search mode for free-text search combined with the KQL `filter`.
+        Only `legacy` is supported; additional modes may be added later.
+      enum:
+        - legacy
+      default: legacy
+
+    GranularRulesSearch:
+      type: object
+      description: |
+        Free-text search combined with the KQL `filter` (e.g. `search[term]` / `search[mode]` query keys).
+      properties:
+        term:
+          type: string
+          maxLength: 1000
+        mode:
+          $ref: '#/components/schemas/GranularRulesSearchMode'
+
+    GranularRulesFacetCategory:
+      type: string
+      description: |
+        Facet dimension to include in `counts` when requested via `include_counts`.
+        The server maps friendly names to underlying rule fields.
+      enum:
+        - tags
+        - severity
+        - risk_score
+        - type
+        - enabled
+        - customization_status
+        - execution_status
+        - name
+
+    FacetCounts:
+      type: object
+      description: |
+        Per-category facet counts. Each key is a facet category from `include_counts`;
+        each value maps a displayed bucket value (string) to a non-negative count.
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: integer
+          minimum: 0

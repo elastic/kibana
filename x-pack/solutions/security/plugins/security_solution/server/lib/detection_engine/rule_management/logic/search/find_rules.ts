@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsPitParams } from '@kbn/core/server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
 
@@ -28,6 +30,9 @@ export interface FindRuleOptions {
   sortOrder: SortOrder | undefined;
   page: Page | undefined;
   perPage: PerPage | undefined;
+  /** When set, saved-objects `find` uses `search_after` instead of offset pagination. */
+  searchAfter?: SortResults;
+  pit?: SavedObjectsPitParams;
   hasReference?: HasReferences | undefined;
   ruleIds?: string[] | undefined;
 }
@@ -40,6 +45,8 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
+  searchAfter,
+  pit,
   hasReference,
   ruleIds,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
@@ -51,6 +58,8 @@ export const findRules = ({
       filter: enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds)),
       sortOrder,
       sortField: transformSortField(sortField),
+      ...(searchAfter ? { searchAfter } : {}),
+      ...(pit ? { pit } : {}),
       hasReference,
     },
   });

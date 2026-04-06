@@ -27,6 +27,7 @@ import {
   updateRule,
   patchRule,
   fetchRules,
+  fetchRulesGranular,
   fetchRuleById,
   importRules,
   exportRules,
@@ -501,6 +502,63 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const rulesResp = await fetchRules({});
       expect(rulesResp).toEqual(rulesMock);
+    });
+  });
+
+  describe('fetchRulesGranular', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(rulesMock);
+    });
+
+    test('uses _find_granular with sort tokens, API version, and default facet counts', async () => {
+      await fetchRulesGranular({});
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find_granular',
+        expect.objectContaining({
+          method: 'GET',
+          version: '2026-04-01',
+          query: expect.objectContaining({
+            page: 1,
+            per_page: 20,
+            sort: ['enabled:desc'],
+            include_counts: ['tags', 'enabled', 'type', 'customization_status', 'execution_status'],
+          }),
+        })
+      );
+    });
+
+    test('splits search bar text into search_term and structured filter', async () => {
+      await fetchRulesGranular({
+        filterOptions: {
+          filter: 'hello',
+          showCustomRules: true,
+          showElasticRules: false,
+          tags: [],
+        },
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_find_granular',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            search_term: 'hello',
+            search_mode: 'legacy',
+            filter: 'alert.attributes.params.immutable: false',
+          }),
+        })
+      );
+    });
+
+    test('omits include_counts when includeFacetCounts is false', async () => {
+      await fetchRulesGranular({ includeFacetCounts: false });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.query).not.toHaveProperty('include_counts');
+    });
+
+    test('passes cursor in the query when provided', async () => {
+      await fetchRulesGranular({ cursor: 'opaque-cursor' });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.query).toEqual(expect.objectContaining({ cursor: 'opaque-cursor' }));
     });
   });
 

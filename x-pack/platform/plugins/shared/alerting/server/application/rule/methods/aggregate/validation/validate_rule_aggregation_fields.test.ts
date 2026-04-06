@@ -29,6 +29,17 @@ describe('validateAggregationTerms', () => {
     }).not.toThrowError();
   });
 
+  it('should allow granular SIEM rule facet aggregation fields', () => {
+    expect(() => {
+      validateRuleAggregationFields({
+        severity: { terms: { field: 'alert.attributes.mapped_params.severity' } },
+        risk: { terms: { field: 'alert.attributes.mapped_params.risk_score' } },
+        ruleName: { terms: { field: 'alert.attributes.name.keyword' } },
+        customized: { terms: { field: 'alert.attributes.params.ruleSource.isCustomized' } },
+      });
+    }).not.toThrowError();
+  });
+
   it('should allow for nested valid aggregations', () => {
     expect(() => {
       validateRuleAggregationFields({

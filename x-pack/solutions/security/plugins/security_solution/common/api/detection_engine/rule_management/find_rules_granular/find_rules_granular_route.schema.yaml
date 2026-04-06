@@ -1,0 +1,144 @@
+openapi: 3.0.0
+info:
+  title: Find detection rules (granular filters)
+  version: '2026-04-01'
+paths:
+  /api/detection_engine/rules/_find_granular:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: FindRulesGranular
+      summary: List detection rules with granular KQL filter, facets, and cursor pagination
+      description: |
+        Paginated listing of installed detection rules using a KQL `filter` string (friendly field
+        vocabulary, rewritten to `alert.attributes.*` server-side), optional legacy search, facet
+        counts, multi-sort, and opaque cursor pagination.
+
+        When `search_mode` is `legacy` and `search_term` is set, the server ANDs the filter KQL
+        with a KQL fragment derived from `search_term` (same semantics as legacy rule management search).
+
+        Sorting is expressed as repeated `sort` query parameters or a single comma-separated value;
+        each token must be `<field>:<order>` where `<order>` is `asc` or `desc` and `<field>` is a
+        supported rule sort field (see `FindRulesSortField` on the classic `_find` endpoint).
+      tags:
+        - Rules API
+      parameters:
+        - name: fields
+          in: query
+          required: false
+          description: Subset of rule fields to return (same semantics as classic `_find`).
+          schema:
+            type: array
+            items:
+              type: string
+        - name: filter
+          in: query
+          required: false
+          description: |
+            KQL filter using friendly field names (`name`, `tags`, `enabled`, …); rewritten to
+            saved-object / alerting fields before execution.
+          schema:
+            type: string
+        - name: include_counts
+          in: query
+          required: false
+          description: Facet categories for which to compute counts over the filtered + searched set.
+          schema:
+            type: array
+            items:
+              $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFacetCategory'
+            maxItems: 32
+        - name: search
+          in: query
+          required: false
+          schema:
+            $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+        - name: sort
+          in: query
+          required: false
+          description: Sort criteria as `field:order` tokens (e.g. `name:asc`). Comma-separated or repeated.
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 16
+        - name: page
+          in: query
+          required: false
+          description: Page number (1-based). Ignored when `cursor` is provided.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          required: false
+          description: Page size.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 10000
+            default: 20
+        - name: cursor
+          in: query
+          required: false
+          description: Opaque cursor from a previous response's `next_cursor`.
+          schema:
+            type: string
+        - name: gaps_range_start
+          in: query
+          required: false
+          description: Gaps range start (must be used with other gap parameters; same rules as classic `_find`).
+          schema:
+            type: string
+        - name: gaps_range_end
+          in: query
+          required: false
+          description: Gaps range end
+          schema:
+            type: string
+        - name: gap_fill_statuses
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
+        - name: gap_auto_fill_scheduler_id
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
+                  next_cursor:
+                    type: string
+                    description: Present when more results exist; pass as `cursor` on the next request.
+                  counts:
+                    $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
