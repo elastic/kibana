@@ -11,6 +11,7 @@ import { getThresholds } from '../common/get_values';
 import { set } from '@kbn/safer-lodash-set';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type {
+  CustomMetricExpressionParams,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
@@ -66,6 +67,15 @@ const mockMetricsExplorerLocator = {
   getRedirectUrl: jest.fn(),
 };
 
+const mockDataView = {
+  title: 'metrics-*,metricbeat-*',
+  fields: [{ name: 'host.name', type: 'string', esTypes: ['keyword'] }],
+};
+
+const mockDataViewsService = {
+  getFieldsForWildcard: jest.fn().mockResolvedValue(mockDataView.fields),
+};
+
 const mockOptions = {
   executionId: '',
   startedAt: mockNow,
@@ -115,7 +125,8 @@ describe('The metric threshold rule type', () => {
     jest.setSystemTime();
   });
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    services.getDataViews.mockResolvedValue(mockDataViewsService);
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
       ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
@@ -303,6 +314,44 @@ describe('The metric threshold rule type', () => {
       setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
       await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
       testNAlertsReported(0);
+    });
+  });
+
+  describe('data view fetching', () => {
+    test('does not fetch a data view when the rule has no custom count filters', async () => {
+      setEvaluationResults([]);
+
+      await executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [baseNonCountCriterion],
+        },
+      });
+
+      expect(services.getDataViews).not.toHaveBeenCalled();
+      expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6]).toBeUndefined();
+    });
+
+    test('fetches a data view when the rule uses a filtered custom count metric', async () => {
+      setEvaluationResults([]);
+
+      await executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [baseCustomCriterion],
+        },
+      });
+
+      expect(services.getDataViews).toHaveBeenCalledTimes(1);
+      expect(mockDataViewsService.getFieldsForWildcard).toHaveBeenCalledWith({
+        pattern: 'metrics-*,metricbeat-*',
+        allowNoIndex: true,
+      });
+      expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6]).toEqual(
+        mockDataView
+      );
     });
   });
 
@@ -899,7 +948,7 @@ describe('The metric threshold rule type', () => {
         stateResult2
       );
       expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-      expect(mockedEvaluateRule.mock.calls[2][8]).toEqual([
+      expect(mockedEvaluateRule.mock.calls[2][9]).toEqual([
         { bucketKey: { groupBy0: 'b' }, key: 'b' },
       ]);
     });
@@ -3447,6 +3496,7 @@ const mockLibs: any = {
       return Promise.resolve({
         id: sourceId,
         configuration: {
+          metricAlias: 'metrics-*,metricbeat-*',
           logIndices: {
             type: 'index_pattern',
             indexPatternId: 'some-id',
@@ -3508,3 +3558,18 @@ const baseCountCriterion = {
   threshold: [0],
   comparator: COMPARATORS.GREATER_THAN,
 } as CountMetricExpressionParams;
+
+const baseCustomCriterion = {
+  aggType: Aggregators.CUSTOM,
+  timeSize: 1,
+  timeUnit: 'm',
+  threshold: [0],
+  comparator: COMPARATORS.GREATER_THAN,
+  customMetrics: [
+    {
+      name: 'A',
+      aggType: Aggregators.COUNT,
+      filter: 'host.name: *foo*',
+    },
+  ],
+} as CustomMetricExpressionParams;

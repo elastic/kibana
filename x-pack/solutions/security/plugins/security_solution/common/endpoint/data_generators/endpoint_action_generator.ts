@@ -451,6 +451,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomScanFailureCode(): string {
     return this.randomChoice([
+      'ra_scan_error_canceled',
+      'ra_scan_error_disabled',
       'ra_scan_error_invalid-input',
       'ra_scan_error_not-found',
       'ra_scan_error_queue-quota',
