@@ -14,7 +14,7 @@ import { registerListSuitesRoute } from './list_suites';
 import { registerRunSuiteRoute } from './run_suite';
 import { registerGetSuiteStatusRoute } from './get_suite_status';
 import { registerGetSuiteRunsRoute } from './get_suite_runs';
-import type { SuiteRunStatus } from '../../lib/suite_runner';
+import type { SuiteRunner, SuiteRunStatus } from '../../lib/suite_runner';
 
 jest.mock('@kbn/fs', () => ({
   readFileSync: jest.fn(),
@@ -47,12 +47,13 @@ const mockSuites = [
 
 const mockSuitesJson = JSON.stringify({ suites: mockSuites });
 
-const createMockSuiteRunner = () => ({
-  startRun: jest.fn(),
-  listRuns: jest.fn(),
-  getStatus: jest.fn(),
-  getCurrentRun: jest.fn(),
-});
+const createMockSuiteRunner = () =>
+  ({
+    startRun: jest.fn(),
+    listRuns: jest.fn(),
+    getStatus: jest.fn(),
+    getCurrentRun: jest.fn(),
+  } as unknown as SuiteRunner);
 
 const buildSuiteRunStatus = (overrides: Partial<SuiteRunStatus> = {}): SuiteRunStatus => ({
   runId: 'run-uuid-1',
