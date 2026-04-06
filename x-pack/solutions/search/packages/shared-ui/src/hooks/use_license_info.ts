@@ -8,11 +8,9 @@
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo } from 'react';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { ILicense } from '@kbn/licensing-types';
-import { Observable } from 'rxjs';
 
 export const useGetLicenseInfo = (licensing: LicensingPluginStart) => {
-  const license = useObservable<ILicense | null>(licensing?.license$ ?? new Observable(), null);
+  const license = useObservable(licensing.license$, null);
 
   const { isTrial, licenseType, hasEnterpriseLicense } = useMemo(
     () => ({

@@ -16,7 +16,7 @@ export const WelcomeMessage = () => {
     <EuiFlexItem grow={false}>
       <EuiTitle
         size="xs"
-        aria-label={i18n.translate('undefined.welcomeMessage.euiTitle.welcomeMessageLabel', {
+        aria-label={i18n.translate('xpack.search.gettingStarted.welcome.welcomeMessageLabel', {
           defaultMessage: 'Welcome message',
         })}
       >

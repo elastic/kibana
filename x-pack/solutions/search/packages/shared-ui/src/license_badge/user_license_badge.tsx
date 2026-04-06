@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LicenseType } from '@kbn/licensing-types/src/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { css } from '@emotion/react';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { useGetLicenseInfo } from '../hooks';
