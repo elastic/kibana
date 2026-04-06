@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/zod'
-  - '@kbn/fs'
 tags:
   - plugin
   - prod

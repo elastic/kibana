@@ -15,11 +15,18 @@ import { registerRunSuiteRoute } from './run_suite';
 import { registerGetSuiteStatusRoute } from './get_suite_status';
 import { registerGetSuiteRunsRoute } from './get_suite_runs';
 import type { SuiteRunner, SuiteRunStatus } from '../../lib/suite_runner';
-import { readFileSync } from '@kbn/fs';
+import { readFileSync } from 'fs';
 
-jest.mock('@kbn/fs', () => ({
-  readFileSync: jest.fn(),
-}));
+// Mock only fs.readFileSync — delegate to the real implementation by default so
+// @kbn/repo-info (and any other module that reads files during test bootstrap)
+// keeps working. Individual tests override with `mockReturnValueOnce(...)`.
+jest.mock('fs', () => {
+  const actualFs = jest.requireActual('fs');
+  return {
+    ...actualFs,
+    readFileSync: jest.fn(actualFs.readFileSync),
+  };
+});
 
 const mockReadFileSync = readFileSync as jest.Mock;
 

@@ -7,10 +7,15 @@
 
 import { randomUUID } from 'crypto';
 import { spawn } from 'child_process';
-import { existsSync, mkdirSync, statSync, symlinkSync } from 'fs';
+// eslint-disable-next-line @kbn/eslint/require_kbn_fs
+import { existsSync, mkdirSync, readFileSync, statSync, symlinkSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { readFileSync, writeFileSync } from '@kbn/fs';
 import type { Logger } from '@kbn/logging';
+
+// SuiteRunner reads/writes files OUTSIDE Kibana's data/ directory — specifically
+// `.git` (to resolve main-worktree path) and `.scout/servers/local.json` (to
+// sync Scout config with the live kibana/es URLs). `@kbn/fs` sandboxes all I/O
+// to `data/`, which is not where these files live, so we use native `fs` here.
 
 export interface ServerInfo {
   kibanaUrl: string;
@@ -66,7 +71,7 @@ const resolveMainRepoRoot = (worktreeRoot: string): string | undefined => {
   const gitPath = resolve(worktreeRoot, '.git');
   if (!existsSync(gitPath) || !statSync(gitPath).isFile()) return undefined;
 
-  const content = (readFileSync(gitPath, 'utf-8') as string).trim();
+  const content = readFileSync(gitPath, 'utf-8').trim();
   // In a worktree, .git is a file: "gitdir: /main/repo/.git/worktrees/<name>"
   const match = content.match(/^gitdir:\s+(.+)$/);
   if (!match) return undefined;
@@ -122,7 +127,7 @@ export class SuiteRunner {
 
     try {
       if (existsSync(configPath)) {
-        const existing = JSON.parse(readFileSync(configPath, 'utf-8') as string);
+        const existing = JSON.parse(readFileSync(configPath, 'utf-8'));
         const currentKibana = existing?.hosts?.kibana;
         const currentEs = existing?.hosts?.elasticsearch;
 
