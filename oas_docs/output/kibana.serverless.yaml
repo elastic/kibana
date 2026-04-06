@@ -439,7 +439,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.
+        Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.<br/><br/>[Required authorization] Route required privileges: actions:oauth.
       operationId: get-actions-connector-oauth-callback
       parameters:
         - description: The authorization code returned by the OAuth provider.
