@@ -24,7 +24,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
 
   async run(): Promise<void> {
     if (this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT)) {
-      // Store step config as input so the record is self contained
+      // Store step config as input so the record is self-contained
       // consistent with every other step type & readable without a definition lookup
       const withConfig = this.node.configuration?.with;
       if (withConfig) {
@@ -49,11 +49,12 @@ export class WaitForInputStepImpl implements NodeImplementation {
   }
 
   private resume(): void {
-    const context = this.workflowRuntime.getWorkflowExecution().context;
+    const execution = this.workflowRuntime.getWorkflowExecution();
+    const context = execution.context;
     const resumeInput = context?.resumeInput as Record<string, unknown> | undefined;
     const ctx = context as Record<string, unknown> | null | undefined;
     const resumedBy = typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown';
-    const executionId = this.workflowRuntime.getWorkflowExecution().id;
+    const executionId = execution.id;
 
     this.stepExecutionRuntime.finishStep(resumeInput);
 
