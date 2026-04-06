@@ -76,6 +76,8 @@ export const IntegrationCards = ({
             grow={maxCardWidth ? 0 : 1}
             key={name}
             data-test-subj="entity_analytics-integration-card"
+            aria-disabled={!isClickable || undefined}
+            tabIndex={!isClickable ? -1 : undefined}
             css={css`
               max-width: ${maxCardWidth}px;
               ${!isClickable &&
