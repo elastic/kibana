@@ -115,7 +115,7 @@ describe('NameField', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Please provide a unique rule name.')).toBeInTheDocument();
+      expect(screen.getByText('Name is required.')).toBeInTheDocument();
     });
   });
 });

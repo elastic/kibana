@@ -31,8 +31,8 @@ export const NameField = () => {
             });
           }
           if (value.trim() === DEFAULT_RULE_NAME) {
-            return i18n.translate('xpack.alertingV2.ruleForm.nameCannotBeDefaultError', {
-              defaultMessage: 'Please provide a unique rule name.',
+            return i18n.translate('xpack.alertingV2.ruleForm.nameRequiredError', {
+              defaultMessage: 'Name is required.',
             });
           }
           return true;

@@ -40,7 +40,7 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
       await pageObjects.ruleForm.clickSave();
       const errorCallout = pageObjects.ruleForm.errorCallout();
       await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Please provide a unique rule name');
+      await expect(errorCallout).toContainText('Name is required');
     });
   });
 
@@ -82,9 +82,7 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
     await test.step('verify no name-specific errors appear', async () => {
       const nameRequiredError = page.getByText('Name is required.');
-      const uniqueNameError = page.getByText('Please provide a unique rule name.');
       await expect(nameRequiredError).toBeHidden();
-      await expect(uniqueNameError).toBeHidden();
     });
   });
 });
