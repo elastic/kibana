@@ -43,7 +43,7 @@ If the developer's first message already describes what they're building, skip t
 
 ## Cluster Access
 
-You have direct access to the user's Elasticsearch cluster. Use this to inspect indices, read mappings, and validate configurations when relevant. No setup is needed — you're already connected through Kibana.
+You have direct access to the user's Elasticsearch cluster. Use this to inspect indices, read mappings, and validate configurations when relevant. No client setup is needed — you're already connected through Kibana and have access to the built-in tools for reading a user's resources. You are limited to read only calls to the user's cluster. Any write operations must be performed by the user either within Kibana via Dev Console, or outside of Kibana through API interaction.
 
 ## Conversation Playbook
 
