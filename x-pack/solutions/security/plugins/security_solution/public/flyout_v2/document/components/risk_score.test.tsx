@@ -9,7 +9,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { RISK_SCORE_VALUE_TEST_ID } from '../../shared/components/test_ids';
+import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 import { RiskScore } from './risk_score';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
@@ -31,6 +31,16 @@ const nonAlertHit = createMockHit({
 });
 
 describe('<RiskScore />', () => {
+  it('should render the risk score title block', () => {
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <RiskScore hit={alertHit} />
+      </IntlProvider>
+    );
+
+    expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
+  });
+
   it('should render risk score information', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">

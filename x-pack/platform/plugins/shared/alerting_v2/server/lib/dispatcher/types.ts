@@ -68,6 +68,8 @@ export interface NotificationPolicy {
   matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
   /** data.* fields used to group episodes into a single notification */
   groupBy: string[];
+  /** User-defined tags for organizing and filtering policies */
+  tags: string[];
   /** How episodes are grouped into notification payloads */
   groupingMode?: 'per_episode' | 'all' | 'per_field';
   /** Throttle configuration controlling notification frequency */
