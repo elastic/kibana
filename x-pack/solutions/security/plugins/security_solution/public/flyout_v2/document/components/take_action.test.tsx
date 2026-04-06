@@ -121,7 +121,7 @@ describe('<TakeAction />', () => {
     });
   });
 
-  it('should pass hit, ecsData and refetchFlyoutData from useEventDetails to TakeActionButton', () => {
+  it('should pass hit, ecsData, refetchFlyoutData and onAlertUpdated from useEventDetails to TakeActionButton', () => {
     const hit = createMockHit();
     const onAlertUpdated = jest.fn();
     render(<TakeAction hit={hit} onAlertUpdated={onAlertUpdated} />);
