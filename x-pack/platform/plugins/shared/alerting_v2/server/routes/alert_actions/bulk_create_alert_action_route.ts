@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Request, Response, type RouteHandler } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import {
@@ -17,9 +16,11 @@ import {
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { BaseAlertingRoute } from '../base_alerting_route';
 
 @injectable()
-export class BulkCreateAlertActionRoute implements RouteHandler {
+export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
   static method = 'post' as const;
   static path = `${ALERTING_V2_ALERT_API_PATH}/action/_bulk`;
   static security: RouteSecurity = {
@@ -27,12 +28,9 @@ export class BulkCreateAlertActionRoute implements RouteHandler {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Bulk create alert actions',
     description: 'Create actions for multiple alert groups in a single request.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {
@@ -40,31 +38,25 @@ export class BulkCreateAlertActionRoute implements RouteHandler {
     },
   } as const;
 
+  protected readonly routeName = 'bulk create alert action';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, BulkCreateAlertActionBody>,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const { processed, total } = await this.alertActionsClient.createBulkActions(
-        this.request.body
-      );
+  protected async execute() {
+    const { processed, total } = await this.alertActionsClient.createBulkActions(this.request.body);
 
-      return this.response.ok({
-        body: {
-          processed,
-          total,
-        },
-      });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    return this.ctx.response.ok({
+      body: {
+        processed,
+        total,
+      },
+    });
   }
 }

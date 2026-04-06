@@ -51,6 +51,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (tokenStr.includes('http')) {
       return { basePath: mockBasePath };
     }
+    if (tokenStr.includes('uiSettings')) {
+      return { get: () => true };
+    }
     return {};
   }),
   CoreStart: jest.fn((name: string) => `CoreStart(${name})`),
@@ -164,7 +167,7 @@ describe('NotificationPolicyFormPage', () => {
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent(
         'Create notification policy'
       );
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Save');
+      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
     });
 
     it('submits create payload on save', async () => {
@@ -228,7 +231,7 @@ describe('NotificationPolicyFormPage', () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit notification policy');
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update');
+      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
     });
 
     it('shows loading state while fetching', () => {

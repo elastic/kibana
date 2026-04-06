@@ -1,5 +1,5 @@
 {
-  "sha1": "d21b2de04c9ea484f334d8ae73c982ffd745da9c",
+  "sha1": "aa110322c607758a30cc461d2f9dc7a49cd1b5dc",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -10,20 +10,6 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 15,
         "column": 16
-      }
-    },
-    {
-      "id": "61762fc85e5e046-883e55fae4bd272",
-      "title": "Flyout system Emotion cache stability opening a flyout after a cascade close does not corrupt the Emotion style cache",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/flyout_stability/flyout_emotion_cache.spec.ts",
-        "line": 28,
-        "column": 12
       }
     },
     {
@@ -797,28 +783,6 @@
       }
     },
     {
-      "id": "df7f704800ddfee-907d1e2585aa1b6",
-      "title": "Traces in Discover - Explore from APM Transaction Detail - Legacy waterfall size warning \"view in Discover\" link opens traces experience",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 256,
-        "column": 14
-      }
-    },
-    {
       "id": "df7f704800ddfee-b27782d1c9e1c78",
       "title": "Traces in Discover - Explore from APM Transaction Detail - Unified waterfall size warning \"view in Discover\" link opens traces experience",
       "expectedStatus": "passed",
@@ -836,7 +800,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 301,
+        "line": 256,
         "column": 14
       }
     },
@@ -858,7 +822,51 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 345,
+        "line": 300,
+        "column": 14
+      }
+    },
+    {
+      "id": "750ff43cca0a010-e381f54b428fb28",
+      "title": "Traces in Discover - Flyout cascade-close Emotion cache stability closing the Trace Timeline flyout navigates back to the Document Viewer without corrupting the Emotion style cache",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/flyout_cascade_close.spec.ts",
+        "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "6274006e10c2393-292942683092e7c",
+      "title": "Traces in Discover - Logs overview tab Similar errors - occurrences chart renders without error in the log child flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/logs_overview_tab.spec.ts",
+        "line": 59,
         "column": 14
       }
     },
@@ -973,6 +981,28 @@
       }
     },
     {
+      "id": "7d9a57b0659b738-4d04757deaffae3",
+      "title": "Traces in Discover - Overview tab content and actions Trace Summary section - service badge navigates to the APM service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 195,
+        "column": 14
+      }
+    },
+    {
       "id": "7d9a57b0659b738-e4a0cc5ccc67dad",
       "title": "Traces in Discover - Overview tab content and actions Errors section - error link and Open in Discover return expected results",
       "expectedStatus": "passed",
@@ -990,7 +1020,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
-        "line": 197,
+        "line": 223,
         "column": 14
       }
     },
@@ -1012,7 +1042,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
-        "line": 247,
+        "line": 273,
         "column": 14
       }
     },
@@ -1034,7 +1064,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
-        "line": 290,
+        "line": 316,
         "column": 14
       }
     },
@@ -1439,6 +1469,28 @@
       }
     },
     {
+      "id": "53f97d0c42b6e9b-a1cda56e9e147e3",
+      "title": "Traces in Discover - Waterfall flyout usage Service badge in full-screen waterfall navigates to the APM service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 224,
+        "column": 14
+      }
+    },
+    {
       "id": "53f97d0c42b6e9b-287bab24f344d0f",
       "title": "Traces in Discover - Waterfall flyout usage Open in Discover from child flyout sections navigates to the correct data",
       "expectedStatus": "passed",
@@ -1456,7 +1508,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
-        "line": 224,
+        "line": 250,
         "column": 14
       }
     }
