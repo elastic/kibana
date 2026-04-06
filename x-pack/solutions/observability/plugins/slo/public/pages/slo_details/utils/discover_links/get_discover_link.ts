@@ -284,7 +284,7 @@ export function getApmTracesDiscoverUrl({
   const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
 
   return discoverLocator?.getRedirectUrl({
-    timeRange: { from: timeRange.from, to: timeRange.to },
+    timeRange,
     query: { esql: query.print() },
   });
 }

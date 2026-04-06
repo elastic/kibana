@@ -40,7 +40,6 @@ export function SloDetailsHistory({ slo }: Props) {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      {isApmIndicatorType(slo.indicator) && <ApmSourcePanel slo={slo} />}
       <EuiFlexGroup justifyContent="flexEnd" direction="row" gutterSize="s">
         <EuiFlexItem grow css={{ maxWidth: 500 }}>
           {slo.timeWindow.type === 'calendarAligned' ? (
@@ -80,7 +79,15 @@ export function SloDetailsHistory({ slo }: Props) {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      {isApmIndicatorType(slo.indicator) && (
+        <ApmSourcePanel
+          slo={slo}
+          timeRange={{
+            from: state.range.from.toISOString(),
+            to: state.range.to.toISOString(),
+          }}
+        />
+      )}
       <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorRatePanel">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -100,7 +107,6 @@ export function SloDetailsHistory({ slo }: Props) {
           />
         </EuiFlexGroup>
       </EuiPanel>
-
       <HistoricalDataCharts
         slo={slo}
         isAutoRefreshing={false}
@@ -108,7 +114,6 @@ export function SloDetailsHistory({ slo }: Props) {
         onBrushed={onBrushed}
         hideHeaderDurationLabel={true}
       />
-
       <EventsChartPanel
         slo={slo}
         range={state.range}

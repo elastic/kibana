@@ -6,17 +6,17 @@
  */
 
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
+  EuiPopover,
   EuiStat,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -25,7 +25,7 @@ import type {
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
-import React from 'react';
+import React, { useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchApmTracesIndex } from '../../../hooks/use_fetch_apm_indices';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
@@ -37,35 +37,35 @@ import { getApmTracesDiscoverUrl } from '../utils/discover_links/get_discover_li
 import type { TimeBounds } from '../types';
 import { WideChart } from './wide_chart';
 
-const linkStyle = css`
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-`;
-
 export interface Props {
+  slo: SLOWithSummaryResponse;
   data: ChartData[];
   isLoading: boolean;
-  slo: SLOWithSummaryResponse;
-  onBrushed?: (timeBounds: TimeBounds) => void;
+  timeRange?: { from: string; to: string };
   hideHeaderDurationLabel?: boolean;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-const viewInApmLabel = i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.viewInApm', {
-  defaultMessage: 'View in APM',
+const openLabel = i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.open', {
+  defaultMessage: 'Open',
 });
 
-const openInDiscoverLabel = i18n.translate(
-  'xpack.slo.sloDetails.sliHistoryChartPanel.openInDiscover',
-  { defaultMessage: 'Open traces in Discover' }
+const inApmLabel = i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.inApm', {
+  defaultMessage: 'In APM',
+});
+
+const tracesInDiscoverLabel = i18n.translate(
+  'xpack.slo.sloDetails.sliHistoryChartPanel.tracesInDiscover',
+  { defaultMessage: 'Traces in Discover' }
 );
 
 export function SliChartPanel({
+  slo,
   data,
   isLoading,
-  slo,
-  onBrushed,
+  timeRange,
   hideHeaderDurationLabel = false,
+  onBrushed,
 }: Props) {
   const {
     uiSettings,
@@ -73,6 +73,8 @@ export function SliChartPanel({
     http: { basePath },
     application: { capabilities },
   } = useKibana().services;
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
+
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailedStatus = isSloFailed(slo.summary.status);
   const observedValue = data.at(-1)?.value;
@@ -84,7 +86,12 @@ export function SliChartPanel({
   const isRemote = !!slo.remote;
   const canNavigateToApm = isApm && hasApmReadCapabilities && !isRemote;
 
-  const apmUrl = isApm ? convertSliApmParamsToApmAppDeeplinkUrl(slo) : undefined;
+  const defaultTimeRange = { from: `now-${slo.timeWindow.duration}`, to: 'now' };
+  const effectiveTimeRange = timeRange ?? defaultTimeRange;
+
+  const apmUrl = isApm
+    ? convertSliApmParamsToApmAppDeeplinkUrl(slo, effectiveTimeRange)
+    : undefined;
   const apmLink = apmUrl ? basePath.prepend(apmUrl) : undefined;
 
   const { data: tracesIndex } = useFetchApmTracesIndex();
@@ -106,12 +113,12 @@ export function SliChartPanel({
         transactionName: String(slo.groupings?.['transaction.name'] ?? params.transactionName),
       },
       share,
-      timeRange: {
-        from: `now-${slo.timeWindow.duration}`,
-        to: 'now',
-      },
+      timeRange: effectiveTimeRange,
     });
   })();
+
+  const isApmLinkEnabled = canNavigateToApm && !!apmLink;
+  const isDiscoverLinkEnabled = !!discoverLink;
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
@@ -140,33 +147,45 @@ export function SliChartPanel({
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiFlexItem grow={0}>
-            <EuiFlexGroup gutterSize="m" responsive={false}>
-              {canNavigateToApm && apmLink && (
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    css={linkStyle}
+          {isApm && (
+            <EuiFlexItem grow={0}>
+              <EuiPopover
+                aria-label={openLabel}
+                button={
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="arrowDown"
+                    iconSide="right"
+                    onClick={() => setIsActionsOpen(!isActionsOpen)}
+                    data-test-subj="sliChartActionsButton"
+                  >
+                    {openLabel}
+                  </EuiButtonEmpty>
+                }
+                isOpen={isActionsOpen}
+                closePopover={() => setIsActionsOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+              >
+                <EuiContextMenuPanel>
+                  <EuiContextMenuItem
                     href={apmLink}
+                    disabled={!isApmLinkEnabled}
                     data-test-subj="slidHistoryChartViewInApmLink"
                   >
-                    {viewInApmLabel}
-                  </EuiLink>
-                </EuiFlexItem>
-              )}
-              {discoverLink && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content={openInDiscoverLabel} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      data-test-subj="slidHistoryChartOpenInDiscoverLink"
-                      aria-label={openInDiscoverLabel}
-                      iconType="discoverApp"
-                      href={discoverLink}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                    {inApmLabel}
+                  </EuiContextMenuItem>
+                  <EuiContextMenuItem
+                    href={discoverLink}
+                    disabled={!isDiscoverLinkEnabled}
+                    data-test-subj="slidHistoryChartOpenInDiscoverLink"
+                  >
+                    {tracesInDiscoverLabel}
+                  </EuiContextMenuItem>
+                </EuiContextMenuPanel>
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>

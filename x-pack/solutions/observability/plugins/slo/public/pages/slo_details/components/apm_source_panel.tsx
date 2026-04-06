@@ -20,11 +20,12 @@ type APMIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateInd
 
 const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
-interface Props {
+interface ApmSourcePanelProps {
   slo: SLOWithSummaryResponse;
+  timeRange?: { from: string; to: string };
 }
 
-export function ApmSourcePanel({ slo }: Props) {
+export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
   const {
     application: { capabilities },
     share,
@@ -44,7 +45,9 @@ export function ApmSourcePanel({ slo }: Props) {
   const transactionTypeValue = String(slo.groupings?.['transaction.type'] ?? transactionType);
   const transactionNameValue = String(slo.groupings?.['transaction.name'] ?? transactionName);
 
-  const timeRange = { from: `now-${slo.timeWindow.duration}`, to: 'now' };
+  const defaultTimeRange = { from: `now-${slo.timeWindow.duration}`, to: 'now' };
+  const effectiveTimeRange = timeRange ?? defaultTimeRange;
+
   const canNavigateToApm = hasApmReadCapabilities && !isRemote;
 
   const locator = canNavigateToApm ? share.url.locators.get(APM_APP_LOCATOR_ID) : undefined;
@@ -56,8 +59,8 @@ export function ApmSourcePanel({ slo }: Props) {
       serviceName,
       query: {
         environment: 'ENVIRONMENT_ALL',
-        rangeFrom: timeRange.from,
-        rangeTo: timeRange.to,
+        rangeFrom: effectiveTimeRange.from,
+        rangeTo: effectiveTimeRange.to,
       },
     };
 
