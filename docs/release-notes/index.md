@@ -29,13 +29,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ::::{NOTE}
 % ::::
 
-
-### Features and enhancements [kibana-9.3.3-features-enhancements]
-
-**Machine Learning**:
-* Adds aria labels to job wizard combo boxes [#258509]({{kib-pull}}258509).
-
-
 ### Fixes [kibana-9.3.3-fixes]
 
 **Alerting**:
@@ -71,6 +64,7 @@ For the Elastic Security 9.3.3 release information, refer to [Elastic Security S
 **Machine Learning**:
 * Fixes the anomaly swim lane dashboard panel not refreshing [#259962]({{kib-pull}}259962).
 * Fixes a console error when opening the data frame analytics jobs list [#258591]({{kib-pull}}258591).
+* Adds aria labels to job wizard combo boxes [#258509]({{kib-pull}}258509).
 
 ## 9.3.2 [kibana-9.3.2-release-notes]
 
