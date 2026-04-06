@@ -33,13 +33,14 @@ const toEntitySourceFormValues = (
 
 const toWatchlistFormValues = (
   watchlist: GetWatchlistResponse,
-  entitySource?: MonitoringEntitySource
+  ruleBasedSources: MonitoringEntitySource[]
 ): WatchlistFormValues => ({
   name: watchlist.name ?? '',
   description: watchlist.description ?? '',
   riskModifier: watchlist.riskModifier,
   managed: watchlist.managed ?? false,
-  entitySources: entitySource ? [toEntitySourceFormValues(entitySource)] : undefined,
+  entitySources:
+    ruleBasedSources.length > 0 ? ruleBasedSources.map(toEntitySourceFormValues) : undefined,
 });
 
 export const useGetWatchlistFormData = (watchlistId?: string) => {
@@ -58,19 +59,40 @@ export const useGetWatchlistFormData = (watchlistId?: string) => {
       listWatchlistEntitySources({ watchlistId: watchlistId as string, signal }),
   });
 
-  // Use the first entity source linked to the watchlist (if any)
-  const firstSource = entitySourcesQuery.data?.sources?.[0];
+  // For managed watchlists the sources may include integration sources.
+  // Filter down to rule-based sources (index / store) that the form can edit.
+  const ruleBasedSources = useMemo(
+    () =>
+      (entitySourcesQuery.data?.sources ?? []).filter(
+        (s) => s.type === 'index' || s.type === 'store'
+      ),
+    [entitySourcesQuery.data]
+  );
+
+  // Map source type → persisted ID so the mutation layer knows whether to
+  // create or update each source independently.
+  const ruleBasedSourceIds = useMemo<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    for (const s of ruleBasedSources) {
+      if (s.id && s.type) {
+        map[s.type] = s.id;
+      }
+    }
+    return map;
+  }, [ruleBasedSources]);
 
   const initialWatchlist = useMemo(() => {
     if (!watchlistQuery.data) {
       return null;
     }
-    return toWatchlistFormValues(watchlistQuery.data, firstSource);
-  }, [watchlistQuery.data, firstSource]);
+    return toWatchlistFormValues(watchlistQuery.data, ruleBasedSources);
+  }, [watchlistQuery.data, ruleBasedSources]);
 
   return {
     initialWatchlist,
-    entitySourceId: firstSource?.id,
+    // Keep entitySourceId for backwards compat (non-managed single-source case)
+    entitySourceId: ruleBasedSources[0]?.id,
+    ruleBasedSourceIds,
     isLoading: watchlistQuery.isLoading || entitySourcesQuery.isLoading,
     isError: watchlistQuery.isError || entitySourcesQuery.isError,
   };

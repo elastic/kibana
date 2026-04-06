@@ -19,6 +19,8 @@ export interface WatchlistFormState {
   watchlist: CreateWatchlistRequestBodyInput;
   normalizedWatchlistId?: string;
   entitySourceId?: string;
+  /** Maps source type ('store' | 'index') → persisted entity-source ID. */
+  ruleBasedSourceIds: Record<string, string>;
   isEditMode: boolean;
   isDisabled: boolean;
   isNameInvalid: boolean;

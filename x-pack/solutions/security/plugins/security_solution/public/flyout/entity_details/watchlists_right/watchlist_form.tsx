@@ -89,16 +89,14 @@ export const WatchlistForm = ({
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      {watchlist.managed ? (
-        <ManagedWatchlistSourceInput watchlist={watchlist} />
-      ) : (
-        <RuleBasedSourceInput
-          watchlistName={watchlist.name}
-          isEditMode={isEditMode}
-          onFieldChange={onFieldChange}
-          initialEntitySource={watchlist.entitySources?.[0]}
-        />
-      )}
+      {watchlist.managed && <ManagedWatchlistSourceInput watchlist={watchlist} />}
+      <RuleBasedSourceInput
+        watchlistName={watchlist.name}
+        isEditMode={isEditMode}
+        isManaged={watchlist.managed}
+        onFieldChange={onFieldChange}
+        initialEntitySources={watchlist.entitySources}
+      />
     </EuiForm>
   );
 };

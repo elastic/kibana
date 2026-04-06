@@ -15,6 +15,8 @@ import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 export interface UseUpdateWatchlistOptions {
   watchlistId?: string;
   entitySourceId?: string;
+  /** Maps source type ('store' | 'index') → persisted entity-source ID. */
+  ruleBasedSourceIds: Record<string, string>;
   watchlist: CreateWatchlistRequestBodyInput;
   spaceId?: string;
   onSuccess?: () => void;
@@ -23,6 +25,7 @@ export interface UseUpdateWatchlistOptions {
 export const useUpdateWatchlist = ({
   watchlistId,
   entitySourceId,
+  ruleBasedSourceIds,
   watchlist,
   spaceId,
   onSuccess,
@@ -31,7 +34,8 @@ export const useUpdateWatchlist = ({
   const {
     notifications: { toasts },
   } = useKibana().services;
-  const { updateWatchlist, updateWatchlistEntitySource } = useEntityAnalyticsRoutes();
+  const { updateWatchlist, updateWatchlistEntitySource, createWatchlistEntitySource } =
+    useEntityAnalyticsRoutes();
 
   return useMutation({
     mutationFn: async () => {
@@ -42,22 +46,41 @@ export const useUpdateWatchlist = ({
       // Update the watchlist itself (name, description, riskModifier)
       const updatedWatchlist = await updateWatchlist({ id: watchlistId, body: watchlist });
 
-      // If we have an entity source to update, send the update
-      const firstEntitySource = watchlist.entitySources?.[0];
-      if (entitySourceId && firstEntitySource) {
-        const entitySourceBody: UpdateWatchlistEntitySourceRequestBodyInput = {
-          name: firstEntitySource.name,
-          indexPattern: firstEntitySource.indexPattern,
-          identifierField: firstEntitySource.identifierField,
-          queryRule: firstEntitySource.queryRule,
-          enabled: firstEntitySource.enabled,
-        };
+      // Process each rule-based entity source independently.
+      // For each source in the form, either update the persisted one or create a new one.
+      for (const source of watchlist.entitySources ?? []) {
+        const sourceType = source.type ?? 'index';
+        const existingId = ruleBasedSourceIds[sourceType];
 
-        await updateWatchlistEntitySource({
-          watchlistId,
-          entitySourceId,
-          body: entitySourceBody,
-        });
+        if (existingId) {
+          // Existing rule-based source of this type → update it
+          const entitySourceBody: UpdateWatchlistEntitySourceRequestBodyInput = {
+            name: source.name,
+            indexPattern: source.indexPattern,
+            identifierField: source.identifierField,
+            queryRule: source.queryRule,
+            enabled: source.enabled,
+          };
+
+          await updateWatchlistEntitySource({
+            watchlistId,
+            entitySourceId: existingId,
+            body: entitySourceBody,
+          });
+        } else {
+          // No existing rule-based source of this type → create a new one
+          await createWatchlistEntitySource({
+            watchlistId,
+            body: {
+              type: sourceType,
+              name: source.name,
+              indexPattern: source.indexPattern,
+              identifierField: source.identifierField,
+              queryRule: source.queryRule,
+              enabled: source.enabled,
+            },
+          });
+        }
       }
 
       return updatedWatchlist;

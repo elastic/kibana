@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, type FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonGroup,
@@ -42,22 +42,35 @@ import {
  */
 type EntitySourceInput = NonNullable<CreateWatchlistRequestBodyInput['entitySources']>[number];
 
-const getRuleToggleButtons = (isEditMode: boolean, initialEntitySource?: EntitySourceInput) => {
+/** Derive the query string from an entity source (shared between init paths). */
+const queryFromSource = (s?: EntitySourceInput): string =>
+  (s?.queryRule ?? (s?.filter?.kuery as string) ?? '') as string;
+
+/** Build index-pattern combo options from a comma-separated string. */
+const indexPatternsFromSource = (s?: EntitySourceInput): Array<EuiComboBoxOptionOption<string>> =>
+  s?.indexPattern ? s.indexPattern.split(',').map((p: string) => ({ label: p.trim() })) : [];
+
+const getRuleToggleButtons = (
+  isEditMode: boolean,
+  isManaged: boolean,
+  initialEntitySource?: EntitySourceInput
+) => {
   // Only lock the toggle in edit mode so users can't switch source type on an existing entity source.
   // In create mode both buttons stay enabled even though onFieldChange sets initialEntitySource,
   // because isEditMode is explicitly false from the parent.
+  // If the watchlist is managed, we allow editing both options even in edit mode.
   const lockedType = initialEntitySource?.type === 'index' ? 'indexPattern' : 'entityStore';
 
   return [
     {
       id: 'entityStore',
       label: 'Entity Store',
-      isDisabled: isEditMode && lockedType !== 'entityStore',
+      isDisabled: isEditMode && !isManaged && lockedType !== 'entityStore',
     },
     {
       id: 'indexPattern',
       label: 'IndexPattern',
-      isDisabled: isEditMode && lockedType !== 'indexPattern',
+      isDisabled: isEditMode && !isManaged && lockedType !== 'indexPattern',
     },
   ];
 };
@@ -155,34 +168,40 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
 export interface RuleBasedSourceInputProps {
   watchlistName: string;
   isEditMode: boolean;
+  isManaged?: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
-  initialEntitySource?: EntitySourceInput;
+  initialEntitySources?: EntitySourceInput[];
 }
 
 export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   watchlistName,
   isEditMode,
+  isManaged = false,
   onFieldChange,
-  initialEntitySource,
+  initialEntitySources,
 }) => {
   const {
     services: { data },
   } = useKibana();
   const { sourcererDataView } = useSourcererDataView(PageScope.default);
 
+  // For non-managed: first source (existing single-source behaviour)
+  // For managed: split sources by type so each toggle has its own state
+  const initialEntitySource = isManaged ? undefined : initialEntitySources?.[0];
+  const initialStoreSource = isManaged
+    ? initialEntitySources?.find((s) => s.type === 'store')
+    : undefined;
+  const initialIndexSource = isManaged
+    ? initialEntitySources?.find((s) => s.type === 'index')
+    : undefined;
+
   // Derive initial values from the stored entity source (for edit mode)
   const initialRuleFilter = initialEntitySource?.type === 'index' ? 'indexPattern' : 'entityStore';
-  const initialQuery: Query = {
-    query: initialEntitySource?.queryRule ?? initialEntitySource?.filter?.kuery ?? '',
-    language: 'kuery',
-  };
-  const initialIndexPatterns: Array<EuiComboBoxOptionOption<string>> =
-    initialEntitySource?.indexPattern
-      ? initialEntitySource.indexPattern.split(',').map((p) => ({ label: p.trim() }))
-      : [];
+  const initialQuery: Query = { query: queryFromSource(initialEntitySource), language: 'kuery' };
+  const initialIndexPatterns = indexPatternsFromSource(initialEntitySource);
   const initialEntityField = initialEntitySource?.identifierField ?? '';
 
   const [ruleFilter, setRuleFilter] = useState<string>(initialRuleFilter);
@@ -206,24 +225,80 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
 
   const indexOptions = useMemo(() => indices?.map((index) => ({ label: index })) ?? [], [indices]);
 
-  // Sync internal state when initialEntitySource arrives asynchronously (edit mode)
-  const [hasInitialized, setHasInitialized] = useState(Boolean(initialEntitySource));
+  // --- Managed: per-type state saved in refs so toggling doesn't lose data ---
+  const storeStateRef = useRef({
+    filterQuery: { query: queryFromSource(initialStoreSource), language: 'kuery' } as Query,
+  });
+  const indexStateRef = useRef({
+    filterQuery: { query: queryFromSource(initialIndexSource), language: 'kuery' } as Query,
+    selectedIndexPatterns: indexPatternsFromSource(initialIndexSource),
+    entityField: initialIndexSource?.identifierField ?? '',
+  });
+
+  // Track which types have been activated (either initially existed or user touched)
+  const activeManagedTypes = useRef<Set<string>>(
+    new Set([...(initialStoreSource ? ['store'] : []), ...(initialIndexSource ? ['index'] : [])])
+  );
+
+  // Sync internal state when initialEntitySource(s) arrive asynchronously (edit mode)
+  const [hasInitialized, setHasInitialized] = useState(
+    Boolean(initialEntitySource || initialStoreSource || initialIndexSource)
+  );
+
+  const hydrateManagedState = useCallback(() => {
+    if (initialStoreSource) {
+      storeStateRef.current = {
+        filterQuery: { query: queryFromSource(initialStoreSource), language: 'kuery' },
+      };
+      activeManagedTypes.current.add('store');
+    }
+    if (initialIndexSource) {
+      indexStateRef.current = {
+        filterQuery: { query: queryFromSource(initialIndexSource), language: 'kuery' },
+        selectedIndexPatterns: indexPatternsFromSource(initialIndexSource),
+        entityField: initialIndexSource.identifierField ?? '',
+      };
+      activeManagedTypes.current.add('index');
+    }
+    const defaultToggle = initialStoreSource ? 'entityStore' : 'indexPattern';
+    setRuleFilter(defaultToggle);
+    if (defaultToggle === 'entityStore') {
+      setFilterQuery(storeStateRef.current.filterQuery);
+    } else {
+      setFilterQuery(indexStateRef.current.filterQuery);
+      setSelectedIndexPatterns(indexStateRef.current.selectedIndexPatterns);
+      setEntityField(indexStateRef.current.entityField);
+    }
+  }, [initialStoreSource, initialIndexSource]);
+
+  const hydrateNonManagedState = useCallback(() => {
+    if (!initialEntitySource) return;
+    setRuleFilter(initialEntitySource.type === 'index' ? 'indexPattern' : 'entityStore');
+    setFilterQuery({ query: queryFromSource(initialEntitySource), language: 'kuery' });
+    setEntityField(initialEntitySource.identifierField ?? '');
+    if (initialEntitySource.indexPattern) {
+      setSelectedIndexPatterns(indexPatternsFromSource(initialEntitySource));
+    }
+  }, [initialEntitySource]);
+
   useEffect(() => {
-    if (initialEntitySource && !hasInitialized) {
-      setRuleFilter(initialEntitySource.type === 'index' ? 'indexPattern' : 'entityStore');
-      setFilterQuery({
-        query: initialEntitySource.queryRule ?? initialEntitySource.filter?.kuery ?? '',
-        language: 'kuery',
-      });
-      setEntityField(initialEntitySource.identifierField ?? '');
-      if (initialEntitySource.indexPattern) {
-        setSelectedIndexPatterns(
-          initialEntitySource.indexPattern.split(',').map((p) => ({ label: p.trim() }))
-        );
-      }
+    if (hasInitialized) return;
+    if (isManaged && (initialStoreSource || initialIndexSource)) {
+      hydrateManagedState();
+      setHasInitialized(true);
+    } else if (!isManaged && initialEntitySource) {
+      hydrateNonManagedState();
       setHasInitialized(true);
     }
-  }, [initialEntitySource, hasInitialized]);
+  }, [
+    initialEntitySource,
+    initialStoreSource,
+    initialIndexSource,
+    isManaged,
+    hasInitialized,
+    hydrateManagedState,
+    hydrateNonManagedState,
+  ]);
 
   useEffect(() => {
     setFilters(filterManager.getFilters());
@@ -261,24 +336,65 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     [watchlistName]
   );
 
-  const updateEntitySource = useCallback(
-    (query: Query) => {
-      if (ruleFilter === 'entityStore') {
-        onFieldChange('entitySources', [buildEntityStoreSource(query)]);
-      } else {
-        onFieldChange('entitySources', [
-          buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, query),
-        ]);
+  /**
+   * Emit the full entitySources array.
+   * Non-managed: single source based on the active toggle.
+   * Managed: one source per activated type (store, index, or both).
+   */
+  const emitSources = useCallback(
+    ({
+      activeFilter,
+      query,
+      patterns,
+      field,
+    }: {
+      activeFilter: string;
+      query: Query;
+      patterns: Array<EuiComboBoxOptionOption<string>>;
+      field: string;
+    }) => {
+      if (!isManaged) {
+        // Non-managed: single source (existing behaviour)
+        if (activeFilter === 'entityStore') {
+          onFieldChange('entitySources', [buildEntityStoreSource(query)]);
+        } else {
+          onFieldChange('entitySources', [
+            buildIndexEntitySource(watchlistName, patterns, field, query),
+          ]);
+        }
+        return;
       }
+
+      // Managed: build both sources from current + saved state
+      // First, persist the live state into the right ref
+      if (activeFilter === 'entityStore') {
+        storeStateRef.current = { filterQuery: query };
+      } else {
+        indexStateRef.current = {
+          filterQuery: query,
+          selectedIndexPatterns: patterns,
+          entityField: field,
+        };
+      }
+
+      const sources: EntitySourceInput[] = [];
+      if (activeManagedTypes.current.has('store')) {
+        sources.push(buildEntityStoreSource(storeStateRef.current.filterQuery));
+      }
+      if (activeManagedTypes.current.has('index')) {
+        sources.push(
+          buildIndexEntitySource(
+            watchlistName,
+            indexStateRef.current.selectedIndexPatterns,
+            indexStateRef.current.entityField,
+            indexStateRef.current.filterQuery
+          )
+        );
+      }
+
+      onFieldChange('entitySources', sources.length > 0 ? sources : undefined);
     },
-    [
-      ruleFilter,
-      onFieldChange,
-      buildEntityStoreSource,
-      watchlistName,
-      selectedIndexPatterns,
-      entityField,
-    ]
+    [isManaged, onFieldChange, buildEntityStoreSource, watchlistName]
   );
 
   // onSubmitQuery is required by QueryBarComponent and fires on explicit submit (Enter/refresh).
@@ -286,9 +402,18 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   const onSubmitQuery = useCallback(
     (query: Query) => {
       setFilterQuery(query);
-      updateEntitySource(query);
+      // Mark the current toggle's type as active now that the user has modified data
+      if (isManaged) {
+        activeManagedTypes.current.add(ruleFilter === 'entityStore' ? 'store' : 'index');
+      }
+      emitSources({
+        activeFilter: ruleFilter,
+        query,
+        patterns: selectedIndexPatterns,
+        field: entityField,
+      });
     },
-    [updateEntitySource]
+    [emitSources, ruleFilter, selectedIndexPatterns, entityField, isManaged]
   );
 
   const onSavedQuery = useCallback((newSavedQuery: SavedQuery | undefined) => {
@@ -297,51 +422,87 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
 
   const onRuleButtonChange = useCallback(
     (optionId: string) => {
-      setRuleFilter(optionId);
-      if (optionId === 'entityStore') {
-        // Immediately send entity store source with current filter
-        onFieldChange('entitySources', [buildEntityStoreSource(filterQuery)]);
-      } else {
-        // Immediately send index source with current state
-        onFieldChange('entitySources', [
-          buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, filterQuery),
-        ]);
+      if (isManaged) {
+        // Save current state into the ref for the type we're leaving
+        const leavingType = ruleFilter === 'entityStore' ? 'store' : 'index';
+        if (leavingType === 'store') {
+          storeStateRef.current = { filterQuery };
+        } else {
+          indexStateRef.current = {
+            filterQuery,
+            selectedIndexPatterns,
+            entityField,
+          };
+        }
+
+        // Restore the incoming type's state (don't mark it as active yet —
+        // that only happens when the user actually modifies data for this type)
+        const enteringType = optionId === 'entityStore' ? 'store' : 'index';
+        if (enteringType === 'store') {
+          setFilterQuery(storeStateRef.current.filterQuery);
+        } else {
+          setFilterQuery(indexStateRef.current.filterQuery);
+          setSelectedIndexPatterns(indexStateRef.current.selectedIndexPatterns);
+          setEntityField(indexStateRef.current.entityField);
+        }
       }
+
+      setRuleFilter(optionId);
+
+      if (!isManaged) {
+        // Non-managed: emit immediately so the form state reflects the toggle change
+        emitSources({
+          activeFilter: optionId,
+          query: filterQuery,
+          patterns: selectedIndexPatterns,
+          field: entityField,
+        });
+      }
+      // Managed: no emit needed — each type is independent and the form
+      // state only changes when the user modifies data (via onSubmitQuery, etc.)
     },
-    [
-      onFieldChange,
-      buildEntityStoreSource,
-      filterQuery,
-      watchlistName,
-      selectedIndexPatterns,
-      entityField,
-    ]
+    [isManaged, ruleFilter, filterQuery, selectedIndexPatterns, entityField, emitSources]
   );
 
   const onIndexPatternsChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedIndexPatterns(selected);
-      onFieldChange('entitySources', [
-        buildIndexEntitySource(watchlistName, selected, entityField, filterQuery),
-      ]);
+      if (isManaged) {
+        activeManagedTypes.current.add('index');
+      }
+      emitSources({
+        activeFilter: ruleFilter,
+        query: filterQuery,
+        patterns: selected,
+        field: entityField,
+      });
     },
-    [entityField, filterQuery, onFieldChange, watchlistName]
+    [entityField, filterQuery, ruleFilter, emitSources, isManaged]
   );
 
   const onEntityFieldChange = useCallback(
     (value: string) => {
       setEntityField(value);
-      onFieldChange('entitySources', [
-        buildIndexEntitySource(watchlistName, selectedIndexPatterns, value, filterQuery),
-      ]);
+      if (isManaged) {
+        activeManagedTypes.current.add('index');
+      }
+      emitSources({
+        activeFilter: ruleFilter,
+        query: filterQuery,
+        patterns: selectedIndexPatterns,
+        field: value,
+      });
     },
-    [selectedIndexPatterns, filterQuery, onFieldChange, watchlistName]
+    [selectedIndexPatterns, filterQuery, ruleFilter, emitSources, isManaged]
   );
 
   const isEntityStore = ruleFilter === 'entityStore';
+
+  // For non-managed: lock the toggle so users can't switch an existing source's type.
+  // For managed: both buttons are always enabled (each is its own source).
   const ruleToggleButtons = useMemo(
-    () => getRuleToggleButtons(isEditMode, initialEntitySource),
-    [isEditMode, initialEntitySource]
+    () => getRuleToggleButtons(isEditMode, isManaged, initialEntitySource),
+    [isEditMode, isManaged, initialEntitySource]
   );
 
   return (
