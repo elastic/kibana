@@ -572,10 +572,7 @@ describe('SmlService', () => {
       const smlService = service.start({ logger });
 
       const result = await smlService.checkItemsAccess({
-        items: [
-          { id: 'item-1', type: 'lens' },
-          { id: 'item-2', type: 'dashboard' },
-        ],
+        ids: ['item-1', 'item-2'],
         spaceId: 'default',
         esClient,
         request,
@@ -600,7 +597,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'missing-item', type: 'lens' }],
+        ids: ['missing-item'],
         spaceId: 'default',
         esClient,
         request,
@@ -630,7 +627,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'item-1', type: 'lens' }],
+        ids: ['item-1'],
         spaceId: 'default',
         esClient,
         request,
@@ -660,7 +657,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'item-1', type: 'dashboard' }],
+        ids: ['item-1'],
         spaceId: 'default',
         esClient,
         request,
@@ -690,7 +687,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.checkItemsAccess({
-        items: [{ id: 'item-1', type: 'lens' }],
+        ids: ['item-1'],
         spaceId: 'default',
         esClient,
         request,
@@ -708,10 +705,7 @@ describe('SmlService', () => {
       esClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await smlService.checkItemsAccess({
-        items: [
-          { id: 'item-1', type: 'lens' },
-          { id: 'item-2', type: 'lens' },
-        ],
+        ids: ['item-1', 'item-2'],
         spaceId: 'default',
         esClient,
         request,
@@ -732,7 +726,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.checkItemsAccess({
-        items: [{ id: 'id-1', type: 'lens' }],
+        ids: ['id-1'],
         spaceId: 'my-space',
         esClient,
         request,
