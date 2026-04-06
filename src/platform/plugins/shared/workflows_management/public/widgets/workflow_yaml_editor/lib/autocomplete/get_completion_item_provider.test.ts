@@ -402,6 +402,86 @@ describe('getCompletionItemProvider', () => {
       expect(result?.incomplete).toBe(false);
     });
 
+    it('should call YAML providers on empty lines outside liquid blocks', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
+      buildAutocompleteContext.mockReturnValueOnce({
+        path: [],
+        line: '',
+        lineUpToCursor: '',
+        lineParseResult: { matchType: 'liquid-block-keyword', fullKey: '', match: null },
+        isInLiquidBlock: false,
+        focusedStepInfo: null,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            { label: 'consts', insertText: 'consts' },
+            { label: 'description', insertText: 'description' },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(yamlProvider.provideCompletionItems).toHaveBeenCalled();
+      expect(result?.suggestions).toHaveLength(2);
+      expect(result?.suggestions?.map((s) => s.label)).toEqual(
+        expect.arrayContaining(['consts', 'description'])
+      );
+    });
+
+    it('should skip YAML providers for liquid-block-keyword when inside a liquid block', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
+      buildAutocompleteContext.mockReturnValueOnce({
+        path: ['steps', 0, 'with', 'message'],
+        line: '  assign',
+        lineUpToCursor: '  assign',
+        lineParseResult: { matchType: 'liquid-block-keyword', fullKey: 'assign', match: null },
+        isInLiquidBlock: true,
+        focusedStepInfo: null,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [{ label: 'should-not-appear', insertText: 'nope' }],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(yamlProvider.provideCompletionItems).not.toHaveBeenCalled();
+      expect(result?.suggestions).toHaveLength(0);
+    });
+
     it('should handle providers that return null or undefined', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
