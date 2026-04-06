@@ -140,13 +140,16 @@ export const useEntityAnalyticsRoutes = () => {
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
-      http.fetch<GetEntityMaintainersResponse>(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET, {
-        method: 'GET',
-        query: {
-          ...ENTITY_STORE_V2_QUERY,
-          ...(ids && ids.length > 0 ? { ids } : {}),
-        },
-      });
+      http.fetch<GetEntityMaintainersResponse>(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
+        {
+          method: 'GET',
+          query: {
+            ...ENTITY_STORE_V2_QUERY,
+            ...(ids && ids.length > 0 ? { ids } : {}),
+          },
+        }
+      );
 
     const fetchRiskScoreMaintainer = async (): Promise<
       EntityMaintainerResponseItem | undefined
@@ -206,7 +209,7 @@ export const useEntityAnalyticsRoutes = () => {
       signal?: AbortSignal;
       params: FetchEntitiesListParams;
     }) =>
-      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
         version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
         query: {
@@ -264,7 +267,7 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const initRiskEngine = async () => {
       if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
           method: 'POST',
           query: ENTITY_STORE_V2_QUERY,
           body: JSON.stringify({}),
@@ -293,7 +296,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -318,7 +321,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -343,7 +346,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -403,7 +406,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Get Entity Store v2 privileges
      */
     const fetchEntityStoreV2Privileges = () =>
-      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
         version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
       });

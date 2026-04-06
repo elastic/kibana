@@ -21,14 +21,12 @@ import {
   ENABLE_DE_HEALTH_UI_SETTING,
   RULES_LANDING_PATH,
   RULES_PATH,
-  AI_RULE_CREATION_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
-import { AiRuleCreationPage } from '../detection_engine/rule_creation_ui/pages/ai_rule_creation/ai_rule_creation_page';
 import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
 import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
@@ -162,13 +160,6 @@ const getRulesSubRoutes = (
         {
           path: '/rules/create',
           main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
-            omitSpyRoute: true,
-          }),
-          exact: true,
-        },
-        {
-          path: AI_RULE_CREATION_PATH,
-          main: withSecurityRoutePageWrapper(AiRuleCreationPage, SecurityPageName.aiRuleCreation, {
             omitSpyRoute: true,
           }),
           exact: true,
