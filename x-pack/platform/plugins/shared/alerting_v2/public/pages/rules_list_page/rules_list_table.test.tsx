@@ -63,6 +63,9 @@ const defaultProps: RulesListTableProps = {
   page: 1,
   perPage: 20,
   search: '',
+  hasActiveFilters: false,
+  sortField: undefined,
+  sortDirection: undefined,
   isLoading: false,
   selectedCount: 0,
   isAllSelected: false,
@@ -120,7 +123,7 @@ describe('RulesListTable', () => {
     });
 
     it('renders a generic empty state when there are no rules', () => {
-      renderTable({ items: [], totalItemCount: 0, search: '' });
+      renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
       expect(screen.getByText('No rules found.')).toBeInTheDocument();
     });
@@ -128,7 +131,13 @@ describe('RulesListTable', () => {
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search.')).toBeInTheDocument();
+      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+    });
+
+    it('renders a filter-specific empty state when no rules match', () => {
+      renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
+
+      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {
