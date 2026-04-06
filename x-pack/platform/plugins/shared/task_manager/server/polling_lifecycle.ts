@@ -61,6 +61,7 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './lib/create_managed_configuration';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
+import { requeueRunningTasksOwnedByThisInstance } from './lib/requeue_running_tasks_owned_by_this_instance';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -107,6 +108,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
   private started = false;
+  private hasRequeued = false;
 
   public pool: TaskPool;
 
@@ -284,6 +286,14 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   };
 
   private pollForWork = async (): Promise<TimedFillPoolResult> => {
+    if (!this.hasRequeued) {
+      this.hasRequeued = true;
+      await requeueRunningTasksOwnedByThisInstance({
+        taskStore: this.store,
+        logger: this.logger,
+      });
+    }
+
     return fillPool(
       // claim available tasks
       async () => {

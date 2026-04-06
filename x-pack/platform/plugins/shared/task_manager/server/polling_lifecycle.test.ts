@@ -45,6 +45,10 @@ jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
 }));
 
+jest.mock('./lib/requeue_running_tasks_owned_by_this_instance', () => ({
+  requeueRunningTasksOwnedByThisInstance: jest.fn().mockResolvedValue(undefined),
+}));
+
 interface EsError extends Error {
   name: string;
   statusCode: number;
@@ -152,7 +156,7 @@ describe('TaskPollingLifecycle', () => {
       },
     });
 
-    test('begins polling once the ES and SavedObjects services are available', () => {
+    test('begins polling once the ES and SavedObjects services are available', async () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
 
@@ -160,6 +164,7 @@ describe('TaskPollingLifecycle', () => {
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
 
       elasticsearchAndSOAvailability$.next(true);
+      await Promise.resolve();
 
       clock.tick(150);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
@@ -200,7 +205,7 @@ describe('TaskPollingLifecycle', () => {
   });
 
   describe('stop', () => {
-    test('stops polling if stop() is called', () => {
+    test('stops polling if stop() is called', async () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const pollingLifecycle = new TaskPollingLifecycle({
         elasticsearchAndSOAvailability$,
@@ -213,6 +218,7 @@ describe('TaskPollingLifecycle', () => {
 
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(0);
       elasticsearchAndSOAvailability$.next(true);
+      await Promise.resolve();
 
       clock.tick(50);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
@@ -330,12 +336,13 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
         );
       });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
 
       const workerUtilizationEvent = emittedEvents.find(
         (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
@@ -370,12 +377,13 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
         );
       });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
 
       const workerUtilizationEvent = emittedEvents.find(
         (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
@@ -405,12 +413,13 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
         );
       });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
     });
   });
 
@@ -438,12 +447,13 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
         );
       });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
 
       const pollingCycleEvent = emittedEvents.find(
         (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
@@ -480,12 +490,13 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
         );
       });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
 
       const pollingCycleEvent = emittedEvents.find(
         (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
@@ -521,12 +532,13 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
         );
       });
+
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
 
       const pollingCycleEvent = emittedEvents.find(
         (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
