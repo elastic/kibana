@@ -9,8 +9,7 @@ pageLoadAssetSize:
   alertingVTwo: 157791
   apm: 25363
   apmSourcesAccess: 2278
-  automaticImport: 12162
-  automaticImportVTwo: 15269
+  automaticImport: 15269
   banners: 4006
   canvas: 14881
   cases: 177203
@@ -46,7 +45,7 @@ pageLoadAssetSize:
   dataVisualizer: 32727
   developerToolbar: 4467
   devTools: 8109
-  discover: 28240
+  discover: 31186
   discoverEnhanced: 5509
   discoverShared: 2322
   elasticAssistant: 301540
@@ -104,7 +103,7 @@ pageLoadAssetSize:
   kibanaUtils: 54161
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 85000
+  lens: 86000
   licenseManagement: 8265
   licensing: 10073
   links: 8620
@@ -113,7 +112,7 @@ pageLoadAssetSize:
   logsShared: 82701
   logstash: 15882
   maintenanceWindows: 8775
-  management: 12951
+  management: 14304
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
@@ -178,7 +177,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 11422
+  streams: 12500
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755

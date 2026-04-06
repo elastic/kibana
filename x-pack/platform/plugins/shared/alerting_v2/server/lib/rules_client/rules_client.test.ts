@@ -41,7 +41,6 @@ const baseCreateData: CreateRuleParams['data'] = {
   evaluation: {
     query: {
       base: 'FROM logs-* | LIMIT 1',
-      condition: 'WHERE true',
     },
   },
 };
@@ -51,7 +50,7 @@ const baseSoAttrs = createRuleSoAttributes({
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
   evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1', condition: 'WHERE true' },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 });
 
@@ -238,7 +237,7 @@ describe('RulesClient', () => {
           data: {
             ...baseCreateData,
             evaluation: {
-              query: { base: 'FROM |', condition: 'WHERE true' },
+              query: { base: 'FROM |' },
             },
           },
           options: { id: 'rule-id-5' },
@@ -862,7 +861,28 @@ describe('RulesClient', () => {
       );
     });
 
-    it('combines explicit filters with the search query', async () => {
+    it('trims search before passing it to the saved objects client', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ search: '  prod alerts  ' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.labels: alerts*'
+          ),
+        })
+      );
+    });
+
+    it('passes filters and search together', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -876,7 +896,7 @@ describe('RulesClient', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: expect.stringContaining('alerting_rule.attributes.enabled: true'),
+          filter: expect.stringContaining(`${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`),
         })
       );
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
@@ -907,6 +927,46 @@ describe('RulesClient', () => {
         sortField: 'updatedAt',
         sortOrder: 'desc',
       });
+    });
+
+    it('maps kind sorting without transformation', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'kind', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'kind',
+          sortOrder: 'desc',
+        })
+      );
+    });
+
+    it('maps enabled sorting without transformation', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'enabled', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'enabled',
+          sortOrder: 'desc',
+        })
+      );
     });
   });
 

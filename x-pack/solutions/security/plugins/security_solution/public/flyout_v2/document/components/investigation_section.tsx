@@ -65,7 +65,7 @@ export const InvestigationSection = memo(
     );
     const ruleId = useMemo(
       () =>
-        (getFieldValue(hit, EVENT_KIND) as string) === 'signal'
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
           ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
           : (getFieldValue(hit, 'signal.rule.id') as string),
       [hit]
