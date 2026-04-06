@@ -1167,6 +1167,197 @@ describe('TaskManagerRunner', () => {
       expect(createTaskRunnerParams.fakeRequest).toBeDefined();
       expect(createTaskRunnerParams.taskInstance).toEqual(instance);
     });
+
+    test('calls enrichFakeRequest with the fake request and userProfileId when both are present', async () => {
+      const mockUser = {
+        username: 'test_user',
+        roles: ['superuser'],
+        authentication_provider: { type: 'task_manager', name: 'task_manager' },
+        elastic_cloud_user: false,
+        profile_uid: 'u_profile_123',
+      };
+      const enrichFakeRequest = jest.fn().mockResolvedValue(mockUser);
+      const setUserOnRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+        setUserOnRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
+      expect(enrichFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ headers: expect.any(Object) }),
+        'u_profile_123'
+      );
+    });
+
+    test('passes enrichRequest on RunContext when enrichFakeRequest succeeds', async () => {
+      const mockUser = {
+        username: 'test_user',
+        roles: ['superuser'],
+        authentication_provider: { type: 'task_manager', name: 'task_manager' },
+        elastic_cloud_user: false,
+        profile_uid: 'u_profile_123',
+      };
+      const enrichFakeRequest = jest.fn().mockResolvedValue(mockUser);
+      const setUserOnRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+        setUserOnRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeDefined();
+      expect(typeof createTaskRunnerParams.enrichRequest).toBe('function');
+    });
+
+    test('enrichRequest is undefined when userProfileId is absent', async () => {
+      const enrichFakeRequest = jest.fn();
+      const setUserOnRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+        setUserOnRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).not.toHaveBeenCalled();
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeUndefined();
+    });
+
+    test('task still runs when enrichFakeRequest fails (graceful degradation)', async () => {
+      const enrichFakeRequest = jest.fn().mockRejectedValue(new Error('ES authenticate failed'));
+      const setUserOnRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+        setUserOnRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to enrich fake request with user profile')
+      );
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeUndefined();
+      expect(createTaskRunnerParams.fakeRequest).toBeDefined();
+    });
+
+    test('enrichRequest uses cached user via setUserOnRequest instead of re-calling enrichFakeRequest', async () => {
+      const mockUser = {
+        username: 'test_user',
+        roles: ['superuser'],
+        authentication_provider: { type: 'task_manager', name: 'task_manager' },
+        elastic_cloud_user: false,
+        profile_uid: 'u_profile_123',
+      };
+      const enrichFakeRequest = jest.fn().mockResolvedValue(mockUser);
+      const setUserOnRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+        setUserOnRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      const childRequest = { fake: 'child-request' };
+      await createTaskRunnerParams.enrichRequest(childRequest);
+
+      expect(setUserOnRequest).toHaveBeenCalledTimes(1);
+      expect(setUserOnRequest).toHaveBeenCalledWith(childRequest, mockUser);
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
+    });
+
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
       const id = Date.now().toString();
@@ -3593,6 +3784,8 @@ describe('TaskManagerRunner', () => {
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     strategy?: string;
+    enrichFakeRequest?: jest.Mock;
+    setUserOnRequest?: jest.Mock;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3674,6 +3867,8 @@ describe('TaskManagerRunner', () => {
       getPollInterval: () => 500,
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
+      enrichFakeRequest: opts.enrichFakeRequest,
+      setUserOnRequest: opts.setUserOnRequest,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

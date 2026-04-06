@@ -486,6 +486,10 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).toHaveBeenCalledWith({ uid: 'enriched-profile-uid', data: undefined });
         expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+        });
       });
 
       it('passes dataPath when resolving profile via profile_uid', async () => {
@@ -505,6 +509,10 @@ describe('UserProfileService', () => {
           uid: 'enriched-profile-uid',
           data: 'kibana.some.path',
         });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+        });
       });
 
       it('throws if profile is not found', async () => {
@@ -520,6 +528,10 @@ describe('UserProfileService', () => {
         await expect(
           startContract.getCurrent({ request: mockRequest })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"User profile is not found."`);
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+        });
       });
     });
 

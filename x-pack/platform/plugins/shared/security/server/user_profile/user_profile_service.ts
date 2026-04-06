@@ -384,7 +384,18 @@ export class UserProfileService {
       this.logger.debug(
         `Resolving current user profile directly from profile_uid on the authenticated user.`
       );
-      return this.getUserProfile<D>(clusterClient, currentUser.profile_uid, dataPath);
+      try {
+        const profile = await this.getUserProfile<D>(
+          clusterClient,
+          currentUser.profile_uid,
+          dataPath
+        );
+        this.recordGetCurrentSuccess({});
+        return profile;
+      } catch (error) {
+        this.recordGetCurrentFailure({});
+        throw error;
+      }
     }
 
     let profileId: string | undefined;

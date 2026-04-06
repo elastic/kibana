@@ -23,6 +23,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -138,7 +139,8 @@ type Opts = {
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
-  enrichFakeRequest?: (request: KibanaRequest, userProfileId: string) => Promise<void>;
+  enrichFakeRequest?: (request: KibanaRequest, userProfileId: string) => Promise<AuthenticatedUser>;
+  setUserOnRequest?: (request: KibanaRequest, user: AuthenticatedUser) => void;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -199,7 +201,8 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly enrichFakeRequest?: (
     request: KibanaRequest,
     userProfileId: string
-  ) => Promise<void>;
+  ) => Promise<AuthenticatedUser>;
+  private readonly setUserOnRequest?: (request: KibanaRequest, user: AuthenticatedUser) => void;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -229,6 +232,7 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    setUserOnRequest,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -252,6 +256,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.setUserOnRequest = setUserOnRequest;
   }
 
   /**
@@ -450,9 +455,10 @@ export class TaskManagerRunner implements TaskRunner {
             userProfileId
           );
 
+          let cachedUser: AuthenticatedUser | undefined;
           if (fakeRequest && userProfileId && this.enrichFakeRequest) {
             try {
-              await this.enrichFakeRequest(fakeRequest, userProfileId);
+              cachedUser = await this.enrichFakeRequest(fakeRequest, userProfileId);
             } catch (err) {
               this.logger.warn(
                 `Failed to enrich fake request with user profile for task ${this.taskType} ${this.instance.task.id}: ${err.message}`
@@ -460,10 +466,11 @@ export class TaskManagerRunner implements TaskRunner {
             }
           }
 
+          const setUserOnRequestRef = this.setUserOnRequest;
           const enrichRequest =
-            fakeRequest && userProfileId && this.enrichFakeRequest
+            cachedUser && setUserOnRequestRef
               ? async (request: KibanaRequest) => {
-                  await this.enrichFakeRequest!(request, userProfileId);
+                  setUserOnRequestRef(request, cachedUser);
                 }
               : undefined;
 

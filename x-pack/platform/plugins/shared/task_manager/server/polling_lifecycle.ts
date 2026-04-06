@@ -13,6 +13,7 @@ import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart, KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -69,7 +70,12 @@ export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;
 }
 
-export type EnrichFakeRequest = (request: KibanaRequest, userProfileId: string) => Promise<void>;
+export type EnrichFakeRequest = (
+  request: KibanaRequest,
+  userProfileId: string
+) => Promise<AuthenticatedUser>;
+
+export type SetUserOnRequest = (request: KibanaRequest, user: AuthenticatedUser) => void;
 
 export interface TaskPollingLifecycleOpts {
   logger: Logger;
@@ -85,6 +91,7 @@ export interface TaskPollingLifecycleOpts {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: EnrichFakeRequest;
+  setUserOnRequest?: SetUserOnRequest;
 }
 
 export type TaskLifecycleEvent =
@@ -127,6 +134,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private apiKeyStrategy: ApiKeyStrategy;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
   private enrichFakeRequest?: EnrichFakeRequest;
+  private setUserOnRequest?: SetUserOnRequest;
 
   private eventLogger: TaskEventLogger;
 
@@ -150,6 +158,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    setUserOnRequest,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -160,6 +169,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.config = config;
     this.apiKeyStrategy = apiKeyStrategy;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.setUserOnRequest = setUserOnRequest;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
@@ -288,6 +298,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      setUserOnRequest: this.setUserOnRequest,
     });
   };
 
