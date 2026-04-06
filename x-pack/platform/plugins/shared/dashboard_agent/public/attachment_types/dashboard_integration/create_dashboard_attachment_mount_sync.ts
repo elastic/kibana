@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ignoreElements, merge, tap, type Observable } from 'rxjs';
+import { ignoreElements, merge, Observable, tap, type Observable as RxObservable } from 'rxjs';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { createManualChanges$ } from './manual_changes_tracker';
+import { createOriginSyncSubscription } from './origin_sync_subscription';
 
 export interface DashboardAttachmentMountSyncParams {
   api: DashboardApi;
@@ -23,29 +24,15 @@ export const createDashboardAttachmentMountSync$ = ({
   getAttachment,
   updateOrigin,
   addAttachment,
-}: DashboardAttachmentMountSyncParams): Observable<never> => {
-  // Sync attachment origin when dashboard is saved.
-  const savedDashboardOriginSync$ = api.onSave$.pipe(
-    tap(({ previousDashboardId, dashboardId }) => {
-      if (!dashboardId) {
-        return;
-      }
-      const currentAttachment = getAttachment();
-
-      // Only update origin if:
-      //    a. The attachment has no origin yet (first save of unsaved dashboard)
-      //    b. The attachment already points to this dashboard (second+ save)
-      //    c. The saved dashboard was previously the attachment's origin (save / save as)
-      const shouldUpdate =
-        !currentAttachment.origin ||
-        dashboardId === currentAttachment.origin ||
-        previousDashboardId === currentAttachment.origin;
-
-      if (shouldUpdate) {
-        void updateOrigin(dashboardId);
-      }
-    }),
-    ignoreElements()
+}: DashboardAttachmentMountSyncParams): RxObservable<never> => {
+  const savedDashboardOriginSync$ = new Observable<never>(() =>
+    createOriginSyncSubscription({
+      api,
+      attachmentOrigin: getAttachment().origin,
+      onOriginChange: (origin) => {
+        void updateOrigin(origin);
+      },
+    })
   );
 
   const manualChanges$ = createManualChanges$({
