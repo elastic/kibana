@@ -100,7 +100,6 @@ describe('get_tracked_alerts', () => {
       expect(tracked.indices).toEqual({});
       expect(tracked.active).toEqual({});
       expect(tracked.recovered).toEqual({});
-      expect(tracked.delayed).toEqual({});
       expect(tracked.all).toEqual({});
       expect(tracked.seqNo).toEqual({});
       expect(tracked.primaryTerm).toEqual({});
@@ -121,10 +120,31 @@ describe('get_tracked_alerts', () => {
       const mockAlert = {
         [ALERT_UUID]: 'uuid-1',
         [ALERT_INSTANCE_ID]: 'id-1',
+        [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
       } as unknown as TestAlertDoc;
       tracked.all['uuid-1'] = mockAlert;
+      tracked.active['uuid-1'] = mockAlert;
       expect(tracked.getById('id-1')).toBe(mockAlert);
       expect(tracked.getById('nonexistent')).toBeUndefined();
+    });
+
+    it('getById prefers active over recovered when same instance id exists in both', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const recoveredAlert = {
+        [ALERT_UUID]: 'uuid-old',
+        [ALERT_INSTANCE_ID]: 'id-1',
+        [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+      } as unknown as TestAlertDoc;
+      const activeAlert = {
+        [ALERT_UUID]: 'uuid-new',
+        [ALERT_INSTANCE_ID]: 'id-1',
+        [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+      } as unknown as TestAlertDoc;
+      tracked.all['uuid-old'] = recoveredAlert;
+      tracked.recovered['uuid-old'] = recoveredAlert;
+      tracked.all['uuid-new'] = activeAlert;
+      tracked.active['uuid-new'] = activeAlert;
+      expect(tracked.getById('id-1')).toBe(activeAlert);
     });
   });
 
