@@ -1,0 +1,8 @@
+{
+  "hooks": {
+    "postEdit": {
+      "command": "node scripts/type_check.js --project tsconfig.json 2>&1 | head -20",
+      "description": "Auto-run type check after file edits"
+    }
+  }
+}

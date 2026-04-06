@@ -90,7 +90,7 @@ export function registerSmlRecordsRoutes({
         'Create a new SML record or update an existing one. Records are always marked as user_defined=true to prevent overwriting by crawl events.',
       options: {
         tags: ['sml-records', 'oas-tag:agent builder'],
-        availability: { since: '9.2.0' },
+        availability: { since: '9.5.0' },
       },
     })
     .addVersion(
@@ -135,7 +135,7 @@ export function registerSmlRecordsRoutes({
       description: 'Retrieve a specific SML record by its unique identifier.',
       options: {
         tags: ['sml-records', 'oas-tag:agent builder'],
-        availability: { since: '9.2.0' },
+        availability: { since: '9.5.0' },
       },
     })
     .addVersion(
@@ -174,7 +174,7 @@ export function registerSmlRecordsRoutes({
       description: 'Delete an SML record by its unique identifier. This action cannot be undone.',
       options: {
         tags: ['sml-records', 'oas-tag:agent builder'],
-        availability: { since: '9.2.0' },
+        availability: { since: '9.5.0' },
       },
     })
     .addVersion(

@@ -3990,6 +3990,292 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/sml/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/sml/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an SML record by its unique identifier. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: delete-agent-builder-sml-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the SML record.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSmlRecordResponse:
+                  description: Example response showing that the deletion operation was successful
+                  value:
+                    success: true
+          description: Indicates a successful response
+      summary: Delete an SML record
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "https://${KIBANA_URL}/api/agent_builder/sml/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/agent_builder/sml/{id}
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/sml/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a specific SML record by its unique identifier.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-sml-id
+      parameters:
+        - description: The unique identifier of the SML record.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSmlRecordResponse:
+                  description: Example response returning an SML record
+                  value:
+                    content: Elasticsearch index containing project records for a SaaS customer support platform. Approximately 50,000 project records.
+                    created_at: '2026-04-01T00:00:00.000Z'
+                    id: index::projects::0
+                    origin_id: projects
+                    params:
+                      index_pattern: projects
+                    permissions:
+                      - index:projects/read
+                    spaces:
+                      - '*'
+                    tags:
+                      - customer_support
+                      - saas
+                      - entity
+                    title: projects
+                    type: index
+                    updated_at: '2026-04-01T00:00:00.000Z'
+                    user_defined: true
+          description: Indicates a successful response
+      summary: Get an SML record by ID
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/agent_builder/sml/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/sml/{id}
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/sml/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new SML record or update an existing one. Records are always marked as user_defined=true to prevent overwriting by crawl events.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: put-agent-builder-sml-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the SML record.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createSmlRecordRequest:
+                description: Example request to create an SML record for an Elasticsearch index
+                value:
+                  content: |-
+                    Elasticsearch index containing project records for a SaaS customer support platform. Approximately 50,000 project records. Tracks the full project lifecycle including creation, deletion, and resource usage.
+
+                    Fields:
+                    - id (keyword): unique project identifier
+                    - name (keyword): human-readable project name
+                    - owner_id (keyword): references the owning user
+                    - created_at (date): project creation time
+                    - deleted_at (date): deletion time, null if active
+                    - active_models (integer): count of deployed ML models
+                  origin_id: projects
+                  params:
+                    index_pattern: projects
+                  permissions:
+                    - index:projects/read
+                  spaces:
+                    - '*'
+                  tags:
+                    - customer_support
+                    - saas
+                    - entity
+                  title: projects
+                  type: index
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  description: The searchable content / LLM-generated summary.
+                  minLength: 1
+                  type: string
+                origin_id:
+                  description: The origin identifier (e.g., index name, saved object ID).
+                  minLength: 1
+                  type: string
+                params:
+                  additionalProperties: {}
+                  description: Type-specific parameters (e.g., index_pattern for type "index").
+                  type: object
+                permissions:
+                  description: Kibana privileges required to access this record. Defaults to [].
+                  items:
+                    type: string
+                  type: array
+                spaces:
+                  description: Space IDs this record belongs to. Use ["*"] for all spaces.
+                  items:
+                    type: string
+                  minItems: 1
+                  type: array
+                tags:
+                  description: Optional tags for categorization and filtering.
+                  items:
+                    type: string
+                  type: array
+                title:
+                  description: Display title for the record.
+                  minLength: 1
+                  type: string
+                type:
+                  description: The SML record type (e.g., "index").
+                  minLength: 1
+                  type: string
+              required:
+                - type
+                - title
+                - origin_id
+                - content
+                - spaces
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createSmlRecordResponse:
+                  description: Example response returning the created SML record
+                  value:
+                    content: |-
+                      Elasticsearch index containing project records for a SaaS customer support platform. Approximately 50,000 project records. Tracks the full project lifecycle including creation, deletion, and resource usage.
+
+                      Fields:
+                      - id (keyword): unique project identifier
+                      - name (keyword): human-readable project name
+                      - owner_id (keyword): references the owning user
+                      - created_at (date): project creation time
+                      - deleted_at (date): deletion time, null if active
+                      - active_models (integer): count of deployed ML models
+                    created_at: '2026-04-01T00:00:00.000Z'
+                    id: index::projects::0
+                    origin_id: projects
+                    params:
+                      index_pattern: projects
+                    permissions:
+                      - index:projects/read
+                    spaces:
+                      - '*'
+                    tags:
+                      - customer_support
+                      - saas
+                      - entity
+                    title: projects
+                    type: index
+                    updated_at: '2026-04-01T00:00:00.000Z'
+                    user_defined: true
+          description: Indicates a successful response
+      summary: Create or update an SML record
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "https://${KIBANA_URL}/api/agent_builder/sml/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "type": "index",
+                "title": "projects",
+                "origin_id": "projects",
+                "content": "Elasticsearch index containing project records...",
+                "spaces": ["*"],
+                "permissions": ["index:projects/read"],
+                "tags": ["customer_support", "saas"],
+                "params": { "index_pattern": "projects" }
+              }'
+        - lang: Console
+          source: |
+            PUT kbn:/api/agent_builder/sml/{id}
+            {
+              "type": "index",
+              "title": "projects",
+              "origin_id": "projects",
+              "content": "Elasticsearch index containing project records...",
+              "spaces": ["*"],
+              "permissions": ["index:projects/read"],
+              "tags": ["customer_support", "saas"],
+              "params": { "index_pattern": "projects" }
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/tools:
     get:
       description: |-
