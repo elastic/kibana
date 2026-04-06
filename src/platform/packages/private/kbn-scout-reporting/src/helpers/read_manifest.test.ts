@@ -56,10 +56,6 @@ describe('read_manifest', () => {
       readFileSyncSpy.mockRestore();
     });
 
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('should read and parse the manifest for plugin correctly', () => {
       const fileContent = `
         {
