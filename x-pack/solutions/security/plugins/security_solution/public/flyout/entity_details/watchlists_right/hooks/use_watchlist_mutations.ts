@@ -12,7 +12,6 @@ import { useUpdateWatchlist } from './use_update_watchlist';
 export interface UseWatchlistMutationsParams {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
-  entitySourceId?: string;
   /** Maps source type ('store' | 'index') → persisted entity-source ID. */
   ruleBasedSourceIds: Record<string, string>;
   spaceId?: string;
@@ -23,7 +22,6 @@ export interface UseWatchlistMutationsParams {
 export const useWatchlistMutations = ({
   watchlist,
   watchlistId,
-  entitySourceId,
   ruleBasedSourceIds,
   spaceId,
   isEditMode,
@@ -36,7 +34,6 @@ export const useWatchlistMutations = ({
   });
   const updateMutation = useUpdateWatchlist({
     watchlistId,
-    entitySourceId,
     ruleBasedSourceIds,
     watchlist,
     spaceId,

@@ -14,7 +14,6 @@ import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 
 export interface UseUpdateWatchlistOptions {
   watchlistId?: string;
-  entitySourceId?: string;
   /** Maps source type ('store' | 'index') → persisted entity-source ID. */
   ruleBasedSourceIds: Record<string, string>;
   watchlist: CreateWatchlistRequestBodyInput;
@@ -24,7 +23,6 @@ export interface UseUpdateWatchlistOptions {
 
 export const useUpdateWatchlist = ({
   watchlistId,
-  entitySourceId,
   ruleBasedSourceIds,
   watchlist,
   spaceId,

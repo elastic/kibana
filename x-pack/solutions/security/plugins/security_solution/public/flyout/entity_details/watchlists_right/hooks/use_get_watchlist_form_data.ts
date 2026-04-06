@@ -90,8 +90,6 @@ export const useGetWatchlistFormData = (watchlistId?: string) => {
 
   return {
     initialWatchlist,
-    // Keep entitySourceId for backwards compat (non-managed single-source case)
-    entitySourceId: ruleBasedSources[0]?.id,
     ruleBasedSourceIds,
     isLoading: watchlistQuery.isLoading || entitySourcesQuery.isLoading,
     isError: watchlistQuery.isError || entitySourcesQuery.isError,
