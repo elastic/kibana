@@ -30,6 +30,16 @@ export {
   convertTimeseriesCommandToFrom,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
+  hasChangePointCommand,
+  getChangePointEntityFieldName,
+  getChangePointOutputColumnNames,
+  getSourceQueryBeforeChangePoint,
+  getForkWithChangePoint,
+  getBranchLabelFromForkBranch,
+  getForkBranchLabels,
+  getTemplateSourceQueryFromForkWithChangePoint,
+  replaceEntityValueInSourceQuery,
+  type ForkBranchLabel,
 } from './utils/query_parsing_helpers';
 export {
   getIndexPatternFromESQLQuery,

@@ -70,6 +70,15 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
+  hasChangePointCommand,
+  getChangePointOutputColumnNames,
+  getSourceQueryBeforeChangePoint,
+  getForkWithChangePoint,
+  getBranchLabelFromForkBranch,
+  getForkBranchLabels,
+  getTemplateSourceQueryFromForkWithChangePoint,
+  replaceEntityValueInSourceQuery,
+  type ForkBranchLabel,
   type ESQLStatsQueryMeta,
 } from './src';
 
