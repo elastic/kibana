@@ -30,7 +30,7 @@ export const bulkEditParamsOperationsSchema = schema.arrayOf(bulkEditParamsOpera
 export const bulkEditRuleParamsOptionsSchema = schema.object({
   filter: schema.maybe(schema.string()),
   ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-  operations: schema.arrayOf(bulkEditParamsOperationsSchema),
+  operations: bulkEditParamsOperationsSchema,
 });
 
 const bulkEditExceptionListParamField = schema.literal('params.exceptionsList');
