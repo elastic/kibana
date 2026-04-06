@@ -37,7 +37,7 @@ describe('Pie Schema', () => {
         const validated = pieStateSchema.validate(input);
         expect(validated.type).toBe('pie');
         expect(validated.metrics).toHaveLength(1);
-        expect(validated.metrics[0].operation).toBe('count');
+        expect(validated.metrics[0]).toHaveProperty('operation', 'count');
       });
 
       it('validates configuration with metrics and group_by', () => {
@@ -713,7 +713,6 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
           ],
@@ -721,7 +720,7 @@ describe('Pie Schema', () => {
 
         const validated = pieStateSchema.validate(input);
         expect(validated.dataset.type).toBe('esql');
-        expect(validated.metrics[0].operation).toBe('value');
+        expect(validated.metrics[0]).toHaveProperty('column', 'count');
       });
 
       it('validates ES|QL configuration with group_by', () => {
@@ -729,13 +728,11 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
           ],
           group_by: [
             {
-              operation: 'value',
               column: 'category',
             },
           ],
@@ -751,11 +748,9 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
             {
-              operation: 'value',
               column: 'sum_sales',
             },
           ],
@@ -771,7 +766,6 @@ describe('Pie Schema', () => {
           title: 'Sales Chart',
           metrics: [
             {
-              operation: 'value',
               column: 'sum_sales',
               color: {
                 type: 'static',
@@ -781,7 +775,6 @@ describe('Pie Schema', () => {
           ],
           group_by: [
             {
-              operation: 'value',
               column: 'category',
               color: {
                 mode: 'categorical',

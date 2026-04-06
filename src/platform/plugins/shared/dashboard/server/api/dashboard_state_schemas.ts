@@ -27,21 +27,28 @@ import {
 
 const MAX_PANELS = 100;
 
-export const panelGridSchema = schema.object({
-  x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
-  y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
-  w: schema.number({
-    defaultValue: DEFAULT_PANEL_WIDTH,
-    min: 1,
-    max: DASHBOARD_GRID_COLUMN_COUNT,
-    meta: { description: 'The width of the panel in grid units' },
-  }),
-  h: schema.number({
-    defaultValue: DEFAULT_PANEL_HEIGHT,
-    min: 1,
-    meta: { description: 'The height of the panel in grid units' },
-  }),
-});
+export const panelGridSchema = schema.object(
+  {
+    x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
+    y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
+    w: schema.number({
+      defaultValue: DEFAULT_PANEL_WIDTH,
+      min: 1,
+      max: DASHBOARD_GRID_COLUMN_COUNT,
+      meta: { description: 'The width of the panel in grid units' },
+    }),
+    h: schema.number({
+      defaultValue: DEFAULT_PANEL_HEIGHT,
+      min: 1,
+      meta: { description: 'The height of the panel in grid units' },
+    }),
+  },
+  {
+    meta: {
+      id: 'kbn-dashboard-panel-grid',
+    },
+  }
+);
 
 export function getPanelSchema(isDashboardAppRequest: boolean) {
   const basePanelProps = {
@@ -86,7 +93,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
         },
         {
           meta: {
-            id: `kbn-dashboard-panel-${type}`,
+            id: `kbn-dashboard-panel-type-${type}`,
             title: type,
           },
         }
@@ -136,6 +143,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
     {
       meta: {
         description: 'Collapsable section',
+        id: 'kbn-dashboard-section',
         title: 'section',
       },
     }
@@ -177,6 +185,9 @@ export const optionsSchema = schema.object(
   },
   {
     defaultValue: DEFAULT_DASHBOARD_OPTIONS,
+    meta: {
+      id: 'kbn-dashboard-options',
+    },
   }
 );
 
@@ -188,38 +199,44 @@ export const accessControlSchema = schema.maybe(
   })
 );
 
-export function getDashboardStateSchema(
-  isDashboardAppRequest: boolean,
-  { allowAccessControl = true }: { allowAccessControl?: boolean } = {}
-) {
-  return schema.object({
-    pinned_panels: pinnedPanelsSchema,
-    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
-    options: optionsSchema,
-    panels: schema.arrayOf(
-      schema.oneOf([
-        getPanelSchema(isDashboardAppRequest),
-        getSectionSchema(isDashboardAppRequest),
-      ]),
-      {
-        defaultValue: [],
-        maxSize: MAX_PANELS,
-      }
-    ),
-    project_routing: schema.maybe(schema.string()),
-    query: schema.maybe(querySchema),
-    refresh_interval: schema.maybe(refreshIntervalSchema),
-    tags: schema.maybe(
-      schema.arrayOf(
-        schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } }),
+export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
+  return schema.object(
+    {
+      pinned_panels: pinnedPanelsSchema,
+      description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
+      filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
+      options: optionsSchema,
+      panels: schema.arrayOf(
+        schema.oneOf([
+          getPanelSchema(isDashboardAppRequest),
+          getSectionSchema(isDashboardAppRequest),
+        ]),
         {
-          maxSize: 100,
+          defaultValue: [],
+          maxSize: MAX_PANELS,
         }
-      )
-    ),
-    time_range: schema.maybe(timeRangeSchema),
-    title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    access_control: allowAccessControl ? accessControlSchema : schema.never(),
-  });
+      ),
+      project_routing: schema.maybe(schema.string()),
+      query: schema.maybe(querySchema),
+      refresh_interval: schema.maybe(refreshIntervalSchema),
+      tags: schema.maybe(
+        schema.arrayOf(
+          schema.string({
+            meta: { description: 'An array of tags ids applied to this dashboard' },
+          }),
+          {
+            maxSize: 100,
+          }
+        )
+      ),
+      time_range: schema.maybe(timeRangeSchema),
+      title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+      access_control: accessControlSchema,
+    },
+    {
+      meta: {
+        id: isDashboardAppRequest ? 'kbn-dashboard-app-data' : 'kbn-dashboard-data',
+      },
+    }
+  );
 }
