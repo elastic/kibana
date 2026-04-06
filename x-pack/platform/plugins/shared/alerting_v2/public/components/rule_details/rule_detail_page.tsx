@@ -63,6 +63,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
               { defaultMessage: 'Edit Rule' }
             )}
             data-test-subj="openEditRuleFlyoutButton"
+            color="text"
             iconType="pencil"
             name="edit"
             href={basePath.prepend(paths.ruleEdit(rule.id))}

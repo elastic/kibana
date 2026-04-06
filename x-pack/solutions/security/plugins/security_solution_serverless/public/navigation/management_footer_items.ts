@@ -141,6 +141,17 @@ export const createManagementFooterItemsTree = (
           ],
         },
         {
+          title: i18nStrings.projectPerformance.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              link: 'management:queryActivity',
+              breadcrumbStatus: 'hidden',
+              badgeType: 'new',
+            },
+          ],
+        },
+        {
           title: i18nStrings.ml.title,
           children: [
             { link: 'management:overview' },
@@ -148,6 +159,14 @@ export const createManagementFooterItemsTree = (
             { link: 'management:analytics' },
             { link: 'management:trained_models' },
             { link: 'management:supplied_configurations' },
+          ],
+        },
+        {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
           ],
         },
         {

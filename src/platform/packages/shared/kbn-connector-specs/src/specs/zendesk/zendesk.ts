@@ -10,12 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import getTicketWorkflow from './workflows/get_ticket.yaml';
-import getTicketCommentsWorkflow from './workflows/get_ticket_comments.yaml';
-import listTicketsWorkflow from './workflows/list_tickets.yaml';
-import searchWorkflow from './workflows/search.yaml';
-import whoAmIWorkflow from './workflows/who_am_i.yaml';
-
 const buildBaseUrl = (ctx: ActionContext): string =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
 
@@ -302,12 +296,4 @@ export const ZendeskConnector: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [
-    getTicketWorkflow,
-    getTicketCommentsWorkflow,
-    listTicketsWorkflow,
-    searchWorkflow,
-    whoAmIWorkflow,
-  ],
 };

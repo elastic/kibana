@@ -55,7 +55,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['synthetics-private-location'] });
+      await kibanaServer.savedObjects.clean({
+        types: ['synthetics-private-location', 'synthetics-monitor-multi-space'],
+      });
       privateLocation = await testPrivateLocationsService.addTestPrivateLocation();
       projectMonitors = setUniqueIdsAndLocations(getFixtureJson('project_browser_monitor'), [
         privateLocation,
@@ -116,22 +118,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           '[request body.monitors]: array size is [550], but cannot be greater than [500]'
         );
       } finally {
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(0, 250) })
-          .expect(200);
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete.slice(250, 251) })
-          .expect(200);
+        try {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(0, 250) });
+        } catch (e) {
+          // best-effort cleanup
+        }
+        try {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete.slice(250, 251) });
+        } catch (e) {
+          // best-effort cleanup
+        }
       }
     });
 
@@ -191,14 +205,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(totalAfterDeletion).to.eql(1);
       } finally {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete })
-          .expect(200);
+        try {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete });
+        } catch (e) {
+          // best-effort cleanup
+        }
       }
     });
 
@@ -285,25 +305,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete })
-          .expect(200);
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-              '{projectName}',
-              secondProject
+        try {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
             )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete })
-          .expect(200);
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete });
+        } catch (e) {
+          // best-effort cleanup
+        }
+        try {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                secondProject
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete });
+        } catch (e) {
+          // best-effort cleanup
+        }
       }
     });
 
@@ -409,26 +438,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
-        await supertest
-          .delete(
-            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-              '{projectName}',
-              project
-            )}`
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete })
-          .expect(200);
+        try {
+          await supertest
+            .delete(
+              `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )}`
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete });
+        } catch (e) {
+          // best-effort cleanup
+        }
 
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete })
-          .expect(200);
+        try {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete });
+        } catch (e) {
+          // best-effort cleanup
+        }
       }
     });
 
@@ -509,14 +547,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
-        await supertest
-          .delete(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete })
-          .expect(200);
+        try {
+          await supertest
+            .delete(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+                '{projectName}',
+                project
+              )
+            )
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send({ monitors: monitorsToDelete });
+        } catch (e) {
+          // best-effort cleanup
+        }
       }
     });
   });

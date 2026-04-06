@@ -2112,7 +2112,7 @@
           "FleetStartDeps"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-        "lineNumber": 153,
+        "lineNumber": 151,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2134,7 +2134,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 154,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2196,7 +2196,7 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 155,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2218,7 +2218,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 156,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2241,30 +2241,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 157,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.FleetStartServices.automaticImportVTwo",
-            "type": "Object",
-            "tags": [],
-            "label": "automaticImportVTwo",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "automaticImportVTwo",
-                "scope": "public",
-                "docId": "kibAutomaticImportVTwoPluginApi",
-                "section": "def-public.AutomaticImportV2PluginStart",
-                "text": "AutomaticImportV2PluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 158,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2296,7 +2273,7 @@
               ") | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 159,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2319,7 +2296,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 160,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2342,7 +2319,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 161,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2364,7 +2341,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 162,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8913,7 +8890,7 @@
       "label": "FleetSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-      "lineNumber": 105,
+      "lineNumber": 104,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -8931,7 +8908,7 @@
         "\nDescribes public Fleet plugin contract returned at the `start` stage."
       ],
       "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-      "lineNumber": 107,
+      "lineNumber": 106,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -8955,7 +8932,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-          "lineNumber": 111,
+          "lineNumber": 110,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -8971,7 +8948,7 @@
             "FleetConfigType"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-          "lineNumber": 113,
+          "lineNumber": 112,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -8995,7 +8972,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-          "lineNumber": 114,
+          "lineNumber": 113,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -9100,7 +9077,7 @@
             "() => Promise<true>"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-          "lineNumber": 115,
+          "lineNumber": 114,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -9144,7 +9121,7 @@
             ">>; }; }"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-          "lineNumber": 116,
+          "lineNumber": 115,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -36589,7 +36566,7 @@
           "\"aws.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 39,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -36623,7 +36600,7 @@
           "\"azure.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 40,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37397,7 +37374,7 @@
           "\"gcp.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 41,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37976,7 +37953,7 @@
           "\"organization-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 46,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38482,7 +38459,7 @@
           "\"single-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 45,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
