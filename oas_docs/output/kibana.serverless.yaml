@@ -632,6 +632,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 36
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -18862,23 +18864,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -19209,23 +19213,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -19457,90 +19463,6 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/protection_updates_note/{package_policy_id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/endpoint/scripts_library:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/scripts_library</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Retrieve a list of scripts
-      operationId: EndpointScriptLibraryListScripts
-      parameters:
-        - description: Page number of the results to return. Defaults to 1.
-          in: query
-          name: page
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_Page'
-        - description: Number of results to return per page. Defaults to 10. Max value is 1000.
-          in: query
-          name: pageSize
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiPageSize'
-        - description: The field to sort the results by. Defaults to name.
-          in: query
-          name: sortField
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiSortField'
-        - description: The direction to sort the results by. Defaults to asc (ascending).
-          in: query
-          name: sortDirection
-          required: false
-          schema:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_SortDirection'
-        - description: |
-            A KQL query string to filter the list of scripts. Nearly all fields in the script object are searchable.
-          in: query
-          name: kuery
-          required: false
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/Security_Endpoint_Management_API_Kuery'
-              - example: platform:windows
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                response:
-                  summary: List of scripts response example
-                  value:
-                    data: []
-                    page: 1
-                    pageSize: 10
-                    sortDirection: asc
-                    sortField: name
-                    total: 100
-              schema:
-                type: object
-                properties:
-                  data:
-                    items:
-                      $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScript'
-                    type: array
-                  page:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_Page'
-                  pageSize:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiPageSize'
-                  sortDirection:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_SortDirection'
-                  sortField:
-                    $ref: '#/components/schemas/Security_Endpoint_Management_API_ApiSortField'
-                  total:
-                    description: The total number of scripts matching the query
-                    type: integer
-          description: List of scripts response
-      summary: Get a list of scripts
-      tags:
-        - Security Endpoint Management API
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/entity_analytics/monitoring/engine/delete:
     delete:
       operationId: DeleteMonitoringEngine
@@ -82781,7 +82703,7 @@ components:
       description: Agent ID
       type: string
     Security_Endpoint_Management_API_AgentIds:
-      description: A list of agent IDs. Max of 50.
+      description: A list of agent IDs. Max of 250.
       example:
         - agent-id-1
         - agent-id-2
@@ -82790,7 +82712,7 @@ components:
         - items:
             minLength: 1
             type: string
-          maxItems: 50
+          maxItems: 250
           minItems: 1
           type: array
         - minLength: 1
@@ -82803,24 +82725,6 @@ components:
         - crowdstrike
         - microsoft_defender_endpoint
       example: endpoint
-      type: string
-    Security_Endpoint_Management_API_ApiPageSize:
-      default: 10
-      description: Number of items per page
-      example: 10
-      maximum: 1000
-      minimum: 1
-      type: integer
-    Security_Endpoint_Management_API_ApiSortField:
-      description: Determines which field is used to sort the results.
-      enum:
-        - name
-        - createdAt
-        - createdBy
-        - updatedAt
-        - updatedBy
-        - fileSize
-      example: updatedAt
       type: string
     Security_Endpoint_Management_API_Cancel:
       allOf:
@@ -82850,23 +82754,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -82932,6 +82838,7 @@ components:
         - unisolate
       items:
         $ref: '#/components/schemas/Security_Endpoint_Management_API_Command'
+      maxItems: 50
       type: array
     Security_Endpoint_Management_API_Comment:
       description: Optional comment
@@ -82952,13 +82859,14 @@ components:
       example: '2023-10-31T23:59:59.999Z'
       type: string
     Security_Endpoint_Management_API_EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example:
         - endpoint-id-1
         - endpoint-id-2
       items:
         minLength: 1
         type: string
+      maxItems: 250
       minItems: 1
       type: array
     Security_Endpoint_Management_API_EndpointMetadataResponse:
@@ -83047,90 +82955,6 @@ components:
               revision: 2
       type: object
       properties: {}
-    Security_Endpoint_Management_API_EndpointScript:
-      type: object
-      properties:
-        createdAt:
-          format: date-time
-          type: string
-        createdBy:
-          example: elastic
-          type: string
-        description:
-          description: Description of the script and its purpose/functionality
-          example: Collects host data for investigation
-          type: string
-        downloadUri:
-          description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
-          example: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
-          type: string
-        example:
-          type: string
-        fileHash:
-          description: SHA256 hash of the script file that was uploaded
-          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
-          type: string
-        fileName:
-          description: Name of the script file that was uploaded
-          example: collect_host_data.sh
-          type: string
-        fileSize:
-          description: Size of the script file that was uploaded in bytes
-          example: 12345
-          type: integer
-        id:
-          example: 123e4567-e89b-12d3-a456-426655440000
-          format: uuid
-          type: string
-        instructions:
-          description: Instructions for using the script, including details around its supported input arguments
-          type: string
-        name:
-          example: Collect host data
-          type: string
-        pathToExecutable:
-          description: |
-            The relative path to the file included in the archive that should be executed once its contents are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).
-          type: string
-        platform:
-          items:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptPlatform'
-          type: array
-        requiresInput:
-          type: boolean
-        tags:
-          description: Tags that categorize the script
-          items:
-            $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptTags'
-          type: array
-        updatedAt:
-          format: date-time
-          type: string
-        updatedBy:
-          example: admin
-          type: string
-        version:
-          type: string
-    Security_Endpoint_Management_API_EndpointScriptPlatform:
-      enum:
-        - linux
-        - macos
-        - windows
-      type: string
-    Security_Endpoint_Management_API_EndpointScriptTags:
-      enum:
-        - remediationAction
-        - dataCollection
-        - networkDiagnostics
-        - networkAction
-        - systemInventory
-        - forensicCollection
-        - threatHunting
-        - discovery
-        - systemManagement
-        - userManagement
-        - troubleshooting
-      type: string
     Security_Endpoint_Management_API_Execute:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
@@ -83180,23 +83004,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83361,23 +83187,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83440,23 +83268,25 @@ components:
         agent_type:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
         alert_ids:
-          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
           example:
             - alert-id-1
             - alert-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         case_ids:
-          description: The IDs of cases where the action taken will be logged.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example:
             - case-id-1
             - case-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         comment:
@@ -83521,6 +83351,7 @@ components:
           - inactive
           - unenrolled
         type: string
+      maxItems: 20
       type: array
     Security_Endpoint_Management_API_Isolate:
       allOf:
@@ -83615,23 +83446,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83800,23 +83633,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84327,23 +84162,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84394,23 +84231,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84565,23 +84404,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84730,23 +84571,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84810,7 +84653,7 @@ components:
       type: object
       properties: {}
     Security_Endpoint_Management_API_UserIds:
-      description: A list of user IDs.
+      description: A list of user IDs. Max of 50.
       example:
         - user-id-1
         - user-id-2
@@ -84818,12 +84661,13 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
           type: string
     Security_Endpoint_Management_API_WithOutputs:
-      description: A list of action IDs that should include the complete output of the action.
+      description: A list of action IDs that should include the complete output of the action. Max of 50.
       example:
         - action-id-1
         - action-id-2
@@ -84831,6 +84675,7 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
@@ -85441,6 +85286,15 @@ components:
         notes:
           items:
             type: string
+          type: array
+        related_entities:
+          items:
+            type: object
+            properties:
+              entity_id:
+                type: string
+              relationship_type:
+                type: string
           type: array
         score_type:
           description: Distinguishes base, propagated, and resolution scores.

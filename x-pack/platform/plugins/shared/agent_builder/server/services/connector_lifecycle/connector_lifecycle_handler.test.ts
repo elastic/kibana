@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ToolType } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
 const SIMPLE_WORKFLOW_YAML = `version: "1"
@@ -55,9 +55,9 @@ const createMockWorkflowsManagement = () => ({
   },
 });
 
-const createMockUiSettingsClient = (connectorsEnabled = true) => ({
+const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID) return connectorsEnabled;
+    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
     return undefined;
   }),
 });
