@@ -83,9 +83,7 @@ describe('options list control transforms', () => {
         Object {
           "data_view_id": "data-view-id",
           "field_name": "test",
-          "ignore_validations": false,
           "title": "Test",
-          "use_global_filters": true,
         }
       `);
     });
