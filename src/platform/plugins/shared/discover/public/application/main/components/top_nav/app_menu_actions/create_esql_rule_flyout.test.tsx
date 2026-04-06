@@ -98,6 +98,76 @@ describe('CreateESQLRuleFlyout', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('should re-render with updated query when store state changes', async () => {
+    const services = createDiscoverServicesMock();
+    services.history.push('/app/discover');
+    const RuleFormFlyout = services.alertingVTwo!.DynamicRuleFormFlyout as jest.Mock;
+
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setAppState)({
+        appState: { query: { esql: 'FROM logs*' } },
+      })
+    );
+
+    render(
+      <CreateESQLRuleFlyout
+        services={services}
+        tabId={tabId}
+        getState={toolkit.internalState.getState}
+        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'FROM logs*' }),
+      expect.anything()
+    );
+
+    act(() => {
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.setAppState)({
+          appState: { query: { esql: 'FROM updated_index | LIMIT 5' } },
+        })
+      );
+    });
+
+    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'FROM updated_index | LIMIT 5' }),
+      expect.anything()
+    );
+  });
+
+  it('should show a danger toast and close when the query is not ES|QL', async () => {
+    const services = createDiscoverServicesMock();
+    services.history.push('/app/discover');
+
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    const tabId = toolkit.getCurrentTab().id;
+
+    const onClose = jest.fn();
+
+    render(
+      <CreateESQLRuleFlyout
+        services={services}
+        tabId={tabId}
+        getState={toolkit.internalState.getState}
+        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
+        onClose={onClose}
+      />
+    );
+
+    expect(services.core.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('should close flyout when pathname changes', async () => {
     const { services, onClose } = await renderFlyout();
 

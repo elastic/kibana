@@ -8,10 +8,19 @@
  */
 
 import React, { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
-import type { AggregateQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { DiscoverServices } from '../../../../../build_services';
+
+const getEsqlQuery = (getState: () => DiscoverInternalState, tabId: string): string | null => {
+  const { query } = selectTab(getState(), tabId).appState;
+  if (!isOfAggregateQueryType(query)) {
+    return null;
+  }
+  return query.esql;
+};
 
 export function CreateESQLRuleFlyout({
   services,
@@ -27,7 +36,7 @@ export function CreateESQLRuleFlyout({
   onClose: () => void;
 }) {
   const getQuery = useCallback(
-    () => (selectTab(getState(), tabId).appState.query as AggregateQuery)?.esql || '',
+    () => getEsqlQuery(getState, tabId),
     [getState, tabId]
   );
 
@@ -40,6 +49,17 @@ export function CreateESQLRuleFlyout({
   onCloseRef.current = onClose;
 
   const initialPathnameRef = useRef(history.location.pathname);
+
+  useEffect(() => {
+    if (query === null) {
+      core.notifications.toasts.addDanger(
+        i18n.translate('discover.alerts.esqlRuleFlyout.queryTypeError', {
+          defaultMessage: 'Unable to create an ES|QL rule: the current query is not ES|QL.',
+        })
+      );
+      onCloseRef.current();
+    }
+  }, [query, core.notifications.toasts]);
 
   useEffect(() => {
     const unlisten = history.listen((location) => {
@@ -59,6 +79,10 @@ export function CreateESQLRuleFlyout({
       appChangeSubscription.unsubscribe();
     };
   }, [history, core.application.currentAppId$]);
+
+  if (query === null) {
+    return null;
+  }
 
   return <RuleFormFlyout query={query} onClose={onClose} />;
 }
