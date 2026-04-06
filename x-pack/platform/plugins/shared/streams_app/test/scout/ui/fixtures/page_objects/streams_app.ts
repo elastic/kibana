@@ -743,6 +743,7 @@ export class StreamsApp {
 
   async fillDateProcessorFormatInput(value: string) {
     await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+    await this.page.keyboard.press('Enter');
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
