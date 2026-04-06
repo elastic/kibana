@@ -8,7 +8,6 @@
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { ALERTING_V2_EPISODES_MANAGEMENT_PATH, MANAGEMENT_APP_ID } from '../constants';
 import { getAlertingV2Breadcrumb, type AlertingV2BreadcrumbPage } from '../lib/breadcrumb';
 import { useSetBreadcrumbs } from '../application/breadcrumb_context';
 
@@ -22,7 +21,6 @@ export function useBreadcrumbs(
 ) {
   const setBreadcrumbs = useSetBreadcrumbs();
   const chrome = useService(CoreStart('chrome'));
-  const application = useService(CoreStart('application'));
 
   useEffect(() => {
     const rootBreadcrumb: ChromeBreadcrumb = {
@@ -41,9 +39,7 @@ export function useBreadcrumbs(
 
     const episodesListBreadcrumb: ChromeBreadcrumb = {
       ...getAlertingV2Breadcrumb('episodes_list'),
-      href: application.getUrlForApp(MANAGEMENT_APP_ID, {
-        path: ALERTING_V2_EPISODES_MANAGEMENT_PATH,
-      }),
+      href: '/',
     };
 
     let breadcrumbs: ChromeBreadcrumb[];
@@ -107,5 +103,5 @@ export function useBreadcrumbs(
 
     const docTitle = [...breadcrumbs].reverse().map((b) => (b.text as string) ?? '');
     chrome.docTitle.change(docTitle);
-  }, [page, options.ruleName, setBreadcrumbs, chrome, application]);
+  }, [page, options.ruleName, setBreadcrumbs, chrome]);
 }
