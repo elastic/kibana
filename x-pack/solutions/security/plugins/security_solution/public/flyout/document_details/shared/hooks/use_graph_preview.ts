@@ -10,6 +10,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
 import {
+  type EuidSourceFields,
   getGraphActorEuidSourceFields,
   getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common';
@@ -92,13 +93,23 @@ export const useGraphPreview = ({
 }: UseGraphPreviewParams): UseGraphPreviewResult => {
   const euidApi = useEntityStoreEuidApi();
   const euid = euidApi?.euid;
+  const EMPTY_EUID_SOURCE_FIELDS: EuidSourceFields = useMemo(
+    () => ({
+      user: [],
+      host: [],
+      service: [],
+      generic: [],
+      all: [],
+    }),
+    []
+  );
   const GRAPH_ACTOR_EUID_SOURCE_FIELDS = useMemo(
-    () => (euid ? getGraphActorEuidSourceFields(euid) : []),
-    [euid]
+    () => (euid ? getGraphActorEuidSourceFields(euid) : EMPTY_EUID_SOURCE_FIELDS),
+    [euid, EMPTY_EUID_SOURCE_FIELDS]
   );
   const GRAPH_TARGET_EUID_SOURCE_FIELDS = useMemo(
-    () => (euid ? getGraphTargetEuidSourceFields(euid) : []),
-    [euid]
+    () => (euid ? getGraphTargetEuidSourceFields(euid) : EMPTY_EUID_SOURCE_FIELDS),
+    [euid, EMPTY_EUID_SOURCE_FIELDS]
   );
   const timestamp = getField(getFieldsData('@timestamp'));
   const originalEventId = getFieldsData('kibana.alert.original_event.id');
@@ -107,14 +118,24 @@ export const useGraphPreview = ({
 
   // Get actor IDs from EUID source fields (raw ECS fields used to compute actor EUIDs)
   const actorIds: string[] = [];
-  GRAPH_ACTOR_EUID_SOURCE_FIELDS.forEach((field) => {
+  [
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+  ].forEach((field) => {
     const fieldValues = getFieldArray(getFieldsData(field));
     actorIds.push(...fieldValues);
   });
 
   // Get target IDs from EUID source fields (raw ECS fields used to compute target EUIDs)
   const targetIds: string[] = [];
-  GRAPH_TARGET_EUID_SOURCE_FIELDS.forEach((field) => {
+  [
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
+  ].forEach((field) => {
     const fieldValues = getFieldArray(getFieldsData(field));
     targetIds.push(...fieldValues);
   });

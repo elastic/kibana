@@ -9,6 +9,8 @@ import {
   getGraphActorEuidSourceFields,
   getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common/constants';
+
+export { type EuidSourceFields } from '@kbn/cloud-security-posture-common/constants';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 
 export const GRAPH_ACTOR_EUID_SOURCE_FIELDS = getGraphActorEuidSourceFields(euid);

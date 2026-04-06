@@ -174,15 +174,15 @@ export const GRAPH_TARGET_ENTITY_FIELDS = [
  * These mirror the identity fields from Entity Store definitions.
  * Server-side code derives these dynamically via euid.getEuidSourceFields().
  */
-export const getGraphActorEuidSourceFields = (euid: EntityStoreEuid) =>
-  [
-    ...euid.getEuidSourceFields('user').identitySourceFields,
-    ...euid.getEuidSourceFields('host').identitySourceFields,
-    ...euid.getEuidSourceFields('service').identitySourceFields,
-    ...euid.getEuidSourceFields('generic').identitySourceFields,
-    'event.module',
-    'data_stream.dataset',
-  ] as const;
+export const getGraphActorEuidSourceFields = (euid: EntityStoreEuid) => {
+  return {
+    user: [...euid.getEuidSourceFields('user').identitySourceFields],
+    host: [...euid.getEuidSourceFields('host').identitySourceFields],
+    service: [...euid.getEuidSourceFields('service').identitySourceFields],
+    generic: [...euid.getEuidSourceFields('generic').identitySourceFields],
+    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+  };
+};
 
 function toTargetField(field: string): string {
   return field.replace('.', '.target.');
@@ -192,12 +192,14 @@ function toTargetField(field: string): string {
  * Raw source fields used to compute target EUIDs in entity store v2.
  * Target-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS.
  */
-export const getGraphTargetEuidSourceFields = (euid: EntityStoreEuid) =>
-  [
-    ...euid.getEuidSourceFields('user').identitySourceFields.map(toTargetField),
-    ...euid.getEuidSourceFields('host').identitySourceFields.map(toTargetField),
-    ...euid.getEuidSourceFields('service').identitySourceFields.map(toTargetField),
-    ...euid.getEuidSourceFields('generic').identitySourceFields.map(toTargetField),
-    'event.module',
-    'data_stream.dataset',
-  ] as const;
+export const getGraphTargetEuidSourceFields = (euid: EntityStoreEuid) => {
+  return {
+    user: [...euid.getEuidSourceFields('user').identitySourceFields.map(toTargetField)],
+    host: [...euid.getEuidSourceFields('host').identitySourceFields.map(toTargetField)],
+    service: [...euid.getEuidSourceFields('service').identitySourceFields.map(toTargetField)],
+    generic: [...euid.getEuidSourceFields('generic').identitySourceFields.map(toTargetField)],
+    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+  };
+};
+
+export type EuidSourceFields = ReturnType<typeof getGraphActorEuidSourceFields>;

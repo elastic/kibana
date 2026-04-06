@@ -9,6 +9,7 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
+import { type EuidSourceFields, GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 import {
   checkIfEntitiesIndexLookupMode,
   concatJsonObjectPropertyBool,
@@ -54,8 +55,14 @@ const buildRelationshipsEsqlQuery = ({
     )
     .join('\n');
 
-  // Store source entity fields before LOOKUP JOIN as they get overwritten by target entity fields
-  const enrichmentSection = `// Store source entity fields before lookup (they get overwritten by target entity fields)
+  return `SET unmapped_fields="nullify";
+FROM ${indexName}
+| EVAL _source_source_fields = ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)}
+${coalesceStatements}
+| FORK
+${forkBranches}
+| WHERE _target_id != ""
+// Store source entity fields before lookup (they get overwritten by target entity fields)
 | RENAME _source_id = entity.id
 | RENAME _source_name = entity.name
 | RENAME _source_type = entity.type
@@ -65,6 +72,7 @@ const buildRelationshipsEsqlQuery = ({
 // Lookup target entity metadata
 | EVAL entity.id = _target_id
 | LOOKUP JOIN ${indexName} ON entity.id
+| EVAL _target_source_fields = ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)}
 | RENAME _target_name = entity.name
 | RENAME _target_type = entity.type
 | RENAME _target_sub_type = entity.sub_type
@@ -76,14 +84,7 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME entity.type = _source_type
 | RENAME entity.sub_type = _source_sub_type
 | RENAME host.ip = _source_host_ip
-| RENAME entity.EngineMetadata.Type = _source_engine_metadata_type`;
-
-  return `FROM ${indexName}
-${coalesceStatements}
-| FORK
-${forkBranches}
-| WHERE _target_id != ""
-${enrichmentSection}
+| RENAME entity.EngineMetadata.Type = _source_engine_metadata_type
 // Build enriched actors doc data with entity metadata (from the queried entity)
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', 'entity.id')},
@@ -108,9 +109,7 @@ ${enrichmentSection}
           ${JSON_OBJECT_END}),
         ""
       ),
-      ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
-        ${concatJsonObjectPropertyEsqlExprAsString('entity.id', 'entity.id')},
-      ${JSON_OBJECT_END},
+      ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
 // Build enriched targets doc data with entity metadata
@@ -140,8 +139,7 @@ ${enrichmentSection}
         'engine_type',
         '_target_engine_metadata_type'
       )}), ""),
-    ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyEsqlExprAsString('entity.id', '_target_id')},
+    ${JSON_OBJECT_SEPARATOR}, _target_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END},
 ${JSON_OBJECT_END})
@@ -291,7 +289,8 @@ export const fetchEntities = async ({
   const indexName = getEntitiesLatestIndexName(spaceId);
 
   logger.trace(`Fetching entities from index [${indexName}] for ${entityIds.length} entities`);
-  const esqlQuery = `FROM ${indexName}
+  const esqlQuery = `SET unmapped_fields="nullify";
+    FROM ${indexName}
     | WHERE entity.id IN (${entityIds.map((_, idx) => `?entityId${idx}`).join(',')})
     | EVAL id = entity.id
     | EVAL name = entity.name
@@ -320,9 +319,7 @@ export const fetchEntities = async ({
             ${JSON_OBJECT_END}),
           ""
         ),
-        ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
-          ${concatJsonObjectPropertyEsqlExprAsString('entity.id', 'entity.id')},
-        ${JSON_OBJECT_END},
+        ${JSON_OBJECT_SEPARATOR}, ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)},
       ${JSON_OBJECT_END},
     ${JSON_OBJECT_END})
     | KEEP id, name, type, sub_type, docData`;
@@ -348,4 +345,30 @@ export const fetchEntities = async ({
     }
     throw error;
   }
+};
+
+const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
+  const properties = Object.keys(fields)
+    .map((type) => {
+      if (type === 'all') {
+        return fields.all.map(
+          (field) =>
+            `CASE(${field} IS NOT NULL, ${concatJsonObjectPropertyEsqlExprSafe(field, field)}, "")`
+        );
+      } else {
+        const typeEuidFields = fields[type as keyof EuidSourceFields];
+        return typeEuidFields.map(
+          (field) => `CASE(STARTS_WITH(entity.id, "${type}:") AND ${field} IS NOT NULL,
+            ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), field)}, "")`
+        );
+      }
+    })
+    .flat()
+    .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
+  return `REPLACE(
+    REPLACE(
+      REPLACE(
+        CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
+    "\\\\{,", ${JSON_OBJECT_START}),
+  ",}", ${JSON_OBJECT_END})`;
 };

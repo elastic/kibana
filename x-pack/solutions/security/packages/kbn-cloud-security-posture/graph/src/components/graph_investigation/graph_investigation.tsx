@@ -32,20 +32,10 @@ import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
-import {
-  EVENT_ID,
-  GRAPH_NODES_LIMIT,
-  RELATED_ENTITY,
-  TOGGLE_SEARCH_BAR_STORAGE_KEY,
-} from '../../common/constants';
+import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import {
-  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-  addFilter,
-  // TODO Replace `getFilterValues` with function that gets the current filter state
-  getFilterValues,
-} from '../filters/search_filters';
+import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
@@ -70,7 +60,7 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, euid, onOpenEventPreview);
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
   const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
@@ -335,13 +325,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
     const pinnedIds = useMemo(() => {
-      const filterValues = getFilterValues(searchFilters, [
-        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS,
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS,
-        RELATED_ENTITY,
-      ]).map(String);
-      return filterValues;
-    }, [GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS, searchFilters]);
+      return []; // TODO implement pinning functionality and pass pinned IDs here - should keep its own state
+    }, []);
 
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {

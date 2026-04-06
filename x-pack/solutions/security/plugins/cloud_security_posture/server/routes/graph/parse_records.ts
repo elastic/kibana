@@ -253,6 +253,7 @@ const createEntityNode = (
   logger?: Logger
 ): void => {
   const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+  const EXPAND_DOT_NOTATION = false;
 
   if (nodesMap[nodeId] !== undefined) return;
 
@@ -267,26 +268,12 @@ const createEntityNode = (
     if (doc.entity?.sourceFields) {
       (doc as Writable<typeof doc>).entity = {
         ...doc.entity,
-        sourceFields: expandDotNotation(doc.entity.sourceFields),
+        sourceFields: EXPAND_DOT_NOTATION
+          ? expandDotNotation(doc.entity.sourceFields)
+          : doc.entity.sourceFields,
       };
     }
   });
-
-  // const documentsData: NodeDocumentDataModel[] = deduplicateEntityDocuments(
-  //   docData
-  //     ? castArray(docData)
-  //         .filter((d): d is string => d != null)
-  //         .map((d) => {
-  //           try {
-  //             return JSON.parse(d);
-  //           } catch (e) {
-  //             logger?.error(`Failed to parse document data for node [${nodeId}]: ${e}`);
-  //             logger?.trace(d);
-  //             throw e;
-  //           }
-  //         })
-  //     : []
-  // );
 
   nodesMap[nodeId] = {
     id: nodeId,
