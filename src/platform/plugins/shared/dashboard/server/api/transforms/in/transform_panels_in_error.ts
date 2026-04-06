@@ -14,7 +14,6 @@ export class TransformPanelsInError extends Error {
 
   constructor(message: string, panelErrors: TransformPanelInError[]) {
     super(message);
-    this.message = message;
     this.name = 'TransformPanelsInError';
     this.panelErrors = panelErrors;
   }

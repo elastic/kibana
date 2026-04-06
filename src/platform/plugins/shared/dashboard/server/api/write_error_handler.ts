@@ -20,6 +20,7 @@ export function writeErrorHandler(error: any, response: KibanaResponseFactory): 
       statusCode: 400,
       bypassErrorFormat: true,
       body: {
+        message: 'Bad request',
         panelErrors: (error as TransformPanelsInError).panelErrors.map((panelError) => ({
           message: panelError.message,
           panel_type: panelError.type,

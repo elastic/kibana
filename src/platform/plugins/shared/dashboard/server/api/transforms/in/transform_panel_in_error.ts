@@ -13,8 +13,7 @@ export class TransformPanelInError extends Error {
 
   constructor(message: string, type: string, config: object) {
     super(message);
-    this.message = message;
-    this.name = 'TransformPanelIn';
+    this.name = 'TransformPanelInError';
     this.type = type;
     this.config = config;
   }
