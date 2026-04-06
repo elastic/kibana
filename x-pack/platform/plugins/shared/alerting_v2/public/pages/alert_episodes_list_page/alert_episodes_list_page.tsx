@@ -48,7 +48,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { InputTimeRange } from '@kbn/data-plugin/public/query';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { paths } from '../../constants';
-import type { KibanaServices } from '../../episodes_kibana_services';
+import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 
@@ -101,7 +101,7 @@ function EmptyToolbar() {
 }
 
 export const AlertEpisodesListPage = () => {
-  const services = useKibana<KibanaServices>().services;
+  const services = useKibana<AlertEpisodesKibanaServices>().services;
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 

@@ -19,7 +19,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
  * Kibana context services for the Alert episodes management UI
  * (`mountEpisodesApp` + `KibanaContextProvider`).
  */
-export type KibanaServices = CoreStart & {
+export type AlertEpisodesKibanaServices = CoreStart & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;

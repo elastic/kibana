@@ -31,7 +31,7 @@ import { RulesApp } from './rules_app';
 import { NotificationPoliciesApp } from './notification_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
-import type { KibanaServices } from '../episodes_kibana_services';
+import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -95,7 +95,7 @@ export const mountEpisodesApp = async ({
   const lens = container.get(PluginStart('lens')) as LensPublicStart;
   const charts = container.get(PluginStart('charts')) as ChartsPluginStart;
 
-  const kibanaReactServices: KibanaServices = {
+  const kibanaReactServices: AlertEpisodesKibanaServices = {
     ...coreStart,
     data,
     dataViews,
