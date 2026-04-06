@@ -5964,7 +5964,7 @@
             "section": "def-server.FindResult",
             "text": "FindResult"
           },
-          ">; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; findGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"@timestamp\" | \"kibana.alert.rule.gap.status\" | \"kibana.alert.rule.gap.total_gap_duration_ms\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; } & { page: number; perPage: number; ruleId: string; }>) => Promise<{ total: number; data: ",
+          ">; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; findGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"@timestamp\" | \"kibana.alert.rule.gap.status\" | \"kibana.alert.rule.gap.total_gap_duration_ms\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; excludedReasons?: (\"rule_disabled\" | \"rule_did_not_run\")[] | undefined; } & { page: number; perPage: number; ruleId: string; }>) => Promise<{ total: number; data: ",
           "Gap",
           "[]; page: number; perPage: number; }>; fillGapById: (params: Readonly<{} & { ruleId: string; gapId: string; }>) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
@@ -5980,7 +5980,7 @@
           "BulkFillGapsByRuleIdsOptions",
           ") => Promise<",
           "BulkFillGapsByRuleIdsResult",
-          ">; getRuleIdsWithGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string[] | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; highestPriorityGapFillStatuses?: (\"unfilled\" | \"filled\" | \"in_progress\")[] | undefined; ruleTypes?: Readonly<{} & { type: string; consumer: string; }>[] | undefined; maxRulesToFetch?: number | undefined; } & {}>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; summary: Readonly<{} & { totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; totalDurationMs: number; rulesByGapFillStatus: Readonly<{} & { unfilled: number; filled: number; inProgress: number; }>; }>; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{ gapFillStatus?: string | undefined; } & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; createGapAutoFillScheduler: (params: ",
+          ">; getRuleIdsWithGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string[] | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; excludedReasons?: (\"rule_disabled\" | \"rule_did_not_run\")[] | undefined; highestPriorityGapFillStatuses?: (\"error\" | \"unfilled\" | \"filled\" | \"in_progress\")[] | undefined; ruleTypes?: Readonly<{} & { type: string; consumer: string; }>[] | undefined; maxRulesToFetch?: number | undefined; schedulerId?: string | undefined; } & {}>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; summary: Readonly<{} & { totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; totalErrorDurationMs: number; totalDurationMs: number; rulesByGapFillStatus: Readonly<{} & { error: number; unfilled: number; filled: number; inProgress: number; }>; }>; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{ excludedReasons?: (\"rule_disabled\" | \"rule_did_not_run\")[] | undefined; schedulerId?: string | undefined; } & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{ gapFillStatus?: string | undefined; } & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; createGapAutoFillScheduler: (params: ",
           "CreateGapAutoFillSchedulerParams",
           ") => Promise<",
           "GapAutoFillSchedulerResponse",
@@ -11786,6 +11786,25 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.DEFAULT_EXCLUDED_GAP_REASONS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_EXCLUDED_GAP_REASONS",
+        "description": [
+          "Default gap reasons to exclude from gap monitoring and auto-fill when no explicit setting is provided"
+        ],
+        "signature": [
+          "\"rule_disabled\"[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_reason.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.DEFAULT_LOOK_BACK_WINDOW",
         "type": "number",
         "tags": [],
@@ -11911,10 +11930,10 @@
         "label": "GapFillStatus",
         "description": [],
         "signature": [
-          "\"unfilled\" | \"filled\" | \"in_progress\""
+          "\"error\" | \"unfilled\" | \"filled\" | \"in_progress\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_status.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11933,6 +11952,25 @@
         "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_reason.ts",
         "lineNumber": 18,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.GapReasonType",
+        "type": "Any",
+        "tags": [],
+        "label": "GapReasonType",
+        "description": [
+          "Default gap reasons to exclude from gap monitoring and auto-fill when no explicit setting is provided"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_reason.ts",
+        "lineNumber": 25,
+        "columnNumber": 85,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16268,7 +16306,7 @@
           "\nRepresents the status of a gap fill process for a rule.\nThis is a derived, per-rule aggregation that summarizes how well\nthe set of gaps for a rule has been filled. It is calculated from the gap\nduration sums with precedence: unfilled > in_progress > filled."
         ],
         "signature": [
-          "{ readonly UNFILLED: \"unfilled\"; readonly IN_PROGRESS: \"in_progress\"; readonly FILLED: \"filled\"; }"
+          "{ readonly UNFILLED: \"unfilled\"; readonly IN_PROGRESS: \"in_progress\"; readonly FILLED: \"filled\"; readonly ERROR: \"error\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_status.ts",
         "lineNumber": 25,

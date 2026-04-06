@@ -31,7 +31,7 @@ export const getFailureStoreStatsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
       request,
     });
 
@@ -46,7 +46,9 @@ export const getFailureStoreStatsRoute = createServerRoute({
     const stats = await getFailureStoreStats({
       name,
       esClient: scopedClusterClient.asCurrentUser,
-      esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
+      esClientAsSecondaryAuthUser: isSecurityEnabled
+        ? scopedClusterClient.asSecondaryAuthUser
+        : undefined,
       isServerless: server.isServerless,
     });
 

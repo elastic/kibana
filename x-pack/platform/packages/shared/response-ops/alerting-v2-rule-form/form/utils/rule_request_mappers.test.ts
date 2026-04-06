@@ -31,6 +31,8 @@ describe('rule_request_mappers', () => {
         base: 'FROM logs-* | LIMIT 10',
       },
     },
+    stateTransitionAlertDelayMode: 'immediate',
+    stateTransitionRecoveryDelayMode: 'immediate',
   };
 
   describe('mapFormValuesToRuleRequest', () => {
@@ -52,34 +54,6 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(baseFormValues);
 
       expect(result).not.toHaveProperty('kind');
-    });
-
-    it('omits empty condition from evaluation query', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        evaluation: { query: { base: 'FROM logs', condition: '' } },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.evaluation.query).toEqual({ base: 'FROM logs' });
-      expect(result.evaluation.query).not.toHaveProperty('condition');
-    });
-
-    it('includes non-empty condition in evaluation query', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        evaluation: {
-          query: { base: 'FROM logs | STATS count() BY host', condition: 'WHERE count > 100' },
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.evaluation.query).toEqual({
-        base: 'FROM logs | STATS count() BY host',
-        condition: 'WHERE count > 100',
-      });
     });
 
     it('maps grouping fields when present', () => {
@@ -116,29 +90,6 @@ describe('rule_request_mappers', () => {
       expect(result.recovery_policy!.query).toBeUndefined();
     });
 
-    it('maps recovery_policy type query with condition-only mode', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        evaluation: {
-          query: { base: 'FROM logs | STATS count() BY host', condition: 'WHERE count > 100' },
-        },
-        recoveryPolicy: {
-          type: 'query',
-          query: { condition: 'WHERE count <= 50' },
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.recovery_policy).toEqual({
-        type: 'query',
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count <= 50',
-        },
-      });
-    });
-
     it('maps recovery_policy type query with full base query', () => {
       const formValues: FormValues = {
         ...baseFormValues,
@@ -156,28 +107,12 @@ describe('rule_request_mappers', () => {
       });
     });
 
-    it('maps recovery_policy type query with explicit recovery base overriding evaluation base', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        evaluation: { query: { base: 'FROM logs | STATS count() BY host' } },
-        recoveryPolicy: {
-          type: 'query',
-          query: { base: 'FROM other_index', condition: 'WHERE recovered = true' },
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.recovery_policy).toEqual({
-        type: 'query',
-        query: { base: 'FROM other_index', condition: 'WHERE recovered = true' },
-      });
-    });
-
     it('maps state_transition for alert kind with pending count and timeframe', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'duration',
+        stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 3, pendingTimeframe: '10m' },
       };
 
@@ -190,6 +125,8 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 5 },
       };
 
@@ -223,10 +160,31 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toBeUndefined();
     });
 
+    it('omits pending fields when alert delay mode is immediate even if pendingCount is stale', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransition: {
+          pendingCount: 2,
+          pendingTimeframe: null,
+          recoveringCount: 3,
+          recoveringTimeframe: null,
+        },
+      };
+
+      expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
+        recovering_count: 3,
+      });
+    });
+
     it('maps state_transition with recovering count and timeframe', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: { recoveringCount: 4, recoveringTimeframe: '15m' },
       };
 
@@ -242,6 +200,8 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'breaches',
         stateTransition: { recoveringCount: 3 },
       };
 
@@ -255,6 +215,8 @@ describe('rule_request_mappers', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'duration',
         stateTransition: {
           pendingCount: 2,
           recoveringCount: 5,
@@ -464,6 +426,8 @@ describe('rule_request_mappers', () => {
         kind: 'alert',
         grouping: { fields: ['host.name'] },
         recoveryPolicy: { type: 'no_breach' },
+        stateTransitionAlertDelayMode: 'duration',
+        stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
       };
 
@@ -529,7 +493,6 @@ describe('rule_request_mappers', () => {
       evaluation: {
         query: {
           base: 'FROM logs-* | STATS count() BY host',
-          condition: 'WHERE count > 100',
         },
       },
     } as RuleResponse;
@@ -545,6 +508,8 @@ describe('rule_request_mappers', () => {
         owner: 'test-owner',
         labels: ['tag1'],
       });
+      expect(result.stateTransitionAlertDelayMode).toBe('immediate');
+      expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
     it('maps description from the API response', () => {
@@ -581,29 +546,12 @@ describe('rule_request_mappers', () => {
       expect(result.schedule).toEqual({ every: '10m', lookback: '1m' });
     });
 
-    it('maps evaluation query with condition', () => {
+    it('maps evaluation query base', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
 
       expect(result.evaluation).toEqual({
         query: {
           base: 'FROM logs-* | STATS count() BY host',
-          condition: 'WHERE count > 100',
-        },
-      });
-    });
-
-    it('maps evaluation query without condition', () => {
-      const rule = {
-        ...baseRuleResponse,
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
-      } as RuleResponse;
-
-      const result = mapRuleResponseToFormValues(rule);
-
-      expect(result.evaluation).toEqual({
-        query: {
-          base: 'FROM logs-* | LIMIT 10',
-          condition: undefined,
         },
       });
     });
@@ -630,7 +578,7 @@ describe('rule_request_mappers', () => {
         ...baseRuleResponse,
         recovery_policy: {
           type: 'query',
-          query: { base: 'FROM logs', condition: 'WHERE recovered = true' },
+          query: { base: 'FROM logs' },
         },
       } as RuleResponse;
 
@@ -638,7 +586,7 @@ describe('rule_request_mappers', () => {
 
       expect(result.recoveryPolicy).toEqual({
         type: 'query',
-        query: { base: 'FROM logs', condition: 'WHERE recovered = true' },
+        query: { base: 'FROM logs' },
       });
     });
 
@@ -671,9 +619,11 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransition).toEqual({
         pendingCount: 3,
         pendingTimeframe: '10m',
-        recoveringCount: undefined,
-        recoveringTimeframe: undefined,
+        recoveringCount: null,
+        recoveringTimeframe: null,
       });
+      expect(result.stateTransitionAlertDelayMode).toBe('duration');
+      expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
     it('maps state_transition with recovering fields', () => {
@@ -685,11 +635,13 @@ describe('rule_request_mappers', () => {
       const result = mapRuleResponseToFormValues(rule);
 
       expect(result.stateTransition).toEqual({
-        pendingCount: undefined,
-        pendingTimeframe: undefined,
+        pendingCount: null,
+        pendingTimeframe: null,
         recoveringCount: 5,
         recoveringTimeframe: '15m',
       });
+      expect(result.stateTransitionAlertDelayMode).toBe('immediate');
+      expect(result.stateTransitionRecoveryDelayMode).toBe('duration');
     });
 
     it('maps state_transition with both pending and recovering fields', () => {
@@ -706,16 +658,25 @@ describe('rule_request_mappers', () => {
 
       expect(result.stateTransition).toEqual({
         pendingCount: 2,
-        pendingTimeframe: undefined,
+        pendingTimeframe: null,
         recoveringCount: 4,
         recoveringTimeframe: '20m',
       });
+      expect(result.stateTransitionAlertDelayMode).toBe('breaches');
+      expect(result.stateTransitionRecoveryDelayMode).toBe('duration');
     });
 
-    it('omits stateTransition when not present in response', () => {
+    it('initializes stateTransition with null fields when not present in response', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
 
-      expect(result).not.toHaveProperty('stateTransition');
+      expect(result.stateTransition).toEqual({
+        pendingCount: null,
+        pendingTimeframe: null,
+        recoveringCount: null,
+        recoveringTimeframe: null,
+      });
+      expect(result.stateTransitionAlertDelayMode).toBe('immediate');
+      expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
     it('maps artifacts when present', () => {
@@ -742,7 +703,7 @@ describe('rule_request_mappers', () => {
         grouping: { fields: ['host.name'] },
         recovery_policy: {
           type: 'query',
-          query: { base: 'FROM logs-* | STATS count() BY host', condition: 'WHERE count <= 50' },
+          query: { base: 'FROM logs-* | STATS count() BY host | WHERE count <= 50' },
         },
         state_transition: { pending_count: 3, pending_timeframe: '10m' },
       } as RuleResponse;
@@ -759,6 +720,8 @@ describe('rule_request_mappers', () => {
         grouping: formValues.grouping,
         recoveryPolicy: formValues.recoveryPolicy,
         stateTransition: formValues.stateTransition,
+        stateTransitionAlertDelayMode: formValues.stateTransitionAlertDelayMode!,
+        stateTransitionRecoveryDelayMode: formValues.stateTransitionRecoveryDelayMode!,
         artifacts: formValues.artifacts,
       };
 
@@ -767,11 +730,10 @@ describe('rule_request_mappers', () => {
       expect(createPayload.kind).toBe('alert');
       expect(createPayload.metadata.description).toBe('Roundtrip description');
       expect(createPayload.evaluation.query.base).toBe('FROM logs-* | STATS count() BY host');
-      expect(createPayload.evaluation.query.condition).toBe('WHERE count > 100');
       expect(createPayload.grouping).toEqual({ fields: ['host.name'] });
       expect(createPayload.recovery_policy).toEqual({
         type: 'query',
-        query: { base: 'FROM logs-* | STATS count() BY host', condition: 'WHERE count <= 50' },
+        query: { base: 'FROM logs-* | STATS count() BY host | WHERE count <= 50' },
       });
       expect(createPayload.state_transition).toEqual({
         pending_count: 3,

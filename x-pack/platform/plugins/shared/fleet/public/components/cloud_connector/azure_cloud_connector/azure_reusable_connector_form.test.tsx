@@ -213,6 +213,8 @@ describe('AzureReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'azure',
         accountType: undefined,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -222,6 +224,8 @@ describe('AzureReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'azure',
         accountType: 'single-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -233,6 +237,8 @@ describe('AzureReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'azure',
         accountType: 'organization-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 

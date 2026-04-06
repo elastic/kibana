@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/evals'
   - '@kbn/evals-phoenix-executor'
-  - '@kbn/object-utils'
   - '@kbn/tooling-log'
   - '@kbn/streams-ai'
   - '@kbn/datemath'
@@ -34,6 +33,8 @@ dependsOn:
   - '@kbn/es-snapshot-loader'
   - '@kbn/es-errors'
   - '@kbn/otel-demo'
+  - '@kbn/ai-tools'
+  - '@kbn/std'
 tags:
   - functional-tests
   - package

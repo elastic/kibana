@@ -67,7 +67,7 @@ describe('KI query generation code evaluator', () => {
         expected_categories: ['error', 'operational'],
         esql_substrings: ['timeout', 'charge'],
       },
-      metadata: null,
+      metadata: { failure_mode: 'payment_unreachable' },
     });
 
     expect(result.score).toBe(1);
@@ -107,7 +107,7 @@ describe('KI query generation code evaluator', () => {
         expected_categories: ['error'],
         esql_substrings: ['timeout'],
       },
-      metadata: null,
+      metadata: { failure_mode: 'some_failure' },
     });
 
     expect(result.score).toBeCloseTo(1 / 7, 5);
@@ -123,5 +123,47 @@ describe('KI query generation code evaluator', () => {
       esqlSubstringCoverageRate: 0,
       evidenceGroundingRate: 0,
     });
+  });
+
+  it('excludes execution hit rate from the score for healthy-baseline scenarios', async () => {
+    const query = 'FROM logs | WHERE message LIKE "*timeout*"';
+    const evaluator = getKIQueryGenerationCodeEvaluator(
+      createEsClient({
+        [query]: { values: [] },
+      })
+    );
+
+    const result = await evaluator.evaluate({
+      input: {
+        sample_logs: ['service running normally', 'request completed timeout check'],
+      },
+      output: [
+        {
+          esql: query,
+          title: 'Timeout monitoring',
+          category: 'operational',
+          severity_score: 50,
+          evidence: ['timeout'],
+        },
+      ],
+      expected: {
+        expected_categories: ['operational'],
+      },
+      metadata: {
+        failure_domain: 'none',
+        difficulty: 'easy',
+      },
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.details).toMatchObject({
+      syntaxValidityRate: 1,
+      executionHitRate: 0,
+      categoryComplianceRate: 1,
+      severityComplianceRate: 1,
+      expectedCategoryCoverageRate: 1,
+      evidenceGroundingRate: 1,
+    });
+    expect(result.explanation).not.toContain('queries returned no hits');
   });
 });
