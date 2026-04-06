@@ -18,8 +18,10 @@ import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
+import { MetricsInfoError } from './metrics_info_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
+import { isSuppressedFetchError } from './utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -48,6 +50,7 @@ export const MetricsExperienceGrid = ({
     metricItems,
     allDimensions,
     loading: isDiscoverLoading,
+    error: metricsInfoError,
   } = useFetchMetricsData({
     fetchParams,
     services,
@@ -116,6 +119,13 @@ export const MetricsExperienceGrid = ({
 
   if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
+  }
+
+  const showMetricsInfoError =
+    metricsInfoError != null && !isDiscoverLoading && !isSuppressedFetchError(metricsInfoError);
+
+  if (showMetricsInfoError) {
+    return <MetricsInfoError />;
   }
 
   return (

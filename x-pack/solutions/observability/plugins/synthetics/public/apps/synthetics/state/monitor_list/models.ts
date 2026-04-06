@@ -25,6 +25,7 @@ export interface MonitorFilterState {
   schedules?: string[];
   locations?: string[];
   monitorQueryIds?: string[]; // Monitor Query IDs
+  configIds?: string[]; // Config IDs (UUIDs)
   showFromAllSpaces?: boolean;
   useLogicalAndFor?: UseLogicalAndField[];
 }
