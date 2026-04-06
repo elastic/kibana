@@ -29,6 +29,7 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
   });
 
   test('shows validation error when rule name is cleared after editing', async ({
+    page,
     pageObjects,
   }) => {
     await test.step('set a name then clear it', async () => {
@@ -38,13 +39,13 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
     await test.step('attempt to save and verify error is shown', async () => {
       await pageObjects.ruleForm.clickSave();
-      const errorCallout = pageObjects.ruleForm.errorCallout();
-      await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Name is required');
+      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByText('Name is required.')).toBeVisible();
     });
   });
 
   test('shows name validation error when saving after confirming the default placeholder text', async ({
+    page,
     pageObjects,
   }) => {
     await test.step('open name edit and save with the default "Untitled rule" text', async () => {
@@ -53,9 +54,8 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
     await test.step('attempt to save and verify error is shown', async () => {
       await pageObjects.ruleForm.clickSave();
-      const errorCallout = pageObjects.ruleForm.errorCallout();
-      await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Name is required');
+      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.getByText('Name is required.')).toBeVisible();
     });
   });
 
