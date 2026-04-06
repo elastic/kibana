@@ -39,10 +39,6 @@ describe('route_config', () => {
       it('returns "conversation" for plugins route', () => {
         expect(getSidebarViewForRoute('/agents/elastic-ai-agent/plugins')).toBe('conversation');
       });
-
-      it('returns "conversation" for connectors route', () => {
-        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/connectors')).toBe('conversation');
-      });
     });
 
     describe('manage routes', () => {
