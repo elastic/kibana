@@ -8,7 +8,11 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { createMetricAggregation, createTimeBucketAggregation, resolveConflictingFieldTypes } from './create_aggregation';
+import {
+  createMetricAggregation,
+  createTimeBucketAggregation,
+  resolveConflictingFieldTypes,
+} from './create_aggregation';
 
 describe('createMetricAggregation', () => {
   describe('with resolved metric name (column escaping)', () => {
@@ -147,17 +151,26 @@ describe('resolveConflictingFieldTypes', () => {
     });
 
     it('should resolve double + half_float to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT]);
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.DOUBLE,
+        ES_FIELD_TYPES.HALF_FLOAT,
+      ]);
       expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
     });
 
     it('should resolve float + half_float to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT]);
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.FLOAT,
+        ES_FIELD_TYPES.HALF_FLOAT,
+      ]);
       expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
     });
 
     it('should resolve double + scaled_float to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.SCALED_FLOAT]);
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.DOUBLE,
+        ES_FIELD_TYPES.SCALED_FLOAT,
+      ]);
       expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
     });
 
