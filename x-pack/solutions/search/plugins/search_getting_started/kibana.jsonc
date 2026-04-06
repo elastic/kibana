@@ -17,6 +17,7 @@
       "licensing"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "cloud",
       "console",
       "searchNavigation",

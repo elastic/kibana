@@ -30,28 +30,26 @@ export const createDashboardAttachmentMountSync$ = ({
   updateOrigin,
   addAttachment,
 }: DashboardAttachmentMountSyncParams): Observable<never> => {
-  let previousSavedObjectId = api.savedObjectId$.value;
-
-  const savedDashboardOriginSync$ = api.savedObjectId$.pipe(
-    tap((currentSavedObjectId) => {
-      const currentAttachment = getAttachment();
-      // Only update origin if:
-      // there is an id to update to (currentId is not undefined)
-      // the id is different from the current origin (currentId !== currentAttachment.origin)
-      // 1. The attachment has no origin yet (unsaved), OR
-      // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
-      // This prevents linking to unrelated dashboards when navigating
-
-      const shouldUpdate =
-        currentSavedObjectId &&
-        currentSavedObjectId !== currentAttachment.origin &&
-        (!currentAttachment.origin ||
-          previousSavedObjectId === currentAttachment.origin ||
-          currentSavedObjectId === currentAttachment.origin);
-      if (shouldUpdate) {
-        void updateOrigin(currentSavedObjectId);
+  // Sync attachment origin when dashboard is saved.
+  const savedDashboardOriginSync$ = api.onSave$.pipe(
+    tap(({ previousDashboardId, dashboardId }) => {
+      if (!dashboardId) {
+        return;
       }
-      previousSavedObjectId = currentSavedObjectId;
+      const currentAttachment = getAttachment();
+
+      // Only update origin if:
+      //    a. The attachment has no origin yet (first save of unsaved dashboard)
+      //    b. The attachment already points to this dashboard (second+ save)
+      //    c. The saved dashboard was previously the attachment's origin (save / save as)
+      const shouldUpdate =
+        !currentAttachment.origin ||
+        dashboardId === currentAttachment.origin ||
+        previousDashboardId === currentAttachment.origin;
+
+      if (shouldUpdate) {
+        void updateOrigin(dashboardId);
+      }
     }),
     ignoreElements()
   );
@@ -64,9 +62,9 @@ export const createDashboardAttachmentMountSync$ = ({
           attachment.type === DASHBOARD_ATTACHMENT_TYPE &&
           event.data.round.input.attachment_refs?.some(
             (ref) =>
-              (ref.attachment_id === attachment.id &&
-                ref.operation === ATTACHMENT_REF_OPERATION.updated) ||
-              ref.operation === ATTACHMENT_REF_OPERATION.created
+              ref.attachment_id === attachment.id &&
+              (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
+                ref.operation === ATTACHMENT_REF_OPERATION.created)
           ) === true
       );
 
