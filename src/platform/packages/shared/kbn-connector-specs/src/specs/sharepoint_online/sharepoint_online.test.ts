@@ -1009,7 +1009,12 @@ describe('SharepointOnline', () => {
   });
 
   describe('search action', () => {
-    it('should search with default entity types', async () => {
+    const appOnlySearchContext = {
+      ...mockContext,
+      secrets: { authType: 'oauth_client_credentials' },
+    } as unknown as ActionContext;
+
+    it('should search with default entity types using app-only auth (includes region)', async () => {
       const mockResponse = {
         data: {
           value: [
@@ -1034,7 +1039,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.search.handler(mockContext, {
+      const result = (await SharepointOnline.actions.search.handler(appOnlySearchContext, {
         query: 'test document',
       })) as SharePointSearchResponse;
 
@@ -1054,6 +1059,56 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.value[0].hitsContainers[0].hits).toHaveLength(1);
+    });
+
+    it('should search with delegated auth (omits region)', async () => {
+      const delegatedSearchContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+
+      const mockResponse = {
+        data: {
+          value: [
+            {
+              hitsContainers: [
+                {
+                  hits: [
+                    {
+                      hitId: '1',
+                      resource: {
+                        '@odata.type': '#microsoft.graph.driveItem',
+                        name: 'Document.docx',
+                      },
+                    },
+                  ],
+                  total: 1,
+                },
+              ],
+            },
+          ],
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.search.handler(delegatedSearchContext, {
+        query: 'test document',
+      })) as SharePointSearchResponse;
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/search/query',
+        {
+          requests: [
+            {
+              entityTypes: ['site'],
+              query: {
+                queryString: 'test document',
+              },
+            },
+          ],
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should search with custom entity types', async () => {
@@ -1081,7 +1136,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.search.handler(mockContext, {
+      const result = (await SharepointOnline.actions.search.handler(appOnlySearchContext, {
         query: 'project site',
         entityTypes: ['site', 'list'],
       })) as SharePointSearchResponse;
@@ -1121,7 +1176,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = (await SharepointOnline.actions.search.handler(mockContext, {
+      const result = (await SharepointOnline.actions.search.handler(appOnlySearchContext, {
         query: 'documents',
         from: 10,
         size: 25,

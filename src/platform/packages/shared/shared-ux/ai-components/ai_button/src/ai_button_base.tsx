@@ -11,10 +11,13 @@ import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 
-import { useAiButtonGradientStyles, useSvgAiGradient } from './use_ai_gradient_styles';
+import {
+  useAiButtonGradientStyles,
+  useSvgAiGradient,
+} from '../../gradient_styles/use_ai_gradient_styles';
 import { useAiButtonXsSizeCss } from './ai_button_xs_size_styles';
-import { SvgAiGradientDefs } from './svg_ai_gradient_defs';
-import { AiAssistantLogo } from './ai_assistant_logo';
+import { SvgAiGradientDefs } from '../../gradient_styles/svg_ai_gradient_defs';
+import { AiAssistantLogo } from '../../ai_icons/ai_assistant_logo';
 import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
 
 const resolvedIconType = (iconType: AiButtonIconType): IconType =>

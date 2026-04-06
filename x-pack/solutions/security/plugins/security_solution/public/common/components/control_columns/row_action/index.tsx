@@ -13,7 +13,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { DocumentFlyout } from '../../../../flyout_v2/document';
+import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -27,7 +27,7 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
@@ -112,6 +112,10 @@ const RowActionComponent = ({
   } = useUserPrivileges();
   const showNotes = canReadNotes;
 
+  const handleAlertUpdated = useCallback(() => {
+    refetch?.();
+  }, [refetch]);
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (newFlyoutSystemEnabled && hit) {
       overlays.openSystemFlyout(
@@ -119,7 +123,14 @@ const RowActionComponent = ({
           services,
           store,
           history,
-          children: <DocumentFlyout hit={hit} renderCellActions={cellActionRenderer} />,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={eventId}
+              indexName={indexName ?? undefined}
+              renderCellActions={cellActionRenderer}
+              onAlertUpdated={handleAlertUpdated}
+            />
+          ),
         }),
         {
           ownFocus: false,
@@ -145,15 +156,16 @@ const RowActionComponent = ({
       });
     }
   }, [
-    eventId,
-    hit,
-    indexName,
     newFlyoutSystemEnabled,
-    openFlyout,
+    hit,
     overlays,
-    history,
     services,
     store,
+    history,
+    eventId,
+    indexName,
+    handleAlertUpdated,
+    openFlyout,
     tableId,
     telemetry,
   ]);

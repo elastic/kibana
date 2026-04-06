@@ -117,6 +117,41 @@ describe('JiraConnector', () => {
         }
       );
     });
+
+    it('should use api.atlassian.com base URL when using OAuth with cloud ID', async () => {
+      const oauthContext = {
+        ...mockContext,
+        config: {
+          subdomain: 'mycompany',
+          cloudId: '11223344-a1b2-3c33-d444-ef1234567890',
+        },
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+
+      const mockResponse = { data: { issues: [], total: 0 } };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await JiraConnector.actions.searchIssuesWithJql.handler(oauthContext, { jql: 'project = X' });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.atlassian.com/ex/jira/11223344-a1b2-3c33-d444-ef1234567890/rest/api/3/search/jql',
+        { jql: 'project = X' }
+      );
+    });
+
+    it('should throw when OAuth is used without cloud ID', async () => {
+      const oauthContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+
+      await expect(
+        JiraConnector.actions.searchIssuesWithJql.handler(oauthContext, { jql: 'project = X' })
+      ).rejects.toThrow(
+        'Jira Cloud ID is required in connector configuration when using OAuth authentication.'
+      );
+    });
   });
 
   describe('getIssue action', () => {

@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod/v4';
 
 export type EntitySourceType = z.infer<typeof EntitySourceType>;
-export const EntitySourceType = z.enum(['index', 'entity_analytics_integration']);
+export const EntitySourceType = z.enum(['index', 'entity_analytics_integration', 'store']);
 export type EntitySourceTypeEnum = typeof EntitySourceType.enum;
 export const EntitySourceTypeEnum = EntitySourceType.enum;
 

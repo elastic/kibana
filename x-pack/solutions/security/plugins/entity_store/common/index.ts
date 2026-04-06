@@ -41,32 +41,44 @@ export const API_VERSIONS = {
   },
 } as const;
 
-const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
+const PUBLIC_BASE_ROUTE = '/api/security/entity_store';
+const INTERNAL_BASE_ROUTE = '/internal/security/entity_store';
 
 export const ENTITY_STORE_ROUTES = {
-  INSTALL: `${ENTITY_STORE_BASE_ROUTE}/install`,
-  UPDATE: ENTITY_STORE_BASE_ROUTE,
-  UNINSTALL: `${ENTITY_STORE_BASE_ROUTE}/uninstall`,
-  STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
-  START: `${ENTITY_STORE_BASE_ROUTE}/start`,
-  STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
-  CHECK_PRIVILEGES: `${ENTITY_STORE_BASE_ROUTE}/check_privileges`,
-  FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
-  FORCE_HISTORY_SNAPSHOT: `${ENTITY_STORE_BASE_ROUTE}/force_history_snapshot`,
-  CRUD_CREATE: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
-  CRUD_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
-  CRUD_BULK_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
-  CRUD_GET: `${ENTITY_STORE_BASE_ROUTE}/entities`,
-  CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
-  RESOLUTION_LINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/link`,
-  RESOLUTION_UNLINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/unlink`,
-  RESOLUTION_GROUP: `${ENTITY_STORE_BASE_ROUTE}/resolution/group`,
-  ENTITY_MAINTAINERS_START: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/start/{id}`,
-  ENTITY_MAINTAINERS_STOP: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/stop/{id}`,
-  ENTITY_MAINTAINERS_RUN: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/run/{id}`,
-  ENTITY_MAINTAINERS_GET: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers`,
-  ENTITY_MAINTAINERS_INIT: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/init`,
-} as const satisfies Record<string, string>;
+  public: {
+    INSTALL: `${PUBLIC_BASE_ROUTE}/install`,
+    UPDATE: PUBLIC_BASE_ROUTE,
+    UNINSTALL: `${PUBLIC_BASE_ROUTE}/uninstall`,
+    STATUS: `${PUBLIC_BASE_ROUTE}/status`,
+    START: `${PUBLIC_BASE_ROUTE}/start`,
+    STOP: `${PUBLIC_BASE_ROUTE}/stop`,
+    CHECK_PRIVILEGES: `${PUBLIC_BASE_ROUTE}/check_privileges`,
+    CRUD_CREATE: `${PUBLIC_BASE_ROUTE}/entities/{entityType}`,
+    CRUD_UPDATE: `${PUBLIC_BASE_ROUTE}/entities/{entityType}`,
+    CRUD_BULK_UPDATE: `${PUBLIC_BASE_ROUTE}/entities/bulk`,
+    CRUD_GET: `${PUBLIC_BASE_ROUTE}/entities`,
+    CRUD_DELETE: `${PUBLIC_BASE_ROUTE}/entities/`,
+    RESOLUTION_LINK: `${PUBLIC_BASE_ROUTE}/resolution/link`,
+    RESOLUTION_UNLINK: `${PUBLIC_BASE_ROUTE}/resolution/unlink`,
+    RESOLUTION_GROUP: `${PUBLIC_BASE_ROUTE}/resolution/group`,
+  },
+  internal: {
+    FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
+    FORCE_CCS_EXTRACT_TO_UPDATES: `${INTERNAL_BASE_ROUTE}/{entityType}/force_ccs_extract_to_updates`,
+    FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
+    ENTITY_MAINTAINERS_START: `${INTERNAL_BASE_ROUTE}/entity_maintainers/start/{id}`,
+    ENTITY_MAINTAINERS_STOP: `${INTERNAL_BASE_ROUTE}/entity_maintainers/stop/{id}`,
+    ENTITY_MAINTAINERS_RUN: `${INTERNAL_BASE_ROUTE}/entity_maintainers/run/{id}`,
+    ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE_ROUTE}/entity_maintainers`,
+    ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE_ROUTE}/entity_maintainers/init`,
+  },
+} as const satisfies Record<string, Record<string, string>>;
+
+export {
+  EntityMaintainerTaskStatus,
+  EntityMaintainerResponseItem,
+  GetEntityMaintainersResponse,
+} from './entity_maintainers';
 
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
