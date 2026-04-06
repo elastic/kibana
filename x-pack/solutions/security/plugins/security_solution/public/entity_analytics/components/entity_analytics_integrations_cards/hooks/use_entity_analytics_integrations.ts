@@ -9,8 +9,8 @@ import { useQuery } from '@kbn/react-query';
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
-import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
-import { getInstalledPackages } from '../../../../../onboarding/components/onboarding_body/cards/common/integrations/integrations_check_complete_helpers';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { getInstalledPackages } from '../../../../onboarding/components/onboarding_body/cards/common/integrations/integrations_check_complete_helpers';
 
 const isGetInfoResponse = (
   integration: GetInfoResponse | undefined

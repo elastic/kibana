@@ -9,10 +9,10 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import { css } from '@emotion/react';
-import { INTEGRATION_APP_ID } from '../../../../common/lib/integrations/constants';
-import { useIntegrationLinkState } from '../../../../common/hooks/integrations/use_integration_link_state';
-import { addPathParamToUrl } from '../../../../common/utils/integrations';
-import { useNavigation } from '../../../../common/lib/kibana';
+import { INTEGRATION_APP_ID } from '../../../common/lib/integrations/constants';
+import { useIntegrationLinkState } from '../../../common/hooks/integrations/use_integration_link_state';
+import { addPathParamToUrl } from '../../../common/utils/integrations';
+import { useNavigation } from '../../../common/lib/kibana';
 import { useEntityAnalyticsIntegrations } from './hooks/use_entity_analytics_integrations';
 
 export interface IntegrationCardsProps {
