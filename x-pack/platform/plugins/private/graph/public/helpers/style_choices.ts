@@ -167,7 +167,7 @@ export const iconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.bolt', { defaultMessage: 'Bolt' }),
   },
   {
-    id: 'waypoint',
+    id: 'mapMarker',
     prevName: 'fa-map-marker',
     package: 'eui',
     patterns: [/location/i, /geo/i, /position/i],
@@ -209,25 +209,25 @@ iconChoices.forEach((icon) => {
 export const urlTemplateIconChoices: GenericIcon[] = [
   // Patterns are used to help default icon choices for common field names
   {
-    id: 'chartLine',
+    id: 'visLine',
     prevName: 'fa-line-chart',
     package: 'eui',
     label: i18n.translate('xpack.graph.icon.lineChart', { defaultMessage: 'Line chart' }),
   },
   {
-    id: 'chartPie',
+    id: 'visPie',
     prevName: 'fa-pie-chart',
     package: 'eui',
     label: i18n.translate('xpack.graph.icon.pieChart', { defaultMessage: 'Pie chart' }),
   },
   {
-    id: 'chartArea',
+    id: 'visArea',
     prevName: 'fa-area-chart',
     package: 'eui',
     label: i18n.translate('xpack.graph.icon.areaChart', { defaultMessage: 'Area chart' }),
   },
   {
-    id: 'chartBarVertical',
+    id: 'visBarVertical',
     prevName: 'fa-bar-chart',
     package: 'eui',
     label: i18n.translate('xpack.graph.icon.barChart', { defaultMessage: 'Bar chart' }),
@@ -257,7 +257,7 @@ export const urlTemplateIconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.eye', { defaultMessage: 'Eye' }),
   },
   {
-    id: 'chartGauge',
+    id: 'visGauge',
     prevName: 'fa-tachimeter',
     package: 'eui',
     label: i18n.translate('xpack.graph.icon.tachometer', { defaultMessage: 'Tachometer' }),
@@ -275,7 +275,7 @@ export const urlTemplateIconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.externalLink', { defaultMessage: 'External link' }),
   },
   {
-    id: 'table',
+    id: 'visTable',
     prevName: 'fa-table',
     package: 'eui',
     label: i18n.translate('xpack.graph.icon.table', { defaultMessage: 'Table' }),

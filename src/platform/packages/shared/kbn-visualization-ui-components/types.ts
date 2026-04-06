@@ -17,13 +17,13 @@ export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type SharedSetOfIcons =
   | 'empty'
   | 'asterisk'
-  | 'warning'
+  | 'alert'
   | 'bell'
   | 'bolt'
   | 'bug'
-  | 'comment'
+  | 'editorComment'
   | 'flag'
   | 'heart'
-  | 'waypoint'
-  | 'star'
+  | 'mapMarker'
+  | 'starEmpty'
   | 'tag';

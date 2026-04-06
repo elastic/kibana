@@ -74,13 +74,13 @@ export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
     }),
   },
   {
-    value: 'comment',
+    value: 'editorComment',
     label: i18n.translate('visualizationUiComponents.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),
   },
   {
-    value: 'warning',
+    value: 'alert',
     label: i18n.translate('visualizationUiComponents.iconSelect.alertIconLabel', {
       defaultMessage: 'Alert',
     }),

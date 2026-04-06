@@ -20,7 +20,7 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
     }),
   },
   {
-    value: 'warning',
+    value: 'alert',
     label: i18n.translate('eventAnnotationComponents.xyChart.iconSelect.alertIconLabel', {
       defaultMessage: 'Alert',
     }),
@@ -52,7 +52,7 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
   },
 
   {
-    value: 'comment',
+    value: 'editorComment',
     label: i18n.translate('eventAnnotationComponents.xyChart.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),
@@ -70,25 +70,25 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
     }),
   },
   {
-    value: 'waypoint',
+    value: 'mapMarker',
     label: i18n.translate('eventAnnotationComponents.xyChart.iconSelect.mapMarkerLabel', {
       defaultMessage: 'Map Marker',
     }),
   },
   {
-    value: 'pinFill',
+    value: 'pinFilled',
     label: i18n.translate('eventAnnotationComponents.xyChart.iconSelect.mapPinLabel', {
       defaultMessage: 'Map Pin',
     }),
   },
   {
-    value: 'star',
+    value: 'starEmpty',
     label: i18n.translate('eventAnnotationComponents.xyChart.iconSelect.starLabel', {
       defaultMessage: 'Star',
     }),
   },
   {
-    value: 'starFill',
+    value: 'starFilled',
     label: i18n.translate('eventAnnotationComponents.xyChart.iconSelect.starFilledLabel', {
       defaultMessage: 'Star filled',
     }),
