@@ -62,19 +62,7 @@ apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentA
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
-    const batches = [
-      [1, 3000],
-      [3001, 6000],
-      [6001, 9000],
-      [9001, 12000],
-    ];
-    for (const [start, end] of batches) {
-      const objects = [];
-      for (let i = start; i <= end; i++) {
-        objects.push({ type: 'visualization', id: `test-vis-${i}` });
-      }
-      await kbnClient.savedObjects.bulkDelete({ objects });
-    }
+    await kbnClient.savedObjects.clean({ types: ['visualization'] });
   });
 
   apiTest('returns the correct count for each included types', async ({ apiClient }) => {
