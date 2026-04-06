@@ -80,6 +80,7 @@ export const bulkFillGapsByRuleIds = async (
         rule,
         range,
         maxGapCountPerRule: options.maxGapCountPerRule,
+        excludedReasons: options.excludedReasons,
       });
 
       switch (backfillResult.outcome) {
