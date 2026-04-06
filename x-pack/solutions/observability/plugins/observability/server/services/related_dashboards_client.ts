@@ -13,7 +13,7 @@ import type {
   ScanDashboardsResult,
   DashboardReadResponseBody,
 } from '@kbn/dashboard-plugin/server';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
