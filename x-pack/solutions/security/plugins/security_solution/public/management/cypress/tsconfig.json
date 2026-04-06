@@ -10,7 +10,7 @@
     "outDir": "target/types",
     "types": [
       "cypress",
-      "node",
+      "node"
     ],
   },
   "kbn_references": [
