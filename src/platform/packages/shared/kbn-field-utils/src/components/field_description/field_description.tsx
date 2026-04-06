@@ -125,13 +125,7 @@ const StreamDescriptionItem: React.FC<{
     <>
       <EuiSpacer size="xs" />
       <EuiText color="subdued" size="xs" className="eui-textBreakWord eui-textLeft">
-        <strong>
-          {i18n.translate('fieldUtils.fieldDescription.streamDescriptionLabel', {
-            defaultMessage: '{streamName}:',
-            values: { streamName },
-          })}
-        </strong>{' '}
-        <Markdown readOnly>{description}</Markdown>
+        <strong>{streamName}</strong> <Markdown readOnly>{description}</Markdown>
       </EuiText>
     </>
   );
