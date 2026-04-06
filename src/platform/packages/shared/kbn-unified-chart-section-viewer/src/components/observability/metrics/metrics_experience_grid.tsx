@@ -21,6 +21,7 @@ import { MetricsExperienceGridContent } from './metrics_experience_grid_content'
 import { MetricsInfoError } from './metrics_info_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
+import { shouldShowMetricsFetchError } from './utils/should_show_metrics_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -120,10 +121,7 @@ export const MetricsExperienceGrid = ({
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
-  const isMetricsInfoAbortError =
-    metricsInfoError instanceof Error && metricsInfoError.name === 'AbortError';
-  const showMetricsInfoError =
-    metricsInfoError != null && !isDiscoverLoading && !isMetricsInfoAbortError;
+  const showMetricsInfoError = shouldShowMetricsFetchError(metricsInfoError, isDiscoverLoading);
 
   if (showMetricsInfoError) {
     return <MetricsInfoError />;
