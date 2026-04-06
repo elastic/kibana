@@ -25,9 +25,7 @@ export const ManagedWatchlistSourceInput = ({ watchlist }: ManagedWatchlistSourc
   // In the future, this can be expanded into a switch statement or component map
   // when more managed source types are added.
   const isPrivilegedUserMonitoring = watchlist.name === PRIVILEGED_USER_WATCHLIST_NAME;
-
-  // eslint-disable-next-line no-console
-  console.log('currentPath', currentPath);
+  
   return (
     <>
       <EuiSpacer size="l" />
