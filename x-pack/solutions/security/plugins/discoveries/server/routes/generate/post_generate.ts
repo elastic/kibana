@@ -17,11 +17,14 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { createTracedLogger } from '@kbn/discoveries/impl/lib/create_traced_logger';
 import { validateRequest } from '@kbn/discoveries/impl/attack_discovery/generation/validate_request';
 import type { DiscoveriesPluginStartDeps } from '../../types';
-import { resolveConnectorDetails } from '../../workflows/helpers/resolve_connector_details';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
 import type { WorkflowInitializationService } from '../../lib/workflow_initialization';
-import { executeGenerationWorkflow, getInferredPrebuiltStepTypes } from './helpers';
+import {
+  executeGenerationWorkflow,
+  getInferredPrebuiltStepTypes,
+  resolveApiConfig,
+} from './helpers';
 
 const ROUTE_PATH = '/internal/attack_discovery/_generate';
 
@@ -113,24 +116,13 @@ export const registerGenerateRoute = (
           const tracedLogger = createTracedLogger(logger, executionUuid);
 
           // Resolve action_type_id from connector_id when not provided.
-          // getStartServices() is only called when a lookup is required:
-          const resolvedApiConfig =
-            apiConfig.action_type_id != null
-              ? apiConfig
-              : await (async () => {
-                  const { pluginsStart } = await getStartServices();
-                  const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(
-                    request
-                  );
-                  const { actionTypeId } = await resolveConnectorDetails({
-                    actionsClient,
-                    connectorId: apiConfig.connector_id,
-                    inference: pluginsStart.inference,
-                    logger: tracedLogger,
-                    request,
-                  });
-                  return { ...apiConfig, action_type_id: actionTypeId };
-                })();
+          // getStartServices() is only called when a lookup is required.
+          const resolvedApiConfig = await resolveApiConfig({
+            apiConfig,
+            getStartServices,
+            logger: tracedLogger,
+            request,
+          });
 
           tracedLogger.info(`Starting Attack discovery ${type} pipeline via generation workflow`);
           tracedLogger.debug(

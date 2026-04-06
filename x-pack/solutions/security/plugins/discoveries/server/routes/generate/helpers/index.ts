@@ -7,3 +7,4 @@
 
 export { executeGenerationWorkflow } from '@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow';
 export { getInferredPrebuiltStepTypes } from './get_inferred_prebuilt_step_types';
+export { resolveApiConfig } from './resolve_api_config';

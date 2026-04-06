@@ -30,15 +30,11 @@ jest.mock('uuid', () => ({
 }));
 
 const mockExecuteGenerationWorkflow = jest.fn().mockResolvedValue(undefined);
+const mockResolveApiConfig = jest.fn();
 
 jest.mock('./helpers', () => ({
   executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-}));
-
-const mockResolveConnectorDetails = jest.fn();
-
-jest.mock('../../workflows/helpers/resolve_connector_details', () => ({
-  resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
+  resolveApiConfig: (...args: unknown[]) => mockResolveApiConfig(...args),
 }));
 
 const mockWorkflowInitService = {
@@ -67,10 +63,10 @@ describe('registerGenerateRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockResolveConnectorDetails.mockResolvedValue({
-      actionTypeId: '.gen-ai',
-      connectorName: 'Test Connector',
-    });
+    mockResolveApiConfig.mockImplementation(
+      ({ apiConfig }: { apiConfig: Record<string, unknown> }) =>
+        Promise.resolve({ ...apiConfig, action_type_id: apiConfig.action_type_id || '.gen-ai' })
+    );
 
     mockRouter = {
       versioned: {
@@ -614,7 +610,7 @@ describe('registerGenerateRoute', () => {
       return () => getVersionHandler(versionHandler);
     };
 
-    it('resolves action_type_id from connector_id when action_type_id is not provided', async () => {
+    it('calls resolveApiConfig with the request api_config, getStartServices, logger, and request', async () => {
       mockRequest.body = {
         alerts_index_pattern: '.alerts-security.alerts-default',
         api_config: {
@@ -646,60 +642,64 @@ describe('registerGenerateRoute', () => {
 
       await getHandler()(mockContext, mockRequest, mockResponse);
 
-      expect(mockResolveConnectorDetails).toHaveBeenCalledWith(
+      expect(mockResolveApiConfig).toHaveBeenCalledWith(
         expect.objectContaining({
-          connectorId: 'test-connector',
+          apiConfig: expect.objectContaining({
+            connector_id: 'test-connector',
+          }),
+          getStartServices: mockGetStartServices,
         })
       );
+    });
+
+    it('passes the resolved api_config from resolveApiConfig to executeGenerationWorkflow', async () => {
+      const resolvedConfig = {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      };
+
+      mockResolveApiConfig.mockResolvedValue(resolvedConfig);
+
+      mockRequest.body = {
+        alerts_index_pattern: '.alerts-security.alerts-default',
+        api_config: {
+          connector_id: 'test-connector',
+        },
+        type: 'attack_discovery',
+      };
+
+      const mockResponse = {
+        badRequest: jest.fn(),
+        customError: jest.fn(),
+        ok: jest.fn((obj) => obj),
+      };
+
+      const mockContext = {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      };
+      const getHandler = setVersionHandler();
+
+      registerGenerateRoute(mockRouter, mockLogger, {
+        analytics: mockAnalytics,
+        getEventLogIndex: mockGetEventLogIndex,
+        getEventLogger: mockGetEventLogger,
+        getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
+      });
+
+      await getHandler()(mockContext, mockRequest, mockResponse);
 
       expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
-          apiConfig: expect.objectContaining({
-            action_type_id: '.gen-ai',
-            connector_id: 'test-connector',
-          }),
+          apiConfig: resolvedConfig,
         })
       );
     });
 
-    it('does not resolve action_type_id when it is already provided', async () => {
-      mockRequest.body = {
-        alerts_index_pattern: '.alerts-security.alerts-default',
-        api_config: {
-          action_type_id: '.bedrock',
-          connector_id: 'test-connector',
-        },
-        type: 'attack_discovery',
-      };
-
-      const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
-      };
-
-      const mockContext = {
-        core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
-        }),
-      };
-      const getHandler = setVersionHandler();
-
-      registerGenerateRoute(mockRouter, mockLogger, {
-        analytics: mockAnalytics,
-        getEventLogIndex: mockGetEventLogIndex,
-        getEventLogger: mockGetEventLogger,
-        getStartServices: mockGetStartServices,
-        workflowInitService: mockWorkflowInitService,
-      });
-
-      await getHandler()(mockContext, mockRequest, mockResponse);
-
-      expect(mockResolveConnectorDetails).not.toHaveBeenCalled();
-    });
-
-    it('returns an error when connector resolution fails', async () => {
-      mockResolveConnectorDetails.mockRejectedValue(
+    it('returns an error when resolveApiConfig fails', async () => {
+      mockResolveApiConfig.mockRejectedValue(
         new Error('Failed to resolve connector details for test-connector: Not found')
       );
 
