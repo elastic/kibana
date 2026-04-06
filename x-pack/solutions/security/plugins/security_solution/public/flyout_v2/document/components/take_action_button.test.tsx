@@ -12,14 +12,19 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
+import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions'
+);
 
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
+const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 
 const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord =>
   ({
@@ -32,7 +37,6 @@ const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
 const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
-
 const mockOnAlertUpdated = jest.fn();
 
 const defaultProps = {
@@ -50,6 +54,10 @@ describe('<TakeActionButton />', () => {
     jest.clearAllMocks();
     mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [] });
     mockUseAlertsActions.mockReturnValue({ actionItems: [], panels: [] });
+    mockUseAlertAssigneesActions.mockReturnValue({
+      alertAssigneesItems: [],
+      alertAssigneesPanels: [],
+    });
   });
 
   it('should render the take action button', () => {
@@ -133,5 +141,71 @@ describe('<TakeActionButton />', () => {
         alertStatus: undefined,
       })
     );
+  });
+
+  it('should call useAlertAssigneesActions with ecsData and closePopover', () => {
+    renderTakeActionButton();
+
+    expect(mockUseAlertAssigneesActions).toHaveBeenCalledWith(
+      expect.objectContaining({ ecsRowData: mockEcsData })
+    );
+  });
+
+  it('should call onAlertUpdated and refetchFlyoutData when assignees are updated', () => {
+    renderTakeActionButton();
+
+    const assigneesCallArgs = mockUseAlertAssigneesActions.mock.calls[0][0];
+    assigneesCallArgs.refetch();
+
+    expect(mockOnAlertUpdated).toHaveBeenCalled();
+    expect(mockRefetchFlyoutData).toHaveBeenCalled();
+  });
+
+  describe('alert vs non-alert document', () => {
+    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
+    const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
+
+    beforeEach(() => {
+      mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
+      mockUseAlertAssigneesActions.mockReturnValue({
+        alertAssigneesItems: [assigneeItem],
+        alertAssigneesPanels: [],
+      });
+    });
+
+    it('should include status and assignees items for alert documents (event.kind === signal)', () => {
+      const alertHit = createMockHit({ 'event.kind': 'signal' });
+      const { getByTestId, getByText } = renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Mark as acknowledged')).toBeInTheDocument();
+      expect(getByText('Assign alert')).toBeInTheDocument();
+    });
+
+    it('should exclude status and assignees items for non-alert documents', () => {
+      const eventHit = createMockHit({ 'event.kind': 'event' });
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+    });
+
+    it('should exclude status and assignees items when event.kind is not set', () => {
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit(),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+    });
   });
 });
