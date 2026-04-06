@@ -11,7 +11,12 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { resolveInterruptedWorkflowRunTask, shouldFailOnWorkflowRunRetry } from './task_recovery';
+import {
+  buildTaskAttemptsExhaustedMessage,
+  resolveExhaustedWorkflowRunTask,
+  resolveInterruptedWorkflowRunTask,
+  shouldFailOnWorkflowRunRetry,
+} from './task_recovery';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 describe('shouldFailOnWorkflowRunRetry', () => {
@@ -89,5 +94,96 @@ describe('resolveInterruptedWorkflowRunTask', () => {
     ).resolves.toBe('task_complete');
 
     expect(esClient.update).toHaveBeenCalled();
+  });
+});
+
+describe('resolveExhaustedWorkflowRunTask', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let repository: WorkflowExecutionRepository;
+  const logger = loggingSystemMock.create().get();
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    repository = new WorkflowExecutionRepository(esClient);
+    jest.spyOn(logger, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('does nothing when taskAttempts is below maxAttempts', async () => {
+    await resolveExhaustedWorkflowRunTask({
+      workflowExecutionRepository: repository,
+      workflowRunId: 'run-1',
+      spaceId: 'default',
+      taskAttempts: 2,
+      maxAttempts: 3,
+      error: new Error('ignored'),
+      logger,
+    });
+
+    expect(esClient.get).not.toHaveBeenCalled();
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('marks FAILED with TaskAttemptsExhaustedError on last attempt when execution is non-terminal', async () => {
+    esClient.get.mockResolvedValue({
+      _source: {
+        id: 'run-1',
+        spaceId: 'default',
+        workflowId: 'w',
+        status: ExecutionStatus.RUNNING,
+      },
+    } as any);
+    esClient.update.mockResolvedValue({} as any);
+
+    const thrown = new Error('handler blew up');
+
+    await resolveExhaustedWorkflowRunTask({
+      workflowExecutionRepository: repository,
+      workflowRunId: 'run-1',
+      spaceId: 'default',
+      taskAttempts: 3,
+      maxAttempts: 3,
+      error: thrown,
+      logger,
+    });
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'run-1',
+        doc: expect.objectContaining({
+          status: ExecutionStatus.FAILED,
+          error: {
+            type: 'TaskAttemptsExhaustedError',
+            message: buildTaskAttemptsExhaustedMessage(thrown.message),
+          },
+        }),
+      })
+    );
+  });
+
+  it('does not update when execution is already terminal on last attempt', async () => {
+    esClient.get.mockResolvedValue({
+      _source: {
+        id: 'run-1',
+        spaceId: 'default',
+        workflowId: 'w',
+        status: ExecutionStatus.COMPLETED,
+      },
+    } as any);
+
+    await resolveExhaustedWorkflowRunTask({
+      workflowExecutionRepository: repository,
+      workflowRunId: 'run-1',
+      spaceId: 'default',
+      taskAttempts: 3,
+      maxAttempts: 3,
+      error: new Error('handler blew up'),
+      logger,
+    });
+
+    expect(esClient.update).not.toHaveBeenCalled();
   });
 });

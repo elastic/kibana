@@ -102,6 +102,52 @@ export async function markExecutionFailedTaskRecovery(
   });
 }
 
+/**
+ * After `workflow:run` throws on the last Task Manager attempt, mark a still-non-terminal
+ * execution FAILED so it does not remain stuck if the handler exits without updating state.
+ */
+export async function resolveExhaustedWorkflowRunTask({
+  workflowExecutionRepository,
+  workflowRunId,
+  spaceId,
+  taskAttempts,
+  maxAttempts,
+  error,
+  logger,
+}: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  taskAttempts: number;
+  maxAttempts: number;
+  error: unknown;
+  logger: Logger;
+}): Promise<void> {
+  if (taskAttempts < maxAttempts) {
+    return;
+  }
+
+  try {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (execution && !isTerminalStatus(execution.status)) {
+      const lastMessage = error instanceof Error ? error.message : String(error);
+      await markExecutionFailedTaskRecovery(workflowExecutionRepository, workflowRunId, {
+        type: 'TaskAttemptsExhaustedError',
+        message: buildTaskAttemptsExhaustedMessage(lastMessage),
+      });
+    }
+  } catch (markFailedErr) {
+    logger.error(
+      `Failed to mark workflow execution ${workflowRunId} as FAILED after task attempts exhausted: ${
+        markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+      }`
+    );
+  }
+}
+
 /** Exported for unit tests */
 export function shouldFailOnWorkflowRunRetry(
   execution: EsWorkflowExecution | null,

@@ -16,7 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
@@ -37,8 +37,7 @@ import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
-  buildTaskAttemptsExhaustedMessage,
-  markExecutionFailedTaskRecovery,
+  resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
@@ -218,33 +217,15 @@ export class WorkflowsExecutionEnginePlugin
                     workflowsExecutionEngine.isEventDrivenExecutionEnabled,
                 });
               } catch (error) {
-                if (taskInstance.attempts >= WORKFLOW_RUN_TASK_MAX_ATTEMPTS) {
-                  try {
-                    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-                      workflowRunId,
-                      spaceId
-                    );
-                    if (execution && !isTerminalStatus(execution.status)) {
-                      const lastMessage = error instanceof Error ? error.message : String(error);
-                      await markExecutionFailedTaskRecovery(
-                        workflowExecutionRepository,
-                        workflowRunId,
-                        {
-                          type: 'TaskAttemptsExhaustedError',
-                          message: buildTaskAttemptsExhaustedMessage(lastMessage),
-                        }
-                      );
-                    }
-                  } catch (markFailedErr) {
-                    logger.error(
-                      `Failed to mark workflow execution ${workflowRunId} as FAILED after task attempts exhausted: ${
-                        markFailedErr instanceof Error
-                          ? markFailedErr.message
-                          : String(markFailedErr)
-                      }`
-                    );
-                  }
-                }
+                await resolveExhaustedWorkflowRunTask({
+                  workflowExecutionRepository,
+                  workflowRunId,
+                  spaceId,
+                  taskAttempts: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
+                  error,
+                  logger,
+                });
                 throw error;
               }
             },
