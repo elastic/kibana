@@ -915,6 +915,101 @@ export class WorkflowsService {
   }
 
   /**
+   * Disables all enabled workflows across all spaces. Sets `enabled: false`,
+   * patches YAML accordingly, and unschedules any scheduled tasks.
+   * Used when a user opts out of workflows by toggling the global UI setting off.
+   */
+  public async disableAllWorkflows(): Promise<{
+    total: number;
+    disabled: number;
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    await this.ensureInitialized();
+
+    const client = this.workflowStorage.getClient();
+    const pageSize = 1000;
+    const failures: Array<{ id: string; error: string }> = [];
+    const disabledIds: string[] = [];
+
+    const searchResponse = await client.search({
+      query: {
+        bool: {
+          must: [{ term: { enabled: true } }],
+          must_not: [{ exists: { field: 'deleted_at' } }],
+        },
+      },
+      size: pageSize,
+      _source: true,
+      track_total_hits: true,
+    });
+
+    const hits = searchResponse.hits.hits.filter(
+      (hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+        hit._id != null && hit._source != null
+    );
+
+    if (hits.length === 0) {
+      return { total: 0, disabled: 0, failures: [] };
+    }
+
+    const bulkOperations = hits.map((hit) => {
+      const source = hit._source;
+      const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
+      return {
+        index: {
+          _id: hit._id,
+          document: {
+            ...source,
+            enabled: false,
+            yaml: updatedYaml,
+          },
+        },
+      };
+    });
+
+    try {
+      const bulkResponse = await client.bulk({
+        operations: bulkOperations,
+        refresh: true,
+      });
+
+      bulkResponse.items.forEach((item) => {
+        const operation = item.index;
+        if (operation?.error) {
+          failures.push({
+            id: operation._id ?? 'unknown',
+            error:
+              typeof operation.error === 'object' && 'reason' in operation.error
+                ? operation.error.reason ?? JSON.stringify(operation.error)
+                : JSON.stringify(operation.error),
+          });
+        } else if (operation?._id) {
+          disabledIds.push(operation._id);
+        }
+      });
+
+      await this.unscheduleDeletedWorkflowTasks(disabledIds);
+    } catch (error) {
+      bulkOperations.forEach((op) => {
+        failures.push({
+          id: op.index._id ?? 'unknown',
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
+    }
+
+    this.logger.info(
+      `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
+    );
+
+    return {
+      total: hits.length,
+      disabled: disabledIds.length,
+      failures,
+    };
+  }
+
+  /**
    * Returns all enabled, non-deleted workflows in the space that are subscribed to the given trigger type.
    * Used by the event-driven handler to resolve which workflows to run when an event is emitted.
    */
