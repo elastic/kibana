@@ -12,12 +12,14 @@ import type { ICommandMethods } from '../registry';
 import type { ICommandContext } from '../types';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 import { validate } from './validate';
 
 const userAgentCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const userAgentCommand = {
