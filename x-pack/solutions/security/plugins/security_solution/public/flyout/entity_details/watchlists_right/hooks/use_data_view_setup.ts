@@ -35,21 +35,28 @@ export const useDataViewSetup = () => {
     return () => subscription.unsubscribe();
   }, [filterManager]);
 
-  // Create a DataView from the sourcerer spec (same pattern as AlertFiltersKqlBar)
   useEffect(() => {
-    let dv: DataView;
+    let cancelled = false;
+    let dvId: string | undefined;
+
     const createDataView = async () => {
-      if (sourcererDataView) {
-        dv = await data.dataViews.create(sourcererDataView);
-        setDataView(dv);
+      if (!sourcererDataView) return;
+
+      const dv = await data.dataViews.create(sourcererDataView);
+
+      if (cancelled) {
+        if (dv.id) data.dataViews.clearInstanceCache(dv.id);
+        return;
       }
+
+      dvId = dv.id;
+      setDataView(dv);
     };
     createDataView();
 
     return () => {
-      if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv.id);
-      }
+      cancelled = true;
+      if (dvId) data.dataViews.clearInstanceCache(dvId);
     };
   }, [data.dataViews, sourcererDataView]);
 
