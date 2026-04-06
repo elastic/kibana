@@ -131,7 +131,9 @@ export class WorkflowStateTracker {
       }
     } catch (error) {
       this.logger.error(
-        `[WorkflowStateTracker] Failed to ensure index exists: ${error instanceof Error ? error.message : String(error)}`
+        `[WorkflowStateTracker] Failed to ensure index exists: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       throw error;
     }
@@ -176,7 +178,9 @@ export class WorkflowStateTracker {
       this.logger.debug(`[WorkflowStateTracker] Initialized execution: ${executionId}`);
     } catch (error) {
       this.logger.error(
-        `[WorkflowStateTracker] Failed to initialize execution execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+        `[WorkflowStateTracker] Failed to initialize execution execution_id=${executionId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       throw error;
     }
@@ -228,7 +232,9 @@ export class WorkflowStateTracker {
       );
     } catch (error) {
       this.logger.error(
-        `[WorkflowStateTracker] Failed to update progress execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+        `[WorkflowStateTracker] Failed to update progress execution_id=${executionId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
   }
@@ -287,7 +293,9 @@ export class WorkflowStateTracker {
       );
     } catch (error) {
       this.logger.error(
-        `[WorkflowStateTracker] Failed to complete phase execution_id=${executionId} phase=${phaseNumber}: ${error instanceof Error ? error.message : String(error)}`
+        `[WorkflowStateTracker] Failed to complete phase execution_id=${executionId} phase=${phaseNumber}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
   }
@@ -315,7 +323,9 @@ export class WorkflowStateTracker {
       this.logger.info(`[WorkflowStateTracker] Completed execution: ${executionId}`);
     } catch (error) {
       this.logger.error(
-        `[WorkflowStateTracker] Failed to complete execution execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+        `[WorkflowStateTracker] Failed to complete execution execution_id=${executionId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
   }
@@ -364,7 +374,9 @@ export class WorkflowStateTracker {
       );
     } catch (error) {
       this.logger.error(
-        `[WorkflowStateTracker] Failed to mark execution as failed execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+        `[WorkflowStateTracker] Failed to mark execution as failed execution_id=${executionId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
   }
@@ -385,7 +397,9 @@ export class WorkflowStateTracker {
         return null;
       }
       this.logger.error(
-        `[WorkflowStateTracker] Failed to get execution state execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+        `[WorkflowStateTracker] Failed to get execution state execution_id=${executionId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       throw error;
     }

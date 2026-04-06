@@ -191,7 +191,9 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
                 logger,
               }).catch((err) => {
                 logger.error(
-                  `[AESOP] Background cross-evaluation failed: ${err instanceof Error ? err.message : String(err)}`
+                  `[AESOP] Background cross-evaluation failed: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
                 );
               });
             }
@@ -216,7 +218,9 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
           const durationMs = Date.now() - startTime;
 
           logger.error(
-            `[AESOP] Failed to reject skill skill_id=${skillId} duration_ms=${durationMs}: ${getErrorMessage(error)}`
+            `[AESOP] Failed to reject skill skill_id=${skillId} duration_ms=${durationMs}: ${getErrorMessage(
+              error
+            )}`
           );
 
           if (error instanceof AESOPError) {
@@ -249,13 +253,12 @@ async function crossEvaluatePendingSkills({
   rejectedSkill,
   logger,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   esClient: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   actionsClient: any;
   connectorId: string;
   rejectedSkill: { id: string; name: string; rejection_reason: string; review_notes: string };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   logger: any;
 }) {
   // Find all pending_review skills that haven't been validated yet

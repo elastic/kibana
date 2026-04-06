@@ -113,7 +113,9 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           logger.error(
-            `[AESOP] Failed to list proposed skills error=${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to list proposed skills error=${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
 
           return response.customError({

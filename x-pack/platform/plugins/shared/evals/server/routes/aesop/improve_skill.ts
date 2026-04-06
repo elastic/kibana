@@ -68,7 +68,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
           }
 
           logger.info(
-            `[AESOP] Improving skill skill_id=${skillId} skill_name=${skill.name} mode=${useAgent ? 'agent' : 'direct-llm'}`
+            `[AESOP] Improving skill skill_id=${skillId} skill_name=${skill.name} mode=${
+              useAgent ? 'agent' : 'direct-llm'
+            }`
           );
 
           // Try agent-based improvement if requested
@@ -183,7 +185,6 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             throw new Error('Actions plugin not available');
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const actionsClient: any = await actionsStart.getActionsClientWithRequest(request);
 
           const prompt = buildImprovementPrompt(skill);
@@ -264,7 +265,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             logger,
           }).catch((err) => {
             logger.error(
-              `[AESOP] Auto-validation after improvement failed skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+              `[AESOP] Auto-validation after improvement failed skill_id=${skillId}: ${
+                err instanceof Error ? err.message : String(err)
+              }`
             );
           });
 
@@ -281,7 +284,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
           });
         } catch (error) {
           logger.error(
-            `[AESOP] Failed to improve skill skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to improve skill skill_id=${skillId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
 
           return response.customError({
@@ -392,14 +397,13 @@ async function autoValidateImprovedSkill({
   improvedSkill,
   logger,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   esClient: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   actionsClient: any;
   connectorId: string;
   skillId: string;
   improvedSkill: { name: string; description: string; markdown: string };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   logger: any;
 }) {
   const startTime = Date.now();

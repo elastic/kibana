@@ -162,7 +162,9 @@ export function registerRunExplorationRoute({
               skillRegistry = await agentBuilderStart.skills.getRegistry({ request });
             } catch (err) {
               logger.warn(
-                `[AESOP] Could not create skill registry error=${err instanceof Error ? err.message : String(err)}`
+                `[AESOP] Could not create skill registry error=${
+                  err instanceof Error ? err.message : String(err)
+                }`
               );
             }
           }
@@ -190,7 +192,9 @@ export function registerRunExplorationRoute({
           );
           executor.execute().catch((err) => {
             logger.error(
-              `[AESOP] Background exploration failed error=${err instanceof Error ? err.message : String(err)}`
+              `[AESOP] Background exploration failed error=${
+                err instanceof Error ? err.message : String(err)
+              }`
             );
           });
 
@@ -208,7 +212,9 @@ export function registerRunExplorationRoute({
           });
         } catch (error) {
           logger.error(
-            `[AESOP] Failed to start exploration error=${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to start exploration error=${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
 
           return response.customError({

@@ -78,7 +78,9 @@ export function registerGetExplorationProgressRoute({ router, logger }: AESOPRou
           });
         } catch (error) {
           logger.error(
-            `[AESOP] Failed to fetch exploration progress execution_id=${executionId} error=${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to fetch exploration progress execution_id=${executionId} error=${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
 
           return response.customError({

@@ -77,7 +77,9 @@ export function registerUpdateSkillRoute({ router, logger }: AESOPRouteDependenc
           });
 
           logger.info(
-            `[AESOP] Skill updated skill_id=${skillId} fields_updated=${Object.keys(updates).join(',')}`
+            `[AESOP] Skill updated skill_id=${skillId} fields_updated=${Object.keys(updates).join(
+              ','
+            )}`
           );
 
           return response.ok({
@@ -90,7 +92,9 @@ export function registerUpdateSkillRoute({ router, logger }: AESOPRouteDependenc
           });
         } catch (error) {
           logger.error(
-            `[AESOP] Failed to update skill skill_id=${skillId} error=${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to update skill skill_id=${skillId} error=${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
 
           return response.customError({

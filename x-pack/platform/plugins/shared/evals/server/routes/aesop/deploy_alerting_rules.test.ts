@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Tests for AESOP Alerting Rules Deployment Route
  */

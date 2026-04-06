@@ -144,7 +144,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                     }
                   } catch (err) {
                     logger.error(
-                      `[AESOP] Agent-based validation failed, results not saved skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+                      `[AESOP] Agent-based validation failed, results not saved skill_id=${skillId}: ${
+                        err instanceof Error ? err.message : String(err)
+                      }`
                     );
                     // Fall back: mark as failed so user can retry with direct LLM
                     await esClient
@@ -209,7 +211,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
               },
               onError: (error, iteration) => {
                 logger.error(
-                  `[AESOP] Convergence loop error at iteration ${iteration} skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+                  `[AESOP] Convergence loop error at iteration ${iteration} skill_id=${skillId}: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
                 );
               },
             });
@@ -241,7 +245,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
               })
               .catch((err) => {
                 logger.error(
-                  `[AESOP] Convergence loop failed skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+                  `[AESOP] Convergence loop failed skill_id=${skillId}: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
                 );
               });
           } else {
@@ -255,7 +261,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
               logger,
             }).catch((err) => {
               logger.error(
-                `[AESOP] Background LLM validation failed skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+                `[AESOP] Background LLM validation failed skill_id=${skillId}: ${
+                  err instanceof Error ? err.message : String(err)
+                }`
               );
             });
           }
@@ -273,7 +281,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
           });
         } catch (error) {
           logger.error(
-            `[AESOP] Failed to start validation skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to start validation skill_id=${skillId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
 
           // Revert skill status on setup failure
@@ -313,7 +323,7 @@ async function runLLMValidation({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   actionsClient: any;
   connectorId: string;
   skillId: string;
@@ -400,7 +410,9 @@ async function runLLMValidation({
     const durationMs = Date.now() - startTime;
 
     logger.error(
-      `[AESOP] LLM validation failed skill_id=${skillId} duration_ms=${durationMs}: ${error instanceof Error ? error.message : String(error)}`
+      `[AESOP] LLM validation failed skill_id=${skillId} duration_ms=${durationMs}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
 
     // Mark as failed — preserve previous score if it exists
@@ -569,7 +581,7 @@ async function runLLMValidationAndGetScore({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   actionsClient: any;
   connectorId: string;
   skillId: string;
@@ -663,7 +675,7 @@ async function runLLMImprovement({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   actionsClient: any;
   connectorId: string;
   skillId: string;

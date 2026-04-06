@@ -65,7 +65,9 @@ export function registerGetSkillDetailRoute({ router, logger }: AESOPRouteDepend
             return response.notFound({ body: { message: `Skill ${skillId} not found` } });
           }
           logger.error(
-            `[AESOP] Failed to get skill detail skill_id=${skillId} error=${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to get skill detail skill_id=${skillId} error=${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
           return response.customError({
             statusCode: 500,

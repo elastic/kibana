@@ -139,7 +139,9 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
           const toolIds = inferTools(skill.markdown || '').slice(0, MAX_TOOLS);
 
           logger.info(
-            `[AESOP] Deploying skill to Agent Builder skill_id=${skillId} agent_builder_skill_id=${agentBuilderSkillId} update_existing=${isUpdateExisting} tool_ids=${toolIds.join(',')}`
+            `[AESOP] Deploying skill to Agent Builder skill_id=${skillId} agent_builder_skill_id=${agentBuilderSkillId} update_existing=${isUpdateExisting} tool_ids=${toolIds.join(
+              ','
+            )}`
           );
 
           // 6. Create or update skill in Agent Builder via SkillRegistry
@@ -241,7 +243,9 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
           });
         } catch (error) {
           logger.error(
-            `[AESOP] Failed to approve skill skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Failed to approve skill skill_id=${skillId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
 
           return response.customError({

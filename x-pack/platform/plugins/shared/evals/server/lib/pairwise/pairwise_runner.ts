@@ -26,7 +26,11 @@ const computePairwiseResults = (
     const delta = avgA - avgB;
     const isTie = Math.abs(delta) < 0.05;
     const winner: 'A' | 'B' | 'tie' = isTie ? 'tie' : delta > 0 ? 'A' : 'B';
-    const direction: 'A_better' | 'B_better' | 'tie' = isTie ? 'tie' : delta > 0 ? 'A_better' : 'B_better';
+    const direction: 'A_better' | 'B_better' | 'tie' = isTie
+      ? 'tie'
+      : delta > 0
+      ? 'A_better'
+      : 'B_better';
     return { evaluator, scoreA: avgA, scoreB: avgB, winner, direction, delta };
   });
 
