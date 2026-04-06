@@ -42,6 +42,7 @@ components:
       type: array
       description: A set of agent health statuses to filter by.
       example: [ "healthy", "updating" ]
+      maxItems: 20
       items:
         type: string
         enum:
@@ -79,10 +80,10 @@ components:
             type: string
             minLength: 1
           minItems: 1
-          maxItems: 50
+          maxItems: 250
         - type: string
           minLength: 1
-      description: A list of agent IDs. Max of 50.
+      description: A list of agent IDs. Max of 250.
       example: [ "agent-id-1", "agent-id-2" ]
       minLength: 1
 
@@ -108,6 +109,7 @@ components:
       type: array
       description: A list of response action command names.
       example: [ "isolate", "unisolate" ]
+      maxItems: 50
       items:
         $ref: '#/components/schemas/Command'
 
@@ -137,9 +139,10 @@ components:
             type: string
             minLength: 1
           minItems: 1
+          maxItems: 50
         - type: string
           minLength: 1
-      description: A list of user IDs.
+      description: A list of user IDs. Max of 50.
       example: [ "user-id-1", "user-id-2" ]
 
     WithOutputs:
@@ -149,9 +152,10 @@ components:
             type: string
             minLength: 1
           minItems: 1
+          maxItems: 50
         - type: string
           minLength: 1
-      description: A list of action IDs that should include the complete output of the action.
+      description: A list of action IDs that should include the complete output of the action. Max of 50.
       example: [ "action-id-1", "action-id-2" ]
 
     Type:
@@ -172,12 +176,13 @@ components:
 
     EndpointIds:
       type: array
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example: [ "endpoint-id-1", "endpoint-id-2" ]
       items:
         type: string
         minLength: 1
       minItems: 1
+      maxItems: 250
 
     Comment:
       type: string
@@ -206,17 +211,19 @@ components:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
           type: array
-          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
           example: [ "alert-id-1", "alert-id-2" ]
           minItems: 1
+          maxItems: 50
           items:
             type: string
             minLength: 1
         case_ids:
           type: array
-          description: The IDs of cases where the action taken will be logged.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example: [ "case-id-1", "case-id-2" ]
           minItems: 1
+          maxItems: 50
           items:
             type: string
             minLength: 1

@@ -2715,6 +2715,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sie
 
 /x-pack/solutions/security/test/serverless/functional/test_suites/ftr/discover @elastic/security-threat-hunting
 x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/resolver.ts @elastic/security-threat-hunting
 
 ## Security Solution Threat Hunting areas - Threat Hunting Investigations
 
