@@ -153,7 +153,7 @@ export function registerSmlRulesRoutes({
         'Create a new SML rule or update an existing one. Rules define how Elasticsearch indices should be summarized by an LLM.',
       options: {
         tags: ['sml-rules', 'oas-tag:agent builder'],
-        availability: { since: '9.2.0' },
+        availability: { since: '9.5.0' },
       },
     })
     .addVersion(
@@ -195,7 +195,7 @@ export function registerSmlRulesRoutes({
       description: 'Retrieve all registered SML rules.',
       options: {
         tags: ['sml-rules', 'oas-tag:agent builder'],
-        availability: { since: '9.2.0' },
+        availability: { since: '9.5.0' },
       },
     })
     .addVersion(
@@ -237,7 +237,7 @@ export function registerSmlRulesRoutes({
       description: 'Retrieve a specific SML rule by its unique identifier.',
       options: {
         tags: ['sml-rules', 'oas-tag:agent builder'],
-        availability: { since: '9.2.0' },
+        availability: { since: '9.5.0' },
       },
     })
     .addVersion(
@@ -277,7 +277,7 @@ export function registerSmlRulesRoutes({
       description: 'Delete an SML rule by its unique identifier. This action cannot be undone.',
       options: {
         tags: ['sml-rules', 'oas-tag:agent builder'],
-        availability: { since: '9.2.0' },
+        availability: { since: '9.5.0' },
       },
     })
     .addVersion(
