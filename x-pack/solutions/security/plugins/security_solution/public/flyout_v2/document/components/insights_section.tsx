@@ -28,6 +28,7 @@ import { PrevalenceDetails } from '../../prevalence/prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
+import { ThreatIntelligenceDetails } from '../../threat_intelligence';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -45,13 +46,17 @@ export interface InsightsSectionProps {
    * Document to display in the overview tab
    */
   hit: DataTableRecord;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
  * Insights section of the overview tab.
  * Content to be added soon.
  */
-export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
+export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionProps) => {
   const { services } = useKibana();
   const { overlays } = services;
   const store = useStore();
@@ -81,7 +86,22 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
     [rule?.investigation_fields?.field_names]
   );
 
-  const onShowThreatIntelligenceDetails = useCallback(() => {}, []);
+  const onShowThreatIntelligenceDetails = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <ThreatIntelligenceDetails hit={hit} />,
+      }),
+      {
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      }
+    );
+  }, [history, hit, overlays, services, store]);
   const onShowAlert = useCallback(
     (id: string, indexName: string) =>
       services.overlays?.openSystemFlyout(
@@ -94,12 +114,13 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
               documentId={id}
               indexName={indexName}
               renderCellActions={cellActionRenderer}
+              onAlertUpdated={onAlertUpdated}
             />
           ),
         }),
         { ownFocus: false, resizable: true, session: 'inherit', size: 's' }
       ),
-    [history, services, store]
+    [history, onAlertUpdated, services, store]
   );
   const onShowCorrelationsDetails = useCallback(() => {
     overlays.openSystemFlyout(

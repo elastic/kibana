@@ -17,6 +17,6 @@
     "@kbn/streams-schema",
     "@kbn/kibana-api-cli",
     "@kbn/dev-cli-runner",
-    "@kbn/core"
+    "@kbn/core",
   ]
 }

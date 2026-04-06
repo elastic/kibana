@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
@@ -44,6 +45,7 @@ import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification
 import { useSnoozeNotificationPolicy } from '../../hooks/use_snooze_notification_policy';
 import { useUnsnoozeNotificationPolicy } from '../../hooks/use_unsnooze_notification_policy';
 import { useUpdateNotificationPolicyApiKey } from '../../hooks/use_update_notification_policy_api_key';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { NotificationPoliciesBulkActions } from './components/notification_policies_bulk_actions';
 import { NotificationPoliciesSearchBar } from './components/notification_policies_search_bar';
 import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
@@ -61,12 +63,14 @@ const descriptionTextStyle = css`
 `;
 
 export const ListNotificationPoliciesPage = () => {
+  useBreadcrumbs('notification_policies_list');
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
   const [enabled, setEnabled] = useState('');
   const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
   const [selectedPolicies, setSelectedPolicies] = useState<NotificationPolicyResponse[]>([]);
@@ -118,11 +122,14 @@ export const ListNotificationPoliciesPage = () => {
   };
 
   const clonePolicy = (policy: NotificationPolicyResponse) => {
-    const { name, description, destinations, matcher, groupBy, throttle } = policy;
+    const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
+      policy;
     const data: CreateNotificationPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
+      groupingMode: groupingMode ?? 'per_episode',
+      ...(tags != null && { tags }),
       ...(matcher != null && { matcher }),
       ...(groupBy != null && { groupBy }),
       ...(throttle != null && { throttle }),
@@ -134,6 +141,7 @@ export const ListNotificationPoliciesPage = () => {
     page: page + 1,
     perPage,
     search: search || undefined,
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
     enabled: enabled === 'true' ? true : enabled === 'false' ? false : undefined,
     sortField,
     sortOrder: sortDirection,
@@ -146,6 +154,11 @@ export const ListNotificationPoliciesPage = () => {
 
   const handleEnabledChange = useCallback((value: string) => {
     setEnabled(value);
+    setPage(0);
+  }, []);
+
+  const handleTagsChange = useCallback((tags: string[]) => {
+    setSelectedTags(tags);
     setPage(0);
   }, []);
 
@@ -245,6 +258,27 @@ export const ListNotificationPoliciesPage = () => {
       render: (destinations: NotificationPolicyResponse['destinations']) => (
         <NotificationPolicyDestinationsSummary destinations={destinations} />
       ),
+    },
+    {
+      field: 'tags',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.tags"
+          defaultMessage="Tags"
+        />
+      ),
+      render: (tags: string[] | null) => {
+        if (!tags || tags.length === 0) return null;
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {tags.map((tag) => (
+              <EuiFlexItem grow={false} key={tag}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'updatedAt',
@@ -367,6 +401,8 @@ export const ListNotificationPoliciesPage = () => {
             onSearchChange={handleSearchChange}
             enabled={enabled}
             onEnabledChange={handleEnabledChange}
+            selectedTags={selectedTags}
+            onTagsChange={handleTagsChange}
           />
         </EuiFlexItem>
         {errorMessage ? (

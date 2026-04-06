@@ -13,7 +13,7 @@ export const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <div
       css={css`
-        width: ${CONTAINER_WIDTH};
+        max-width: ${CONTAINER_WIDTH};
         margin: 0 auto;
       `}
     >

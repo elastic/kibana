@@ -34,7 +34,7 @@ export const breakdownMetricAPIAttributes = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
   },
 } as MetricState;
 
@@ -82,7 +82,7 @@ export const complexMetricAPIAttributes = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
   },
 } as MetricState;
 
@@ -109,7 +109,6 @@ export const complexESQLMetricAPIAttributes = {
   metrics: [
     {
       type: 'primary',
-      operation: 'value',
       column: 'count',
       color: {
         type: 'dynamic',
@@ -119,14 +118,12 @@ export const complexESQLMetricAPIAttributes = {
       background_chart: {
         type: 'bar',
         max_value: {
-          operation: 'value',
           column: 'bytes',
         },
       },
     },
     {
       type: 'secondary',
-      operation: 'value',
       column: 'bytes',
       compare: {
         to: 'baseline',
@@ -137,7 +134,6 @@ export const complexESQLMetricAPIAttributes = {
     },
   ],
   breakdown_by: {
-    operation: 'value',
     column: 'extension.keyword',
   },
 } as MetricState;
@@ -169,7 +165,7 @@ export const metricAPIWithTermsRankedBySecondary = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
     rank_by: {
       type: 'column',
       metric: 1,
