@@ -22,6 +22,7 @@ export function useBreadcrumbs(
 ) {
   const setBreadcrumbs = useSetBreadcrumbs();
   const chrome = useService(CoreStart('chrome'));
+  const application = useService(CoreStart('application'));
 
   useEffect(() => {
     const rootBreadcrumb: ChromeBreadcrumb = {
@@ -106,5 +107,5 @@ export function useBreadcrumbs(
 
     const docTitle = [...breadcrumbs].reverse().map((b) => (b.text as string) ?? '');
     chrome.docTitle.change(docTitle);
-  }, [page, options.ruleName, setBreadcrumbs, chrome]);
+  }, [page, options.ruleName, setBreadcrumbs, chrome, application]);
 }
