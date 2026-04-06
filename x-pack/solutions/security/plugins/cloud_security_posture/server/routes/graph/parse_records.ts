@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
-import { castArray } from 'lodash';
+import { castArray, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
@@ -24,6 +24,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import { ENTITY_RELATIONSHIP_LABELS } from '@kbn/cloud-security-posture-common/constants';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 import {
   type EventEdge,
   type RelationshipEdge,
@@ -266,11 +267,15 @@ const createEntityNode = (
 
   documentsData?.forEach((doc) => {
     if (doc.entity?.sourceFields) {
+      const currentlySupportedSourceFields = omit(
+        doc.entity.sourceFields,
+        GRAPH_ACTOR_EUID_SOURCE_FIELDS.all
+      );
       (doc as Writable<typeof doc>).entity = {
         ...doc.entity,
         sourceFields: EXPAND_DOT_NOTATION
-          ? expandDotNotation(doc.entity.sourceFields)
-          : doc.entity.sourceFields,
+          ? expandDotNotation(currentlySupportedSourceFields)
+          : currentlySupportedSourceFields,
       };
     }
   });

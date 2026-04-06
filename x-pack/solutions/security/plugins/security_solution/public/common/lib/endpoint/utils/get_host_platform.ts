@@ -9,7 +9,7 @@ import type { Ecs } from '@elastic/ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { get } from 'lodash';
 import { ECS_OS_TYPE_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
-import { parseEcsFieldPath } from './parse_ecs_field_path';
+import { parseEcsFieldPath } from '..';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../../../common/endpoint/constants';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';

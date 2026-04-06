@@ -366,8 +366,7 @@ const buildSourceFieldsJson = (fields: EuidSourceFields, euidColumn: string): st
       if (type === 'all') {
         return fields[type as keyof EuidSourceFields].map((field) => {
           const column = ENTITY_FIELD_COLUMN_MAP[field] ?? `\`${field}\``;
-          return `CASE(${column} IS NOT NULL,
-            ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), column)}, "")`;
+          return concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), column);
         });
       } else if (type === 'generic') {
         // Generic field: include when EUID doesn't match any typed prefix
@@ -382,14 +381,15 @@ const buildSourceFieldsJson = (fields: EuidSourceFields, euidColumn: string): st
       } else {
         return fields[type as keyof EuidSourceFields].map((field) => {
           const column = ENTITY_FIELD_COLUMN_MAP[field] ?? `\`${field}\``;
-          return `CASE(STARTS_WITH(${euidColumn}, "${type}:") AND ${column} IS NOT NULL,
+          return `CASE(STARTS_WITH(${euidColumn}, "${type}:"),
             ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), column)}, "")`;
         });
       }
     })
     .flat()
     .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
-  return `REPLACE(
+  return `
+  REPLACE(
     REPLACE(
       REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
     "\\\\{,", ${JSON_OBJECT_START}),
