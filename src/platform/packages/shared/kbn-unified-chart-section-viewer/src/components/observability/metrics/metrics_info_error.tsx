@@ -16,6 +16,8 @@ import { i18n } from '@kbn/i18n';
  * METRICS_INFO failure state. Layout aligned with Discover’s `ErrorCallout` (EuiEmptyPrompt):
  * icon on top, bordered card, title + description (fixed copy — not the raw error message).
  */
+
+// TODO #261332: https://github.com/elastic/kibana/issues/261332
 export const MetricsInfoError = () => {
   const { euiTheme } = useEuiTheme();
 
