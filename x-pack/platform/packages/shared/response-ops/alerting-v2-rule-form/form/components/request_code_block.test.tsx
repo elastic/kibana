@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { RequestCodeBlock } from './request_code_block';
 import { createFormWrapper, defaultTestFormValues } from '../../test_utils';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import * as ruleRequestMappers from '../utils/rule_request_mappers';
 
 describe('RequestCodeBlock', () => {
   const formValues = {
@@ -67,5 +68,22 @@ describe('RequestCodeBlock', () => {
 
     const codeBlock = screen.getByTestId('codeBlock');
     expect(codeBlock).toBeInTheDocument();
+  });
+
+  it('renders error message when request serialization fails', () => {
+    const createMapperSpy = jest
+      .spyOn(ruleRequestMappers, 'mapFormValuesToCreateRequest')
+      .mockImplementation(() => {
+        throw new Error('serialization error');
+      });
+
+    render(<RequestCodeBlock activeTab="create" data-test-subj="codeBlock" />, {
+      wrapper: createFormWrapper(formValues),
+    });
+
+    const content = screen.getByTestId('codeBlock').textContent!;
+    expect(content).toContain('Error serializing rule request');
+
+    createMapperSpy.mockRestore();
   });
 });

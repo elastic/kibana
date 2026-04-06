@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -49,10 +49,7 @@ export const RequestCodeBlock = ({
   const { getValues } = useFormContext<FormValues>();
   const formValues = getValues();
 
-  const formattedRequest = useMemo(
-    () => stringifyRequest(formValues, activeTab),
-    [formValues, activeTab]
-  );
+  const formattedRequest = stringifyRequest(formValues, activeTab);
 
   const method = activeTab === 'update' ? 'PATCH' : 'POST';
   const path =

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ShowRequestModal } from './show_request_modal';
 import { createFormWrapper } from '../../test_utils';
@@ -97,5 +97,13 @@ describe('ShowRequestModal', () => {
     render(<ShowRequestModal onClose={onClose} />, { wrapper: createFormWrapper() });
 
     expect(screen.getByTestId('showRequestModalCodeBlock')).toBeInTheDocument();
+  });
+
+  it('calls onClose when modal close button is clicked', () => {
+    render(<ShowRequestModal onClose={onClose} />, { wrapper: createFormWrapper() });
+
+    fireEvent.click(screen.getByLabelText('Closes this modal window'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

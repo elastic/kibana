@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,10 +53,6 @@ interface ShowRequestModalProps {
 export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => {
   const [activeTab, setActiveTab] = useState<ShowRequestActivePage>(ruleId ? 'update' : 'create');
 
-  const onCloseModal = useCallback(() => {
-    onClose();
-  }, [onClose]);
-
   const title = activeTab === 'update' ? TITLE_UPDATE : TITLE_CREATE;
   const subtitle = activeTab === 'update' ? SUBTITLE_UPDATE : SUBTITLE_CREATE;
 
@@ -64,7 +60,7 @@ export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => 
     <EuiModal
       data-test-subj="ruleV2ShowRequestModal"
       aria-labelledby="showRequestModal"
-      onClose={onCloseModal}
+      onClose={onClose}
     >
       <EuiModalHeader>
         <EuiFlexGroup direction="column" gutterSize="s">
