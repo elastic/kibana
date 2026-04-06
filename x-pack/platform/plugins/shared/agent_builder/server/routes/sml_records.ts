@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -100,6 +101,10 @@ export function registerSmlRecordsRoutes({
             body: RECORD_BODY_SCHEMA,
           },
         },
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/sml_records_create_or_update.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { sml } = getInternalServices();
@@ -135,6 +140,9 @@ export function registerSmlRecordsRoutes({
             params: RECORD_ID_PARAMS_SCHEMA,
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/sml_records_get_by_id.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { sml } = getInternalServices();
@@ -165,6 +173,9 @@ export function registerSmlRecordsRoutes({
           request: {
             params: RECORD_ID_PARAMS_SCHEMA,
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/sml_records_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

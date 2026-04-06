@@ -1,0 +1,79 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createSmlRecordRequest:
+          description: "Example request to create an SML record for an Elasticsearch index"
+          value:
+            type: index
+            title: projects
+            origin_id: projects
+            content: "Elasticsearch index containing project records for a SaaS customer support platform. Approximately 50,000 project records. Tracks the full project lifecycle including creation, deletion, and resource usage.\n\nFields:\n- id (keyword): unique project identifier\n- name (keyword): human-readable project name\n- owner_id (keyword): references the owning user\n- created_at (date): project creation time\n- deleted_at (date): deletion time, null if active\n- active_models (integer): count of deployed ML models"
+            spaces:
+              - "*"
+            permissions:
+              - "index:projects/read"
+            tags:
+              - customer_support
+              - saas
+              - entity
+            params:
+              index_pattern: projects
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          createSmlRecordResponse:
+            description: "Example response returning the created SML record"
+            value:
+              id: "index::projects::0"
+              type: index
+              title: projects
+              origin_id: projects
+              content: "Elasticsearch index containing project records for a SaaS customer support platform. Approximately 50,000 project records. Tracks the full project lifecycle including creation, deletion, and resource usage.\n\nFields:\n- id (keyword): unique project identifier\n- name (keyword): human-readable project name\n- owner_id (keyword): references the owning user\n- created_at (date): project creation time\n- deleted_at (date): deletion time, null if active\n- active_models (integer): count of deployed ML models"
+              created_at: "2026-04-01T00:00:00.000Z"
+              updated_at: "2026-04-01T00:00:00.000Z"
+              spaces:
+                - "*"
+              permissions:
+                - "index:projects/read"
+              tags:
+                - customer_support
+                - saas
+                - entity
+              user_defined: true
+              params:
+                index_pattern: projects
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X PUT "https://${KIBANA_URL}/api/agent_builder/sml/{id}" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "type": "index",
+        "title": "projects",
+        "origin_id": "projects",
+        "content": "Elasticsearch index containing project records...",
+        "spaces": ["*"],
+        "permissions": ["index:projects/read"],
+        "tags": ["customer_support", "saas"],
+        "params": { "index_pattern": "projects" }
+      }'
+- lang: Console
+  source: |
+    PUT kbn:/api/agent_builder/sml/{id}
+    {
+      "type": "index",
+      "title": "projects",
+      "origin_id": "projects",
+      "content": "Elasticsearch index containing project records...",
+      "spaces": ["*"],
+      "permissions": ["index:projects/read"],
+      "tags": ["customer_support", "saas"],
+      "params": { "index_pattern": "projects" }
+    }

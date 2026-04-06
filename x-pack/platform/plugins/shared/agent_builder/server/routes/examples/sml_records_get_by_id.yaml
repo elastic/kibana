@@ -1,0 +1,36 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          getSmlRecordResponse:
+            description: "Example response returning an SML record"
+            value:
+              id: "index::projects::0"
+              type: index
+              title: projects
+              origin_id: projects
+              content: "Elasticsearch index containing project records for a SaaS customer support platform. Approximately 50,000 project records."
+              created_at: "2026-04-01T00:00:00.000Z"
+              updated_at: "2026-04-01T00:00:00.000Z"
+              spaces:
+                - "*"
+              permissions:
+                - "index:projects/read"
+              tags:
+                - customer_support
+                - saas
+                - entity
+              user_defined: true
+              params:
+                index_pattern: projects
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "https://${KIBANA_URL}/api/agent_builder/sml/{id}" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn:/api/agent_builder/sml/{id}
