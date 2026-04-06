@@ -25,29 +25,19 @@ interface ScalarVariable {
   yamlPath: Array<string | number>;
 }
 
-function getValueStartOffset(node: YamlScalar): number | null {
-  if (!node.range) return null;
-  const rangeStart = node.range[0];
-  if (node.type === 'QUOTE_DOUBLE' || node.type === 'QUOTE_SINGLE') {
-    return rangeStart + 1;
-  }
-  return rangeStart;
-}
-
 function extractVariablesFromScalar(
+  yamlString: string,
   node: YamlScalar,
   yamlPath: Array<string | number>
 ): ScalarVariable[] {
-  const value = node.value;
-  if (typeof value !== 'string' || value === '') return [];
+  if (typeof node.value !== 'string' || node.value === '' || !node.range) return [];
 
-  const valueStartOffset = getValueStartOffset(node);
-  if (valueStartOffset === null) return [];
-
+  const rangeStart = node.range[0];
+  const rawSource = yamlString.slice(rangeStart, node.range[1]);
   const results: ScalarVariable[] = [];
 
   try {
-    const tokens = liquidEngine.parse(value);
+    const tokens = liquidEngine.parse(rawSource);
     for (const token of tokens) {
       if (!(token instanceof Output)) {
         // skip HTML nodes and other non-output tokens
@@ -57,8 +47,8 @@ function extractVariablesFromScalar(
           const propertyAccess = first as PropertyAccessToken;
           results.push({
             key: propertyAccess.getText(),
-            startOffset: valueStartOffset + token.token.begin,
-            endOffset: valueStartOffset + token.token.end,
+            startOffset: rangeStart + token.token.begin,
+            endOffset: rangeStart + token.token.end,
             yamlPath,
           });
         }
@@ -76,13 +66,14 @@ export function collectAllVariables(
   yamlDocument: Document,
   workflowGraph: WorkflowGraph
 ): VariableItem[] {
+  const yamlString = model.getValue();
   const variables: ScalarVariable[] = [];
 
   visit(yamlDocument, {
     Scalar(_k, node, ancestors) {
       if (!node.range || node.value === '') return;
       const yamlPath = getPathFromAncestors(ancestors, node);
-      variables.push(...extractVariablesFromScalar(node, yamlPath));
+      variables.push(...extractVariablesFromScalar(yamlString, node, yamlPath));
     },
   });
 
