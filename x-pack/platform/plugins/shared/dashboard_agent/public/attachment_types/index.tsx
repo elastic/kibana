@@ -33,7 +33,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboardPlugin: DashboardStart;
 }): (() => void) => {
-  const { attachments, addAttachment } = agentBuilder;
+  const { attachments } = agentBuilder;
   let dashboardApi: DashboardApi | undefined;
   // maintains a dashboardApi reference for access in getActionButtons
   const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
@@ -57,13 +57,7 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
     getIcon: () => 'productDashboard',
     onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
-      onAttachmentMount({
-        ...params,
-        agentBuilder,
-        dashboardPlugin,
-        addAttachment,
-        checkSavedDashboardExist,
-      }),
+      onAttachmentMount({ ...params, agentBuilder, dashboardPlugin, checkSavedDashboardExist }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}

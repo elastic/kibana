@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { ignoreElements, merge, Observable, tap, type Observable as RxObservable } from 'rxjs';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { merge, Observable, type Observable as RxObservable } from 'rxjs';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { createManualChanges$ } from './manual_changes_tracker';
+import { createManualChangesSubscription } from './manual_changes_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 
 export interface DashboardAttachmentMountSyncParams {
+  agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   getAttachment: () => DashboardAttachment;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   updateOrigin: (origin: string) => Promise<unknown>;
-  addAttachment: (attachment: AttachmentInput) => void;
 }
 
 export const createDashboardAttachmentMountSync$ = ({
+  agentBuilder,
   api,
   getAttachment,
   checkSavedDashboardExist,
   updateOrigin,
-  addAttachment,
 }: DashboardAttachmentMountSyncParams): RxObservable<never> => {
   const savedDashboardOriginSync$ = new Observable<never>(() =>
     createOriginSyncSubscription({
@@ -38,14 +38,12 @@ export const createDashboardAttachmentMountSync$ = ({
     })
   );
 
-  const manualChanges$ = createManualChanges$({
-    api,
-    getAttachment,
-  }).pipe(
-    tap((attachment) => {
-      addAttachment(attachment);
-    }),
-    ignoreElements()
+  const manualChanges$ = new Observable<never>(() =>
+    createManualChangesSubscription({
+      agentBuilder,
+      api,
+      getAttachment,
+    })
   );
 
   return merge(savedDashboardOriginSync$, manualChanges$);

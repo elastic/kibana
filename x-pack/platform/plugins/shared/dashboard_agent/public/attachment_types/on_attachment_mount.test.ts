@@ -141,7 +141,6 @@ describe('onAttachmentMount - manual changes sync', () => {
       checkSavedDashboardExist,
       getAttachment,
       updateOrigin,
-      addAttachment,
     } as unknown as OnAttachmentMountParams);
   };
 

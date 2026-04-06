@@ -6,7 +6,6 @@
  */
 
 import { EMPTY, merge, Observable, switchMap } from 'rxjs';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -17,7 +16,6 @@ import { createDashboardAttachmentMountSync$ } from './dashboard_integration/cre
 export interface OnAttachmentMountParams extends AttachmentLifecycleParams<DashboardAttachment> {
   agentBuilder: AgentBuilderPluginStart;
   dashboardPlugin: DashboardStart;
-  addAttachment: (attachment: AttachmentInput) => void;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
@@ -28,7 +26,6 @@ export interface OnAttachmentMountParams extends AttachmentLifecycleParams<Dashb
 export const onAttachmentMount = ({
   agentBuilder,
   dashboardPlugin,
-  addAttachment,
   checkSavedDashboardExist,
   getAttachment,
   updateOrigin,
@@ -39,9 +36,9 @@ export const onAttachmentMount = ({
         api
           ? merge(
               createDashboardAttachmentMountSync$({
+                agentBuilder,
                 api,
                 getAttachment,
-                addAttachment,
                 checkSavedDashboardExist,
                 updateOrigin,
               }),
