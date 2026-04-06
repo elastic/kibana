@@ -1,214 +1,214 @@
 pageLoadAssetSize:
   actions: 2961
   advancedSettings: 1981
-  agentBuilder: 2020
+  agentBuilder: 254
   agentBuilderPlatform: 3968
   aiAssistantManagementSelection: 392
   aiops: 317
   alerting: 8782
-  apm: 45604
+  apm: 16253
   apmSourcesAccess: 766
   automaticImport: 7026
-  automaticImportVTwo: 33092
+  automaticImportVTwo: 10081
   banners: 1144
-  canvas: 29691
-  cases: 24385
-  charts: 24108
+  canvas: 6000
+  cases: 1465
+  charts: 1188
   cloud: 8389
-  cloudConnect: 15803
+  cloudConnect: 4940
   cloudDataMigration: 1755
-  cloudDefend: 9658
+  cloudDefend: 3152
   cloudExperiments: 75153
-  cloudFullStory: 1541
-  cloudLinks: 11800
-  cloudSecurityPosture: 23016
-  console: 48764
-  contentConnectors: 3375
+  cloudFullStory: 1373
+  cloudLinks: 13772
+  cloudSecurityPosture: 12181
+  console: 24580
+  contentConnectors: 2789
   contentManagement: 6725
-  controls: 7448
+  controls: 4379
   core: 320
-  cps: 5120
-  crossClusterReplication: 7846
+  cps: 5119
+  crossClusterReplication: 7691
   customIntegrations: 636
-  dashboard: 22999
-  dashboardAgent: 2074
-  dashboardMarkdown: 4820
-  data: 34720
-  dataQuality: 19504
-  datasetQuality: 631
-  dataSources: 1147
+  dashboard: 550
+  dashboardAgent: 814
+  dashboardMarkdown: 2058
+  data: 11799
+  dataQuality: 5836
+  datasetQuality: 41092
+  dataSources: 2053
   dataUsage: 4111
-  dataViewEditor: 14357
-  dataViewFieldEditor: 44542
-  dataViewManagement: 1598
-  dataViews: 18063
-  dataVisualizer: 5868
-  developerToolbar: 1345
-  devTools: 437
-  discover: 23373
-  discoverEnhanced: 24026
-  discoverShared: 1237
-  elasticAssistant: 160054
+  dataViewEditor: 3312
+  dataViewFieldEditor: 16263
+  dataViewManagement: 1302
+  dataViews: 1697
+  dataVisualizer: 7421
+  developerToolbar: 1177
+  devTools: 4475
+  discover: 15239
+  discoverEnhanced: 1119
+  discoverShared: 1070
+  elasticAssistant: 142346
   elasticAssistantSharedState: 3353
   elasticConsole: 830
-  embeddable: 23680
-  embeddableAlertsTable: 1663
-  enterpriseSearch: 29208
+  embeddable: 760
+  embeddableAlertsTable: 1263
+  enterpriseSearch: 28122
   entityStore: 852
-  esql: 23016
-  esqlDataGrid: 382
-  esUiShared: 13205
+  esql: 308
+  esqlDataGrid: 215
+  esUiShared: 2284
   evals: 25465
-  eventAnnotation: 40249
-  eventAnnotationListing: 24950
-  exploratoryView: 24862
-  expressionGauge: 23488
-  expressionHeatmap: 35054
-  expressionLegacyMetricVis: 29720
-  expressionMetricVis: 23217
-  expressionPartitionVis: 26634
-  expressions: 25610
-  expressionTagcloud: 29396
-  expressionXY: 23487
-  features: 1386
+  eventAnnotation: 17299
+  eventAnnotationListing: 2388
+  exploratoryView: 707
+  expressionGauge: 5424
+  expressionHeatmap: 11990
+  expressionLegacyMetricVis: 6800
+  expressionMetricVis: 13854
+  expressionPartitionVis: 21956
+  expressions: 2689
+  expressionTagcloud: 6629
+  expressionXY: 566
+  features: 1218
   feedback: 3110
   fieldFormats: 4195
-  fieldsMetadata: 1710
-  files: 20323
+  fieldsMetadata: 1527
+  files: 3957
   filesManagement: 911
   fileUpload: 217
-  fleet: 32851
-  genAiSettings: 1588
+  fleet: 4772
+  genAiSettings: 1277
   globalSearch: 5170
-  globalSearchBar: 23357
+  globalSearchBar: 18678
   globalSearchProviders: 2572
-  graph: 26692
+  graph: 3659
   grokdebugger: 1276
   home: 9066
   imageEmbeddable: 1700
-  indexLifecycleManagement: 26418
+  indexLifecycleManagement: 26404
   indexManagement: 316
-  inference: 755082
-  infra: 56782
-  ingestPipelines: 11134
-  inputControlVis: 26178
-  inspectComponent: 1320
-  inspector: 7131
-  interactiveSetup: 33155
-  intercepts: 19074
+  inference: 848564
+  infra: 45387
+  ingestPipelines: 270
+  inputControlVis: 3196
+  inspectComponent: 1152
+  inspector: 590
+  interactiveSetup: 32426
+  intercepts: 14394
   kibanaOverview: 1840
-  kibanaReact: 1392
+  kibanaReact: 1225
   kibanaUsageCollection: 515
-  kibanaUtils: 25819
-  kql: 23244
+  kibanaUtils: 2884
+  kql: 337
   kubernetesSecurity: 247
-  lens: 28414
-  licenseManagement: 4013
+  lens: 349
+  licenseManagement: 3292
   licensing: 8317
-  links: 6404
+  links: 3900
   lists: 371
-  logsDataAccess: 1216
-  logsShared: 24695
+  logsDataAccess: 308
+  logsShared: 1774
   logstash: 11698
   maintenanceWindows: 3741
-  management: 32478
-  maps: 23853
+  management: 9543
+  maps: 932
   mapsEms: 3229
-  metricsDataAccess: 8397
-  ml: 23621
+  metricsDataAccess: 1557
+  ml: 700
   mockIdpPlugin: 3976
-  monitoring: 22474
+  monitoring: 22416
   navigation: 8671
-  newsfeed: 389
-  noDataPage: 797
-  observability: 27828
-  observabilityAgentBuilder: 882
-  observabilityAIAssistant: 20396
-  observabilityAIAssistantApp: 23461
-  observabilityAiAssistantManagement: 2889
+  newsfeed: 9687
+  noDataPage: 630
+  observability: 3674
+  observabilityAgentBuilder: 715
+  observabilityAIAssistant: 4030
+  observabilityAIAssistantApp: 6279
+  observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7727
-  observabilityShared: 31719
-  osquery: 44711
+  observabilityOnboarding: 7629
+  observabilityShared: 7564
+  osquery: 13044
   painlessLab: 2211
   presentationPanel: 442
   presentationUtil: 771
-  productDocBase: 489
+  productDocBase: 3614
   productIntercept: 4738
-  profiling: 37587
-  reindexService: 12120
-  remoteClusters: 391
-  reporting: 39044
-  rollup: 24641
-  runtimeFields: 11165
-  sampleDataIngest: 1251
-  savedObjects: 532
+  profiling: 12945
+  reindexService: 1696
+  remoteClusters: 5794
+  reporting: 33990
+  rollup: 8005
+  runtimeFields: 301
+  sampleDataIngest: 1084
+  savedObjects: 365
   savedObjectsFinder: 256
-  savedObjectsManagement: 1016
+  savedObjectsManagement: 18255
   savedObjectsTagging: 18366
-  savedObjectsTaggingOss: 975
-  savedSearch: 23617
-  screenshotMode: 1146
-  screenshotting: 25847
-  searchAssistant: 2318
+  savedObjectsTaggingOss: 808
+  savedSearch: 696
+  screenshotMode: 979
+  screenshotting: 2912
+  searchAssistant: 1545
   searchGettingStarted: 2250
-  searchHomepage: 4049
-  searchIndices: 5163
+  searchHomepage: 3900
+  searchIndices: 5044
   searchInferenceEndpoints: 4231
   searchNavigation: 3813
-  searchNotebooks: 14382
+  searchNotebooks: 3490
   searchPlayground: 5542
-  searchprofiler: 2968
+  searchprofiler: 2260
   searchQueryRules: 2130
   searchSynonyms: 1897
   security: 215
-  securitySolution: 126357
-  securitySolutionEss: 9340
-  securitySolutionServerless: 21508
+  securitySolution: 91670
+  securitySolutionEss: 19484
+  securitySolutionServerless: 31839
   serverless: 1259
   serverlessObservability: 12620
   serverlessSearch: 17287
-  serverlessWorkplaceAI: 3440
-  sessionView: 546
-  share: 21888
-  slo: 49693
-  snapshotRestore: 27828
-  spaces: 767
-  stackAlerts: 28677
-  stackConnectors: 93837
-  streams: 2571
-  streamsApp: 33114
-  synthetics: 45277
-  telemetry: 43654
-  telemetryManagementSection: 226
-  timelines: 2271
-  transform: 9354
-  triggersActionsUi: 31040
-  uiActions: 23001
-  unifiedDocViewer: 23475
-  unifiedSearch: 23417
-  upgradeAssistant: 2587
-  uptime: 62515
-  urlDrilldown: 24202
+  serverlessWorkplaceAI: 4375
+  sessionView: 379
+  share: 379
+  slo: 19118
+  snapshotRestore: 16852
+  spaces: 22531
+  stackAlerts: 1717
+  stackConnectors: 67443
+  streams: 4477
+  streamsApp: 56249
+  synthetics: 18251
+  telemetry: 20586
+  telemetryManagementSection: 1738
+  timelines: 1140
+  transform: 8644
+  triggersActionsUi: 2948
+  uiActions: 454
+  unifiedDocViewer: 568
+  unifiedSearch: 511
+  upgradeAssistant: 1821
+  uptime: 37819
+  urlDrilldown: 1267
   urlForwarding: 1412
-  usageCollection: 23129
-  ux: 4054
-  visDefaultEditor: 23644
-  visTypeGauge: 23251
-  visTypeHeatmap: 23229
-  visTypeMarkdown: 27838
-  visTypeMetric: 29850
-  visTypePie: 27577
-  visTypeTable: 36210
-  visTypeTagcloud: 26066
-  visTypeTimelion: 29668
-  visTypeTimeseries: 35839
-  visTypeVega: 39744
-  visTypeVislib: 30930
-  visTypeXy: 47526
-  visualizationListing: 2010
-  visualizations: 24096
-  watcher: 6418
-  workflowsExtensions: 4346
-  workflowsManagement: 43274
-  workplaceAIApp: 8759
+  usageCollection: 223
+  ux: 2418
+  visDefaultEditor: 738
+  visTypeGauge: 7651
+  visTypeHeatmap: 6970
+  visTypeMarkdown: 4932
+  visTypeMetric: 6930
+  visTypePie: 22899
+  visTypeTable: 13203
+  visTypeTagcloud: 3117
+  visTypeTimelion: 6661
+  visTypeTimeseries: 12718
+  visTypeVega: 14834
+  visTypeVislib: 21992
+  visTypeXy: 24422
+  visualizationListing: 1091
+  visualizations: 1147
+  watcher: 5484
+  workflowsExtensions: 33877
+  workflowsManagement: 19817
+  workplaceAIApp: 8674
