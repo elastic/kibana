@@ -35,10 +35,7 @@ export function CreateESQLRuleFlyout({
   subscribe: (listener: () => void) => () => void;
   onClose: () => void;
 }) {
-  const getQuery = useCallback(
-    () => getEsqlQuery(getState, tabId),
-    [getState, tabId]
-  );
+  const getQuery = useCallback(() => getEsqlQuery(getState, tabId), [getState, tabId]);
 
   const query = useSyncExternalStore(subscribe, getQuery);
 
