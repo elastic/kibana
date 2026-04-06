@@ -348,6 +348,13 @@ export const stopEntityTypes = (
     body: { entityTypes },
   });
 
+export const startAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
 export const stopAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
   apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
     headers,
