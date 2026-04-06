@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { markdownEmbeddableFactory } from './markdown_embeddable';
 import type { MarkdownEditorApi } from './types';
+import { getMockLinkToContainerState } from '@kbn/embeddable-plugin/public/mocks';
 
 jest.mock('./markdown_client/markdown_client', () => {
   return {
@@ -51,12 +52,15 @@ const renderEmbeddable = async (
 
   const factory = markdownEmbeddableFactory;
 
+  const mockLinkToContainerState = getMockLinkToContainerState(factory);
+
   const embeddable = await factory.buildEmbeddable({
     initializeDrilldownsManager: jest.fn(),
     initialState: {
       content: '[click here](https://example.com)',
     },
     parentApi: parentApiStub,
+    linkToContainerState: mockLinkToContainerState,
     finalizeApi: (api) =>
       ({
         ...api,

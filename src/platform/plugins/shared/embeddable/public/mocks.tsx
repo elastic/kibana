@@ -20,7 +20,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { BehaviorSubject, of } from 'rxjs';
-import type { EmbeddableStateTransfer } from '.';
+import type { DefaultEmbeddableApi, EmbeddableFactory, EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
@@ -146,3 +146,23 @@ export async function mockInitializeDrilldownsManager(
 ): Promise<DrilldownsManager> {
   return mockDrilldownsManager();
 }
+
+export const getMockLinkToContainerState = <
+  SerializedState extends {} = {},
+  ApiType extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+>(
+  factory: EmbeddableFactory<SerializedState, ApiType>
+): jest.Mocked<
+  Parameters<
+    EmbeddableFactory<SerializedState, ApiType>['buildEmbeddable']
+  >[0]['linkToContainerState']
+> => {
+  const mockLinkToContainerState: jest.Mocked<
+    Parameters<typeof factory.buildEmbeddable>[0]['linkToContainerState']
+  > = ({ serializeState, applySerializedState }) => ({
+    serializeState,
+    applySerializedState,
+    hasUnsavedChanges$: of(false),
+  });
+  return mockLinkToContainerState;
+};

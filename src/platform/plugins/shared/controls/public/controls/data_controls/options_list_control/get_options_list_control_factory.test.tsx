@@ -17,6 +17,7 @@ import React from 'react';
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
+import { getMockLinkToContainerState } from '@kbn/embeddable-plugin/public/mocks';
 
 const render = (ui: React.ReactElement) => {
   return rtlRender(ui, { wrapper: EuiThemeProvider });
@@ -26,6 +27,8 @@ describe('Options List Control Api', () => {
   const uuid = 'myControl1';
   const factory = getOptionsListControlFactory();
   const finalizeApi = getMockedFinalizeApi(uuid, factory);
+
+  const mockLinkToContainerState = getMockLinkToContainerState(factory);
 
   const getDataView = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
@@ -81,6 +84,7 @@ describe('Options List Control Api', () => {
             data_view_id: 'myDataViewId',
             field_name: 'myFieldName',
           },
+          linkToContainerState: mockLinkToContainerState,
           finalizeApi,
           uuid,
           parentApi: {},
@@ -106,6 +110,7 @@ describe('Options List Control Api', () => {
             field_name: 'myFieldName',
             selected_options: ['cool', 'test'],
           },
+          linkToContainerState: mockLinkToContainerState,
           finalizeApi,
           uuid,
           parentApi: {},
@@ -138,6 +143,7 @@ describe('Options List Control Api', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -154,6 +160,7 @@ describe('Options List Control Api', () => {
           field_name: 'myFieldName',
           selected_options: ['cool', 'test'],
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -197,6 +204,7 @@ describe('Options List Control Api', () => {
           field_name: 'myFieldName',
           exists_selected: true,
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -227,6 +235,7 @@ describe('Options List Control Api', () => {
           exists_selected: true,
           exclude: true,
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -272,6 +281,7 @@ describe('Options List Control Api', () => {
           field_name: 'myFieldName',
           exists_selected: true,
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -303,6 +313,7 @@ describe('Options List Control Api', () => {
           field_name: 'myFieldName',
           exists_selected: true,
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -334,6 +345,7 @@ describe('Options List Control Api', () => {
           field_name: 'myFieldName',
           selected_options: ['woof', 'bark'],
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -370,6 +382,7 @@ describe('Options List Control Api', () => {
           field_name: 'myFieldName',
           selected_options: ['woof', 'bark'],
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -416,6 +429,7 @@ describe('Options List Control Api', () => {
           single_select: true,
           selected_options: ['woof'],
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: {},

@@ -64,6 +64,7 @@ describe('embeddable renderer', () => {
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
         initializeDrilldownsManager: expect.any(Function),
+        linkToContainerState: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: expect.any(String),
@@ -88,6 +89,7 @@ describe('embeddable renderer', () => {
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
         initializeDrilldownsManager: expect.any(Function),
+        linkToContainerState: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: '12345',
@@ -108,6 +110,7 @@ describe('embeddable renderer', () => {
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
         initializeDrilldownsManager: expect.any(Function),
+        linkToContainerState: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi,
         uuid: expect.any(String),

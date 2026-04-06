@@ -21,6 +21,7 @@ import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
+import { getMockLinkToContainerState } from '@kbn/embeddable-plugin/public/mocks';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -39,6 +40,8 @@ describe('RangeSliderControlApi', () => {
   const parentApi = mockedDashboardApi;
   const factory = getRangesliderControlFactory();
   const finalizeApi = getMockedFinalizeApi(uuid, factory, parentApi);
+
+  const mockLinkToContainerState = getMockLinkToContainerState(factory);
 
   let totalResults = DEFAULT_TOTAL_RESULTS;
   let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
@@ -104,6 +107,7 @@ describe('RangeSliderControlApi', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi,
@@ -120,6 +124,7 @@ describe('RangeSliderControlApi', () => {
           field_name: 'myFieldName',
           value: ['5', '10'],
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi,
@@ -160,6 +165,7 @@ describe('RangeSliderControlApi', () => {
           field_name: 'myFieldName',
           value: ['5', '10'],
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi,
@@ -184,6 +190,7 @@ describe('RangeSliderControlApi', () => {
           field_name: 'myFieldName',
           value: ['5', '10'],
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi,
@@ -204,6 +211,7 @@ describe('RangeSliderControlApi', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi,
@@ -227,6 +235,7 @@ describe('RangeSliderControlApi', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi,
@@ -244,6 +253,7 @@ describe('RangeSliderControlApi', () => {
           field_name: 'myFieldName',
           step: 1024,
         },
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi,

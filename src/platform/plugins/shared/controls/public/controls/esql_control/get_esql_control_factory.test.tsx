@@ -15,6 +15,7 @@ import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject } from 'rxjs';
+import { getMockLinkToContainerState } from '@kbn/embeddable-plugin/public/mocks';
 
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
@@ -44,6 +45,8 @@ describe('ESQLControlApi', () => {
   const factory = getESQLControlFactory();
   const finalizeApi = getMockedFinalizeApi(uuid, factory, dashboardApi);
 
+  const mockLinkToContainerState = getMockLinkToContainerState(factory);
+
   test('should publish ES|QL variable', async () => {
     const initialState: OptionsListESQLControlState = {
       ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
@@ -57,6 +60,7 @@ describe('ESQLControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState,
+      linkToContainerState: mockLinkToContainerState,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -84,6 +88,7 @@ describe('ESQLControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState,
+      linkToContainerState: mockLinkToContainerState,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -114,6 +119,7 @@ describe('ESQLControlApi', () => {
       await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: dashboardApi,
@@ -137,6 +143,7 @@ describe('ESQLControlApi', () => {
       await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: dashboardApi,
@@ -177,6 +184,7 @@ describe('ESQLControlApi', () => {
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,
+        linkToContainerState: mockLinkToContainerState,
         finalizeApi,
         uuid,
         parentApi: dashboardApi,
