@@ -42,7 +42,7 @@ components:
           type: array
           items:
             type: string
-          description: List of entity source IDs associated with the watchlist
+          description: List of entity source IDs associated with the watchlist       
         createdAt:
           type: string
           format: date-time

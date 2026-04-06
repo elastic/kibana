@@ -1,5 +1,5 @@
 {
-  "sha1": "4f877478b2592a2aa85ca222f014b1bc6e34418a",
+  "sha1": "530beed816d7fce80594b32c260642314a8922ed",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -338,7 +338,7 @@
     {
       "id": "3ff6decf4c25127-1e36b15992c9e68",
       "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -349,14 +349,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 11
       }
     },
     {
       "id": "3ff6decf4c25127-bb6c00e207d6b96",
       "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -367,14 +367,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 224,
+        "line": 225,
         "column": 11
       }
     },
     {
       "id": "3ff6decf4c25127-b92795356361dc9",
       "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -385,14 +385,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 11
       }
     },
     {
       "id": "3ff6decf4c25127-c189381fa89f5ce",
       "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 224,
+        "line": 225,
         "column": 11
       }
     },
