@@ -80,8 +80,6 @@ export class ObservabilityAgentBuilderPlugin
     registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
 
     if (plugins.searchInferenceEndpoints) {
-      // Register the shared Observability parent feature.
-      // Another observability plugin may have already registered it.
       plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
 
       const failures: string[] = [];
