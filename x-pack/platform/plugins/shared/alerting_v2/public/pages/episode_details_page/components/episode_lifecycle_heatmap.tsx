@@ -5,18 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { HeatmapStyle, RecursivePartial } from '@elastic/charts';
 import { Chart, Heatmap, Predicate, ScaleType, Settings, Tooltip } from '@elastic/charts';
-import { EuiEmptyPrompt, EuiPanel, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { AlertingV2EpisodesKibanaServices } from '../../../episodes_kibana_services';
 
-/** Short strip: one heatmap row + compact x-axis labels. */
-const CHART_HEIGHT = 40;
+/** Short strip: one heatmap row. Timestamps are rendered outside the chart. */
+const CHART_HEIGHT = 20;
 
 const STATUS_VALUE: Record<AlertEpisodeStatus, number> = {
   [ALERT_EPISODE_STATUS.PENDING]: 0,
@@ -131,19 +140,24 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
   const baseTheme = services.charts.theme.useChartsBaseTheme();
 
   const data: HeatmapDatum[] = useMemo(() => {
-    const rows = eventRows.map((row, rowIndex) => {
-      const status = row['episode.status'] as AlertEpisodeStatus;
-      const ts = typeof row['@timestamp'] === 'string' ? row['@timestamp'] : '';
-      const tsMs = ts ? Date.parse(ts) : Number.NaN;
-      return {
-        ts,
-        tsMs: Number.isFinite(tsMs) ? tsMs : Number.POSITIVE_INFINITY,
-        y: LIFECYCLE_Y,
-        value: STATUS_VALUE[status],
-        status,
-        rowIndex,
-      };
-    });
+    const rows = eventRows
+      .filter((row) => {
+        const status = row['episode.status'];
+        return typeof status === 'string' && status in STATUS_VALUE;
+      })
+      .map((row, rowIndex) => {
+        const status = row['episode.status'] as AlertEpisodeStatus;
+        const ts = typeof row['@timestamp'] === 'string' ? row['@timestamp'] : '';
+        const tsMs = ts ? Date.parse(ts) : Number.NaN;
+        return {
+          ts,
+          tsMs: Number.isFinite(tsMs) ? tsMs : Number.POSITIVE_INFINITY,
+          y: LIFECYCLE_Y,
+          value: STATUS_VALUE[status],
+          status,
+          rowIndex,
+        };
+      });
 
     rows.sort((a, b) => {
       if (a.tsMs !== b.tsMs) return a.tsMs - b.tsMs;
@@ -159,24 +173,8 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
     }));
   }, [eventRows]);
 
-  const eventCount = data.length;
-
-  const formatXAxisLabel = useCallback(
-    (x: string | number) => {
-      const col = typeof x === 'number' ? x : Number(x);
-      if (!Number.isFinite(col) || eventCount === 0) return '';
-      if (eventCount === 1) {
-        const ts = data[0]?.ts;
-        return ts && ts.length > 0 ? compactAxisTime(ts) : '';
-      }
-      if (col !== 0 && col !== eventCount - 1) {
-        return '';
-      }
-      const ts = col === 0 ? data[0]?.ts : data[eventCount - 1]?.ts;
-      return ts && ts.length > 0 ? compactAxisTime(ts) : '';
-    },
-    [data, eventCount]
-  );
+  const firstTimestamp = data[0]?.ts;
+  const lastTimestamp = data.length > 1 ? data[data.length - 1]?.ts : undefined;
 
   const heatmapTheme: RecursivePartial<HeatmapStyle> = useMemo(
     () => ({
@@ -188,12 +186,7 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
         border: { strokeWidth: 1, stroke: euiTheme.colors.emptyShade },
       },
       yAxisLabel: { visible: false },
-      xAxisLabel: {
-        visible: true,
-        fontSize: 10,
-        rotation: 0,
-        padding: { top: 2, bottom: 0, left: 0, right: 0 },
-      },
+      xAxisLabel: { visible: false },
     }),
     [euiTheme]
   );
@@ -250,7 +243,6 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-
       <Chart size={{ height: CHART_HEIGHT }}>
         <Tooltip
           body={({ items: values }) => {
@@ -296,11 +288,33 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
           valueAccessor="value"
           xScale={{ type: ScaleType.Ordinal }}
           xSortPredicate={Predicate.NumAsc}
-          xAxisLabelFormatter={formatXAxisLabel}
           xAxisLabelName=""
           yAxisLabelName=""
         />
       </Chart>
+      {(firstTimestamp || lastTimestamp) && (
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          responsive={false}
+          gutterSize="none"
+          css={css`
+            padding-top: ${euiTheme.size.xs};
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {firstTimestamp ? compactAxisTime(firstTimestamp) : ''}
+            </EuiText>
+          </EuiFlexItem>
+          {lastTimestamp && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {compactAxisTime(lastTimestamp)}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
     </EuiPanel>
   );
 };
