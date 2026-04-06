@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   type FieldHook,
   UseField,
@@ -21,6 +21,51 @@ import type {
 import * as i18n from '../../translations';
 
 type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> & ConditionRenderProps;
+
+interface RadioGroupFieldProps {
+  field: FieldHook<string>;
+  label: string;
+  name: string;
+  options: Array<{ id: string; label: string }>;
+  firstOption: string;
+}
+
+const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
+  field,
+  label,
+  name,
+  options,
+  firstOption,
+}) => {
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+  // When the form value is empty (e.g. set to '' by useYamlFormSync when no
+  // default is defined in the YAML), sync it to the first available option so
+  // the stored value matches what the UI shows as selected.
+  useEffect(() => {
+    if (field.value === '') {
+      field.setValue(firstOption);
+    }
+    // field.setValue is a stable reference; only re-run when the value or the
+    // first option changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field.value, firstOption]);
+
+  const idSelected =
+    typeof field.value === 'string' && field.value !== '' ? field.value : firstOption;
+
+  return (
+    <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+      <EuiRadioGroup
+        name={name}
+        options={options}
+        idSelected={idSelected}
+        onChange={(id) => field.setValue(id)}
+      />
+    </EuiFormRow>
+  );
+};
+RadioGroupField.displayName = 'RadioGroupField';
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
   label,
@@ -52,30 +97,17 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
     [isRequired, metadata.default, metadata.options]
   );
 
-  const renderField = useCallback(
-    (field: FieldHook<string>) => {
-      const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-      return (
-        <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
-          <EuiRadioGroup
-            name={name}
-            options={options}
-            idSelected={
-              typeof field.value === 'string' && field.value !== ''
-                ? field.value
-                : metadata.options[0]
-            }
-            onChange={(id) => field.setValue(id)}
-          />
-        </EuiFormRow>
-      );
-    },
-    [label, name, options, metadata.options]
-  );
-
   return (
     <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
-      {renderField}
+      {(field: FieldHook<string>) => (
+        <RadioGroupField
+          field={field}
+          label={label ?? ''}
+          name={name}
+          options={options}
+          firstOption={metadata.options[0]}
+        />
+      )}
     </UseField>
   );
 };

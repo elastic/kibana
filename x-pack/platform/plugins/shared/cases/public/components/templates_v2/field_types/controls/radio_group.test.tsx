@@ -29,7 +29,8 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
 }) => {
   const { form } = useForm<{}>({
     defaultValue: {
-      [CASE_EXTENDED_FIELDS]: initialValue ? { severity_as_keyword: initialValue } : {},
+      [CASE_EXTENDED_FIELDS]:
+        initialValue !== undefined ? { severity_as_keyword: initialValue } : {},
     },
     options: { stripEmptyFields: false },
   });
@@ -87,11 +88,13 @@ describe('RadioGroup', () => {
       expect(screen.getByLabelText('high')).toBeChecked();
     });
 
-    it('shows the first option selected when form value is empty string (yaml sync with no default)', () => {
-      // useYamlFormSync calls form.setFieldValue(path, '') when metadata.default is absent.
-      // The component must fall back to options[0] rather than rendering with nothing selected.
+    it('shows the first option selected when form value is empty string (yaml sync with no default)', async () => {
+      // useYamlFormSync sets the field to '' when metadata.default is absent.
+      // The component must sync the stored value to options[0] so the UI and
+      // the form agree — this test uses initialValue="" which now correctly
+      // writes the empty string into the form's defaultValue.
       render(<FormWrapper initialValue="" onSubmitResult={jest.fn()} />);
-      expect(screen.getByLabelText('low')).toBeChecked();
+      await waitFor(() => expect(screen.getByLabelText('low')).toBeChecked());
     });
   });
 
@@ -123,6 +126,20 @@ describe('RadioGroup', () => {
   });
 
   describe('isRequired validation', () => {
+    it('passes required validation when the form value starts as empty string (yaml sync)', async () => {
+      // The component syncs '' → options[0], so required validation must pass
+      // after the sync even though the initial stored value was empty.
+      const onSubmitResult = jest.fn();
+      render(<FormWrapper isRequired initialValue="" onSubmitResult={onSubmitResult} />);
+
+      await waitFor(() => expect(screen.getByLabelText('low')).toBeChecked());
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+      await waitFor(() => {
+        expect(onSubmitResult).toHaveBeenCalledWith(expect.objectContaining({ isValid: true }));
+      });
+    });
+
     it('allows submission when isRequired is true and an option is selected', async () => {
       const onSubmitResult = jest.fn();
       render(<FormWrapper isRequired defaultOption="medium" onSubmitResult={onSubmitResult} />);
@@ -149,6 +166,26 @@ describe('RadioGroup', () => {
   });
 
   describe('submitted value', () => {
+    it('submits options[0] when the initial form value is empty string (yaml sync)', async () => {
+      // Regression: before the fix the submitted value was '' even though the
+      // UI showed 'low' as selected.
+      const onSubmitResult = jest.fn();
+      render(<FormWrapper initialValue="" onSubmitResult={onSubmitResult} />);
+
+      await waitFor(() => expect(screen.getByLabelText('low')).toBeChecked());
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+      await waitFor(() => {
+        expect(onSubmitResult).toHaveBeenCalled();
+      });
+
+      const { data } = onSubmitResult.mock.calls[0][0];
+      const submitted = (data as Record<string, Record<string, unknown>>)[CASE_EXTENDED_FIELDS]
+        ?.severity_as_keyword;
+
+      expect(submitted).toBe('low');
+    });
+
     it('submits the selected option as a plain string', async () => {
       const onSubmitResult = jest.fn();
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
