@@ -163,7 +163,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
           textAlign="right"
           description={
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.count"
+              id="sharedUXPackages.data_cascade.demo.custom_header.row.count"
               defaultMessage="<indicator>record count</indicator>"
               values={{
                 indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
@@ -186,7 +186,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.action"
+              id="sharedUXPackages.data_cascade.demo.custom_header.row.action"
               defaultMessage="Take action"
             />
           ),

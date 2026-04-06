@@ -180,7 +180,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
           textAlign="right"
           description={
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.count"
+              id="sharedUXPackages.data_cascade.demo.multiple_stats_per_row.row.count"
               defaultMessage="<indicator>record count</indicator>"
               values={{
                 indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
@@ -245,7 +245,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.action"
+              id="sharedUXPackages.data_cascade.demo.multiple_stats_per_row.row.action"
               defaultMessage="Take action"
             />
           ),

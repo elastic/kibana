@@ -134,7 +134,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           textAlign="right"
           description={
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.count"
+              id="sharedUXPackages.data_cascade.demo.custom_header_with_hidden_row_actions.row.count"
               defaultMessage="<indicator>record count</indicator>"
               values={{
                 indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
@@ -219,7 +219,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.favorite"
+              id="sharedUXPackages.data_cascade.demo.custom_header_with_hidden_row_actions.row.favorite"
               defaultMessage="Favorite"
             />
           ),
@@ -232,7 +232,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.flag"
+              id="sharedUXPackages.data_cascade.demo.custom_header_with_hidden_row_actions.row.flag"
               defaultMessage="Flag"
             />
           ),
@@ -245,7 +245,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.create_alerts"
+              id="sharedUXPackages.data_cascade.demo.custom_header_with_hidden_row_actions.row.create_alerts"
               defaultMessage="Create alerts"
             />
           ),
@@ -258,7 +258,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.download"
+              id="sharedUXPackages.data_cascade.demo.custom_header_with_hidden_row_actions.row.download"
               defaultMessage="Download"
             />
           ),

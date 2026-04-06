@@ -138,7 +138,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
           textAlign="right"
           description={
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.count"
+              id="sharedUXPackages.data_cascade.demo.custom_header_with_custom_row_actions.row.count"
               defaultMessage="<indicator>record count</indicator>"
               values={{
                 indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
@@ -254,7 +254,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
             onClick: sendAlertsActionClickHandler.bind(String(groupValue)),
             label: (
               <FormattedMessage
-                id="sharedUXPackages.data_cascade.demo.row.edit"
+                id="sharedUXPackages.data_cascade.demo.custom_header_with_custom_row_actions.row.edit"
                 defaultMessage="Create alert"
               />
             ),

@@ -189,7 +189,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           textAlign="right"
           description={
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.count"
+              id="sharedUXPackages.data_cascade.demo.row_selection.row.count"
               defaultMessage="<indicator>record count</indicator>"
               values={{
                 indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
@@ -274,7 +274,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.investigate"
+              id="sharedUXPackages.data_cascade.demo.row_selection.row.investigate"
               defaultMessage="Investigate"
             />
           ),
@@ -287,7 +287,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.flag"
+              id="sharedUXPackages.data_cascade.demo.row_selection.row.flag"
               defaultMessage="Flag"
             />
           ),
@@ -300,7 +300,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.create_alerts"
+              id="sharedUXPackages.data_cascade.demo.row_selection.row.create_alerts"
               defaultMessage="Create alerts"
             />
           ),
@@ -313,7 +313,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.download"
+              id="sharedUXPackages.data_cascade.demo.row_selection.row.download"
               defaultMessage="Download"
             />
           ),
