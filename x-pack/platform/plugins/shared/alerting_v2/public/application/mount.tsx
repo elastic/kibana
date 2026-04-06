@@ -16,11 +16,8 @@ import { Context } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -34,7 +31,7 @@ import { RulesApp } from './rules_app';
 import { NotificationPoliciesApp } from './notification_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
-import type { AlertingV2EpisodesKibanaServices } from '../episodes_kibana_services';
+import type { KibanaServices } from '../episodes_kibana_services';
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -42,29 +39,32 @@ interface AlertingV2MountParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const mountAlertingV2App = ({
+export const mountAlertingV2App = async ({
   params,
   container,
 }: {
   params: AlertingV2MountParams;
   container: Container;
-}): AppUnmount => {
+}): Promise<AppUnmount> => {
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
 
+  const getStartServices = container.get(DiCoreSetup('getStartServices'));
+  const [coreStart] = await getStartServices();
+
   ReactDOM.render(
-    <Context.Provider value={container}>
-      <QueryClientProvider client={queryClient}>
-        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <Router history={history}>
               <RulesApp />
             </Router>
-          </I18nProvider>
-        </BreadcrumbProvider>
-      </QueryClientProvider>
-    </Context.Provider>,
+          </BreadcrumbProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
     element
   );
 
@@ -78,7 +78,7 @@ export const mountEpisodesApp = async ({
   params: ManagementAppMountParams;
   container: Container;
 }): Promise<AppUnmount> => {
-  const { element, history, setBreadcrumbs, theme } = params;
+  const { element, history, setBreadcrumbs } = params;
 
   element.classList.add(APP_WRAPPER_CLASS);
 
@@ -95,7 +95,7 @@ export const mountEpisodesApp = async ({
   const lens = container.get(PluginStart('lens')) as LensPublicStart;
   const charts = container.get(PluginStart('charts')) as ChartsPluginStart;
 
-  const kibanaReactServices: AlertingV2EpisodesKibanaServices = {
+  const kibanaReactServices: KibanaServices = {
     ...coreStart,
     data,
     dataViews,
@@ -109,25 +109,21 @@ export const mountEpisodesApp = async ({
   };
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...coreStart}>
-      <KibanaThemeProvider theme={theme}>
-        <KibanaContextProvider services={kibanaReactServices}>
-          <Context.Provider value={container}>
-            <QueryClientProvider client={queryClient}>
-              <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-                <I18nProvider>
-                  <Router history={history}>
-                    <RedirectAppLinks coreStart={coreStart}>
-                      <EpisodesApp />
-                    </RedirectAppLinks>
-                  </Router>
-                </I18nProvider>
-              </BreadcrumbProvider>
-            </QueryClientProvider>
-          </Context.Provider>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </KibanaRenderContextProvider>,
+    coreStart.rendering.addContext(
+      <KibanaContextProvider services={kibanaReactServices}>
+        <Context.Provider value={container}>
+          <QueryClientProvider client={queryClient}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <Router history={history}>
+                <RedirectAppLinks coreStart={coreStart}>
+                  <EpisodesApp />
+                </RedirectAppLinks>
+              </Router>
+            </BreadcrumbProvider>
+          </QueryClientProvider>
+        </Context.Provider>
+      </KibanaContextProvider>
+    ),
     element
   );
 
@@ -136,29 +132,32 @@ export const mountEpisodesApp = async ({
   };
 };
 
-export const mountNotificationPoliciesApp = ({
+export const mountNotificationPoliciesApp = async ({
   params,
   container,
 }: {
   params: AlertingV2MountParams;
   container: Container;
-}): AppUnmount => {
+}): Promise<AppUnmount> => {
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
 
+  const getStartServices = container.get(DiCoreSetup('getStartServices'));
+  const [coreStart] = await getStartServices();
+
   ReactDOM.render(
-    <Context.Provider value={container}>
-      <QueryClientProvider client={queryClient}>
-        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <Router history={history}>
               <NotificationPoliciesApp />
             </Router>
-          </I18nProvider>
-        </BreadcrumbProvider>
-      </QueryClientProvider>
-    </Context.Provider>,
+          </BreadcrumbProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
     element
   );
 

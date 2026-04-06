@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-episodes-ui/queries/episode_events_query';
-import type { AlertingV2EpisodesKibanaServices } from '../../../episodes_kibana_services';
+import type { KibanaServices } from '../../../episodes_kibana_services';
 
 /** Short strip: one heatmap row. Timestamps are rendered outside the chart. */
 const CHART_HEIGHT = 20;
@@ -137,7 +137,7 @@ export interface EpisodeLifecycleHeatmapProps {
 
 export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapProps) => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana<AlertingV2EpisodesKibanaServices>();
+  const { services } = useKibana<KibanaServices>();
   const baseTheme = services.charts.theme.useChartsBaseTheme();
 
   const data: HeatmapDatum[] = useMemo(() => {

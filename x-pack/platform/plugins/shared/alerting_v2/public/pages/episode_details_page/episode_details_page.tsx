@@ -53,7 +53,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
-import type { AlertingV2EpisodesKibanaServices } from '../../episodes_kibana_services';
+import type { KibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EpisodeLifecycleHeatmap } from './components/episode_lifecycle_heatmap';
 
@@ -112,7 +112,7 @@ type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 export function EpisodeDetailsPage() {
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
-  const { services } = useKibana<AlertingV2EpisodesKibanaServices>();
+  const { services } = useKibana<KibanaServices>();
   const { euiTheme } = useEuiTheme();
   const { data, notifications, http, expressions } = services;
 
