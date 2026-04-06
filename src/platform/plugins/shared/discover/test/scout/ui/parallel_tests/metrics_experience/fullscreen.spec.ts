@@ -119,7 +119,7 @@ spaceTest.describe(
         await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
       });
 
-      await spaceTest.step('exit fullscreen mode', async () => {
+      await spaceTest.step('exit fullscreen mode.', async () => {
         await metricsExperience.fullscreenButton.click();
         await expect(metricsExperience.fullscreen).toBeHidden();
       });
