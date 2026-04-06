@@ -15,4 +15,9 @@ import { ragChatbotSkill } from './rag_chatbot';
 import { vectorHybridSearchSkill } from './vector_hybrid_search';
 export { catalogEcommerceSkill, keywordSearchSkill, ragChatbotSkill, vectorHybridSearchSkill };
 
-export const skills = [catalogEcommerceSkill, keywordSearchSkill, ragChatbotSkill, vectorHybridSearchSkill];
+export const skills = [
+  catalogEcommerceSkill,
+  keywordSearchSkill,
+  ragChatbotSkill,
+  vectorHybridSearchSkill,
+];

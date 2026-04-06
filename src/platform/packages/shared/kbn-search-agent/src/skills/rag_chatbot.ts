@@ -12,7 +12,8 @@
 export const ragChatbotSkill = {
   id: 'rag-chatbot',
   name: 'rag-chatbot',
-  description: 'Guide for building RAG (retrieval-augmented generation) chatbots and Q&A systems with Elasticsearch. Use when a developer wants to build a chatbot, Q&A system, or AI assistant that answers questions from their own data.',
+  description:
+    'Guide for building RAG (retrieval-augmented generation) chatbots and Q&A systems with Elasticsearch. Use when a developer wants to build a chatbot, Q&A system, or AI assistant that answers questions from their own data.',
   content: `# RAG / Chatbot Guide
 
 Guide developers through building retrieval-augmented generation (RAG) systems with Elasticsearch as the retrieval backend. Use this guide when they want a chatbot, Q&A interface, or AI assistant that answers from their own documents.
