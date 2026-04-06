@@ -56,8 +56,6 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    // Currently only evaluation.query.base is used as the effective query.
-    // evaluation.query.condition is reserved for future no-data support.
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: rule.evaluation.query.base.trimEnd() }),
       expect.objectContaining({ signal: abortController.signal })

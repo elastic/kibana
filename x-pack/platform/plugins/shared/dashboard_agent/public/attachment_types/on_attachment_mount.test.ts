@@ -9,10 +9,12 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
+import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import { onAttachmentMount, type OnAttachmentMountParams } from './on_attachment_mount';
 
 interface MockDashboardApi {
   savedObjectId$: BehaviorSubject<string | undefined>;
+  onSave$: Subject<DashboardSaveEvent>;
   layout$: BehaviorSubject<unknown>;
   children$: BehaviorSubject<Record<string, MockChildApi>>;
   title$: BehaviorSubject<string>;
@@ -42,8 +44,15 @@ interface MockChildApi {
   applySerializedState: jest.Mock;
 }
 
+const mockSavedDashboardState = {
+  title: 'Saved Dashboard',
+  description: '',
+  panels: [],
+} as unknown as DashboardSaveEvent['dashboardState'];
+
 const createMockDashboardApi = (): MockDashboardApi => ({
   savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
+  onSave$: new Subject<DashboardSaveEvent>(),
   layout$: new BehaviorSubject<unknown>([]),
   children$: new BehaviorSubject<Record<string, MockChildApi>>({
     'panel-1': {
@@ -338,6 +347,54 @@ describe('onAttachmentMount - manual changes sync', () => {
       jest.advanceTimersByTime(200);
 
       expect(addAttachment).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('save origin sync', () => {
+    it('updates origin on the first save of an unsaved dashboard', () => {
+      getAttachment.mockReturnValue(createMockAttachment({ origin: undefined }));
+
+      mountHandler();
+      dashboardAppClientApi$.next(mockApi);
+
+      mockApi.onSave$.next({
+        previousDashboardId: undefined,
+        dashboardId: 'new-dashboard-id',
+        dashboardState: mockSavedDashboardState,
+      });
+
+      expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
+    });
+
+    it('updates origin on save as when the attachment is linked to the previous dashboard', () => {
+      getAttachment.mockReturnValue(createMockAttachment({ origin: 'dashboard-a' }));
+
+      mountHandler();
+      dashboardAppClientApi$.next(mockApi);
+
+      mockApi.onSave$.next({
+        previousDashboardId: 'dashboard-a',
+        dashboardId: 'dashboard-b',
+        dashboardState: mockSavedDashboardState,
+      });
+
+      expect(updateOrigin).toHaveBeenCalledWith('dashboard-b');
+    });
+
+    it('does not relink the attachment after navigating to a different saved dashboard', () => {
+      getAttachment.mockReturnValue(createMockAttachment({ origin: 'dashboard-a' }));
+      mockApi.savedObjectId$.next('dashboard-b');
+
+      mountHandler();
+      dashboardAppClientApi$.next(mockApi);
+
+      mockApi.onSave$.next({
+        previousDashboardId: 'dashboard-b',
+        dashboardId: 'dashboard-b',
+        dashboardState: mockSavedDashboardState,
+      });
+
+      expect(updateOrigin).not.toHaveBeenCalled();
     });
   });
 

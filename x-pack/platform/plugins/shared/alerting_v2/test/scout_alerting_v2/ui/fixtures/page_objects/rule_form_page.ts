@@ -11,11 +11,11 @@ export class RuleFormPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoCreate() {
-    await this.page.gotoApp('management/insightsAndAlerting/alerting_v2/create');
+    await this.page.gotoApp('management/alertingV2/rules/create');
   }
 
   async gotoRulesList() {
-    await this.page.gotoApp('management/insightsAndAlerting/alerting_v2');
+    await this.page.gotoApp('management/alertingV2/rules');
   }
 
   async gotoDiscover() {
@@ -81,7 +81,15 @@ export class RuleFormPage {
   }
 
   async openRulesFlyoutFromDiscover() {
-    await this.page.testSubj.locator('discoverRulesMenuButton').click();
-    await this.page.testSubj.locator('discoverCreateRuleButton').click();
+    const alertsButton = this.page.testSubj.locator('discoverAlertsButton');
+
+    if (await alertsButton.isVisible()) {
+      await alertsButton.click();
+    } else {
+      await this.page.testSubj.locator('app-menu-overflow-button').click();
+      await alertsButton.click();
+    }
+
+    await this.page.testSubj.locator('discoverCreateEsqlRuleV2Button').click();
   }
 }

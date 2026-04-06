@@ -368,7 +368,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
-        "lineNumber": 187,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -384,7 +384,7 @@
               "ResolveValidationAffectedProjectsOptions"
             ],
             "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
-            "lineNumber": 187,
+            "lineNumber": 186,
             "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
