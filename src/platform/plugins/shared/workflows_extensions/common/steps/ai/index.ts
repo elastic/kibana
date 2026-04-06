@@ -35,3 +35,10 @@ export {
   type AiClassifyStepOutputSchema,
   buildStructuredOutputSchema,
 } from './ai_classify_step';
+
+export {
+  MAX_CONVERSATION_HISTORY_MESSAGES,
+  MAX_CONVERSATION_HISTORY_TOKENS,
+  MAX_ATTACHMENT_DATA_CHARS,
+  MAX_ATTACHMENTS,
+} from './guardrail_context_limits';

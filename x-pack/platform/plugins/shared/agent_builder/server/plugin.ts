@@ -25,7 +25,7 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition } from './step_types';
+import { getAiGuardrailStepDefinition, getRunAgentStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -163,12 +163,6 @@ export class AgentBuilderPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      getRunAgentStepDefinition(this.serviceManager)
-    );
-
-    registerAgentBuilderHandlerContext({ coreSetup });
-
     const getInternalServices = () => {
       const services = this.serviceManager.internalStart;
       if (!services) {
@@ -176,6 +170,13 @@ export class AgentBuilderPlugin
       }
       return services;
     };
+
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      getRunAgentStepDefinition(this.serviceManager)
+    );
+    setupDeps.workflowsExtensions.registerStepDefinition(getAiGuardrailStepDefinition(coreSetup));
+
+    registerAgentBuilderHandlerContext({ coreSetup });
 
     const router = coreSetup.http.createRouter<AgentBuilderHandlerContext>();
     registerRoutes({

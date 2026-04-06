@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { AiGuardrailStepDefinition } from './ai_guardrail_step';
 import { runAgentStepDefinition } from './run_agent_step';
 
 export function registerWorkflowSteps(
@@ -13,4 +14,5 @@ export function registerWorkflowSteps(
 ): void {
   // Register steps
   workflowsExtensions.registerStepDefinition(runAgentStepDefinition);
+  workflowsExtensions.registerStepDefinition(AiGuardrailStepDefinition);
 }
