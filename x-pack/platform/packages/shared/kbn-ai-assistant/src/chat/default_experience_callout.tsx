@@ -77,13 +77,21 @@ export const DefaultExperienceCallout = ({ isConversationApp }: DefaultExperienc
         <EuiText size="s">
           <FormattedMessage
             id="xpack.aiAssistant.defaultExperienceCallout.body"
-            defaultMessage="AI Agent, built on the Agent Builder platform, will replace AI Assistant as the default chat experience in an upcoming release. Try AI Agent now, and you can switch back to AI Assistant at any time in {genAiSettingsLink}."
+            defaultMessage="AI Agent, built on the Agent Builder platform, will replace AI Assistant as the default chat experience in an upcoming release. Try AI Agent now, and you can switch back to AI Assistant at any time in {genAiSettingsLink}. Learn more in our {documentationLink}."
             values={{
               genAiSettingsLink: (
                 <EuiLink href={genAiSettingsHref}>
                   <FormattedMessage
                     id="xpack.aiAssistant.defaultExperienceCallout.genAiSettingsLink"
                     defaultMessage="GenAI Settings"
+                  />
+                </EuiLink>
+              ),
+              documentationLink: (
+                <EuiLink href={docLinks?.links.agentBuilder.learnMore} target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.aiAssistant.defaultExperienceCallout.documentationLink"
+                    defaultMessage="documentation"
                   />
                 </EuiLink>
               ),

@@ -35,7 +35,12 @@ jest.mock('../hooks/use_kibana', () => ({
         getUrlForApp: mockGetUrlForApp,
       },
       docLinks: {
-        links: { agentBuilder: { agentBuilder: 'https://docs.elastic.co' } },
+        links: {
+          agentBuilder: {
+            agentBuilder: 'https://docs.elastic.co',
+            learnMore: 'https://docs.elastic.co/agent-builder',
+          },
+        },
       },
     },
   }),
@@ -90,7 +95,7 @@ describe('DefaultExperienceCallout', () => {
   it('renders the callout when conditions are met', () => {
     renderCallout();
 
-    expect(screen.getByText('AI Assistant is moving to AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('AI Agent is becoming the default')).toBeInTheDocument();
     expect(screen.getByTestId('defaultExperienceCalloutTryAgentButton')).toBeInTheDocument();
   });
 
@@ -200,5 +205,13 @@ describe('DefaultExperienceCallout', () => {
 
     const link = screen.getByText('GenAI Settings');
     expect(link.closest('a')).toHaveAttribute('href', '/app/management/ai/genAiSettings');
+  });
+
+  it('includes a documentation link', () => {
+    renderCallout();
+
+    const link = screen.getByText('documentation');
+    expect(link.closest('a')).toHaveAttribute('href', 'https://docs.elastic.co/agent-builder');
+    expect(link.closest('a')).toHaveAttribute('target', '_blank');
   });
 });
