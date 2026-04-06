@@ -282,6 +282,53 @@ describe('zod', () => {
       });
     });
 
+    test('collapses union [scalar, array] query params to array', () => {
+      expect(
+        convertQuery(
+          z.object({
+            tags: z.optional(z.union([z.string(), z.array(z.string())])),
+          })
+        )
+      ).toEqual({
+        query: [
+          {
+            in: 'query',
+            name: 'tags',
+            required: false,
+            schema: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+          },
+        ],
+        shared: {},
+      });
+    });
+
+    test('collapses union [enum, array[enum]] query params preserving enum', () => {
+      const attachmentType = z.enum(['dashboard', 'rule', 'slo']);
+      expect(
+        convertQuery(
+          z.object({
+            attachmentTypes: z.optional(z.union([attachmentType, z.array(attachmentType)])),
+          })
+        )
+      ).toEqual({
+        query: [
+          {
+            in: 'query',
+            name: 'attachmentTypes',
+            required: false,
+            schema: {
+              type: 'array',
+              items: { type: 'string', enum: ['dashboard', 'rule', 'slo'] },
+            },
+          },
+        ],
+        shared: {},
+      });
+    });
+
     test('handles transform schemas (like dateFromString)', () => {
       const dateFromString = z.string().transform((input) => new Date(input));
       const schema = z.object({ from: dateFromString, to: dateFromString });

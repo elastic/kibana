@@ -107,6 +107,14 @@ describe('TimeFieldSelect', () => {
     expect(select).toHaveValue('event_time');
   });
 
+  it('renders correctly in flyout layout', () => {
+    render(<TimeFieldSelect />, {
+      wrapper: createFormWrapper({}, mockServices, { layout: 'flyout' }),
+    });
+
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
+  });
+
   it('passes query to useDataFields hook', () => {
     render(<TimeFieldSelect />, {
       wrapper: createFormWrapper(
