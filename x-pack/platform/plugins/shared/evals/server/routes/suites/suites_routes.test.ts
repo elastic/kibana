@@ -20,7 +20,6 @@ jest.mock('@kbn/fs', () => ({
   readFileSync: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { readFileSync } = require('@kbn/fs') as { readFileSync: jest.Mock };
 
 const SUITES_URL = '/internal/evals/suites';
@@ -83,7 +82,12 @@ describe('suite routes', () => {
   describe('GET /internal/evals/suites', () => {
     const setup = (suiteRunner?: ReturnType<typeof createMockSuiteRunner>) => {
       const router = httpServiceMock.createRouter();
-      registerListSuitesRoute({ router, logger, repoRoot, suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined });
+      registerListSuitesRoute({
+        router,
+        logger,
+        repoRoot,
+        suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined,
+      });
 
       const versionedRouter = router.versioned as MockedVersionedRouter;
       const { handler } = versionedRouter.getRoute('get', SUITES_URL).versions[
@@ -180,7 +184,12 @@ describe('suite routes', () => {
   describe('POST /internal/evals/suites/{suiteId}/run', () => {
     const setup = (suiteRunner?: ReturnType<typeof createMockSuiteRunner>) => {
       const router = httpServiceMock.createRouter();
-      registerRunSuiteRoute({ router, logger, repoRoot, suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined });
+      registerRunSuiteRoute({
+        router,
+        logger,
+        repoRoot,
+        suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined,
+      });
 
       const versionedRouter = router.versioned as MockedVersionedRouter;
       const { handler } = versionedRouter.getRoute('post', SUITE_RUN_URL).versions[
@@ -336,7 +345,12 @@ describe('suite routes', () => {
   describe('GET /internal/evals/suites/{suiteId}/status', () => {
     const setup = (suiteRunner?: ReturnType<typeof createMockSuiteRunner>) => {
       const router = httpServiceMock.createRouter();
-      registerGetSuiteStatusRoute({ router, logger, repoRoot, suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined });
+      registerGetSuiteStatusRoute({
+        router,
+        logger,
+        repoRoot,
+        suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined,
+      });
 
       const versionedRouter = router.versioned as MockedVersionedRouter;
       const { handler } = versionedRouter.getRoute('get', SUITE_STATUS_URL).versions[
@@ -509,7 +523,12 @@ describe('suite routes', () => {
   describe('GET /internal/evals/suites/{suiteId}/runs', () => {
     const setup = (suiteRunner?: ReturnType<typeof createMockSuiteRunner>) => {
       const router = httpServiceMock.createRouter();
-      registerGetSuiteRunsRoute({ router, logger, repoRoot, suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined });
+      registerGetSuiteRunsRoute({
+        router,
+        logger,
+        repoRoot,
+        suiteRunner: suiteRunner ? asSuiteRunner(suiteRunner) : undefined,
+      });
 
       const versionedRouter = router.versioned as MockedVersionedRouter;
       const { handler } = versionedRouter.getRoute('get', SUITE_RUNS_URL).versions[
