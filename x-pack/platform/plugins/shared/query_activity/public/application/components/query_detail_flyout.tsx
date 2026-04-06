@@ -175,9 +175,15 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             ...(query.traceId
               ? [
                   {
-                    title: i18n.translate('xpack.queryActivity.flyout.traceIdLabel', {
-                      defaultMessage: 'Trace ID',
-                    }),
+                    title: (
+                      <EuiText size="s">
+                        <strong>
+                          {i18n.translate('xpack.queryActivity.flyout.traceIdLabel', {
+                            defaultMessage: 'Trace ID',
+                          })}
+                        </strong>
+                      </EuiText>
+                    ),
                     description: inspectInDiscoverLinkProps ? (
                       <EuiLink
                         data-test-subj="queryActivityFlyoutTraceIdLink"
@@ -193,9 +199,15 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
                 ]
               : []),
             {
-              title: i18n.translate('xpack.queryActivity.flyout.sourceLabel', {
-                defaultMessage: 'Source',
-              }),
+              title: (
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('xpack.queryActivity.flyout.sourceLabel', {
+                      defaultMessage: 'Source',
+                    })}
+                  </strong>
+                </EuiText>
+              ),
               description: source || <em>{notAvailableLabel}</em>,
             },
           ]}
