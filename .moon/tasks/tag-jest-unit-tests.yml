@@ -9,7 +9,6 @@ tasks:
     command: node
     args:
       - scripts/jest.js
-      - '--runInBand'
       - '--passWithNoTests'
       - '--config'
       - '@files(jest-config)'
