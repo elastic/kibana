@@ -69,14 +69,14 @@ Ask what they're building, in their own words. One question only — something l
 
 Listen for signals that tell you which approach to recommend:
 
-| Signal                                                                                                      | Approach          | Output                               |
-| ----------------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------ |
-| "search bar", "filter by", "facets", "autocomplete"                                                         | keyword-search    | Ranked results                       |
-| "find similar", "natural language", "meaning-based"                                                         | semantic-search   | Ranked results (by meaning)          |
-| "both keyword and semantic", "hybrid"                                                                       | hybrid-search     | Ranked results (combined)            |
-| "chatbot", "Q&A", "answer from my docs", "RAG"                                                              | rag-chatbot       | Generated answers (not just results) |
-| "product search", "e-commerce", "catalog"                                                                   | catalog-ecommerce | Ranked results with facets           |
-| "vector store", "embeddings", "LangChain", "LlamaIndex", "AI app", "agent", "similarity", "recommendations" | vector-database   | Vectors for downstream AI            |
+| Signal                                                                                                      | Approach             | Output                               |
+| ----------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------ |
+| "search bar", "filter by", "facets", "autocomplete"                                                         | keyword-search       | Ranked results                       |
+| "find similar", "natural language", "meaning-based"                                                         | vector-hybrid-search | Ranked results (by meaning)          |
+| "both keyword and semantic", "hybrid"                                                                       | vector-hybrid-search | Ranked results (combined)            |
+| "chatbot", "Q&A", "answer from my docs", "RAG"                                                              | rag-chatbot          | Generated answers (not just results) |
+| "product search", "e-commerce", "catalog"                                                                   | catalog-ecommerce    | Ranked results with facets           |
+| "vector store", "embeddings", "LangChain", "LlamaIndex", "AI app", "agent", "similarity", "recommendations" | vector-hybrid-search | Vectors for downstream AI            |
 
 **Semantic vs RAG — a key distinction.** Semantic search returns a _list of relevant results_ ranked by meaning. RAG retrieves relevant documents and then feeds them to an LLM to _generate an answer_. If the developer says "I want to answer questions from my docs," that's RAG — they want answers, not a list of documents. If they say "I want users to find relevant docs by describing what they need," that's semantic search. Ask: "Do you want to show users a list of results, or generate direct answers from the content?"
 
@@ -97,7 +97,7 @@ Don't try to build Observability or Security workflows from scratch with search 
 
 > "Will people be typing searches directly — like a search bar or filter UI — or is this for an AI application that retrieves data programmatically, like a LangChain agent, an AI assistant, or a recommendation engine?"
 
-If the answer is **people searching directly**, continue to the natural language follow-up below. If the answer is **an AI application**, route to the **vector-database** approach — the developer needs Elasticsearch as a vector store, not as a human-facing search engine. The architecture, mapping, and integration patterns are fundamentally different.
+If the answer is **people searching directly**, continue to the natural language follow-up below. If the answer is **an AI application**, route to the **vector-hybrid-search** approach — the developer needs Elasticsearch as a vector store, not as a human-facing search engine. The architecture, mapping, and integration patterns are fundamentally different.
 
 **Follow-up (for human-facing search): "Will users also search in natural language?"** Once you know people are searching directly, find out whether they'll only use specific terms (e.g., "size 10 Nike running shoes") or whether they'll also use natural, descriptive queries (e.g., "comfortable shoes for running in the rain"). Keyword search handles the first case well on its own. But if users will also describe what they want in their own words, adding semantic search on top makes a big difference. One question — something like:
 

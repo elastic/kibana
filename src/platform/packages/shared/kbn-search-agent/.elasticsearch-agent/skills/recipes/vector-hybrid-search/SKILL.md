@@ -35,7 +35,7 @@ Ask these routing questions first:
 
 Minimal — works out of the box on Serverless:
 
-```
+```json
 PUT /my-index
 {
   "mappings": {
@@ -50,7 +50,7 @@ PUT /my-index
 
 With a specific inference endpoint:
 
-```
+```json
 PUT /my-index
 {
   "mappings": {
@@ -66,7 +66,7 @@ PUT /my-index
 
 ### `dense_vector` Mapping
 
-```
+```json
 PUT /my-index
 {
   "mappings": {
@@ -96,7 +96,7 @@ Set `dims` to match the embedding model output (OpenAI text-embedding-3-small = 
 
 ### Semantic Search (`semantic_text`)
 
-```
+```json
 POST /my-index/_search
 {
   "retriever": {
@@ -114,7 +114,7 @@ POST /my-index/_search
 
 ### Pure kNN (`dense_vector`)
 
-```
+```json
 POST /my-index/_search
 {
   "retriever": {
@@ -130,7 +130,7 @@ POST /my-index/_search
 
 ### Hybrid Search with RRF
 
-```
+```json
 POST /my-index/_search
 {
   "retriever": {
@@ -168,7 +168,7 @@ Add `filter` clauses to both retrievers for filtered hybrid search.
 
 Start without reranking. Add `text_similarity_reranker` if relevance isn't good enough after tuning:
 
-```
+```json
 POST /my-index/_search
 {
   "retriever": {
