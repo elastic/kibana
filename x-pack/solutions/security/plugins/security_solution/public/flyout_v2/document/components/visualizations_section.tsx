@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { alertFlyoutHistoryKey, discoverFlyoutHistoryKey } from '../constants/flyout_history';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -23,6 +24,7 @@ import { AnalyzerGraph } from '../../analyzer';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -61,6 +63,8 @@ export const VisualizationsSection = memo(
     const store = useStore();
     const history = useHistory();
     const sessionViewConfig = useSessionViewConfig(hit);
+    const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : discoverFlyoutHistoryKey;
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -83,10 +87,15 @@ export const VisualizationsSection = memo(
               />
             ),
           }),
-          { ...defaultToolsFlyoutProperties }
+          {
+            ...defaultToolsFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
         ),
-      [history, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
+
     const onShowSessionView = useCallback(
       () =>
         overlays.openSystemFlyout(
@@ -104,10 +113,15 @@ export const VisualizationsSection = memo(
               />
             ),
           }),
-          { ...defaultToolsFlyoutProperties }
+          {
+            ...defaultToolsFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
         ),
       [
         history,
+        historyKey,
         hit,
         onAlertUpdated,
         overlays,

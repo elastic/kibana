@@ -261,7 +261,7 @@ export function UnifiedDocViewerFlyout({
   // Document Viewer flyout and any nested flyouts (e.g. Trace Waterfall) into
   // the same back-button navigation history, enabling "Back" to return the user
   // from the Trace Waterfall to the Document Viewer.
-  const historyKey = useMemo(() => Symbol('docViewerFlyout'), []);
+  const historyKey = useMemo(() => Symbol.for('docViewerFlyout'), []);
 
   return (
     <FlyoutHistoryKeyContext.Provider value={historyKey}>
