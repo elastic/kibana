@@ -8,7 +8,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
-import { FETCH_NOTES_ERROR, NotesHeader } from './notes_header';
+import { FETCH_NOTES_ERROR, Notes } from './notes';
+import {
+  NOTES_ADD_NOTE_BUTTON_TEST_ID,
+  NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID,
+  NOTES_COUNT_TEST_ID,
+  NOTES_LOADING_TEST_ID,
+  NOTES_TITLE_TEST_ID,
+  NOTES_VIEW_NOTES_BUTTON_TEST_ID,
+} from './test_ids';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { ReqStatus } from '../../../notes';
@@ -34,34 +42,24 @@ jest.mock('react-redux', () => {
   };
 });
 
-const testIds = {
-  title: 'notesHeaderTitle',
-  addNoteButton: 'notesHeaderAddNoteButton',
-  viewNotesButton: 'notesHeaderViewNotesButton',
-  addNoteIconButton: 'notesHeaderAddNoteIconButton',
-  count: 'notesHeaderCount',
-  loading: 'notesHeaderLoading',
-};
-
 const defaultProps = {
   documentId: 'doc-1',
-  onOpenNotesTab: mockOnOpenNotesTab,
-  testIds,
+  onShowNotes: mockOnOpenNotesTab,
 };
 
-const renderNotesHeader = (
-  props: Partial<Parameters<typeof NotesHeader>[0]> = {},
+const renderNotes = (
+  props: Partial<Parameters<typeof Notes>[0]> = {},
   storeState?: Parameters<typeof createMockStore>[0]
 ) => {
   const store = storeState ? createMockStore(storeState) : createMockStore(mockGlobalState);
   return render(
     <TestProviders store={store}>
-      <NotesHeader {...defaultProps} {...props} />
+      <Notes {...defaultProps} {...props} />
     </TestProviders>
   );
 };
 
-describe('NotesHeader', () => {
+describe('Notes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useUserPrivileges as jest.Mock).mockReturnValue({
@@ -70,13 +68,13 @@ describe('NotesHeader', () => {
   });
 
   it('renders the Notes title', () => {
-    const { getByTestId } = renderNotesHeader();
-    expect(getByTestId(testIds.title)).toBeInTheDocument();
-    expect(getByTestId(testIds.title)).toHaveTextContent('Notes');
+    const { getByTestId } = renderNotes();
+    expect(getByTestId(NOTES_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(NOTES_TITLE_TEST_ID)).toHaveTextContent('Notes');
   });
 
   it('dispatches fetch when not disabled and user can read', () => {
-    renderNotesHeader();
+    renderNotes();
     expect(mockDispatch).toHaveBeenCalled();
   });
 
@@ -91,13 +89,13 @@ describe('NotesHeader', () => {
         },
       },
     };
-    const { getByTestId } = renderNotesHeader({}, storeState);
-    expect(getByTestId(testIds.loading)).toBeInTheDocument();
+    const { getByTestId } = renderNotes({}, storeState);
+    expect(getByTestId(NOTES_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
   it('shows Add note button when no notes and user has crud', () => {
-    const { getByTestId } = renderNotesHeader();
-    const button = getByTestId(testIds.addNoteButton);
+    const { getByTestId } = renderNotes();
+    const button = getByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
     button.click();
     expect(mockOnOpenNotesTab).toHaveBeenCalled();
@@ -123,19 +121,19 @@ describe('NotesHeader', () => {
         ids: ['note-1'],
       },
     };
-    const { getByTestId } = renderNotesHeader({ documentId: 'doc-1' }, storeState);
-    expect(getByTestId(testIds.count)).toBeInTheDocument();
-    expect(getByTestId(testIds.count)).toHaveTextContent('1');
-    const iconButton = getByTestId(testIds.addNoteIconButton);
+    const { getByTestId } = renderNotes({ documentId: 'doc-1' }, storeState);
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toHaveTextContent('1');
+    const iconButton = getByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID);
     iconButton.click();
     expect(mockOnOpenNotesTab).toHaveBeenCalled();
   });
 
   it('shows dash when disabled and does not dispatch fetch', () => {
-    const { getByText, queryByTestId } = renderNotesHeader({ disabled: true });
+    const { getByText, queryByTestId } = renderNotes({ disabled: true });
     expect(mockDispatch).not.toHaveBeenCalled();
-    expect(queryByTestId(testIds.addNoteButton)).not.toBeInTheDocument();
-    expect(queryByTestId(testIds.count)).not.toBeInTheDocument();
+    expect(queryByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(NOTES_COUNT_TEST_ID)).not.toBeInTheDocument();
     expect(getByText(getEmptyValue())).toBeInTheDocument();
   });
 
@@ -154,7 +152,7 @@ describe('NotesHeader', () => {
         },
       },
     };
-    renderNotesHeader({}, storeState);
+    renderNotes({}, storeState);
     expect(mockAddError).toHaveBeenCalledWith(null, {
       title: FETCH_NOTES_ERROR,
     });
@@ -164,8 +162,8 @@ describe('NotesHeader', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       notesPrivileges: { crud: false, read: false },
     });
-    const { getByText, queryByTestId } = renderNotesHeader();
-    expect(queryByTestId(testIds.addNoteButton)).not.toBeInTheDocument();
+    const { getByText, queryByTestId } = renderNotes();
+    expect(queryByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByText(getEmptyValue())).toBeInTheDocument();
   });
 
@@ -192,8 +190,8 @@ describe('NotesHeader', () => {
         ids: ['note-1'],
       },
     };
-    const { getByTestId } = renderNotesHeader({ documentId: 'doc-1' }, storeState);
-    const viewButton = getByTestId(testIds.viewNotesButton);
+    const { getByTestId } = renderNotes({ documentId: 'doc-1' }, storeState);
+    const viewButton = getByTestId(NOTES_VIEW_NOTES_BUTTON_TEST_ID);
     expect(viewButton).toBeInTheDocument();
     viewButton.click();
     expect(mockOnOpenNotesTab).toHaveBeenCalled();
