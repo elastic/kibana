@@ -60,7 +60,7 @@ export function registerUpdateSkillRoute({ router, logger }: AESOPRouteDependenc
 
           // Add edit metadata
           updates.last_edited_at = new Date().toISOString();
-          updates.last_edited_by = request.auth.credentials?.username || 'unknown';
+          updates.last_edited_by = 'unknown';
 
           // Reset validation when content changes — edits require re-validation
           if (markdown !== undefined) {
@@ -72,14 +72,13 @@ export function registerUpdateSkillRoute({ router, logger }: AESOPRouteDependenc
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
-            body: { doc: updates },
+            doc: updates,
             refresh: 'wait_for',
           });
 
-          logger.info('[AESOP] Skill updated', {
-            skill_id: skillId,
-            fields_updated: Object.keys(updates),
-          });
+          logger.info(
+            `[AESOP] Skill updated skill_id=${skillId} fields_updated=${Object.keys(updates).join(',')}`
+          );
 
           return response.ok({
             body: {
@@ -90,10 +89,9 @@ export function registerUpdateSkillRoute({ router, logger }: AESOPRouteDependenc
             },
           });
         } catch (error) {
-          logger.error('[AESOP] Failed to update skill', {
-            error: error instanceof Error ? error.message : String(error),
-            skill_id: skillId,
-          });
+          logger.error(
+            `[AESOP] Failed to update skill skill_id=${skillId} error=${error instanceof Error ? error.message : String(error)}`
+          );
 
           return response.customError({
             statusCode: 500,

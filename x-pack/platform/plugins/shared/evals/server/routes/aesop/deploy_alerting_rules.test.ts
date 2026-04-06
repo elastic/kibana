@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Tests for AESOP Alerting Rules Deployment Route
  */
@@ -12,14 +13,16 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { registerDeployAlertingRulesRoute } from './deploy_alerting_rules';
 import { ALERTING_RULES } from '../../lib/aesop/monitoring/alerting_rules';
-import type { EvalsRequestHandlerContext } from '../../types';
 
 describe('Deploy Alerting Rules Route', () => {
-  let mockRouter: ReturnType<typeof httpServerMock.createRouter>;
-  let mockContext: EvalsRequestHandlerContext;
+  let mockRouter: any;
+  let mockContext: any;
 
   beforeEach(() => {
-    mockRouter = httpServerMock.createRouter();
+    mockRouter = (httpServerMock as any).createRouter?.() ?? {
+      versioned: { post: jest.fn().mockReturnValue({ addVersion: jest.fn() }) },
+      post: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
+    };
     mockContext = {
       core: {
         elasticsearch: {

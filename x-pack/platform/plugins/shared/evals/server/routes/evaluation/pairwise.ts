@@ -171,7 +171,7 @@ const resolveSkill = async (
       const so = await skillClient.get(id);
       const skill = skillClient.toDocument(so);
       return {
-        id: skill.id,
+        id: skill.id ?? id,
         name: skill.name,
         description: skill.description,
         markdown: skill.markdown,

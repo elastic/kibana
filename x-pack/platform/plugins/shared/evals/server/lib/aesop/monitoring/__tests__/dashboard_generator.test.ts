@@ -47,7 +47,7 @@ describe('DashboardGeneratorService', () => {
       expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
 
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
-      const [type, attributes, options] = createCall;
+      const [type, , options] = createCall as [string, any, any];
 
       expect(type).toBe('dashboard');
       expect(options?.id).toBe('aesop-performance-monitoring');
@@ -65,7 +65,7 @@ describe('DashboardGeneratorService', () => {
       await service.createPerformanceMonitoringDashboard();
 
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
-      const [, attributes] = createCall;
+      const [, attributes] = createCall as [string, any, any];
 
       const panels = JSON.parse(attributes.panelsJSON);
       expect(panels).toHaveLength(8);
@@ -95,7 +95,7 @@ describe('DashboardGeneratorService', () => {
       await service.createPerformanceMonitoringDashboard();
 
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
-      const [, attributes] = createCall;
+      const [, attributes] = createCall as [string, any, any];
 
       expect(attributes.title).toBe('AESOP: Autonomous Skill Discovery - Performance Monitoring');
       expect(attributes.description).toContain('Operational metrics');
@@ -119,7 +119,7 @@ describe('DashboardGeneratorService', () => {
       await service.createPerformanceMonitoringDashboard();
 
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
-      const [, attributes] = createCall;
+      const [, attributes] = createCall as [string, any, any];
 
       const options = JSON.parse(attributes.optionsJSON);
       expect(options).toEqual({
@@ -174,7 +174,7 @@ describe('DashboardGeneratorService', () => {
       await service.createPerformanceMonitoringDashboard();
 
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
-      const [, attributes] = createCall;
+      const [, attributes] = createCall as [string, any, any];
       const panels = JSON.parse(attributes.panelsJSON);
 
       const skillInvocationPanel = panels[0];
@@ -193,7 +193,7 @@ describe('DashboardGeneratorService', () => {
       await service.createPerformanceMonitoringDashboard();
 
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
-      const [, attributes] = createCall;
+      const [, attributes] = createCall as [string, any, any];
       const panels = JSON.parse(attributes.panelsJSON);
 
       const approvalRatePanel = panels[2];
@@ -214,7 +214,7 @@ describe('DashboardGeneratorService', () => {
       await service.createPerformanceMonitoringDashboard();
 
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
-      const [, attributes] = createCall;
+      const [, attributes] = createCall as [string, any, any];
       const panels = JSON.parse(attributes.panelsJSON);
 
       const costPanel = panels[7];

@@ -48,10 +48,11 @@ export class ExplorationCache {
       return null;
     }
 
-    this.logger.debug(`[AESOP Cache] Hit: ${key}`, {
-      age_ms: Date.now() - entry.createdAt,
-      ttl_remaining_ms: entry.expiresAt - Date.now(),
-    });
+    const ageMs = Date.now() - entry.createdAt;
+    const ttlRemainingMs = entry.expiresAt - Date.now();
+    this.logger.debug(
+      `[AESOP Cache] Hit: ${key} (age_ms=${ageMs}, ttl_remaining_ms=${ttlRemainingMs})`
+    );
 
     return entry.value as T;
   }
@@ -68,7 +69,7 @@ export class ExplorationCache {
       createdAt: Date.now(),
     });
 
-    this.logger.debug(`[AESOP Cache] Set: ${key}`, { ttl_ms: ttl });
+    this.logger.debug(`[AESOP Cache] Set: ${key} (ttl_ms=${ttl})`);
   }
 
   /**

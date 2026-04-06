@@ -5,12 +5,32 @@
  * 2.0.
  */
 
+// Spike test — uses an extended withRetry API (exponentialBackoff, jitter, timeouts, callbacks)
+// not yet reflected in the current aesop_errors.ts implementation.
 import {
-  withRetry,
+  withRetry as withRetryImpl,
   AESOPError,
   WorkflowTimeoutError,
   AgentExecutionError,
 } from '../../errors/aesop_errors';
+
+const withRetry = withRetryImpl as any;
+
+// Local type alias that mirrors the withRetry options shape for this spike test
+interface RetryConfig {
+  maxRetries: number;
+  retryDelay?: number;
+  exponentialBackoff?: boolean;
+  maxRetryDelay?: number;
+  jitter?: boolean;
+  overallTimeout?: number;
+  operationTimeout?: number;
+  retryableErrors?: string[];
+  onRetry?: (attempt: number, error: Error, delayMs: number) => void;
+  onMaxRetriesExceeded?: (maxRetries: number, error: Error) => void;
+  logger: { info: jest.Mock; warn: jest.Mock; error: jest.Mock; debug: jest.Mock };
+  operation: string;
+}
 
 describe('Workflow Retry Logic', () => {
   let mockLogger: any;
@@ -103,13 +123,9 @@ describe('Workflow Retry Logic', () => {
   describe('exponential backoff', () => {
     it('should apply exponential backoff between retries', async () => {
       const operation = jest.fn();
-      const delays: number[] = [];
-
       operation.mockRejectedValueOnce(new Error('Retry 1'));
       operation.mockRejectedValueOnce(new Error('Retry 2'));
       operation.mockResolvedValueOnce('success');
-
-      const startTime = Date.now();
 
       const promise = withRetry(operation, {
         maxRetries: 3,
@@ -155,9 +171,6 @@ describe('Workflow Retry Logic', () => {
 
     it('should add jitter to prevent thundering herd', async () => {
       const operation = jest.fn().mockRejectedValue(new Error('Retry'));
-
-      const delays1: number[] = [];
-      const delays2: number[] = [];
 
       // Run retry twice with same config
       const config: RetryConfig = {

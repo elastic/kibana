@@ -16,10 +16,10 @@ const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/evaluate` as const;
 const EvaluateRequestBody = z.object({
   items: z.array(
     z.object({
-      input: z.record(z.unknown()),
+      input: z.record(z.string(), z.unknown()),
       output: z.unknown(),
       expected: z.unknown().optional(),
-      metadata: z.record(z.unknown()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     })
   ),
   evaluator_names: z.array(z.string()).min(1),

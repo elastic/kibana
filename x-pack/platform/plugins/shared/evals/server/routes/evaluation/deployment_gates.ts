@@ -15,7 +15,7 @@ const EVALS_DEPLOYMENT_GATES_URL = `${EVALS_INTERNAL_URL}/config/deployment-gate
 
 const DeploymentGatesRequestBody = z.object({
   composite_threshold: z.number().min(0).max(1),
-  per_evaluator: z.record(z.object({ min: z.number().min(0).max(1) })),
+  per_evaluator: z.record(z.string(), z.object({ min: z.number().min(0).max(1) })),
   required_pass: z.array(z.string()),
   min_repetitions: z.number().min(1).max(100),
 });

@@ -35,8 +35,8 @@ export const evaluateCiGates = (
         gate: 'required-pass',
         evaluator: required,
         expected: 0,
-        actual: result.score ?? 0,
-        message: `Required evaluator "${required}" failed (score: ${result.score ?? 'null'})`,
+        actual: result?.score ?? 0,
+        message: `Required evaluator "${required}" failed (score: ${result?.score ?? 'null'})`,
       });
     }
   }

@@ -114,7 +114,9 @@ export class MetricsCollectorService {
    * Collect skill usage metrics from OTEL traces
    */
   async collectSkillUsageMetrics(timeRange: TimeRange): Promise<SkillMetrics> {
-    this.logger.debug('[AESOP Metrics] Collecting skill usage metrics', { timeRange });
+    this.logger.debug(
+      `[AESOP Metrics] Collecting skill usage metrics from=${timeRange.from} to=${timeRange.to}`
+    );
 
     try {
       const result = await this.esClient.search({
@@ -240,7 +242,8 @@ export class MetricsCollectorService {
 
       const avgSuccessRate =
         bySkill.length > 0
-          ? bySkill.reduce((sum, s) => sum + s.success_rate, 0) / bySkill.length
+          ? bySkill.reduce((sum: number, s: (typeof bySkill)[0]) => sum + s.success_rate, 0) /
+            bySkill.length
           : 0;
 
       return {
@@ -253,7 +256,11 @@ export class MetricsCollectorService {
         },
       };
     } catch (error) {
-      this.logger.error('[AESOP Metrics] Failed to collect skill usage metrics', { error });
+      this.logger.error(
+        `[AESOP Metrics] Failed to collect skill usage metrics error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }
@@ -356,8 +363,8 @@ export class MetricsCollectorService {
       if (byCycle.length >= 3) {
         const recentCycles = byCycle.slice(-3);
         const improvements = recentCycles
-          .map((c) => c.improvement_from_previous)
-          .filter((i) => i !== null) as number[];
+          .map((c: { improvement_from_previous: number | null }) => c.improvement_from_previous)
+          .filter((i: number | null) => i !== null) as number[];
 
         if (improvements.length >= 2) {
           const avgImprovement = improvements.reduce((sum, i) => sum + i, 0) / improvements.length;
@@ -377,7 +384,11 @@ export class MetricsCollectorService {
         },
       };
     } catch (error) {
-      this.logger.error('[AESOP Metrics] Failed to collect approval rate metrics', { error });
+      this.logger.error(
+        `[AESOP Metrics] Failed to collect approval rate metrics error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }
@@ -452,7 +463,11 @@ export class MetricsCollectorService {
           ? byExecution.reduce((sum, e) => sum + e.skills_proposed, 0) / byExecution.length
           : 0;
 
-      const totalExecutions = result.hits.total;
+      const totalExecutionsRaw = result.hits.total;
+      const totalExecutions =
+        typeof totalExecutionsRaw === 'number'
+          ? totalExecutionsRaw
+          : totalExecutionsRaw?.value ?? 0;
       // Query only returns completed executions; success rate requires a separate
       // count of total (including failed) executions to be meaningful
       const successRate = byExecution.length > 0 ? 100 : 0;
@@ -464,15 +479,16 @@ export class MetricsCollectorService {
           p95_duration_minutes: p95Duration,
           avg_indices_per_run: avgIndices,
           avg_skills_per_run: avgSkills,
-          total_executions:
-            typeof totalExecutions === 'number' ? totalExecutions : totalExecutions.value,
+          total_executions: totalExecutions,
           success_rate: successRate,
         },
       };
     } catch (error) {
-      this.logger.error('[AESOP Metrics] Failed to collect exploration performance metrics', {
-        error,
-      });
+      this.logger.error(
+        `[AESOP Metrics] Failed to collect exploration performance metrics error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }
@@ -481,7 +497,9 @@ export class MetricsCollectorService {
    * Collect token usage metrics by AESOP agent type
    */
   async collectTokenUsageByAgent(timeRange: TimeRange): Promise<TokenUsageByAgent> {
-    this.logger.debug('[AESOP Metrics] Collecting token usage by agent', { timeRange });
+    this.logger.debug(
+      `[AESOP Metrics] Collecting token usage by agent from=${timeRange.from} to=${timeRange.to}`
+    );
 
     try {
       const result = await this.esClient.search({
@@ -585,10 +603,16 @@ export class MetricsCollectorService {
       });
 
       const totalInvocations = (result.aggregations?.total_invocations_all as any)?.value || 0;
-      const totalTokensSum = byAgent.reduce((sum, a) => sum + a.total_tokens, 0);
+      const totalTokensSum = byAgent.reduce(
+        (sum: number, a: { total_tokens: number }) => sum + a.total_tokens,
+        0
+      );
       const totalCachedTokensAll =
         (result.aggregations?.total_cached_tokens_all as any)?.value || 0;
-      const totalCostSum = byAgent.reduce((sum, a) => sum + a.estimated_cost_usd, 0);
+      const totalCostSum = byAgent.reduce(
+        (sum: number, a: { estimated_cost_usd: number }) => sum + a.estimated_cost_usd,
+        0
+      );
 
       const overallPromptTokens = buckets.reduce(
         (sum: number, b: any) => sum + (b.total_prompt_tokens?.value || 0),
@@ -608,7 +632,11 @@ export class MetricsCollectorService {
         },
       };
     } catch (error) {
-      this.logger.error('[AESOP Metrics] Failed to collect token usage by agent', { error });
+      this.logger.error(
+        `[AESOP Metrics] Failed to collect token usage by agent error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }

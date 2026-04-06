@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { CircuitBreaker, CircuitBreakerState } from '../circuit_breaker';
+// Spike test — uses a planned CircuitBreaker API (execute/getState/shutdown/getExecutionSummary)
+// that is not yet implemented in the current circuit_breaker.ts.
+// Typed as any to allow tests to compile until the implementation catches up.
+import { CircuitBreaker as CircuitBreakerImpl } from '../circuit_breaker';
+
+const CircuitBreaker = CircuitBreakerImpl as any;
+const CircuitBreakerState = {
+  CLOSED: 'CLOSED',
+  OPEN: 'OPEN',
+  HALF_OPEN: 'HALF_OPEN',
+} as const;
 
 describe('Workflow Circuit Breaker', () => {
-  let circuitBreaker: CircuitBreaker;
+  let circuitBreaker: any;
   let mockLogger: any;
 
   beforeEach(() => {

@@ -61,7 +61,6 @@ export const registerValidateSkillRoute = ({
             connector_id: connectorId,
             auto_converge: autoConverge,
             evaluators,
-            connector_ids: connectorIds,
             threshold,
             max_iterations: maxIterations,
             convergence_delta: convergenceDelta,
@@ -102,6 +101,12 @@ export const registerValidateSkillRoute = ({
             validation_connector_id: connectorId,
           });
 
+          if (!skillValidationService) {
+            return response.badRequest({
+              body: { message: 'Skill validation service is not available' },
+            });
+          }
+
           const validation = await skillValidationService.validateSkill(
             skill,
             {
@@ -109,7 +114,6 @@ export const registerValidateSkillRoute = ({
               maxIterations: maxIterations ?? 5,
               convergenceDelta: convergenceDelta ?? 0.02,
               connectorId,
-              connectorIds,
               evaluators,
               requiredPass,
             },

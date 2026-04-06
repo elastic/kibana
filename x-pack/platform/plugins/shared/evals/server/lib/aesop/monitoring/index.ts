@@ -9,12 +9,7 @@ export { DashboardGeneratorService } from './dashboard_generator';
 export { MetricsCollectorService } from './metrics_collector';
 export { FeedbackLoaderService } from './feedback_loader';
 export { APMInstrumentationService } from './apm_instrumentation';
-export {
-  ALERTING_RULES,
-  getAlertingRule,
-  getAlertingRulesByTags,
-  getCriticalAlertingRules,
-} from './alerting_rules';
+export { ALERTING_RULES } from './alerting_rules';
 
 export type {
   TimeRange,
@@ -25,4 +20,4 @@ export type {
 } from './metrics_collector';
 
 export type { FeedbackRecord, FeedbackSummary } from './feedback_loader';
-export type { AlertingRule, AlertingAction } from './alerting_rules';
+export type { AlertingRule } from './alerting_rules';

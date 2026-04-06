@@ -35,12 +35,12 @@ describe('AESOP Feedback Learning Integration', () => {
     feedbackLoader = new FeedbackLoaderService(esClient);
 
     // Clear feedback index before each test
-    await esClient.delete({
+    await esClient.deleteByQuery({
       index: '.aesop-rejection-feedback',
       query: {
         match_all: {},
       },
-      refresh: 'wait_for',
+      refresh: true,
     });
   });
 

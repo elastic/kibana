@@ -53,10 +53,9 @@ export function registerDeployMonitoringDashboardRoute({ router, logger }: AESOP
 
           const dashboardUrl = `/app/dashboards#/view/${dashboardId}`;
 
-          logger.info('[AESOP] Dashboard deployed successfully', {
-            dashboard_id: dashboardId,
-            url: dashboardUrl,
-          });
+          logger.info(
+            `[AESOP] Dashboard deployed successfully dashboard_id=${dashboardId} url=${dashboardUrl}`
+          );
 
           return response.ok({
             body: {

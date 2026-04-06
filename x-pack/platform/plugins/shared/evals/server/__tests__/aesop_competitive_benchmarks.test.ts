@@ -900,7 +900,7 @@ describe('AESOP Competitive Benchmarks', () => {
 
       // Mock: Verify skill complexity is comparable
       const aesopAvgToolsPerSkill = 6;
-      const torqBaselineSteps = 8;
+      // torqBaselineSteps = 8; // baseline reference, not used in assertions
 
       // AESOP skills should be in similar complexity range
       expect(aesopAvgToolsPerSkill).toBeGreaterThanOrEqual(4);

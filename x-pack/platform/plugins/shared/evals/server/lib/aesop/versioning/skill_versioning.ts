@@ -40,7 +40,7 @@ export interface SkillVersion {
     eval_score: number;
     avg_tokens: number;
     avg_latency_ms: number;
-    error_rate: number;
+    error_rate?: number;
   };
 
   // Metadata
@@ -74,7 +74,7 @@ export class SkillVersioningService {
     await this.esClient.index({
       index: '.aesop-skill-versions',
       id: `${skillId}-v1`,
-      body: version,
+      document: version,
       refresh: 'wait_for',
     });
 
@@ -125,7 +125,7 @@ export class SkillVersioningService {
     await this.esClient.index({
       index: '.aesop-skill-versions',
       id: `${skillId}-v${newVersionNumber}`,
-      body: newVersion,
+      document: newVersion,
       refresh: 'wait_for',
     });
 
@@ -133,14 +133,12 @@ export class SkillVersioningService {
     await this.esClient.update({
       index: '.aesop-proposed-skills',
       id: skillId,
-      body: {
-        doc: {
-          markdown: improvedMarkdown,
-          current_version: newVersionNumber,
-          version_history: {
-            total_versions: newVersionNumber,
-            latest_version_id: `${skillId}-v${newVersionNumber}`,
-          },
+      doc: {
+        markdown: improvedMarkdown,
+        current_version: newVersionNumber,
+        version_history: {
+          total_versions: newVersionNumber,
+          latest_version_id: `${skillId}-v${newVersionNumber}`,
         },
       },
     });
@@ -154,16 +152,16 @@ export class SkillVersioningService {
   async getLatestVersion(skillId: string): Promise<SkillVersion> {
     const result = await this.esClient.search({
       index: '.aesop-skill-versions',
-      body: {
-        query: {
-          term: { skill_id: skillId },
-        },
-        sort: [{ version: { order: 'desc' } }],
-        size: 1,
+      query: {
+        term: { skill_id: skillId },
       },
+      sort: [{ version: { order: 'desc' } }],
+      size: 1,
     });
 
-    if (result.hits.total.value === 0) {
+    const total = result.hits.total;
+    const totalValue = typeof total === 'number' ? total : total?.value ?? 0;
+    if (totalValue === 0) {
       throw new Error(`No versions found for skill ${skillId}`);
     }
 
@@ -176,13 +174,11 @@ export class SkillVersioningService {
   async getVersionHistory(skillId: string): Promise<SkillVersion[]> {
     const result = await this.esClient.search({
       index: '.aesop-skill-versions',
-      body: {
-        query: {
-          term: { skill_id: skillId },
-        },
-        sort: [{ version: { order: 'asc' } }],
-        size: 100,
+      query: {
+        term: { skill_id: skillId },
       },
+      sort: [{ version: { order: 'asc' } }],
+      size: 100,
     });
 
     return result.hits.hits.map((hit) => hit._source as SkillVersion);
@@ -204,17 +200,15 @@ export class SkillVersioningService {
     await this.esClient.update({
       index: '.aesop-proposed-skills',
       id: skillId,
-      body: {
-        doc: {
-          markdown: targetVersionData.markdown,
-          tools: targetVersionData.tools,
-          confidence: targetVersionData.confidence,
-          current_version: targetVersion,
-          rollback_metadata: {
-            rolled_back_at: new Date().toISOString(),
-            rolled_back_from: await this.getLatestVersion(skillId).then((v) => v.version),
-            rolled_back_to: targetVersion,
-          },
+      doc: {
+        markdown: targetVersionData.markdown,
+        tools: targetVersionData.tools,
+        confidence: targetVersionData.confidence,
+        current_version: targetVersion,
+        rollback_metadata: {
+          rolled_back_at: new Date().toISOString(),
+          rolled_back_from: await this.getLatestVersion(skillId).then((v) => v.version),
+          rolled_back_to: targetVersion,
         },
       },
     });
@@ -309,44 +303,43 @@ export async function initializeSkillVersioningIndex(esClient: ElasticsearchClie
   try {
     await esClient.indices.create({
       index: '.aesop-skill-versions',
-      body: {
-        mappings: {
-          properties: {
-            skill_id: { type: 'keyword' },
-            skill_name: { type: 'text' },
-            version: { type: 'integer' },
-            markdown: { type: 'text' },
-            tools: { type: 'keyword' },
-            confidence: { type: 'float' },
-            changes_from_previous: {
-              properties: {
-                markdown_diff: { type: 'text' },
-                tools_added: { type: 'keyword' },
-                tools_removed: { type: 'keyword' },
-                improvement_rationale: { type: 'text' },
-              },
+      mappings: {
+        properties: {
+          skill_id: { type: 'keyword' },
+          skill_name: { type: 'text' },
+          version: { type: 'integer' },
+          markdown: { type: 'text' },
+          tools: { type: 'keyword' },
+          confidence: { type: 'float' },
+          changes_from_previous: {
+            properties: {
+              markdown_diff: { type: 'text' },
+              tools_added: { type: 'keyword' },
+              tools_removed: { type: 'keyword' },
+              improvement_rationale: { type: 'text' },
             },
-            metrics: {
-              properties: {
-                eval_score: { type: 'float' },
-                avg_tokens: { type: 'float' },
-                avg_latency_ms: { type: 'float' },
-                error_rate: { type: 'float' },
-              },
-            },
-            created_at: { type: 'date' },
-            created_by: { type: 'keyword' },
-            source_iteration: { type: 'integer' },
-            parent_version: { type: 'integer' },
-            is_deployed: { type: 'boolean' },
-            agent_builder_skill_id: { type: 'keyword' },
           },
+          metrics: {
+            properties: {
+              eval_score: { type: 'float' },
+              avg_tokens: { type: 'float' },
+              avg_latency_ms: { type: 'float' },
+              error_rate: { type: 'float' },
+            },
+          },
+          created_at: { type: 'date' },
+          created_by: { type: 'keyword' },
+          source_iteration: { type: 'integer' },
+          parent_version: { type: 'integer' },
+          is_deployed: { type: 'boolean' },
+          agent_builder_skill_id: { type: 'keyword' },
         },
       },
     });
   } catch (error) {
     // Ignore if already exists
-    if (!getErrorMessage(error).includes('already exists')) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    if (!errMsg.includes('already exists')) {
       throw error;
     }
   }

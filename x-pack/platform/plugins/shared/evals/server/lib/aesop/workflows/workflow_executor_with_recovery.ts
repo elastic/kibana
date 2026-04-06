@@ -131,10 +131,9 @@ export class WorkflowExecutorWithRecovery {
     const results: AgentResult[] = [];
     const errorSummary: Array<{ agentId: string; error: string; circuitState?: CircuitState }> = [];
 
-    this.logger.info('[WorkflowExecutor] Starting workflow execution', {
-      total_agents: options.agents.length,
-      continue_on_failure: options.continueOnFailure,
-    });
+    this.logger.info(
+      `[WorkflowExecutor] Starting workflow execution total_agents=${options.agents.length} continue_on_failure=${options.continueOnFailure}`
+    );
 
     // Execute each agent
     for (const agentId of options.agents) {
@@ -150,9 +149,9 @@ export class WorkflowExecutorWithRecovery {
 
         // If not continuing on failure, stop execution
         if (!options.continueOnFailure && !agentResult.skipped) {
-          this.logger.error('[WorkflowExecutor] Stopping execution due to agent failure', {
-            failed_agent: agentId,
-          });
+          this.logger.error(
+            `[WorkflowExecutor] Stopping execution due to agent failure failed_agent=${agentId}`
+          );
           break;
         }
       }
@@ -174,14 +173,9 @@ export class WorkflowExecutorWithRecovery {
       status = 'failed';
     }
 
-    this.logger.info('[WorkflowExecutor] Workflow execution finished', {
-      status,
-      total_agents: results.length,
-      successful: successfulAgents,
-      failed: failedAgents,
-      skipped: skippedAgents,
-      duration_ms: totalDurationMs,
-    });
+    this.logger.info(
+      `[WorkflowExecutor] Workflow execution finished status=${status} total_agents=${results.length} successful=${successfulAgents} failed=${failedAgents} skipped=${skippedAgents} duration_ms=${totalDurationMs}`
+    );
 
     return {
       totalAgents: results.length,
@@ -239,11 +233,9 @@ export class WorkflowExecutorWithRecovery {
           maxRetries: options.maxRetries || 3,
           operationName: `agent_${agentId}`,
           onRetry: (attempt, err, delayMs) => {
-            this.logger.warn(`[WorkflowExecutor] Retrying agent ${agentId}`, {
-              attempt,
-              error: err?.message,
-              delay_ms: delayMs,
-            });
+            this.logger.warn(
+              `[WorkflowExecutor] Retrying agent ${agentId} attempt=${attempt} error=${err?.message} delay_ms=${delayMs}`
+            );
           },
         }
       );
@@ -261,9 +253,9 @@ export class WorkflowExecutorWithRecovery {
       // Record failure in circuit breaker
       this.circuitBreaker.recordFailure(agentId, err);
 
-      this.logger.error(`[WorkflowExecutor] Agent ${agentId} failed after ${attempts} attempts`, {
-        error,
-      });
+      this.logger.error(
+        `[WorkflowExecutor] Agent ${agentId} failed after ${attempts} attempts error=${error}`
+      );
     }
 
     const durationMs = Date.now() - agentStartTime;

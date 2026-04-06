@@ -75,10 +75,7 @@ export class APMInstrumentationService {
     const startTime = Date.now();
     const spanId = this.generateSpanId();
 
-    this.logger.debug(`[AESOP APM] Starting workflow step: ${stepName}`, {
-      span_id: spanId,
-      metadata,
-    });
+    this.logger.debug(`[AESOP APM] Starting workflow step: ${stepName} span_id=${spanId}`);
 
     try {
       const result = await operation();
@@ -95,10 +92,9 @@ export class APMInstrumentationService {
         '@timestamp': new Date().toISOString(),
       });
 
-      this.logger.info(`[AESOP APM] ✅ Workflow step completed: ${stepName}`, {
-        duration_ms: duration,
-        span_id: spanId,
-      });
+      this.logger.info(
+        `[AESOP APM] ✅ Workflow step completed: ${stepName} duration_ms=${duration} span_id=${spanId}`
+      );
 
       return result;
     } catch (error) {
@@ -116,11 +112,9 @@ export class APMInstrumentationService {
         '@timestamp': new Date().toISOString(),
       });
 
-      this.logger.error(`[AESOP APM] ❌ Workflow step failed: ${stepName}`, {
-        duration_ms: duration,
-        span_id: spanId,
-        error: errorMessage,
-      });
+      this.logger.error(
+        `[AESOP APM] ❌ Workflow step failed: ${stepName} duration_ms=${duration} span_id=${spanId} error=${errorMessage}`
+      );
 
       throw error;
     }
@@ -143,9 +137,7 @@ export class APMInstrumentationService {
     const startTime = Date.now();
     const spanId = this.generateSpanId();
 
-    this.logger.debug(`[AESOP APM] Invoking agent: ${agentId}`, {
-      span_id: spanId,
-    });
+    this.logger.debug(`[AESOP APM] Invoking agent: ${agentId} span_id=${spanId}`);
 
     try {
       const result = await operation();
@@ -170,16 +162,13 @@ export class APMInstrumentationService {
         type: 'agent_execution',
         duration_ms: duration,
         outcome: 'success',
-        metadata,
+        metadata: { ...metadata } as Record<string, unknown>,
         '@timestamp': new Date().toISOString(),
       });
 
-      this.logger.info(`[AESOP APM] ✅ Agent invocation completed: ${agentId}`, {
-        duration_ms: duration,
-        span_id: spanId,
-        total_tokens: tokens.total_tokens,
-        cached_tokens: tokens.cached_tokens,
-      });
+      this.logger.info(
+        `[AESOP APM] ✅ Agent invocation completed: ${agentId} duration_ms=${duration} span_id=${spanId} total_tokens=${tokens.total_tokens} cached_tokens=${tokens.cached_tokens}`
+      );
 
       return result;
     } catch (error) {
@@ -197,11 +186,9 @@ export class APMInstrumentationService {
         '@timestamp': new Date().toISOString(),
       });
 
-      this.logger.error(`[AESOP APM] ❌ Agent invocation failed: ${agentId}`, {
-        duration_ms: duration,
-        span_id: spanId,
-        error: errorMessage,
-      });
+      this.logger.error(
+        `[AESOP APM] ❌ Agent invocation failed: ${agentId} duration_ms=${duration} span_id=${spanId} error=${errorMessage}`
+      );
 
       throw error;
     }
@@ -278,10 +265,11 @@ export class APMInstrumentationService {
       });
     } catch (error) {
       // Don't fail the operation if metrics recording fails
-      this.logger.error('[AESOP APM] Failed to record span', {
-        error: error instanceof Error ? error.message : String(error),
-        span_name: span.name,
-      });
+      this.logger.error(
+        `[AESOP APM] Failed to record span span_name=${span.name} error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
@@ -350,37 +338,35 @@ export class APMInstrumentationService {
       if (!indexExists) {
         await this.esClient.indices.create({
           index: this.metricsIndex,
-          body: {
-            settings: {
-              number_of_shards: 1,
-              number_of_replicas: 1,
-            },
-            mappings: {
-              properties: {
-                '@timestamp': { type: 'date' },
-                span_id: { type: 'keyword' },
-                name: { type: 'keyword' },
-                type: { type: 'keyword' },
-                duration_ms: { type: 'long' },
-                outcome: { type: 'keyword' },
-                error: { type: 'text' },
-                metadata: {
-                  type: 'object',
-                  dynamic: true,
-                },
+          settings: {
+            number_of_shards: 1,
+            number_of_replicas: 1,
+          },
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              span_id: { type: 'keyword' },
+              name: { type: 'keyword' },
+              type: { type: 'keyword' },
+              duration_ms: { type: 'long' },
+              outcome: { type: 'keyword' },
+              error: { type: 'text' },
+              metadata: {
+                type: 'object',
+                dynamic: true,
               },
             },
           },
         });
 
-        this.logger.info('[AESOP APM] ✅ Metrics index created', {
-          index: this.metricsIndex,
-        });
+        this.logger.info(`[AESOP APM] ✅ Metrics index created index=${this.metricsIndex}`);
       }
     } catch (error) {
-      this.logger.error('[AESOP APM] Failed to create metrics index', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        `[AESOP APM] Failed to create metrics index error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 }

@@ -168,7 +168,7 @@ describe('failure_harvester', () => {
     it('respects custom failureThreshold', async () => {
       const results = [{ itemIndex: 0, evaluator: 'acc', score: 0.4 }];
 
-      const count = await indexFailures(esClient, 'run-1', 'skill-1', results, baseItems, logger, {
+      await indexFailures(esClient, 'run-1', 'skill-1', results, baseItems, logger, {
         failureThreshold: 0.5,
       });
       // 0.4 < 0.5 threshold → should be indexed

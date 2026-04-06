@@ -69,23 +69,19 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
             });
           }
 
-          logger.info('[AESOP] Starting LLM-based skill validation', {
-            skill_id: skillId,
-            skill_name: skill.name,
-            connector_id: connectorId,
-          });
+          logger.info(
+            `[AESOP] Starting LLM-based skill validation skill_id=${skillId} skill_name=${skill.name} connector_id=${connectorId}`
+          );
 
           // 2. Mark as validating
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
-            body: {
-              doc: {
-                validation: {
-                  status: 'validating',
-                  started_at: new Date().toISOString(),
-                  connector_id: connectorId,
-                },
+            doc: {
+              validation: {
+                status: 'validating',
+                started_at: new Date().toISOString(),
+                connector_id: connectorId,
               },
             },
           });
@@ -127,41 +123,36 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                       await esClient.update({
                         index: '.aesop-proposed-skills',
                         id: skillId,
-                        body: {
-                          doc: {
-                            validation: {
-                              status: result.passed ? 'passed' : 'failed',
-                              final_score: result.score,
-                              completed_at: new Date().toISOString(),
-                              connector_id: connectorId,
-                              duration_ms: Date.now() - agentStartTime,
-                              criteria: result.criteria,
-                              llm_feedback: result.feedback,
-                              strengths: result.strengths,
-                              weaknesses: result.weaknesses,
-                              suggestions: result.suggestions,
-                              iterations: [{ score: result.score, iteration: 1 }],
-                              validated_by: 'agent',
-                            },
+                        doc: {
+                          validation: {
+                            status: result.passed ? 'passed' : 'failed',
+                            final_score: result.score,
+                            completed_at: new Date().toISOString(),
+                            connector_id: connectorId,
+                            duration_ms: Date.now() - agentStartTime,
+                            criteria: result.criteria,
+                            llm_feedback: result.feedback,
+                            strengths: result.strengths,
+                            weaknesses: result.weaknesses,
+                            suggestions: result.suggestions,
+                            iterations: [{ score: result.score, iteration: 1 }],
+                            validated_by: 'agent',
                           },
                         },
                         refresh: 'wait_for',
                       });
                     }
                   } catch (err) {
-                    logger.error('[AESOP] Agent-based validation failed, results not saved', {
-                      error: err instanceof Error ? err.message : String(err),
-                      skill_id: skillId,
-                    });
+                    logger.error(
+                      `[AESOP] Agent-based validation failed, results not saved skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+                    );
                     // Fall back: mark as failed so user can retry with direct LLM
                     await esClient
                       .update({
                         index: '.aesop-proposed-skills',
                         id: skillId,
-                        body: {
-                          doc: {
-                            validation: { status: 'failed', error: 'Agent validation failed' },
-                          },
+                        doc: {
+                          validation: { status: 'failed', error: 'Agent validation failed' },
                         },
                       })
                       .catch(() => {});
@@ -217,10 +208,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                 });
               },
               onError: (error, iteration) => {
-                logger.error(`[AESOP] Convergence loop error at iteration ${iteration}`, {
-                  error: error instanceof Error ? error.message : String(error),
-                  skill_id: skillId,
-                });
+                logger.error(
+                  `[AESOP] Convergence loop error at iteration ${iteration} skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+                );
               },
             });
 
@@ -232,30 +222,27 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                 await esClient.update({
                   index: '.aesop-proposed-skills',
                   id: skillId,
-                  body: {
-                    doc: {
-                      validation: {
-                        status: convergenceResult.converged ? 'passed' : 'failed',
-                        final_score: convergenceResult.finalScore,
-                        completed_at: new Date().toISOString(),
-                        convergence: {
-                          converged: convergenceResult.converged,
-                          reason: convergenceResult.reason,
-                          total_iterations: convergenceResult.iterations.length,
-                          total_duration_ms: convergenceResult.totalDurationMs,
-                        },
-                        iterations: convergenceResult.iterations,
+                  doc: {
+                    validation: {
+                      status: convergenceResult.converged ? 'passed' : 'failed',
+                      final_score: convergenceResult.finalScore,
+                      completed_at: new Date().toISOString(),
+                      convergence: {
+                        converged: convergenceResult.converged,
+                        reason: convergenceResult.reason,
+                        total_iterations: convergenceResult.iterations.length,
+                        total_duration_ms: convergenceResult.totalDurationMs,
                       },
+                      iterations: convergenceResult.iterations,
                     },
                   },
                   refresh: 'wait_for',
                 });
               })
               .catch((err) => {
-                logger.error('[AESOP] Convergence loop failed', {
-                  error: err instanceof Error ? err.message : String(err),
-                  skill_id: skillId,
-                });
+                logger.error(
+                  `[AESOP] Convergence loop failed skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+                );
               });
           } else {
             // 4b. Single-pass validation (existing behavior)
@@ -267,10 +254,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
               skill,
               logger,
             }).catch((err) => {
-              logger.error('[AESOP] Background LLM validation failed', {
-                error: err instanceof Error ? err.message : String(err),
-                skill_id: skillId,
-              });
+              logger.error(
+                `[AESOP] Background LLM validation failed skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+              );
             });
           }
 
@@ -286,14 +272,16 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
             },
           });
         } catch (error) {
-          logger.error('[AESOP] Failed to start validation', { error, skill_id: skillId });
+          logger.error(
+            `[AESOP] Failed to start validation skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+          );
 
           // Revert skill status on setup failure
           await esClient
             .update({
               index: '.aesop-proposed-skills',
               id: skillId,
-              body: { doc: { validation: { status: 'pending' } } },
+              doc: { validation: { status: 'pending' } },
             })
             .catch((revertErr) => {
               logger.warn(
@@ -325,7 +313,8 @@ async function runLLMValidation({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actionsClient: any;
   connectorId: string;
   skillId: string;
   skill: ProposedSkillDocument;
@@ -378,37 +367,31 @@ async function runLLMValidation({
 
     const durationMs = Date.now() - startTime;
 
-    logger.info('[AESOP] LLM validation completed', {
-      skill_id: skillId,
-      score: evaluation.score,
-      passed: evaluation.passed,
-      duration_ms: durationMs,
-      eval_trace_id: evalTraceId,
-    });
+    logger.info(
+      `[AESOP] LLM validation completed skill_id=${skillId} score=${evaluation.score} passed=${evaluation.passed} duration_ms=${durationMs} eval_trace_id=${evalTraceId}`
+    );
 
     // Update skill with validation results
     await esClient.update({
       index: '.aesop-proposed-skills',
       id: skillId,
-      body: {
-        doc: {
-          validation: {
-            status: evaluation.passed ? 'passed' : 'failed',
-            final_score: evaluation.score,
-            started_at: skill.validation?.started_at || new Date().toISOString(),
-            completed_at: new Date().toISOString(),
-            connector_id: connectorId,
-            eval_trace_id: evalTraceId,
-            duration_ms: durationMs,
-            criteria: evaluation.criteria,
-            llm_feedback: evaluation.feedback,
-            strengths: evaluation.strengths,
-            weaknesses: evaluation.weaknesses,
-            suggestions: evaluation.suggestions,
-            llm_prompt: userPrompt,
-            llm_raw_response: llmRawResponse,
-            iterations: [{ score: evaluation.score, iteration: 1 }],
-          },
+      doc: {
+        validation: {
+          status: evaluation.passed ? 'passed' : 'failed',
+          final_score: evaluation.score,
+          started_at: skill.validation?.started_at || new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          connector_id: connectorId,
+          eval_trace_id: evalTraceId,
+          duration_ms: durationMs,
+          criteria: evaluation.criteria,
+          llm_feedback: evaluation.feedback,
+          strengths: evaluation.strengths,
+          weaknesses: evaluation.weaknesses,
+          suggestions: evaluation.suggestions,
+          llm_prompt: userPrompt,
+          llm_raw_response: llmRawResponse,
+          iterations: [{ score: evaluation.score, iteration: 1 }],
         },
       },
       refresh: 'wait_for',
@@ -416,25 +399,21 @@ async function runLLMValidation({
   } catch (error) {
     const durationMs = Date.now() - startTime;
 
-    logger.error('[AESOP] LLM validation failed', {
-      error: error instanceof Error ? error.message : String(error),
-      skill_id: skillId,
-      duration_ms: durationMs,
-    });
+    logger.error(
+      `[AESOP] LLM validation failed skill_id=${skillId} duration_ms=${durationMs}: ${error instanceof Error ? error.message : String(error)}`
+    );
 
     // Mark as failed — preserve previous score if it exists
     await esClient
       .update({
         index: '.aesop-proposed-skills',
         id: skillId,
-        body: {
-          doc: {
-            validation: {
-              status: 'failed',
-              completed_at: new Date().toISOString(),
-              duration_ms: durationMs,
-              error: error instanceof Error ? error.message : String(error),
-            },
+        doc: {
+          validation: {
+            status: 'failed',
+            completed_at: new Date().toISOString(),
+            duration_ms: durationMs,
+            error: error instanceof Error ? error.message : String(error),
           },
         },
         refresh: 'wait_for',
@@ -590,7 +569,8 @@ async function runLLMValidationAndGetScore({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actionsClient: any;
   connectorId: string;
   skillId: string;
   skill: ProposedSkillDocument;
@@ -644,29 +624,25 @@ async function runLLMValidationAndGetScore({
   const llmRawResponse = extractLLMResponse(result.data);
   const evaluation = parseLLMEvaluation(llmRawResponse);
 
-  logger.info('[AESOP] Convergence iteration validated', {
-    skill_id: skillId,
-    score: evaluation.score,
-    passed: evaluation.passed,
-  });
+  logger.info(
+    `[AESOP] Convergence iteration validated skill_id=${skillId} score=${evaluation.score} passed=${evaluation.passed}`
+  );
 
   // Persist the latest evaluation details (criteria, feedback, etc.) for the UI
   await esClient.update({
     index: '.aesop-proposed-skills',
     id: skillId,
-    body: {
-      doc: {
-        validation: {
-          status: 'validating',
-          final_score: evaluation.score,
-          connector_id: connectorId,
-          criteria: evaluation.criteria,
-          llm_feedback: evaluation.feedback,
-          strengths: evaluation.strengths,
-          weaknesses: evaluation.weaknesses,
-          suggestions: evaluation.suggestions,
-          llm_raw_response: llmRawResponse,
-        },
+    doc: {
+      validation: {
+        status: 'validating',
+        final_score: evaluation.score,
+        connector_id: connectorId,
+        criteria: evaluation.criteria,
+        llm_feedback: evaluation.feedback,
+        strengths: evaluation.strengths,
+        weaknesses: evaluation.weaknesses,
+        suggestions: evaluation.suggestions,
+        llm_raw_response: llmRawResponse,
       },
     },
     refresh: 'wait_for',
@@ -687,7 +663,8 @@ async function runLLMImprovement({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actionsClient: any;
   connectorId: string;
   skillId: string;
   logger: Logger;
@@ -702,9 +679,9 @@ async function runLLMImprovement({
   }
 
   if (!skill.validation?.llm_feedback) {
-    logger.warn('[AESOP] No validation feedback available for improvement, skipping', {
-      skill_id: skillId,
-    });
+    logger.warn(
+      `[AESOP] No validation feedback available for improvement, skipping skill_id=${skillId}`
+    );
     return;
   }
 
@@ -763,29 +740,27 @@ Return the improved skill as JSON: { "name": "...", "description": "...", "markd
   await esClient.update({
     index: '.aesop-proposed-skills',
     id: skillId,
-    body: {
-      doc: {
-        name: improved.name,
-        description: improved.description,
-        markdown: improved.markdown,
-        improvement_history: [
-          ...(skill.improvement_history || []),
-          {
-            improved_at: new Date().toISOString(),
-            improved_by: 'llm-convergence',
-            connector_id: connectorId,
-            previous_score: skill.validation?.final_score,
-            feedback_applied: skill.validation?.llm_feedback,
-          },
-        ],
-        last_edited_at: new Date().toISOString(),
-        last_edited_by: 'llm-convergence',
-      },
+    doc: {
+      name: improved.name,
+      description: improved.description,
+      markdown: improved.markdown,
+      improvement_history: [
+        ...(skill.improvement_history || []),
+        {
+          improved_at: new Date().toISOString(),
+          improved_by: 'llm-convergence',
+          connector_id: connectorId,
+          previous_score: skill.validation?.final_score,
+          feedback_applied: skill.validation?.llm_feedback,
+        },
+      ],
+      last_edited_at: new Date().toISOString(),
+      last_edited_by: 'llm-convergence',
     },
     refresh: 'wait_for',
   });
 
-  logger.info('[AESOP] Convergence iteration improved skill', { skill_id: skillId });
+  logger.info(`[AESOP] Convergence iteration improved skill skill_id=${skillId}`);
 }
 
 function parseImprovedSkillResponse(response: string): {

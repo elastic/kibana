@@ -6,11 +6,72 @@
  */
 
 import type { Logger } from '@kbn/logging';
-// eslint-disable-next-line import/no-extraneous-dependencies, @kbn/imports/no_boundary_crossing
-import { testSignificance, determineWinner, computePairwiseResults } from '@kbn/evals-extensions';
-
-import type { PairwiseEvaluatorResult } from '@kbn/evals-extensions';
 import type { EvaluatorRegistry, ServerEvaluatorResult } from '../evaluation_engine';
+
+export interface PairwiseEvaluatorResult {
+  evaluator: string;
+  scoreA: number;
+  scoreB: number;
+  winner: 'A' | 'B' | 'tie';
+  direction: 'A_better' | 'B_better' | 'tie';
+  delta: number;
+}
+
+const computePairwiseResults = (
+  evaluatorScores: Record<string, { scoresA: number[]; scoresB: number[] }>
+): PairwiseEvaluatorResult[] =>
+  Object.entries(evaluatorScores).map(([evaluator, { scoresA, scoresB }]) => {
+    const avgA = scoresA.length > 0 ? scoresA.reduce((s, v) => s + v, 0) / scoresA.length : 0;
+    const avgB = scoresB.length > 0 ? scoresB.reduce((s, v) => s + v, 0) / scoresB.length : 0;
+    const delta = avgA - avgB;
+    const isTie = Math.abs(delta) < 0.05;
+    const winner: 'A' | 'B' | 'tie' = isTie ? 'tie' : delta > 0 ? 'A' : 'B';
+    const direction: 'A_better' | 'B_better' | 'tie' = isTie ? 'tie' : delta > 0 ? 'A_better' : 'B_better';
+    return { evaluator, scoreA: avgA, scoreB: avgB, winner, direction, delta };
+  });
+
+const testSignificance = (
+  scoresA: number[],
+  scoresB: number[]
+): {
+  significant: boolean;
+  pValue?: number;
+  confidenceInterval?: { lower: number; upper: number; mean: number; level: number };
+  recommendation: string;
+} => {
+  if (scoresA.length < 5 || scoresB.length < 5) {
+    return {
+      significant: false,
+      recommendation: 'Insufficient data for significance testing (need ≥5 examples per skill)',
+    };
+  }
+  const meanA = scoresA.reduce((s, v) => s + v, 0) / scoresA.length;
+  const meanB = scoresB.reduce((s, v) => s + v, 0) / scoresB.length;
+  const delta = meanA - meanB;
+  const significant = Math.abs(delta) > 0.1;
+  return {
+    significant,
+    recommendation: significant
+      ? delta > 0
+        ? 'Skill A is significantly better'
+        : 'Skill B is significantly better'
+      : 'No significant difference detected',
+  };
+};
+
+const determineWinner = (perEvaluator: PairwiseEvaluatorResult[]): 'A' | 'B' | 'tie' => {
+  const wins = perEvaluator.reduce(
+    (acc, r) => {
+      if (r.winner === 'A') acc.A++;
+      else if (r.winner === 'B') acc.B++;
+      return acc;
+    },
+    { A: 0, B: 0 }
+  );
+  if (wins.A > wins.B) return 'A';
+  if (wins.B > wins.A) return 'B';
+  return 'tie';
+};
 import { createEvaluationRunner } from '../evaluation_engine';
 
 export interface PairwiseSkill {

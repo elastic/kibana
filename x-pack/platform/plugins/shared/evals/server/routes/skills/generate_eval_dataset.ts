@@ -101,7 +101,7 @@ export function registerSkillGenerateEvalDatasetRoute({ router, logger }: SkillR
 
           return response.ok({
             body: {
-              dataset_id: upsertResult.datasetId,
+              dataset_id: upsertResult.dataset_id,
               dataset_name: datasetName,
               added: upsertResult.added,
               removed: upsertResult.removed,

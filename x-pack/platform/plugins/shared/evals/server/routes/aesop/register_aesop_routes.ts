@@ -27,11 +27,15 @@ import { registerGenerateEvalDatasetRoute } from './generate_eval_dataset';
 import { registerRunOnlineEvalRoute } from './run_online_eval';
 import { registerProposeEvaluatorsRoute } from './propose_evaluators';
 import type { SkillOnlineEvalService } from '../../lib/aesop/skill_online_eval_service';
+import type { SkillValidationService } from '../../lib/aesop/skill_validation_service';
+import type { EvaluatorRegistry } from '../../lib/evaluation_engine';
 
 export interface AESOPRouteDependencies {
   router: IRouter<EvalsRequestHandlerContext>;
   logger: Logger;
   skillOnlineEvalService?: SkillOnlineEvalService;
+  skillValidationService?: SkillValidationService;
+  evaluatorRegistry?: EvaluatorRegistry;
 }
 
 /**

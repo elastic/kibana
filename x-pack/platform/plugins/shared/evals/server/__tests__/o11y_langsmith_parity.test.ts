@@ -498,7 +498,7 @@ describe('O11y Traces vs LangSmith Parity', () => {
         completionTokens: 800,
       };
 
-      const pricing = {
+      const pricing: Record<string, { inputPer1M: number; outputPer1M: number }> = {
         'claude-3-5-sonnet-20241022': {
           inputPer1M: 3.0, // $3 per 1M input tokens
           outputPer1M: 15.0, // $15 per 1M output tokens

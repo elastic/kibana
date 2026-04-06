@@ -118,10 +118,11 @@ export class CircuitBreaker {
     this.updateCircuitState(circuit);
 
     if (circuit.state === CircuitState.OPEN) {
-      this.logger.warn(`[CircuitBreaker] Circuit OPEN for agent: ${agentId}, skipping invocation`, {
-        consecutive_failures: circuit.consecutiveFailures,
-        opened_at: circuit.openedAt ? new Date(circuit.openedAt).toISOString() : undefined,
-      });
+      this.logger.warn(
+        `[CircuitBreaker] Circuit OPEN for agent: ${agentId}, skipping invocation consecutive_failures=${
+          circuit.consecutiveFailures
+        } opened_at=${circuit.openedAt ? new Date(circuit.openedAt).toISOString() : undefined}`
+      );
       return true;
     }
 
@@ -175,11 +176,9 @@ export class CircuitBreaker {
       error: error?.message || String(error),
     });
 
-    this.logger.warn(`[CircuitBreaker] Failure recorded for agent: ${agentId}`, {
-      consecutive_failures: circuit.consecutiveFailures,
-      threshold: this.options.failureThreshold,
-      error: error?.message,
-    });
+    this.logger.warn(
+      `[CircuitBreaker] Failure recorded for agent: ${agentId} consecutive_failures=${circuit.consecutiveFailures} threshold=${this.options.failureThreshold} error=${error?.message}`
+    );
 
     // Check if we should open the circuit
     if (circuit.state === CircuitState.CLOSED) {
@@ -294,11 +293,14 @@ export class CircuitBreaker {
     circuit.state = CircuitState.OPEN;
     circuit.openedAt = now;
 
-    this.logger.error(`[CircuitBreaker] Circuit OPENED for agent: ${circuit.agentId}`, {
-      consecutive_failures: circuit.consecutiveFailures,
-      failure_threshold: this.options.failureThreshold,
-      recent_failures: circuit.failureHistory.slice(-3).map((f) => f.error),
-    });
+    this.logger.error(
+      `[CircuitBreaker] Circuit OPENED for agent: ${circuit.agentId} consecutive_failures=${
+        circuit.consecutiveFailures
+      } failure_threshold=${this.options.failureThreshold} recent_failures=${circuit.failureHistory
+        .slice(-3)
+        .map((f) => f.error)
+        .join('|')}`
+    );
   }
 
   /**
@@ -310,9 +312,9 @@ export class CircuitBreaker {
     circuit.consecutiveSuccesses = 0;
     circuit.openedAt = undefined;
 
-    this.logger.info(`[CircuitBreaker] Circuit CLOSED for agent: ${circuit.agentId}`, {
-      message: 'Agent recovered, circuit restored to normal operation',
-    });
+    this.logger.info(
+      `[CircuitBreaker] Circuit CLOSED for agent: ${circuit.agentId} - Agent recovered, circuit restored to normal operation`
+    );
   }
 
   /**
@@ -322,9 +324,9 @@ export class CircuitBreaker {
     circuit.state = CircuitState.HALF_OPEN;
     circuit.consecutiveSuccesses = 0;
 
-    this.logger.info(`[CircuitBreaker] Circuit HALF-OPEN for agent: ${circuit.agentId}`, {
-      message: 'Testing agent recovery with limited requests',
-    });
+    this.logger.info(
+      `[CircuitBreaker] Circuit HALF-OPEN for agent: ${circuit.agentId} - Testing agent recovery with limited requests`
+    );
   }
 
   /**

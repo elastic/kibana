@@ -10,9 +10,6 @@ export type {
   SkillValidation,
   SkillEvaluatorResult,
   ConvergenceIteration,
-  SkillReview,
-  SkillDeployment,
-  ImprovementEntry,
   ConvergenceConfig,
 } from './types';
 export {

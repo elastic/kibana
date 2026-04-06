@@ -24,9 +24,9 @@ const ImportExamplesRequestBody = z.object({
   examples: z
     .array(
       z.object({
-        input: z.record(z.unknown()).optional(),
-        output: z.record(z.unknown()).optional(),
-        metadata: z.record(z.unknown()).optional(),
+        input: z.record(z.string(), z.unknown()).optional(),
+        output: z.record(z.string(), z.unknown()).optional(),
+        metadata: z.record(z.string(), z.unknown()).optional(),
       })
     )
     .min(1)

@@ -55,7 +55,7 @@ const GRADE_THRESHOLDS: Array<[CompositeScoreResult['compositeGrade'], number]> 
   ['F', 0],
 ];
 
-const computeCompositeScore = (
+export const computeCompositeScore = (
   evaluatorResults: Array<{ evaluator: string; score: number | null }>,
   config: CompositeScoreConfig
 ): CompositeScoreResult => {
@@ -87,7 +87,7 @@ const computeCompositeScore = (
   return { compositeScore, compositeGrade, dimensionScores };
 };
 
-const evaluateCiGates = (
+export const evaluateCiGates = (
   evaluatorResults: Array<{ evaluator: string; score: number | null }>,
   compositeScore: number,
   config: CiGateConfig

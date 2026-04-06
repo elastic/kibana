@@ -174,7 +174,7 @@ export class EvalsPlugin
     };
   }
 
-  async start(core: CoreStart, plugins: EvalsStartDependencies): Promise<EvalsPluginStart> {
+  start(core: CoreStart, plugins: EvalsStartDependencies): EvalsPluginStart {
     this.actionsStart = plugins.actions;
 
     // Load custom evaluators from saved objects asynchronously (fire-and-forget).

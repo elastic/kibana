@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { EvalsRequestHandlerContext } from '../../types';
 import { registerRejectSkillRoute } from './reject_skill';
-import type { IRouter } from '@kbn/core/server';
 
 describe('AESOP Reject Skill Route', () => {
-  let mockRouter: jest.Mocked<IRouter<EvalsRequestHandlerContext>>;
-  let mockContext: jest.Mocked<EvalsRequestHandlerContext>;
+  let mockRouter: any;
+  let mockContext: any;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let routeHandler: any;
 
@@ -101,7 +100,7 @@ describe('AESOP Reject Skill Route', () => {
           review_notes: 'This overlaps with existing alert enrichment skill',
           rejection_reason: 'overlaps_existing',
         },
-        auth: { credentials: { username: 'reviewer@elastic.co' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
@@ -120,7 +119,7 @@ describe('AESOP Reject Skill Route', () => {
           rejection_reason: 'poor_quality',
           suggested_improvements: 'Make it more specific to security alerts',
         },
-        auth: { credentials: { username: 'lead@elastic.co' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
@@ -157,7 +156,7 @@ describe('AESOP Reject Skill Route', () => {
           review_notes: 'Not useful for SOC analysts',
           rejection_reason: 'not_useful',
         },
-        auth: { credentials: { username: 'soc-lead@elastic.co' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
@@ -208,7 +207,7 @@ describe('AESOP Reject Skill Route', () => {
       await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
 
       const feedbackCall = mockEsClient.index.mock.calls[0][0];
-      expect(feedbackCall.body.learning_signals).toEqual({
+      expect((feedbackCall.document as any)?.learning_signals).toEqual({
         pattern_frequency_threshold: 'too_low',
         confidence_threshold: 'too_low',
         validation_score_threshold: 'passed',
@@ -488,7 +487,7 @@ describe('AESOP Reject Skill Route', () => {
           review_notes: 'Test',
           rejection_reason: 'poor_quality',
         },
-        auth: { credentials: { username: 'reviewer' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
@@ -555,7 +554,7 @@ describe('AESOP Reject Skill Route', () => {
           review_notes: 'Rejected',
           rejection_reason: 'other',
         },
-        auth: { credentials: { username: 'security-reviewer@elastic.co' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());

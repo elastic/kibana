@@ -290,7 +290,7 @@ describe('POST /internal/aesop/skills/{skillId}/approve', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: { review_notes: 'Looks good' },
-        auth: { credentials: { username: 'test-user' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
@@ -309,7 +309,7 @@ describe('POST /internal/aesop/skills/{skillId}/approve', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: {},
-        auth: { credentials: { username: 'test-user' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
@@ -356,7 +356,7 @@ describe('POST /internal/aesop/skills/{skillId}/approve', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: {},
-        auth: { credentials: { username: 'test-user' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
@@ -375,7 +375,7 @@ describe('POST /internal/aesop/skills/{skillId}/approve', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: {},
-        auth: {},
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
@@ -410,7 +410,7 @@ describe('POST /internal/aesop/skills/{skillId}/approve', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: { update_existing: true },
-        auth: { credentials: { username: 'test-user' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
@@ -465,7 +465,7 @@ describe('POST /internal/aesop/skills/{skillId}/approve', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: {},
-        auth: { credentials: { username: 'test-user' } },
+        auth: { isAuthenticated: true } as any,
       });
 
       await routeHandler(contextWithNoAgentBuilder, mockRequest, mockResponse);

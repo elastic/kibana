@@ -75,10 +75,11 @@ export class RateLimiterService {
 
     // Reset window if expired
     if (now - state.windowStart > windowMs) {
-      this.logger.debug(`[RateLimiter] Resetting window for ${key}`, {
-        oldWindowStart: new Date(state.windowStart).toISOString(),
-        newWindowStart: new Date(now).toISOString(),
-      });
+      this.logger.debug(
+        `[RateLimiter] Resetting window for ${key} oldWindowStart=${new Date(
+          state.windowStart
+        ).toISOString()} newWindowStart=${new Date(now).toISOString()}`
+      );
 
       state.count = 0;
       state.windowStart = now;
@@ -89,13 +90,9 @@ export class RateLimiterService {
       const resetAt = state.windowStart + windowMs;
       const retryAfterSeconds = Math.ceil((resetAt - now) / 1000);
 
-      this.logger.warn(`[RateLimiter] Rate limit exceeded for ${key}`, {
-        operation,
-        userId,
-        count: state.count,
-        limit: limit.maxRequests,
-        retryAfterSeconds,
-      });
+      this.logger.warn(
+        `[RateLimiter] Rate limit exceeded for ${key} operation=${operation} userId=${userId} count=${state.count} limit=${limit.maxRequests} retryAfterSeconds=${retryAfterSeconds}`
+      );
 
       return {
         allowed: false,
@@ -111,13 +108,11 @@ export class RateLimiterService {
     state.lastAttempt = now;
     this.attempts.set(key, state);
 
-    this.logger.debug(`[RateLimiter] Request allowed for ${key}`, {
-      operation,
-      userId,
-      count: state.count,
-      limit: limit.maxRequests,
-      remaining: limit.maxRequests - state.count,
-    });
+    this.logger.debug(
+      `[RateLimiter] Request allowed for ${key} operation=${operation} userId=${userId} count=${
+        state.count
+      } limit=${limit.maxRequests} remaining=${limit.maxRequests - state.count}`
+    );
 
     return {
       allowed: true,

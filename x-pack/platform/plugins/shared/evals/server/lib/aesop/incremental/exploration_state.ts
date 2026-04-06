@@ -128,14 +128,9 @@ export class ExplorationStateService {
         refresh: 'wait_for',
       });
 
-      this.logger.info(`[AESOP State] Saved exploration state`, {
-        timestamp,
-        indices_count: state.discovered_indices.length,
-        relationships_count: state.discovered_relationships.length,
-        patterns_count: state.discovered_patterns.length,
-        skills_count: state.generated_skills.length,
-        coverage: state.discovery_coverage,
-      });
+      this.logger.info(
+        `[AESOP State] Saved exploration state timestamp=${timestamp} indices_count=${state.discovered_indices.length} relationships_count=${state.discovered_relationships.length} patterns_count=${state.discovered_patterns.length} skills_count=${state.generated_skills.length} coverage=${state.discovery_coverage}`
+      );
 
       // Cleanup old states
       await this.cleanupOldStates();
@@ -161,11 +156,11 @@ export class ExplorationStateService {
 
       const state = result._source as ExplorationState & { saved_at: string };
 
-      this.logger.info(`[AESOP State] Loaded last exploration state`, {
-        timestamp: state.saved_at,
-        indices_count: state.discovered_indices.length,
-        age_hours: this.calculateAgeHours(state.saved_at),
-      });
+      this.logger.info(
+        `[AESOP State] Loaded last exploration state timestamp=${state.saved_at} indices_count=${
+          state.discovered_indices.length
+        } age_hours=${this.calculateAgeHours(state.saved_at)}`
+      );
 
       return state;
     } catch (error) {
@@ -269,7 +264,7 @@ export class ExplorationStateService {
   /**
    * Ensure state index exists with proper mappings
    */
-  private async ensureIndexExists(): Promise<void> {
+  async ensureIndexExists(): Promise<void> {
     try {
       const exists = await this.esClient.indices.exists({
         index: STATE_INDEX,
@@ -281,41 +276,39 @@ export class ExplorationStateService {
 
       await this.esClient.indices.create({
         index: STATE_INDEX,
-        body: {
-          settings: {
-            number_of_shards: 1,
-            number_of_replicas: 1,
-            hidden: true,
-          },
-          mappings: {
-            properties: {
-              last_run_timestamp: { type: 'date' },
-              saved_at: { type: 'date' },
-              historical_id: { type: 'keyword' },
-              discovered_indices: { type: 'keyword' },
-              discovered_relationships: {
-                type: 'nested',
-                properties: {
-                  from: { type: 'keyword' },
-                  to: { type: 'keyword' },
-                  via: { type: 'keyword' },
-                  confidence: { type: 'float' },
-                },
+        settings: {
+          number_of_shards: 1,
+          number_of_replicas: 1,
+          'index.hidden': true,
+        },
+        mappings: {
+          properties: {
+            last_run_timestamp: { type: 'date' },
+            saved_at: { type: 'date' },
+            historical_id: { type: 'keyword' },
+            discovered_indices: { type: 'keyword' },
+            discovered_relationships: {
+              type: 'nested',
+              properties: {
+                from: { type: 'keyword' },
+                to: { type: 'keyword' },
+                via: { type: 'keyword' },
+                confidence: { type: 'float' },
               },
-              discovered_patterns: {
-                type: 'nested',
-                properties: {
-                  pattern_id: { type: 'keyword' },
-                  frequency: { type: 'integer' },
-                  description: { type: 'text' },
-                },
-              },
-              generated_skills: { type: 'keyword' },
-              discovery_coverage: { type: 'float' },
-              total_runtime_ms: { type: 'long' },
-              index_doc_counts: { type: 'object' },
-              index_mapping_fingerprints: { type: 'object' },
             },
+            discovered_patterns: {
+              type: 'nested',
+              properties: {
+                pattern_id: { type: 'keyword' },
+                frequency: { type: 'integer' },
+                description: { type: 'text' },
+              },
+            },
+            generated_skills: { type: 'keyword' },
+            discovery_coverage: { type: 'float' },
+            total_runtime_ms: { type: 'long' },
+            index_doc_counts: { type: 'object' },
+            index_mapping_fingerprints: { type: 'object' },
           },
         },
       });

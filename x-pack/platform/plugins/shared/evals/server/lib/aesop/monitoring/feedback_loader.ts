@@ -59,7 +59,7 @@ export class FeedbackLoaderService {
    * @returns Aggregated feedback summary with recommendations
    */
   async loadRecentFeedback(cycleWindow: number = 5): Promise<FeedbackSummary> {
-    this.logger.debug('[AESOP Feedback] Loading recent feedback', { cycleWindow });
+    this.logger.debug(`[AESOP Feedback] Loading recent feedback cycleWindow=${cycleWindow}`);
 
     try {
       // Query .aesop-proposed-skills for feedback records
@@ -141,16 +141,17 @@ export class FeedbackLoaderService {
         recommendations,
       };
 
-      this.logger.info('[AESOP Feedback] ✅ Feedback loaded successfully', {
-        total_records: feedbackRecords.length,
-        total_rejected: summary.total_rejected,
-        total_approved: summary.total_approved,
-        recommendations: summary.recommendations,
-      });
+      this.logger.info(
+        `[AESOP Feedback] ✅ Feedback loaded successfully total_records=${feedbackRecords.length} total_rejected=${summary.total_rejected} total_approved=${summary.total_approved}`
+      );
 
       return summary;
     } catch (error) {
-      this.logger.error('[AESOP Feedback] Failed to load feedback', { error });
+      this.logger.error(
+        `[AESOP Feedback] Failed to load feedback error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }
@@ -255,17 +256,17 @@ export class FeedbackLoaderService {
     // Rule 1: If >3 poor quality rejections, increase min_confidence
     if (poorQualityCount > 3) {
       minConfidence += 0.05;
-      this.logger.debug('[AESOP Feedback] Increasing min_confidence due to poor quality', {
-        count: poorQualityCount,
-      });
+      this.logger.debug(
+        `[AESOP Feedback] Increasing min_confidence due to poor quality count=${poorQualityCount}`
+      );
     }
 
     // Rule 2: If >2 not useful rejections, increase min_pattern_frequency
     if (notUsefulCount > 2) {
       minPatternFrequency += 10;
-      this.logger.debug('[AESOP Feedback] Increasing min_pattern_frequency due to low utility', {
-        count: notUsefulCount,
-      });
+      this.logger.debug(
+        `[AESOP Feedback] Increasing min_pattern_frequency due to low utility count=${notUsefulCount}`
+      );
     }
 
     // Rule 3: If >2 overlaps, add exclude patterns
@@ -276,18 +277,19 @@ export class FeedbackLoaderService {
         .slice(0, 5);
 
       excludePatterns.push(...overlappingSkills);
-      this.logger.debug('[AESOP Feedback] Adding exclude patterns due to overlaps', {
-        count: overlapsCount,
-        patterns: overlappingSkills,
-      });
+      this.logger.debug(
+        `[AESOP Feedback] Adding exclude patterns due to overlaps count=${overlapsCount} patterns=${overlappingSkills.join(
+          ','
+        )}`
+      );
     }
 
     // Rule 4: If >3 too generic, add focus areas
     if (tooGenericCount > 3) {
       focusAreas.push('high_specificity', 'concrete_use_cases');
-      this.logger.debug('[AESOP Feedback] Adding focus areas due to generic skills', {
-        count: tooGenericCount,
-      });
+      this.logger.debug(
+        `[AESOP Feedback] Adding focus areas due to generic skills count=${tooGenericCount}`
+      );
     }
 
     recommendations.min_confidence_threshold = minConfidence;

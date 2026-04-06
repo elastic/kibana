@@ -68,7 +68,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
           }
 
           // Fetch associated proposed skills (if any)
-          let proposedSkills = [];
+          let proposedSkills: any[] = [];
           try {
             const skillsResult = await esClient.search({
               index: '.aesop-proposed-skills',
@@ -86,7 +86,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
           }
 
           // Fetch discovered relationships (if stored)
-          let discoveredRelationships = [];
+          let discoveredRelationships: any[] = [];
           try {
             const relationshipsResult = await esClient.search({
               index: '.aesop-discovered-relationships',
@@ -103,7 +103,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
           }
 
           // Fetch discovered patterns
-          let discoveredPatterns = [];
+          let discoveredPatterns: any[] = [];
           try {
             const patternsResult = await esClient.search({
               index: '.aesop-discovered-patterns',

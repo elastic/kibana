@@ -58,13 +58,19 @@ export class WorkflowNotFoundError extends AESOPError {
 }
 
 export class WorkflowExecutionError extends AESOPError {
-  constructor(workflowId: string, executionId: string, cause: string) {
+  constructor(workflowId: string, failedStep: string, originalError: Error | string) {
+    const causeMessage =
+      originalError instanceof Error ? originalError.message : String(originalError);
     super(
-      `Workflow '${workflowId}' execution failed: ${cause}`,
+      `Workflow '${workflowId}' execution failed at step '${failedStep}': ${causeMessage}`,
       'WORKFLOW_EXECUTION_FAILED',
       500,
       true, // Retryable - may be transient
-      { workflow_id: workflowId, execution_id: executionId, cause }
+      {
+        workflowId,
+        failedStep,
+        originalError: causeMessage,
+      }
     );
     this.name = 'WorkflowExecutionError';
   }
@@ -101,26 +107,28 @@ export class SkillNotFoundError extends AESOPError {
 }
 
 export class SkillValidationNotPassedError extends AESOPError {
-  constructor(skillId: string, currentStatus: string) {
+  constructor(skillId: string, actualScore: number, requiredScore: number) {
     super(
-      `Skill '${skillId}' cannot be approved - validation status is '${currentStatus}'. Skill must pass validation before approval.`,
+      `Skill '${skillId}' validation score ${actualScore} did not meet required ${requiredScore}. Increase iterations or improve skill to raise the score.`,
       'SKILL_VALIDATION_NOT_PASSED',
       400,
       false,
-      { skill_id: skillId, validation_status: currentStatus }
+      { skillId, actualScore, requiredScore }
     );
     this.name = 'SkillValidationNotPassedError';
   }
 }
 
 export class SkillAlreadyDeployedError extends AESOPError {
-  constructor(skillId: string, agentBuilderSkillId: string) {
+  constructor(skillId: string, agentBuilderSkillId?: string) {
     super(
-      `Skill '${skillId}' is already deployed to Agent Builder (ID: ${agentBuilderSkillId}). Cannot deploy twice.`,
+      agentBuilderSkillId
+        ? `Skill '${skillId}' is already deployed to Agent Builder (ID: ${agentBuilderSkillId}). Cannot deploy twice.`
+        : `Skill '${skillId}' is already deployed. Cannot duplicate deployment.`,
       'SKILL_ALREADY_DEPLOYED',
       409,
       false,
-      { skill_id: skillId, agent_builder_skill_id: agentBuilderSkillId }
+      { skillId, agentBuilderSkillId }
     );
     this.name = 'SkillAlreadyDeployedError';
   }

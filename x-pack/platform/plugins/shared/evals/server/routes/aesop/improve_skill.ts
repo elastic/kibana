@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import type { ProposedSkillDocument } from '../../lib/aesop/types';
 
@@ -69,11 +67,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             });
           }
 
-          logger.info('[AESOP] Improving skill', {
-            skill_id: skillId,
-            skill_name: skill.name,
-            mode: useAgent ? 'agent' : 'direct-llm',
-          });
+          logger.info(
+            `[AESOP] Improving skill skill_id=${skillId} skill_name=${skill.name} mode=${useAgent ? 'agent' : 'direct-llm'}`
+          );
 
           // Try agent-based improvement if requested
           if (useAgent) {
@@ -107,24 +103,22 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
                   await esClient.update({
                     index: '.aesop-proposed-skills',
                     id: skillId,
-                    body: {
-                      doc: {
-                        name: improved.name || skill.name,
-                        description: improved.description || skill.description,
-                        markdown: improved.markdown,
-                        validation: { status: 'pending' },
-                        improvement_history: [
-                          ...(skill.improvement_history || []),
-                          {
-                            improved_at: new Date().toISOString(),
-                            improved_by: 'agent',
-                            connector_id: connectorId,
-                            previous_score: skill.validation?.final_score,
-                          },
-                        ],
-                        last_edited_at: new Date().toISOString(),
-                        last_edited_by: 'agent-auto-improve',
-                      },
+                    doc: {
+                      name: improved.name || skill.name,
+                      description: improved.description || skill.description,
+                      markdown: improved.markdown,
+                      validation: { status: 'pending' },
+                      improvement_history: [
+                        ...(skill.improvement_history || []),
+                        {
+                          improved_at: new Date().toISOString(),
+                          improved_by: 'agent',
+                          connector_id: connectorId,
+                          previous_score: skill.validation?.final_score,
+                        },
+                      ],
+                      last_edited_at: new Date().toISOString(),
+                      last_edited_by: 'agent-auto-improve',
                     },
                     refresh: 'wait_for',
                   });
@@ -146,20 +140,18 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
                     await esClient.update({
                       index: '.aesop-proposed-skills',
                       id: skillId,
-                      body: {
-                        doc: {
-                          validation: {
-                            status: validationResult.passed ? 'passed' : 'failed',
-                            final_score: validationResult.score,
-                            completed_at: new Date().toISOString(),
-                            duration_ms: Date.now() - startTime,
-                            criteria: validationResult.criteria,
-                            llm_feedback: validationResult.feedback,
-                            strengths: validationResult.strengths,
-                            weaknesses: validationResult.weaknesses,
-                            suggestions: validationResult.suggestions,
-                            validated_by: 'agent',
-                          },
+                      doc: {
+                        validation: {
+                          status: validationResult.passed ? 'passed' : 'failed',
+                          final_score: validationResult.score,
+                          completed_at: new Date().toISOString(),
+                          duration_ms: Date.now() - startTime,
+                          criteria: validationResult.criteria,
+                          llm_feedback: validationResult.feedback,
+                          strengths: validationResult.strengths,
+                          weaknesses: validationResult.weaknesses,
+                          suggestions: validationResult.suggestions,
+                          validated_by: 'agent',
                         },
                       },
                       refresh: 'wait_for',
@@ -191,7 +183,8 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             throw new Error('Actions plugin not available');
           }
 
-          const actionsClient = await actionsStart.getActionsClientWithRequest(request);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const actionsClient: any = await actionsStart.getActionsClientWithRequest(request);
 
           const prompt = buildImprovementPrompt(skill);
 
@@ -234,34 +227,32 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
-            body: {
-              doc: {
-                name: improved.name,
-                description: improved.description,
-                markdown: improved.markdown,
-                validation: {
-                  status: 'validating',
-                  started_at: new Date().toISOString(),
-                  connector_id: connectorId,
-                },
-                improvement_history: [
-                  ...(skill.improvement_history || []),
-                  {
-                    improved_at: new Date().toISOString(),
-                    improved_by: 'llm',
-                    connector_id: connectorId,
-                    previous_score: skill.validation?.final_score,
-                    feedback_applied: skill.validation?.llm_feedback,
-                  },
-                ],
-                last_edited_at: new Date().toISOString(),
-                last_edited_by: 'llm-auto-improve',
+            doc: {
+              name: improved.name,
+              description: improved.description,
+              markdown: improved.markdown,
+              validation: {
+                status: 'validating',
+                started_at: new Date().toISOString(),
+                connector_id: connectorId,
               },
+              improvement_history: [
+                ...(skill.improvement_history || []),
+                {
+                  improved_at: new Date().toISOString(),
+                  improved_by: 'llm',
+                  connector_id: connectorId,
+                  previous_score: skill.validation?.final_score,
+                  feedback_applied: skill.validation?.llm_feedback,
+                },
+              ],
+              last_edited_at: new Date().toISOString(),
+              last_edited_by: 'llm-auto-improve',
             },
             refresh: 'wait_for',
           });
 
-          logger.info('[AESOP] Skill improved, starting auto-validation', { skill_id: skillId });
+          logger.info(`[AESOP] Skill improved, starting auto-validation skill_id=${skillId}`);
 
           // Fire-and-forget: validate the improved skill
           autoValidateImprovedSkill({
@@ -272,10 +263,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             improvedSkill: improved,
             logger,
           }).catch((err) => {
-            logger.error('[AESOP] Auto-validation after improvement failed', {
-              error: err instanceof Error ? err.message : String(err),
-              skill_id: skillId,
-            });
+            logger.error(
+              `[AESOP] Auto-validation after improvement failed skill_id=${skillId}: ${err instanceof Error ? err.message : String(err)}`
+            );
           });
 
           return response.ok({
@@ -290,10 +280,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             },
           });
         } catch (error) {
-          logger.error('[AESOP] Failed to improve skill', {
-            error: error instanceof Error ? error.message : String(error),
-            skill_id: skillId,
-          });
+          logger.error(
+            `[AESOP] Failed to improve skill skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+          );
 
           return response.customError({
             statusCode: 500,
@@ -403,12 +392,15 @@ async function autoValidateImprovedSkill({
   improvedSkill,
   logger,
 }: {
-  esClient: ElasticsearchClient;
-  actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  esClient: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actionsClient: any;
   connectorId: string;
   skillId: string;
   improvedSkill: { name: string; description: string; markdown: string };
-  logger: Logger;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  logger: any;
 }) {
   const startTime = Date.now();
   const evalTraceId = `aesop-eval-${skillId}-${Date.now()}`;
@@ -457,51 +449,44 @@ async function autoValidateImprovedSkill({
     await esClient.update({
       index: '.aesop-proposed-skills',
       id: skillId,
-      body: {
-        doc: {
-          validation: {
-            status: evaluation.passed ? 'passed' : 'failed',
-            final_score: evaluation.score,
-            completed_at: new Date().toISOString(),
-            connector_id: connectorId,
-            eval_trace_id: evalTraceId,
-            duration_ms: durationMs,
-            criteria: evaluation.criteria,
-            llm_feedback: evaluation.feedback,
-            strengths: evaluation.strengths,
-            weaknesses: evaluation.weaknesses,
-            suggestions: evaluation.suggestions,
-            llm_raw_response: rawResponse,
-            iterations: [{ score: evaluation.score, iteration: 1 }],
-          },
+      doc: {
+        validation: {
+          status: evaluation.passed ? 'passed' : 'failed',
+          final_score: evaluation.score,
+          completed_at: new Date().toISOString(),
+          connector_id: connectorId,
+          eval_trace_id: evalTraceId,
+          duration_ms: durationMs,
+          criteria: evaluation.criteria,
+          llm_feedback: evaluation.feedback,
+          strengths: evaluation.strengths,
+          weaknesses: evaluation.weaknesses,
+          suggestions: evaluation.suggestions,
+          llm_raw_response: rawResponse,
+          iterations: [{ score: evaluation.score, iteration: 1 }],
         },
       },
       refresh: 'wait_for',
     });
 
-    logger.info('[AESOP] Auto-validation complete', {
-      skill_id: skillId,
-      score: evaluation.score,
-      passed: evaluation.passed,
-      duration_ms: durationMs,
-    });
+    logger.info(
+      `[AESOP] Auto-validation complete skill_id=${skillId} score=${evaluation.score} passed=${evaluation.passed} duration_ms=${durationMs}`
+    );
   } catch (error) {
     await esClient
       .update({
         index: '.aesop-proposed-skills',
         id: skillId,
-        body: {
-          doc: {
-            validation: {
-              status: 'failed',
-              completed_at: new Date().toISOString(),
-              error: error instanceof Error ? error.message : String(error),
-            },
+        doc: {
+          validation: {
+            status: 'failed',
+            completed_at: new Date().toISOString(),
+            error: error instanceof Error ? error.message : String(error),
           },
         },
         refresh: 'wait_for',
       })
-      .catch((markFailedErr) => {
+      .catch((markFailedErr: unknown) => {
         logger.warn(
           `[AESOP] Failed to mark skill as failed after auto-validation: ${
             markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)

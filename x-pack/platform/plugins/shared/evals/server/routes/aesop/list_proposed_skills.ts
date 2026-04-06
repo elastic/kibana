@@ -66,19 +66,17 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
           try {
             result = await esClient.search({
               index: '.aesop-proposed-skills',
-              body: {
-                query: {
-                  bool: {
-                    must: mustClauses.length > 0 ? mustClauses : [{ match_all: {} }],
-                  },
+              query: {
+                bool: {
+                  must: mustClauses.length > 0 ? mustClauses : [{ match_all: {} }],
                 },
-                sort: [
-                  { 'metadata.created_at': { order: 'desc' } },
-                  { confidence: { order: 'desc' } },
-                ],
-                from: offset,
-                size: limit,
               },
+              sort: [
+                { 'metadata.created_at': { order: 'desc' } },
+                { confidence: { order: 'desc' } },
+              ],
+              from: offset,
+              size: limit,
             });
           } catch (error: any) {
             // Index doesn't exist yet - return empty list (exploration hasn't run)
@@ -98,7 +96,7 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
 
           const skills = result.hits.hits.map((hit) => ({
             id: hit._id,
-            ...hit._source,
+            ...(hit._source as Record<string, unknown>),
           }));
 
           return response.ok({
@@ -114,7 +112,9 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
           });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          logger.error('[AESOP] Failed to list proposed skills', { error });
+          logger.error(
+            `[AESOP] Failed to list proposed skills error=${error instanceof Error ? error.message : String(error)}`
+          );
 
           return response.customError({
             statusCode: 500,

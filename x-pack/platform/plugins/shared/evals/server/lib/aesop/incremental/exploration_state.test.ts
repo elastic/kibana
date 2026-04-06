@@ -7,12 +7,10 @@
 
 import type { ExplorationState } from './exploration_state';
 import { ExplorationStateService } from './exploration_state';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
 
 describe('ExplorationStateService', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockEsClient: any;
+  let mockLogger: any;
   let service: ExplorationStateService;
 
   const createMockState = (overrides?: Partial<ExplorationState>): ExplorationState => ({
@@ -57,14 +55,14 @@ describe('ExplorationStateService', () => {
       get: jest.fn(),
       search: jest.fn(),
       deleteByQuery: jest.fn(),
-    } as any;
+    };
 
     mockLogger = {
       info: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
-    } as any;
+    };
 
     service = new ExplorationStateService(mockEsClient, mockLogger);
   });
@@ -357,7 +355,7 @@ describe('ExplorationStateService', () => {
       mockEsClient.indices.exists.mockResolvedValue(false);
       mockEsClient.indices.create.mockResolvedValue({} as any);
 
-      await service.ensureIndexExists();
+      await (service as any).ensureIndexExists();
 
       expect(mockEsClient.indices.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -382,7 +380,7 @@ describe('ExplorationStateService', () => {
     it('should skip creation if index already exists', async () => {
       mockEsClient.indices.exists.mockResolvedValue(true);
 
-      await service.ensureIndexExists();
+      await (service as any).ensureIndexExists();
 
       expect(mockEsClient.indices.create).not.toHaveBeenCalled();
     });

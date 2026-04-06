@@ -25,7 +25,15 @@ describe('registerDeployMonitoringDashboardRoute', () => {
       },
     } as unknown as jest.Mocked<IRouter<EvalsRequestHandlerContext>>;
 
-    registerDeployMonitoringDashboardRoute(mockRouter);
+    registerDeployMonitoringDashboardRoute({
+      router: mockRouter,
+      logger: {
+        info: jest.fn(),
+        debug: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+      } as any,
+    });
 
     expect(mockRouter.versioned.post).toHaveBeenCalledWith({
       path: '/internal/aesop/monitoring/dashboard/deploy',
@@ -157,9 +165,8 @@ describe('registerDeployMonitoringDashboardRoute', () => {
     expect(mockLogger.info).toHaveBeenCalledWith(
       '[AESOP] Deploying performance monitoring dashboard'
     );
-    expect(mockLogger.info).toHaveBeenCalledWith('[AESOP] ✅ Dashboard deployed successfully', {
-      dashboard_id: 'aesop-performance-monitoring',
-      url: '/app/dashboards#/view/aesop-performance-monitoring',
-    });
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      '[AESOP] Dashboard deployed successfully dashboard_id=aesop-performance-monitoring url=/app/dashboards#/view/aesop-performance-monitoring'
+    );
   });
 });

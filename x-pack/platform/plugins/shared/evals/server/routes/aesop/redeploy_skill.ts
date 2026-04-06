@@ -91,10 +91,9 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
             skill.deployment?.agent_builder_skill_id || `aesop-${skillId}`;
           const toolIds = inferTools(skill.markdown || '').slice(0, MAX_TOOLS);
 
-          logger.info('[AESOP] Re-deploying skill to Agent Builder', {
-            skill_id: skillId,
-            agent_builder_skill_id: agentBuilderSkillId,
-          });
+          logger.info(
+            `[AESOP] Re-deploying skill to Agent Builder skill_id=${skillId} agent_builder_skill_id=${agentBuilderSkillId}`
+          );
 
           // Get Agent Builder SkillRegistry
           const evalsContext = await context.evals;
@@ -130,21 +129,19 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
-            body: {
-              doc: {
-                deployment: {
-                  deployed: true,
-                  deployed_at: new Date().toISOString(),
-                  agent_builder_skill_id: agentBuilderSkillId,
-                  tool_ids: toolIds,
-                  redeployed: true,
-                },
+            doc: {
+              deployment: {
+                deployed: true,
+                deployed_at: new Date().toISOString(),
+                agent_builder_skill_id: agentBuilderSkillId,
+                tool_ids: toolIds,
+                redeployed: true,
               },
             },
             refresh: 'wait_for',
           });
 
-          logger.info('[AESOP] Skill re-deployed', { skill_id: skillId });
+          logger.info(`[AESOP] Skill re-deployed skill_id=${skillId}`);
 
           return response.ok({
             body: {

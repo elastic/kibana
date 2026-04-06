@@ -108,13 +108,17 @@ export class DashboardGeneratorService {
         overwrite: true,
       });
 
-      this.logger.info('[AESOP Dashboard] ✅ Dashboard created successfully', {
-        dashboard_id: dashboardId,
-      });
+      this.logger.info(
+        `[AESOP Dashboard] ✅ Dashboard created successfully dashboard_id=${dashboardId}`
+      );
 
       return dashboardId;
     } catch (error) {
-      this.logger.error('[AESOP Dashboard] ❌ Failed to create dashboard', { error });
+      this.logger.error(
+        `[AESOP Dashboard] ❌ Failed to create dashboard error=${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }

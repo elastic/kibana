@@ -43,19 +43,17 @@ export function registerUnrejectSkillRoute({ router, logger }: AESOPRouteDepende
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
-            body: {
-              doc: {
-                review: {
-                  status: 'pending_review',
-                  restored_by: request.auth.credentials?.username || 'unknown',
-                  restored_at: new Date().toISOString(),
-                },
+            doc: {
+              review: {
+                status: 'pending_review',
+                restored_by: 'unknown',
+                restored_at: new Date().toISOString(),
               },
             },
             refresh: 'wait_for',
           });
 
-          logger.info('[AESOP] Skill restored to pending review', { skill_id: skillId });
+          logger.info(`[AESOP] Skill restored to pending review skill_id=${skillId}`);
 
           return response.ok({
             body: { success: true, skill_id: skillId },

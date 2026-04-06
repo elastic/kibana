@@ -15,10 +15,10 @@ const EVALS_EVALUATORS_TEST_URL = `${EVALS_INTERNAL_URL}/evaluators/test` as con
 
 const TestEvaluatorRequestBody = z.object({
   evaluator_name: z.string(),
-  input: z.record(z.unknown()),
+  input: z.record(z.string(), z.unknown()),
   output: z.unknown(),
   expected: z.unknown().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const registerTestEvaluatorRoute = ({

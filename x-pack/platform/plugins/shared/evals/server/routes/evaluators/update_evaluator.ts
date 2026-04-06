@@ -21,7 +21,7 @@ const UpdateEvaluatorRequestParams = z.object({
 
 const UpdateEvaluatorRequestBody = z.object({
   description: z.string().max(1024).optional(),
-  tags: z.record(z.string()).optional(),
+  tags: z.record(z.string(), z.string()).optional(),
 });
 
 export const registerUpdateEvaluatorRoute = ({

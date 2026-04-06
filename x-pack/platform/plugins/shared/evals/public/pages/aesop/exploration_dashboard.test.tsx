@@ -303,7 +303,7 @@ describe('ExplorationDashboard Component', () => {
     });
 
     it('should allow selecting scoped indices', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       renderComponent();
 
       await waitFor(() => {

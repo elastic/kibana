@@ -117,7 +117,7 @@ export function registerSkillRunOnlineEvalRoute({
 
           // Register tracked run for progress polling
           const runId = `eval-${Date.now()}`;
-          const trackedRun = skillOnlineEvalService.registerRun(skillId, runId);
+          skillOnlineEvalService.registerRun(skillId, runId);
 
           skillOnlineEvalService
             .runOnlineEval(

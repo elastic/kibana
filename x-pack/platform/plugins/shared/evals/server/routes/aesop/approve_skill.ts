@@ -132,18 +132,15 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
 
           // 4. Generate a valid skill ID for Agent Builder
           const agentBuilderSkillId = isUpdateExisting
-            ? skill.base_skill.id
+            ? skill.base_skill!.id
             : sanitizeSkillId(`aesop-${skillId}`);
 
           // 5. Infer tools from skill content (max 5)
           const toolIds = inferTools(skill.markdown || '').slice(0, MAX_TOOLS);
 
-          logger.info('[AESOP] Deploying skill to Agent Builder', {
-            skill_id: skillId,
-            agent_builder_skill_id: agentBuilderSkillId,
-            update_existing: isUpdateExisting,
-            tool_ids: toolIds,
-          });
+          logger.info(
+            `[AESOP] Deploying skill to Agent Builder skill_id=${skillId} agent_builder_skill_id=${agentBuilderSkillId} update_existing=${isUpdateExisting} tool_ids=${toolIds.join(',')}`
+          );
 
           // 6. Create or update skill in Agent Builder via SkillRegistry
           const evalsContext = await context.evals;
@@ -164,20 +161,18 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
-            body: {
-              doc: {
-                review: {
-                  status: 'approved',
-                  reviewed_by: request.auth.credentials?.username || 'unknown',
-                  reviewed_at: new Date().toISOString(),
-                  review_notes,
-                },
-                deployment: {
-                  deployed: true,
-                  deployed_at: new Date().toISOString(),
-                  tool_ids: toolIds,
-                  updated_existing: isUpdateExisting || false,
-                },
+            doc: {
+              review: {
+                status: 'approved',
+                reviewed_by: 'unknown',
+                reviewed_at: new Date().toISOString(),
+                review_notes,
+              },
+              deployment: {
+                deployed: true,
+                deployed_at: new Date().toISOString(),
+                tool_ids: toolIds,
+                updated_existing: isUpdateExisting || false,
               },
             },
             refresh: 'wait_for',
@@ -210,33 +205,26 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
               .update({
                 index: '.aesop-proposed-skills',
                 id: skillId,
-                body: {
-                  doc: {
-                    review: { status: 'pending_review' },
-                    deployment: { deployed: false },
-                  },
+                doc: {
+                  review: { status: 'pending_review' },
+                  deployment: { deployed: false },
                 },
               })
               .catch(() => {});
             throw deployError;
           }
 
-          logger.info('[AESOP] Skill deployed to Agent Builder', {
-            skill_id: skillId,
-            agent_builder_skill_id: createdSkill.id,
-            update_existing: isUpdateExisting,
-            tools: toolIds,
-          });
+          logger.info(
+            `[AESOP] Skill deployed to Agent Builder skill_id=${skillId} agent_builder_skill_id=${createdSkill.id} update_existing=${isUpdateExisting}`
+          );
 
           // 6c. Update ES document with Agent Builder skill ID
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
-            body: {
-              doc: {
-                deployment: {
-                  agent_builder_skill_id: createdSkill.id,
-                },
+            doc: {
+              deployment: {
+                agent_builder_skill_id: createdSkill.id,
               },
             },
             refresh: 'wait_for',
@@ -252,10 +240,9 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
             },
           });
         } catch (error) {
-          logger.error('[AESOP] Failed to approve skill', {
-            error: error instanceof Error ? error.message : String(error),
-            skill_id: skillId,
-          });
+          logger.error(
+            `[AESOP] Failed to approve skill skill_id=${skillId}: ${error instanceof Error ? error.message : String(error)}`
+          );
 
           return response.customError({
             statusCode: 500,

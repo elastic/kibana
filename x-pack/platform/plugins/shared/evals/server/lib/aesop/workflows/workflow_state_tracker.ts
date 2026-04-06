@@ -130,7 +130,9 @@ export class WorkflowStateTracker {
         this.logger.info(`[WorkflowStateTracker] Created index: ${WORKFLOW_EXECUTIONS_INDEX}`);
       }
     } catch (error) {
-      this.logger.error('[WorkflowStateTracker] Failed to ensure index exists', { error });
+      this.logger.error(
+        `[WorkflowStateTracker] Failed to ensure index exists: ${error instanceof Error ? error.message : String(error)}`
+      );
       throw error;
     }
   }
@@ -173,10 +175,9 @@ export class WorkflowStateTracker {
 
       this.logger.debug(`[WorkflowStateTracker] Initialized execution: ${executionId}`);
     } catch (error) {
-      this.logger.error('[WorkflowStateTracker] Failed to initialize execution', {
-        execution_id: executionId,
-        error,
-      });
+      this.logger.error(
+        `[WorkflowStateTracker] Failed to initialize execution execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+      );
       throw error;
     }
   }
@@ -196,9 +197,9 @@ export class WorkflowStateTracker {
     try {
       const state = await this.getExecutionState(executionId);
       if (!state) {
-        this.logger.warn('[WorkflowStateTracker] Execution not found, cannot update progress', {
-          execution_id: executionId,
-        });
+        this.logger.warn(
+          `[WorkflowStateTracker] Execution not found, cannot update progress execution_id=${executionId}`
+        );
         return;
       }
 
@@ -222,16 +223,13 @@ export class WorkflowStateTracker {
         refresh: 'wait_for',
       });
 
-      this.logger.debug(`[WorkflowStateTracker] Updated progress for execution: ${executionId}`, {
-        phase: phaseNumber,
-        step: stepName,
-        progress: progressPercentage,
-      });
+      this.logger.debug(
+        `[WorkflowStateTracker] Updated progress for execution: ${executionId} phase=${phaseNumber} step=${stepName} progress=${progressPercentage}`
+      );
     } catch (error) {
-      this.logger.error('[WorkflowStateTracker] Failed to update progress', {
-        execution_id: executionId,
-        error,
-      });
+      this.logger.error(
+        `[WorkflowStateTracker] Failed to update progress execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -248,9 +246,9 @@ export class WorkflowStateTracker {
     try {
       const state = await this.getExecutionState(executionId);
       if (!state) {
-        this.logger.warn('[WorkflowStateTracker] Execution not found, cannot complete phase', {
-          execution_id: executionId,
-        });
+        this.logger.warn(
+          `[WorkflowStateTracker] Execution not found, cannot complete phase execution_id=${executionId}`
+        );
         return;
       }
 
@@ -285,17 +283,12 @@ export class WorkflowStateTracker {
       });
 
       this.logger.debug(
-        `[WorkflowStateTracker] Completed phase ${phaseNumber} for execution: ${executionId}`,
-        {
-          duration_ms: durationMs,
-        }
+        `[WorkflowStateTracker] Completed phase ${phaseNumber} for execution: ${executionId} duration_ms=${durationMs}`
       );
     } catch (error) {
-      this.logger.error('[WorkflowStateTracker] Failed to complete phase', {
-        execution_id: executionId,
-        phase: phaseNumber,
-        error,
-      });
+      this.logger.error(
+        `[WorkflowStateTracker] Failed to complete phase execution_id=${executionId} phase=${phaseNumber}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -321,10 +314,9 @@ export class WorkflowStateTracker {
 
       this.logger.info(`[WorkflowStateTracker] Completed execution: ${executionId}`);
     } catch (error) {
-      this.logger.error('[WorkflowStateTracker] Failed to complete execution', {
-        execution_id: executionId,
-        error,
-      });
+      this.logger.error(
+        `[WorkflowStateTracker] Failed to complete execution execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -337,9 +329,9 @@ export class WorkflowStateTracker {
     try {
       const state = await this.getExecutionState(executionId);
       if (!state) {
-        this.logger.warn('[WorkflowStateTracker] Execution not found, cannot fail it', {
-          execution_id: executionId,
-        });
+        this.logger.warn(
+          `[WorkflowStateTracker] Execution not found, cannot fail it execution_id=${executionId}`
+        );
         return;
       }
 
@@ -367,14 +359,13 @@ export class WorkflowStateTracker {
         refresh: 'wait_for',
       });
 
-      this.logger.warn(`[WorkflowStateTracker] Failed execution: ${executionId}`, {
-        error: errorMessage,
-      });
+      this.logger.warn(
+        `[WorkflowStateTracker] Failed execution: ${executionId} error=${errorMessage}`
+      );
     } catch (error) {
-      this.logger.error('[WorkflowStateTracker] Failed to mark execution as failed', {
-        execution_id: executionId,
-        error,
-      });
+      this.logger.error(
+        `[WorkflowStateTracker] Failed to mark execution as failed execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -393,10 +384,9 @@ export class WorkflowStateTracker {
       if (error.meta?.statusCode === 404) {
         return null;
       }
-      this.logger.error('[WorkflowStateTracker] Failed to get execution state', {
-        execution_id: executionId,
-        error,
-      });
+      this.logger.error(
+        `[WorkflowStateTracker] Failed to get execution state execution_id=${executionId}: ${error instanceof Error ? error.message : String(error)}`
+      );
       throw error;
     }
   }
@@ -416,16 +406,9 @@ export class WorkflowStateTracker {
     currentPhase: number,
     progressPercentage: number
   ): number {
-    const startTime = new Date(state.started_at).getTime();
-    const now = Date.now();
-    const elapsedMs = now - startTime;
-
     // If we have actual duration data from completed phases, use it
     const completedPhases = state.phases.filter((p) => p.status === 'completed');
-    const actualCompletedDuration = completedPhases.reduce(
-      (sum, p) => sum + (p.duration_ms || 0),
-      0
-    );
+    void completedPhases.reduce((sum, p) => sum + (p.duration_ms || 0), 0);
 
     // Estimate remaining phases based on average durations
     const remainingPhases = SELF_EXPLORATION_PHASES.filter((p) => p.phase_number > currentPhase);

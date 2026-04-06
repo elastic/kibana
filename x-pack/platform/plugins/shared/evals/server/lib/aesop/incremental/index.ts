@@ -16,16 +16,8 @@
  * This reduces exploration time from hours to minutes for daily updates.
  */
 
-export {
-  ExplorationStateService,
-  ExplorationState,
-  StateHistoryConfig,
-  initializeExplorationStateIndex,
-} from './exploration_state';
+export { ExplorationStateService, initializeExplorationStateIndex } from './exploration_state';
+export type { ExplorationState, StateHistoryConfig } from './exploration_state';
 
-export {
-  ChangeDetector,
-  ChangeDetectionResult,
-  ChangeDetectionConfig,
-  summarizeChanges,
-} from './detect_changes';
+export { ChangeDetector, summarizeChanges } from './detect_changes';
+export type { ChangeDetectionResult, ChangeDetectionConfig } from './detect_changes';

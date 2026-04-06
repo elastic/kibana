@@ -69,20 +69,17 @@ export function registerGetExplorationProgressRoute({ router, logger }: AESOPRou
             });
           }
 
-          logger.debug('[AESOP] Fetched exploration progress', {
-            execution_id: executionId,
-            progress: state.progress_percentage,
-            phase: state.current_phase,
-          });
+          logger.debug(
+            `[AESOP] Fetched exploration progress execution_id=${executionId} progress=${state.progress_percentage} phase=${state.current_phase}`
+          );
 
           return response.ok({
             body: state,
           });
         } catch (error) {
-          logger.error('[AESOP] Failed to fetch exploration progress', {
-            execution_id: executionId,
-            error,
-          });
+          logger.error(
+            `[AESOP] Failed to fetch exploration progress execution_id=${executionId} error=${error instanceof Error ? error.message : String(error)}`
+          );
 
           return response.customError({
             statusCode: 500,

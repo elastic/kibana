@@ -8,12 +8,10 @@
 import type { ChangeDetectionResult } from './detect_changes';
 import { ChangeDetector, summarizeChanges } from './detect_changes';
 import type { ExplorationState } from './exploration_state';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
 
 describe('ChangeDetector', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockEsClient: any;
+  let mockLogger: any;
   let detector: ChangeDetector;
 
   const createMockState = (overrides?: Partial<ExplorationState>): ExplorationState => ({

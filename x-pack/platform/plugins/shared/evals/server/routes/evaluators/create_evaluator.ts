@@ -53,7 +53,7 @@ const CreateEvaluatorRequestBody = z.object({
   description: z.string().max(1024),
   type: z.enum(['llm-judge', 'code', 'esql']),
   config: z.union([LlmJudgeConfigSchema, CodeConfigSchema, EsqlConfigSchema]),
-  tags: z.record(z.string()).optional(),
+  tags: z.record(z.string(), z.string()).optional(),
   shared: z.boolean().optional(),
 });
 

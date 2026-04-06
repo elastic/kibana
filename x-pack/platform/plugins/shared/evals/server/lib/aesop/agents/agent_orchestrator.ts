@@ -56,7 +56,7 @@ export class AgentOrchestrator {
     logger.debug(`[AESOP] Agent ${agentId} execution started: ${executionId}`);
 
     try {
-      const response = await lastValueFrom(
+      const response = (await lastValueFrom(
         events$.pipe(
           filter(
             (event: any) => event.type === 'messageComplete' || event.type === 'conversationUpdate'
@@ -83,16 +83,17 @@ export class AgentOrchestrator {
             return of('');
           })
         )
-      );
+      )) as string;
 
       logger.info(`[AESOP] Agent ${agentId} completed (${response.length} chars)`);
       return response;
     } catch (error) {
       // lastValueFrom throws EmptyError when observable completes without emitting
-      logger.error(`[AESOP] Agent ${agentId} execution failed`, {
-        error: error instanceof Error ? error.message : String(error),
-        execution_id: executionId,
-      });
+      logger.error(
+        `[AESOP] Agent ${agentId} execution failed: ${
+          error instanceof Error ? error.message : String(error)
+        } (execution_id=${executionId})`
+      );
       return '';
     }
   }

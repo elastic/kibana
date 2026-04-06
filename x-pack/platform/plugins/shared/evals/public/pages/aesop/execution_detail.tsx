@@ -460,7 +460,7 @@ export const ExecutionDetailPage = () => {
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiBasicTable
-                  items={execution.schemas_discovered}
+                  items={execution.schemas_discovered as any[]}
                   columns={schemaColumns}
                   tableLayout="auto"
                 />

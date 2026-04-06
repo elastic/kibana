@@ -72,11 +72,9 @@ export function registerDeployAlertingRulesRoute({ router, logger }: AESOPRouteD
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-        logger.info('[AESOP Alerting] Deploying alerting rules', {
-          requested_rules: requestedRuleIds?.length ?? 'all',
-          dry_run,
-          overwrite,
-        });
+        logger.info(
+          `[AESOP Alerting] Deploying alerting rules requested_rules=${requestedRuleIds?.length ?? 'all'} dry_run=${dry_run} overwrite=${overwrite}`
+        );
 
         // Filter rules if specific IDs requested
         const rulesToDeploy = requestedRuleIds
@@ -202,9 +200,7 @@ export function registerDeployAlertingRulesRoute({ router, logger }: AESOPRouteD
               }
             } catch (error) {
               const errorMessage = error instanceof Error ? error.message : String(error);
-              logger.error(`[AESOP Alerting] ❌ Failed to deploy rule: ${rule.id}`, {
-                error: errorMessage,
-              });
+              logger.error(`[AESOP Alerting] ❌ Failed to deploy rule: ${rule.id}: ${errorMessage}`);
               errors.push({
                 rule_id: rule.id,
                 error: errorMessage,
@@ -214,13 +210,9 @@ export function registerDeployAlertingRulesRoute({ router, logger }: AESOPRouteD
 
           const allDeployedRules = [...createdRules, ...updatedRules];
 
-          logger.info('[AESOP Alerting] ✅ Alerting rules deployment completed', {
-            total_rules: rulesToDeploy.length,
-            created: createdRules.length,
-            updated: updatedRules.length,
-            skipped: skippedRules.length,
-            errors: errors.length,
-          });
+          logger.info(
+            `[AESOP Alerting] ✅ Alerting rules deployment completed total_rules=${rulesToDeploy.length} created=${createdRules.length} updated=${updatedRules.length} skipped=${skippedRules.length} errors=${errors.length}`
+          );
 
           return response.ok({
             body: {

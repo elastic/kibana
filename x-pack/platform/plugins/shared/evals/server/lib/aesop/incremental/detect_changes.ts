@@ -122,13 +122,9 @@ export class ChangeDetector {
 
     const elapsed = Date.now() - startTime;
 
-    this.logger.info(`[AESOP Changes] Change detection completed in ${elapsed}ms`, {
-      new_indices: newIndices.length,
-      modified_indices: modifiedIndices.length,
-      removed_indices: removedIndices.length,
-      total_new_documents: totalNewDocuments,
-      previous_exploration: lastState.last_run_timestamp,
-    });
+    this.logger.info(
+      `[AESOP Changes] Change detection completed in ${elapsed}ms new_indices=${newIndices.length} modified_indices=${modifiedIndices.length} removed_indices=${removedIndices.length} total_new_documents=${totalNewDocuments} previous_exploration=${lastState.last_run_timestamp}`
+    );
 
     return {
       new_indices: newIndices,
@@ -163,9 +159,9 @@ export class ChangeDetector {
     const previousIndicesSet = new Set(lastState.discovered_indices);
     const newIndices = currentIndices.filter((idx) => !previousIndicesSet.has(idx));
 
-    this.logger.debug(`[AESOP Changes] Found ${newIndices.length} new indices`, {
-      new_indices: newIndices,
-    });
+    this.logger.debug(
+      `[AESOP Changes] Found ${newIndices.length} new indices: ${newIndices.join(', ')}`
+    );
 
     return newIndices;
   }
@@ -219,9 +215,11 @@ export class ChangeDetector {
     // Deduplicate
     const uniqueModifications = Array.from(new Set(modifications));
 
-    this.logger.debug(`[AESOP Changes] Found ${uniqueModifications.length} modified indices`, {
-      modified_indices: uniqueModifications,
-    });
+    this.logger.debug(
+      `[AESOP Changes] Found ${
+        uniqueModifications.length
+      } modified indices: ${uniqueModifications.join(', ')}`
+    );
 
     return uniqueModifications;
   }
@@ -249,9 +247,11 @@ export class ChangeDetector {
     );
 
     if (removedIndices.length > 0) {
-      this.logger.warn(`[AESOP Changes] Detected ${removedIndices.length} removed indices`, {
-        removed_indices: removedIndices,
-      });
+      this.logger.warn(
+        `[AESOP Changes] Detected ${removedIndices.length} removed indices: ${removedIndices.join(
+          ', '
+        )}`
+      );
     }
 
     return removedIndices;
@@ -355,10 +355,12 @@ export class ChangeDetector {
 
         if (previousFingerprint && currentFingerprint !== previousFingerprint) {
           changes.push(indexName);
-          this.logger.debug(`[AESOP Changes] Mapping changed for ${indexName}`, {
-            previous: previousFingerprint.substring(0, 8),
-            current: currentFingerprint.substring(0, 8),
-          });
+          this.logger.debug(
+            `[AESOP Changes] Mapping changed for ${indexName} previous=${previousFingerprint.substring(
+              0,
+              8
+            )} current=${currentFingerprint.substring(0, 8)}`
+          );
         }
       }
     } catch (error) {
@@ -396,11 +398,11 @@ export class ChangeDetector {
         const changeRatio = (currentCount - previousCount) / previousCount;
         if (changeRatio > this.config.docCountChangeThreshold) {
           changes.push(indexName);
-          this.logger.debug(`[AESOP Changes] Doc count changed for ${indexName}`, {
-            previous: previousCount,
-            current: currentCount,
-            change_pct: Math.round(changeRatio * 100),
-          });
+          this.logger.debug(
+            `[AESOP Changes] Doc count changed for ${indexName} previous=${previousCount} current=${currentCount} change_pct=${Math.round(
+              changeRatio * 100
+            )}`
+          );
         }
       }
     } catch (error) {

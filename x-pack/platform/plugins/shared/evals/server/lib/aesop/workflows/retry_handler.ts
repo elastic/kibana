@@ -132,20 +132,16 @@ export class WorkflowRetryHandler {
           : this.isRetryableError(error);
 
         if (!isRetryable) {
-          this.logger.warn(`[RetryHandler] ${operationName} failed with non-retryable error`, {
-            error: lastError.message,
-            attempt,
-          });
+          this.logger.warn(
+            `[RetryHandler] ${operationName} failed with non-retryable error attempt=${attempt} error=${lastError.message}`
+          );
           throw lastError;
         }
 
         // If this was the last attempt, throw
         if (attempt >= opts.maxRetries) {
           this.logger.error(
-            `[RetryHandler] ${operationName} failed after ${opts.maxRetries} attempts`,
-            {
-              error: lastError.message,
-            }
+            `[RetryHandler] ${operationName} failed after ${opts.maxRetries} attempts error=${lastError.message}`
           );
           throw new MaxRetriesExceededError(operationName, attempt, lastError);
         }
@@ -154,11 +150,11 @@ export class WorkflowRetryHandler {
         const delayMs = this.calculateBackoff(attempt, opts);
 
         this.logger.warn(
-          `[RetryHandler] ${operationName} failed (attempt ${attempt}/${opts.maxRetries}), retrying in ${delayMs}ms`,
-          {
-            error: lastError.message,
-            statusCode: error.statusCode || error.status,
-          }
+          `[RetryHandler] ${operationName} failed (attempt ${attempt}/${
+            opts.maxRetries
+          }), retrying in ${delayMs}ms error=${lastError.message} statusCode=${
+            error.statusCode || error.status
+          }`
         );
 
         // Invoke retry callback if provided
@@ -166,9 +162,11 @@ export class WorkflowRetryHandler {
           try {
             opts.onRetry(attempt, error, delayMs);
           } catch (callbackError) {
-            this.logger.warn('[RetryHandler] onRetry callback threw error', {
-              error: callbackError,
-            });
+            this.logger.warn(
+              `[RetryHandler] onRetry callback threw error: ${
+                callbackError instanceof Error ? callbackError.message : String(callbackError)
+              }`
+            );
           }
         }
 

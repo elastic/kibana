@@ -55,7 +55,7 @@ export function registerRunExplorationRoute({
           const internalClient = coreContext.elasticsearch.client.asInternalUser;
           const rateLimiter = new PersistentRateLimiter(internalClient, logger);
 
-          const userId = request.auth.credentials?.username || 'anonymous';
+          const userId = 'anonymous';
           const rateLimit = await rateLimiter.checkRateLimit(userId, 'exploration');
 
           if (!rateLimit.allowed) {
@@ -86,11 +86,9 @@ export function registerRunExplorationRoute({
             }
           }
 
-          logger.info('[AESOP] Starting autonomous exploration', {
-            user_id: userId,
-            include_sample_data,
-            rate_limit_remaining: rateLimit.remaining,
-          });
+          logger.info(
+            `[AESOP] Starting autonomous exploration user_id=${userId} include_sample_data=${include_sample_data} rate_limit_remaining=${rateLimit.remaining}`
+          );
 
           // Phase 1: Auto-discover available indices
           logger.info('[AESOP] Phase 1: Discovering available indices...');
@@ -121,12 +119,9 @@ export function registerRunExplorationRoute({
 
           const topIndices = indexCatalog.indices.slice(0, 10).map((idx) => idx.name);
 
-          logger.info('[AESOP] Autonomous discovery complete', {
-            discovered_indices: indexCatalog.securityRelevantCount,
-            analyst_role: roleInference.role,
-            sampling_strategy: samplingConfig.strategyName,
-            top_indices: topIndices,
-          });
+          logger.info(
+            `[AESOP] Autonomous discovery complete discovered_indices=${indexCatalog.securityRelevantCount} analyst_role=${roleInference.role} sampling_strategy=${samplingConfig.strategyName}`
+          );
 
           // Use the current user's client for index creation (kibana_system lacks
           // privileges to create custom .aesop-* indices, but the logged-in user does)
@@ -141,13 +136,9 @@ export function registerRunExplorationRoute({
           const stateTracker = new WorkflowStateTracker(currentUserClient, logger);
           await stateTracker.initializeExecution(executionId, 'aesop.self_exploration');
 
-          logger.info('[AESOP] Exploration initialized', {
-            execution_id: executionId,
-            user_id: userId,
-            discovered_indices: topIndices.length,
-            inferred_role: roleInference.role,
-            sampling_strategy: samplingConfig.strategyName,
-          });
+          logger.info(
+            `[AESOP] Exploration initialized execution_id=${executionId} user_id=${userId} discovered_indices=${topIndices.length} inferred_role=${roleInference.role} sampling_strategy=${samplingConfig.strategyName}`
+          );
 
           // Record APM metric for exploration start
           await apmService.instrumentWorkflowStep(
@@ -170,9 +161,9 @@ export function registerRunExplorationRoute({
             try {
               skillRegistry = await agentBuilderStart.skills.getRegistry({ request });
             } catch (err) {
-              logger.warn('[AESOP] Could not create skill registry', {
-                error: err instanceof Error ? err.message : String(err),
-              });
+              logger.warn(
+                `[AESOP] Could not create skill registry error=${err instanceof Error ? err.message : String(err)}`
+              );
             }
           }
 
@@ -198,7 +189,9 @@ export function registerRunExplorationRoute({
             }
           );
           executor.execute().catch((err) => {
-            logger.error('[AESOP] Background exploration failed', { error: err });
+            logger.error(
+              `[AESOP] Background exploration failed error=${err instanceof Error ? err.message : String(err)}`
+            );
           });
 
           return response.ok({
@@ -214,7 +207,9 @@ export function registerRunExplorationRoute({
             },
           });
         } catch (error) {
-          logger.error('[AESOP] Failed to start exploration', { error });
+          logger.error(
+            `[AESOP] Failed to start exploration error=${error instanceof Error ? error.message : String(error)}`
+          );
 
           return response.customError({
             statusCode: 500,
