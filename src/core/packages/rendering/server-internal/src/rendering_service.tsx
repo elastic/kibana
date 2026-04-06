@@ -39,6 +39,8 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
+import { readFileSync } from 'fs';
+import { fromRoot } from '@kbn/repo-info';
 import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
 import {
   getSettingValue,
@@ -74,8 +76,29 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private chunkManifestCache: string[] | null = null;
 
   constructor(private readonly coreContext: CoreContext) {}
+
+  private getPreloadChunkFilenames(): string[] {
+    const isDist = this.coreContext.env.packageInfo.buildNum !== Number.MAX_SAFE_INTEGER;
+    if (isDist && this.chunkManifestCache) {
+      return this.chunkManifestCache;
+    }
+
+    try {
+      const manifestPath = fromRoot('target/public/bundles/chunk-manifest.json');
+      const raw = readFileSync(manifestPath, 'utf-8');
+      const manifest = JSON.parse(raw) as { chunks: string[] };
+      const result = manifest.chunks;
+      if (isDist) {
+        this.chunkManifestCache = result;
+      }
+      return result;
+    } catch {
+      return [];
+    }
+  }
 
   public async preboot({
     http,
@@ -292,16 +315,18 @@ export class RenderingService {
     const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
 
     // RSPack page-load optimizations: preload the 3 critical scripts (dll, src,
-    // bundle) and the 3 most-used Inter font weights so the browser starts
-    // downloading them during HTML parsing instead of after bootstrap.js runs.
-    // URLs must match the ones bootstrap.js loads -- both derive from the same
-    // staticAssetsHrefBase, so they're guaranteed to match across all deployment
-    // topologies (self-hosted, Cloud, CDN, reverse proxy).
+    // bundle) plus named shared chunks, and the 3 most-used Inter font weights
+    // so the browser starts downloading them during HTML parsing instead of
+    // after bootstrap.js runs.  The shared chunk preloads eliminate the async
+    // chunk discovery waterfall (browser would otherwise need 2 round-trips to
+    // discover shared-plugins, shared-packages, etc.).
+    const chunkFilenames = useRspack ? this.getPreloadChunkFilenames() : [];
     const preloadScripts = useRspack
       ? [
           `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
           `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
           `${bundlesHref}/kibana.bundle.js`,
+          ...chunkFilenames.map((f) => `${bundlesHref}/chunks/${f}`),
         ]
       : undefined;
 

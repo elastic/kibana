@@ -36,6 +36,7 @@ import {
 import type { ThemeTag } from '../types';
 import { XPackBannerPlugin } from '../plugins/xpack_banner_plugin';
 import { BundleMetricsPlugin, type PluginMetricsInfo } from '../plugins/bundle_metrics_plugin';
+import { ChunkPreloadManifestPlugin } from '../plugins/chunk_preload_manifest_plugin';
 import { readLimits, DEFAULT_LIMITS_PATH } from '../limits';
 
 /**
@@ -728,6 +729,9 @@ export async function createSingleCompileConfig(
 
       // Elastic License 2.0 banner for x-pack plugin chunks
       new XPackBannerPlugin(repoRoot, plugins),
+
+      // Emit chunk-manifest.json listing named shared chunks for <link rel="preload">
+      new ChunkPreloadManifestPlugin(),
 
       // Bundle metrics -- collects per-plugin sizes and module counts, emits metrics.json
       ...(dist
