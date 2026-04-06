@@ -122,9 +122,7 @@ export const MetricsExperienceGrid = ({
   }
 
   const showMetricsInfoError =
-    metricsInfoError != null &&
-    !isDiscoverLoading &&
-    !isSuppressedFetchError(metricsInfoError);
+    metricsInfoError != null && !isDiscoverLoading && !isSuppressedFetchError(metricsInfoError);
 
   if (showMetricsInfoError) {
     return <MetricsInfoError />;
