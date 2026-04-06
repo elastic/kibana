@@ -33,6 +33,11 @@ describe('useBreadcrumbs', () => {
           docTitle: { change: mockDocTitleChange },
         } as any;
       }
+      if (service === 'application') {
+        return {
+          getUrlForApp: jest.fn().mockReturnValue('/app/management'),
+        } as any;
+      }
       return undefined as any;
     });
   });
