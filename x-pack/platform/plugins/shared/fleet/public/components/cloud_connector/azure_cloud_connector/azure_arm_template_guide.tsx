@@ -73,7 +73,7 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
               values={{
                 outputs: <strong>{'Outputs'}</strong>,
                 outputValues: (
-                  <strong>{'ClientID, TenantID, and Elastic Cloud Connector ID'}</strong>
+                  <strong>{'ClientID, TenantID, and Federated Identity ID'}</strong>
                 ),
               }}
             />
