@@ -158,7 +158,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cell-actions'
   - '@kbn/unified-data-table'
-  - '@kbn/alerting-v2-plugin'
+  - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
