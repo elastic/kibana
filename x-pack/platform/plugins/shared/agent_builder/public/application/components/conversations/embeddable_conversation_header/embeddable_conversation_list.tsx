@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,
@@ -33,6 +34,7 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
 }) => {
   const { euiTheme } = useEuiTheme();
   const { agentId, conversationId, setConversationId } = useConversationContext();
+  const { removeError } = useSendMessage();
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
   const sortedConversations = useMemo(
@@ -81,6 +83,7 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
             <button
               css={isActive ? activeItemStyles : itemStyles}
               onClick={() => {
+                removeError();
                 setConversationId?.(conversation.id);
                 onClose();
               }}
