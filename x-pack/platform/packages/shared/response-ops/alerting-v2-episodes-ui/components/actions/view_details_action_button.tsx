@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { EpisodeActionButton } from './episode_action_button';
 
 const label = i18n.translate('xpack.alertingV2.episodesUi.actions.viewDetailsLabel', {
   defaultMessage: 'View details',
@@ -23,21 +23,18 @@ export function AlertEpisodeViewDetailsActionButton({
   href,
   buttonsOutlined = true,
 }: AlertEpisodeViewDetailsActionButtonProps) {
-  const buttonProps = {
-    size: 's' as const,
-    color: 'text' as const,
-    iconType: 'eye',
-    href,
-    'data-test-subj': 'alertingEpisodeActionsViewDetailsButton',
-    'aria-label': label,
-    css: css`
-      min-inline-size: unset;
-    `,
-  };
-
-  return buttonsOutlined ? (
-    <EuiButton {...buttonProps} fill={false} />
-  ) : (
-    <EuiButtonEmpty {...buttonProps} />
+  return (
+    <EpisodeActionButton
+      outlined={buttonsOutlined}
+      size="s"
+      color="text"
+      iconType="eye"
+      href={href}
+      data-test-subj="alertingEpisodeActionsViewDetailsButton"
+      aria-label={label}
+      css={css`
+        min-inline-size: unset;
+      `}
+    />
   );
 }

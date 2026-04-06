@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
+import { EpisodeActionButton } from './episode_action_button';
 
 export interface AlertEpisodeAcknowledgeActionButtonProps {
   lastAckAction?: string | null;
@@ -52,20 +52,18 @@ export function AlertEpisodeAcknowledgeActionButton({
     });
   }, [createAlertAction, episodeId, groupHash, actionType]);
 
-  const buttonProps = {
-    size: 's' as const,
-    color: 'text' as const,
-    iconType: isAcknowledged ? 'crossCircle' : 'checkCircle',
-    onClick: handleClick,
-    isLoading,
-    isDisabled: !episodeId || !groupHash,
-    'data-test-subj': 'alertEpisodeAcknowledgeActionButton',
-    children: label,
-  };
-
-  return buttonsOutlined ? (
-    <EuiButton {...buttonProps} fill={false} />
-  ) : (
-    <EuiButtonEmpty {...buttonProps} />
+  return (
+    <EpisodeActionButton
+      outlined={buttonsOutlined}
+      size="s"
+      color="text"
+      iconType={isAcknowledged ? 'crossCircle' : 'checkCircle'}
+      onClick={handleClick}
+      isLoading={isLoading}
+      isDisabled={!episodeId || !groupHash}
+      data-test-subj="alertEpisodeAcknowledgeActionButton"
+    >
+      {label}
+    </EpisodeActionButton>
   );
 }

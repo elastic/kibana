@@ -33,6 +33,15 @@ export interface AlertEpisodeActionsProps {
   http: HttpStart;
 }
 
+/**
+ * Container for episode action buttons (view details, acknowledge, snooze, etc.).
+ *
+ * When adding a new action button, use {@link EpisodeActionButton} (from
+ * `./episode_action_button`) instead of importing `EuiButton` / `EuiButtonEmpty`
+ * directly. `EpisodeActionButton` centralises the outlined-vs-borderless
+ * rendering driven by the `buttonsOutlined` prop, keeping all action buttons
+ * visually consistent.
+ */
 export function AlertEpisodeActions({
   episodeId,
   groupHash,

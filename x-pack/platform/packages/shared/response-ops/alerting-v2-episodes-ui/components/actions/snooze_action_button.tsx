@@ -6,13 +6,14 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeSnoozeForm } from './snooze_form';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
+import { EpisodeActionButton } from './episode_action_button';
 
 const unsnoozeLabel = i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
   defaultMessage: 'Unsnooze',
@@ -65,34 +66,19 @@ export function AlertEpisodeSnoozeActionButton({
     [createAlertAction, groupHash]
   );
 
-  const unsnoozeButtonProps = {
-    size: 's' as const,
-    color: 'text' as const,
-    iconType: 'bellSlash' as const,
-    onClick: handleUnsnooze,
-    isDisabled: !groupHash,
-    isLoading,
-    'data-test-subj': 'alertEpisodeUnsnoozeActionButton',
-    children: unsnoozeLabel,
-  };
-
-  const snoozeTriggerButtonProps = {
-    size: 's' as const,
-    color: 'text' as const,
-    iconType: 'bell' as const,
-    onClick: togglePopover,
-    isDisabled: !groupHash,
-    isLoading,
-    'data-test-subj': 'alertEpisodeSnoozeActionButton',
-    children: snoozeLabel,
-  };
-
   return isSnoozed ? (
-    buttonsOutlined ? (
-      <EuiButton {...unsnoozeButtonProps} fill={false} />
-    ) : (
-      <EuiButtonEmpty {...unsnoozeButtonProps} />
-    )
+    <EpisodeActionButton
+      outlined={buttonsOutlined}
+      size="s"
+      color="text"
+      iconType="bellSlash"
+      onClick={handleUnsnooze}
+      isDisabled={!groupHash}
+      isLoading={isLoading}
+      data-test-subj="alertEpisodeUnsnoozeActionButton"
+    >
+      {unsnoozeLabel}
+    </EpisodeActionButton>
   ) : (
     <EuiPopover
       aria-label={i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.popoverAriaLabel', {
@@ -104,11 +90,18 @@ export function AlertEpisodeSnoozeActionButton({
         align-items: center;
       `}
       button={
-        buttonsOutlined ? (
-          <EuiButton {...snoozeTriggerButtonProps} fill={false} />
-        ) : (
-          <EuiButtonEmpty {...snoozeTriggerButtonProps} />
-        )
+        <EpisodeActionButton
+          outlined={buttonsOutlined}
+          size="s"
+          color="text"
+          iconType="bell"
+          onClick={togglePopover}
+          isDisabled={!groupHash}
+          isLoading={isLoading}
+          data-test-subj="alertEpisodeSnoozeActionButton"
+        >
+          {snoozeLabel}
+        </EpisodeActionButton>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
