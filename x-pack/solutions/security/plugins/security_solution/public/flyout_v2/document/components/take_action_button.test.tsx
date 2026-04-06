@@ -13,6 +13,7 @@ import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
+import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -21,10 +22,12 @@ jest.mock('../../../detections/components/alerts_table/timeline_actions/use_aler
 jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions'
 );
+jest.mock('../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions');
 
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
+const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
 
 const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord =>
   ({
@@ -58,6 +61,7 @@ describe('<TakeActionButton />', () => {
       alertAssigneesItems: [],
       alertAssigneesPanels: [],
     });
+    mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [], alertTagsPanels: [] });
   });
 
   it('should render the take action button', () => {
@@ -161,9 +165,21 @@ describe('<TakeActionButton />', () => {
     expect(mockRefetchFlyoutData).toHaveBeenCalled();
   });
 
+  it('should call useAlertTagsActions with ecsData and onAlertUpdated as refetch', () => {
+    renderTakeActionButton();
+
+    expect(mockUseAlertTagsActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ecsRowData: mockEcsData,
+        refetch: mockOnAlertUpdated,
+      })
+    );
+  });
+
   describe('alert vs non-alert document', () => {
     const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
     const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
+    const tagsItem = { name: 'Apply alert tags', onClick: jest.fn() };
 
     beforeEach(() => {
       mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
@@ -171,6 +187,7 @@ describe('<TakeActionButton />', () => {
         alertAssigneesItems: [assigneeItem],
         alertAssigneesPanels: [],
       });
+      mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [tagsItem], alertTagsPanels: [] });
     });
 
     it('should include status and assignees items for alert documents (event.kind === signal)', () => {
@@ -181,6 +198,7 @@ describe('<TakeActionButton />', () => {
 
       expect(getByText('Mark as acknowledged')).toBeInTheDocument();
       expect(getByText('Assign alert')).toBeInTheDocument();
+      expect(getByText('Apply alert tags')).toBeInTheDocument();
     });
 
     it('should exclude status and assignees items for non-alert documents', () => {
@@ -194,6 +212,7 @@ describe('<TakeActionButton />', () => {
 
       expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
       expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
     });
 
     it('should exclude status and assignees items when event.kind is not set', () => {
@@ -206,6 +225,7 @@ describe('<TakeActionButton />', () => {
 
       expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
       expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
     });
   });
 });

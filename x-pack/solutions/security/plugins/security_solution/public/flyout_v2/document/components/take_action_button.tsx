@@ -18,6 +18,7 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
+import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -81,6 +82,12 @@ export const TakeActionButton = memo(
       refetch: onAlertUpdated,
     });
 
+    const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
+      closePopover: closePopoverHandler,
+      ecsRowData: ecsData,
+      refetch: onAlertUpdated,
+    });
+
     const onAssigneesUpdate = useCallback(() => {
       onAlertUpdated();
       refetchFlyoutData();
@@ -97,8 +104,9 @@ export const TakeActionButton = memo(
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
         ...(isAlert ? alertAssigneesItems : []),
+        ...(isAlert ? alertTagsItems : []),
       ],
-      [addToCaseActionItems, isAlert, statusActionItems, alertAssigneesItems]
+      [addToCaseActionItems, alertTagsItems, isAlert, statusActionItems, alertAssigneesItems]
     );
 
     const panels = useMemo(
@@ -106,8 +114,9 @@ export const TakeActionButton = memo(
         { id: 0, items },
         ...(isAlert ? statusActionPanels : []),
         ...(isAlert ? alertAssigneesPanels : []),
+        ...(isAlert ? alertTagsPanels : []),
       ],
-      [isAlert, items, statusActionPanels, alertAssigneesPanels]
+      [alertTagsPanels, isAlert, items, statusActionPanels, alertAssigneesPanels]
     );
 
     const takeActionButton = (
