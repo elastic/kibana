@@ -221,6 +221,13 @@ export const createNavigationTree = (
             ],
           },
           {
+            title: i18nStrings.clusterPerformance.title,
+            children: [
+              { link: 'monitoring' },
+              { link: 'management:queryActivity', badgeType: 'new' },
+            ],
+          },
+          {
             title: i18nStrings.ml.title,
             children: [
               { link: 'management:overview' },
