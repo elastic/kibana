@@ -32,10 +32,10 @@ const KIND_ICONS: Record<string, string> = {
  * Renders the description and tags row below the page title.
  */
 export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({ rule }) => {
-  const { description, labels } = rule.metadata;
-  const hasLabels = labels && labels.length > 0;
+  const { description, tags } = rule.metadata;
+  const hasTags = tags && tags.length > 0;
 
-  if (!description && !hasLabels) {
+  if (!description && !hasTags) {
     return null;
   }
 
@@ -48,12 +48,12 @@ export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({ ru
           </EuiText>
         </EuiFlexItem>
       )}
-      {hasLabels && (
+      {hasTags && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
-            {labels!.map((label) => (
-              <EuiFlexItem key={label} grow={false}>
-                <EuiBadge color="hollow">{label}</EuiBadge>
+            {tags!.map((tag) => (
+              <EuiFlexItem key={tag} grow={false}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

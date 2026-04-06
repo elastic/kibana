@@ -51,9 +51,9 @@ describe('buildRuleSoFilter', () => {
       );
     });
 
-    it('maps metadata.labels to SO attributes path', () => {
-      expect(buildRuleSoFilter('metadata.labels: "production"')).toBe(
-        'alerting_rule.attributes.metadata.labels: "production"'
+    it('maps metadata.tags to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.tags: "production"')).toBe(
+        'alerting_rule.attributes.metadata.tags: "production"'
       );
     });
   });

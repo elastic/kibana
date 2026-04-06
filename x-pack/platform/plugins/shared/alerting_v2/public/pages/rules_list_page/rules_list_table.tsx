@@ -318,37 +318,37 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'metadata',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
         ),
         width: '20%',
         render: (_metadata: RuleApiResponse['metadata']) => {
-          const labels = _metadata?.labels;
-          if (!labels || labels.length === 0) {
+          const tags = _metadata?.tags;
+          if (!tags || tags.length === 0) {
             return (
               <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
             );
           }
-          const overflowCount = labels.length - 1;
+          const overflowCount = tags.length - 1;
           return (
             <EuiBadgeGroup
               gutterSize="xs"
               css={labelsContainerStyle}
-              data-test-subj="labelsContainer"
+              data-test-subj="tagsContainer"
             >
               <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
-                {labels[0]}
+                {tags[0]}
               </EuiBadge>
               {overflowCount > 0 && (
                 <span css={overflowTooltipStyle}>
-                  <EuiToolTip content={labels.slice(1).join(', ')}>
+                  <EuiToolTip content={tags.slice(1).join(', ')}>
                     <EuiBadge
                       tabIndex={0}
                       color="hollow"
-                      data-test-subj="overflowLabelsBadge"
+                      data-test-subj="overflowTagsBadge"
                       iconType="tag"
                       title=""
                     >
-                      {i18n.translate('xpack.alertingV2.rulesList.labels.overflow', {
+                      {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
                         defaultMessage: '+{count}',
                         values: { count: overflowCount },
                       })}

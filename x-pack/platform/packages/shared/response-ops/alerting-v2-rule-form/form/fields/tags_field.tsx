@@ -19,7 +19,7 @@ export const TagsField = () => {
 
   return (
     <Controller
-      name="metadata.labels"
+      name="metadata.tags"
       control={control}
       rules={{
         validate: (value) => {
