@@ -58,7 +58,7 @@ export class CloudConnectedPlugin
   private readonly logger: Logger;
   private readonly config: CloudConnectConfig;
   private licenseSubscription?: Subscription;
-  private isCloudEnabled = false;
+  private isEss = false;
   private cloudApiUrl?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -77,7 +77,7 @@ export class CloudConnectedPlugin
     // CCM is enabled for ECE deployments and self-managed clusters.
     if (plugins.cloud?.isCloudEnabled && !plugins.cloud?.isEce) {
       this.logger.debug('cloudConnected: Skipping setup - running on ESS');
-      this.isCloudEnabled = true;
+      this.isEss = true;
       return {};
     }
 
@@ -107,7 +107,7 @@ export class CloudConnectedPlugin
     this.logger.debug('cloudConnected: Started');
 
     // No-op if running on ESS (plugin is effectively disabled there).
-    if (this.isCloudEnabled) {
+    if (this.isEss) {
       return {};
     }
 
