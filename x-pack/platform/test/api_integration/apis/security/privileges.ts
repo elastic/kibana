@@ -97,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         'manage_tools',
         'manage_skills',
       ],
+      automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
