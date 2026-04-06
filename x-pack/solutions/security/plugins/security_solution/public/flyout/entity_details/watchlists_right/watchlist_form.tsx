@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { canUpdateWatchlistField } from '../../../../common/api/entity_analytics/watchlists/management';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import {
   WATCHLIST_DESCRIPTION_LABEL,
@@ -42,6 +43,10 @@ export const WatchlistForm = ({
   isNameInvalid,
   onFieldChange,
 }: WatchlistFormProps) => {
+  const isManaged = watchlist.managed === true;
+  const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
+  const isDescriptionDisabled = isEditMode && !canUpdateWatchlistField('description', isManaged);
+
   return (
     <EuiForm component="form" fullWidth>
       <EuiFormRow
@@ -66,6 +71,7 @@ export const WatchlistForm = ({
           value={watchlist.name}
           onChange={(e) => onFieldChange('name', e.target.value)}
           isInvalid={isNameInvalid}
+          disabled={isNameDisabled}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -83,6 +89,7 @@ export const WatchlistForm = ({
           name="WatchlistDescription"
           value={watchlist.description}
           onChange={(e) => onFieldChange('description', e.target.value)}
+          disabled={isDescriptionDisabled}
         />
       </EuiFormRow>
       <EuiFormRow label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}>

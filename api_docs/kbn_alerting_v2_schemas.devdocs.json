@@ -1025,6 +1025,42 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.FindRulesSortField",
+        "type": "Type",
+        "tags": [],
+        "label": "FindRulesSortField",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 291,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.findRulesSortFieldSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "findRulesSortFieldSchema",
+        "description": [
+          "Sort field for find rules API."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 290,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
         "id": "def-common.GroupingMode",
         "type": "Type",
         "tags": [],
@@ -1656,7 +1692,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 300,
+        "lineNumber": 311,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2108,7 +2144,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 290,
+        "lineNumber": 294,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2211,6 +2247,32 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
         "lineNumber": 278,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ruleTagsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleTagsResponseSchema",
+        "description": [
+          "Rule tags response schema."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ tags: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 304,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
