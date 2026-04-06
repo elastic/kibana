@@ -183,7 +183,7 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
-     * Fetches entities from the Entity Store v2 unified latest index (internal entity_store plugin route).
+     * Fetches entities from the Entity Store v2 unified latest index (`entity_store` plugin CRUD GET; public API version).
      */
     const fetchEntitiesListV2 = ({
       signal,
@@ -193,7 +193,7 @@ export const useEntityAnalyticsRoutes = () => {
       params: FetchEntitiesListParams;
     }) =>
       http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
-        version: ENTITY_STORE_API_VERSIONS.internal.v2,
+        version: ENTITY_STORE_API_VERSIONS.public.v1,
         method: 'GET',
         query: {
           entity_types: params.entityTypes,
@@ -390,7 +390,7 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const fetchEntityStoreV2Privileges = () =>
       http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
-        version: ENTITY_STORE_API_VERSIONS.internal.v2,
+        version: ENTITY_STORE_API_VERSIONS.public.v1,
         method: 'GET',
       });
 

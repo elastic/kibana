@@ -13,7 +13,9 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
   // changing access control is not allowed through update endpoint
-  return getDashboardStateSchema(isDashboardAppRequest, { allowAccessControl: false });
+  const { access_control, ...rest } =
+    getDashboardStateSchema(isDashboardAppRequest).getPropSchemas();
+  return schema.object(rest);
 }
 
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {

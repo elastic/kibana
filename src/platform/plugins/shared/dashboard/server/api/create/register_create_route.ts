@@ -22,7 +22,7 @@ export function registerCreateRoute(
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
     path: basePath,
-    summary: 'Create a dashboard with an auto-generated ID or a specified ID',
+    summary: 'Create a dashboard',
     ...routeConfig,
   });
 
