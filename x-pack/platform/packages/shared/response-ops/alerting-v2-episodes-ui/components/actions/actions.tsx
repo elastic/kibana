@@ -6,15 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiListGroup,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
@@ -22,6 +14,7 @@ import { AlertEpisodeAcknowledgeActionButton } from './acknowledge_action_button
 import { AlertEpisodeSnoozeActionButton } from './snooze_action_button';
 import type { AlertEpisodeAction, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertEpisodeResolveActionButton } from './resolve_action_button';
+import { AlertEpisodeViewDetailsActionButton } from './view_details_action_button';
 
 export interface AlertEpisodeActionsProps {
   episodeId?: string;
@@ -61,36 +54,10 @@ export function AlertEpisodeActions({
     >
       {viewDetailsHref ? (
         <EuiFlexItem grow={false}>
-          {buttonsOutlined ? (
-            <EuiButton
-              size="s"
-              color="text"
-              fill={false}
-              iconType="eye"
-              href={viewDetailsHref}
-              data-test-subj="alertingEpisodeActionsViewDetailsButton"
-              aria-label={i18n.translate('xpack.alertingV2.episodesUi.actions.viewDetailsLabel', {
-                defaultMessage: 'View details',
-              })}
-              css={css`
-                min-inline-size: unset;
-              `}
-            />
-          ) : (
-            <EuiButtonEmpty
-              size="s"
-              color="text"
-              iconType="eye"
-              href={viewDetailsHref}
-              data-test-subj="alertingEpisodeActionsViewDetailsButton"
-              aria-label={i18n.translate('xpack.alertingV2.episodesUi.actions.viewDetailsLabel', {
-                defaultMessage: 'View details',
-              })}
-              css={css`
-                min-inline-size: unset;
-              `}
-            />
-          )}
+          <AlertEpisodeViewDetailsActionButton
+            href={viewDetailsHref}
+            buttonsOutlined={buttonsOutlined}
+          />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
