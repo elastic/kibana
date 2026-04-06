@@ -16,7 +16,7 @@ import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useEntityStoreV2Status } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store_v2_status';
+import { useIsEntityStoreV2Available } from '../../../../entity_analytics/components/entity_store/hooks/use_is_entity_store_v2_available';
 
 export interface UseGraphPreviewParams {
   /**
@@ -112,9 +112,9 @@ export const useGraphPreview = ({
   // Check if user license is high enough to access graph visualization
   const hasRequiredLicense = useHasGraphVisualizationLicense();
 
-  // Check if entity store v2 is running
-  const { data: entityStoreStatus } = useEntityStoreV2Status();
-  const isEntityStoreRunning = entityStoreStatus?.status === 'running';
+  // Check if entity store v2 entities index exists
+  const { data: entitiesIndexExists } = useIsEntityStoreV2Available();
+  const isEntityStoreRunning = entitiesIndexExists?.indexExists === true;
 
   // Check if graph has all required data fields for graph visualization
   const hasGraphData =
