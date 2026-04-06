@@ -209,6 +209,19 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getDataViewsService: () => dataViewsService,
 
+      getInternalDataViewsService: memoize(async () => {
+        const spaceId = getSpaceId();
+        const internalSoClient = coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .asScopedToNamespace(spaceId);
+        return startPlugins.dataViews.dataViewsServiceFactory(
+          internalSoClient,
+          coreContext.elasticsearch.client.asInternalUser,
+          undefined,
+          true
+        );
+      }),
+
       getEntityStoreApiKeyManager,
 
       getPrivilegedUserMonitoringApiKeyManager,
@@ -348,6 +361,12 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: options.logger,
           dataClient: getEntityStoreDataClient(),
         });
+      }),
+      getEntityStoreUpdateClient: memoize(() => {
+        return startPlugins.entityStore.createCRUDClient(
+          coreContext.elasticsearch.client.asCurrentUser,
+          getSpaceId()
+        );
       }),
       getAssetInventoryClient: memoize(
         () =>

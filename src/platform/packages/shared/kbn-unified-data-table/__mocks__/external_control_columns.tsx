@@ -71,7 +71,7 @@ const TestTrailingColumn = () => {
       button={
         <EuiButtonIcon
           aria-label="show actions"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           color="text"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
@@ -119,7 +119,7 @@ export const testLeadingControlColumn: EuiDataGridControlColumn = {
   width: 100,
 };
 
-export const mockRowAdditionalLeadingControls = ['visBarVerticalStacked', 'heart', 'inspect'].map(
+export const mockRowAdditionalLeadingControls = ['chartBarVerticalStack', 'heart', 'inspect'].map(
   (iconType): RowControlColumn => ({
     id: `exampleRowControl-${iconType}`,
     render: (Control, rowProps) => {

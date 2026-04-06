@@ -6,9 +6,20 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { useFormContext } from 'react-hook-form';
 import { AlertDelayField } from './alert_delay_field';
-import { createFormWrapper } from '../../test_utils';
+import { RecoveryDelayField } from './recovery_delay_field';
+import type { FormValues } from '../types';
+import { mapFormValuesToUpdateRequest } from '../utils/rule_request_mappers';
+import { createFormWrapper, createMockServices } from '../../test_utils';
+
+let getFormValues: (() => FormValues) | undefined;
+
+const CaptureFormGetValues = () => {
+  getFormValues = useFormContext<FormValues>().getValues;
+  return null;
+};
 
 describe('AlertDelayField', () => {
   it('renders the alert delay form row', () => {
@@ -36,10 +47,11 @@ describe('AlertDelayField', () => {
     expect(screen.getByText('No delay - Alerts on first breach')).toBeInTheDocument();
   });
 
-  it('derives breaches mode from form state with pendingCount', () => {
+  it('shows breaches controls when alert delay mode is breaches', () => {
     render(<AlertDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'breaches',
         stateTransition: { pendingCount: 3 },
       }),
     });
@@ -47,10 +59,11 @@ describe('AlertDelayField', () => {
     expect(screen.getByTestId('stateTransitionCountInput')).toBeInTheDocument();
   });
 
-  it('derives duration mode from form state with pendingTimeframe', () => {
+  it('shows duration controls when alert delay mode is duration', () => {
     render(<AlertDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'duration',
         stateTransition: { pendingTimeframe: '10m' },
       }),
     });
@@ -84,6 +97,7 @@ describe('AlertDelayField', () => {
     render(<AlertDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
+        stateTransitionAlertDelayMode: 'breaches',
         stateTransition: { pendingCount: 3 },
       }),
     });
@@ -101,5 +115,50 @@ describe('AlertDelayField', () => {
     });
 
     expect(screen.getByTestId('stateTransitionDelayMode')).toBeInTheDocument();
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<AlertDelayField />, {
+      wrapper: createFormWrapper({ kind: 'alert' }, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByTestId('stateTransitionDelayMode')).toBeInTheDocument();
+  });
+
+  it('clears alert delay (pending) when switching to immediate while recovery delay stays on breaches', () => {
+    getFormValues = undefined;
+    render(
+      <>
+        <CaptureFormGetValues />
+        <AlertDelayField />
+        <RecoveryDelayField />
+      </>,
+      {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransitionAlertDelayMode: 'breaches',
+          stateTransitionRecoveryDelayMode: 'breaches',
+          stateTransition: {
+            pendingCount: 2,
+            pendingTimeframe: null,
+            recoveringCount: 3,
+            recoveringTimeframe: null,
+          },
+        }),
+      }
+    );
+
+    const alertRow = screen.getByTestId('alertDelayFormRow');
+    fireEvent.click(within(alertRow).getByText('Immediate'));
+
+    const values = getFormValues!();
+    expect(values.stateTransitionAlertDelayMode).toBe('immediate');
+    expect(values.stateTransition?.pendingCount).toBeNull();
+    expect(values.stateTransition?.pendingTimeframe).toBeNull();
+    expect(values.stateTransition?.recoveringCount).toBe(3);
+
+    expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
+      recovering_count: 3,
+    });
   });
 });

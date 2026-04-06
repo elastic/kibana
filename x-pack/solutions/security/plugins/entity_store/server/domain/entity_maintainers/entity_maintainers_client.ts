@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers, type KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
   getTaskId,
   removeEntityMaintainer,
@@ -32,6 +33,8 @@ export interface EntityMaintainerListEntry {
   taskStatus: EntityMaintainerTaskStatus;
   interval: string;
   description?: string;
+  nextRunAt: string | null;
+  minLicense: LicenseType;
   taskSnapshot?: TaskSnapshot;
 }
 
@@ -157,19 +160,22 @@ export class EntityMaintainersClient {
     }
   }
 
-  public async getMaintainers(): Promise<EntityMaintainerListEntry[]> {
+  public async getMaintainers(ids?: string[]): Promise<EntityMaintainerListEntry[]> {
     const entries = entityMaintainersRegistry.getAll();
+    const filteredEntries = ids?.length ? entries.filter(({ id }) => ids.includes(id)) : entries;
 
     const results = await Promise.all(
-      entries.map(async (entry): Promise<EntityMaintainerListEntry> => {
-        const { id, interval, description } = entry;
+      filteredEntries.map(async (entry): Promise<EntityMaintainerListEntry> => {
+        const { id, interval, description, minLicense } = entry;
         const taskId = getTaskId(id, this.namespace);
         let taskSnapshot: TaskSnapshot | undefined;
+        let nextRunAt: string | null = null;
         let taskStatus: EntityMaintainerTaskStatus = EntityMaintainerTaskStatus.NEVER_STARTED;
 
         try {
           const task = await this.taskManager.get(taskId);
           const { metadata, state, taskStatus: taskStatusFromState } = task.state;
+          nextRunAt = task.runAt?.toISOString() ?? null;
           taskStatus = taskStatusFromState;
           const runs = metadata?.runs ?? 0;
           const lastSuccessTimestamp = metadata?.lastSuccessTimestamp ?? null;
@@ -195,6 +201,8 @@ export class EntityMaintainersClient {
           taskStatus,
           interval,
           description,
+          nextRunAt,
+          minLicense,
           taskSnapshot,
         };
       })

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Request, Response } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const getNotificationPolicyParamsSchema = z.object({
@@ -20,45 +21,44 @@ const getNotificationPolicyParamsSchema = z.object({
 });
 
 @injectable()
-export class GetNotificationPolicyRoute {
+export class GetNotificationPolicyRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
     },
   };
-  static options = { access: 'internal' } as const;
+  static routeOptions = {
+    summary: 'Get a notification policy',
+    description: 'Get a notification policy by identifier.',
+  } as const;
   static validate = {
     request: {
       params: buildRouteValidationWithZod(getNotificationPolicyParamsSchema),
     },
   } as const;
 
+  protected readonly routeName = 'get notification policy';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       z.infer<typeof getNotificationPolicyParamsSchema>,
       unknown,
       unknown
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
     private readonly notificationPolicyClient: NotificationPolicyClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const notificationPolicy = await this.notificationPolicyClient.getNotificationPolicy({
-        id: this.request.params.id,
-      });
-      return this.response.ok({ body: notificationPolicy });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  protected async execute() {
+    const notificationPolicy = await this.notificationPolicyClient.getNotificationPolicy({
+      id: this.request.params.id,
+    });
+    return this.ctx.response.ok({ body: notificationPolicy });
   }
 }

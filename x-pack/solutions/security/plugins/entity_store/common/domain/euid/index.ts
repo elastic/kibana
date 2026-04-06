@@ -18,3 +18,4 @@ export {
 } from './esql';
 export { applyFieldEvaluations } from './field_evaluations';
 export { getEuidSourceFields, type IdentitySourceFields } from './identity_fields';
+export { hashEuid, HASH_ALG } from './hash_euid';

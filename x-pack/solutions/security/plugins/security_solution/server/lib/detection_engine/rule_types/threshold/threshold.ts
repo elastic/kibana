@@ -176,6 +176,7 @@ export const thresholdExecutor = async ({
     });
     return {
       ...result,
+      alertsCandidateCount: buckets.length,
       state: {
         ...state,
         initialized: true,

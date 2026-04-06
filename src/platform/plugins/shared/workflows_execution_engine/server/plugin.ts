@@ -540,6 +540,8 @@ export class WorkflowsExecutionEnginePlugin
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
+      const dispatchEventId =
+        typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -553,6 +555,7 @@ export class WorkflowsExecutionEnginePlugin
         executedBy,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
+        ...(dispatchEventId ? { dispatchEventId } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(

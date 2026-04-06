@@ -9,61 +9,41 @@ import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
 import fs from 'fs';
 import os from 'os';
+import {
+  SavedObjectsTracker,
+  cleanupDownloadedFile,
+  installLogsSampleData,
+  removeLogsSampleData,
+} from '../../helpers';
 
 const defaultSettings = {
   defaultIndex: 'kibana_sample_data_logs',
   'dateFormat:tz': 'UTC',
 };
 
-// Shared across tests + afterEach cleanup; safe because Playwright runs tests in a file serially
+const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
-
-// Tracks saved objects created during each test for afterEach cleanup
-const createdArtifacts: Array<{ type: string; title?: string }> = [];
 
 test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await apiServices.sampleData.install('logs');
-    await kbnClient.uiSettings.update(defaultSettings);
+    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
+    await uiSettings.set({
+      'timepicker:timeDefaults': '{ "from": "now-1h", "to": "now"}',
+    });
     await pageObjects.dashboard.goto();
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    if (downloadedFilePath && fs.existsSync(downloadedFilePath)) {
-      fs.unlinkSync(downloadedFilePath);
-      downloadedFilePath = null;
-    }
-
-    if (createdArtifacts.length > 0) {
-      const uniqueTypes = [...new Set(createdArtifacts.map((a) => a.type))];
-      for (const type of uniqueTypes) {
-        const response = await kbnClient.savedObjects.find<{ title: string }>({ type });
-        const artifactsOfType = createdArtifacts.filter((a) => a.type === type);
-        const cleanAll = artifactsOfType.some((a) => !a.title);
-
-        const objectsToDelete = cleanAll
-          ? response.saved_objects
-          : response.saved_objects.filter((so) =>
-              artifactsOfType.some((a) => a.title === so.attributes.title)
-            );
-
-        if (objectsToDelete.length > 0) {
-          await kbnClient.savedObjects.bulkDelete({
-            objects: objectsToDelete.map((so) => ({ type: so.type, id: so.id })),
-          });
-        }
-      }
-      createdArtifacts.length = 0;
-    }
+    downloadedFilePath = cleanupDownloadedFile(downloadedFilePath);
+    await tracker.cleanup(kbnClient);
   });
 
   test.afterAll(async ({ kbnClient, apiServices }) => {
-    await apiServices.sampleData.remove('logs');
-    await kbnClient.savedObjects.cleanStandardList();
+    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should create dashboard with ES|QL, Lens, and Custom visualization panels', async ({
@@ -71,7 +51,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     pageObjects,
   }) => {
     const dashboardName = 'Test Dashboard with Multiple Panels';
-    createdArtifacts.push({ type: 'dashboard', title: dashboardName });
+    tracker.track({ type: 'dashboard', title: dashboardName });
 
     await pageObjects.dashboard.openNewDashboard();
 
@@ -127,7 +107,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   test('should duplicate an existing dashboard and preserve panels', async ({ pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
     const duplicatedDashboardTitle = `${logsDashboardTitle} (1)`;
-    createdArtifacts.push({ type: 'dashboard', title: duplicatedDashboardTitle });
+    tracker.track({ type: 'dashboard', title: duplicatedDashboardTitle });
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
     await pageObjects.dashboard.ensureViewMode();
@@ -154,7 +134,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   test('should save a copy of a dashboard from edit mode', async ({ pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
     const copiedDashboardTitle = '[Logs] Web Traffic Copy';
-    createdArtifacts.push({ type: 'dashboard', title: copiedDashboardTitle });
+    tracker.track({ type: 'dashboard', title: copiedDashboardTitle });
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
     await pageObjects.dashboard.switchToEditMode();
@@ -180,7 +160,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
   test('should add dashboard and URL link types to a dashboard', async ({ page, pageObjects }) => {
     const dashboardName = 'Test Dashboard with Links';
-    createdArtifacts.push({ type: 'dashboard', title: dashboardName });
+    tracker.track({ type: 'dashboard', title: dashboardName });
 
     await pageObjects.dashboard.openNewDashboard();
 
@@ -208,8 +188,8 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   }) => {
     const panelTitle = 'Test Lens Panel';
     const dashboardName = 'Test Dashboard Lens Panel Actions';
-    createdArtifacts.push({ type: 'dashboard', title: dashboardName });
-    createdArtifacts.push({ type: 'lens', title: 'Saved Lens Panel' });
+    tracker.track({ type: 'dashboard', title: dashboardName });
+    tracker.track({ type: 'lens', title: 'Saved Lens Panel' });
 
     await pageObjects.dashboard.openNewDashboard();
 
@@ -399,12 +379,13 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await test.step('maximize a panel', async () => {
       await pageObjects.dashboard.maximizePanel();
     });
+
     await expect(page.locator('.dshLayout-isMaximizedPanel')).toBeVisible();
   });
 
   test('should display created by for a newly created dashboard', async ({ page, pageObjects }) => {
     const dashboardName = 'Created By Test Dashboard';
-    createdArtifacts.push({ type: 'dashboard', title: dashboardName });
+    tracker.track({ type: 'dashboard', title: dashboardName });
 
     await test.step('create and save a new dashboard', async () => {
       await pageObjects.dashboard.openNewDashboard();
@@ -434,9 +415,9 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   });
 
   test('should add panels from library to dashboard', async ({ pageObjects }) => {
-    createdArtifacts.push({ type: 'lens', title: 'Lib Lens Panel' });
-    createdArtifacts.push({ type: 'dashboard', title: 'Dashboard with Library Panels' });
-    createdArtifacts.push({ type: 'dashboard', title: 'Dashboard from Library' });
+    tracker.track({ type: 'lens', title: 'Lib Lens Panel' });
+    tracker.track({ type: 'dashboard', title: 'Dashboard with Library Panels' });
+    tracker.track({ type: 'dashboard', title: 'Dashboard from Library' });
 
     await test.step('save a lens panel to the library', async () => {
       await pageObjects.dashboard.openNewDashboard();
@@ -468,7 +449,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   test('should add a URL drilldown to a lens panel', async ({ page, pageObjects }) => {
     const panelTitle = 'Drilldown Test Panel';
     const dashboardName = 'Test Dashboard Drilldown';
-    createdArtifacts.push({ type: 'dashboard', title: dashboardName });
+    tracker.track({ type: 'dashboard', title: dashboardName });
 
     await pageObjects.dashboard.openNewDashboard();
 

@@ -81,6 +81,7 @@ const mockUseKibanaReturnValue = {
           push: true,
           createComment: true,
           reopenCase: true,
+          manageTemplates: true,
         }),
         getRuleIdFromEvent: jest.fn(),
         getObservablesFromEcs: jest.fn().mockReturnValue([]),

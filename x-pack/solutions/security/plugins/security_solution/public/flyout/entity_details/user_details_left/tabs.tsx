@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   getInsightsInputTab,
+  getResolutionGroupTab,
   getRiskInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
@@ -34,7 +35,8 @@ export const useTabs = (
   hasMisconfigurationFindings?: boolean,
   hasNonClosedAlerts?: boolean,
   identityFields?: IdentityFields,
-  entityId?: string
+  entityId?: string,
+  entityStoreEntityId?: string
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -71,6 +73,10 @@ export const useTabs = (
       );
     }
 
+    if (entityStoreEntityId) {
+      tabs.push(getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'user' }));
+    }
+
     return tabs;
   }, [
     entityId,
@@ -81,6 +87,7 @@ export const useTabs = (
     managedUser,
     name,
     scopeId,
+    entityStoreEntityId,
   ]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({

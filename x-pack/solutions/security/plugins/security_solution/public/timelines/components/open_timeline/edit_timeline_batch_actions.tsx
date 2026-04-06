@@ -76,7 +76,7 @@ export const useEditTimelineBatchActions = ({
           <EuiContextMenuItem
             data-test-subj="export-timeline-action"
             disabled={disabled}
-            icon="exportAction"
+            icon="upload"
             key="ExportItemKey"
             onClick={handleEnableExportTimelineDownloader}
           >
