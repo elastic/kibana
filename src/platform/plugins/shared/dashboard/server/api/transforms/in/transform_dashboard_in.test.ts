@@ -94,7 +94,6 @@ describe('transformDashboardIn', () => {
           "timeTo": "now",
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
@@ -118,7 +117,6 @@ describe('transformDashboardIn', () => {
           "timeRestore": false,
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
