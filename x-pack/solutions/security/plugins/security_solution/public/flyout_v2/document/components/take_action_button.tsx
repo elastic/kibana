@@ -19,6 +19,8 @@ import { useAddToCaseActions } from '../../../detections/components/alerts_table
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -62,6 +64,8 @@ export const TakeActionButton = memo(
       setIsPopoverOpen(false);
     }, []);
 
+    const isInSecurityApp = useIsInSecurityApp();
+
     const eventId = hit.raw._id as string;
     const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
     const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
@@ -99,14 +103,28 @@ export const TakeActionButton = memo(
       refetch: onAssigneesUpdate,
     });
 
+    const { investigateInTimelineActionItems } = useInvestigateInTimeline({
+      ecsRowData: ecsData,
+      onInvestigateInTimelineAlertClick: closePopoverHandler,
+    });
+
     const items = useMemo(
       () => [
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
         ...(isAlert ? alertAssigneesItems : []),
         ...(isAlert ? alertTagsItems : []),
+        ...(isInSecurityApp ? investigateInTimelineActionItems : []),
       ],
-      [addToCaseActionItems, alertTagsItems, isAlert, statusActionItems, alertAssigneesItems]
+      [
+        addToCaseActionItems,
+        alertTagsItems,
+        investigateInTimelineActionItems,
+        isAlert,
+        isInSecurityApp,
+        statusActionItems,
+        alertAssigneesItems,
+      ]
     );
 
     const panels = useMemo(
