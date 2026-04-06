@@ -272,23 +272,28 @@ export function createNavigationTree({
             title: MACHINE_LEARNING_TITLE,
             children: [
               { link: 'management:trained_models', breadcrumbStatus: 'hidden' },
+              { link: 'management:anomaly_detection' },
+              { link: 'management:analytics' },
+            ],
+          },
+          {
+            id: 'settings_model_management',
+            title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.modelManagement', {
+              defaultMessage: 'Model Management',
+            }),
+            children: [
+              {
+                id: 'searchInferenceEndpointsElasticInferenceService',
+                link: 'management:elastic_inference_service',
+              },
               {
                 id: 'searchInferenceEndpoints',
                 link: 'management:inference_endpoints',
-                breadcrumbStatus: 'hidden',
               },
               {
                 id: 'searchInferenceEndpointsModelSettings',
                 link: 'management:model_settings',
-                breadcrumbStatus: 'hidden',
               },
-              {
-                id: 'searchInferenceEndpointsElasticInferenceService',
-                link: 'management:elastic_inference_service',
-                breadcrumbStatus: 'hidden',
-              },
-              { link: 'management:anomaly_detection' },
-              { link: 'management:analytics' },
             ],
           },
           {
