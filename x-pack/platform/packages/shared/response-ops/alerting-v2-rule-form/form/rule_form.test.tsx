@@ -17,7 +17,7 @@ jest.mock('./fields/rule_preview_panel', () => ({
   RulePreviewPanel: () => <div data-test-subj="mockRulePreviewPanel">Preview Panel</div>,
 }));
 
-// Mock NameField to avoid rendering inline edit title setup
+// Mock NameField to avoid rendering full field setup
 jest.mock('./fields/name_field', () => ({
   NameField: () => <div data-test-subj="mockNameField">Rule Name</div>,
 }));

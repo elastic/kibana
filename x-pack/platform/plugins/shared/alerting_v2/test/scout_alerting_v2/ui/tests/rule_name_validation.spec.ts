@@ -15,8 +15,8 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
     await pageObjects.ruleForm.gotoCreate();
   });
 
-  test('displays "Untitled rule" as the default placeholder name', async ({ pageObjects }) => {
-    await expect(pageObjects.ruleForm.nameInlineEdit()).toContainText('Untitled rule');
+  test('displays "Untitled rule" as the default placeholder', async ({ pageObjects }) => {
+    await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('placeholder', 'Untitled rule');
   });
 
   test('shows "Name is required" error when saving with empty default value', async ({
@@ -40,7 +40,7 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
       await pageObjects.ruleForm.clickSave();
       const errorCallout = pageObjects.ruleForm.errorCallout();
       await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Name is required');
+      await expect(errorCallout).toContainText('Please provide a unique rule name');
     });
   });
 
@@ -76,7 +76,7 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
   test('no name validation error with a custom rule name', async ({ page, pageObjects }) => {
     await pageObjects.ruleForm.setRuleName('My custom alert rule');
-    await expect(pageObjects.ruleForm.nameInlineEdit()).toContainText('My custom alert rule');
+    await expect(pageObjects.ruleForm.nameInput()).toHaveValue('My custom alert rule');
 
     await pageObjects.ruleForm.clickSave();
 
