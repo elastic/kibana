@@ -94,8 +94,8 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
   });
 
 /**
- * Converts dashboard attachment data to a DashboardState.
- * Uses provided values from the attachment data, falling back to defaults for missing fields.
+ * Converts a DashboardAttachment to a DashboardState.
+ * Uses provided values from the attachment, falling back to defaults for missing fields.
  */
 export const attachmentDataToDashboardState = ({
   panels = [],
