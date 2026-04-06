@@ -11,6 +11,7 @@ import type { RenderContentPanelProps } from '@kbn/response-ops-alerts-table/typ
 
 import * as alertsTableI18n from '../../../../components/alerts_table/translations';
 import {
+  RUN_WORKFLOWS_PANEL_WIDTH,
   AlertWorkflowsPanel,
   RUN_WORKFLOW_BULK_PANEL_ID,
 } from '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
@@ -91,6 +92,7 @@ export const useBulkAttackRunWorkflowItems = ({
               id: RUN_WORKFLOW_BULK_PANEL_ID,
               title: alertsTableI18n.SELECT_WORKFLOW_PANEL_TITLE,
               'data-test-subj': 'attack-workflow-context-menu-panel',
+              width: RUN_WORKFLOWS_PANEL_WIDTH,
               renderContent,
             },
           ]

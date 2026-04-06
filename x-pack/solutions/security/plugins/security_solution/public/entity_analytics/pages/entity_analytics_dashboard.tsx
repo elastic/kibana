@@ -25,6 +25,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 import { PageLoader } from '../../common/components/page_loader';
+import { EaMlJobCallout } from '../components/ea_ml_job_callout';
 
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
@@ -72,6 +73,8 @@ const EntityAnalyticsComponent = () => {
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
             <HeaderPage title={ENTITY_ANALYTICS} />
+
+            <EaMlJobCallout />
 
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />

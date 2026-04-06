@@ -28,6 +28,7 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getDateHistogramCompletionItem,
+  getTimeseriesDateHistogramCompletionItem,
 } from '../complete_items';
 import { columnExists as _columnExists } from '../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../definitions/utils';
@@ -55,6 +56,7 @@ export async function autocomplete(
     return [];
   }
   const isInlineStats = command.name === 'inline stats';
+  const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
   const columnExists = (name: string) => _columnExists(name, context);
 
@@ -74,7 +76,6 @@ export async function autocomplete(
 
     if (filteringContext) {
       const isInBy = isNodeWithinByClause(foundFunction, command);
-      const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
       let location: Location;
 
@@ -226,7 +227,11 @@ export async function autocomplete(
         location: Location.STATS_BY,
         context,
         callbacks,
-        emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
+        emptySuggestions: [
+          (isTimeseriesSource
+            ? getTimeseriesDateHistogramCompletionItem
+            : getDateHistogramCompletionItem)(context?.histogramBarTarget ?? 0),
+        ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
         ignoredColumns,
@@ -258,7 +263,9 @@ export async function autocomplete(
         callbacks,
         emptySuggestions: [
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
+          (isTimeseriesSource
+            ? getTimeseriesDateHistogramCompletionItem
+            : getDateHistogramCompletionItem)(context?.histogramBarTarget ?? 0),
         ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,

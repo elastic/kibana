@@ -72,6 +72,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
@@ -81,9 +82,11 @@ import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
+  ALERTING_V2_PATH,
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
@@ -154,6 +157,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView?: ExploratoryViewPublicStart;
+  expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -187,6 +191,7 @@ export interface ObservabilityPublicPluginsStart {
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   cps?: CPSPluginStart;
+  ingestHub?: IngestHubStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -216,6 +221,16 @@ export class Plugin
       path: ALERTS_PATH,
       visibleIn: [],
       keywords: ['alerts', 'rules'],
+    },
+    {
+      id: 'alerts_v2',
+      title: i18n.translate('xpack.observability.alertsV2LinkTitle', {
+        defaultMessage: 'Alerts v2',
+      }),
+      order: 8002,
+      path: ALERTING_V2_PATH,
+      visibleIn: [],
+      keywords: ['alerts_v2'],
     },
   ];
 
@@ -409,6 +424,8 @@ export class Plugin
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
+              const isAlertingV2Enabled = Boolean(coreStart.application.capabilities.alertingVTwo);
+
               const chatExperience$ =
                 coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -455,8 +472,11 @@ export class Plugin
                   //
                   // See https://github.com/elastic/kibana/issues/103325.
                   const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
-                  const alertsLink: NavigationEntry[] = otherLinks
-                    .filter((link) => link.id === 'alerts')
+                  const alertsLinks: NavigationEntry[] = otherLinks
+                    .filter(
+                      (link) =>
+                        link.id === 'alerts' || (isAlertingV2Enabled && link.id === 'alerts_v2')
+                    )
                     .map((link) => ({
                       app: observabilityAppId,
                       label: link.title,
@@ -477,7 +497,7 @@ export class Plugin
                       sortKey: 100,
                       entries: [
                         ...overviewLink,
-                        ...alertsLink,
+                        ...alertsLinks,
                         ...sloLink,
                         ...casesLink,
                         ...aiAssistantLink,

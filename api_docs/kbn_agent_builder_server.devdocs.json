@@ -1535,7 +1535,9 @@
               "\nHandler to call to execute the tool."
             ],
             "signature": [
-              "(args: z.infer<RunInput>, context: ",
+              "(args: ",
+              "output",
+              "<RunInput>, context: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -1723,7 +1725,9 @@
                 "section": "def-common.ExecutableToolHandlerParams",
                 "text": "ExecutableToolHandlerParams"
               },
-              "<z.infer<TSchema>>) => Promise<",
+              "<",
+              "output",
+              "<TSchema>>) => Promise<",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -2337,7 +2341,9 @@
                 "section": "def-common.ToolHandlerFn",
                 "text": "ToolHandlerFn"
               },
-              "<z.infer<TSchema>, ",
+              "<",
+              "output",
+              "<TSchema>, ",
               {
                 "pluginId": "@kbn/agent-builder-common",
                 "scope": "common",
@@ -2663,7 +2669,11 @@
             "description": [],
             "signature": [
               "AttachmentBoundedTool",
-              "<ZodObject<any>>[]"
+              "<",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/processed_input.ts",
             "lineNumber": 17,
@@ -4828,7 +4838,11 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ZodObject<any>>>"
+              "<{}, ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
             "lineNumber": 23,
@@ -4888,7 +4902,11 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ZodObject<any>>[]>"
+              "<{}, ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
             "lineNumber": 28,
@@ -5135,7 +5153,11 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ZodObject<any>>>"
+              ", {}, ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 56,
@@ -5197,7 +5219,11 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ZodObject<any>>[]>"
+              ", {}, ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 61,
@@ -5266,7 +5292,11 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ZodObject<any>>>"
+              ", {}, ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 65,
@@ -5335,7 +5365,11 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ZodObject<any>>>"
+              ", {}, ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 69,
@@ -6270,7 +6304,7 @@
           },
           " | undefined; skills?: ",
           "SkillDefinition",
-          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/workflows\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
+          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/workflows\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/builtin_definition.ts",
         "lineNumber": 11,

@@ -122,14 +122,47 @@ node scripts/evals start --suite agent-builder
 `evals init` walks you through EIS (Cloud Connected Mode) connector discovery or validates existing connectors in `kibana.dev.yml`. It outputs an `export KIBANA_TESTING_AI_CONNECTORS="..."` command to paste into your shell.
 
 `evals start` orchestrates the full stack in one terminal:
-1. Starts the EDOT collector (Docker) for trace capture -- exports traces to your local ES from `kibana.dev.yml`
+1. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
 2. Starts Scout (ES + Kibana with `evals_tracing` config)
 3. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
-4. Runs the Playwright eval suite with `TRACING_ES_URL` pointing to your local ES
+4. Runs the Playwright eval suite with `TRACING_ES_URL` pointing to the configured tracing cluster
 
 EDOT and Scout run as **persistent background daemons** -- they stay alive between eval runs for faster iteration. Use `node scripts/evals stop` to shut them down when you're done.
 
 Both commands prompt interactively when flags are omitted (suite, connector, model). Pass `--skip-server` to skip EDOT/Scout startup if you already have them running.
+
+#### Profiles: golden datasets + local export (recommended for UI iteration)
+
+For iterating on the Evals UI (runs list / run detail pages), it’s often useful to:
+
+- **Read datasets from the golden cluster** (shared, curated datasets)
+- **Write results + traces to your local Elasticsearch/Kibana** (`http://localhost:9200` / `http://localhost:5601`)
+
+The Evals CLI supports this via **vault config profiles** in:
+
+- `x-pack/platform/packages/shared/kbn-evals/scripts/vault/`
+- `config.json` (default)
+- `config.<profile>.json` (e.g. `config.local.json`)
+
+Create the profiles:
+
+```bash
+# 1) Golden cluster config (datasets + keys)
+node scripts/evals init config
+
+# 2) Local export profile (results + traces to localhost:9200, no golden API key setup)
+node scripts/evals init config --profile local
+```
+
+Run a suite using golden datasets but exporting locally:
+
+```bash
+node scripts/evals start --suite attack-discovery --export-profile local
+```
+
+Notes:
+- `--datasets-profile <name>` loads `EVALUATIONS_KBN_URL` / `EVALUATIONS_KBN_API_KEY` from `config.<name>.json`
+- `--export-profile <name>` loads `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS` from `config.<name>.json`
 
 #### Filtering tests with `--grep`
 
@@ -321,6 +354,38 @@ node scripts/evals start --suite <suite-id>
 
 `evals start` handles EDOT, Scout, and EIS CCM enablement automatically.
 
+## Snapshot datasets (Dataplex)
+
+Snapshot datasets used by eval suites are stored in GCS and can optionally be registered in **Dataplex** for discoverability (see the Snapshot Dataset Management best practices).
+
+### Where aspects files live
+
+Team-owned Dataplex aspects YAML files are checked in under:
+
+- `x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/<team>/`
+
+These YAML files are **metadata only** (GCS path, description, indices, etc). Never commit credentials.
+
+### Syncing Dataplex entries from aspects files
+
+This repo includes a helper command that runs `gcloud dataplex entries create/update` based on those YAML files:
+
+```bash
+# One-time: create the aspect type + entry type + entry group (requires permissions)
+node scripts/evals dataplex bootstrap
+
+# Create/update entries for all checked-in aspects YAML files
+node scripts/evals dataplex sync
+
+# Dry run (print what would happen)
+node scripts/evals dataplex sync --dry-run
+
+# If you do not have Dataplex write permissions, generate commands to hand off
+node scripts/evals dataplex sync --print-commands
+```
+
+Note: The **Dataplex "Aspect types"** console page lists *schemas*. Snapshot datasets themselves show up under Dataplex **Entries**.
+
 <details>
 <summary>Manual flow (if you prefer full control)</summary>
 
@@ -400,7 +465,7 @@ telemetry.tracing.exporters:
 If you want EDOT to store traces in a specific Elasticsearch cluster, override via env:
 
 ```bash
-ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
 ```
 
 If you want to view traces in the Phoenix UI, add a Phoenix exporter to the `telemetry.tracing.exporters` list in `kibana.dev.yml` (alongside the APM and telemetry flags shown above):
@@ -485,7 +550,7 @@ Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to rece
 ```bash
 # Optionally use non-default ports using --http-port <http-port> or --grpc-port <grpc-port>
 # You must update the tracing exporters with the right port in kibana.dev.yml
-ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
 ```
 
 The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. Alternatively, you can use a managed OTLP endpoint instead of running EDOT Collector locally (this hasn't been tested yet though).
@@ -617,6 +682,12 @@ If your datasets are curated in another Kibana instance, set `EVALUATIONS_KBN_UR
 When that remote Kibana should be accessed with an API key, set `EVALUATIONS_KBN_API_KEY` (or `--evaluations-kbn-api-key`).
 When `EVALUATIONS_KBN_API_KEY` is provided, requests use `Authorization: ApiKey ...`; otherwise URL-embedded credentials in `EVALUATIONS_KBN_URL` are used.
 
+##### Golden cluster Kibana API key for dataset operations
+
+The recommended approach is to run `node scripts/evals init config`, which creates a single unified API key covering both dataset operations and evaluation result export. See [Golden cluster API key privileges](#golden-cluster-api-key-privileges-required) for details.
+
+In CI, these values are automatically sourced from the vault config field `evaluationsKbn`.
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
@@ -667,45 +738,39 @@ The evaluation results are automatically exported to Elasticsearch in datastream
 
 ### Golden cluster API key privileges (required)
 
-When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` will export documents into the `kibana-evaluations` data stream.
+A single API key can cover **all** golden cluster operations: evaluation result export, trace storage, and dataset management. The key is created via the Kibana API (not the ES API) so it can bundle both Elasticsearch index privileges and Kibana feature privileges using `kibana_role_descriptors`.
 
-When exporting to an external cluster (`EVALUATIONS_ES_URL`/`EVALUATIONS_ES_API_KEY`), `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs a **preflight export check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
+When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs an export **preflight check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
 
-#### Writer key (minimal)
+**Automatic setup (recommended):**
 
-Use Kibana Dev Tools on the golden cluster to create an API key with the minimal privileges required to export results:
-
-```http
-POST /_security/api_key
-{
-  "name": "kbn-evals-golden-cluster-writer",
-  "expiration": "365d",
-  "role_descriptors": {
-    "kbn-evals-evaluations-writer": {
-      "cluster": [],
-      "indices": [
-        {
-          "names": ["kibana-evaluations*"],
-          "privileges": [
-            "create_doc",
-            "read",
-            "view_index_metadata"
-          ]
-        }
-      ]
-    }
-  },
-  "metadata": {
-    "application": "kbn-evals",
-    "purpose": "export evaluation results",
-    "environment": "ci"
-  }
-}
+```bash
+node scripts/evals init config
 ```
 
-Then copy the returned `encoded` value into `evaluationsEs.apiKey` (Vault `kbn-evals` config) as `EVALUATIONS_ES_API_KEY`.
+This interactive wizard opens your browser to the golden cluster Dev Tools, copies the API key creation payload to your clipboard, and walks you through pasting the result back. The single `encoded` key is applied to all four config fields (`evaluationsEs.apiKey`, `tracingEs.apiKey`, `evaluationsKbn.apiKey`, and the tracing exporter `Authorization` header).
 
-`@kbn/evals` also runs a preflight check that writes a single sentinel document (with a deterministic ID) to validate that exports will succeed. It attempts to delete the document afterwards, but deletion failures are ignored (so the writer key does not need `delete`). Any leftover preflight document uses `run_id:"kbn-evals-preflight"` and `evaluator.name:"preflight"` and should not interfere with normal analysis.
+**Manual setup:**
+
+In the golden cluster Kibana Dev Tools, run `POST kbn:/internal/security/api_key` with the privilege payload defined in [`src/api_key/golden_cluster_privileges.json`](src/api_key/golden_cluster_privileges.json). The `init config` wizard builds this request automatically, filling your email from `git config user.email`.
+
+For manual use, add a `"name"` (e.g. `"kbn-evals-<your-email>"`) and `"expiration"` (e.g. `"90d"`) alongside the `kibana_role_descriptors` and `metadata` from that JSON file.
+
+This grants:
+
+- **Evaluation results**: write/read `kibana-evaluations*` data stream (index privileges)
+- **Tracing**: write/read `traces-*` indices (for OTLP trace ingest and trace-based evaluators)
+- **Dataset storage**: write/read/delete `kibana-evaluation-dataset*` indices (backing storage for managed datasets)
+- **Dataset API access**: Kibana `evals` feature privilege (`all`) for `/internal/evals/datasets/*` routes
+
+Copy the returned `encoded` value and use it for all four secret fields in your vault config:
+
+| Config field | Env variable | Value |
+| --- | --- | --- |
+| `evaluationsEs.apiKey` | `EVALUATIONS_ES_API_KEY` | `<encoded>` |
+| `tracingEs.apiKey` | `TRACING_ES_API_KEY` | `<encoded>` |
+| `evaluationsKbn.apiKey` | `EVALUATIONS_KBN_API_KEY` | `<encoded>` |
+| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS` | `ApiKey <encoded>` |
 
 ### Exporting to a separate Elasticsearch cluster
 

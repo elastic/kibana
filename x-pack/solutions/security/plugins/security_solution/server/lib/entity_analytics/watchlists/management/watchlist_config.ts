@@ -15,6 +15,7 @@ import type {
 import type { SetOptional } from 'type-fest';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import { validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
@@ -32,6 +33,7 @@ interface WatchlistConfigClientDeps {
 
 type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
+type WatchlistObjectWithId = WatchlistObject & { id: string };
 
 const omitWatchlistMeta = (
   watchlist: Partial<WatchlistObject>
@@ -79,19 +81,20 @@ export class WatchlistConfigClient {
   constructor(private readonly deps: WatchlistConfigClientDeps) {}
 
   async create(
-    attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>
+    attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>,
+    options?: { id?: string }
   ): Promise<WatchlistObject> {
     const so = await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
       watchlistConfigTypeName,
       { ...attrs, managed: attrs.managed ?? false },
-      { refresh: 'wait_for' }
+      { id: options?.id, refresh: 'wait_for' }
     );
 
     await createOrUpdateIndex({
       esClient: this.deps.esClient,
       logger: this.deps.logger,
       options: {
-        index: getIndexForWatchlist(attrs.name, this.deps.namespace),
+        index: getIndexForWatchlist(this.deps.namespace),
         mappings: generateWatchlistEntityIndexMappings(),
       },
     });
@@ -101,6 +104,9 @@ export class WatchlistConfigClient {
 
   async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
+
+    validateWatchlistUpdate(id, attrs, existing);
+
     const existingAttrs = omitWatchlistMeta(existing);
     const attrsNoMeta = omitWatchlistMeta(attrs);
     const update: Partial<WatchlistSavedObjectAttributes> = {
@@ -116,16 +122,15 @@ export class WatchlistConfigClient {
     return this.get(id);
   }
 
-  async list(): Promise<WatchlistObject[]> {
+  async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
     return this.deps.soClient
       .find<WatchlistObject>({
         type: watchlistConfigTypeName,
         namespaces: [this.deps.namespace],
-        perPage: MAX_PER_PAGE,
+        perPage: limit,
       })
-
       .then((response) => {
-        return response.saved_objects.map((so) => toWatchlistObject(so));
+        return response.saved_objects.map((so) => toWatchlistObject(so) as WatchlistObjectWithId);
       });
   }
 
@@ -145,6 +150,24 @@ export class WatchlistConfigClient {
   }
 
   async delete(id: string) {
+    // Cascade-delete linked entity sources to prevent orphans
+    const entitySourceIds = await this.getEntitySourceIds(id);
+    const results = await Promise.allSettled(
+      entitySourceIds.map((sourceId) =>
+        this.deps.soClient.delete(watchlistEntitySourceTypeName, sourceId, {
+          refresh: 'wait_for',
+        })
+      )
+    );
+
+    for (const [i, result] of results.entries()) {
+      if (result.status === 'rejected') {
+        this.deps.logger.warn(
+          `Failed to delete entity source '${entitySourceIds[i]}' while deleting watchlist '${id}': ${result.reason.message}`
+        );
+      }
+    }
+
     return this.deps.soClient.delete(watchlistConfigTypeName, id, { refresh: 'wait_for' });
   }
 

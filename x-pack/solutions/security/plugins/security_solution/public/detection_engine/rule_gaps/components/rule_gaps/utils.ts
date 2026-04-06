@@ -6,7 +6,7 @@
  */
 
 import { gapStatus, gapReasonType } from '@kbn/alerting-plugin/common';
-import type { GapStatus } from '../../types';
+import type { GapReasonType, GapStatus } from '../../types';
 import * as i18n from './translations';
 
 export const getStatusLabel = (status: GapStatus) => {
@@ -21,7 +21,7 @@ export const getStatusLabel = (status: GapStatus) => {
   return '';
 };
 
-export const getReasonLabel = (reason: string | undefined) => {
+export const getReasonLabel = (reason: GapReasonType | undefined) => {
   switch (reason) {
     case gapReasonType.RULE_DISABLED:
       return i18n.GAP_REASON_RULE_DISABLED;
