@@ -51,12 +51,7 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
   body?: Record<string, any>;
   query?: Record<string, any>;
   path?: string;
-  /**
-   * The matched route template (e.g. `/api/foo/{id}`).
-   *
-   * Core derives `KibanaRequest.route.routePath` from the underlying Hapi
-   * request's `request.route.path`, so this option sets the Hapi `request.route.path`.
-   */
+  // Sets Hapi request.route.path
   routePath?: string;
   method?: RouteMethod;
   socket?: Socket;
