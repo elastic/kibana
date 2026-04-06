@@ -15,12 +15,13 @@ import { registerRunSuiteRoute } from './run_suite';
 import { registerGetSuiteStatusRoute } from './get_suite_status';
 import { registerGetSuiteRunsRoute } from './get_suite_runs';
 import type { SuiteRunner, SuiteRunStatus } from '../../lib/suite_runner';
+import { readFileSync } from '@kbn/fs';
 
 jest.mock('@kbn/fs', () => ({
   readFileSync: jest.fn(),
 }));
 
-const { readFileSync } = require('@kbn/fs') as { readFileSync: jest.Mock };
+const mockReadFileSync = readFileSync as jest.Mock;
 
 const SUITES_URL = '/internal/evals/suites';
 const SUITE_RUN_URL = '/internal/evals/suites/{suiteId}/run';
@@ -98,7 +99,7 @@ describe('suite routes', () => {
     };
 
     it('returns formatted suite list from evals.suites.json', async () => {
-      readFileSync.mockReturnValueOnce(mockSuitesJson);
+      mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
       const { handler } = setup();
 
       const request = httpServerMock.createKibanaRequest({
@@ -130,7 +131,7 @@ describe('suite routes', () => {
     });
 
     it('omits ciLabels from the response', async () => {
-      readFileSync.mockReturnValueOnce(mockSuitesJson);
+      mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
       const { handler } = setup();
 
       const request = httpServerMock.createKibanaRequest({ method: 'get', path: SUITES_URL });
@@ -143,7 +144,7 @@ describe('suite routes', () => {
     });
 
     it('returns empty suites array when json has no suites key', async () => {
-      readFileSync.mockReturnValueOnce(JSON.stringify({}));
+      mockReadFileSync.mockReturnValueOnce(JSON.stringify({}));
       const { handler } = setup();
 
       const request = httpServerMock.createKibanaRequest({ method: 'get', path: SUITES_URL });
@@ -154,7 +155,7 @@ describe('suite routes', () => {
     });
 
     it('returns 500 when readFileSync throws (missing file)', async () => {
-      readFileSync.mockImplementationOnce(() => {
+      mockReadFileSync.mockImplementationOnce(() => {
         throw new Error('ENOENT: no such file or directory');
       });
       const { handler } = setup();
@@ -170,7 +171,7 @@ describe('suite routes', () => {
     });
 
     it('returns 500 when the file contains invalid JSON', async () => {
-      readFileSync.mockReturnValueOnce('not valid json');
+      mockReadFileSync.mockReturnValueOnce('not valid json');
       const { handler } = setup();
 
       const request = httpServerMock.createKibanaRequest({ method: 'get', path: SUITES_URL });
@@ -200,7 +201,7 @@ describe('suite routes', () => {
     };
 
     it('returns run details on successful start', async () => {
-      readFileSync.mockReturnValueOnce(mockSuitesJson);
+      mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
       const suiteRunner = createMockSuiteRunner();
       const runStatus = buildSuiteRunStatus();
       suiteRunner.startRun.mockReturnValueOnce(runStatus);
@@ -226,7 +227,7 @@ describe('suite routes', () => {
     });
 
     it('passes all optional params to startRun', async () => {
-      readFileSync.mockReturnValueOnce(mockSuitesJson);
+      mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
       const suiteRunner = createMockSuiteRunner();
       const runStatus = buildSuiteRunStatus();
       suiteRunner.startRun.mockReturnValueOnce(runStatus);
@@ -274,7 +275,7 @@ describe('suite routes', () => {
     });
 
     it('returns 404 when suiteId does not exist in evals.suites.json', async () => {
-      readFileSync.mockReturnValueOnce(mockSuitesJson);
+      mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
       const suiteRunner = createMockSuiteRunner();
 
       const { handler } = setup(suiteRunner);
@@ -296,7 +297,7 @@ describe('suite routes', () => {
     });
 
     it('returns 500 when startRun throws', async () => {
-      readFileSync.mockReturnValueOnce(mockSuitesJson);
+      mockReadFileSync.mockReturnValueOnce(mockSuitesJson);
       const suiteRunner = createMockSuiteRunner();
       suiteRunner.startRun.mockImplementationOnce(() => {
         throw new Error('A suite run is already in progress');
@@ -321,7 +322,7 @@ describe('suite routes', () => {
     });
 
     it('returns 500 when readFileSync throws while loading suites', async () => {
-      readFileSync.mockImplementationOnce(() => {
+      mockReadFileSync.mockImplementationOnce(() => {
         throw new Error('ENOENT: no such file');
       });
       const suiteRunner = createMockSuiteRunner();
