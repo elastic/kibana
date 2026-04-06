@@ -21,7 +21,7 @@ export function writeErrorHandler(error: any, response: KibanaResponseFactory): 
       bypassErrorFormat: true,
       body: {
         message: 'Bad request',
-        panelErrors: (error as TransformPanelsInError).panelErrors.map((panelError) => ({
+        panel_errors: (error as TransformPanelsInError).panelErrors.map((panelError) => ({
           message: panelError.message,
           panel_type: panelError.type,
           panel_config: panelError.config,
