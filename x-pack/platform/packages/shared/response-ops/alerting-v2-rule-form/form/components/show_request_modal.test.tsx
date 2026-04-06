@@ -51,14 +51,10 @@ describe('ShowRequestModal', () => {
     expect(screen.getByTestId('showRequestUpdateTab')).toBeInTheDocument();
   });
 
-  it('switches to update tab and changes title/subtitle', async () => {
-    const user = userEvent.setup();
-
+  it('defaults to update tab when ruleId is provided', () => {
     render(<ShowRequestModal ruleId="rule-123" onClose={onClose} />, {
       wrapper: createFormWrapper(),
     });
-
-    await user.click(screen.getByTestId('showRequestUpdateTab'));
 
     expect(screen.getByTestId('showRequestModalTitle')).toHaveTextContent(
       'Update alerting rule request'
@@ -68,18 +64,32 @@ describe('ShowRequestModal', () => {
     );
   });
 
-  it('switches back to create tab', async () => {
+  it('switches to create tab from update default', async () => {
     const user = userEvent.setup();
 
     render(<ShowRequestModal ruleId="rule-123" onClose={onClose} />, {
       wrapper: createFormWrapper(),
     });
 
-    await user.click(screen.getByTestId('showRequestUpdateTab'));
     await user.click(screen.getByTestId('showRequestCreateTab'));
 
     expect(screen.getByTestId('showRequestModalTitle')).toHaveTextContent(
       'Create alerting rule request'
+    );
+  });
+
+  it('switches back to update tab', async () => {
+    const user = userEvent.setup();
+
+    render(<ShowRequestModal ruleId="rule-123" onClose={onClose} />, {
+      wrapper: createFormWrapper(),
+    });
+
+    await user.click(screen.getByTestId('showRequestCreateTab'));
+    await user.click(screen.getByTestId('showRequestUpdateTab'));
+
+    expect(screen.getByTestId('showRequestModalTitle')).toHaveTextContent(
+      'Update alerting rule request'
     );
   });
 

@@ -51,7 +51,7 @@ interface ShowRequestModalProps {
 }
 
 export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => {
-  const [activeTab, setActiveTab] = useState<ShowRequestActivePage>('create');
+  const [activeTab, setActiveTab] = useState<ShowRequestActivePage>(ruleId ? 'update' : 'create');
 
   const onCloseModal = useCallback(() => {
     onClose();
