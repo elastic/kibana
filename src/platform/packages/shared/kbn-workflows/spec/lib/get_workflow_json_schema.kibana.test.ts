@@ -280,12 +280,20 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     expect(brokenRefObjectsCount).toEqual(0);
   });
 
-  // Smoke: generated schema must round-trip for Monaco / YAML tooling.
+  // Smoke: schema must load in yaml-language-server (Monaco path), not just JSON-serialize.
   // Not compared to isValidJsonSchema — Monaco schema includes allOf/discriminator etc.
-  it('should produce JSON Schema that round-trips for Monaco / YAML LSP', () => {
+  it('should load generated JSON Schema in Monaco / YAML LSP', async () => {
     expect(jsonSchema).toBeDefined();
-    expect(() => JSON.parse(JSON.stringify(jsonSchema))).not.toThrow();
-    expect(JSON.stringify(jsonSchema).length).toBeGreaterThan(20);
+    const diagnostics = await validateWithYamlLsp(
+      'smoke-test-workflow.yaml',
+      yaml.stringify({
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [KIBANA_VALID_SAMPLE_STEPS[0]],
+      })
+    );
+    expect(diagnostics).toEqual([]);
   });
 
   KIBANA_VALID_SAMPLE_STEPS.forEach((step) => {
