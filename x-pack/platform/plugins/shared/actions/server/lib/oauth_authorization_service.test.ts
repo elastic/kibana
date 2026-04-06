@@ -133,7 +133,6 @@ describe('OAuthAuthorizationService', () => {
       });
     });
 
-
     it('passes namespace when provided', async () => {
       const service = createService();
       const getResult = createMockConnector({
