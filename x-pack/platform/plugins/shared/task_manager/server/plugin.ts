@@ -449,32 +449,20 @@ export class TaskManagerPlugin
         kibanasPerPartition: this.config.kibanas_per_partition,
       });
 
-      const enrichFakeRequest = async (
-        request: KibanaRequest,
-        userProfileId: string
-      ): Promise<AuthenticatedUser> => {
-        const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
-        const esUser = await esClient.security.authenticate();
-        const authenticatedUser: AuthenticatedUser = {
-          username: esUser.username,
-          roles: esUser.roles,
-          full_name: esUser.full_name ?? undefined,
-          email: esUser.email ?? undefined,
-          enabled: esUser.enabled,
-          metadata: esUser.metadata as AuthenticatedUser['metadata'],
-          authentication_realm: esUser.authentication_realm,
-          lookup_realm: esUser.lookup_realm,
-          authentication_type: esUser.authentication_type,
+      const enrichFakeRequest = (request: KibanaRequest, userProfileId: string) => {
+        const minimalUser: AuthenticatedUser = {
+          username: '',
+          roles: [],
+          enabled: true,
+          metadata: { _reserved: false },
+          authentication_realm: { name: 'task_manager', type: 'task_manager' },
+          lookup_realm: { name: 'task_manager', type: 'task_manager' },
+          authentication_type: '',
           authentication_provider: { type: 'task_manager', name: 'task_manager' },
           elastic_cloud_user: false,
           profile_uid: userProfileId,
         };
-        security.authc.setCurrentUser(request, authenticatedUser);
-        return authenticatedUser;
-      };
-
-      const setUserOnRequest = (request: KibanaRequest, user: AuthenticatedUser) => {
-        security.authc.setCurrentUser(request, user);
+        security.authc.setCurrentUser(request, minimalUser);
       };
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
@@ -491,7 +479,6 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
-        setUserOnRequest,
       });
     }
 

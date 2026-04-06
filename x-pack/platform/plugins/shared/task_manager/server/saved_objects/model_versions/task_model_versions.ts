@@ -147,7 +147,18 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '10': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          userScope: {
+            properties: {
+              userProfileId: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    ],
     schemas: {
       // set cost to normal if it is not in the version 8 costs literals
       forwardCompatibility: (attributes) => {
