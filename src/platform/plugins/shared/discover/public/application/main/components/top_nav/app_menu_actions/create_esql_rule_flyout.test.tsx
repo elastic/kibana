@@ -9,21 +9,10 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { CreateESQLRuleFlyout } from './create_esql_rule_flyout';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 import { internalStateActions } from '../../../state_management/redux';
-
-const discoverParamsMock: AppMenuExtensionParams = {
-  dataView: dataViewMock,
-  adHocDataViews: [],
-  isEsqlMode: true,
-  authorizedRuleTypeIds: [ES_QUERY_ID],
-  actions: { updateAdHocDataViews: jest.fn() },
-};
 
 const renderFlyout = async ({
   onClose = jest.fn(),
@@ -46,10 +35,10 @@ const renderFlyout = async ({
 
   render(
     <CreateESQLRuleFlyout
-      discoverParams={discoverParamsMock}
       services={services}
       tabId={tabId}
       getState={toolkit.internalState.getState}
+      subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
       onClose={onClose}
     />
   );
@@ -82,10 +71,10 @@ describe('CreateESQLRuleFlyout', () => {
 
     render(
       <CreateESQLRuleFlyout
-        discoverParams={discoverParamsMock}
         services={services}
         tabId={tabId}
         getState={toolkit.internalState.getState}
+        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
         onClose={onClose}
       />
     );
@@ -107,6 +96,76 @@ describe('CreateESQLRuleFlyout', () => {
     });
 
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('should re-render with updated query when store state changes', async () => {
+    const services = createDiscoverServicesMock();
+    services.history.push('/app/discover');
+    const RuleFormFlyout = services.alertingVTwo!.DynamicRuleFormFlyout as jest.Mock;
+
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setAppState)({
+        appState: { query: { esql: 'FROM logs*' } },
+      })
+    );
+
+    render(
+      <CreateESQLRuleFlyout
+        services={services}
+        tabId={tabId}
+        getState={toolkit.internalState.getState}
+        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'FROM logs*' }),
+      expect.anything()
+    );
+
+    act(() => {
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.setAppState)({
+          appState: { query: { esql: 'FROM updated_index | LIMIT 5' } },
+        })
+      );
+    });
+
+    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'FROM updated_index | LIMIT 5' }),
+      expect.anything()
+    );
+  });
+
+  it('should show a danger toast and close when the query is not ES|QL', async () => {
+    const services = createDiscoverServicesMock();
+    services.history.push('/app/discover');
+
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    const tabId = toolkit.getCurrentTab().id;
+
+    const onClose = jest.fn();
+
+    render(
+      <CreateESQLRuleFlyout
+        services={services}
+        tabId={tabId}
+        getState={toolkit.internalState.getState}
+        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
+        onClose={onClose}
+      />
+    );
+
+    expect(services.core.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('should close flyout when pathname changes', async () => {

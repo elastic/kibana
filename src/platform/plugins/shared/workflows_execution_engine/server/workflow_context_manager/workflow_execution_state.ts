@@ -11,11 +11,20 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
+/** Context for the step that failed during this run; used to build workflow_execution_failed event. */
+export interface FailedStepContext {
+  stepId: string;
+  stepName: string;
+  stepExecutionId: string;
+}
+
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
+
+  private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
   /**
    * Maps step IDs to their execution IDs in chronological order.
@@ -49,6 +58,14 @@ export class WorkflowExecutionState {
 
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
+  }
+
+  public setLastFailedStepContext(ctx: FailedStepContext): void {
+    this.lastFailedStepContext = ctx;
+  }
+
+  public getLastFailedStepContext(): FailedStepContext | undefined {
+    return this.lastFailedStepContext;
   }
 
   public updateWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): void {
