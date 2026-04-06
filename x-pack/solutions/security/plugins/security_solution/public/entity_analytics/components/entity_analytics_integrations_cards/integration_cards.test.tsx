@@ -8,13 +8,13 @@
 import React, { Suspense } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { IntegrationCardsProps } from './integrations_cards';
-import { IntegrationCards } from './integrations_cards';
-import { TestProviders } from '../../../../common/mock';
+import type { IntegrationCardsProps } from './integration_cards';
+import { IntegrationCards } from './integration_cards';
+import { TestProviders } from '../../../common/mock';
 
 const mockNavigateTo = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
   return {
     ...original,
     useNavigation: () => ({
@@ -23,12 +23,12 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/integrations/use_integration_link_state', () => ({
+jest.mock('../../../common/hooks/integrations/use_integration_link_state', () => ({
   useIntegrationLinkState: jest.fn(() => {}),
 }));
 
 const mockAddPathParamToUrl = jest.fn((...args: unknown[]) => 'URL_WITH_PARAMS');
-jest.mock('../../../../common/utils/integrations', () => ({
+jest.mock('../../../common/utils/integrations', () => ({
   addPathParamToUrl: (...args: unknown[]) => mockAddPathParamToUrl(...args),
 }));
 
@@ -60,14 +60,14 @@ const mockIntegrations = [uninstalledOktaIntegration, installedAdIntegration];
 
 const mockUseEntityAnalyticsIntegrations = jest.fn(() => mockIntegrations);
 
-jest.mock('../hooks/use_integrations', () => ({
+jest.mock('./hooks/use_entity_analytics_integrations', () => ({
   useEntityAnalyticsIntegrations: () => mockUseEntityAnalyticsIntegrations(),
 }));
 
 // Helper component to wrap IntegrationCards with Suspense
-const IntegrationCardsWithSuspense = (props: IntegrationCardsProps) => (
+const IntegrationCardsWithSuspense = (props: Omit<IntegrationCardsProps, 'redirectPath'>) => (
   <Suspense fallback={<EuiLoadingSpinner data-test-subj="loading-integration-cards" />}>
-    <IntegrationCards {...props} />
+    <IntegrationCards {...props} redirectPath="/test-redirect" />
   </Suspense>
 );
 

@@ -22,7 +22,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../hooks/use_integrations', () => ({
+jest.mock('../../entity_analytics_integrations_cards/hooks/use_entity_analytics_integrations', () => ({
   useEntityAnalyticsIntegrations: jest.fn(() => [
     {
       packageInfo: {

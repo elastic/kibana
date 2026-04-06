@@ -12,15 +12,15 @@ import { css } from '@emotion/react';
 import { INTEGRATION_APP_ID } from '../../../../common/lib/integrations/constants';
 import { useIntegrationLinkState } from '../../../../common/hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../../common/utils/integrations';
-import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
-import { useEntityAnalyticsIntegrations } from '../hooks/use_integrations';
+import { useEntityAnalyticsIntegrations } from './hooks/use_entity_analytics_integrations';
 
 export interface IntegrationCardsProps {
   maxCardWidth?: number;
   showInstallationStatus?: boolean;
   onIntegrationInstalled?: (count: number) => void;
   titleSize?: 'xs' | 's';
+  redirectPath: string;
 }
 
 /**
@@ -32,8 +32,9 @@ export const IntegrationCards = ({
   maxCardWidth,
   showInstallationStatus = false,
   titleSize = 's',
+  redirectPath,
 }: IntegrationCardsProps) => {
-  const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
+  const state = useIntegrationLinkState(redirectPath);
   const { navigateTo } = useNavigation();
   const integrations = useEntityAnalyticsIntegrations();
 
@@ -43,13 +44,13 @@ export const IntegrationCards = ({
         appId: INTEGRATION_APP_ID,
         path: addPathParamToUrl(
           `/detail/${id}-${version}/overview`,
-          ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+          redirectPath,
           { prerelease: 'true' } // entityanalytics_ad is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
         ),
         state,
       });
     },
-    [navigateTo, state]
+    [navigateTo, state, redirectPath]
   );
 
   useEffect(() => {

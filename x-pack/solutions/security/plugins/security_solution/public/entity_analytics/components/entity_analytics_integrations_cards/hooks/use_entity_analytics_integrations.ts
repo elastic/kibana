@@ -9,8 +9,8 @@ import { useQuery } from '@kbn/react-query';
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { getInstalledPackages } from '../../../../onboarding/components/onboarding_body/cards/common/integrations/integrations_check_complete_helpers';
+import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
+import { getInstalledPackages } from '../../../../../onboarding/components/onboarding_body/cards/common/integrations/integrations_check_complete_helpers';
 
 const isGetInfoResponse = (
   integration: GetInfoResponse | undefined
@@ -78,19 +78,4 @@ export const useEntityAnalyticsIntegrations = () => {
       hasDataStreams: activeIntegration ? activeIntegration.dataStreams.length > 0 : false,
     };
   });
-};
-
-export const usePrivilegedAccessDetectionIntegration = () => {
-  const { data: pad } = useGetPackageInfoByKeyQuery(
-    'pad',
-    undefined, // When package version is undefined it gets the latest version
-    {
-      prerelease: true, // This is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
-    },
-    {
-      suspense: false,
-    }
-  );
-
-  return isGetInfoResponse(pad) ? pad.item : undefined;
 };
