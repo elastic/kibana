@@ -9,6 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import { css } from '@emotion/react';
+import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../common/constants';
 import { INTEGRATION_APP_ID } from '../../../common/lib/integrations/constants';
 import { useIntegrationLinkState } from '../../../common/hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../common/utils/integrations';
@@ -20,7 +21,6 @@ export interface IntegrationCardsProps {
   showInstallationStatus?: boolean;
   onIntegrationInstalled?: (count: number) => void;
   titleSize?: 'xs' | 's';
-  redirectPath: string;
 }
 
 /**
@@ -32,9 +32,8 @@ export const IntegrationCards = ({
   maxCardWidth,
   showInstallationStatus = false,
   titleSize = 's',
-  redirectPath,
 }: IntegrationCardsProps) => {
-  const state = useIntegrationLinkState(redirectPath);
+  const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
   const { navigateTo } = useNavigation();
   const integrations = useEntityAnalyticsIntegrations();
 
@@ -44,13 +43,13 @@ export const IntegrationCards = ({
         appId: INTEGRATION_APP_ID,
         path: addPathParamToUrl(
           `/detail/${id}-${version}/overview`,
-          redirectPath,
+          ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
           { prerelease: 'true' } // entityanalytics_ad is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
         ),
         state,
       });
     },
-    [navigateTo, state, redirectPath]
+    [navigateTo, state]
   );
 
   useEffect(() => {

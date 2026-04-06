@@ -65,9 +65,9 @@ jest.mock('./hooks/use_entity_analytics_integrations', () => ({
 }));
 
 // Helper component to wrap IntegrationCards with Suspense
-const IntegrationCardsWithSuspense = (props: Omit<IntegrationCardsProps, 'redirectPath'>) => (
+const IntegrationCardsWithSuspense = (props: IntegrationCardsProps) => (
   <Suspense fallback={<EuiLoadingSpinner data-test-subj="loading-integration-cards" />}>
-    <IntegrationCards {...props} redirectPath="/test-redirect" />
+    <IntegrationCards {...props} />
   </Suspense>
 );
 

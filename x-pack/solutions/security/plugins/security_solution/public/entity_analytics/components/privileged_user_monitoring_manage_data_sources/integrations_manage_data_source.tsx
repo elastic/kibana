@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { IntegrationCards } from '../entity_analytics_integrations_cards';
-import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../common/constants';
 
 export const IntegrationsManageDataSource = () => {
   return (
@@ -34,12 +33,7 @@ export const IntegrationsManageDataSource = () => {
           />
         </p>
       </EuiText>
-      <IntegrationCards
-        maxCardWidth={360}
-        showInstallationStatus
-        titleSize="xs"
-        redirectPath={ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH}
-      />
+      <IntegrationCards maxCardWidth={360} showInstallationStatus titleSize="xs" />
     </EuiFlexGroup>
   );
 };
