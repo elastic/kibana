@@ -19,7 +19,7 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './canvas_integration/dashboard_canvas_content';
-import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment_in_dashboard';
+import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 import { onAttachmentMount } from './on_attachment_mount';
 
 export const registerDashboardAttachmentUiDefinition = ({
