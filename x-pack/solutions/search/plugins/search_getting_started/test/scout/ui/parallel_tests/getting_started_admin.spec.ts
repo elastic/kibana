@@ -173,6 +173,59 @@ test.describe(
       });
     });
 
+    test('Top navigation renders correctly', async ({ pageObjects }) => {
+      await test.step('renders top nav section', async () => {
+        const topNav = await pageObjects.gettingStarted.getTopNav();
+        await expect(topNav).toBeVisible();
+      });
+
+      await test.step('renders ask expert link with correct href', async () => {
+        const askExpertLink = await pageObjects.gettingStarted.getAskExpertLink();
+        await expect(askExpertLink).toBeVisible();
+        await expect(askExpertLink).toHaveAttribute('href', /.+/);
+      });
+
+      await test.step('renders Elastic Cloud link', async () => {
+        const cloudHomeLink = await pageObjects.gettingStarted.getCloudHomeLink();
+        await expect(cloudHomeLink).toBeVisible();
+        await expect(cloudHomeLink).toHaveAttribute('href', /cloud\.elastic\.co/);
+      });
+    });
+
+    test('Top navigation links respond to screen size', async ({ pageObjects, page }) => {
+      await test.step('shows Usage and Organization links on large screens', async () => {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await pageObjects.gettingStarted.goto();
+
+        const usageLink = await pageObjects.gettingStarted.getCloudUsageLink();
+        await expect(usageLink).toBeVisible();
+        await expect(usageLink).toHaveAttribute('href', /billing\/usage/);
+
+        const orgLink = await pageObjects.gettingStarted.getCloudOrganizationLink();
+        await expect(orgLink).toBeVisible();
+        await expect(orgLink).toHaveAttribute('href', /account\/members/);
+      });
+
+      await test.step('hides Usage and Organization links on small screens', async () => {
+        await page.setViewportSize({ width: 768, height: 900 });
+        await pageObjects.gettingStarted.goto();
+
+        const usageLink = await pageObjects.gettingStarted.getCloudUsageLink();
+        await expect(usageLink).toBeHidden();
+
+        const orgLink = await pageObjects.gettingStarted.getCloudOrganizationLink();
+        await expect(orgLink).toBeHidden();
+      });
+
+      await test.step('hides ask expert link on extra small screens', async () => {
+        await page.setViewportSize({ width: 375, height: 812 });
+        await pageObjects.gettingStarted.goto();
+
+        const askExpertLink = await pageObjects.gettingStarted.getAskExpertLink();
+        await expect(askExpertLink).toBeHidden();
+      });
+    });
+
     test('Language selector shows correct code examples', async ({ pageObjects }) => {
       await test.step('shows JavaScript code example', async () => {
         await pageObjects.gettingStarted.selectCodingLanguage('javascript');

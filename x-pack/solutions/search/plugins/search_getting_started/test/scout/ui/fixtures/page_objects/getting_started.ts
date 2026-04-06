@@ -165,4 +165,24 @@ export class GettingStarted {
   async getEmbeddedConsole() {
     return this.page.testSubj.locator('consoleEmbeddedBody');
   }
+
+  async getTopNav() {
+    return this.page.testSubj.locator('gettingStartedTopNav');
+  }
+
+  async getAskExpertLink() {
+    return this.page.testSubj.locator('gettingStartedAskExpert');
+  }
+
+  async getCloudHomeLink() {
+    return this.page.testSubj.locator('gettingStartedCloudHome');
+  }
+
+  async getCloudUsageLink() {
+    return this.page.testSubj.locator('gettingStartedUsage');
+  }
+
+  async getCloudOrganizationLink() {
+    return this.page.testSubj.locator('gettingStartedCloudOrganizationMembers');
+  }
 }
