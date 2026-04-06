@@ -55,6 +55,9 @@ import {
   type IdentityFields,
 } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
+import { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID } from './constants';
+
+export { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID };
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -76,8 +79,7 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
-export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
-export const USER_PANEL_OBSERVED_USER_QUERY_ID = 'UserPanelObservedUserQuery';
+
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
