@@ -139,12 +139,14 @@ export const ConsoleTutorialsGroup = () => {
   const tutorialCardStyles = css`
     cursor: pointer;
     border-radius: ${euiTheme.border.radius.medium};
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
     padding: ${euiTheme.size.base};
     &:hover {
       background-color: ${euiTheme.colors.backgroundBaseSubdued};
       .tutorialTitle {
         color: ${euiTheme.colors.textPrimary};
       }
+      border-color: transparent;
     }
   `;
 
