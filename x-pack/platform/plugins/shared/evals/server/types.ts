@@ -7,6 +7,7 @@
 
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetup, PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 
 export type EvalsPluginSetup = Record<string, never>;
@@ -16,12 +17,22 @@ export interface EvalsPluginStart {
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
+  actions?: ActionsPluginSetup;
+  agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
+  workflows?: any; // Optional: Required for AESOP workflow registration
 }
 
-export type EvalsStartDependencies = Record<string, never>;
+export interface EvalsStartDependencies {
+  actions?: ActionsPluginStart;
+  agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
+  workflows?: any; // Optional: Required for AESOP workflow execution
+}
 
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
+  getActionsStart: () => ActionsPluginStart | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getAgentBuilderStart: () => any | undefined;
 }
 
 export type EvalsRequestHandlerContext = CustomRequestHandlerContext<{

@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # ═══════════════════════════════════════════════════════════════
+  # Elasticsearch - Primary data store
+  # ═══════════════════════════════════════════════════════════════
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.0-SNAPSHOT
+    container_name: aesop-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=changeme
+      - xpack.license.self_generated.type=trial
+      - xpack.ml.enabled=true
+      - cluster.name=aesop-cluster
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - aesop-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -u elastic:changeme -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # ═══════════════════════════════════════════════════════════════
+  # EDOT Collector - O11y trace collection
+  # ═══════════════════════════════════════════════════════════════
+  edot-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: aesop-edot-collector
+    command: ["--config=/etc/otel/config.yaml"]
+    ports:
+      - "4318:4318"  # OTLP HTTP receiver
+      - "4317:4317"  # OTLP gRPC receiver
+    volumes:
+      - ./docker/edot-config.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - aesop-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ═══════════════════════════════════════════════════════════════
+  # Kibana - UI and API server
+  # ═══════════════════════════════════════════════════════════════
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.4.0-SNAPSHOT
+    container_name: aesop-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - xpack.evals.enabled=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://edot-collector:4318
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_LOGS_EXPORTER=none
+    ports:
+      - "5601:5601"
+    networks:
+      - aesop-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      edot-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -q '\"level\":\"available\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+
+  # ═══════════════════════════════════════════════════════════════
+  # Data Generator - Loads demo data for hypothesis testing
+  # ═══════════════════════════════════════════════════════════════
+  data-generator:
+    image: node:18-alpine
+    container_name: aesop-data-generator
+    working_dir: /app
+    volumes:
+      - ./x-pack/solutions/security/plugins/security_solution/scripts/aesop_demo:/app
+      - ./scripts:/scripts
+    command: sh -c "
+      echo 'Waiting for Elasticsearch...' &&
+      sleep 30 &&
+      echo 'Generating demo data for hypothesis validation...' &&
+      node data_generator.ts --mode hypothesis-validation
+    "
+    networks:
+      - aesop-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ES_URL=http://elasticsearch:9200
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=changeme
+
+networks:
+  aesop-network:
+    driver: bridge
+
+volumes:
+  es-data:
+    driver: local

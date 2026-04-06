@@ -15,6 +15,10 @@ import { RunsListPage } from './pages/runs_list';
 import { RunDetailPage } from './pages/run_detail';
 import { DatasetsListPage } from './pages/datasets_list';
 import { DatasetDetailPage } from './pages/dataset_detail';
+import { ProposedSkillsList } from './pages/aesop/proposed_skills_list';
+import { ExplorationDashboard } from './pages/aesop/exploration_dashboard';
+import { ExecutionDetailPage } from './pages/aesop/execution_detail';
+import { AesopErrorBoundary } from './pages/aesop/components/aesop_error_boundary';
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
@@ -28,12 +32,28 @@ const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
   defaultMessage: 'Datasets',
 });
 
+const aesopTabLabel = i18n.translate('xpack.evals.navigation.aesop', {
+  defaultMessage: 'AESOP',
+});
+
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
   defaultMessage: 'Run details',
 });
 
 const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetDetail', {
   defaultMessage: 'Dataset details',
+});
+
+const aesopSkillsBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.aesopSkills', {
+  defaultMessage: 'Proposed Skills',
+});
+
+const aesopExplorationBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.aesopExploration', {
+  defaultMessage: 'Exploration Dashboard',
+});
+
+const aesopExecutionDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.aesopExecutionDetail', {
+  defaultMessage: 'Execution Detail',
 });
 
 const EvalsHeader: React.FC = () => {
@@ -65,7 +85,28 @@ const getBreadcrumbs = ({
 }): ChromeBreadcrumb[] => {
   const runsHref = getHref('/');
   const datasetsHref = getHref('/datasets');
+  const aesopSkillsHref = getHref('/aesop/skills/proposed');
+  const aesopExplorationHref = getHref('/aesop/exploration');
 
+  // AESOP routes
+  if (pathname.startsWith('/aesop/exploration/') && pathname.split('/').length > 3) {
+    // Execution detail page
+    return [
+      { text: aesopTabLabel, href: aesopSkillsHref },
+      { text: aesopExplorationBreadcrumbLabel, href: aesopExplorationHref },
+      { text: aesopExecutionDetailBreadcrumbLabel },
+    ];
+  }
+
+  if (pathname.startsWith('/aesop/exploration')) {
+    return [{ text: aesopTabLabel, href: aesopSkillsHref }, { text: aesopExplorationBreadcrumbLabel }];
+  }
+
+  if (pathname.startsWith('/aesop')) {
+    return [{ text: aesopTabLabel, href: aesopSkillsHref }, { text: aesopSkillsBreadcrumbLabel }];
+  }
+
+  // Datasets routes
   if (pathname.startsWith('/datasets/')) {
     return [{ text: datasetsTabLabel, href: datasetsHref }, { text: datasetDetailBreadcrumbLabel }];
   }
@@ -74,6 +115,7 @@ const getBreadcrumbs = ({
     return [{ text: datasetsTabLabel }];
   }
 
+  // Runs routes
   if (pathname.startsWith('/runs/')) {
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
   }
@@ -85,15 +127,19 @@ const EvalsNavigation: React.FC = () => {
   const history = useHistory();
   const { pathname } = useLocation();
   const isDatasetsSelected = pathname.startsWith('/datasets');
+  const isAESOPSelected = pathname.startsWith('/aesop');
 
   return (
     <div style={{ flex: '0 0 auto' }}>
       <EuiTabs size="s">
-        <EuiTab isSelected={!isDatasetsSelected} onClick={() => history.push('/')}>
+        <EuiTab isSelected={!isDatasetsSelected && !isAESOPSelected} onClick={() => history.push('/')}>
           {runsTabLabel}
         </EuiTab>
         <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push('/datasets')}>
           {datasetsTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isAESOPSelected} onClick={() => history.push('/aesop/skills/proposed')}>
+          {aesopTabLabel}
         </EuiTab>
       </EuiTabs>
     </div>
@@ -136,6 +182,22 @@ export const EvalsApp: React.FC<{
             <Route exact path="/datasets" component={DatasetsListPage} />
             <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
             <Route path="/runs/:runId" component={RunDetailPage} />
+            {/* AESOP Routes */}
+            <Route exact path="/aesop/skills/proposed">
+              <AesopErrorBoundary>
+                <ProposedSkillsList />
+              </AesopErrorBoundary>
+            </Route>
+            <Route exact path="/aesop/exploration">
+              <AesopErrorBoundary>
+                <ExplorationDashboard />
+              </AesopErrorBoundary>
+            </Route>
+            <Route path="/aesop/exploration/:executionId">
+              <AesopErrorBoundary>
+                <ExecutionDetailPage />
+              </AesopErrorBoundary>
+            </Route>
           </Routes>
         </div>
       </div>
