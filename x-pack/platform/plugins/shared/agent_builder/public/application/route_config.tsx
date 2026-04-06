@@ -9,7 +9,6 @@ import React from 'react';
 import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { RouteDisplay } from './components/common/route_display';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
@@ -90,13 +89,6 @@ export const agentRoutes: RouteDefinition[] = [
     isExperimental: true,
     navLabel: navLabels.plugins,
     element: <AgentBuilderAgentPluginsPage />,
-  },
-  {
-    path: '/agents/:agentId/connectors',
-    sidebarView: 'conversation',
-    navLabel: navLabels.connectors,
-    isExperimental: true,
-    element: <RouteDisplay />,
   },
   {
     path: '/agents/:agentId/tools',

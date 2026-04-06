@@ -76312,6 +76312,7 @@ components:
         - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
         - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
         - RULE_FILL_GAPS_DISABLED_RULE
+        - USER_INSUFFICIENT_RULE_PRIVILEGES
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
@@ -85955,6 +85956,9 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entityCount:
+          description: Number of entities in the watchlist
+          type: number
         entitySourceIds:
           description: List of entity source IDs associated with the watchlist
           items:

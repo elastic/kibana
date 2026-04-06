@@ -373,14 +373,6 @@
       "tags": {
         "type": "keyword"
       },
-      "throttle": {
-        "type": "object",
-        "properties": {
-          "strategy": {
-            "type": "keyword"
-          }
-        }
-      },
       "name": {
         "fields": {
           "keyword": {
@@ -392,6 +384,14 @@
       },
       "snoozedUntil": {
         "type": "date"
+      },
+      "throttle": {
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
       },
       "updatedAt": {
         "type": "date"
@@ -445,9 +445,6 @@
           "description": {
             "type": "text"
           },
-          "labels": {
-            "type": "keyword"
-          },
           "name": {
             "fields": {
               "keyword": {
@@ -457,6 +454,9 @@
             "type": "text"
           },
           "owner": {
+            "type": "keyword"
+          },
+          "tags": {
             "type": "keyword"
           }
         }
@@ -1339,31 +1339,6 @@
       },
       "version": {
         "type": "integer"
-      }
-    }
-  },
-  "data_connector": {
-    "dynamic": false,
-    "properties": {
-      "kscIds": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "toolIds": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "workflowIds": {
-        "type": "keyword"
       }
     }
   },

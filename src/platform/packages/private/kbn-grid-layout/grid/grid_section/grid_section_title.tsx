@@ -115,7 +115,7 @@ export const GridSectionTitle = React.memo(
             aria-label={i18n.translate('kbnGridLayout.section.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
-            iconType={'arrowDown'}
+            iconType="chevronSingleDown"
             onKeyDown={handleKeyDown}
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
