@@ -120,29 +120,14 @@ test('create and edit entity', async () => {
 
 #### Scout API auth (`cookieHeader` vs API key)
 
-FTR often used `roleScopedSupertest` with `useCookieHeader: true` and `withInternalHeaders` for **internal** routes. In Scout API tests, map that to **`samlAuth`** and merge **`cookieHeader`** with your common headers (`kbn-xsrf`, `x-elastic-internal-origin`, etc.) on `apiClient` requests.
+For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, code examples), see [Authentication in Scout API tests](docs/extend/scout/api-auth.md).
 
-```ts
-const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-const adminInteractiveHeaders = {
-  ...MY_COMMON_HEADERS,
-  ...cookieHeader,
-};
-await apiClient.post('internal/my_plugin/flow', {
-  headers: adminInteractiveHeaders,
-  responseType: 'json',
-});
-```
+**FTR mapping:** FTR `roleScopedSupertest` with `useCookieHeader: true` / `withInternalHeaders` maps to **`samlAuth`** + **`cookieHeader`** merged with common headers on `apiClient` requests. FTR `supertest` with API key auth maps to **`requestAuth.getApiKey(...)`** + **`apiKeyHeader`**.
 
-**When to prefer `cookieHeader` (interactive user) over `requestAuth.getApiKey(...)`**
+**FTR migration gotchas (not covered in the general doc):**
 
-- Handlers that call **`core.security.authc.apiKeys.create`** (or otherwise create **nested** API keys for the current user) often **fail with HTTP 500** if the incoming request is authenticated with an **API key**. Use **`samlAuth.asInteractiveUser('admin')`** (or the same role FTR used with cookies) for those routes—see observability onboarding `POST internal/observability_onboarding/flow` migration (`89c171c3851c1c6f70f55749b5477b1f0adfffb8`).
-- **Negative / least-privilege tests** that in FTR used a **custom role + cookie** (e.g. empty `kibana: []` privileges) and expect **404** from scoped saved-object access: use **`await samlAuth.asInteractiveUser(customRoleDescriptor)`** and **`cookieHeader`** on the request. **`requestAuth.getApiKeyForCustomRole(...)`** can still resolve **200** for the same role shape because API-key privilege resolution differs from an interactive session—match FTR with cookies.
-
-**When API keys are still appropriate**
-
-- Public `api/*` routes, or internal routes that **do not** create nested keys and were explicitly tested with API key in FTR (e.g. some "terminal" step reporters).
-- Use `requestAuth.getApiKey('admin')` / `getApiKeyForCustomRole` per `scout-api-testing`; combine with `cookieHeader` in the **same** spec when different calls need different auth modes.
+- Handlers that call **`core.security.authc.apiKeys.create`** (nested API keys) often **fail with HTTP 500** when the incoming request uses an API key. Use **`samlAuth.asInteractiveUser('admin')`** (or the role FTR used with cookies) for those routes.
+- **Negative / least-privilege tests** that in FTR used a **custom role + cookie** (e.g. empty `kibana: []` privileges) and expect **404** from scoped saved-object access: use **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`**. **`requestAuth.getApiKeyForCustomRole(...)`** can resolve **200** for the same role shape because API-key privilege resolution differs from an interactive session.
 
 ### 5) Split loadTestFile suites
 
@@ -241,7 +226,7 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 - Placing Scout tests outside `test/scout*/{ui,api}/{tests,parallel_tests}`.
 - Ignoring existing parallel Scout config (mixing `tests/` with `parallel_tests/`).
 - Using the wrong Scout package (solution tests in security/observability/search must import from their solution Scout package, not `@kbn/scout`).
-- Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only "deployment agnostic" in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
+- Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only “deployment agnostic” in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
 - Importing `expect` from the wrong entrypoint (use `/ui` for UI, `/api` for API).
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs instead).
