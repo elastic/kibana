@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/task-manager-plugin'
   - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/rule-data-utils'
+  - '@kbn/alerts-as-data-utils'
 tags:
   - plugin
   - prod

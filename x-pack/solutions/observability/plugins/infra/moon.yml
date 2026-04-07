@@ -137,6 +137,7 @@ dependsOn:
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/inspector-plugin'
+  - '@kbn/es-query-constants'
 tags:
   - plugin
   - prod

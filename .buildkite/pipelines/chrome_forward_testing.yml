@@ -150,7 +150,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -246,6 +246,7 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -261,7 +262,7 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 105
+      diskSizeGb: 120
     depends_on:
       - build
     timeout_in_minutes: 75

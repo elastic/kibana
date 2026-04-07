@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { ScoutServerConfig } from '../../../../../types';
+import { defaultConfig } from '../../default/stateful/base.config';
+import { examplesServerArgs } from '../shared';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('console', () => {
-    loadTestFile(require.resolve('./proxy_route'));
-    loadTestFile(require.resolve('./autocomplete_entities'));
-    loadTestFile(require.resolve('./es_config'));
-  });
-}
+export const servers: ScoutServerConfig = {
+  ...defaultConfig,
+  kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...examplesServerArgs],
+  },
+};
