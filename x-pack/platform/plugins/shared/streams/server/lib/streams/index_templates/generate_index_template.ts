@@ -7,7 +7,9 @@
 
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { getAncestorsAndSelf, isDslLifecycle } from '@kbn/streams-schema';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { ASSET_VERSION } from '../../../../common/constants';
+import { failureStoreToIndexTemplateDataStreamOptions } from '../data_streams/manage_data_streams';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
@@ -17,10 +19,20 @@ import { getIndexTemplateName } from './name';
 // with the index pattern.
 export const MAX_PRIORITY = 9223372036854775807n;
 
-export function generateIndexTemplate(name: string, lifecycle?: IngestStreamLifecycle) {
+export function generateIndexTemplate(
+  name: string,
+  lifecycle?: IngestStreamLifecycle,
+  failureStore?: FailureStore,
+  isServerless?: boolean
+) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
     return [...acc, `${ancestorName}@stream.layer`];
   }, [] as string[]);
+
+  const dataStreamOptions =
+    failureStore !== undefined && isServerless !== undefined
+      ? failureStoreToIndexTemplateDataStreamOptions(failureStore, isServerless)
+      : undefined;
 
   return {
     name: getIndexTemplateName(name),
@@ -60,6 +72,7 @@ export function generateIndexTemplate(name: string, lifecycle?: IngestStreamLife
             },
           }
         : {}),
+      ...(dataStreamOptions ? { data_stream_options: dataStreamOptions } : {}),
     },
     allow_auto_create: true,
     // ignore missing component templates to be more robust against out-of-order syncs

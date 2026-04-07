@@ -762,7 +762,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'upsert_index_template',
-        request: generateIndexTemplate(this._definition.name, lifecycle),
+        request: generateIndexTemplate(
+          this._definition.name,
+          lifecycle,
+          failureStore,
+          this.dependencies.isServerless
+        ),
       },
       {
         type: 'upsert_dot_streams_document',

@@ -26,9 +26,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('streams APIs with security disabled', () => {
     before(async () => {
-      // Enable streams
-      await supertest.post('/api/streams/_enable').set(PUBLIC_HEADERS).expect(200);
-
       // Index a document into a classic stream to test classic-specific endpoints
       await es.index({
         index: 'logs-test.security-disabled',

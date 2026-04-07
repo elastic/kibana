@@ -46,7 +46,7 @@ export function RetentionColumn({
   if (isErrorLifecycle(lifecycle)) {
     // For logs.ecs and logs.otel (new root streams without a data stream yet), show a dash
     if (streamName && isRoot(streamName) && streamName !== LOGS_ROOT_STREAM_NAME) {
-      return <span>—</span>;
+      return <span>-</span>;
     }
     return (
       <EuiBadge
