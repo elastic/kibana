@@ -52,7 +52,6 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
 import { SuggestionStatusColumn } from './suggestion_status_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
-import { useKibana } from '../../hooks/use_kibana';
 import { useAIFeatures } from '../../hooks/use_ai_features';
 import {
   NAME_COLUMN_HEADER,
