@@ -23,26 +23,27 @@ const BUMP_TYPE = process.env.WORKFLOW;
 
       // Step 2: Wait for ES build to complete, then bump package.json on the release branch
       pipeline.push('  - wait');
+      // TODO: add more file changes.
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions.yml')
       );
 
-      // Step 3: Wait, then bump versions.json on main
-      pipeline.push('  - wait');
+      // TODO: this should only be on main.
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
 
       // Step 4: Wait, then trigger DRA builds for both snapshot and staging (synchronous)
+      // TODO: we have cases where we only do DRA snapshot and not staging, if the branch is main we only run DRA snapshot, otheerwise we run
+      // both.
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
 
-      // Step 5: Wait for DRA builds, then reconcile PR labels and update label color
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
     }
 
-    if (BUMP_TYPE === 'minor' || BUMP_TYPE === 'major') {
+    if (BUMP_TYPE === 'minor') {
       // Step 1: Trigger ES build and promote on main (synchronous)
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/trigger_es_build_and_promote.yml', false)
@@ -67,7 +68,18 @@ const BUMP_TYPE = process.env.WORKFLOW;
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
+
+      // TODO: just update the branch in the package.json
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
+
+      // TODO: add step for doing something like this in new branch: https://github.com/elastic/kibana/pull/246793 only done on main
+
+      // Step 4: Wait, then trigger DRA builds for both snapshot and staging (synchronous)
+      // TODO: we have cases where we only do DRA snapshot and not staging, if the branch is main we only run DRA snapshot, otheerwise we run
+      // both.
+      pipeline.push('  - wait');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
 
       // Step 6: Wait, then ensure the version label exists for the new version
       pipeline.push('  - wait');

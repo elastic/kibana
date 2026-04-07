@@ -1,4 +1,5 @@
 steps:
+  # TODO: run the bash files directly and only run the build and promote, because verify will fail.
   - name: Trigger ES Build/Verify/Promote
     key: trigger-es-build
     trigger: kibana-elasticsearch-snapshot-build
