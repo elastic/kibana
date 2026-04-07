@@ -204,7 +204,10 @@ export const UIAM_CONTAINERS = [
     ],
     cmdParams: [],
   },
-  {
+];
+
+if (process.env.UIAM_OAUTH === 'true') {
+  UIAM_CONTAINERS.push({
     name: 'uiam-oauth',
     image: process.env.UIAM_DOCKER_IMAGE || UIAM_DEFAULT_IMAGE,
     params: [
@@ -312,8 +315,8 @@ export const UIAM_CONTAINERS = [
       'timeout 1 bash -c "</dev/tcp/localhost/8443"',
     ],
     cmdParams: [],
-  },
-];
+  });
+}
 
 /**
  * Run a single UIAM-related container.

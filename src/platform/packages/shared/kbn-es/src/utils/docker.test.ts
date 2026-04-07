@@ -1018,6 +1018,42 @@ describe('runServerlessCluster()', () => {
     expect(initializeUiamContainersMock).toHaveBeenCalledTimes(1);
   });
 
+  test('should start 3 serverless ES nodes and three UIAM containers when UIAM_OAUTH is enabled', async () => {
+    const originalEnv = process.env.UIAM_OAUTH;
+    process.env.UIAM_OAUTH = 'true';
+
+    try {
+      waitUntilClusterReadyMock.mockResolvedValue();
+      mockFs({
+        [baseEsPath]: {},
+      });
+      execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+      await runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true });
+
+      expect(runUiamContainerMock).toHaveBeenCalledTimes(3);
+      expect(runUiamContainerMock).toHaveBeenCalledWith(
+        expect.anything(),
+        dockerUiam.UIAM_CONTAINERS[0]
+      );
+      expect(runUiamContainerMock).toHaveBeenCalledWith(
+        expect.anything(),
+        dockerUiam.UIAM_CONTAINERS[1]
+      );
+      expect(runUiamContainerMock).toHaveBeenCalledWith(
+        expect.anything(),
+        dockerUiam.UIAM_CONTAINERS[2]
+      );
+      expect(initializeUiamContainersMock).toHaveBeenCalledTimes(1);
+    } finally {
+      if (originalEnv === undefined) {
+        delete process.env.UIAM_OAUTH;
+      } else {
+        process.env.UIAM_OAUTH = originalEnv;
+      }
+    }
+  });
+
   test(`should wait for serverless nodes to return 'green' status`, async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
