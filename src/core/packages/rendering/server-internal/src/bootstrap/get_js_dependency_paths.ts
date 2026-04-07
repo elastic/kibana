@@ -26,29 +26,32 @@ export const getJsDependencyPaths = (
 /**
  * Get JS dependency paths for RSPack unified compilation mode.
  *
- * In unified mode, internal plugins are compiled into a single bundle (kibana.bundle.js).
- * External (3rd party) plugins are built separately by @kbn/plugin-helpers and loaded
- * as additional scripts after the unified bundle.
- *
  * Load order:
- * 1. Webpack shared deps (kbn-ui-shared-deps) - for npm externals
- * 2. Single unified Kibana bundle - contains core + all internal plugins + runtime
- * 3. External plugin bundles (if any) - register with __kbnBundles__ on load
+ * 1. Webpack shared deps (kbn-ui-shared-deps) — npm externals (React, lodash, etc.)
+ * 2. Rspack async chunks (shared + plugin entries) — JSONP modules queue into
+ *    `globalThis.webpackChunkkibana_bundle` before the runtime loads
+ * 3. kibana.bundle.js (LAST) — Rspack runtime drains the JSONP queue, then
+ *    dynamic imports resolve instantly without network requests
+ * 4. External plugin bundles (if any) — register with __kbnBundles__ on load
  */
 export const getRspackDependencyPaths = (
   regularBundlePath: string,
   _bundlePaths: Map<string, PluginInfo>,
-  externalPluginPaths: string[] = []
+  externalPluginPaths: string[] = [],
+  chunkPaths: string[] = []
 ) => {
   return [
-    // 1. Shared deps built by webpack (for npm externals like React, lodash)
     `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
 
-    // 2. Single unified bundle containing core + all internal plugins + runtime
+    // Rspack async chunks: loaded before the runtime so their JSONP callbacks
+    // push module factories into the global queue. When the runtime (inside
+    // kibana.bundle.js) initializes, it drains the queue and marks all chunks
+    // as installed, allowing import() to resolve synchronously.
+    ...chunkPaths,
+
     `${regularBundlePath}/kibana.bundle.js`,
 
-    // 3. External plugin bundles (loaded after unified bundle so __kbnBundles__ is available)
     ...externalPluginPaths,
   ];
 };

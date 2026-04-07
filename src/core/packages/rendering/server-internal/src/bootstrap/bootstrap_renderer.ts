@@ -74,6 +74,29 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   const useRspack = isRspackModeEnabled();
   const useHMR = !packageInfo.dist && process.env.KBN_HMR !== 'false';
+  const isDist = packageInfo.dist;
+
+  // Read chunk-manifest.json to get all async chunk filenames for the load() array.
+  // Cached in dist mode (chunks don't change at runtime). In dev mode, re-read each
+  // request so HMR-triggered recompilations are picked up.
+  let cachedAllChunkFilenames: string[] | null = null;
+  const getAllChunkFilenames = (): string[] => {
+    if (isDist && cachedAllChunkFilenames) {
+      return cachedAllChunkFilenames;
+    }
+    try {
+      const manifestPath = fromRoot('target/public/bundles/chunk-manifest.json');
+      const raw = Fs.readFileSync(manifestPath, 'utf-8');
+      const manifest = JSON.parse(raw) as { allChunks?: string[] };
+      const result = manifest.allChunks ?? [];
+      if (isDist) {
+        cachedAllChunkFilenames = result;
+      }
+      return result;
+    } catch {
+      return [];
+    }
+  };
 
   // Detect external plugins once at startup (not per-request).
   // External plugins live in the plugins/ directory and have standalone bundles
@@ -133,10 +156,13 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         return `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`;
       });
 
+      const chunkPaths = getAllChunkFilenames().map((f) => `${bundlesHref}/${f}`);
+
       const rspackPaths = getRspackDependencyPaths(
         bundlesHref,
         bundlePaths,
-        externalPluginScriptPaths
+        externalPluginScriptPaths,
+        chunkPaths
       );
 
       const bundlesDir = `${bundlesHref}/`;

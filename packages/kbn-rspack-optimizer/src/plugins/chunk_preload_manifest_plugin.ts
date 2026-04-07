@@ -9,31 +9,22 @@
 
 import { rspack, type Compiler, type Chunk } from '@rspack/core';
 
-export interface ChunkPreloadManifestPluginOptions {
-  /**
-   * When true, plugin entry chunks (the direct async children of the kibana
-   * entrypoint) are included alongside the named shared chunks.
-   */
-  includePluginEntries?: boolean;
-}
-
 /**
- * Emits `chunk-manifest.json` containing the filenames of chunks that should
- * be preloaded via `<link rel="preload">` in the HTML template.
+ * Emits `chunk-manifest.json` with two fields:
  *
- * Always includes named shared chunks — discovered dynamically from any
- * splitChunks cache group with a static `name` (string, not a function).
+ * - `sharedChunks`: Named shared chunks (from splitChunks cache groups with a
+ *   static `name`). Used by `rendering_service.tsx` for `<link rel="preload">`
+ *   in `<head>` — a small set (3-5) that gives the browser a head start on
+ *   downloading critical shared code during HTML parsing.
  *
- * When `includePluginEntries` is true, also includes plugin entry chunks
- * discovered via the chunk graph (async children of the kibana entrypoint).
+ * - `allChunks`: ALL async chunks (shared + plugin entries + unnamed shared).
+ *   Used by `bootstrap_renderer.ts` to populate the bootstrap `load()` array,
+ *   enabling eager parallel download of every chunk via `<script async=false>`
+ *   before `kibana.bundle.js`. Rspack's JSONP mechanism queues module factories
+ *   so that dynamic imports resolve without network requests once the runtime
+ *   drains the queue.
  */
 export class ChunkPreloadManifestPlugin {
-  private readonly includePluginEntries: boolean;
-
-  constructor(options: ChunkPreloadManifestPluginOptions = {}) {
-    this.includePluginEntries = options.includePluginEntries ?? false;
-  }
-
   apply(compiler: Compiler) {
     compiler.hooks.compilation.tap('ChunkPreloadManifestPlugin', (compilation) => {
       compilation.hooks.processAssets.tap(
@@ -48,11 +39,6 @@ export class ChunkPreloadManifestPlugin {
               ? splitChunksConfig.cacheGroups
               : undefined;
 
-          // Build a map from cache group KEY → static name.  We use the key
-          // (not the name) because rspack stamps each chunk's `idNameHints`
-          // with the cache group key, giving us a reliable way to identify
-          // which group produced a chunk — even for maxSize sub-chunks whose
-          // names differ from the original static name.
           const staticNameGroupKeys = new Set<string>();
           if (cacheGroups && typeof cacheGroups === 'object') {
             for (const [key, group] of Object.entries(cacheGroups)) {
@@ -63,9 +49,6 @@ export class ChunkPreloadManifestPlugin {
           }
 
           const isNamedSharedChunk = (chunk: Chunk): boolean => {
-            // idNameHints contains the cache group key(s) that produced this
-            // chunk.  If ANY hint matches a static-name group, the chunk (or
-            // its maxSize parent) was created by that group.
             for (const hint of chunk.idNameHints) {
               if (staticNameGroupKeys.has(hint)) return true;
             }
@@ -80,38 +63,39 @@ export class ChunkPreloadManifestPlugin {
             }
           };
 
-          const chunkFiles: string[] = [];
+          // 1. Collect named shared chunks (for preload)
+          const sharedChunkFiles: string[] = [];
           const sharedChunks = new Set<Chunk>();
 
           for (const chunk of compilation.chunks) {
             if (isNamedSharedChunk(chunk)) {
-              collectJsFiles(chunk, chunkFiles);
+              collectJsFiles(chunk, sharedChunkFiles);
               sharedChunks.add(chunk);
             }
           }
 
-          if (this.includePluginEntries) {
-            const entrypoint = compilation.entrypoints.get('kibana');
-            if (entrypoint) {
-              // `childrenIterable` yields the async chunk groups created by
-              // each `import()` in the entry — one per plugin.  Each child
-              // group's chunks include the plugin entry itself plus shared
-              // prerequisites; we skip shared chunks already collected above.
-              for (const childGroup of entrypoint.childrenIterable) {
-                for (const chunk of childGroup.chunks) {
-                  if (!sharedChunks.has(chunk)) {
-                    collectJsFiles(chunk, chunkFiles);
-                  }
+          // 2. Collect ALL async chunks (shared + plugin entries) for the load() array
+          const allChunkFiles: string[] = [...sharedChunkFiles];
+
+          const entrypoint = compilation.entrypoints.get('kibana');
+          if (entrypoint) {
+            for (const childGroup of entrypoint.childrenIterable) {
+              for (const chunk of childGroup.chunks) {
+                if (!sharedChunks.has(chunk)) {
+                  collectJsFiles(chunk, allChunkFiles);
                 }
               }
             }
           }
 
-          chunkFiles.sort();
+          sharedChunkFiles.sort();
+          allChunkFiles.sort();
 
           compilation.emitAsset(
             'chunk-manifest.json',
-            new rspack.sources.RawSource(JSON.stringify({ chunks: chunkFiles }))
+            new rspack.sources.RawSource(
+              JSON.stringify({ sharedChunks: sharedChunkFiles, allChunks: allChunkFiles })
+            )
           );
         }
       );

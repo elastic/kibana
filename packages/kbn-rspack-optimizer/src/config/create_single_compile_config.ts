@@ -731,7 +731,8 @@ export async function createSingleCompileConfig(
       // Elastic License 2.0 banner for x-pack plugin chunks
       new XPackBannerPlugin(repoRoot, plugins),
 
-      // Emit chunk-manifest.json listing named shared chunks for <link rel="preload">
+      // Emit chunk-manifest.json with sharedChunks (for <link rel="preload">) and
+      // allChunks (for eager loading via the bootstrap load() array)
       new ChunkPreloadManifestPlugin(),
 
       // Bundle metrics -- collects per-plugin sizes and module counts, emits metrics.json
@@ -862,7 +863,7 @@ export function findTargetEntry(contextDir: string, target: string = 'public'): 
  */
 // Entry file version - increment when changing the entry generation logic
 // This ensures the entry file is regenerated when config structure changes
-const ENTRY_VERSION = 'v9';
+const ENTRY_VERSION = 'v10';
 
 function createUnifiedEntry(
   wrapperDir: string,
@@ -931,22 +932,39 @@ function createUnifiedEntry(
   // orchestration shell and enables core to download in parallel with all plugins.
   // All targets for the same plugin share a webpackChunkName so rspack merges
   // them into a single chunk.
-  const allImports = pluginEntries
-    .map((entry) => {
-      const chunkName = `plugin-${entry.pluginId}`;
-      // Sanitize the entry id for use as a filename (replace / with __)
-      const wrapperFilename = `${entry.id.replace(/\//g, '__')}.js`;
-      const wrapperPath = Path.join(pluginWrapperDir, wrapperFilename);
-      const relativeSourcePath = toRelativePath(entry.path, pluginWrapperDir);
+  const BATCH_SIZE = 30;
 
-      Fs.writeFileSync(wrapperPath, `export * from ${JSON.stringify(relativeSourcePath)};\n`);
+  const importLines = pluginEntries.map((entry) => {
+    const chunkName = `plugin-${entry.pluginId}`;
+    const wrapperFilename = `${entry.id.replace(/\//g, '__')}.js`;
+    const wrapperPath = Path.join(pluginWrapperDir, wrapperFilename);
+    const relativeSourcePath = toRelativePath(entry.path, pluginWrapperDir);
 
-      const relativeWrapperPath = toRelativePath(wrapperPath);
-      return `    import(/* webpackChunkName: ${JSON.stringify(chunkName)} */ ${JSON.stringify(
-        relativeWrapperPath
-      )}).then(m => registerPlugin('${entry.bundleId}', m))`;
+    Fs.writeFileSync(wrapperPath, `export * from ${JSON.stringify(relativeSourcePath)};\n`);
+
+    const relativeWrapperPath = toRelativePath(wrapperPath);
+    return `    import(/* webpackChunkName: ${JSON.stringify(chunkName)} */ ${JSON.stringify(
+      relativeWrapperPath
+    )}).then(m => registerPlugin('${entry.bundleId}', m))`;
+  });
+
+  // Split imports into batches separated by setTimeout(0) to yield the main
+  // thread between groups, preventing TBT concentration from executing all
+  // ~220 plugin module factories in a single long task.
+  const batches: string[][] = [];
+  for (let i = 0; i < importLines.length; i += BATCH_SIZE) {
+    batches.push(importLines.slice(i, i + BATCH_SIZE));
+  }
+
+  const batchBlocks = batches
+    .map((batch, idx) => {
+      const promiseAll = `  await Promise.all([\n${batch.join(',\n')}\n  ]);`;
+      if (idx < batches.length - 1) {
+        return `${promiseAll}\n  await new Promise(r => setTimeout(r, 0));`;
+      }
+      return promiseAll;
     })
-    .join(',\n');
+    .join('\n');
 
   const content = `// Auto-generated unified entry for Kibana RSPack build
 // Plugin list hash: ${pluginListHash}
@@ -957,6 +975,13 @@ function createUnifiedEntry(
 // 2. Each target gets a webpackChunkName; same-plugin targets merge into one chunk
 // 3. RSPack naturally splits shared code via splitChunks cache groups
 // 4. kibana.bundle.js is just the runtime + orchestration shell
+//
+// TBT MITIGATION:
+// With eager chunk loading, all chunks are pre-loaded via the bootstrap load()
+// array. When this entry runs, every import() resolves instantly (modules already
+// in JSONP queue), concentrating all ~220 plugin factory executions into one
+// macrotask. To prevent a single long blocking task, imports are batched with
+// setTimeout(0) yielding between groups of ${BATCH_SIZE}.
 
 // Verify __kbnBundles__ is available
 if (typeof __kbnBundles__ === 'undefined' || typeof __kbnBundles__.define !== 'function') {
@@ -969,16 +994,15 @@ function registerPlugin(bundleId, moduleExports) {
 }
 
 // ============================================
-// All bundles (core + plugins) loaded in parallel via async imports
+// All bundles (core + plugins) loaded in parallel via batched async imports
 // ============================================
 // Core is loaded as "plugin-core" alongside all other plugins.
-// Promise.all ensures ALL .then() callbacks complete before resolving,
-// so core is guaranteed to be registered before __kbnBootstrap__() runs.
-window.__kbnPluginsLoaded = Promise.all([
-${allImports}
-]).then(() => {
+// Batches of ${BATCH_SIZE} imports run in parallel within each batch, with a
+// setTimeout(0) yield between batches to break up the long task.
+window.__kbnPluginsLoaded = (async () => {
+${batchBlocks}
   console.log('[@kbn/rspack-optimizer] All plugins loaded');
-}).catch(err => {
+})().catch(err => {
   console.error('[@kbn/rspack-optimizer] Failed to load plugins:', err);
   throw err;
 });

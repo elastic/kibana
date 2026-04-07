@@ -80,6 +80,10 @@ export class RenderingService {
 
   constructor(private readonly coreContext: CoreContext) {}
 
+  // Returns the small set of named shared chunks (3-5) for <link rel="preload">
+  // in <head>. These give the browser a download head start during HTML parsing.
+  // All chunks (including these) are also loaded via the bootstrap load() array;
+  // the browser deduplicates automatically.
   private getPreloadChunkFilenames(): string[] {
     const isDist = this.coreContext.env.packageInfo.buildNum !== Number.MAX_SAFE_INTEGER;
     if (isDist && this.chunkManifestCache) {
@@ -89,8 +93,8 @@ export class RenderingService {
     try {
       const manifestPath = fromRoot('target/public/bundles/chunk-manifest.json');
       const raw = readFileSync(manifestPath, 'utf-8');
-      const manifest = JSON.parse(raw) as { chunks: string[] };
-      const result = manifest.chunks;
+      const manifest = JSON.parse(raw) as { sharedChunks?: string[]; chunks?: string[] };
+      const result = manifest.sharedChunks ?? manifest.chunks ?? [];
       if (isDist) {
         this.chunkManifestCache = result;
       }
