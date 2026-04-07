@@ -24,6 +24,7 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
@@ -116,6 +117,17 @@ export const UserPanelContent = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.user}
       />
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedDataSection
         identityFields={identityFields}
         userName={userName}
