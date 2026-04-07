@@ -15,7 +15,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -23,34 +23,34 @@ const mockRules = [
     id: 'rule-2',
     kind: 'signal',
     enabled: false,
-    metadata: { name: 'Rule Two', labels: [] },
+    metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM metrics-*' } },
   },
 ];
 
-const mockRulesWithManyLabels = [
+const mockRulesWithManyTags = [
   {
-    id: 'rule-many-labels',
+    id: 'rule-many-tags',
     kind: 'alert',
     enabled: true,
     metadata: {
-      name: 'Rule With Many Labels',
-      labels: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
+      name: 'Rule With Many Tags',
+      tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
-const mockRulesWithLongLabels = [
+const mockRulesWithLongTags = [
   {
-    id: 'rule-long-labels',
+    id: 'rule-long-tags',
     kind: 'alert',
     enabled: true,
     metadata: {
-      name: 'Rule With Long Labels',
-      labels: ['this-is-a-very-long-label-name-that-should-be-truncated'],
+      name: 'Rule With Long Tags',
+      tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
@@ -161,37 +161,37 @@ describe('RulesListTable', () => {
       expect(screen.getByText('Detect only')).toBeInTheDocument();
     });
 
-    it('renders label badges for rules with labels', () => {
+    it('renders tag badges for rules with tags', () => {
       renderTable();
 
       expect(screen.getByText('prod')).toBeInTheDocument();
     });
 
-    it('truncates labels to show only the first 1 and a +N badge for overflow', () => {
+    it('truncates tags to show only the first 1 and a +N badge for overflow', () => {
       renderTable({
-        items: mockRulesWithManyLabels as any,
+        items: mockRulesWithManyTags as any,
         totalItemCount: 1,
       });
 
-      // First label should be visible
+      // First tag should be visible
       expect(screen.getByText('new')).toBeInTheDocument();
 
-      // Remaining 8 labels should be hidden behind +8 badge
-      expect(screen.getByTestId('overflowLabelsBadge')).toHaveTextContent('+8');
+      // Remaining 8 tags should be hidden behind +8 badge
+      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+8');
 
-      // Overflow labels should not be directly visible
+      // Overflow tags should not be directly visible
       expect(screen.queryByText('rna')).not.toBeInTheDocument();
     });
 
-    it('renders long label text with native EuiBadge truncation', () => {
+    it('renders long tag text with native EuiBadge truncation', () => {
       renderTable({
-        items: mockRulesWithLongLabels as any,
+        items: mockRulesWithLongTags as any,
         totalItemCount: 1,
       });
 
-      // The full label text is in the DOM; CSS handles visual truncation
+      // The full tag text is in the DOM; CSS handles visual truncation
       expect(
-        screen.getByText('this-is-a-very-long-label-name-that-should-be-truncated')
+        screen.getByText('this-is-a-very-long-tag-name-that-should-be-truncated')
       ).toBeInTheDocument();
     });
   });

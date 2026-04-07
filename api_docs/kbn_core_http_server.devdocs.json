@@ -4495,26 +4495,6 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
-                "plugin": "dataCatalog",
-                "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
-              },
-              {
-                "plugin": "dataCatalog",
-                "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
                 "plugin": "elasticConsole",
                 "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/conversations.ts"
               },
@@ -4553,6 +4533,14 @@
               {
                 "plugin": "licenseManagement",
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
+              },
+              {
+                "plugin": "queryActivity",
+                "path": "x-pack/platform/plugins/shared/query_activity/server/routes/privileges.ts"
+              },
+              {
+                "plugin": "queryActivity",
+                "path": "x-pack/platform/plugins/shared/query_activity/server/routes/search.ts"
               },
               {
                 "plugin": "sampleDataIngest",
@@ -4985,18 +4973,6 @@
               {
                 "plugin": "searchHomepage",
                 "path": "x-pack/solutions/search/plugins/search_homepage/server/routes/size_stats.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/status.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/status.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/onboarding.ts"
               },
               {
                 "plugin": "searchNotebooks",
@@ -5511,50 +5487,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
               },
               {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
                 "plugin": "features",
                 "path": "x-pack/platform/plugins/shared/features/server/routes/index.test.ts"
               },
@@ -5565,6 +5497,14 @@
               {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "queryActivity",
+                "path": "x-pack/platform/plugins/shared/query_activity/server/routes/privileges.test.ts"
+              },
+              {
+                "plugin": "queryActivity",
+                "path": "x-pack/platform/plugins/shared/query_activity/server/routes/search.test.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -5681,6 +5621,18 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/config.test.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.test.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.test.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/routes/health.test.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -7240,6 +7192,10 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/skills.ts"
               },
               {
@@ -7623,14 +7579,6 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
                 "plugin": "elasticConsole",
                 "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/chat_completions.ts"
               },
@@ -7671,6 +7619,10 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_permissions_route.ts"
               },
               {
+                "plugin": "queryActivity",
+                "path": "x-pack/platform/plugins/shared/query_activity/server/routes/cancel.ts"
+              },
+              {
                 "plugin": "sampleDataIngest",
                 "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
@@ -7689,6 +7641,10 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8135,14 +8091,6 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
-                "plugin": "searchIndices",
-                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/indices.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/indices.ts"
-              },
-              {
                 "plugin": "searchPlayground",
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
               },
@@ -8551,30 +8499,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/routes/key_rotation.test.ts"
               },
@@ -8589,6 +8513,10 @@
               {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "queryActivity",
+                "path": "x-pack/platform/plugins/shared/query_activity/server/routes/cancel.test.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -9855,10 +9783,6 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
                 "plugin": "elasticConsole",
                 "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/conversations.ts"
               },
@@ -10679,14 +10603,6 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
-              },
-              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/delete.ts"
               },
@@ -10763,10 +10679,6 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
-                "plugin": "searchIndices",
-                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/documents.ts"
-              },
-              {
                 "plugin": "searchQueryRules",
                 "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
@@ -10809,34 +10721,6 @@
               {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -16798,6 +16682,14 @@
               {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/datasets/get_dataset.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/tracing/get_projects.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/tracing/get_project_traces.ts"
               },
               {
                 "plugin": "inferenceEndpoint",

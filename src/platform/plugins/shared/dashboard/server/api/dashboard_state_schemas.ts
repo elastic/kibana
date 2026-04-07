@@ -11,12 +11,13 @@ import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 /**
  * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
  * get the pinned panel schema from a pinned panel registry **independent** from controls
  */
 import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
-import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
@@ -217,7 +218,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         }
       ),
       project_routing: schema.maybe(schema.string()),
-      query: schema.maybe(querySchema),
+      query: schema.maybe(asCodeQuerySchema),
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
         schema.arrayOf(
