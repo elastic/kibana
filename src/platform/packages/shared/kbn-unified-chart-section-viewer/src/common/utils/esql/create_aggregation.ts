@@ -45,7 +45,7 @@ function buildAggregationNode(
   instrument: MappingTimeSeriesMetricType,
   field: ESQLAstExpression,
   customFunction?: string
-) {
+): ESQLAstExpression | undefined {
   // Normalize to array for consistent handling
   const fieldTypesArray = Array.isArray(types) ? types : [types];
   const primaryType = fieldTypesArray[0];
@@ -59,9 +59,11 @@ function buildAggregationNode(
       if (castFunction) {
         castedField = synth.exp`${synth.kwd(castFunction)}(${field})`;
       }
+    } else {
+      // Incompatible types (e.g., keyword + double) — return undefined
+      // so callers can gracefully produce a no-op instead of a broken query
+      return undefined;
     }
-    // If types are incompatible, we'll proceed with the primary type
-    // and let the query execution surface the error to the user
   }
 
   if (customFunction) {
@@ -115,6 +117,9 @@ export function createMetricAggregation({
 }): string {
   const field = metricName ? synth.col(metricName.split('.')) : synth.dpar(placeholderName);
   const node = buildAggregationNode(type, instrument, field, customFunction);
+  if (!node) {
+    return '';
+  }
   return BasicPrettyPrinter.print(node).trim();
 }
 

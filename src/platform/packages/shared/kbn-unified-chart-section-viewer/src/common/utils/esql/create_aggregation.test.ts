@@ -193,16 +193,31 @@ describe('createMetricAggregation with conflicting types', () => {
   });
 
   describe('incompatible types with multiple field types', () => {
-    it('should proceed with primary type when incompatible types are detected', () => {
-      // When types are incompatible (e.g., keyword + double), no cast is applied
-      // The query will execute and let ES|QL surface the verification_exception
+    it('should return empty string when incompatible types are detected', () => {
       const result = createMetricAggregation({
         type: [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE],
         instrument: 'gauge',
         metricName: 'field.name',
       });
-      // Uses the primary type without casting, will fail at query time
-      expect(result).toBe('AVG(field.name)');
+      expect(result).toBe('');
+    });
+
+    it('should return empty string for text + long incompatible types', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.LONG],
+        instrument: 'counter',
+        metricName: 'field.name',
+      });
+      expect(result).toBe('');
+    });
+
+    it('should return empty string for date + double incompatible types', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('');
     });
   });
 
