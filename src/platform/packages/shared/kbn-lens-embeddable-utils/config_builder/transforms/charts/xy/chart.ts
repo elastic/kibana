@@ -248,7 +248,7 @@ function convertDomainStateToAPIFormat(
     if (domain.mode === 'full') {
       return {
         type: 'full',
-        ...{ rounding: domain.niceValues ?? defaultConfig.rounding },
+        rounding: domain.niceValues ?? defaultConfig.rounding,
       };
     }
     if (domain.mode === 'custom') {
@@ -259,13 +259,13 @@ function convertDomainStateToAPIFormat(
         type: 'custom',
         min: domain.lowerBound,
         max: domain.upperBound,
-        ...{ rounding: domain.niceValues ?? defaultConfig.rounding },
+        rounding: domain.niceValues ?? defaultConfig.rounding,
       };
     }
     if (domain.mode === 'dataBounds') {
       return {
         type: 'fit',
-        ...{ rounding: domain.niceValues ?? defaultConfig.rounding },
+        rounding: domain.niceValues ?? defaultConfig.rounding,
       };
     }
   }
