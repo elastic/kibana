@@ -154,7 +154,15 @@ const useMessageEditorController = ({
 
         for (const segment of segments) {
           if (segment.type === 'text') {
-            ref.current.appendChild(document.createTextNode(segment.value));
+            const parts = segment.value.split('\n');
+            parts.forEach((part, i) => {
+              if (part) {
+                ref.current!.appendChild(document.createTextNode(part));
+              }
+              if (i < parts.length - 1) {
+                ref.current!.appendChild(document.createElement('br'));
+              }
+            });
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
           }

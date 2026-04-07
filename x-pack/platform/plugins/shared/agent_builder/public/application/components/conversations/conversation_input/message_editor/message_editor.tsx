@@ -65,9 +65,27 @@ const fragmentContainsBadge = (fragment?: DocumentFragment): boolean => {
 };
 
 /**
+ * Converts a plain text string into a DocumentFragment, preserving line breaks
+ * as <br> elements. Text nodes alone cannot render \n in a contenteditable div.
+ */
+export const createTextFragment = (text: string): DocumentFragment => {
+  const fragment = document.createDocumentFragment();
+  const parts = text.split('\n');
+  parts.forEach((part, i) => {
+    if (part) {
+      fragment.appendChild(document.createTextNode(part));
+    }
+    if (i < parts.length - 1) {
+      fragment.appendChild(document.createElement('br'));
+    }
+  });
+  return fragment;
+};
+
+/**
  * Sanitizes pasted HTML to only allow badge spans.
  * Uses DOMParser to safely parse HTML, then walks its children,
- * keeping only badge spans and text nodes.
+ * keeping only badge spans, <br> elements, and text nodes.
  */
 const sanitizeHtmlIncludeOnlyTextAndBadges = (html: string): DocumentFragment => {
   const parser = new DOMParser();
@@ -82,6 +100,8 @@ const sanitizeHtmlIncludeOnlyTextAndBadges = (html: string): DocumentFragment =>
       if (isElementCommandBadge(element)) {
         // Clone the badge span
         fragment.appendChild(element.cloneNode(true));
+      } else if (element.tagName === 'BR') {
+        fragment.appendChild(document.createElement('br'));
       } else {
         // Strip other HTML, keep text content
         fragment.appendChild(document.createTextNode(element.textContent ?? ''));
@@ -207,7 +227,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           const hasBadgeHtml = htmlData && stringContainsBadge(htmlData);
           const node = hasBadgeHtml
             ? sanitizeHtmlIncludeOnlyTextAndBadges(htmlData)
-            : document.createTextNode(textData);
+            : createTextFragment(textData);
 
           insertNodeAtCursor(node);
 
