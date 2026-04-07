@@ -102,9 +102,11 @@ const metricStatePrimaryMetricOptionsSchema = {
   // to avoid default injection in the wrong type
   type: schema.literal('primary'),
   /**
-   * Sub label
+   * Subtitle
    */
-  sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
+  subtitle: schema.maybe(
+    schema.string({ meta: { description: 'Subtitle below the primary metric value' } })
+  ),
   labels: schema.object(
     {
       /**
@@ -193,16 +195,6 @@ const metricStatePrimaryMetricOptionsSchema = {
     metricValuePositionSchema({
       meta: { description: 'Position of the primary metric value (top, middle, or bottom)' },
       defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryPosition,
-    })
-  ),
-  /**
-   * Font weight for title and subtitle. Possible values:
-   * - 'bold': Bold font weight
-   * - 'normal': Normal font weight
-   */
-  title_weight: schema.maybe(
-    schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
-      meta: { description: 'Font weight for title and subtitle' },
     })
   ),
 };

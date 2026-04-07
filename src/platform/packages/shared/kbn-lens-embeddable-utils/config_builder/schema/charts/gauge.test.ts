@@ -71,7 +71,7 @@ describe('Gauge Schema', () => {
           field: 'performance_score',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           title: { text: 'Score' },
-          sub_title: 'with 80% target',
+          subtitle: 'with 80% target',
           color,
           ticks: { mode: 'bands' as const },
           min: {
@@ -146,7 +146,7 @@ describe('Gauge Schema', () => {
       },
       metric: {
         column: 'score',
-        sub_title: 'Performance',
+        subtitle: 'Performance',
       },
     } satisfies GaugeInput;
 
@@ -165,7 +165,7 @@ describe('Gauge Schema', () => {
       metric: {
         column: 'score',
         title: { text: 'Score' },
-        sub_title: 'with 80% target',
+        subtitle: 'with 80% target',
         color: {
           type: 'dynamic',
           range: 'absolute',
