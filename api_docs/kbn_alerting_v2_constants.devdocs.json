@@ -33,7 +33,24 @@
           "\"/api/alerting/v2/alerts\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 9,
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/notification_policies/suggestions/values\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -50,7 +67,7 @@
           "\"/api/alerting/v2/notification_policies\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,13 +84,118 @@
           "\"/api/alerting/v2/rules\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 8,
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.DEFAULT_ARTIFACT_VALUE_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_ARTIFACT_VALUE_LIMIT",
+        "description": [
+          "Default maximum character length for artifact values (applies when no type-specific override exists)"
+        ],
+        "signature": [
+          "1024"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.MAX_ARTIFACT_VALUE_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_ARTIFACT_VALUE_LIMIT",
+        "description": [
+          "The highest value in ARTIFACT_VALUE_LIMITS (used as the Zod base .max())"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.MAX_TAG_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_TAG_LENGTH",
+        "description": [
+          "Maximum length of a single tag (label)"
+        ],
+        "signature": [
+          "64"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/labels.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.RUNBOOK_ARTIFACT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "RUNBOOK_ARTIFACT_TYPE",
+        "description": [
+          "Artifact type identifier for runbooks"
+        ],
+        "signature": [
+          "\"runbook\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
+        "lineNumber": 9,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ARTIFACT_VALUE_LIMITS",
+        "type": "Object",
+        "tags": [],
+        "label": "ARTIFACT_VALUE_LIMITS",
+        "description": [
+          "\nType-specific artifact value length limits.\n\nTo raise or add a limit for a new artifact type, add an entry here.\nThe framework schema resolves: `ARTIFACT_VALUE_LIMITS[type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT`.\nNo framework code changes are needed — only this map."
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-constants",
+            "id": "def-common.ARTIFACT_VALUE_LIMITS.RUNBOOK_ARTIFACT_TYPE",
+            "type": "number",
+            "tags": [],
+            "label": "[RUNBOOK_ARTIFACT_TYPE]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }
