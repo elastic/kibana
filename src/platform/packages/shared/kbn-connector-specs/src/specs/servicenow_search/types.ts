@@ -49,7 +49,7 @@ export const SearchInputSchema = z.object({
     .describe(
       'Comma-separated list of fields to return (e.g., sys_id,number,short_description,description)'
     ),
-  limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
+  limit: z.number().default(20).describe('Maximum number of results to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
 export type SearchInput = z.infer<typeof SearchInputSchema>;
@@ -74,7 +74,7 @@ export const ListRecordsInputSchema = z.object({
         'Examples: number=INC0010023 | active=true^priority=1 | state=1^ORstate=2 | assigned_toISEMPTY^active=true | assignment_group.nameLIKEnetwork^state!=6 | short_descriptionLIKEnetwork^priority<=2'
     ),
   fields: z.string().optional().describe('Comma-separated list of fields to return'),
-  limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
+  limit: z.number().default(20).describe('Maximum number of results to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
   orderBy: z
     .string()
@@ -88,7 +88,7 @@ export const ListTablesInputSchema = z.object({
     .string()
     .optional()
     .describe('Optional filter to search table names or labels (e.g., "incident", "CMDB")'),
-  limit: z.number().optional().describe('Maximum number of tables to return (default: 50)'),
+  limit: z.number().default(50).describe('Maximum number of tables to return (default: 50)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
 export type ListTablesInput = z.infer<typeof ListTablesInputSchema>;
@@ -97,6 +97,7 @@ export const ListKnowledgeBasesInputSchema = z.object({
   limit: z
     .number()
     .optional()
+    .default(20)
     .describe('Maximum number of knowledge bases to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
@@ -111,7 +112,7 @@ export const GetCommentsInputSchema = z.object({
   recordSysId: z
     .string()
     .describe('The sys_id of the record whose comments/work notes to retrieve'),
-  limit: z.number().optional().describe('Maximum number of entries to return (default: 20)'),
+  limit: z.number().default(20).describe('Maximum number of entries to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
 export type GetCommentsInput = z.infer<typeof GetCommentsInputSchema>;

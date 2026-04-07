@@ -117,9 +117,9 @@ export const FigmaConnector: ConnectorSpec = {
           ),
         format: z
           .enum(['png', 'jpg', 'svg', 'pdf'])
-          .optional()
+          .default('png')
           .describe('Image format (default: png)'),
-        scale: z.number().optional().describe('Scale factor between 0.01 and 4 (default: 1)'),
+        scale: z.number().min(0.01).max(4).default(1).describe('Scale factor between 0.01 and 4 (default: 1)'),
       }),
       handler: async (ctx, input: Figma.RenderNodesInput) => {
         const params: Record<string, string | number> = { ids: input.nodeIds };

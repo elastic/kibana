@@ -46,7 +46,7 @@ export const NotionConnector: ConnectorSpec = {
   actions: {
     // https://developers.notion.com/reference/post-search
     searchPageOrDSByTitle: {
-      isTool: false,
+      isTool: true,
       description:
         'Search for Notion pages or data sources (databases) whose title contains a given string. Use this to discover what pages or databases exist before fetching their content or querying their rows.',
       input: z.object({
@@ -90,7 +90,7 @@ export const NotionConnector: ConnectorSpec = {
 
     // https://developers.notion.com/reference/retrieve-a-page
     getPage: {
-      isTool: false,
+      isTool: true,
       description:
         'Given the ID of a Notion page, retrieve its metadata — including title, properties, parent, created/edited timestamps, and URL. Use this after finding a page ID via searchPageOrDSByTitle.',
       input: z.object({
@@ -111,7 +111,7 @@ export const NotionConnector: ConnectorSpec = {
 
     // https://developers.notion.com/reference/retrieve-a-data-source
     getDataSource: {
-      isTool: false,
+      isTool: true,
       description:
         'Given the ID of a Notion data source (database), retrieve its schema — including the names, types, and options for all columns/properties. Use this before querying rows so you know what filters and fields are available.',
       input: z.object({
@@ -132,7 +132,7 @@ export const NotionConnector: ConnectorSpec = {
 
     // https://developers.notion.com/reference/query-a-data-source
     queryDataSource: {
-      isTool: false,
+      isTool: true,
       description:
         'Given the ID of a Notion data source (database), query its rows. Returns up to 10 rows by default. Supports filtering via the Notion filter JSON format (see https://developers.notion.com/reference/filter-data-source-entries) and cursor-based pagination. Use getDataSource first to understand the available columns and their types before constructing a filter.',
       input: z.object({

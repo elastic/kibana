@@ -124,7 +124,7 @@ const SlackResolveChannelIdInputSchema = z.object({
     .describe(
       'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.'
     ),
-  excludeArchived: z.boolean().optional().describe('Exclude archived channels (default true)'),
+  excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
   cursor: z
     .string()
     .optional()

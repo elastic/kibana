@@ -49,7 +49,7 @@ export const ListChannelMessagesInputSchema = z.object({
     .number()
     .min(1)
     .max(50)
-    .optional()
+    .default(20)
     .describe('Number of messages to return (max 50; default: 20)'),
 });
 export type ListChannelMessagesInput = z.infer<typeof ListChannelMessagesInputSchema>;
@@ -65,7 +65,7 @@ export const ListChatsInputSchema = z.object({
     .number()
     .min(1)
     .max(50)
-    .optional()
+    .default(20)
     .describe('Number of chats to return (max 50; default: 20)'),
 });
 export type ListChatsInput = z.infer<typeof ListChatsInputSchema>;
@@ -80,7 +80,7 @@ export const ListChatMessagesInputSchema = z.object({
     .number()
     .min(1)
     .max(50)
-    .optional()
+    .default(20)
     .describe('Number of messages to return (max 50; default: 20)'),
 });
 export type ListChatMessagesInput = z.infer<typeof ListChatMessagesInputSchema>;
@@ -97,8 +97,8 @@ export const SearchMessagesInputSchema = z.object({
     .number()
     .min(1)
     .max(25)
-    .optional()
+    .default(25)
     .describe('Number of results to return (max 25; default: 25 when omitted)'),
-  enableTopResults: z.boolean().optional().describe('Sort results by relevance (default: false)'),
+  enableTopResults: z.boolean().default(false).describe('Sort results by relevance (default: false)'),
 });
 export type SearchMessagesInput = z.infer<typeof SearchMessagesInputSchema>;

@@ -66,7 +66,8 @@ export type ListEscalationPoliciesInput = z.infer<typeof ListEscalationPoliciesI
 export const ListIncidentsInputSchema = z.object({
   limit: z
     .number()
-    .optional()
+    .max(1000)
+    .default(25)
     .describe('Maximum number of incidents to return (max 1000, default 25)'),
   status: z
     .array(z.string())

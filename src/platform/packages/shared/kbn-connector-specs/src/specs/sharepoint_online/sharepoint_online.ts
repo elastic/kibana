@@ -698,7 +698,7 @@ export const SharepointOnline: ConnectorSpec = {
     '- **Delegated auth (`oauth_authorization_code`)**: `getAllSites` falls back to `/sites?search=` — provide a keyword or omit for wildcard (`*`). The `search` action does not use `region` (omit it to avoid 400 errors).',
     '',
     '### Escape Hatch',
-    'Use `callGraphAPI` to call any Microsoft Graph v1.0 endpoint not covered by the named actions. Paths must start with `/v1.0/`. Useful for accessing user profiles, calendar data, Teams messages (with delegated auth), or other Graph resources.',
+    'Use `callGraphAPI` to call any Microsoft Graph v1.0 endpoint not covered by the named actions. Paths must start with `/v1.0/`. Useful for accessing user profiles, calendar data, or other Graph resources.',
     '',
     '### Common Gotchas',
     '- `@microsoft.graph.downloadUrl` values are time-limited pre-authenticated URLs — use them promptly after calling `getDriveItems`.',
