@@ -29,14 +29,14 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
     const dataSetStep: DataSetStep = {
       name: node.stepId,
       type: node.stepType,
-      spaceId: '',
+      stepId: node.stepId,
       with: node.configuration.with || {},
       'max-step-size': node.configuration['max-step-size'],
     };
     super(dataSetStep, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
-  public override getInput(): unknown {
+  public override getInput(): Record<string, unknown> {
     const withData = this.node.configuration.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
   }

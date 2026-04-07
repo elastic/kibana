@@ -25,10 +25,11 @@ describe('SolutionViewSwitchModal', () => {
         onSwitch={onSwitch}
         currentSolution="es"
         isLoading={false}
+        manageSpacesUrl="app/management/kibana/spaces"
       />
     );
 
-    await user.click(screen.getByRole('button', { name: 'Switch' }));
+    await user.click(screen.getByRole('button', { name: 'Switch now' }));
 
     expect(onSwitch).toHaveBeenCalledWith('es');
   });

@@ -20,11 +20,13 @@ import { useRuleDetailsContext } from '../rule_details_context';
 import { ExecutionLogTable } from './execution_log_table';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useKibana as mockUseKibana } from '../../../../../common/lib/kibana/__mocks__';
+import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../rule_monitoring/components/execution_results_table/use_execution_results');
 jest.mock('../rule_details_context');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../../common/hooks/use_experimental_features', () => {
   return {
     useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
@@ -61,10 +63,26 @@ mockUseRuleExecutionEvents.mockReturnValue({
   isFetching: false,
 });
 
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+
+const defaultAlertsPrivileges = {
+  hasAlertsAll: true,
+  hasAlertsRead: true,
+  hasEncryptionKey: true,
+  hasIndexManage: true,
+  hasIndexMaintenance: true,
+  hasIndexRead: true,
+  hasIndexWrite: true,
+  hasIndexUpdateDelete: true,
+  isAuthenticated: true,
+  loading: false,
+};
+
 describe('ExecutionLogTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+    mockUseAlertsPrivileges.mockReturnValue(defaultAlertsPrivileges);
   });
 
   test('Shows total events returned', () => {
@@ -92,5 +110,30 @@ describe('ExecutionLogTable', () => {
     fireEvent.click(switchButton);
 
     expect(mockTelemetry.reportEvent).toHaveBeenCalled();
+  });
+
+  describe('actions column', () => {
+    const doRender = ({ hasAlertsRead }: { hasAlertsRead: boolean }) => {
+      const ruleDetailsContext = useRuleDetailsContextMock.create();
+      (useRuleDetailsContext as jest.Mock).mockReturnValue(ruleDetailsContext);
+      mockUseAlertsPrivileges.mockReturnValue({
+        ...defaultAlertsPrivileges,
+        hasAlertsRead,
+      });
+      render(<ExecutionLogTable ruleId={'0'} selectAlertsTab={noop} {...coreStart} />, {
+        wrapper: TestProviders,
+      });
+    };
+    it('renders filter action when user can read alerts', () => {
+      doRender({ hasAlertsRead: true });
+      expect(screen.getAllByTestId('action-filter-by-execution-id').length).toBeGreaterThanOrEqual(
+        1
+      );
+    });
+
+    it('does not render filter action when user cannot read alerts', () => {
+      doRender({ hasAlertsRead: false });
+      expect(screen.queryByTestId('action-filter-by-execution-id')).not.toBeInTheDocument();
+    });
   });
 });

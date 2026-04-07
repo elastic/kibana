@@ -91,6 +91,7 @@ export namespace WiredStream {
   }
 
   export interface Definition extends IngestBaseStream.Definition {
+    type: 'wired';
     ingest: WiredIngest;
   }
 
@@ -115,22 +116,32 @@ export namespace WiredStream {
   >;
 }
 
-const wiredStreamDefinitionSchema = ingestBaseStreamDefinitionSchema.extend({
-  ingest: wiredIngestSchemaObject,
-});
+const wiredStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
+  .extend({
+    type: z.literal('wired'),
+    ingest: wiredIngestSchemaObject,
+  })
+  .meta({ id: 'WiredStreamDefinition' });
 
-const wiredStreamGetResponseSchema = ingestBaseStreamGetResponseSchema.extend({
-  stream: wiredStreamDefinitionSchema,
-  data_stream_exists: z.boolean(),
-  inherited_fields: inheritedFieldDefinitionSchema,
-  effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
-  effective_settings: wiredIngestStreamEffectiveSettingsSchema,
-  effective_failure_store: wiredIngestStreamEffectiveFailureStoreSchema,
-});
+const wiredStreamGetResponseSchema = ingestBaseStreamGetResponseSchema
+  .extend({
+    stream: wiredStreamDefinitionSchema,
+    data_stream_exists: z.boolean(),
+    inherited_fields: inheritedFieldDefinitionSchema,
+    effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+    effective_settings: wiredIngestStreamEffectiveSettingsSchema,
+    effective_failure_store: wiredIngestStreamEffectiveFailureStoreSchema,
+  })
+  .meta({ id: 'WiredStreamGetResponse' });
 
-const wiredStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema.extend({
-  stream: ingestBaseStreamUpsertDefinitionSchema.extend({ ingest: wiredIngestUpsertSchemaObject }),
-});
+const wiredStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema
+  .extend({
+    stream: ingestBaseStreamUpsertDefinitionSchema.extend({
+      type: z.literal('wired'),
+      ingest: wiredIngestUpsertSchemaObject,
+    }),
+  })
+  .meta({ id: 'WiredStreamUpsertRequest' });
 
 export const WiredStream: {
   Definition: Validation<BaseStream.Model['Definition'], WiredStream.Definition>;

@@ -8,12 +8,13 @@
 import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { tags } from '@kbn/scout';
 import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Network Direction Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should set network direction with internal networks', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-network-direction-basic';
@@ -29,7 +30,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -53,7 +54,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -84,7 +85,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -114,7 +115,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1', event: { kind: 'test' } },
@@ -150,7 +151,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1' },

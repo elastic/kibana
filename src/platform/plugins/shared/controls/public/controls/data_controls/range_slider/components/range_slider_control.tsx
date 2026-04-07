@@ -12,7 +12,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { debounce } from 'lodash';
 import type { EuiRangeTick, EuiDualRangeProps } from '@elastic/eui';
 import { EuiDualRange, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import type { RangeSliderValue } from '@kbn/controls-schemas';
+import type { RangeSliderControlState, RangeSliderValue } from '@kbn/controls-schemas';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';
@@ -26,9 +26,9 @@ export interface Props {
   fieldName: string;
   max: number | undefined;
   min: number | undefined;
-  step: number;
+  step: RangeSliderControlState['step'];
   uuid: string;
-  value: RangeSliderValue | undefined;
+  value: RangeSliderControlState['value'];
   fieldFormatter?: (value: string) => string;
   onChange: (value: RangeSliderValue | undefined) => void;
   isEdit: boolean;
@@ -232,7 +232,7 @@ export const RangeSliderControl: FC<Props> = ({
                 >
                   <EuiToken
                     tabIndex={0}
-                    iconType="alert"
+                    iconType="warning"
                     size="s"
                     color="euiColorVis9"
                     shape="square"

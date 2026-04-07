@@ -8,19 +8,18 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { z } from '@kbn/zod/v4';
+import { workflowTools } from '../../../common/agent_builder/constants';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-
-export const LIST_WORKFLOWS_TOOL_ID = 'platform.workflows.list_workflows';
 
 export function registerListWorkflowsTool(
   agentBuilder: AgentBuilderPluginSetupContract,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: LIST_WORKFLOWS_TOOL_ID,
+    id: workflowTools.listWorkflows,
     type: ToolType.builtin,
     description: `List workflows in the user's environment.
 
@@ -40,7 +39,9 @@ Returns workflow summaries: id, name, description, tags, enabled status.`,
     tags: ['workflows'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };

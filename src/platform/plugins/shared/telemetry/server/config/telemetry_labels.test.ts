@@ -30,6 +30,8 @@ describe('labelsSchema', () => {
   test('does not allow unknowns', () => {
     expect(() => {
       labelsSchema.validate({ foo: 'bar' });
-    }).toThrowErrorMatchingInlineSnapshot(`"[foo]: definition for this key is missing"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[foo]: Additional properties are not allowed ('foo' was unexpected)"`
+    );
   });
 });

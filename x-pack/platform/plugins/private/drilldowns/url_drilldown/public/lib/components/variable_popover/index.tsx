@@ -21,6 +21,7 @@ import {
   txtAddVariableButtonTitle,
   txtUrlTemplateVariablesHelpLinkText,
   txtUrlTemplateVariablesFilterPlaceholderText,
+  txtVariablePopoverAriaLabel,
 } from './i18n';
 
 export interface Props {
@@ -44,7 +45,7 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
       button={
         <EuiText size="xs">
           <EuiLink onClick={() => setIsVariablesPopoverOpen(true)}>
-            {txtAddVariableButtonTitle} <EuiIcon type="indexOpen" />
+            {txtAddVariableButtonTitle} <EuiIcon type="indexOpen" aria-hidden={true} />
           </EuiLink>
         </EuiText>
       }
@@ -52,6 +53,7 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={txtVariablePopoverAriaLabel}
     >
       <EuiSelectable
         singleSelection={true}

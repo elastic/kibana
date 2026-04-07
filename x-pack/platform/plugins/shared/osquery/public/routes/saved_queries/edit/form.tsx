@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FormProvider } from 'react-hook-form';
@@ -29,12 +29,14 @@ interface EditSavedQueryFormProps {
   defaultValue?: SavedQuerySOFormData;
   handleSubmit: (payload: unknown) => Promise<void>;
   viewMode?: boolean;
+  onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
 const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
   defaultValue,
   handleSubmit,
   viewMode,
+  onDirtyStateChange,
 }) => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
@@ -46,8 +48,15 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
     serializer,
     idSet,
     handleSubmit: formSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = hooksForm;
+
+  const onDirtyStateChangeRef = useRef(onDirtyStateChange);
+  onDirtyStateChangeRef.current = onDirtyStateChange;
+
+  useEffect(() => {
+    onDirtyStateChangeRef.current?.(isDirty);
+  }, [isDirty]);
 
   const onSubmit = async (payload: SavedQueryFormData) => {
     const serializedData = serializer(payload);

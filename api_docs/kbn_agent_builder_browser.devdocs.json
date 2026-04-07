@@ -165,7 +165,7 @@
           "\nPublic-facing contract for the attachment service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 136,
+        "lineNumber": 156,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -195,7 +195,7 @@
               "<TAttachment>) => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 140,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -213,7 +213,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 147,
+                "lineNumber": 167,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -239,7 +239,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 148,
+                "lineNumber": 168,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -273,7 +273,7 @@
               "<TAttachment> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 151,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -291,7 +291,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 158,
+                "lineNumber": 178,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -325,7 +325,7 @@
           "<TAttachment>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 92,
+        "lineNumber": 104,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -343,7 +343,7 @@
               "(attachment: TAttachment) => string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 96,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -359,7 +359,7 @@
                   "TAttachment"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 99,
+                "lineNumber": 111,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -383,7 +383,7 @@
               ") | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 100,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -405,7 +405,7 @@
               "<unknown> | undefined; }) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 104,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -418,7 +418,7 @@
                 "label": "args",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 108,
+                "lineNumber": 120,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -434,7 +434,7 @@
                       "TAttachment"
                     ],
                     "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                    "lineNumber": 108,
+                    "lineNumber": 120,
                     "columnNumber": 22,
                     "deprecated": false,
                     "trackAdoption": false
@@ -451,7 +451,7 @@
                       "<unknown> | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                    "lineNumber": 108,
+                    "lineNumber": 120,
                     "columnNumber": 47,
                     "deprecated": false,
                     "trackAdoption": false
@@ -476,7 +476,7 @@
               "<TAttachment>) => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 109,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -493,7 +493,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 114,
+                "lineNumber": 126,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -519,7 +519,7 @@
               ") => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 115,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -536,7 +536,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 126,
+                "lineNumber": 138,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -553,7 +553,7 @@
                   "CanvasRenderCallbacks"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 127,
+                "lineNumber": 139,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -579,7 +579,7 @@
               "[]) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 129,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -596,7 +596,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 133,
+                "lineNumber": 145,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -604,6 +604,49 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.onAttachmentMount",
+            "type": "Function",
+            "tags": [],
+            "label": "onAttachmentMount",
+            "description": [
+              "\nOptional lifecycle hook called when an attachment is first rendered in the conversation.\nCalled once per attachment (not per version). Use for setting up subscriptions or\nother side effects that should persist across version renders.\n"
+            ],
+            "signature": [
+              "((params: ",
+              "AttachmentLifecycleParams",
+              "<TAttachment>) => void | (() => void)) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.onAttachmentMount.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "AttachmentLifecycleParams",
+                  "<TAttachment>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 153,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "Optional cleanup function called when the attachment is removed from the conversation."
+            ]
           }
         ],
         "initialIsOpen": false

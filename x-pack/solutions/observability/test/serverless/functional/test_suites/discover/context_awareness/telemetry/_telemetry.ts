@@ -224,7 +224,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(3);
+        expect(events.length).to.be(2);
 
         // should trigger a new event after opening the doc viewer
         await dataGrid.clickRowToggle();
@@ -235,7 +235,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(4);
+        expect(events.length).to.be(3);
 
         expect(events[events.length - 1].properties).to.eql({
           contextLevel: 'documentLevel',

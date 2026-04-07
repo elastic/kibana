@@ -65,7 +65,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       name: '',
       actions: [
         ...(canSave
-          ? [
+          ? ([
               {
                 name: i18n.translate('xpack.apm.settings.customLink.table.editButtonLabel', {
                   defaultMessage: 'Edit',
@@ -82,7 +82,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
                   onCustomLinkSelected(customLink);
                 },
               },
-            ]
+            ] satisfies ITableColumn<CustomLink>['actions'])
           : []),
       ],
     },

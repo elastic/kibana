@@ -76,6 +76,7 @@ describe('getDatasetIndex', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "esqlQuery": "from test_index | limit 10",
         "index": "test_index",
         "timeFieldName": undefined,
       }
@@ -242,13 +243,15 @@ describe('buildDatasourceStates', () => {
         metrics: [
           {
             type: 'primary',
-            operation: 'value',
             label: 'test',
             column: 'test',
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
+        styling: {
+          primary: {
+            value: { sizing: 'auto' },
+          },
+        },
         sampling: 1,
         ignore_global_filters: false,
       },
@@ -267,7 +270,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
-                "index": "test",
+                "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
@@ -278,6 +281,8 @@ describe('buildDatasourceStates', () => {
         },
         "usedDataviews": Object {
           "layer_0": Object {
+            "dataSourceType": "esql",
+            "esqlQuery": "from test | limit 10",
             "index": "test",
             "timeFieldName": undefined,
             "type": "adHocDataView",
@@ -513,13 +518,15 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
       filters: [
@@ -564,13 +571,16 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto', alignment: 'left' },
+          labels: { alignment: 'left' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
     };
@@ -590,14 +600,17 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+          labels: { alignment: 'left' },
+        },
+      },
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
         },
       ],
       sampling: 1,
@@ -684,8 +697,8 @@ describe('filtersAndQueryToApiFormat', () => {
           },
         ],
         "query": Object {
-          "language": "kuery",
-          "query": "brand: \\"apple\\"",
+          "expression": "brand: \\"apple\\"",
+          "language": "kql",
         },
       }
     `);

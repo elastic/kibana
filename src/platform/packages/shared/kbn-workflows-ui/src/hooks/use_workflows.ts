@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
-import { searchWorkflows } from '../services/search_workflows';
+import { useWorkflowsApi } from '../api/use_workflows_api';
 
 /**
  * Fetches a paginated/filterable list of workflows.
- *
- * Sends `POST /api/workflows/search` with the provided search params.
  *
  * @example
  * ```ts
@@ -23,17 +20,12 @@ import { searchWorkflows } from '../services/search_workflows';
  * ```
  */
 export function useWorkflows(params: WorkflowsSearchParams) {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
 
   return useQuery<WorkflowListDto>({
     networkMode: 'always',
     queryKey: ['workflows', params],
-    queryFn: async () => {
-      if (!http) {
-        return Promise.reject(new Error('Http service is not available'));
-      }
-      return searchWorkflows(http, params);
-    },
+    queryFn: async () => api.getWorkflows(params),
     keepPreviousData: true,
   });
 }

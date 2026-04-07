@@ -10,10 +10,15 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
+import { telemetryHandler } from '../telemetry_handler';
 
-export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerDeleteRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined
+) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
     path: `${basePath}/{id}`,
@@ -34,26 +39,38 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
             }),
           }),
         },
+        response: {
+          200: {
+            description: 'deleted',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          404: {
+            description: 'not found',
+          },
+        },
       },
     },
-    async (ctx, req, res) => {
-      try {
-        await deleteDashboard(ctx, req.params.id);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with ID [${req.params.id}] was not found.`,
-            },
-          });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          await deleteDashboard(ctx, req.params.id);
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 404) {
+            return res.notFound({
+              body: {
+                message: `A dashboard with ID [${req.params.id}] was not found.`,
+              },
+            });
+          }
+          if (e.isBoom && e.output.statusCode === 403) {
+            return res.forbidden({ body: { message: e.message } });
+          }
+          return res.badRequest({ body: { message: e.message } });
         }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-        return res.badRequest();
-      }
 
-      return res.noContent();
-    }
+        return res.noContent();
+      })
   );
 }

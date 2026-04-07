@@ -38,6 +38,8 @@ export interface CliFlags {
   plugin?: string | string[];
   /** Package filter: single package ID or array of package IDs (id from kibana.jsonc). */
   package?: string | string[];
+  /** Whether to write stats to a flat JSON file. */
+  write?: boolean;
 }
 
 /**
@@ -52,6 +54,8 @@ export interface CliOptions {
   pluginFilter?: string[];
   /** Package filter IDs (id from kibana.jsonc, e.g., @kbn/package-name). */
   packageFilter?: string[];
+  /** Whether to write stats to a flat JSON file. */
+  writeStats?: boolean;
 }
 
 /**

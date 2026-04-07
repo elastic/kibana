@@ -317,7 +317,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             actions.push(
               <EuiContextMenuItem
                 key={`custom_url_${index}`}
-                icon="popout"
+                icon="external"
                 onClick={() => {
                   closePopover();
                   openCustomUrl(item, customUrl);

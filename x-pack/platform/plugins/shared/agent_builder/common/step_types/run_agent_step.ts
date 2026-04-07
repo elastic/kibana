@@ -34,24 +34,33 @@ export const InputSchema = z.object({
    */
   attachments: z
     .array(
-      z.object({
-        /**
-         * Optional unique identifier for the attachment.
-         */
-        id: z.string().optional(),
-        /**
-         * Type of the attachment (e.g., "security.alert").
-         */
-        type: z.string(),
-        /**
-         * Data payload of the attachment, specific to the attachment type.
-         */
-        data: z.record(z.string(), z.any()),
-        /**
-         * When true, the attachment will not be displayed in the UI.
-         */
-        hidden: z.boolean().optional(),
-      })
+      z
+        .object({
+          /**
+           * Optional unique identifier for the attachment.
+           */
+          id: z.string().optional(),
+          /**
+           * Type of the attachment (e.g., "security.alert").
+           */
+          type: z.string(),
+          /**
+           * Data payload of the attachment, specific to the attachment type.
+           * Required unless `origin` is provided.
+           */
+          data: z.record(z.string(), z.any()).optional(),
+          /**
+           * Origin string (e.g. saved object ID) for by-reference attachments; resolved at send time when `data` is omitted.
+           */
+          origin: z.string().optional(),
+          /**
+           * When true, the attachment will not be displayed in the UI.
+           */
+          hidden: z.boolean().optional(),
+        })
+        .refine((a) => a.data !== undefined || a.origin !== undefined, {
+          message: 'Each attachment must include either data or origin',
+        })
     )
     .optional()
     .describe('Optional attachments to provide to the agent.'),

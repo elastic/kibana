@@ -16,15 +16,26 @@ import {
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import {
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  GRAPH_TARGET_EUID_SOURCE_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
+import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import {
-  generateFieldHintCases,
-  formatJsonProperty,
+  getEuidEsqlEvaluation,
+  getFieldEvaluationsEsql,
+} from '@kbn/entity-store/common/domain/euid';
+import {
+  concatJsonObjectPropertyEsqlExprSafe,
   buildEntityEnrichment,
-  checkEnrichmentAvailability,
+  checkIfEntitiesIndexLookupMode,
+  concatJsonObjectPropertyBool,
+  JSON_OBJECT_START,
+  JSON_OBJECT_END,
+  JSON_OBJECT_SEPARATOR,
+  concatJsonObjectPropertyEsqlExprAsString,
+  concatJsonObjectPropertyString,
 } from './utils';
+import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
 
@@ -33,7 +44,6 @@ interface BuildEsqlQueryParams {
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
   isLookupIndexAvailable: boolean;
-  isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
@@ -78,13 +88,7 @@ export const fetchEvents = async ({
     }
   });
 
-  // Check if the entities lookup index exists and is in lookup mode (preferred)
-  // If not, fall back to checking if the enrich policy exists (deprecated)
-  const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(
-    esClient,
-    logger,
-    spaceId
-  );
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -94,7 +98,6 @@ export const fetchEvents = async ({
     originEventIds,
     originAlertIds,
     isLookupIndexAvailable,
-    isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
     pinnedIds,
@@ -142,7 +145,7 @@ const buildDslFilter = (
         : [
             {
               bool: {
-                should: GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({ exists: { field } })),
+                should: GRAPH_TARGET_EUID_SOURCE_FIELDS.map((field) => ({ exists: { field } })),
                 minimum_should_match: 1,
               },
             },
@@ -175,8 +178,104 @@ const buildDslFilter = (
 });
 
 /**
+ * Builds v2 actor resolution using EUID computation.
+ * Computes entity.namespace (from event.module/data_stream.dataset) and per-type EUIDs
+ * in a combined EVAL to prevent the ES|QL optimizer from pruning intermediate columns.
+ * Resolves actorEntityId as the first non-null per-type EUID (user > host > service),
+ * falling back to raw entity.id for generic entities.
+ *
+ * Actor source fields (e.g. host.id, user.name) may be multi-value arrays in raw documents.
+ * The EUID CONCAT ("{type}:" + field) returns null for multi-value inputs, so we MV_EXPAND
+ * typed actor fields to produce one row per value. This may create Cartesian products when
+ * multiple fields are multi-value — duplicate documentsData is deduplicated in parse_records.
+ * entity.id is excluded because its EUID is the raw value (no CONCAT), and expanding it
+ * would create Cartesian products with typed fields. Its multi-value is handled natively
+ * by the downstream MV_EXPAND actorEntityId.
+ */
+const buildV2ActorResolution = (): string => {
+  // MV_EXPAND typed actor source fields so EUID CONCAT receives single values.
+  // entity.id is excluded: its EUID is the raw value (no CONCAT),
+  // and multi-value is handled by the downstream MV_EXPAND actorEntityId.
+  const typedActorFields = GRAPH_ACTOR_EUID_SOURCE_FIELDS.filter((f) => f !== 'entity.id');
+  const mvExpandStatements = typedActorFields.map((field) => `| MV_EXPAND \`${field}\``).join('\n');
+
+  // Combine field evaluations (entity.namespace) and user EUID into a single EVAL
+  // to prevent the ES|QL optimizer from pruning the intermediate entity.namespace column.
+  const userFieldEvaluationsEsql = getFieldEvaluationsEsql('user');
+
+  // Compute EUIDs for typed entity types (excludes generic — falls back to entity.id)
+  const typedEntityTypes = ALL_ENTITY_TYPES.filter((t) => t !== 'generic');
+
+  const evalParts: string[] = [];
+  if (userFieldEvaluationsEsql) {
+    evalParts.push(userFieldEvaluationsEsql);
+  }
+  typedEntityTypes.forEach((type) => {
+    evalParts.push(`_actor_${type}_euid = ${getEuidEsqlEvaluation(type)}`);
+  });
+
+  // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
+  // runs after resolution. entity.id is still the original value at this point.
+  const coalesceArgs = [...typedEntityTypes.map((type) => `_actor_${type}_euid`), '`entity.id`'];
+
+  return `${mvExpandStatements}
+| EVAL ${evalParts.join(',\n  ')}
+| EVAL actorEntityId = COALESCE(${coalesceArgs.join(', ')})`;
+};
+
+/**
+ * Builds ESQL EVAL statements for computing target EUIDs from raw ECS target-namespace fields.
+ * Depends on entity.namespace already being computed by buildV2ActorResolution.
+ * Collects all non-null target EUIDs into a multi-value targetEntityId.
+ *
+ * Target source fields (e.g. host.target.id) may be multi-value arrays in raw documents.
+ * The EUID CONCAT ("host:" + field) returns null for multi-value inputs, so we MV_EXPAND
+ * typed target fields to produce one row per value. This may create Cartesian products when
+ * multiple fields are multi-value — duplicate documentsData is deduplicated in parse_records.
+ * entity.target.id is excluded because its EUID is the raw value (no CONCAT), and expanding
+ * it would create Cartesian products with typed fields. Its multi-value is handled natively
+ * by the downstream MV_EXPAND targetEntityId.
+ */
+const buildV2TargetResolution = (): string => {
+  // MV_EXPAND typed target source fields so EUID CONCAT receives single values.
+  // entity.target.id is excluded: its EUID is the raw value (no CONCAT),
+  // and multi-value is handled by the downstream MV_EXPAND targetEntityId.
+  const typedTargetFields = GRAPH_TARGET_EUID_SOURCE_FIELDS.filter((f) => f !== 'entity.target.id');
+  const mvExpandStatements = typedTargetFields
+    .map((field) => `| MV_EXPAND \`${field}\``)
+    .join('\n');
+
+  const targetEvalParts = ALL_ENTITY_TYPES.map((type) => {
+    const targetEuidEval = getTargetEuidEsqlEvaluation(type);
+    return `_target_${type}_euid = ${targetEuidEval}`;
+  });
+
+  const appendStatements = [
+    '| EVAL targetEntityId = TO_STRING(null)',
+    ...ALL_ENTITY_TYPES.map(
+      (type) => `| EVAL targetEntityId = CASE(
+    _target_${type}_euid IS NULL,
+    targetEntityId,
+    CASE(
+      targetEntityId IS NULL,
+      _target_${type}_euid,
+      MV_DEDUPE(MV_APPEND(targetEntityId, _target_${type}_euid))
+    )
+  )`
+    ),
+  ].join('\n');
+
+  return `${mvExpandStatements}
+| EVAL ${targetEvalParts.join(',\n  ')}
+${appendStatements}`;
+};
+
+/**
  * Generates ESQL statement for evaluating pinned IDs.
- * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
+ * Checks _id, actorEntityId (computed EUID), all actor raw source fields,
+ * targetEntityId (computed EUID), and all target raw source fields.
+ * When a raw source field matches, pinned is set to the computed EUID so
+ * grouping is correct.
  */
 const buildPinnedEsql = (pinnedIds?: string[]): string => {
   if (!pinnedIds || pinnedIds.length === 0) {
@@ -185,17 +284,113 @@ const buildPinnedEsql = (pinnedIds?: string[]): string => {
 
   const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
 
+  const actorRawChecks = GRAPH_ACTOR_EUID_SOURCE_FIELDS.map(
+    (f) => `${ENTITY_FIELD_COLUMN_MAP[f] ?? f} IN (${pinnedParamsStr})`
+  ).join(' OR ');
+
+  const targetRawChecks = GRAPH_TARGET_EUID_SOURCE_FIELDS.map(
+    (f) => `${ENTITY_FIELD_COLUMN_MAP[f] ?? f} IN (${pinnedParamsStr})`
+  ).join(' OR ');
+
   return `| EVAL pinned = CASE(
     _id IN (${pinnedParamsStr}), _id,
     actorEntityId IN (${pinnedParamsStr}), actorEntityId,
+    ${actorRawChecks}, actorEntityId,
     targetEntityId IN (${pinnedParamsStr}), targetEntityId,
+    ${targetRawChecks}, targetEntityId,
     null
   )`;
 };
 
 /**
+ * Maps EUID source fields to saved variable names.
+ * These fields are saved early in the query before LOOKUP JOIN overwrites them
+ * with entity store values. The saved variables are used by buildSourceFieldsJson()
+ * to build the sourceFields JSON from the original log event values.
+ */
+const ENTITY_FIELD_COLUMN_MAP: Record<string, string> = Object.fromEntries([
+  ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.map((f) => [f, `_sf_${f.replace(/\./g, '_')}`]),
+  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.map((f) => [f, `_sf_${f.replace(/\./g, '_')}`]),
+]);
+
+/**
+ * Generates an EVAL statement that saves all EUID source fields.
+ * Placed after typed MV_EXPANDs but before LOOKUP JOIN (which overwrites overlapping
+ * fields like user.id, host.id with entity store values).
+ * Uses MV_FIRST to guarantee single-value scalars — typed fields are already single
+ * (post MV_EXPAND in resolution), but entity.id / entity.target.id may still be multi-value.
+ * Cartesian products from MV_EXPAND may produce rows with different field combinations;
+ * duplicate documentsData per entity ID is deduplicated in parse_records.
+ */
+const buildSaveSourceFieldsEsql = (): string => {
+  const assignments = Object.entries(ENTITY_FIELD_COLUMN_MAP)
+    .map(([field, variable]) => `${variable} = MV_FIRST(\`${field}\`)`)
+    .join(', ');
+  return `| EVAL ${assignments}`;
+};
+
+/**
+ * Maps a source field name to its entity type prefix for EUID matching.
+ * Returns null for generic fields (entity.id, entity.target.id).
+ */
+const getFieldEntityTypePrefix = (field: string): string | null => {
+  if (field.startsWith('user')) return 'user';
+  if (field.startsWith('host')) return 'host';
+  if (field.startsWith('service')) return 'service';
+  return null; // generic entity
+};
+
+const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
+
+/**
+ * Generates an ESQL CONCAT fragment that builds a JSON "sourceFields" object.
+ * Each field is conditionally included only when:
+ * 1. The field value is non-null
+ * 2. The entity type matches the resolved EUID (e.g., user.email only for user: EUIDs)
+ *
+ * For typed entities, values come from saved _sf_* variables (pre-LOOKUP JOIN).
+ * For generic entities, the value is the EUID column itself (which IS the raw
+ * entity.id value post MV_EXPAND).
+ * Uses REPLACE to fix null properties.
+ */
+const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): string => {
+  const properties = fields
+    .map((field) => {
+      const typePrefix = getFieldEntityTypePrefix(field);
+
+      if (typePrefix) {
+        // Typed field: only include when EUID matches the entity type
+        const column = ENTITY_FIELD_COLUMN_MAP[field] ?? `\`${field}\``;
+        return `CASE(STARTS_WITH(${euidColumn}, "${typePrefix}:"),
+          ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${column})`)}, "")`;
+      }
+
+      // Generic field: include when EUID doesn't match any typed prefix
+      // Use the EUID column directly as the value (it IS the raw entity.id post MV_EXPAND)
+      const notTypedCondition = TYPED_ENTITY_PREFIXES.map(
+        (p) => `NOT STARTS_WITH(${euidColumn}, "${p}:")`
+      ).join(' AND ');
+      return `CASE(${notTypedCondition},
+        ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${euidColumn})`)}, "")`;
+    })
+    .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
+  return `
+  REPLACE(
+    REPLACE(
+      REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
+    "\\\\{,", ${JSON_OBJECT_START}),
+  ",}", ${JSON_OBJECT_END})`;
+};
+
+const buildActorSourceFieldsEsql = (): string =>
+  buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS, 'actorEntityId');
+
+const buildTargetSourceFieldsEsql = (): string =>
+  buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
+
+/**
  * Generates ESQL statements for building entity fields with enrichment data.
- * This is used when entity store enrichment is available (via LOOKUP JOIN or ENRICH).
+ * This is used when entity store enrichment is available (via LOOKUP JOIN).
  * Uses REPLACE to fix "{," pattern that occurs when first property is null.
  */
 const buildEnrichedEntityFieldsEsql = (): string => {
@@ -204,41 +399,56 @@ const buildEnrichedEntityFieldsEsql = (): string => {
 // Put required fields first (no comma prefix), optional fields use comma prefix
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-      ${formatJsonProperty('name', 'actorEntityName')},
-      ${formatJsonProperty('type', 'actorEntityType')},
-      ${formatJsonProperty('sub_type', 'actorEntitySubType')},
+    CONCAT("\\"entity\\":",
+    ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
+      CASE(actorEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', 'actorEntityName')}), ""),
+      CASE(actorEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', 'actorEntityType')}), ""),
+      CASE(actorEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'actorEntitySubType')}), ""),
+      CASE(actorEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'actorEntityEngineType')}), ""),
       CASE(
         actorHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
-        ""
-      ),
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-    "}")
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
+        ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"",
+        ${JSON_OBJECT_END}), ""),
+      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+    ${JSON_OBJECT_END}),
+    CONCAT("\\"entity\\":", ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+    ${JSON_OBJECT_END})
   )
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-      ${formatJsonProperty('name', 'targetEntityName')},
-      ${formatJsonProperty('type', 'targetEntityType')},
-      ${formatJsonProperty('sub_type', 'targetEntitySubType')},
+    CONCAT("\\"entity\\":",
+    ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
+      CASE(targetEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', 'targetEntityName')}), ""),
+      CASE(targetEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', 'targetEntityType')}), ""),
+      CASE(targetEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'targetEntitySubType')}), ""),
+      CASE(targetEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'targetEntityEngineType')}), ""),
       CASE(
         targetHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
-        ""
-      ),
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-    "}")
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
+        ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"",
+        ${JSON_OBJECT_END}), ""),
+      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+    ${JSON_OBJECT_END}),
+    CONCAT("\\"entity\\":",
+    ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+    ${JSON_OBJECT_END})
   )`;
 };
 
@@ -247,95 +457,65 @@ const buildEsqlQuery = ({
   originEventIds,
   originAlertIds,
   isLookupIndexAvailable,
-  isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
-  const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
-
-  // Generate target entity ID collection logic
-  // All fields use the same pattern: only append if not null
-  // This ensures we filter out null values and only collect actual target entity IDs
-  const targetEntityIdEvals = [
-    // Initialize targetEntityId as null
-    '| EVAL targetEntityId = TO_STRING(null)',
-    // For each target field, append if not null
-    ...GRAPH_TARGET_ENTITY_FIELDS.map((field) => {
-      return `| EVAL targetEntityId = CASE(
-    ${field} IS NULL,
-    targetEntityId,
-    CASE(
-      targetEntityId IS NULL,
-      ${field},
-      MV_DEDUPE(MV_APPEND(targetEntityId, ${field}))
-    )
-  )`;
-    }),
-  ].join('\n');
-
-  // Generate actor and target field hint CASE statements
-  const actorFieldHintCases = generateFieldHintCases(GRAPH_ACTOR_ENTITY_FIELDS, 'actorEntityId');
-  const targetFieldHintCases = generateFieldHintCases(GRAPH_TARGET_ENTITY_FIELDS, 'targetEntityId');
-
-  const query = `FROM ${indexPatterns
+  const query = `SET unmapped_fields="nullify";
+FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-| EVAL actorEntityId = COALESCE(
-    ${actorFieldsCoalesce}
-  )
+${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
-${targetEntityIdEvals}
+${buildV2TargetResolution()}
+// Save EUID source fields after MV_EXPAND (single-value per row) but before entity enrichment overwrites them
+${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(pinnedIds)}
-| EVAL actorEntityFieldHint = CASE(
-${actorFieldHintCases},
-    ""
-  )
-| EVAL targetEntityFieldHint = CASE(
-${targetFieldHintCases},
-    ""
-)
 ${
-  isLookupIndexAvailable || isEnrichPolicyExists
+  isLookupIndexAvailable
     ? `
-${buildEntityEnrichment(isLookupIndexAvailable, isEnrichPolicyExists, spaceId)}
+${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
 
 ${buildEnrichedEntityFieldsEsql()}
 `
     : `
-| EVAL actorEntityField = CONCAT(",\\"entity\\":", "{",
-    "\\"availableInEntityStore\\":false",
-    ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-  "}")
-| EVAL targetEntityField = CONCAT(",\\"entity\\":", "{",
-    "\\"availableInEntityStore\\":false",
-    ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-  "}")
+| EVAL actorEntityField = CONCAT("\\"entity\\":",
+  ${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+  ${JSON_OBJECT_END})
+| EVAL targetEntityField = CONCAT("\\"entity\\":",
+  ${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
+    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+  ${JSON_OBJECT_END})
 // Fallback to null string with non-enriched entity metadata
 | EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
+| EVAL actorEntityEngineType = TO_STRING(null)
 | EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
+| EVAL targetEntityEngineType = TO_STRING(null)
 `
 }
 // Create actor and target data with entity data
 
-| EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actorEntityId, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    actorEntityField,
-  "}")
-| EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    targetEntityField,
-  "}")
+| EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
+    ${JSON_OBJECT_SEPARATOR}, actorEntityField,
+  ${JSON_OBJECT_END})
+| EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
+    ${JSON_OBJECT_SEPARATOR}, targetEntityField,
+  ${JSON_OBJECT_END})
 
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip

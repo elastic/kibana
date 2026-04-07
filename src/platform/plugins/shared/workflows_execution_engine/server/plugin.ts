@@ -33,11 +33,14 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
+import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
@@ -54,11 +57,11 @@ import { generateExecutionTaskScope } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
-import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
+import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
@@ -537,6 +540,8 @@ export class WorkflowsExecutionEnginePlugin
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
+      const dispatchEventId =
+        typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -550,6 +555,7 @@ export class WorkflowsExecutionEnginePlugin
         executedBy,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
+        ...(dispatchEventId ? { dispatchEventId } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -622,12 +628,30 @@ export class WorkflowsExecutionEnginePlugin
         { refresh: true }
       );
 
+      const executionId = workflowExecution.id;
+      if (!executionId) {
+        throw new Error('Workflow execution ID is required');
+      }
+
+      const inputsValid = await validateWorkflowInputs(
+        workflow,
+        context,
+        executionId,
+        workflowExecutionRepository,
+        this.logger
+      );
+      if (!inputsValid) {
+        return {
+          workflowExecutionId: executionId,
+        };
+      }
+
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         // Execution was dropped due to concurrency limit, return execution ID
         return {
-          workflowExecutionId: workflowExecution.id as string,
+          workflowExecutionId: executionId,
         };
       }
 
@@ -643,7 +667,7 @@ export class WorkflowsExecutionEnginePlugin
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
 
         await runWorkflow({
-          workflowRunId: workflowExecution.id as string,
+          workflowRunId: executionId,
           spaceId: workflowExecution.spaceId || 'default',
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
@@ -665,7 +689,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       return {
-        workflowExecutionId: workflowExecution.id as string,
+        workflowExecutionId: executionId,
       };
     };
 
@@ -708,6 +732,7 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflowStep: ExecuteWorkflowStep = async (
       workflow,
       stepId,
+      executionContext,
       contextOverride,
       request
     ) => {
@@ -716,6 +741,7 @@ export class WorkflowsExecutionEnginePlugin
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
+        ...(executionContext ?? {}),
         contextOverride,
       };
 
@@ -796,11 +822,24 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
+      const cancelledAt = new Date().toISOString();
+
+      if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+        await cancelWaitingWorkflow({
+          workflowExecution,
+          workflowExecutionRepository,
+          stepExecutionRepository: new StepExecutionRepository(
+            coreStart.elasticsearch.client.asInternalUser
+          ),
+        });
+        return;
+      }
+
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
+        cancelledAt,
         cancelledBy: 'system', // TODO: set user if available
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
@@ -859,6 +898,8 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
       isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
+      getMaxEventChainDepth: this.getMaxEventChainDepth.bind(this),
+      getMaxWorkflowDepth: this.getMaxWorkflowDepth.bind(this),
     };
   }
 
@@ -870,6 +911,14 @@ export class WorkflowsExecutionEnginePlugin
 
   private isLogTriggerEventsEnabled(): boolean {
     return this.config?.eventDriven?.logEvents ?? true;
+  }
+
+  private getMaxEventChainDepth(): number {
+    return this.config?.eventDriven?.maxChainDepth ?? 10;
+  }
+
+  private getMaxWorkflowDepth(): number {
+    return this.config?.maxWorkflowDepth ?? 10;
   }
 
   private async initialize(coreStart: CoreStart): Promise<void> {

@@ -39,6 +39,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -117,6 +118,7 @@ import {
 } from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
@@ -155,7 +157,11 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -237,13 +243,17 @@ export const RuleDetailsPage = connector(
       analytics,
       i18n: i18nStart,
       theme,
-      application: {
-        navigateToApp,
-        capabilities: { actions },
-      },
+      application,
+      cps,
       timelines: timelinesUi,
       spaces: spacesApi,
     } = useKibana().services;
+    const {
+      navigateToApp,
+      capabilities: { actions },
+    } = application;
+
+    useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
@@ -270,13 +280,18 @@ export const RuleDetailsPage = connector(
         isSignalIndexExists,
         isAuthenticated,
         hasEncryptionKey,
-        hasIndexRead,
         signalIndexName,
         hasIndexWrite,
         hasIndexMaintenance,
       },
     ] = useUserData();
-    const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+    const {
+      rules: { edit: canEditRules },
+      enableDisable: { edit: canEnableDisableRules },
+      customHighlightedFields: { edit: canEditCustomHighlightedFields },
+      investigationGuide: { edit: canEditInvestigationGuides },
+    } = useUserPrivileges().rulesPrivileges;
+    const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
@@ -313,7 +328,7 @@ export const RuleDetailsPage = connector(
       }
     }, [rule, startMlJobs]);
 
-    const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
+    const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, canReadAlerts });
 
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
@@ -338,8 +353,8 @@ export const RuleDetailsPage = connector(
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-    const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled(
-      'storeGapsInEventLogEnabled'
+    const newExecutionResultsTableEnabled = useIsExperimentalFeatureEnabled(
+      'newExecutionResultsTableEnabled'
     );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -591,6 +606,12 @@ export const RuleDetailsPage = connector(
       confirmRuleDuplication,
     } = useBulkDuplicateExceptionsConfirmation();
 
+    const deprecationCallout = useDeprecatedRuleDetailsCallout({
+      rule,
+      confirmDeletion,
+      showBulkDuplicateExceptionsConfirmation: showBulkDuplicateConfirmation,
+    });
+
     const {
       isManualRuleRunConfirmationVisible,
       showManualRuleRunConfirmation,
@@ -635,11 +656,16 @@ export const RuleDetailsPage = connector(
 
     const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
 
+    const isRuleEditButtonEnabled =
+      canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
+
     return (
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
+        {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
+        {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
             onCancel={cancelRuleDuplication}
@@ -696,7 +722,7 @@ export const RuleDetailsPage = connector(
                             rule,
                             hasMlPermissions,
                             hasActionsPrivileges,
-                            canEditRules
+                            canEnableDisableRules
                           )}
                         >
                           <EuiFlexGroup>
@@ -706,7 +732,7 @@ export const RuleDetailsPage = connector(
                                 !rule ||
                                 !isExistingRule ||
                                 !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                                !canEditRules ||
+                                !canEnableDisableRules ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               enabled={isRuleEnabled}
@@ -730,14 +756,14 @@ export const RuleDetailsPage = connector(
                               ruleId={ruleId}
                               disabled={
                                 !isExistingRule ||
-                                !canEditRules ||
+                                !isRuleEditButtonEnabled ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               disabledReason={explainLackOfPermission(
                                 rule,
                                 hasMlPermissions,
                                 hasActionsPrivileges,
-                                canEditRules
+                                isRuleEditButtonEnabled
                               )}
                             />
                           </EuiFlexItem>
@@ -847,54 +873,58 @@ export const RuleDetailsPage = connector(
                         </EuiResizeObserver>
                       </RuleFieldsSectionWrapper>
                     </Route>
-                    <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
-                      <>
-                        <SiemSearchBar
-                          dataView={experimentalDataView}
-                          pollForSignalIndex={pollForSignalIndex}
-                          id={InputsModelId.global}
-                          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-                        />
-                        <EuiSpacer />
-                        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                          <EuiFlexItem grow={false}>
-                            <AlertsTableFilterGroup
-                              status={filterGroup}
-                              onFilterGroupChanged={onFilterGroupChangedCallback}
+                    {canReadAlerts && (
+                      <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
+                        <>
+                          <FiltersGlobal>
+                            <SiemSearchBar
+                              dataView={experimentalDataView}
+                              pollForSignalIndex={pollForSignalIndex}
+                              id={InputsModelId.global}
+                              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
                             />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer size="l" />
-                        <Display show={!globalFullScreen}>
-                          <AlertsHistogramPanel
-                            filters={alertMergedFilters}
-                            signalIndexName={signalIndexName}
-                            defaultStackByOption={defaultRuleStackByOption}
-                            updateDateRange={updateDateRangeCallback}
-                          />
+                          </FiltersGlobal>
                           <EuiSpacer />
-                        </Display>
-                        {ruleId != null && (
-                          <GroupedAlertsTable
-                            accordionButtonContent={defaultGroupTitleRenderers}
-                            accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                            dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
-                            dataView={experimentalDataView}
-                            defaultFilters={alertMergedFilters}
-                            defaultGroupingOptions={defaultGroupingOptions}
-                            from={from}
-                            globalFilters={filters}
-                            globalQuery={query}
-                            groupTakeActionItems={groupTakeActionItems}
-                            loading={loading}
-                            renderChildComponent={renderGroupedAlertTable}
-                            tableId={TableId.alertsOnRuleDetailsPage}
-                            to={to}
-                          />
-                        )}
-                      </>
-                    </Route>
+                          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                            <EuiFlexItem grow={false}>
+                              <AlertsTableFilterGroup
+                                status={filterGroup}
+                                onFilterGroupChanged={onFilterGroupChangedCallback}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer size="l" />
+                          <Display show={!globalFullScreen}>
+                            <AlertsHistogramPanel
+                              filters={alertMergedFilters}
+                              signalIndexName={signalIndexName}
+                              defaultStackByOption={defaultRuleStackByOption}
+                              updateDateRange={updateDateRangeCallback}
+                            />
+                            <EuiSpacer />
+                          </Display>
+                          {ruleId != null && (
+                            <GroupedAlertsTable
+                              accordionButtonContent={defaultGroupTitleRenderers}
+                              accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+                              dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
+                              dataView={experimentalDataView}
+                              defaultFilters={alertMergedFilters}
+                              defaultGroupingOptions={defaultGroupingOptions}
+                              from={from}
+                              globalFilters={filters}
+                              globalQuery={query}
+                              groupTakeActionItems={groupTakeActionItems}
+                              loading={loading}
+                              renderChildComponent={renderGroupedAlertTable}
+                              tableId={TableId.alertsOnRuleDetailsPage}
+                              to={to}
+                            />
+                          )}
+                        </>
+                      </Route>
+                    )}
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                       <ExceptionsViewer
                         rule={rule}
@@ -918,20 +948,23 @@ export const RuleDetailsPage = connector(
                       path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}
                     >
                       <>
-                        <ExecutionLogTable
-                          ruleId={ruleId}
-                          selectAlertsTab={navigateToAlertsTab}
-                          analytics={analytics}
-                          i18n={i18nStart}
-                          theme={theme}
-                        />
-                        <EuiSpacer size="xl" />
-                        {storeGapsInEventLogEnabled && (
-                          <>
-                            <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
-                            <EuiSpacer size="xl" />
-                          </>
+                        {newExecutionResultsTableEnabled ? (
+                          <ExecutionResultsTable
+                            ruleId={ruleId}
+                            navigateToAlertsTab={navigateToAlertsTab}
+                          />
+                        ) : (
+                          <ExecutionLogTable
+                            ruleId={ruleId}
+                            selectAlertsTab={navigateToAlertsTab}
+                            analytics={analytics}
+                            i18n={i18nStart}
+                            theme={theme}
+                          />
                         )}
+                        <EuiSpacer size="xl" />
+                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                        <EuiSpacer size="xl" />
                         <RuleBackfillsInfo ruleId={ruleId} />
                       </>
                     </Route>

@@ -226,6 +226,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             rules: [],
             queries: [],
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },

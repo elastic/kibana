@@ -108,6 +108,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       enum: jest.fn(),
       arrayOfStrings: jest.fn(),
       boolean: jest.fn(),
+      string: jest.fn(),
     } as any;
 
     log = {

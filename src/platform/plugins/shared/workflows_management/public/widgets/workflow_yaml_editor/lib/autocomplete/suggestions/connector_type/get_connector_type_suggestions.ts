@@ -18,6 +18,8 @@ import {
   LoopContinueStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
+  SwitchStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WhileStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -244,6 +246,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Keyword,
     },
     {
+      schema: SwitchStepSchema,
+      description:
+        'Multi-way branching. Evaluates expression and runs the steps of the first matching case value',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+    },
+    {
       schema: LoopBreakStepSchema,
       description: 'Exit the enclosing loop immediately',
       icon: monaco.languages.CompletionItemKind.Keyword,
@@ -274,6 +282,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
+    },
+    {
+      schema: WaitForInputStepSchema,
+      description: 'Pause execution until external input is provided (human-in-the-loop)',
+      icon: monaco.languages.CompletionItemKind.Event,
     },
     {
       schema: WorkflowExecuteStepSchema,

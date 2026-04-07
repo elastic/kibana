@@ -79,7 +79,7 @@ export class DiscoverApp {
   async clickNewSearch() {
     await this.page.testSubj.hover('discoverNewButton');
     await this.page.testSubj.click('discoverNewButton');
-    await this.page.testSubj.hover('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
+    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
@@ -337,7 +337,8 @@ export class DiscoverApp {
   async selectTextBaseLang() {
     if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
       await this.page.testSubj.click('select-text-based-language-btn');
-      await this.waitForDocTableRendered();
+      await this.waitUntilSearchingHasFinished();
+      await this.codeEditor.waitCodeEditorReady('ESQLEditor');
     }
   }
 

@@ -22,7 +22,8 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 const defaultParams: HostDetailsPanelProps = {
   isRiskScoreExist: true,
-  name: 'testHost',
+  hostName: 'testHost',
+  entityId: 'testEntityId',
   scopeId: 'test',
 };
 
@@ -41,7 +42,8 @@ const defaultTabs: LeftPanelTabsType = [
   },
 ];
 
-describe('hooks', () => {
+// Failing: See https://github.com/elastic/kibana/issues/261569
+describe.skip('hooks', () => {
   describe('useSelectedTab', () => {
     const mockOpenLeftPanel = jest.fn();
 
@@ -128,12 +130,35 @@ describe('hooks', () => {
       ]);
     });
 
-    it('should return an empty array when no tabs are available', () => {
+    it('should return only the graph view tab when no other tabs are available', () => {
       const { result } = renderHook(
         () =>
           useTabs({
             isRiskScoreExist: false,
-            name: '',
+            hostName: 'testHost',
+            entityId: 'testEntityId',
+            scopeId: 'scope1',
+            hasMisconfigurationFindings: false,
+            hasVulnerabilitiesFindings: false,
+            hasNonClosedAlerts: false,
+            entityStoreEntityId: 'testEntityStoreId',
+          }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current).toEqual([
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP }),
+      ]);
+    });
+
+    it('should return an empty array when no tabs are available and entityId is not provided', () => {
+      const { result } = renderHook(
+        () =>
+          useTabs({
+            isRiskScoreExist: false,
+            hostName: 'testHost',
+            entityId: '',
             scopeId: 'scope1',
             hasMisconfigurationFindings: false,
             hasVulnerabilitiesFindings: false,

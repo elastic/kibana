@@ -33,10 +33,10 @@ const SEARCH_USERS_PLACEHOLDER = i18n.translate(
 const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
 
 interface CreatedByFilterPopoverProps {
-  /** Unique creator usernames extracted from current page data */
-  creators: string[];
-  selectedCreators: string[];
-  onSelectionChange: (creators: string[]) => void;
+  /** Unique usernames of users who created saved objects */
+  users: string[];
+  selectedUsers: string[];
+  onSelectionChange: (users: string[]) => void;
   profilesMap: Map<string, UserProfileWithAvatar>;
   'data-test-subj'?: string;
 }
@@ -59,8 +59,8 @@ const toSelectableOption = (
 };
 
 const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = ({
-  creators,
-  selectedCreators,
+  users,
+  selectedUsers,
   onSelectionChange,
   profilesMap,
   'data-test-subj': dataTestSubj = 'created-by-filter',
@@ -77,26 +77,26 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
   }, [profilesMap]);
 
   const selectableOptions = useMemo(() => {
-    const selectedSet = new Set(selectedCreators);
-    const allCreators = Array.from(new Set([...creators, ...selectedCreators]));
+    const selectedSet = new Set(selectedUsers);
+    const allUsers = Array.from(new Set([...users, ...selectedUsers]));
 
-    return allCreators
+    return allUsers
       .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
       .map((username) =>
         toSelectableOption(username, selectedSet.has(username), usernameToProfile)
       );
-  }, [creators, selectedCreators, usernameToProfile]);
+  }, [users, selectedUsers, usernameToProfile]);
 
   const handleChange = useCallback(
     (_: EuiSelectableOption[], __: unknown, changedOption: EuiSelectableOption) => {
       const username = changedOption.key!;
-      const isRemoving = selectedCreators.includes(username);
+      const isRemoving = selectedUsers.includes(username);
       const updated = isRemoving
-        ? selectedCreators.filter((c) => c !== username)
-        : [...selectedCreators, username];
+        ? selectedUsers.filter((c) => c !== username)
+        : [...selectedUsers, username];
       onSelectionChange(updated);
     },
-    [selectedCreators, onSelectionChange]
+    [selectedUsers, onSelectionChange]
   );
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -118,8 +118,8 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
       iconType="arrowDown"
       onClick={togglePopover}
       isSelected={isOpen}
-      hasActiveFilters={selectedCreators.length > 0}
-      numActiveFilters={selectedCreators.length}
+      hasActiveFilters={selectedUsers.length > 0}
+      numActiveFilters={selectedUsers.length}
       data-test-subj={`${dataTestSubj}-button`}
     >
       {CREATED_BY_LABEL}

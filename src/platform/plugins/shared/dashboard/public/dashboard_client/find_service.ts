@@ -32,7 +32,7 @@ export const findService = {
   },
   findByTitle: async (title: string) => {
     const { dashboards } = await dashboardClient.search({
-      search: title,
+      query: title,
       per_page: 10,
     });
 

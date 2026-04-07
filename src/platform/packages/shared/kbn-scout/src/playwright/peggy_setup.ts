@@ -11,8 +11,8 @@
  * Initialize Peggy require hook for .peggy grammar files.
  * This is required for @kbn/tinymath and other packages that use Peggy grammars.
  *
- * Playwright needs to load it as @kbn/scout is dependent on @kbn/streamlang which uses Peggy (`@kbn/tinymath`).
- * Without this, all Playwright tests would fail with: `"whitespace" SyntaxError: Unexpected string`
+ * Playwright loads this so packages that ship Peggy grammars (for example `@kbn/tinymath`) resolve `.peggy` files.
+ * Without this, tests that pull those modules can fail with: `"whitespace" SyntaxError: Unexpected string`
  *
  * This is similar to the Jest Peggy setup in src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js.
  */

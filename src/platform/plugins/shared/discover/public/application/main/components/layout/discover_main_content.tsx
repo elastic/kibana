@@ -9,12 +9,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import type { ReactElement } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { BehaviorSubject } from 'rxjs';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
@@ -22,10 +22,11 @@ import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useAppStateSelector } from '../../state_management/redux';
-import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import type { SidebarToggleState } from '../../../types';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -58,7 +59,7 @@ export interface DiscoverMainContentProps {
   }) => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
-  panelsToggle: ReactElement<PanelsToggleProps>;
+  sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
 }
 
@@ -69,7 +70,7 @@ export const DiscoverMainContent = ({
   onFieldEdited,
   columns,
   onDropFieldToTable,
-  panelsToggle,
+  sidebarToggleState$,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
@@ -116,6 +117,8 @@ export const DiscoverMainContent = ({
 
   const isEsqlMode = useIsEsqlMode();
   const isDropAllowed = Boolean(onDropFieldToTable);
+  const showChart = useAppStateSelector((state) => !state.hideChart);
+  const showPanelsToggle = !isChartAvailable || !showChart;
 
   const renderViewModeToggle = useCallback(
     (patternCount?: number) => {
@@ -127,19 +130,30 @@ export const DiscoverMainContent = ({
           patternCount={patternCount}
           dataView={dataView}
           prepend={
-            React.isValidElement(panelsToggle)
-              ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
-              : undefined
+            showPanelsToggle ? (
+              <PanelsToggle
+                sidebarToggleState$={sidebarToggleState$}
+                omitChartButton={!isChartAvailable}
+                omitTableButton={!isChartAvailable}
+                dataTestSubjSuffix="InPage"
+              />
+            ) : undefined
           }
         />
       );
     },
-    [viewMode, isEsqlMode, setDiscoverViewMode, dataView, panelsToggle, isChartAvailable]
+    [
+      viewMode,
+      isEsqlMode,
+      setDiscoverViewMode,
+      dataView,
+      showPanelsToggle,
+      sidebarToggleState$,
+      isChartAvailable,
+    ]
   );
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
-
-  const showChart = useAppStateSelector((state) => !state.hideChart);
 
   return (
     <Droppable

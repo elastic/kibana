@@ -13,6 +13,7 @@ export interface AlertsQueryParams {
   from: number;
   size: number;
   sort?: Array<Record<string, 'asc' | 'desc'>>;
+  index?: string;
 }
 
 interface FindAlertsParams extends AlertsQueryParams {
@@ -27,12 +28,14 @@ export const createFindAlerts =
     from,
     size,
     sort,
+    index,
   }: FindAlertsParams): Promise<SearchResponse<Record<string, unknown>>> => {
     return new Promise((resolve, reject) => {
       const $subscription = searchService
         .search(
           {
             params: {
+              ...(index ? { index } : {}),
               body: {
                 query: {
                   ids: { values: alertIds },

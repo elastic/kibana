@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Threshold rule execution logic API', function () {
     loadTestFile(require.resolve('./threshold'));
     loadTestFile(require.resolve('./threshold_alert_suppression'));
+    loadTestFile(require.resolve('./threshold_metrics'));
   });
 }

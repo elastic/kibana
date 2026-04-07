@@ -2676,14 +2676,6 @@
             "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
-          },
-          {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
-          },
-          {
             "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/find.ts"
           },
@@ -8508,13 +8500,13 @@
         "signature": [
           "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
           " | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",

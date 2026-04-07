@@ -34,6 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const STREAM_NAME = 'logs.otel.queries-test';
   const stream: Streams.WiredStream.UpsertRequest['stream'] = {
+    type: 'wired',
     description: '',
     ingest: {
       lifecycle: { inherit: {} },

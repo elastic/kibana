@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './src/constants';
+export {
+  dataViewReferenceSchema,
+  dataViewSchema,
+  dataViewSpecSchema,
+} from './src/schema_data_view';
+export { runtimeFieldSchema } from './src/schema_runtime_field';
+export type {
+  AsCodeDataView,
+  AsCodeDataViewReference,
+  AsCodeDataViewSpec,
+  AsCodeRuntimeField,
+} from './src/types';

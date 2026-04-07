@@ -34,6 +34,7 @@ import apm from 'elastic-apm-node';
 import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
@@ -100,7 +101,7 @@ export function registerRoutes({
       response: KibanaResponseFactory
     ) => {
       if (agent.isStarted()) {
-        agent.addLabels({
+        addSpanLabels({
           plugin: 'apm',
         });
       }

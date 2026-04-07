@@ -37,7 +37,8 @@ const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
 const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
 const FIRST_CARD_LAST_PAGE = `${SORTED_METRICS[PAGE_SIZE * (TOTAL_PAGES - 1)].name}-0`;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/254759
+spaceTest.describe.skip(
   'Metrics in Discover - Grid Navigation',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,
@@ -134,10 +135,24 @@ spaceTest.describe(
 
     spaceTest(
       'should update grid when selecting a breakdown dimension',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, page }) => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
+
+        await spaceTest.step('breakdown selector dropdown has no a11y violations', async () => {
+          await metricsExperience.breakdownSelector.toggleButton.click();
+          await metricsExperience.breakdownSelector.selectable.waitFor({ state: 'visible' });
+          // EUI known issue: https://github.com/elastic/eui/issues/9517
+          // Remove this exclude once fixed upstream.
+          const { violations } = await page.checkA11y({
+            include: ['[data-test-subj="metricsExperienceBreakdownSelectorSelectable"]'],
+            exclude: ['.euiSelectableList__list'],
+          });
+          expect(violations).toHaveLength(0);
+          await metricsExperience.breakdownSelector.toggleButton.click();
+          await metricsExperience.breakdownSelector.selectable.waitFor({ state: 'hidden' });
+        });
 
         await spaceTest.step('select first dimension as breakdown', async () => {
           await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);

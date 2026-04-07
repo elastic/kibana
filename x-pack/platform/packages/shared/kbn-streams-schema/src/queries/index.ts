@@ -70,3 +70,15 @@ export interface QueriesOccurrencesGetResponse {
   occurrences_histogram: Array<{ x: string; y: number }>;
   total_occurrences: number;
 }
+
+export interface QueryLink {
+  'asset.uuid': string;
+  'asset.type': 'query';
+  'asset.id': string;
+  query: StreamQuery;
+  stream_name: string;
+  /** Whether a Kibana rule exists for this query. */
+  rule_backed: boolean;
+  /** The deterministic ID of the Kibana rule associated with this query. */
+  rule_id: string;
+}

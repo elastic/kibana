@@ -108,6 +108,27 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.useSideNavWidth",
+        "type": "Function",
+        "tags": [],
+        "label": "useSideNavWidth",
+        "description": [
+          "\nReturns the effective side nav pixel width."
+        ],
+        "signature": [
+          "() => number"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/use_side_nav_width.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

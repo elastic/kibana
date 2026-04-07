@@ -39,8 +39,12 @@ import {
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import {
+  STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+  useStreamDocCountsFetch,
+} from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
@@ -53,6 +57,7 @@ import {
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   NO_STREAMS_MESSAGE,
   DATA_QUALITY_COLUMN_HEADER,
+  CPS_DOCUMENTS_WARNING,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
@@ -80,6 +85,9 @@ export function StreamsTreeTable({
   openFlyout?: () => void;
 }) {
   const router = useStreamsAppRouter();
+  const { dependencies } = useKibana();
+  const cpsHasLinkedProjects =
+    (dependencies.start.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1;
   const { rangeFrom, rangeTo } = useTimeRange();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
@@ -95,12 +103,10 @@ export function StreamsTreeTable({
     pageSize: 25,
   });
 
-  const numDataPoints = 25;
-
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     canReadFailureStore,
-    numDataPoints,
+    numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
 
   const docCountsFetch = getStreamDocCounts();
@@ -366,7 +372,7 @@ export function StreamsTreeTable({
                 {treeMode && item.children && hasChildren && (
                   <EuiFlexItem grow={false}>
                     <EuiIcon
-                      type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                      type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
                       color="text"
                       size="m"
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
@@ -438,7 +444,15 @@ export function StreamsTreeTable({
         {
           field: 'documentsCount',
           name: (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              {cpsHasLinkedProjects && (
+                <EuiIconTip
+                  content={CPS_DOCUMENTS_WARNING}
+                  type="info"
+                  size="s"
+                  data-test-subj="cpsDocumentsWarningTip"
+                />
+              )}
               {DOCUMENTS_COLUMN_HEADER}
               {!canReadFailureStore && (
                 <EuiIconTip
@@ -460,7 +474,7 @@ export function StreamsTreeTable({
                 indexPattern={item.stream.name}
                 histogramQueryFetch={getStreamHistogram(item.stream.name)}
                 timeState={timeState}
-                numDataPoints={numDataPoints}
+                numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
               />
             ) : null,
         },

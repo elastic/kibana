@@ -23,7 +23,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { useSessionViewConfig } from '../../../../flyout_v2/document/hooks/use_session_view_config';
+import { useSessionViewConfig } from '../../../../flyout_v2/session_view/hooks/use_session_view_config';
 import { SessionViewNotEnabled } from '../../../../flyout_v2/document/components/session_view_not_enabled';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
@@ -62,23 +62,16 @@ export const SessionView: FC = memo(() => {
   const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();
   const openAlertDetailsPreview = useCallback(
     (alertId: string, alertIndex: string, onClose?: () => void) => {
-      // In the SessionView component, when the user clicks on the
-      // expand button to open a alert in the preview panel, this actually also selects the row and opens
-      // the detailed panel in preview.
-      // In order to NOT modify the SessionView code, the setTimeout here guarantees that the alert details preview
-      // will be opened in second, so that we have a correct order in the opened preview panels
-      setTimeout(() => {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: alertId,
-            indexName: alertIndex,
-            scopeId,
-            banner: ALERT_PREVIEW_BANNER,
-            isPreviewMode: true,
-          },
-        });
-      }, 100);
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id: alertId,
+          indexName: alertIndex,
+          scopeId,
+          banner: ALERT_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'preview',

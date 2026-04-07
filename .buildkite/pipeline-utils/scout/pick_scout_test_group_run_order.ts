@@ -17,6 +17,7 @@ export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
   type: 'plugin' | 'package';
+  isAffected?: boolean;
   configs: {
     path: string;
     hasTests: boolean;
@@ -67,9 +68,10 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
+    const affectedPrefix = module.isAffected ? 'affected ' : '';
 
     return {
-      label: `Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
+      label: `${affectedPrefix}Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
       key: module.name,
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       group: module.group,
