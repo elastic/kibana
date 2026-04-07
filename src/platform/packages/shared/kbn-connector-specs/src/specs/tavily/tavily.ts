@@ -20,10 +20,6 @@ import { z } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type { CallToolInput, CrawlInput, ExtractInput, MapInput, SearchInput } from './types';
-import searchWorkflow from './workflows/search.yaml';
-import extractWorkflow from './workflows/extract.yaml';
-import crawlWorkflow from './workflows/crawl.yaml';
-import mapWorkflow from './workflows/map.yaml';
 import {
   ListToolsInputSchema,
   SearchInputSchema,
@@ -182,6 +178,4 @@ export const TavilyConnector: ConnectorSpec = {
       });
     },
   },
-
-  agentBuilderWorkflows: [searchWorkflow, extractWorkflow, crawlWorkflow, mapWorkflow],
 };

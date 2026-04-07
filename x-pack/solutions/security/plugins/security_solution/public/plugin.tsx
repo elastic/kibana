@@ -74,6 +74,7 @@ import { generateIndicatorAttachmentType } from './cases/attachments/indicator/u
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
+import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -283,8 +284,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
     if (plugins.agentBuilder?.attachments) {
-      registerAttachmentUiDefinitions({
+      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerRuleAttachment({
         attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        aiRuleCreation: this.services.aiRuleCreation,
       });
     }
 
@@ -403,16 +407,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
       id: 'security-solution-alert-flyout-header-title',
-      renderHeader: (props) => {
+      renderHeader: ({ hit, onAlertUpdated }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
         return (
           <React.Suspense fallback={null}>
             <LazyAlertFlyoutHeader
-              {...props}
+              hit={hit}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
             />
           </React.Suspense>
         );
@@ -426,7 +431,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     const headerFooterFeature: SecuritySolutionAlertFlyoutFooterFeature = {
       id: 'security-solution-alert-flyout-footer',
-      renderFooter: (hit) => {
+      renderFooter: ({ hit, onAlertUpdated }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -436,6 +441,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               hit={hit}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
             />
           </React.Suspense>
         );
@@ -598,7 +604,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       applicationLinksUpdater.update(appLinks, params);
     });
 
-    const filteredLinks = await getFilteredLinks(core, plugins);
+    const filteredLinks = await getFilteredLinks(core, plugins, this.experimentalFeatures);
     appLinksToUpdate$.next(filteredLinks);
   }
 

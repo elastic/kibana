@@ -164,9 +164,8 @@ export const resolveValidationRunContext = async ({
   });
 
   if (changedFiles.length === 0 && (await isShallowRepository())) {
-    onWarning?.(
-      `Moon reported no changed files for scope=${contract.scope}, but this repository is shallow. A full Git history is required for affected validation; run \`git fetch --unshallow\`.`
-    );
+    onWarning?.('affected file detection is unavailable in a shallow repository');
+    onWarning?.('run `git fetch --unshallow`');
   }
 
   return {

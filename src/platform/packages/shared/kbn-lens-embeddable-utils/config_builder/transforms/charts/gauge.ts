@@ -79,7 +79,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
       : layer.metric.title?.text
       ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.text }
       : { labelMajorMode: 'auto' }),
-    labelMinor: layer.metric.sub_title,
+    labelMinor: layer.metric.subtitle,
   };
 }
 
@@ -165,7 +165,7 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.labelMinor) {
-      props.metric.sub_title = visualization.labelMinor;
+      props.metric.subtitle = visualization.labelMinor;
     }
 
     if (visualization.ticksPosition) {
