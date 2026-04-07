@@ -608,7 +608,7 @@ describe('deprecation header pre-response handler', () => {
   it('adds the deprecation warning header to the request going to a deprecated route', () => {
     const kibanaVersion = '19.73.41';
     const deprecationMessage = 'This is a deprecated endpoint message in the tests';
-    const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+    const warningHeader = `299 Kibana-${kibanaVersion} "${encodeURIComponent(deprecationMessage)}"`;
     const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
 
     handler(
@@ -628,7 +628,7 @@ describe('deprecation header pre-response handler', () => {
   it('does not add the deprecation warning header to the request going to a non-deprecated route', () => {
     const kibanaVersion = '19.73.41';
     const deprecationMessage = 'This is a deprecated endpoint message in the tests';
-    const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+    const warningHeader = `299 Kibana-${kibanaVersion} "${encodeURIComponent(deprecationMessage)}"`;
     const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
 
     handler({ route: { options: { deprecated: {} } } } as any, {} as any, toolkit);

@@ -63,6 +63,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     applicationBottomBarHeight: hasApplicationBottomBar
       ? layoutConfig.applicationBottomBarHeight ?? 0
       : 0,
+    applicationMarginTop: layoutConfig.applicationMarginTop ?? 0,
     applicationMarginRight: layoutConfig.applicationMarginRight ?? 0,
     applicationMarginBottom: layoutConfig.applicationMarginBottom ?? 0,
   };

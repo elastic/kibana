@@ -6,7 +6,6 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
@@ -15,6 +14,8 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { getConnectorDefaultModel } from '@kbn/inference-common';
 
 import type { CombinedPrompts } from '../graphs/default_attack_discovery_graph/prompts';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
@@ -24,7 +25,7 @@ import { getLlmType } from '../../../routes/utils';
 import { runEvaluations } from './run_evaluations';
 import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
 
-interface ConnectorWithPrompts extends Connector {
+interface ConnectorWithPrompts extends InferenceConnector {
   prompts: CombinedPrompts;
 }
 export const evaluateAttackDiscovery = async ({
@@ -39,6 +40,7 @@ export const evaluateAttackDiscovery = async ({
   esClientInternalUser,
   evaluationId,
   evaluatorConnectorId,
+  getInferenceConnectorById,
   langSmithApiKey,
   langSmithProject,
   logger,
@@ -56,6 +58,7 @@ export const evaluateAttackDiscovery = async ({
   esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   langSmithApiKey: string | undefined;
   langSmithProject: string | undefined;
   logger: Logger;
@@ -65,7 +68,7 @@ export const evaluateAttackDiscovery = async ({
   await asyncForEach(attackDiscoveryGraphs, async ({ getDefaultAttackDiscoveryGraph }) => {
     // create a graph for every connector:
     const graphs: Array<{
-      connector: Connector;
+      connector: InferenceConnector;
       graph: DefaultAttackDiscoveryGraph;
       llmType: string | undefined;
       name: string;
@@ -74,7 +77,7 @@ export const evaluateAttackDiscovery = async ({
         tracers: LangChainTracer[];
       };
     }> = connectors.map((connector) => {
-      const llmType = getLlmType(connector.actionTypeId);
+      const llmType = getLlmType(connector.type);
 
       const traceOptions = {
         projectName: langSmithProject,
@@ -89,7 +92,7 @@ export const evaluateAttackDiscovery = async ({
 
       const llm = new ActionsClientLlm({
         actionsClient,
-        connectorId: connector.id,
+        connectorId: connector.connectorId,
         llmType,
         logger,
         temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
@@ -98,7 +101,7 @@ export const evaluateAttackDiscovery = async ({
         telemetryMetadata: {
           pluginId: 'security_attack_discovery',
         },
-        model: connector.config?.defaultModel,
+        model: getConnectorDefaultModel(connector),
       });
 
       const graph = getDefaultAttackDiscoveryGraph({
@@ -126,6 +129,7 @@ export const evaluateAttackDiscovery = async ({
       connectorTimeout,
       evaluatorConnectorId,
       datasetName,
+      getInferenceConnectorById,
       graphs,
       langSmithApiKey,
       logger,

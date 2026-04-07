@@ -23,6 +23,8 @@ export type Task = ListrTask<TaskContext>['task'];
 
 export type FixtureMap = Record<string, TypeVersionFixtures>;
 
+export type MigrationAlgorithm = 'v2' | 'zdt';
+
 export interface TaskContext {
   gitRev: string;
   serverlessGitRev?: string;
@@ -34,6 +36,7 @@ export interface TaskContext {
   serverlessFrom?: MigrationSnapshot;
   to?: MigrationSnapshot;
   updatedTypes: SavedObjectsType<any>[];
+  migrationTypes?: SavedObjectsType<any>[];
   currentRemovedTypes: string[];
   newRemovedTypes: string[];
   baselineMappings?: SavedObjectsTypeMappingDefinitions;
@@ -43,20 +46,21 @@ export interface TaskContext {
   };
   test: boolean; // whether the script is running with TEST data
   fix: boolean;
+  migrationAlgorithms: MigrationAlgorithm[];
+  migrationAlgorithm?: MigrationAlgorithm;
+  migrationKibanaIndex?: string;
 }
 
 export const encryptionOverrides: EncryptedSavedObjectTypeRegistration[] = [
-  // Placeholder for manually specifying any previous versions of ESO registrations
-  // Example:
-  // {
-  //   type: 'connector_token',
-  //   attributesToEncrypt: new Set(['token']),
-  //   attributesToIncludeInAAD: new Set([
-  //     'connectorId',
-  //     'tokenType',
-  //     'expiresAt',
-  //     'createdAt',
-  //     'updatedAt',
-  //   ]),
-  // },
+  {
+    type: 'connector_token',
+    attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
+  },
 ];

@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('index threshold rule', function () {
     it('create rule screenshot', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
       await testSubjects.click('.index-threshold-SelectOption');
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await saveButton.click();
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.setValue('ruleSearchField', ruleName);
       const rulesList = await testSubjects.find('rulesList');

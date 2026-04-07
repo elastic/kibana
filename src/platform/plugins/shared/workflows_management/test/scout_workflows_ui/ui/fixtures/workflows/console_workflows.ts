@@ -83,7 +83,7 @@ steps:
     type: foreach
     foreach: '{{consts.loop_items}}'
     steps:
-      - name: hello_world_step
+      - name: test_console_step
         type: console
         with:
           message: "Test run: {{ execution.isTestRun }}, timestamp: {{foreach.item['@timestamp']}}"
@@ -193,6 +193,23 @@ triggers:
 steps:
   - name: hello_world_step
     type:`;
+
+/**
+ * Workflow with a trailing empty line at the root level.
+ * Used to verify that root-level property suggestions (consts, inputs, etc.)
+ * appear on empty lines outside liquid blocks.
+ */
+export const getRootLevelAutocompleteYaml = (name: string) => `
+name: ${name}
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "hello"
+`;
 
 /**
  * Manual-only workflow with an event variable reference.

@@ -223,6 +223,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       cascadingChanges.push({
         type: 'upsert',
         definition: {
+          type: 'wired',
           name: parentId,
           description: '',
           updated_at: now,
@@ -256,6 +257,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: routeTarget,
               description: '',
               updated_at: now,
@@ -288,9 +290,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: now,
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -338,9 +342,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: new Date().toISOString(),
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -741,7 +747,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       },
       {
         type: 'upsert_ingest_pipeline',
@@ -909,7 +919,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();

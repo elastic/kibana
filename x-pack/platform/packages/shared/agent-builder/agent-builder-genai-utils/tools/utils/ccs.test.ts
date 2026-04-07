@@ -6,7 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isCcsTarget, partitionByCcs, getFieldsFromFieldCaps, getIndexFields } from './ccs';
+import {
+  isCcsTarget,
+  partitionByCcs,
+  getFieldsFromFieldCaps,
+  getBatchedFieldsFromFieldCaps,
+  getIndexFields,
+} from './ccs';
 import { getIndexMappings } from './mappings';
 
 describe('isCcsTarget', () => {
@@ -111,8 +117,8 @@ describe('getFieldsFromFieldCaps', () => {
     });
 
     expect(fields.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
-      { path: 'message', type: 'text', meta: {} },
-      { path: 'status', type: 'keyword', meta: {} },
+      { path: 'message', type: 'text', meta: {}, searchable: true },
+      { path: 'status', type: 'keyword', meta: {}, searchable: true },
     ]);
   });
 });
@@ -160,7 +166,9 @@ describe('getIndexFields', () => {
     });
     expect(result['my-index'].rawMapping).toBeDefined();
     expect(result['my-index'].rawMapping?._meta?.description).toBe('test index');
-    expect(result['my-index'].fields).toEqual([{ path: 'message', type: 'text', meta: {} }]);
+    expect(result['my-index'].fields).toEqual([
+      { path: 'message', type: 'text', meta: {}, searchable: true },
+    ]);
   });
 
   it('returns fields without rawMapping for CCS indices via _field_caps API', async () => {
@@ -184,7 +192,9 @@ describe('getIndexFields', () => {
     });
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
     expect(result['remote:logs'].rawMapping).toBeUndefined();
-    expect(result['remote:logs'].fields).toEqual([{ path: 'status', type: 'keyword', meta: {} }]);
+    expect(result['remote:logs'].fields).toEqual([
+      { path: 'status', type: 'keyword', meta: {}, searchable: true },
+    ]);
   });
 
   it('handles a mix of local and CCS indices', async () => {
@@ -220,11 +230,13 @@ describe('getIndexFields', () => {
     expect(esClient.fieldCaps).toHaveBeenCalled();
 
     expect(result['local-index'].rawMapping).toBeDefined();
-    expect(result['local-index'].fields).toEqual([{ path: 'name', type: 'keyword', meta: {} }]);
+    expect(result['local-index'].fields).toEqual([
+      { path: 'name', type: 'keyword', meta: {}, searchable: true },
+    ]);
 
     expect(result['cluster:remote-index'].rawMapping).toBeUndefined();
     expect(result['cluster:remote-index'].fields).toEqual([
-      { path: 'timestamp', type: 'date', meta: {} },
+      { path: 'timestamp', type: 'date', meta: {}, searchable: true },
     ]);
   });
 
@@ -239,5 +251,47 @@ describe('getIndexFields', () => {
     expect(result).toEqual({});
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
+  });
+});
+
+describe('getBatchedFieldsFromFieldCaps', () => {
+  it('batches requests when resource names would exceed URL length', async () => {
+    const resources = Array.from(
+      { length: 100 },
+      (_, i) => `remote_cluster:logs-elastic_agent.input-${String(i).padStart(7, '0')}`
+    );
+
+    const esClient = {
+      fieldCaps: jest.fn().mockImplementation((params: any) => {
+        const indexNames = (params.index as string).split(',');
+        const fields: Record<string, Record<string, any>> = {};
+        for (const name of indexNames) {
+          fields[`field_${name}`] = {
+            keyword: {
+              type: 'keyword',
+              searchable: true,
+              aggregatable: true,
+              indices: [name],
+            },
+          };
+        }
+        return Promise.resolve({ indices: indexNames, fields });
+      }),
+    } as unknown as ElasticsearchClient;
+
+    const result = await getBatchedFieldsFromFieldCaps({ resources, esClient });
+
+    expect((esClient.fieldCaps as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+
+    for (const call of (esClient.fieldCaps as jest.Mock).mock.calls) {
+      expect((call[0].index as string).length).toBeLessThanOrEqual(3000);
+    }
+
+    expect(Object.keys(result).length).toBe(100);
+    for (const name of resources) {
+      expect(result[name]).toBeDefined();
+      expect(result[name].length).toBe(1);
+      expect(result[name][0].path).toBe(`field_${name}`);
+    }
   });
 });

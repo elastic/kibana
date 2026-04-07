@@ -14,7 +14,7 @@ const rangeValueSchema = schema.oneOf([schema.string(), schema.number()]);
 
 const rangeKeySchema = schema.object(
   {
-    type: schema.literal('RangeKey'),
+    type: schema.literal('range_key'),
     from: rangeValueSchema,
     to: rangeValueSchema,
     ranges: schema.arrayOf(
@@ -26,15 +26,15 @@ const rangeKeySchema = schema.object(
       { maxSize: 100 }
     ),
   },
-  { meta: { id: 'rangeKey', title: 'Range Key' } }
+  { meta: { id: 'range_key', title: 'Range Key' } }
 );
 
 const multiFieldKeySchema = schema.object(
   {
-    type: schema.literal('multiFieldKey'),
+    type: schema.literal('multi_field_key'),
     keys: schema.arrayOf(schema.string(), { maxSize: 100 }),
   },
-  { meta: { id: 'multiFieldKey', title: 'Multi Field Key' } }
+  { meta: { id: 'multi_field_key', title: 'Multi Field Key' } }
 );
 
 export const serializedValueSchema = schema.oneOf([

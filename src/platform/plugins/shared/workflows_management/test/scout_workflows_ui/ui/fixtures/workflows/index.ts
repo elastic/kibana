@@ -18,6 +18,7 @@ export {
   getDummyWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
+  getRootLevelAutocompleteYaml,
   getManualTriggerEventAutocompleteYaml,
   getAlertTriggerEventAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
@@ -30,6 +31,12 @@ export {
   getCreateObsAlertRuleWorkflowYaml,
   getTriggerAlertWorkflowYaml,
 } from './alert_workflows';
+export {
+  getDataMapWithItemAndIndex,
+  getDataMapWithInvalidVariable,
+} from './data_map_validation_workflows';
+export { getLargePerfWorkflowYaml } from './large_perf_workflow';
+export { getInfosecDemoWorkflowYaml } from './infosec_demo_workflow';
 export {
   getAssignAfterUseSameLine,
   getAssignBeforeUseSameLine,

@@ -55,7 +55,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
         Take quick survey
         <span
           color="inherit"
-          data-euiicon-type="popout"
+          data-euiicon-type="external"
         />
       </span>
     </button>

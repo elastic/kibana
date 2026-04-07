@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  getEnrichPolicyId,
-  getEntitiesLatestIndexName,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 
 /**
  * Utility functions for building ESQL queries
@@ -57,12 +54,9 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
 };
 
 /**
- * Generates an ESQL expression that formats a JSON property with comma prefix.
+ * Generates an ESQL expression that formats a JSON property.
  * If the value is NOT NULL, it returns the full property with quoted value.
  * If the value is NULL, it returns an empty string (property is omitted entirely).
- *
- * Always includes comma prefix - place required properties first in the JSON
- * object so optional properties using this function come after.
  *
  * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
  * @param valueVar - The ESQL variable name containing the value
@@ -78,11 +72,43 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
-export const formatJsonProperty = (propertyName: string, valueVar: string): string => {
+export const concatJsonObjectPropertyEsqlExprSafe = (
+  propertyName: string,
+  esqlVariable: string
+): string => {
   // CONCAT returns null if any argument is null, so if valueVar is null,
   // the entire CONCAT returns null, and COALESCE returns empty string
-  return `COALESCE(CONCAT(",\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${esqlVariable}, "\\""), "")`;
 };
+
+export const concatJsonObjectPropertyString = (
+  propertyName: string,
+  stringValue: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", "${stringValue}", "\\"")`;
+};
+
+export const concatJsonObjectPropertyBool = (propertyName: string, boolValue: boolean): string => {
+  return `CONCAT("\\"${propertyName}\\":", "${boolValue}")`;
+};
+
+export const concatJsonObjectPropertyEsqlExpr = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":", ${esqlExpr})`;
+};
+
+export const concatJsonObjectPropertyEsqlExprAsString = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", ${esqlExpr}, "\\"")`;
+};
+
+export const JSON_OBJECT_SEPARATOR = '","';
+export const JSON_OBJECT_START = '"{"';
+export const JSON_OBJECT_END = '"}"';
 
 /**
  * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
@@ -108,6 +134,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntitySubType = entity.sub_type
 | RENAME actorHostIp        = host.ip
 | RENAME actorLookupEntityId = entity.id
+| RENAME actorEntityEngineType = entity.EngineMetadata.Type
 
 | EVAL entity.id = targetEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -115,26 +142,8 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME targetEntityType    = entity.type
 | RENAME targetEntitySubType = entity.sub_type
 | RENAME targetHostIp        = host.ip
-| RENAME targetLookupEntityId = entity.id`;
-};
-
-/**
- * Generates ESQL statements for entity enrichment using ENRICH policy.
- * This is the deprecated fallback method when LOOKUP JOIN is not available.
- *
- * @param enrichPolicyName - The name of the enrich policy
- * @returns ESQL statements for ENRICH policy enrichment
- *
- * @example
- * ```typescript
- * buildEnrichPolicyEsql('entity_store_field_retention_generic_default_v1.0.0')
- * // Returns ESQL with ENRICH for actor and target enrichment
- * ```
- */
-export const buildEnrichPolicyEsql = (enrichPolicyName: string): string => {
-  return `// Use ENRICH policy for entity enrichment (deprecated fallback)
-| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`;
+| RENAME targetLookupEntityId = entity.id
+| RENAME targetEntityEngineType = entity.EngineMetadata.Type`;
 };
 
 /**
@@ -269,19 +278,11 @@ export const buildSourceMetadataEvals = (): string => {
 
 /**
  * Builds ESQL enrichment pipeline based on availability.
- * Prefers LOOKUP JOIN over ENRICH policy when both are available.
+ * Uses LOOKUP JOIN when available, otherwise falls back to null values.
  */
-export const buildEntityEnrichment = (
-  isLookupIndexAvailable: boolean,
-  isEnrichPolicyExists: boolean,
-  spaceId: string
-): string => {
+export const buildEntityEnrichment = (isLookupIndexAvailable: boolean, spaceId: string): string => {
   if (isLookupIndexAvailable) {
     return buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId));
-  }
-
-  if (isEnrichPolicyExists) {
-    return buildEnrichPolicyEsql(getEnrichPolicyId(spaceId));
   }
 
   return `// No enrichment available - use null values
@@ -289,8 +290,10 @@ export const buildEntityEnrichment = (
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
+| EVAL actorEntityEngineType = TO_STRING(null)
 | EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)`;
+| EVAL targetHostIp = TO_STRING(null)
+| EVAL targetEntityEngineType = TO_STRING(null)`;
 };

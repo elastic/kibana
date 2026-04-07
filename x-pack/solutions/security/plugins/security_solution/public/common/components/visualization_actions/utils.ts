@@ -45,6 +45,64 @@ export const getDetailsPageFilter = (pageName: string, detailName?: string): Fil
     : [];
 };
 
+/**
+ * Events table filter: keep documents where at least one ECS / EUID field is present
+ * (aligned with Entity Store host identity branches and canonical `entity.id`).
+ */
+export const HOST_EXPLORE_EVENTS_EXISTENCE_FIELDS = [
+  'host.entity.id',
+  'host.id',
+  'host.name',
+  'host.hostname',
+  'entity.id',
+] as const;
+
+/**
+ * Events table filter: keep documents where at least one ECS / EUID field is present
+ * (aligned with Entity Store user identity inputs and canonical `entity.id`).
+ */
+export const USER_EXPLORE_EVENTS_EXISTENCE_FIELDS = [
+  'user.entity.id',
+  'user.name',
+  'user.id',
+  'user.email',
+  'entity.id',
+] as const;
+
+export const buildAnyFieldExistsFilter = (fields: readonly string[]): Filter[] => {
+  const query = {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: fields.map((field) => ({ exists: { field } })),
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  };
+  return [
+    {
+      query,
+      meta: {
+        alias: '',
+        disabled: false,
+        key: 'bool',
+        negate: false,
+        type: 'custom',
+        value: JSON.stringify({ query }),
+      },
+    },
+  ];
+};
+
+/** Hosts explore Events tab — any host / EUID identifier field present */
+export const hostNameExistsFilter = buildAnyFieldExistsFilter(HOST_EXPLORE_EVENTS_EXISTENCE_FIELDS);
+
+/** Users explore Events tab — any user / EUID identifier field present */
+export const userNameExistsFilter = buildAnyFieldExistsFilter(USER_EXPLORE_EVENTS_EXISTENCE_FIELDS);
+
 export const fieldNameExistsFilter = (pageName: string): Filter[] => {
   const field = pageFilterFieldMap[pageName];
 

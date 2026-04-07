@@ -263,9 +263,31 @@ var ENV_DOCS = [
     example: 'TRACING_ES_URL=http://elastic:changeme@localhost:9200',
   },
   {
+    name: 'TRACING_ES_API_KEY',
+    description: 'API key for authenticating with the tracing Elasticsearch cluster.',
+    example: 'TRACING_ES_API_KEY=...',
+  },
+  {
+    name: 'TRACING_EXPORTERS',
+    description:
+      'JSON array of trace exporter configs (http/grpc/phoenix/langfuse). Overrides kibana.dev.yml tracing exporters when set.',
+    example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
+  },
+  {
     name: 'EVALUATIONS_ES_URL',
     description: 'Elasticsearch URL where evaluation results are exported.',
     example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
+  },
+  {
+    name: 'EVALUATIONS_ES_API_KEY',
+    description: 'API key for authenticating with the evaluations Elasticsearch cluster.',
+    example: 'EVALUATIONS_ES_API_KEY=...',
+  },
+  {
+    name: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT',
+    description:
+      'Skip the Elasticsearch export preflight check (not recommended for CI). Preflight runs a small sentinel write against the configured evaluations cluster.',
+    example: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT=true',
   },
   {
     name: 'SELECTED_EVALUATORS',
@@ -319,13 +341,16 @@ function runFastHelp() {
   logInfo('For full command help/flags: node scripts/evals --full-help');
   logInfo('');
   logInfo('Commands:');
-  logInfo('  init                          Set up connectors for local evals');
+  logInfo('  init                          Set up config + connectors for local evals');
+  logInfo('  init config                   Only create/update vault config.json');
   logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');
   logInfo('  scout                         Start Scout server for evals');
+  logInfo('  clear-index                   Delete kibana-evaluations indices (reset export)');
   logInfo('  run [--suite <id>] [...]      Run an eval suite');
   logInfo('  list [--refresh] [--json]     List eval suites');
+  logInfo('  labels [suite-id ...]         Create/sync GitHub eval suite labels');
   logInfo('  compare <run-a> <run-b>       Compare two eval runs');
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');
@@ -343,12 +368,16 @@ function runFastHelp() {
 function main() {
   var args = process.argv.slice(2);
   var command = args[0];
+  if (command && String(command).startsWith('-')) {
+    command = null;
+  }
   var repoRoot = process.cwd();
 
   var hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
 
   // For subcommand-level help, prefer the full CLI help output.
-  if (hasHelpFlag && (command === 'list' || command === 'env')) {
+  // Keep the fast help output for `node scripts/evals --help` (no command).
+  if (hasHelpFlag && command && command !== 'help') {
     process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
     require('@kbn/setup-node-env');
     void require('@kbn/evals').cli.run();

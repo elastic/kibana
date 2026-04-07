@@ -393,7 +393,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .cases-webhook 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -944,7 +944,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .gen-ai 1`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -1196,6 +1196,10 @@ Object {
       "default": true,
       "type": "boolean",
     },
+    "hasProxyAuth": Object {
+      "default": false,
+      "type": "boolean",
+    },
     "headers": Object {
       "anyOf": Array [
         Object {
@@ -1212,6 +1216,26 @@ Object {
         },
       ],
       "default": null,
+    },
+    "proxyUrl": Object {
+      "anyOf": Array [
+        Object {
+          "format": "uri",
+          "type": "string",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
+    "proxyVerificationMode": Object {
+      "enum": Array [
+        "none",
+        "certificate",
+        "full",
+      ],
+      "type": "string",
     },
     "scope": Object {
       "type": "string",
@@ -1285,6 +1309,28 @@ Object {
       "default": null,
     },
     "pfx": Object {
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
+    "proxyPassword": Object {
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
+    "proxyUsername": Object {
       "anyOf": Array [
         Object {
           "type": "string",
@@ -1679,7 +1725,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .jira 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -2760,7 +2806,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -3204,7 +3250,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow-itom 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -3501,7 +3547,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow-sir 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -4363,7 +4409,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .swimlane 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -4935,8 +4981,22 @@ Object {
       "type": "string",
     },
     "subActionParams": Object {
-      "additionalProperties": false,
       "properties": Object {
+        "alertStates": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "new": Object {
+              "type": "boolean",
+            },
+            "ongoing": Object {
+              "type": "boolean",
+            },
+            "recovered": Object {
+              "type": "boolean",
+            },
+          },
+          "type": "object",
+        },
         "inputs": Object {},
         "spaceId": Object {
           "type": "string",

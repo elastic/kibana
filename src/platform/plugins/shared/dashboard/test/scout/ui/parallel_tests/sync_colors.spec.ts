@@ -94,7 +94,8 @@ const createBaseXYCharts = async (
   await pageObjects.dashboard.waitForPanelsToLoad(2);
 };
 
-spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/258148
+spaceTest.describe.skip('Sync colors', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);

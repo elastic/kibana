@@ -12,9 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
-import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
-import { withAutoSuggest } from './autocomplete/helpers';
+import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
@@ -183,66 +182,51 @@ export async function additionalSourcesSuggestions(
     ...sources.map(({ name }) => name),
     ...views.map(({ name }) => name),
   ]);
-  const suggestionsToAdd = await handleFragment(
-    queryText,
-    (fragment) => sourceExists(fragment, sourceNames),
-    (_fragment, rangeToReplace) => {
-      const sourceSuggestions = getSourceSuggestions(sources, ignored).map((suggestion) => ({
-        ...suggestion,
-        rangeToReplace,
-      }));
-      const viewSuggestions = buildViewsDefinitions(views, ignored).map((suggestion) => ({
-        ...suggestion,
-        rangeToReplace,
-      }));
-      return [...sourceSuggestions, ...viewSuggestions];
-    },
-    (fragment, rangeToReplace) => {
-      const exactMatch = sources.find(({ name: _name }) => _name === fragment);
-      if (exactMatch?.dataStreams) {
-        // this is an integration name, suggest the datastreams
-        const definitions = buildSourcesDefinitions(
-          exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
-        );
+  const prefix = findFinalWord(queryText);
+  const isComplete = prefix ? sourceExists(prefix, sourceNames) : false;
 
-        return definitions;
-      } else {
-        const _suggestions: ISuggestionItem[] = [
-          withAutoSuggest({
-            ...pipeCompleteItem,
-            filterText: fragment,
-            text: fragment + ' | ',
-            rangeToReplace,
-            sortText: '0',
-          }),
-          withAutoSuggest({
-            ...commaCompleteItem,
-            filterText: fragment,
-            text: fragment + ', ',
-            rangeToReplace,
-          }),
-          {
-            ...metadataSuggestion,
-            filterText: fragment,
-            text: fragment + ' METADATA ',
-            rangeToReplace,
-          },
-          ...recommendedQuerySuggestions.map((suggestion) =>
-            suggestion.text
-              ? {
-                  ...suggestion,
-                  rangeToReplace,
-                  filterText: fragment,
-                  text: fragment + suggestion.text,
-                }
-              : suggestion
-          ),
-        ];
-        return _suggestions;
-      }
+  if (isComplete) {
+    const exactMatch = sources.find(({ name }) => name === prefix);
+
+    if (exactMatch?.dataStreams) {
+      return buildSourcesDefinitions(
+        exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+      );
     }
-  );
-  return suggestionsToAdd;
+
+    return [
+      withAutoSuggest({
+        ...pipeCompleteItem,
+        filterText: prefix,
+        text: prefix + ' | ',
+        sortText: '0',
+      }),
+      withAutoSuggest({
+        ...commaCompleteItem,
+        filterText: prefix,
+        text: prefix + ', ',
+      }),
+      {
+        ...metadataSuggestion,
+        filterText: prefix,
+        text: prefix + ' METADATA ',
+      },
+      ...recommendedQuerySuggestions.map((suggestion) =>
+        suggestion.text
+          ? {
+              ...suggestion,
+              filterText: prefix,
+              text: prefix + suggestion.text,
+            }
+          : suggestion
+      ),
+    ];
+  }
+
+  const sourceSuggestions = getSourceSuggestions(sources, ignored);
+  const viewSuggestions = buildViewsDefinitions(views, ignored);
+
+  return [...sourceSuggestions, ...viewSuggestions];
 }
 
 // Treating lookup and time_series mode indices

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
@@ -21,8 +21,8 @@ const querySchema = z.object({
 export function registerResolutionGroup(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.RESOLUTION_GROUP,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -30,7 +30,7 @@ export function registerResolutionGroup(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(querySchema),

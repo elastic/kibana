@@ -30,7 +30,7 @@
           "\n Helper for starting and managing processes. In many ways it resembles the\n API from `grunt_run`, processes are named and can be started, waited for,\n backgrounded once they log something matching a RegExp...\n"
         ],
         "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-        "lineNumber": 29,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 41,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -68,7 +68,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 41,
+                "lineNumber": 45,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -90,7 +90,7 @@
               "(name: string, options: RunOptions) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 51,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -106,7 +106,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 54,
+                "lineNumber": 58,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -123,7 +123,7 @@
                   "RunOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 54,
+                "lineNumber": 58,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -145,7 +145,7 @@
               "(name: string, signal?: NodeJS.Signals) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 153,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -161,7 +161,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 156,
+                "lineNumber": 160,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -178,7 +178,7 @@
                   "NodeJS.Signals"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 156,
+                "lineNumber": 160,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -202,7 +202,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 165,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -224,7 +224,7 @@
               "(signal?: \"exit\" | NodeJS.Signals) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 173,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +240,7 @@
                   "\"exit\" | NodeJS.Signals"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 180,
+                "lineNumber": 184,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,

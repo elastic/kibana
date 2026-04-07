@@ -1,5 +1,5 @@
 {
-  "sha1": "e18efd305939c4df385b71b8fb5d8f9e7a440561",
+  "sha1": "5a50349c536e802d7cc89f631a059cefc83bc835",
   "tests": [
     {
       "id": "b84b07d0bf27e66-b0ce2da86af09e0",
@@ -56,13 +56,13 @@
     {
       "id": "6bb8a5a56f4bbf7-6aa6870c3a32521",
       "title": "MonitorDetails navigates to monitor details and displays ping data",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/monitor_details.spec.ts",
-        "line": 16,
+        "line": 17,
         "column": 7
       }
     },

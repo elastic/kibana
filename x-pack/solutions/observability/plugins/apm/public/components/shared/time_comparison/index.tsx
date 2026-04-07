@@ -20,7 +20,13 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../links/url_helpers';
 import { getComparisonOptions, TimeRangeComparisonEnum } from './get_comparison_options';
 
-export function TimeComparison() {
+export function TimeComparison({
+  compressed,
+  fullWidth,
+}: {
+  compressed?: boolean;
+  fullWidth?: boolean;
+}) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isSmall, isMedium } = useBreakpoints();
@@ -90,15 +96,15 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
+      compressed={compressed}
       aria-label={i18n.translate('xpack.apm.timeComparison.euiSelect.seletTimeComparisonLabel', {
         defaultMessage: 'Select time comparison options',
       })}
-      fullWidth={isSmall || isMedium}
+      fullWidth={fullWidth ?? (isSmall || isMedium)}
       data-test-subj="comparisonSelect"
       disabled={comparisonEnabled === false}
       options={comparisonOptions}
       value={offset}
-      compressed
       prepend={
         <EuiFormPrepend>
           <EuiCheckbox

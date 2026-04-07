@@ -98,6 +98,15 @@ export const myTriggerPublicDefinition: PublicTriggerDefinition = {
 plugins.workflowsExtensions.registerTriggerDefinition(myTriggerPublicDefinition);
 ```
 
+**Async registration (optional):** To keep your plugin's main bundle small, you can register a **loader** instead of the definition. The workflows app awaits `workflowsExtensions.isReady()` before rendering, so trigger definitions are available when the UI needs them:
+
+```typescript
+// In public plugin setup():
+plugins.workflowsExtensions.registerTriggerDefinition(() =>
+  import('./triggers/custom_trigger').then((m) => m.myTriggerPublicDefinition)
+);
+```
+
 Reference: `examples/workflows_extensions_example/public/triggers/custom_trigger.ts` and `public/triggers/index.ts`.
 
 ### Step 4: Emit events — two ways
@@ -188,3 +197,47 @@ All event-driven trigger definitions must be approved by the workflows-eng team 
 4. **Get approval** from the workflows-eng team (via PR review).
 
 If you change the trigger's `eventSchema`, the schema hash changes; update the approved list and get re-approval.
+
+## Event-driven guardrails
+
+To prevent infinite loops and unbounded workflow executions:
+
+- **Event-chain depth**: Depth is inferred from the request inside `emitEvent` (and propagated on outbound `kibana.request` steps via headers). Each time a trigger event schedules workflow runs, depth is incremented for those runs. If the new depth would exceed the configured maximum, those workflows are **not** scheduled and a server warning is logged.
+
+- **Configuration**: Set the maximum chain depth in `kibana.yml` with **`workflowsExecutionEngine.eventDriven.maxChainDepth`**. Default is **`10`**; minimum is **`1`**. See the [workflows execution engine README](../../workflows_execution_engine/README.md#configuration) and [config](../../workflows_execution_engine/server/config.ts).
+
+- **Same request is required for depth tracking**: Emitters must pass the **same request** from the current code path when calling `emitEvent`. The platform attaches depth and source workflow id to that request when a workflow runs; if you use a different request (e.g. a new or unrelated one), the platform cannot infer chain context and cannot enforce the depth limit. **Always use the request you use for attribution/space** so the guardrail works correctly.
+
+#### Event-chain depth (loop) demo
+
+The example plugin registers a second trigger `example.loopTrigger` (payload: `{ iteration: number }`) and a route that emits it. You can demonstrate the event-chain depth guardrail (`workflowsExecutionEngine.eventDriven.maxChainDepth`, default `10`) by running a workflow that re-emits the same trigger until the guardrail stops scheduling. Use a **`kibana.request`** step so the execution engine attaches event-chain headers on the outbound call; a generic HTTP connector step does not add those headers and may not propagate depth correctly.
+
+Example workflow (create this in the UI or import as YAML):
+
+```yaml
+name: Example loop trigger (event-chain depth demo)
+description: >-
+  Triggered by example.loopTrigger; calls emit_loop to re-emit with the next iteration until maxChainDepth is reached.
+enabled: true
+
+triggers:
+  - type: example.loopTrigger
+
+steps:
+  - name: reemit_loop
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/workflows_extensions_example/emit_loop
+      body:
+        iteration: '{{ event.iteration | default: 0 | plus: 1 }}'
+```
+
+1. **Run Kibana with examples:** `yarn start --run-examples`.
+2. **Create the loop workflow** using the YAML above (trigger `example.loopTrigger` and the `kibana.request` step as shown).
+3. **Start the loop:**
+   ```bash
+   curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
+     'http://localhost:5601/api/workflows_extensions_example/emit_loop' -d '{}'
+   ```
+   (or `-d '{"iteration":0}'`). Each run executes the `kibana.request` step, which POSTs to `emit_loop` with the next iteration and re-emits the trigger. After the event chain reaches your configured `maxChainDepth` (default `10`), the guardrail stops scheduling further runs.

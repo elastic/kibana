@@ -31,7 +31,7 @@
  */
 
 import os from 'os';
-import type { OtelLogDocument } from '@kbn/synthtrace-client';
+import type { OtelLogDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { otelLog } from '@kbn/synthtrace-client';
 import type { LogDocument } from '@kbn/synthtrace-client';
 import type { Scenario } from '../cli/scenario';
@@ -145,7 +145,7 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
       }
 
       // Generate traffic streams based on mode
-      const streams: any[] = [];
+      const streams: Array<SynthtraceGenerator<OtelLogDocument>> = [];
 
       if (finalOpts.mode === 'comprehensive' || finalOpts.mode === 'mixed') {
         // Mixed mode: all traffic patterns with realistic distribution

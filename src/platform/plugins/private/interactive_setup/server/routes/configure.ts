@@ -38,6 +38,11 @@ export function defineConfigureRoute({
     {
       path: '/internal/interactive_setup/configure',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route is used during initial Kibana setup before authentication is configured.',
+        },
         authz: {
           enabled: false,
           reason:
@@ -74,7 +79,6 @@ export function defineConfigureRoute({
           code: schema.maybe(schema.string()),
         }),
       },
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       if (!verificationCode.verify(request.body.code)) {

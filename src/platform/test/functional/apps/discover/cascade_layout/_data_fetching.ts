@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const inspector = getService('inspector');
 
   describe('grouping data fetching', function () {
@@ -32,22 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.isShowingCascadeLayout()).to.be(true);
     };
 
-    const getRootRowIds = async () => {
-      const rootRows = await find.allByCssSelector('[data-row-type="root"]');
-      return Promise.all(rootRows.map(async (row) => (await row.getAttribute('id')) ?? ''));
-    };
-
-    const toggleRow = async (rowId: string) => {
-      await testSubjects.click(`toggle-row-${rowId}-button`);
-    };
-
     const getRequestTimestampFromStats = (requestStats: string[][]) => {
       const requestStatsRow = requestStats.find((row) => row?.[0]?.includes('Request timestamp'));
       return requestStatsRow?.[1] ?? '';
     };
 
     const getCascadeRequestTimestamp = async () => {
-      await inspector.open();
+      await discover.openInspectorFromTabMenu();
       try {
         const requestNames = await inspector.getRequestNames();
 
@@ -83,47 +73,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('does not refetch when returning to a previously expanded group', async () => {
       await runCascadeQuery();
 
-      const [firstRowId, secondRowId] = await getRootRowIds();
+      const [firstRowId, secondRowId] = await discover.getCascadeLayoutRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
-      await toggleRow(firstRowId);
+      await discover.toggleCascadeLayoutRow(firstRowId);
       await expectCascadeRequestTimestampToChange(baseline);
 
       const firstTimestamp = await getCascadeRequestTimestamp();
 
-      await toggleRow(secondRowId);
+      await discover.toggleCascadeLayoutRow(secondRowId);
       await expectCascadeRequestTimestampToChange(firstTimestamp);
 
       const secondTimestamp = await getCascadeRequestTimestamp();
 
-      await toggleRow(firstRowId);
+      await discover.toggleCascadeLayoutRow(firstRowId);
       await expectCascadeRequestTimestampToStay(secondTimestamp);
     });
 
     it('does not refetch when re-expanding a group after switching tabs', async () => {
       await runCascadeQuery();
 
-      const [firstRowId] = await getRootRowIds();
+      const [firstRowId] = await discover.getCascadeLayoutRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
-      await toggleRow(firstRowId);
+      await discover.toggleCascadeLayoutRow(firstRowId);
       await expectCascadeRequestTimestampToChange(baseline);
 
       const firstTimestamp = await getCascadeRequestTimestamp();
 
+      await discover.toggleCascadeLayoutRow(firstRowId);
       await unifiedTabs.createNewTab();
       await runCascadeQuery();
 
-      const [secondTabRowId] = await getRootRowIds();
+      const [secondTabRowId] = await discover.getCascadeLayoutRowIds();
       const secondTabBaseline = await getCascadeRequestTimestamp();
 
-      await toggleRow(secondTabRowId);
+      await discover.toggleCascadeLayoutRow(secondTabRowId);
       await expectCascadeRequestTimestampToChange(secondTabBaseline);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
 
-      await toggleRow(firstRowId);
+      await discover.toggleCascadeLayoutRow(firstRowId);
       await expectCascadeRequestTimestampToStay(firstTimestamp);
     });
 
@@ -135,10 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
 
-      const [firstRowId] = await getRootRowIds();
+      const [firstRowId] = await discover.getCascadeLayoutRowIds();
       const baseline = await getCascadeRequestTimestamp();
 
-      await toggleRow(firstRowId);
+      await discover.toggleCascadeLayoutRow(firstRowId);
       await unifiedTabs.selectTab(1);
 
       await unifiedTabs.selectTab(0);

@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/test/cspm_agentless_scout.sh
     label: 'CSPM Agentless Scout E2E Tests'
+    key: cspm-agentless-scout
     agents:
       machineType: n2-standard-8
       preemptible: true

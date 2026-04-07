@@ -47,6 +47,7 @@ export interface LiveQueryDetailsItem {
   pack_id?: string;
   pack_name?: string;
   pack_prebuilt?: boolean;
+  tags?: string[];
   status?: string;
   queries?: PackQueriesQuery[];
 }

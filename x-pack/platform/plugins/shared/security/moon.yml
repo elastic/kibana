@@ -102,6 +102,8 @@ dependsOn:
   - '@kbn/lazy-object'
   - '@kbn/scout'
   - '@kbn/mock-idp-utils'
+  - '@kbn/core-user-activity-server'
+  - '@kbn/core-user-activity-server-mocks'
 tags:
   - plugin
   - prod
@@ -116,26 +118,6 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

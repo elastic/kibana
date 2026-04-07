@@ -17,11 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/browser-mocks
 dependsOn:
-  - '@kbn/utility-types'
   - '@kbn/utility-types-jest'
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-chrome-browser-internal'
-  - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-chrome-browser-internal-types'
   - '@kbn/lazy-object'
   - '@kbn/core-chrome-sidebar-mocks'
 tags:
@@ -36,26 +34,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

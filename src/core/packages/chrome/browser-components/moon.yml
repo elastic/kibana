@@ -20,23 +20,28 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/core-application-browser'
+  - '@kbn/core-application-browser-internal'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/core-application-common'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-browser-hooks'
   - '@kbn/core-chrome-browser-internal-types'
-  - '@kbn/core-chrome-layout-components'
+  - '@kbn/core-chrome-browser-mocks'
+  - '@kbn/core-base-browser-mocks'
+  - '@kbn/react-env'
+  - '@kbn/react-kibana-context-env'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/core-chrome-navigation'
   - '@kbn/core-chrome-sidebar-components'
+  - '@kbn/core-custom-branding-browser'
   - '@kbn/core-custom-branding-common'
   - '@kbn/core-doc-links-browser'
   - '@kbn/core-doc-links-browser-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-mount-utils-browser'
-  - '@kbn/recently-accessed'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/shared-ux-label-formatter'
   - '@kbn/test-jest-helpers'
@@ -53,26 +58,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -188,7 +188,7 @@ export const Example: StoryFn<{}> = () => {
           status: { fieldName: 'event.outcome', value: 'failure' },
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      highlightedSpanId="41b39c13ec0166a8"
     />
   );
 };
@@ -245,7 +245,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      highlightedSpanId="41b39c13ec0166a8"
       showLegend
     />
   );
@@ -306,7 +306,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      highlightedSpanId="41b39c13ec0166a8"
       serviceName="frontend"
       showLegend
     />
@@ -332,7 +332,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
     <TraceWaterfall
       traceItems={traceItems}
       showAccordion={false}
-      highlightedTraceId="99e36adf40935241"
+      highlightedSpanId="99e36adf40935241"
       onClick={() => {}}
     />
   );

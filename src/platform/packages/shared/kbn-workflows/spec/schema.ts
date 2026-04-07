@@ -8,9 +8,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
+import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
-import { timezoneNames } from './schema/triggers/timezone_names';
+import { TriggerSchema } from './schema/triggers';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -24,6 +24,9 @@ export const RetryPolicySchema = z.object({
   'timeout-seconds': z.number().int().min(1).optional(),
 });
 
+export const RetryDelayStrategySchema = z.enum(['fixed', 'exponential']);
+export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
+
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
@@ -31,6 +34,14 @@ export const WorkflowRetrySchema = z.object({
     .string()
     .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
     .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+  /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
+  strategy: RetryDelayStrategySchema.optional(),
+  /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
+  multiplier: z.number().min(1).optional(),
+  /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
+  'max-delay': DurationSchema.optional(),
+  /** Add jitter to delay to avoid thundering herd. Default: false. */
+  jitter: z.boolean().optional(),
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
@@ -95,88 +106,6 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
   return schema;
 }
 
-/* --- Triggers --- */
-export const AlertRuleTriggerSchema = z.object({
-  type: z.literal('alert'),
-  with: z
-    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
-    .optional(),
-});
-
-export const ScheduledTriggerSchema = z.object({
-  type: z.literal('scheduled'),
-  with: z.union([
-    // New format: every: "5m", "2h", "1d", "30s"
-    z.object({
-      every: z
-        .string()
-        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
-    }),
-    z.object({
-      rrule: z.object({
-        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
-        interval: z.number().int().positive(),
-        tzid: z
-          .enum(timezoneNames as [string, ...string[]])
-          .optional()
-          .default('UTC'),
-        dtstart: z.string().optional(),
-        byhour: z.array(z.number().int().min(0).max(23)).optional(),
-        byminute: z.array(z.number().int().min(0).max(59)).optional(),
-        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
-        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
-      }),
-    }),
-  ]),
-});
-
-export const ManualTriggerSchema = z.object({
-  type: z.literal('manual'),
-});
-
-export const TriggerSchema = z.discriminatedUnion('type', [
-  AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
-  ManualTriggerSchema,
-]);
-
-/** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerOnSchema = z
-  .object({
-    condition: z.string().optional(),
-  })
-  .optional();
-
-/**
- * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
- * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
- * Custom triggers allow an `on.condition` clause for KQL filtering.
- */
-export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
-  if (customTriggerIds.length === 0) {
-    return TriggerSchema;
-  }
-  const customSchemas = customTriggerIds.map((id) =>
-    z.object({
-      type: z.literal(id),
-      on: CustomTriggerOnSchema,
-    })
-  );
-  return z.discriminatedUnion('type', [
-    AlertRuleTriggerSchema,
-    ScheduledTriggerSchema,
-    ManualTriggerSchema,
-    ...customSchemas,
-  ]);
-}
-
-export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type.value,
-  ScheduledTriggerSchema.shape.type.value,
-  ManualTriggerSchema.shape.type.value,
-];
-export type TriggerType = (typeof TriggerTypes)[number];
-
 /* --- Steps --- */
 export const TimeoutPropSchema = z.object({
   timeout: DurationSchema.optional(),
@@ -198,6 +127,8 @@ export const MaxIterationsSchema = z.union([
   MaxIterationsObjectSchema,
 ]);
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
+
+export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;
 
 export const LoopStepPropsSchema = z.object({
   'max-iterations': MaxIterationsSchema.optional(),
@@ -261,6 +192,9 @@ export type WaitStep = z.infer<typeof WaitStepSchema>;
 export const WaitForInputStepInputSchema = z
   .object({
     message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    schema: JsonModelSchema.optional().describe(
+      'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
+    ),
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({
@@ -479,6 +413,54 @@ export const getWhileStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const SwitchCaseSchema = z.object({
+  match: z.union([z.string(), z.number(), z.boolean()]),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when this case matches'),
+});
+export type SwitchCase = z.infer<typeof SwitchCaseSchema>;
+
+export const SwitchStepConfigSchema = z.object({
+  expression: z
+    .string()
+    .describe(
+      'Liquid expression evaluated and compared to each case match, e.g. "{{ steps.check.output.status }}"'
+    ),
+  cases: z
+    .array(SwitchCaseSchema)
+    .min(1)
+    .describe('Ordered list of match-to-steps mappings. First matching case is executed'),
+  default: z.array(BaseStepSchema).optional().describe('Steps to execute when no case matches'),
+});
+
+export const SwitchStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('switch')
+    .describe(
+      'Multi-way branching. Evaluates expression and runs the steps of the first case whose match equals the expression'
+    ),
+  ...SwitchStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
+  ...TimeoutPropSchema.shape,
+});
+export type SwitchStep = z.infer<typeof SwitchStepSchema>;
+
+export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = SwitchStepSchema.extend({
+    cases: z.array(
+      SwitchCaseSchema.extend({
+        steps: z.array(stepSchema).min(1),
+      })
+    ),
+    default: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
 export const IfStepConfigSchema = z.object({
   condition: z
     .string()
@@ -572,6 +554,24 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const LoopBreakStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('loop.break')
+    .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
+  ...StepWithIfConditionSchema.shape,
+});
+export type LoopBreakStep = z.infer<typeof LoopBreakStepSchema>;
+
+export const LoopContinueStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('loop.continue')
+    .describe(
+      'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
+    ),
+  ...StepWithIfConditionSchema.shape,
+});
+export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
+
 export const ConsoleStepInputSchema = z.object({
   message: z.unknown().optional(),
 });
@@ -603,6 +603,24 @@ export const WorkflowExecuteAsyncStepOutputSchema = z.object({
   status: z.string(),
   startedAt: z.string().optional(),
 });
+
+export const WorkflowOutputStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.output'),
+  status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
+  with: z.record(z.string(), z.any()),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
+
+export const WorkflowFailStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.fail'),
+  with: z
+    .object({
+      message: z.string().optional(),
+      reason: z.string().optional(),
+    })
+    .optional(),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
@@ -651,6 +669,11 @@ export const WorkflowInputSchema = z.union([
 ]);
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
+/* --- Outputs --- */
+// Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
+export const WorkflowOutputSchema = WorkflowInputSchema;
+export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
+
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
   z.string(),
@@ -669,6 +692,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     WhileStepSchema,
     IfStepSchema,
+    SwitchStepSchema,
     WaitStepSchema,
     WaitForInputStepSchema,
     DataSetStepSchema,
@@ -678,21 +702,36 @@ const StepSchema = z.lazy(() =>
     MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    WorkflowOutputStepSchema,
+    WorkflowFailStepSchema,
+    LoopBreakStepSchema,
+    LoopContinueStepSchema,
     BaseConnectorStepSchema,
   ])
 );
 export type Step = z.infer<typeof StepSchema>;
 
-export const BuiltInStepTypes = [
+export const LoopStepTypes = [
   ForEachStepSchema.shape.type.value,
   WhileStepSchema.shape.type.value,
+] as const;
+export type LoopStepType = (typeof LoopStepTypes)[number];
+
+export const BuiltInStepTypes = [
+  ...LoopStepTypes,
   IfStepSchema.shape.type.value,
+  SwitchStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
+  WaitForInputStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowOutputStepSchema.shape.type.value,
+  WorkflowFailStepSchema.shape.type.value,
+  LoopBreakStepSchema.shape.type.value,
+  LoopContinueStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -713,34 +752,34 @@ const WorkflowSchemaBase = z.object({
       z.array(WorkflowInputSchema),
     ])
     .optional(),
+  outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
 
+/** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
+function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (Array.isArray(value)) {
+    return convertLegacyFieldsToJsonSchema(value);
+  }
+  return undefined;
+}
+
 export const WorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(TriggerSchema).min(1),
 }).transform((data) => {
-  // Transform inputs from legacy array format to JSON Schema format
-  let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-  if (data.inputs) {
-    if (
-      'properties' in data.inputs &&
-      typeof data.inputs === 'object' &&
-      !Array.isArray(data.inputs)
-    ) {
-      normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-    } else if (Array.isArray(data.inputs)) {
-      normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
-    }
-  }
+  const normalizedInputs = normalizeFieldsToJsonSchema(data.inputs);
+  const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  // Return the data with normalized inputs, preserving all other fields as-is
-  // This preserves the optionality of fields since we're not explicitly listing them all
-  // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
-  const { inputs: _, ...rest } = data;
+  const { inputs: _, outputs: __, ...rest } = data;
   return {
     ...rest,
     ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+    ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
   };
 });
 
@@ -770,6 +809,20 @@ const WorkflowSchemaForAutocompleteBase = z
         // New JSON Schema format
         JsonModelSchema,
         // Legacy array format (for backward compatibility during parsing)
+        z.array(
+          z
+            .object({
+              name: z.string().catch(''),
+              type: z.string().catch(''),
+            })
+            .passthrough()
+        ),
+      ])
+      .optional()
+      .catch(undefined),
+    outputs: z
+      .union([
+        JsonModelSchema,
         z.array(
           z
             .object({
@@ -874,7 +927,10 @@ export const EventTimestampSchema = z.object({
  * Full event schema (used for runtime validation of alert-triggered workflows).
  * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
  */
-export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
+export const AlertEventSchema = z.object({
+  ...BaseEventSchema.shape,
+  ...AlertEventPropsSchema.shape,
+});
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -890,11 +946,22 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 );
 
 export const WorkflowContextSchema = z.object({
-  event: EventSchema.optional(),
+  event: AlertEventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  output: z
+    .record(
+      z.string(),
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
   parent: z
@@ -904,13 +971,15 @@ export const WorkflowContextSchema = z.object({
       depth: z.number().optional(),
     })
     .optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual inputs and consts of different types
+  // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
+  output: z.object({}),
   consts: z.object({}),
   // overriding event with base event schema (spaceId only) so it can be
   // dynamically extended with trigger-specific properties (e.g., alerts, rule)

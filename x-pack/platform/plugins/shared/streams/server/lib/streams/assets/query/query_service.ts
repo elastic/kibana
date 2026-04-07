@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { ensureMetadata } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import {
+  QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
@@ -22,20 +29,24 @@ import {
   RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
+import { getQueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
+import type { InferenceResolver } from './helpers/inference_availability';
 
 export class QueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
+    private readonly resolveInference: InferenceResolver,
     private readonly logger: Logger
   ) {}
 
   async getClient({
+    esClient,
     soClient,
     rulesClient,
   }: {
+    esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     rulesClient: RulesClient;
   }): Promise<QueryClient> {
@@ -45,10 +56,14 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
-      core.elasticsearch.client.asInternalUser,
+    const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
+
+    const settings = getQueryStorageSettings(inferenceId);
+
+    const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredQueryLink>(
+      esClient,
       this.logger.get('queries'),
-      queryStorageSettings,
+      settings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
@@ -108,6 +123,11 @@ export class QueryService {
             migrated = { ...migrated, [RULE_BACKED]: true };
           }
 
+          // Back-fill description for queries created before the field was introduced.
+          if (!(QUERY_DESCRIPTION in migrated)) {
+            migrated = { ...migrated, [QUERY_DESCRIPTION]: '' };
+          }
+
           return migrated as StoredQueryLink;
         },
       }
@@ -120,7 +140,8 @@ export class QueryService {
         rulesClient,
         logger: this.logger,
       },
-      isSignificantEventsEnabled
+      isSignificantEventsEnabled,
+      inferenceAvailable
     );
   }
 }

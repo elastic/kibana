@@ -12,7 +12,7 @@ import type {
   UserMessagesGetter,
   LensDocument,
   LensInspector,
-  SupportedDatasourceId,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -46,7 +46,7 @@ export interface EditConfigPanelProps {
     visualizationState: unknown,
     visualizationId?: string,
     /** When restoring state (e.g. on cancel), pass the datasource the state belongs to. */
-    datasourceId?: SupportedDatasourceId
+    datasourceId?: LensDatasourceId
   ) => void;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
@@ -56,7 +56,7 @@ export interface EditConfigPanelProps {
   /** Contains the active data, necessary for some panel configuration such as coloring */
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   /** Optional callback called when updating the by reference embeddable */
-  updateByRefInput?: (soId: string) => void;
+  updateByRefInput?: (soId: string, attrs: TypedLensSerializedState['attributes']) => void;
   /** Callback for closing the edit flyout */
   closeFlyout?: () => void;
   /** Boolean used for adding a flyout wrapper */

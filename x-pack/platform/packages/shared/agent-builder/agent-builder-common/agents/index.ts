@@ -22,7 +22,6 @@ export {
   hasAgentReadAccess,
   hasAgentWriteAccess,
 } from './access_control';
-export type { SkillSelection } from '../skills';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,

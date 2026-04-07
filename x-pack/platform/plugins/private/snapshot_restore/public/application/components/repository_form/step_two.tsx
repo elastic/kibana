@@ -208,7 +208,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
           ) : (
             <EuiButtonEmpty
               flush="left"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={onBack}
               data-test-subj="backButton"
             >

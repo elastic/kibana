@@ -1484,6 +1484,43 @@ describe('validateStreamlang', () => {
         );
       });
 
+      it('should detect mixed types from json_extract processor with conditional type cast overwriting source field', () => {
+        const dsl: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'attributes.message',
+              value: '{"count": 42}',
+            },
+            {
+              action: 'json_extract',
+              field: 'attributes.message',
+              extractions: [
+                { selector: 'count', target_field: 'attributes.message', type: 'integer' },
+              ],
+              where: {
+                field: 'should_extract',
+                eq: 'yes',
+              },
+            },
+          ],
+        };
+
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+          streamType: 'wired',
+        });
+
+        expect(result.isValid).toBe(false);
+        const mixedTypeError = result.errors.find(
+          (e) => e.type === 'mixed_type' && e.field === 'attributes.message'
+        );
+        expect(mixedTypeError).toBeDefined();
+        expect(mixedTypeError?.conflictingTypes).toEqual(
+          expect.arrayContaining(['string', 'number'])
+        );
+      });
+
       it('should allow nested conditional processors to create mixed types', () => {
         const dsl: StreamlangDSL = {
           steps: [
@@ -1793,6 +1830,45 @@ describe('validateStreamlang', () => {
             action: 'math',
             expression: 'attributes.value + log(attributes.other)',
             to: 'attributes.result',
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      const valueErrors = result.errors.filter((e) => e.type === 'invalid_value');
+      expect(valueErrors).toHaveLength(0);
+    });
+
+    it('should detect invalid json_extract selectors', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'attributes.message',
+            extractions: [{ selector: 'a..b', target_field: 'attributes.extracted' }],
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      expect(result.isValid).toBe(false);
+      const valueErrors = result.errors.filter((e) => e.type === 'invalid_value');
+      expect(valueErrors).toHaveLength(1);
+      expect(valueErrors[0].message).toContain('consecutive dots');
+    });
+
+    it('should pass validation for valid json_extract selectors', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'attributes.message',
+            extractions: [
+              { selector: 'user.name', target_field: 'attributes.user_name' },
+              { selector: 'items[0].id', target_field: 'attributes.first_id', type: 'integer' },
+            ],
           },
         ],
       };

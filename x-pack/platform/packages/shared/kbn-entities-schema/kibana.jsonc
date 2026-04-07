@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/entities-schema",
   "owner": [
-    "@elastic/obs-entities"
+    "@elastic/core-analysis"
   ],
   "group": "platform",
   "visibility": "shared"

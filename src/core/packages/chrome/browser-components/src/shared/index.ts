@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LoadingIndicator } from './loading_indicator';
-export type { LoadingIndicatorProps } from './loading_indicator';
 export { HeaderTopBanner } from './header_top_banner';
 export type { HeaderTopBannerProps } from './header_top_banner';
 export { HeaderBreadcrumbsBadges } from './header_breadcrumbs_badges';

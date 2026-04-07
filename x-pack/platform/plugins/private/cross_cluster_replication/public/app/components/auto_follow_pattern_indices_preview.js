@@ -27,11 +27,7 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
   );
 
   return (
-    <EuiCallOut
-      title={title}
-      iconType="indexMapping"
-      data-test-subj="autoFollowPatternIndicesPreview"
-    >
+    <EuiCallOut title={title} iconType="mapping" data-test-subj="autoFollowPatternIndicesPreview">
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
         defaultMessage="The above settings will generate index names that look like this:"

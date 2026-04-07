@@ -13,51 +13,51 @@
   },
   "jobs": [
     {
-      "id": "gcp_audit_rare_method_for_a_city",
-      "file": "gcp_audit_rare_method_for_a_city.json"
+      "id": "gcp_audit_rare_method_for_a_city_ea",
+      "file": "gcp_audit_rare_method_for_a_city_ea.json"
     },
     {
-      "id": "gcp_audit_rare_method_for_a_country",
-      "file": "gcp_audit_rare_method_for_a_country.json"
+      "id": "gcp_audit_rare_method_for_a_country_ea",
+      "file": "gcp_audit_rare_method_for_a_country_ea.json"
     },
     {
-      "id": "gcp_audit_rare_method_for_a_client_user_email",
-      "file": "gcp_audit_rare_method_for_a_client_user_email.json"
+      "id": "gcp_audit_rare_method_for_a_user_email_ea",
+      "file": "gcp_audit_rare_method_for_a_user_email_ea.json"
     },
     {
-      "id": "gcp_audit_high_distinct_count_error_message",
-      "file": "gcp_audit_high_distinct_count_error_message.json"
+      "id": "gcp_audit_high_distinct_count_error_message_ea",
+      "file": "gcp_audit_high_distinct_count_error_message_ea.json"
     },
     {
-      "id": "gcp_audit_rare_error_code",
-      "file": "gcp_audit_rare_error_code.json"
+      "id": "gcp_audit_rare_error_code_ea",
+      "file": "gcp_audit_rare_error_code_ea.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-gcp_audit_rare_method_for_a_city",
-      "file": "datafeed_gcp_audit_rare_method_for_a_city.json",
-      "job_id": "gcp_audit_rare_method_for_a_city"
+      "id": "datafeed-gcp_audit_rare_method_for_a_city_ea",
+      "file": "datafeed_gcp_audit_rare_method_for_a_city_ea.json",
+      "job_id": "gcp_audit_rare_method_for_a_city_ea"
     },
     {
-      "id": "datafeed-gcp_audit_rare_method_for_a_country",
-      "file": "datafeed_gcp_audit_rare_method_for_a_country.json",
-      "job_id": "gcp_audit_rare_method_for_a_country"
+      "id": "datafeed-gcp_audit_rare_method_for_a_country_ea",
+      "file": "datafeed_gcp_audit_rare_method_for_a_country_ea.json",
+      "job_id": "gcp_audit_rare_method_for_a_country_ea"
     },
     {
-      "id": "datafeed-gcp_audit_rare_method_for_a_client_user_email",
-      "file": "datafeed_gcp_audit_rare_method_for_a_client_user_email.json",
-      "job_id": "gcp_audit_rare_method_for_a_client_user_email"
+      "id": "datafeed-gcp_audit_rare_method_for_a_user_email_ea",
+      "file": "datafeed_gcp_audit_rare_method_for_a_user_email_ea.json",
+      "job_id": "gcp_audit_rare_method_for_a_user_email_ea"
     },
     {
-      "id": "datafeed-gcp_audit_high_distinct_count_error_message",
-      "file": "datafeed_gcp_audit_high_distinct_count_error_message.json",
-      "job_id": "gcp_audit_high_distinct_count_error_message"
+      "id": "datafeed-gcp_audit_high_distinct_count_error_message_ea",
+      "file": "datafeed_gcp_audit_high_distinct_count_error_message_ea.json",
+      "job_id": "gcp_audit_high_distinct_count_error_message_ea"
     },
     {
-      "id": "datafeed-gcp_audit_rare_error_code",
-      "file": "datafeed_gcp_audit_rare_error_code.json",
-      "job_id": "gcp_audit_rare_error_code"
+      "id": "datafeed-gcp_audit_rare_error_code_ea",
+      "file": "datafeed_gcp_audit_rare_error_code_ea.json",
+      "job_id": "gcp_audit_rare_error_code_ea"
     }
   ],
   "tags": [

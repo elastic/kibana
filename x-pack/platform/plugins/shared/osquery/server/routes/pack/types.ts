@@ -17,10 +17,13 @@ export interface PackResponseData {
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
   policy_ids?: string[];
   shards?: SOShard;
+  read_only?: boolean;
 }
 
 export interface ReadPackResponseData {
@@ -32,8 +35,10 @@ export interface ReadPackResponseData {
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
   policy_ids?: string[];
   shards: Record<string, number>;
   read_only?: boolean;

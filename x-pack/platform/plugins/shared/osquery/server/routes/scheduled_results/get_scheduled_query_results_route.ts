@@ -10,6 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { isFilters } from '@kbn/es-query';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import type {
@@ -52,6 +53,7 @@ export const getScheduledQueryResultsRoute = (
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')])
               ),
               kuery: schema.maybe(schema.string()),
+              esFilters: schema.maybe(schema.string()),
               startDate: schema.maybe(schema.string()),
             }),
           },
@@ -93,6 +95,21 @@ export const getScheduledQueryResultsRoute = (
           const namespacesOrUndefined =
             osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
+          if (request.query.esFilters) {
+            let parsed: unknown;
+            try {
+              parsed = JSON.parse(request.query.esFilters);
+            } catch {
+              return response.badRequest({ body: { message: 'esFilters contains invalid JSON' } });
+            }
+
+            if (!isFilters(parsed)) {
+              return response.badRequest({
+                body: { message: 'esFilters must be a valid filters array' },
+              });
+            }
+          }
+
           const search = await context.search;
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
@@ -102,6 +119,7 @@ export const getScheduledQueryResultsRoute = (
                 executionCount,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
+                esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(page, pageSize),
                 sort: [

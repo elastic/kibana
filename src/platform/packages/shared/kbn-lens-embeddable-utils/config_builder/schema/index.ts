@@ -47,20 +47,23 @@ import { pieStateSchema } from './charts/pie';
  *  - Defining the `LensApiState` type from the schema types
  *  - Exporting this value as `Type<LensApiState>`
  */
-export const _lensApiStateSchema: any = schema.oneOf([
-  metricStateSchema,
-  legacyMetricStateSchema,
-  xyStateSchema,
-  gaugeStateSchema,
-  heatmapStateSchema,
-  tagcloudStateSchema,
-  regionMapStateSchema,
-  datatableStateSchema,
-  pieStateSchema,
-  mosaicStateSchema,
-  treemapStateSchema,
-  waffleStateSchema,
-]);
+export const _lensApiStateSchema: any = schema.oneOf(
+  [
+    metricStateSchema,
+    legacyMetricStateSchema,
+    xyStateSchema,
+    gaugeStateSchema,
+    heatmapStateSchema,
+    tagcloudStateSchema,
+    regionMapStateSchema,
+    datatableStateSchema,
+    pieStateSchema,
+    mosaicStateSchema,
+    treemapStateSchema,
+    waffleStateSchema,
+  ],
+  { meta: { id: 'lensApiState', title: 'Visualizations' } }
+);
 
 export type LensApiState =
   | MetricState
@@ -80,7 +83,7 @@ export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-export type { XYState } from './charts/xy';
+export type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';

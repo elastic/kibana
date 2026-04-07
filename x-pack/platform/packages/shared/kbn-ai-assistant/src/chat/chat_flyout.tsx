@@ -186,6 +186,7 @@ export function ChatFlyout({
             marginTop: breakpoint === 'xs' ? euiTheme.size.xs : euiTheme.size.s,
           },
         }}
+        focusTrapProps={{ returnFocus: false }}
         paddingSize="m"
         pushAnimation
         minWidth={SIDEBAR_WIDTH}

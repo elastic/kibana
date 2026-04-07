@@ -10,7 +10,7 @@
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL, getSpaceNPRE } from '@kbn/cps-server-utils';
+import { PROJECT_ROUTING_ORIGIN, getSpaceNPRE } from '@kbn/cps-server-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getRequestHandlerFactory } from './cps_request_handler_factory';
 
@@ -29,9 +29,9 @@ describe('getRequestHandlerFactory', () => {
   });
 
   describe('without request (internal user)', () => {
-    it('injects PROJECT_ROUTING_ORIGIN when projectRouting is origin-only', () => {
+    it('injects PROJECT_ROUTING_ORIGIN when no opts are passed', () => {
       const factory = getRequestHandlerFactory(true);
-      const handler = factory({ projectRouting: 'origin-only', logger: mockLogger });
+      const handler = factory({ logger: mockLogger });
       const params = makeSearchParams();
 
       handler({ scoped: false }, params, {}, mockLogger);
@@ -40,45 +40,11 @@ describe('getRequestHandlerFactory', () => {
     });
   });
 
-  describe("projectRouting: 'origin-only'", () => {
-    it('injects PROJECT_ROUTING_ORIGIN when CPS is enabled', () => {
-      const factory = getRequestHandlerFactory(true);
-      const handler = factory({ projectRouting: 'origin-only', logger: mockLogger });
-      const params = makeSearchParams();
-
-      handler({ scoped: true }, params, {}, mockLogger);
-
-      expect((params.body as Record<string, unknown>).project_routing).toBe(PROJECT_ROUTING_ORIGIN);
-    });
-
-    it('strips project_routing when CPS is disabled', () => {
-      const factory = getRequestHandlerFactory(false);
-      const handler = factory({ projectRouting: 'origin-only', logger: mockLogger });
-      const params = makeSearchParams({ project_routing: 'should-be-removed' });
-
-      handler({ scoped: true }, params, {}, mockLogger);
-
-      expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
-    });
-  });
-
-  describe("projectRouting: 'all'", () => {
-    it('injects PROJECT_ROUTING_ALL when CPS is enabled', () => {
-      const factory = getRequestHandlerFactory(true);
-      const handler = factory({ projectRouting: 'all', logger: mockLogger });
-      const params = makeSearchParams();
-
-      handler({ scoped: true }, params, {}, mockLogger);
-
-      expect((params.body as Record<string, unknown>).project_routing).toBe(PROJECT_ROUTING_ALL);
-    });
-  });
-
   describe("projectRouting: 'space'", () => {
     it('injects the space NPRE derived from a KibanaRequest', () => {
       const factory = getRequestHandlerFactory(true);
       const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
-      const handler = factory({ projectRouting: request, logger: mockLogger });
+      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
       const params = makeSearchParams();
 
       handler({ scoped: true }, params, {}, mockLogger);
@@ -86,6 +52,87 @@ describe('getRequestHandlerFactory', () => {
       expect((params.body as Record<string, unknown>).project_routing).toBe(
         getSpaceNPRE('my-space')
       );
+    });
+  });
+
+  describe('timing context', () => {
+    it('sets timing context for internal user', () => {
+      const factory = getRequestHandlerFactory(true);
+      const handler = factory({ logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: false }, params, options, mockLogger);
+
+      expect((options as any).context).toBeDefined();
+      expect((options as any).context.timingContext).toBeDefined();
+      expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
+    });
+
+    it('sets timing context with kibanaRequest for scoped user', () => {
+      const factory = getRequestHandlerFactory(true);
+      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: true }, params, options, mockLogger);
+
+      expect((options as any).context).toBeDefined();
+      expect((options as any).context.timingContext).toBeDefined();
+      expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
+      expect((options as any).context.timingContext.kibanaRequest).toBe(request);
+    });
+
+    it('sets both timing and CPS contexts', () => {
+      const factory = getRequestHandlerFactory(true);
+      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: true }, params, options, mockLogger);
+
+      expect((options as any).context.timingContext).toBeDefined();
+      expect((options as any).context.cpsRoutingContext).toBeDefined();
+    });
+
+    it('does not set timing context when esTimingEnabled is false', () => {
+      const factory = getRequestHandlerFactory(true, false);
+      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: true }, params, options, mockLogger);
+
+      expect((options as any).context?.timingContext).toBeUndefined();
+      expect((options as any).context?.cpsRoutingContext).toBeDefined();
+    });
+
+    it('sets timing context when esTimingEnabled is true (explicit)', () => {
+      const factory = getRequestHandlerFactory(true, true);
+      const handler = factory({ logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: false }, params, options, mockLogger);
+
+      expect((options as any).context).toBeDefined();
+      expect((options as any).context.timingContext).toBeDefined();
+      expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
+    });
+
+    it('defaults esTimingEnabled to true when not specified', () => {
+      const factory = getRequestHandlerFactory(true);
+      const handler = factory({ logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: false }, params, options, mockLogger);
+
+      expect((options as any).context).toBeDefined();
+      expect((options as any).context.timingContext).toBeDefined();
     });
   });
 });

@@ -54,13 +54,14 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
     const valueInput: DiscoverSessionTab = {
       id: uuidv4(),
       label: i18n.translate('discover.savedSearchEmbeddable.action.addPanel.byValueTabName', {
-        defaultMessage: 'New by-value Discover session',
+        defaultMessage: 'New Discover session',
       }),
       sort: [],
       columns: [],
       isTextBasedQuery: true,
       grid: {},
       hideChart: false,
+      hideTable: false,
       serializedSearchSource: {},
     };
 

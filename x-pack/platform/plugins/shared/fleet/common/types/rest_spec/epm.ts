@@ -42,6 +42,8 @@ export interface GetPackagesRequest {
     excludeInstallStatus?: boolean;
     withPackagePoliciesCount?: boolean;
     type?: string;
+    package?: string;
+    all?: boolean;
   };
 }
 
@@ -122,6 +124,10 @@ export interface GetStatsRequest {
 
 export interface GetStatsResponse {
   response: PackageUsageStats;
+}
+
+export interface GetDependenciesResponse {
+  items: Array<{ name: string; version: string; title: string }>;
 }
 
 export interface InstallPackageRequest {

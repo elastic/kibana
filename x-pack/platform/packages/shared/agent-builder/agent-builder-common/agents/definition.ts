@@ -6,7 +6,6 @@
  */
 
 import type { ToolSelection } from '../tools';
-import type { SkillSelection } from '../skills';
 import type { UserIdAndName } from '../base/users';
 import type { AgentVisibility } from './visibility';
 
@@ -87,9 +86,7 @@ export interface AgentConfiguration {
    */
   instructions?: string;
   /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
-   *
-   * This will impact both the research and answer prompts. For custom per-step instructions, use the `research` and `answer` configuration fields instead.
+   * @deprecated does nothing anymore - agent no longer have specific instructions to override
    */
   replace_default_instructions?: boolean;
 
@@ -99,15 +96,26 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
-   * Optional list of skills exposed to the agent.
+   * Optional list of skill IDs exposed to the agent.
    * When undefined, all skills are available (backward compatibility).
    */
-  skills?: SkillSelection[];
+  skill_ids?: string[];
+
+  /**
+   * When true, enables built-in Elastic capabilities for the agent.
+   */
+  enable_elastic_capabilities?: boolean;
 
   /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];
+
+  /**
+   * Optional list of plugin IDs assigned to this agent.
+   * Skills contributed by these plugins will be available to the agent during execution.
+   */
+  plugin_ids?: string[];
 
   /**
    * Custom configuration for the research step of the agent.
@@ -126,7 +134,7 @@ export interface AgentResearchStepConfiguration {
    */
   instructions?: string;
   /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   * @deprecated does nothing anymore - agent no longer have specific instructions to override
    */
   replace_default_instructions?: boolean;
 }
@@ -137,7 +145,7 @@ export interface AgentAnswerStepConfiguration {
    */
   instructions?: string;
   /**
-   * If set to true, the custom instructions will be used as a replacement for the system prompt instead of extending it.
+   * @deprecated does nothing anymore - agent no longer have specific instructions to override
    */
   replace_default_instructions?: boolean;
 }

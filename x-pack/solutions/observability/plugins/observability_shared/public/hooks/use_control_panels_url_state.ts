@@ -7,11 +7,16 @@
 
 import * as rt from 'io-ts';
 import { pick } from 'lodash';
-import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
-import { constant, identity } from 'fp-ts/function';
+import { constant, identity, pipe } from 'fp-ts/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
+import {
+  ESQL_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
 import { useUrlState } from './use_url_state';
 
 const CONTROL_PANELS_URL_KEY = 'controlPanels';
@@ -87,6 +92,39 @@ const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: 
   }, {});
 };
 
+// Ensure the final value has the correct control type values in case we're dealing with an older URL state
+// that still has old string values instead of the new constants.
+const ensureCorrectControlTypes = (controlPanels: ControlPanels) => {
+  return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
+    let type: string;
+
+    switch (controlPanelConfig.type) {
+      case 'optionsListControl':
+        type = OPTIONS_LIST_CONTROL;
+        break;
+      case 'timeSlider':
+        type = TIME_SLIDER_CONTROL;
+        break;
+      case 'rangeSliderControl':
+        type = RANGE_SLIDER_CONTROL;
+        break;
+      case 'esqlControl':
+        type = ESQL_CONTROL;
+        break;
+      default:
+        type = controlPanelConfig.type;
+    }
+
+    return {
+      ...acc,
+      [key]: {
+        ...controlPanelConfig,
+        type,
+      },
+    };
+  }, {});
+};
+
 /**
  * Converts a panel's serialized state (snake_case from the controls plugin) back to
  * the camelCase keys expected by the PanelRT io-ts codec, and strips data view IDs
@@ -138,8 +176,8 @@ const mergeDefaultPanelsWithUrlConfig = (
     };
   }, {});
 
-  // Merge default and existing configs and add dataView.id to each of them
-  return addDataViewIdToControlPanels(merged, dataView.id);
+  // Merge default and existing configs, add dataView.id to each of them and ensure control types have correct values
+  return ensureCorrectControlTypes(addDataViewIdToControlPanels(merged, dataView.id));
 };
 
 const encodeUrlState = (value: ControlPanels) => {

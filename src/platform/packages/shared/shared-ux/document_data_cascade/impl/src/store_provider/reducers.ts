@@ -53,9 +53,25 @@ export interface IStoreState<G extends GroupNode, L extends LeafNode> {
 
 export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
   return {
-    setInitialState(state: IStoreState<G, L>, payload: G[]) {
+    /**
+     * This action is used to set the entire store state, it should be used sparingly.
+     */
+    _setStoreState(
+      state: IStoreState<G, L>,
+      payload: Omit<IStoreState<G, L>, 'table' | 'leafNodes'>
+    ) {
       return produce(state, (draft) => {
-        draft.groupNodes = [...castDraft(payload)];
+        // since the group node and available columns are changing, we need to reset the table and leaf nodes
+        draft.table = {} as TableState;
+        draft.leafNodes = new Map(castDraft([]));
+        draft.groupNodes = castDraft(payload.groupNodes);
+        draft.groupByColumns = castDraft(payload.groupByColumns);
+        draft.currentGroupByColumns = castDraft(payload.currentGroupByColumns);
+      });
+    },
+    setInitialGroupNodes(state: IStoreState<G, L>, payload: G[]) {
+      return produce(state, (draft) => {
+        draft.groupNodes = castDraft(payload);
       });
     },
     setActiveCascadeGroups(state: IStoreState<G, L>, payload: ColumnGroups) {
@@ -94,7 +110,7 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
     setRowGroupNodeData(state: IStoreState<G, L>, payload: { id: string; data: G[] }) {
       return produce(state, (draft) => {
         const stack: GroupNode[] = Array.isArray(draft.groupNodes)
-          ? [...draft.groupNodes]
+          ? ([] as GroupNode[]).concat(draft.groupNodes)
           : [draft.groupNodes];
         while (stack.length > 0) {
           const node = stack.pop()!;

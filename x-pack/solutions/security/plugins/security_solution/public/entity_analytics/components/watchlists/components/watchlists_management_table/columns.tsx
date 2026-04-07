@@ -6,9 +6,16 @@
  */
 
 import type { EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+} from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getRowItemsWithActions } from '../../../../../common/components/tables/helpers';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -38,7 +45,7 @@ const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
 });
 
 const getNumberOfEntitiesColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
-  field: 'users.length', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16103
+  field: 'entityCount',
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.numberOfUsers"
@@ -82,38 +89,113 @@ const getLastUpdatedColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => 
     typeof value === 'string' ? <FormattedRelative value={new Date(value)} /> : getEmptyTagValue(),
 });
 
-const getActionsColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
-  // TODO: add actions with flyout https://github.com/elastic/security-team/issues/16108
+const WatchlistsActionsMenu = ({
+  record,
+  onDelete,
+}: {
+  record: WatchlistTableItemType;
+  onDelete: (record: WatchlistTableItemType) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  const togglePopover = useCallback(() => setIsOpen((value) => !value), []);
+
+  const button = (
+    <EuiButtonIcon
+      iconType="boxesHorizontal"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.expand.ariaLabel',
+        {
+          defaultMessage: 'Watchlist actions',
+        }
+      )}
+      onClick={togglePopover}
+    />
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel
+        items={[
+          <EuiContextMenuItem
+            key="delete"
+            icon="trash"
+            data-test-subj="watchlistsManagementTableActionDelete"
+            onClick={() => {
+              onDelete(record);
+              closePopover();
+            }}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.actions.delete"
+              defaultMessage="Delete"
+            />
+          </EuiContextMenuItem>,
+        ]}
+      />
+    </EuiPopover>
+  );
+};
+
+const WatchlistsActionsCell = ({
+  record,
+  onEdit,
+  onDelete,
+}: {
+  record: WatchlistTableItemType;
+  onEdit: (record: WatchlistTableItemType) => void;
+  onDelete: (record: WatchlistTableItemType) => void;
+}) => (
+  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+    <EuiFlexItem grow={false}>
+      <EuiButtonIcon
+        iconType="pencil"
+        onClick={() => onEdit(record)}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.actions.editButton.ariaLabel',
+          {
+            defaultMessage: 'Edit watchlist',
+          }
+        )}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <WatchlistsActionsMenu record={record} onDelete={onDelete} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const getActionsColumn = (
+  onEdit: (record: WatchlistTableItemType) => void,
+  onDelete: (record: WatchlistTableItemType) => void
+): EuiBasicTableColumn<WatchlistTableItemType> => ({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.actions"
       defaultMessage="Actions"
     />
   ),
-  render: (record: { name: string }) => {
-    return (
-      <EuiButtonIcon
-        iconType="pencil"
-        onClick={() => {}}
-        aria-label={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.expand.ariaLabel',
-          {
-            defaultMessage: 'Watchlist Action',
-          }
-        )}
-      />
-    );
-  },
+  render: (record: WatchlistTableItemType) => (
+    <WatchlistsActionsCell record={record} onEdit={onEdit} onDelete={onDelete} />
+  ),
   width: COLUMN_WIDTHS.actions,
 });
 
 export const buildWatchlistsManagementTableColumns = (
-  euiTheme: EuiThemeComputed
+  euiTheme: EuiThemeComputed,
+  onEdit: (record: WatchlistTableItemType) => void,
+  onDelete: (record: WatchlistTableItemType) => void
 ): Array<EuiBasicTableColumn<WatchlistTableItemType>> => [
   getWatchlistColumn(),
   getNumberOfEntitiesColumn(),
   getRiskScoreWeightingColumn(),
   getSourceColumn(),
   getLastUpdatedColumn(),
-  getActionsColumn(),
+  getActionsColumn(onEdit, onDelete),
 ];

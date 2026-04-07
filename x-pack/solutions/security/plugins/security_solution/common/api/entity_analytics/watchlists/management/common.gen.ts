@@ -39,6 +39,14 @@ export const WatchlistObject = z.object({
    */
   riskModifier: z.number(),
   /**
+   * List of entity source IDs associated with the watchlist
+   */
+  entitySourceIds: z.array(z.string()).optional(),
+  /**
+   * Number of entities in the watchlist
+   */
+  entityCount: z.number().optional(),
+  /**
    * Timestamp indicating when the watchlist was created
    */
   createdAt: z.string().datetime().optional(),

@@ -106,6 +106,7 @@ export async function createRequestHandlerContext({
       logger,
       taskManager: taskManagerStart,
       namespace,
+      analytics,
     }),
     crudClient,
     resolutionClient: new ResolutionClient({
