@@ -34,7 +34,7 @@ export type {
 
 export {
   EVENT_CHAIN_DEPTH_HEADER,
-  EVENT_CHAIN_SOURCE_WORKFLOW_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
   getEventChainContext,
   getOutboundEventChainHeaders,
   setWorkflowEventChainContext,
@@ -51,3 +51,6 @@ export type {
 export { createServerStepDefinition } from './step_registry/types';
 
 export { TriggerRegistry } from './trigger_registry';
+
+export { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from './triggers';
+export type { WorkflowExecutionFailedEvent } from './triggers';

@@ -6,3 +6,4 @@
  */
 
 export { createAlertEvent, indexAlertEvents } from './alert_event';
+export { DISPATCHER_SYSTEM_ACTION_TYPES } from './dispatcher_action_types';

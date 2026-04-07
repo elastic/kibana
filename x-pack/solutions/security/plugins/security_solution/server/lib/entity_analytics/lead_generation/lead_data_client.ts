@@ -56,7 +56,7 @@ export interface LeadDataClient {
   updateLead(id: string, updates: Partial<Pick<Lead, 'status'>>): Promise<boolean>;
   dismissLead(id: string): Promise<boolean>;
   bulkUpdateLeads(ids: readonly string[], updates: { status: LeadStatus }): Promise<number>;
-  getStatus(): Promise<{
+  getStatus(options?: { isEnabled?: boolean }): Promise<{
     isEnabled: boolean;
     indexExists: boolean;
     totalLeads: number;
@@ -344,7 +344,7 @@ export const createLeadDataClient = ({
       return (resp.updated ?? 0) > 0;
     } catch (e) {
       logger.error(`[LeadGeneration] Error updating lead ${id}: ${e}`);
-      return false;
+      throw e;
     }
   };
 
@@ -383,7 +383,9 @@ export const createLeadDataClient = ({
   // -----------------------------------------------------------------------
   // getStatus — engine status (cheap count query)
   // -----------------------------------------------------------------------
-  const getStatus = async (): Promise<{
+  const getStatus = async (options?: {
+    isEnabled?: boolean;
+  }): Promise<{
     isEnabled: boolean;
     indexExists: boolean;
     totalLeads: number;
@@ -416,8 +418,7 @@ export const createLeadDataClient = ({
       logger.debug(`[LeadGeneration] Status check — indices not available: ${e}`);
     }
 
-    // TODO: Wire to Task Manager (#15955) to report actual isEnabled state
-    return { isEnabled: false, indexExists, totalLeads, lastRun };
+    return { isEnabled: options?.isEnabled ?? false, indexExists, totalLeads, lastRun };
   };
 
   // -----------------------------------------------------------------------
