@@ -40,7 +40,7 @@ import { getPromqlFunctionDefinition } from './promql';
 export function getExpressionType(
   root: ESQLAstItem | undefined,
   columns?: Map<string, ESQLColumnData>,
-  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';

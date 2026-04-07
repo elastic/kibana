@@ -33,7 +33,6 @@ import {
   EuiPageSidebar,
   useEuiMinBreakpoint,
   euiCanAnimate,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -258,7 +257,6 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
   const footerContent = footer && (
     <div css={styles.solutionNavFooter} data-test-subj="solutionNavFooter">
-      <EuiHorizontalRule margin="m" />
       {footer}
     </div>
   );

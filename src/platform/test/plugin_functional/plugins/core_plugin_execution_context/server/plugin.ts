@@ -16,15 +16,16 @@ export class CorePluginExecutionContext implements Plugin {
       {
         path: '/execution_context/pass',
         security: {
+          authc: {
+            enabled: false,
+            reason: 'This route is part of a test plugin and does not require authentication.',
+          },
           authz: {
             enabled: false,
             reason: 'This route is opted out from authorization',
           },
         },
         validate: false,
-        options: {
-          authRequired: false,
-        },
       },
       async (context, request, response) => {
         const esClient = (await context.core).elasticsearch.client;

@@ -16,23 +16,49 @@ import { WiredStream } from './models/ingest/wired';
 import { ClassicStream, ClassicIngest } from './models/ingest/classic';
 import { WiredIngest } from './models/ingest/wired';
 import { QueryStream } from './models/query';
-import { streamDefinitionSchema } from './models/streams';
-import { fieldDefinitionSchema } from './fields';
+import { streamDefinitionSchema, Streams } from './models/streams';
+import {
+  fieldDefinitionSchema,
+  fieldDefinitionConfigSchema,
+  classicFieldDefinitionSchema,
+  classicFieldDefinitionConfigSchema,
+  inheritedFieldDefinitionSchema,
+} from './fields';
 import { routingDefinitionSchema } from './models/ingest/routing';
-import { ingestStreamLifecycleSchema } from './models/ingest/lifecycle';
+import {
+  ingestStreamLifecycleSchema,
+  classicIngestStreamEffectiveLifecycleSchema,
+  wiredIngestStreamEffectiveLifecycleSchema,
+} from './models/ingest/lifecycle';
+import { effectiveFailureStoreSchema, failureStoreSchema } from './models/ingest/failure_store';
 
 export const streamsOasDefinitions = {
   /**
-   * Top-level discriminated union of all stream definition variants.
-   * Registered with a `discriminator` extension so OAS code generators can
-   * produce typed structs without inspecting nested properties.
+   * Top-level union of all stream definition variants, with an explicit OAS
+   * discriminator on `type`. .meta({ id: 'StreamDefinition', openapi: { discriminator } })
+   * is applied at definition time in models/streams.ts.
    */
   StreamDefinition: streamDefinitionSchema,
 
   // Individual stream definition variants
+  // .meta({ id }) applied at definition time in their respective files
   WiredStreamDefinition: WiredStream.Definition.right,
   ClassicStreamDefinition: ClassicStream.Definition.right,
   QueryStreamDefinition: QueryStream.Definition.right,
+
+  // Get response union and variants
+  // .meta({ id }) applied at definition time in their respective files
+  StreamGetResponse: Streams.all.GetResponse.right,
+  WiredStreamGetResponse: WiredStream.GetResponse.right,
+  ClassicStreamGetResponse: ClassicStream.GetResponse.right,
+  QueryStreamGetResponse: QueryStream.GetResponse.right,
+
+  // Upsert request union and variants
+  // .meta({ id }) applied at definition time in their respective files
+  StreamUpsertRequest: Streams.all.UpsertRequest.right,
+  WiredStreamUpsertRequest: WiredStream.UpsertRequest.right,
+  ClassicStreamUpsertRequest: ClassicStream.UpsertRequest.right,
+  QueryStreamUpsertRequest: QueryStream.UpsertRequest.right,
 
   // Ingest configs
   WiredIngest: WiredIngest.right,
@@ -40,10 +66,22 @@ export const streamsOasDefinitions = {
 
   // Fields & routing
   FieldDefinition: fieldDefinitionSchema,
+  FieldDefinitionConfig: fieldDefinitionConfigSchema,
+  ClassicFieldDefinition: classicFieldDefinitionSchema,
+  ClassicFieldDefinitionConfig: classicFieldDefinitionConfigSchema,
+  InheritedFieldDefinition: inheritedFieldDefinitionSchema,
   RoutingDefinition: routingDefinitionSchema,
 
   // Lifecycle
+  // .meta({ id }) applied at definition time in lifecycle/index.ts
   IngestStreamLifecycle: ingestStreamLifecycleSchema,
+  ClassicIngestStreamEffectiveLifecycle: classicIngestStreamEffectiveLifecycleSchema,
+  WiredIngestStreamEffectiveLifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+
+  // Failure store
+  // .meta({ id }) applied at definition time in failure_store/index.ts
+  FailureStore: failureStoreSchema,
+  EffectiveFailureStore: effectiveFailureStoreSchema,
 } as const;
 
 export type StreamsOasDefinitions = typeof streamsOasDefinitions;

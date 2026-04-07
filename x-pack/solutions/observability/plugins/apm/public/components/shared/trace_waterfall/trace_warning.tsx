@@ -17,10 +17,10 @@ export function TraceWarning({ children }: { children: React.ReactNode }) {
     case TraceDataState.Partial:
       return (
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiCallOut data-test-subj="traceWarning" color="warning" size="s" title={message} />
           </EuiFlexItem>
-          <EuiFlexItem>{children}</EuiFlexItem>
+          <EuiFlexItem grow={true}>{children}</EuiFlexItem>
         </EuiFlexGroup>
       );
 

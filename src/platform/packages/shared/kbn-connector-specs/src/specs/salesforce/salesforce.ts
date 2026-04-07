@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-
 const SALESFORCE_API_VERSION = 'v66.0';
 
 /** Derive instance base URL from the full token URL (strip /services/oauth2/token and any path). */
@@ -63,6 +62,14 @@ export const SalesforceConnector: ConnectorSpec = {
           meta: {
             scope: { hidden: true },
           },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://login.salesforce.com/services/oauth2/authorize',
+          tokenUrl: 'https://login.salesforce.com/services/oauth2/token',
+          scope: 'api refresh_token',
         },
       },
     ],

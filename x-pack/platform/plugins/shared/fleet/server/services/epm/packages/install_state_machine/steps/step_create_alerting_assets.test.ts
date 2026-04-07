@@ -34,11 +34,12 @@ let internalSoClientMock: ReturnType<typeof createSavedObjectClientMock>;
 
 beforeEach(() => {
   internalSoClientMock = createSavedObjectClientMock();
+  internalSoClientMock.asScopedToNamespace.mockReturnValue(internalSoClientMock as any);
   appContextService.start(
     createAppContextStartContractMock(
       {},
       false,
-      { internal: internalSoClientMock },
+      { internal: internalSoClientMock, withoutSpaceExtensions: internalSoClientMock },
       { enableIntegrationInactivityAlerting: true }
     )
   );
@@ -248,7 +249,7 @@ describe('createInactivityMonitoringTemplate', () => {
       createAppContextStartContractMock(
         {},
         false,
-        { internal: internalSoClientMock },
+        { internal: internalSoClientMock, withoutSpaceExtensions: internalSoClientMock },
         { enableIntegrationInactivityAlerting: false }
       )
     );
@@ -429,6 +430,68 @@ describe('createInactivityMonitoringTemplate', () => {
       expect.stringContaining('Error creating inactivity monitoring template for package nginx'),
       expect.objectContaining({ error: expect.any(Error) })
     );
+  });
+
+  it('should save asset refs as additional space when installAsAdditionalSpace is true', async () => {
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage, installAsAdditionalSpace: true }
+    );
+
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      true,
+      true
+    );
+  });
+
+  it('should use a space-scoped SO client and space-specific template ID when spaceId is provided', async () => {
+    const scopedClientMock = createSavedObjectClientMock();
+    internalSoClientMock.asScopedToNamespace.mockReturnValue(scopedClientMock as any);
+    scopedClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+    scopedClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring-my-space',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage, spaceId: 'my-space' }
+    );
+
+    expect(internalSoClientMock.asScopedToNamespace).toHaveBeenCalledWith('my-space');
+    expect(scopedClientMock.create).toHaveBeenCalledWith(
+      'alerting_rule_template',
+      expect.objectContaining({
+        name: '[Nginx] Idle data streams',
+      }),
+      { id: 'fleet-nginx-inactivity-monitoring-my-space' }
+    );
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring-my-space', type: 'alerting_rule_template' }],
+      false,
+      true
+    );
+    expect(result).toEqual({
+      id: 'fleet-nginx-inactivity-monitoring-my-space',
+      type: 'alerting_rule_template',
+    });
   });
 });
 

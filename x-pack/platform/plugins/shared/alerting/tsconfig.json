@@ -82,6 +82,7 @@
     "@kbn/scout",
     "@kbn/change-history",
     "@kbn/encrypted-saved-objects-shared",
+    "@kbn/core-analytics-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

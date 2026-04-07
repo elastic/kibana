@@ -48,6 +48,9 @@ node scripts/evals start --suite agent-builder --skip-server
 | `--config <path>` | | Playwright config path (alternative to `--suite`) |
 | `--project <id>` | `--model` | Connector/model to evaluate (comma-separated for multiple) |
 | `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators |
+| `--profile <name>` | | Load both dataset + export settings from `config.<name>.json` in the vault config dir |
+| `--datasets-profile <name>` | | Load dataset settings from `config.<name>.json` (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`) |
+| `--export-profile <name>` | | Load export settings from `config.<name>.json` (sets `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS`) |
 | `--grep <pattern>` | | Filter tests by name (passed to Playwright `--grep`) |
 | `--repetitions <n>` | | Number of times to repeat each example |
 | `--skip-server` | | Skip EDOT/Scout/EIS startup (use existing services) |
@@ -55,7 +58,27 @@ node scripts/evals start --suite agent-builder --skip-server
 
 When flags are omitted and stdin is a TTY, `start` prompts interactively for suite, judge, and model selection.
 
-Traces are exported by EDOT to your local Elasticsearch (from `kibana.dev.yml`), and `TRACING_ES_URL` is automatically set so trace-based evaluators query the right cluster.
+Traces are exported by EDOT to the export cluster (controlled by `--export-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
+
+#### Golden dataset + local export (profiles)
+
+Use profiles to fetch datasets from the golden cluster while exporting results and traces to your local Elasticsearch/Kibana (default: `http://localhost:9200` / `http://localhost:5601`).
+
+Create the profiles:
+
+```bash
+# golden cluster config (datasets)
+node scripts/evals init config
+
+# local export profile (results + traces to localhost:9200)
+node scripts/evals init config --profile local
+```
+
+Run:
+
+```bash
+node scripts/evals start --suite attack-discovery --export-profile local
+```
 
 ### `stop` -- Stop background services
 
@@ -112,6 +135,9 @@ node scripts/evals run --suite streams --dry-run
 | `--grep <pattern>` | | Filter tests by name (passed to Playwright `--grep`) |
 | `--repetitions <n>` | | Repeat each example N times |
 | `--executor <name>` | | `kibana` (default) or `phoenix` |
+| `--profile <name>` | | Load both dataset + export settings from `config.<name>.json` |
+| `--datasets-profile <name>` | | Load dataset settings from `config.<name>.json` |
+| `--export-profile <name>` | | Load export settings from `config.<name>.json` |
 | `--trace-es-url <url>` | | Elasticsearch URL for trace queries |
 | `--trace-es-api-key <key>` | | API key for trace ES |
 | `--evaluations-es-url <url>` | | Elasticsearch URL for storing eval results |

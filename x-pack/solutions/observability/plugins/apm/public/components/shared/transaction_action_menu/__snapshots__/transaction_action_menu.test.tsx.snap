@@ -21,7 +21,7 @@ exports[`TransactionActionMenu  matches the snapshot 1`] = `
         </span>
         <span
           color="inherit"
-          data-euiicon-type="arrowDown"
+          data-euiicon-type="chevronSingleDown"
         />
       </span>
     </button>

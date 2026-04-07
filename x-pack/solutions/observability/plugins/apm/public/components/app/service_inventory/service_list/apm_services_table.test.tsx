@@ -22,6 +22,7 @@ import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
+import { EuiThemeProvider } from '@elastic/eui';
 
 jest.mock('../../../../hooks/use_breakpoints', () => ({
   useBreakpoints: () => ({
@@ -203,8 +204,11 @@ function renderApmServicesTable({
 }) {
   const defaultSortFn = (items: ServiceListItem[]) => items;
 
+  // TODO: This should be replaced with renderWithKibanaRenderContext, which would eliminate
+  // the need for <EuiThemeProvider> and <IntlProvider> wrappers, but that's currently
+  // impossible with the way <MockApmPluginContextWrapper> is shaped
   return render(
-    <IntlProvider locale="en">
+    <EuiThemeProvider>
       <MockApmPluginContextWrapper history={history}>
         <ApmServicesTable
           status={status}
@@ -221,7 +225,7 @@ function renderApmServicesTable({
           maxCountExceeded={false}
         />
       </MockApmPluginContextWrapper>
-    </IntlProvider>
+    </EuiThemeProvider>
   );
 }
 

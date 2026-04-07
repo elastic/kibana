@@ -282,7 +282,7 @@ export function ConversationList({
                         }
                       )}
                       titleSize="xs"
-                      iconType="list"
+                      iconType="listBullet"
                       iconSize="m"
                       onToggle={(isOpen) =>
                         setOpenSection(isOpen ? ListSections.CONVERSATIONS : ListSections.ARCHIVED)

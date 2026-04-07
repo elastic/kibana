@@ -61,7 +61,6 @@ export const esqlLegacyMetric: LegacyMetricState = {
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
   metric: {
-    operation: 'value',
     column: 'count',
   },
   sampling: 1,
@@ -83,10 +82,8 @@ export const comprehensiveLegacyMetricWithAdHocDataView: LegacyMetricState = {
   metric: {
     operation: 'sum',
     field: 'response_time',
-    alignments: {
-      labels: 'bottom',
-      value: 'right',
-    },
+    labels: { alignment: 'bottom' },
+    values: { alignment: 'right' },
     size: 'l',
     apply_color_to: 'value',
     color: {
@@ -119,10 +116,8 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
     operation: 'average',
     field: 'response_time',
     label: 'Avg Response Time',
-    alignments: {
-      labels: 'bottom',
-      value: 'right',
-    },
+    labels: { alignment: 'bottom' },
+    values: { alignment: 'right' },
     apply_color_to: 'value',
     color: {
       type: 'dynamic',
@@ -151,12 +146,9 @@ export const comprehensiveEsqlLegacyMetric: LegacyMetricState = {
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },
   metric: {
-    operation: 'value',
     column: 'countA',
-    alignments: {
-      labels: 'top',
-      value: 'right',
-    },
+    labels: { alignment: 'top' },
+    values: { alignment: 'right' },
     size: 'm',
     apply_color_to: 'background',
     color: {
@@ -188,10 +180,8 @@ export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricState = {
     operation: 'average',
     field: 'response_time',
     label: 'Avg Response Time',
-    alignments: {
-      labels: 'bottom',
-      value: 'right',
-    },
+    labels: { alignment: 'bottom' },
+    values: { alignment: 'right' },
     apply_color_to: 'value',
     size: 'l',
   },
@@ -214,10 +204,8 @@ export const legacyMetricWithColorWithoutApplyColorTo: LegacyMetricState = {
     operation: 'average',
     field: 'response_time',
     label: 'Avg Response Time',
-    alignments: {
-      labels: 'bottom',
-      value: 'right',
-    },
+    labels: { alignment: 'bottom' },
+    values: { alignment: 'right' },
     size: 'l',
     color: {
       type: 'dynamic',

@@ -117,6 +117,7 @@ import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_
 import type { IChangeTrackingService } from './rules_client/lib/change_tracking';
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
 import { UiamApiKeyProvisioningTask } from './provisioning';
+import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -419,9 +420,12 @@ export class AlertingPlugin {
       this.config
     );
 
+    uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,
       isServerless: this.isServerless,
+      analytics: core.analytics,
     });
     this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
 

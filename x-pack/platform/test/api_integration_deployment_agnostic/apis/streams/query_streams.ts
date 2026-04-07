@@ -18,9 +18,11 @@ import {
   disableStreams,
   enableStreams,
   forkStream,
+  getQueryStream,
   getStream,
   indexAndAssertTargetStream,
   indexDocument,
+  putQueryStream,
   putStream,
 } from './helpers/requests';
 
@@ -29,7 +31,8 @@ import {
  */
 function createQueryStreamRequest(
   esql: string,
-  viewName: string
+  viewName: string,
+  fieldDescriptions?: Record<string, string>
 ): Streams.QueryStream.UpsertRequest {
   return {
     stream: {
@@ -39,6 +42,7 @@ function createQueryStreamRequest(
         view: viewName,
         esql,
       },
+      ...(fieldDescriptions && { field_descriptions: fieldDescriptions }),
     },
     ...emptyAssets,
   };
@@ -373,6 +377,152 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.message).to.contain('must reference its parent stream');
         // Error should indicate the correct reference format (data stream name)
         expect(response.message).to.contain(CLASSIC_PARENT_NAME);
+      });
+    });
+
+    describe('Field descriptions', () => {
+      const FIELD_DESC_STREAM = 'field-desc-query-stream';
+
+      afterEach(async () => {
+        // Clean up the test stream
+        try {
+          await deleteStream(apiClient, FIELD_DESC_STREAM);
+        } catch {
+          // Ignore if doesn't exist
+        }
+      });
+
+      it('should create a query stream with field_descriptions', async () => {
+        const fieldDescriptions = {
+          '@timestamp': 'The event timestamp',
+          message: 'The log message content',
+        };
+
+        // Create via the _query API endpoint
+        const createResponse = await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: 'FROM logs.otel | LIMIT 10' },
+          field_descriptions: fieldDescriptions,
+        });
+
+        expect(createResponse).to.have.property('acknowledged', true);
+
+        // Verify field_descriptions is returned via GET _query
+        const queryResponse = await getQueryStream(apiClient, FIELD_DESC_STREAM);
+
+        expect(queryResponse).to.have.property('field_descriptions');
+        expect(queryResponse.field_descriptions).to.eql(fieldDescriptions);
+      });
+
+      it('should update field_descriptions without changing the query (view not recreated)', async () => {
+        const initialDescriptions = {
+          '@timestamp': 'Original timestamp description',
+        };
+        const updatedDescriptions = {
+          '@timestamp': 'Updated timestamp description',
+          message: 'Newly added description',
+        };
+        const esqlQuery = 'FROM logs.otel | LIMIT 10';
+
+        // Create the stream with initial descriptions
+        await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: esqlQuery },
+          field_descriptions: initialDescriptions,
+        });
+
+        // Update only field_descriptions (same query)
+        const updateResponse = await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: esqlQuery },
+          field_descriptions: updatedDescriptions,
+        });
+
+        expect(updateResponse).to.have.property('acknowledged', true);
+
+        // Verify the updated descriptions
+        const queryResponse = await getQueryStream(apiClient, FIELD_DESC_STREAM);
+        expect(queryResponse.field_descriptions).to.eql(updatedDescriptions);
+
+        // Verify the query itself is unchanged
+        expect(queryResponse.query.esql).to.equal(esqlQuery);
+      });
+
+      it('should preserve field_descriptions when only the query changes', async () => {
+        const fieldDescriptions = {
+          '@timestamp': 'The event timestamp',
+          message: 'The log message content',
+        };
+        const initialQuery = 'FROM logs.otel | LIMIT 10';
+        const updatedQuery = 'FROM logs.otel | LIMIT 20';
+
+        // Create the stream with descriptions
+        await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: initialQuery },
+          field_descriptions: fieldDescriptions,
+        });
+
+        // Update only the query (no field_descriptions in body)
+        const updateResponse = await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: updatedQuery },
+        });
+
+        expect(updateResponse).to.have.property('acknowledged', true);
+
+        // Verify descriptions are preserved
+        const queryResponse = await getQueryStream(apiClient, FIELD_DESC_STREAM);
+        expect(queryResponse.field_descriptions).to.eql(fieldDescriptions);
+
+        // Verify the query was updated
+        expect(queryResponse.query.esql).to.equal(updatedQuery);
+      });
+
+      it('should allow clearing field_descriptions by passing empty object', async () => {
+        const fieldDescriptions = {
+          '@timestamp': 'The event timestamp',
+        };
+        const esqlQuery = 'FROM logs.otel | LIMIT 10';
+
+        // Create the stream with descriptions
+        await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: esqlQuery },
+          field_descriptions: fieldDescriptions,
+        });
+
+        // Clear descriptions by passing empty object
+        const updateResponse = await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: esqlQuery },
+          field_descriptions: {},
+        });
+
+        expect(updateResponse).to.have.property('acknowledged', true);
+
+        // Verify descriptions are cleared
+        const queryResponse = await getQueryStream(apiClient, FIELD_DESC_STREAM);
+        // field_descriptions should either be undefined or empty object
+        expect(
+          queryResponse.field_descriptions === undefined ||
+            Object.keys(queryResponse.field_descriptions || {}).length === 0
+        ).to.be(true);
+      });
+
+      it('should handle stale field descriptions (fields not in current query output)', async () => {
+        const fieldDescriptions = {
+          '@timestamp': 'The event timestamp',
+          message: 'The log message content',
+          'old.field': 'Description for a field that may not exist in query output',
+        };
+        const esqlQuery = 'FROM logs.otel | LIMIT 10';
+
+        // Create stream with descriptions including a potentially stale field
+        const createResponse = await putQueryStream(apiClient, FIELD_DESC_STREAM, {
+          query: { esql: esqlQuery },
+          field_descriptions: fieldDescriptions,
+        });
+
+        expect(createResponse).to.have.property('acknowledged', true);
+
+        // Verify all descriptions are stored (stale field descriptions are preserved)
+        const queryResponse = await getQueryStream(apiClient, FIELD_DESC_STREAM);
+        expect(queryResponse.field_descriptions).to.eql(fieldDescriptions);
+        expect(queryResponse.field_descriptions).to.have.property('old.field');
       });
     });
   });

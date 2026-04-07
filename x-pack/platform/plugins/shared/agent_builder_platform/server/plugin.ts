@@ -18,6 +18,7 @@ import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
 import { visualizationSmlType } from './sml_types/visualization';
+import { createConnectorSmlType } from './sml_types/connector';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -28,14 +29,10 @@ export class AgentBuilderPlatformPlugin
       PluginStartDependencies
     >
 {
-  // @ts-expect-error unused for now
   private logger: Logger;
-  // @ts-expect-error unused for now
-  private config: AgentBuilderConfig;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
-    this.config = context.config.get();
   }
 
   setup(
@@ -52,6 +49,15 @@ export class AgentBuilderPlatformPlugin
     });
     registerSkills(setupDeps.agentBuilder);
     setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
+
+    const connectorSmlType = createConnectorSmlType({
+      getActionSavedObjectsClient: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });
+      },
+      logger: this.logger.get('sml-connector'),
+    });
+    setupDeps.agentBuilder.sml.registerType(connectorSmlType);
 
     return {};
   }

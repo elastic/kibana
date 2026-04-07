@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
 import type { VersionedAttachment, UpdateOriginResponse } from '@kbn/agent-builder-common';
 import type {
+  CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
   ListAttachmentsResponse,
 } from '@kbn/agent-builder-plugin/common/http_api/attachments';
@@ -224,6 +225,48 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         const body: UpdateOriginResponse = response.body;
         expect(body.attachment.current_version).to.equal(originalVersion);
         expect(body.attachment.versions.length).to.equal(1);
+      });
+    });
+
+    describe('GET /api/agent_builder/conversations/{conversation_id}/attachments/stale', () => {
+      it('returns not stale for text attachment without origin', async () => {
+        const conversationId = await createConversation();
+        const attachment = await createTextAttachment(conversationId);
+
+        const response = await supertest
+          .get(`/api/agent_builder/conversations/${conversationId}/attachments/stale`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        const body: CheckStaleAttachmentsResponse = response.body;
+        expect(body).to.have.property('attachments');
+        expect(body.attachments).to.be.an('array');
+        const resultsForAttachment = body.attachments.filter((a) => a.id === attachment.id);
+        expect(resultsForAttachment).to.have.length(1);
+        expect(resultsForAttachment[0].is_stale).to.equal(false);
+      });
+
+      it('returns empty attachments when conversation has no attachments', async () => {
+        const conversationId = await createConversation();
+
+        const response = await supertest
+          .get(`/api/agent_builder/conversations/${conversationId}/attachments/stale`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        const body: CheckStaleAttachmentsResponse = response.body;
+        expect(body.attachments).to.eql([]);
+      });
+
+      it('returns 404 for non-existent conversation', async () => {
+        const response = await supertest
+          .get(`/api/agent_builder/conversations/non-existent-conversation/attachments/stale`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(404);
+
+        const body: Payload = response.body;
+        expect(body).to.have.property('message');
+        expect(body.message).to.contain('not found');
       });
     });
   });

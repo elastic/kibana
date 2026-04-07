@@ -43,16 +43,21 @@ describe('createFsRepository', () => {
 
     await repository.register({ esClient, log, repoName: 'test-repo' });
 
-    expect(createRepository).toHaveBeenCalledWith({
-      name: 'test-repo',
-      body: {
-        type: 'fs',
-        settings: {
-          location: '/mount/backups',
-          compress: true,
+    expect(createRepository).toHaveBeenCalledWith(
+      {
+        name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
+        body: {
+          type: 'fs',
+          settings: {
+            location: '/mount/backups',
+            compress: true,
+          },
         },
       },
-    });
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
   });
 
   it('omits optional settings when undefined', async () => {
@@ -66,14 +71,19 @@ describe('createFsRepository', () => {
 
     await repository.register({ esClient, log, repoName: 'test-repo' });
 
-    expect(createRepository).toHaveBeenCalledWith({
-      name: 'test-repo',
-      body: {
-        type: 'fs',
-        settings: {
-          location: '/mount/backups',
+    expect(createRepository).toHaveBeenCalledWith(
+      {
+        name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
+        body: {
+          type: 'fs',
+          settings: {
+            location: '/mount/backups',
+          },
         },
       },
-    });
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
   });
 });

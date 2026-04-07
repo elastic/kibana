@@ -33,6 +33,7 @@ import {
   untrackRuleAlerts,
   updateMeta,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import type {
@@ -190,6 +191,9 @@ const bulkDisableRulesWithOCC = async (
                   : null,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
+              ...(castedAttributes.lastRun
+                ? { lastRun: migrateLegacyLastRunOutcomeMsg(castedAttributes.lastRun) }
+                : {}),
             });
 
             rulesToDisable.push({

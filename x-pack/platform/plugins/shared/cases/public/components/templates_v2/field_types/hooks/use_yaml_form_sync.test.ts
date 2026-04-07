@@ -6,6 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import moment from 'moment-timezone';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useYamlFormSync } from './use_yaml_form_sync';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
@@ -405,7 +406,7 @@ describe('useYamlFormSync', () => {
       });
     });
 
-    it('handles multiple fields with different controls', () => {
+    it('handles multiple fields with different controls including DATE_PICKER', () => {
       const mockOnFieldDefaultChange = jest.fn();
       const parsedFields = createParsedFields([
         { name: 'text', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
@@ -440,6 +441,137 @@ describe('useYamlFormSync', () => {
 
       expect(mockOnFieldDefaultChange).toHaveBeenCalledWith('number', '20', 'INPUT_NUMBER');
       expect(mockOnFieldDefaultChange).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('DATE_PICKER serialization', () => {
+    const dateField = [
+      {
+        name: 'scheduled_at',
+        type: 'date',
+        control: 'DATE_PICKER',
+        defaultValue: '2024-06-01T09:00:00.000Z',
+      },
+    ];
+
+    it('serializes a Moment object to a UTC ISO string', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields(dateField);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      const momentValue = moment.utc('2024-06-15T14:30:00.000Z');
+
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                scheduled_at_as_date: momentValue,
+              },
+            },
+          },
+        });
+      });
+
+      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith(
+        'scheduled_at',
+        '2024-06-15T14:30:00.000Z',
+        'DATE_PICKER'
+      );
+    });
+
+    it('converts a local-timezone Moment to UTC ISO string', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields(dateField);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      // Moment in a non-UTC timezone — should still serialize as UTC
+      const localMoment = moment('2024-06-15T14:30:00.000').tz('America/New_York');
+
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                scheduled_at_as_date: localMoment,
+              },
+            },
+          },
+        });
+      });
+
+      const [[, isoValue]] = mockOnFieldDefaultChange.mock.calls;
+      expect(isoValue).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+      expect(isoValue).toBe(localMoment.utc().toISOString());
+    });
+
+    it('does not call onFieldDefaultChange when Moment value matches YAML default', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields(dateField);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      // Moment that serializes to the same value as the YAML default
+      const momentValue = moment.utc('2024-06-01T09:00:00.000Z');
+
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                scheduled_at_as_date: momentValue,
+              },
+            },
+          },
+        });
+      });
+
+      expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
+    });
+
+    it('serializes a native Date object to an ISO string', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields(dateField);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      const dateValue = new Date('2024-06-15T14:30:00.000Z');
+
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                scheduled_at_as_date: dateValue,
+              },
+            },
+          },
+        });
+      });
+
+      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith(
+        'scheduled_at',
+        '2024-06-15T14:30:00.000Z',
+        'DATE_PICKER'
+      );
     });
   });
 });

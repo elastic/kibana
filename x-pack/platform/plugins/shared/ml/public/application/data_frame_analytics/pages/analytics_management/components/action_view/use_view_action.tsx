@@ -49,7 +49,7 @@ export const useViewAction = () => {
       name: (item: DataFrameAnalyticsListRow) => <ViewButton item={item} />,
       enabled: (item: DataFrameAnalyticsListRow) => !getViewLinkStatus(item).disabled,
       description: viewActionButtonText,
-      icon: 'visTable',
+      icon: 'table',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'mlAnalyticsJobViewButton',

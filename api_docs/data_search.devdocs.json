@@ -171,7 +171,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+              "{ start: () => string; clear: () => void; continue: (sessionId: string, keepSearches?: boolean) => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -195,7 +195,7 @@
               "SessionStateContainer",
               "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
               "SessionStateContainer",
-              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -800,7 +800,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+              "{ start: () => string; clear: () => void; continue: (sessionId: string, keepSearches?: boolean) => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -824,7 +824,7 @@
               "SessionStateContainer",
               "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
               "SessionStateContainer",
-              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -1374,7 +1374,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+          "{ start: () => string; clear: () => void; continue: (sessionId: string, keepSearches?: boolean) => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
           "SearchSessionSavedObject",
           ">; destroy: () => void; readonly state$: ",
           "Observable",
@@ -1398,7 +1398,7 @@
           "SessionStateContainer",
           "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
           "SessionStateContainer",
-          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -3095,13 +3095,13 @@
                 "signature": [
                   "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; hasReference?: ",
                   "SavedObjectsFindOptionsReference",
                   " | ",
                   "SavedObjectsFindOptionsReference",
-                  "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; preference?: string | undefined; pit?: ",
                   "SavedObjectsPitParams",
                   " | undefined; searchAfter?: ",
                   "SortResults",
@@ -41323,7 +41323,7 @@
             "label": "inputTypes",
             "description": [],
             "signature": [
-              "(\"kibana_context\" | \"null\")[]"
+              "(\"null\" | \"kibana_context\")[]"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/kibana.ts",
             "lineNumber": 34,

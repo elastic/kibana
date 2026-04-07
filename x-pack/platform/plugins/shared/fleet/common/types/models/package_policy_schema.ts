@@ -72,7 +72,7 @@ const PackagePolicyStreamsSchema = {
   ),
   data_stream: schema.object({
     dataset: schema.string(),
-    type: schema.string(),
+    type: schema.maybe(schema.string()),
     elasticsearch: schema.maybe(
       schema.object({
         privileges: schema.maybe(
@@ -100,6 +100,7 @@ export const PackagePolicyInputsSchema = {
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
   deprecated: schema.maybe(DeprecationInfoSchema),
@@ -273,9 +274,9 @@ export const NewPackagePolicySchema = schema.object({
 
 /**
  * Snapshot of the package policy SO schema as of model version 10.22.0.
- * Permissive on enabled, inputs, and package so the SO layer can store internal
- * shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema gains
- * new fields, create PackagePolicySchemaV{next} that extends this one.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
+ * gains new fields, create PackagePolicySchemaV{next} that extends this one.
  */
 export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
   {

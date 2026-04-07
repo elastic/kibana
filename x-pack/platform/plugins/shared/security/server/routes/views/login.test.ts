@@ -162,7 +162,13 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.security?.authc).toEqual(
+        expect.objectContaining({
+          enabled: false,
+          reason: expect.any(String),
+        })
+      );
       expect(routeConfig.validate).toBe(false);
     });
 

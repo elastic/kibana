@@ -34,6 +34,11 @@ jest.mock('../../../../app_context', () => {
       getLogger: jest.fn().mockReturnValue({
         debug: jest.fn(),
       }),
+      getLockManagerService: jest.fn().mockReturnValue({
+        withLock: jest
+          .fn()
+          .mockImplementation((_lockName: string, fn: () => Promise<void>) => fn()),
+      }),
     },
   };
 });
@@ -207,6 +212,42 @@ describe('stepResolveDependencies', () => {
         spaceId: 'default',
       })
     );
+    expect(appContextService.getLockManagerService).toHaveBeenCalled();
+  });
+
+  it('does not use lock manager when package has no requires.content', async () => {
+    await stepResolveDependencies(
+      createContext({
+        packageInstallContext: {
+          packageInfo: {
+            name: 'no-deps',
+            version: '1.0.0',
+          },
+        },
+      } as Partial<InstallContext>)
+    );
+
+    expect(appContextService.getLockManagerService).not.toHaveBeenCalled();
+    expect(mockedInstallPackage).not.toHaveBeenCalled();
+  });
+
+  it('does not use lock manager when requires.content is an empty list', async () => {
+    await stepResolveDependencies(
+      createContext({
+        packageInstallContext: {
+          packageInfo: {
+            name: 'no-deps',
+            version: '1.0.0',
+            requires: {
+              content: [],
+            },
+          },
+        },
+      } as any)
+    );
+
+    expect(appContextService.getLockManagerService).not.toHaveBeenCalled();
+    expect(mockedInstallPackage).not.toHaveBeenCalled();
   });
 
   it('updates dependency when installed version does not satisfy constraint (to_update)', async () => {

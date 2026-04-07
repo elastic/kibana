@@ -4,9 +4,136 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": [],
+    "enums": [
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-public.AutomaticImportTelemetryEventType",
+        "type": "Enum",
+        "tags": [],
+        "label": "AutomaticImportTelemetryEventType",
+        "description": [
+          "\nAutomatic Import telemetry event types\n\nThese events are sent to Elastic's telemetry cluster (BigQuery) for analytics."
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-public.DataStreamResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStreamResponse",
+        "description": [
+          "\nThe data stream response object with its settings."
+        ],
+        "signature": [
+          "{ dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-public.DataStreamResultsFlyoutComponent",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStreamResultsFlyoutComponent",
+        "description": [],
+        "signature": [
+          "React.ComponentClass<",
+          "DataStreamResultsFlyoutProps",
+          ", any> | React.FunctionComponent<",
+          "DataStreamResultsFlyoutProps",
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/public/components/data_stream_results_flyout/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-public.TaskStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "TaskStatus",
+        "description": [
+          "\nThe status of the task"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-public.TaskStatus",
+        "type": "Any",
+        "tags": [],
+        "label": "TaskStatus",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 125,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-public.DataStreamResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "DataStreamResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ dataStreamId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; inputTypes: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 141,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "automaticImport",
       "id": "def-public.AutomaticImportPluginSetup",
@@ -15,7 +142,7 @@
       "label": "AutomaticImportPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
-      "lineNumber": 17,
+      "lineNumber": 21,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,11 +158,31 @@
       "label": "AutomaticImportPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
-      "lineNumber": 19,
+      "lineNumber": 23,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
+        {
+          "parentPluginId": "automaticImport",
+          "id": "def-public.AutomaticImportPluginStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [],
+          "signature": [
+            "{ useGetIntegrationById: (integrationId: string | undefined) => ",
+            "UseGetIntegrationByIdResult",
+            "; useGetAllIntegrations: () => ",
+            "UseGetAllIntegrationsResult",
+            "; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
+          "lineNumber": 24,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
         {
           "parentPluginId": "automaticImport",
           "id": "def-public.AutomaticImportPluginStart.components",
@@ -46,12 +193,38 @@
           "signature": [
             "{ CreateIntegration: ",
             "CreateIntegrationComponent",
-            "; CreateIntegrationCardButton: ",
-            "CreateIntegrationCardButtonComponent",
+            "; CreateIntegrationSideCardButton: ",
+            "CreateIntegrationSideCardButtonComponent",
+            "; DataStreamResultsFlyout: ",
+            {
+              "pluginId": "automaticImport",
+              "scope": "public",
+              "docId": "kibAutomaticImportPluginApi",
+              "section": "def-public.DataStreamResultsFlyoutComponent",
+              "text": "DataStreamResultsFlyoutComponent"
+            },
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
-          "lineNumber": 20,
+          "lineNumber": 28,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImport",
+          "id": "def-public.AutomaticImportPluginStart.telemetry",
+          "type": "Object",
+          "tags": [],
+          "label": "telemetry",
+          "description": [
+            "\nTelemetry service for reporting Automatic Import analytics events.\nEvents are sent to Elastic's telemetry cluster."
+          ],
+          "signature": [
+            "AutomaticImportTelemetryService"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
+          "lineNumber": 42,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -63,13 +236,13 @@
           "tags": [],
           "label": "renderUpselling",
           "description": [
-            "\nSets the upselling to be rendered in the UI.\nIf defined, the section will be displayed and it will prevent\nthe user from interacting with the rest of the UI."
+            "\nWhen set (e.g. by Security serverless), replaces the Automatic Import UI with upsell content."
           ],
           "signature": [
-            "(upselling: React.ReactNode) => void"
+            "(upselling: React.ComponentType | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
-          "lineNumber": 30,
+          "lineNumber": 47,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -82,10 +255,10 @@
               "label": "upselling",
               "description": [],
               "signature": [
-                "React.ReactNode"
+                "React.ComponentType<{}> | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
-              "lineNumber": 35,
+              "lineNumber": 50,
               "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
@@ -102,7 +275,338 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-server.AutomaticImportPluginSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutomaticImportPluginSetupDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginSetupDependencies.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.PluginSetupContract",
+                "text": "PluginSetupContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginSetupDependencies.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginSetup",
+                "text": "SpacesPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginSetupDependencies.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginSetupDependencies.taskManager",
+            "type": "Object",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerSetupContract",
+                "text": "TaskManagerSetupContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginSetupDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginSetup",
+                "text": "SearchInferenceEndpointsPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-server.AutomaticImportPluginStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutomaticImportPluginStartDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginStart",
+                "text": "SpacesPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.PluginStartContract",
+                "text": "PluginStartContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.inference",
+            "type": "Object",
+            "tags": [],
+            "label": "inference",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceServerStart",
+                "text": "InferenceServerStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.SecurityPluginStart",
+                "text": "SecurityPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.taskManager",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "TaskScheduling",
+              ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+              "TaskStore",
+              ", \"get\" | \"aggregate\" | \"fetch\" | \"bulkGet\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
+              {
+                "pluginId": "@kbn/encrypted-saved-objects-shared",
+                "scope": "common",
+                "docId": "kibKbnEncryptedSavedObjectsSharedPluginApi",
+                "section": "def-common.EncryptedSavedObjectsClient",
+                "text": "EncryptedSavedObjectsClient"
+              },
+              ") => void; registerApiKeyInvalidateFn: (fn?: ",
+              "ApiKeyInvalidationFn",
+              " | undefined) => void; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "server",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-server.FieldsMetadataServerStart",
+                "text": "FieldsMetadataServerStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginStart",
+                "text": "SearchInferenceEndpointsPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -112,25 +616,74 @@
       "type": "Interface",
       "tags": [],
       "label": "AutomaticImportPluginSetup",
-      "description": [],
+      "description": [
+        "The plugin setup interface"
+      ],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-      "lineNumber": 17,
+      "lineNumber": 44,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "automaticImport",
+          "id": "def-server.AutomaticImportPluginSetup.actions",
+          "type": "Object",
+          "tags": [],
+          "label": "actions",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.PluginSetupContract",
+              "text": "PluginSetupContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+          "lineNumber": 46,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImport",
+          "id": "def-server.AutomaticImportPluginSetup.spaces",
+          "type": "Object",
+          "tags": [],
+          "label": "spaces",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesPluginSetup",
+              "text": "SpacesPluginSetup"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+          "lineNumber": 47,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImport",
           "id": "def-server.AutomaticImportPluginSetup.setIsAvailable",
           "type": "Function",
           "tags": [],
           "label": "setIsAvailable",
-          "description": [],
+          "description": [
+            "\nServerless / product-tier integration: when called with `false`, Automatic Import APIs\nreport the feature as unavailable (in addition to license checks)."
+          ],
           "signature": [
             "(isAvailable: boolean) => void"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 18,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -146,7 +699,7 @@
                 "boolean"
               ],
               "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-              "lineNumber": 18,
+              "lineNumber": 52,
               "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
@@ -167,34 +720,11 @@
       "label": "AutomaticImportPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-      "lineNumber": 21,
+      "lineNumber": 56,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "automaticImport",
-          "id": "def-server.AutomaticImportPluginStart.inference",
-          "type": "Object",
-          "tags": [],
-          "label": "inference",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "inference",
-              "scope": "server",
-              "docId": "kibInferencePluginApi",
-              "section": "def-server.InferenceServerStart",
-              "text": "InferenceServerStart"
-            }
-          ],
-          "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 22,
-          "columnNumber": 3,
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -204,92 +734,84 @@
     "functions": [
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.partialShuffleArray",
+        "id": "def-common.normalizeLogLinesForUpload",
         "type": "Function",
         "tags": [],
-        "label": "partialShuffleArray",
-        "description": [
-          "\nPartially shuffles an array using the modified Fisher-Yates algorithm.\n\nThe array is partially shuffled in place, meaning that:\n  - the first `start` elements are kept in their place;\n  - the slice from `start` to `end` is filled with the sample from the remaining element;\n  - the sample is guaranteed to be reasonably unbiased (any bias only come from the random function).\nWe do not make any guarantees regarding the order of elements after `end`.\n\nReproducibility:\n  - the result is deterministic for the given random seed.\n\nPerformance:\n  - we perform exactly `end-start` operations, each including:\n    - a random number generation; and\n    - possibly an array element swap; also\n  - we use constant extra memory.\n\nImplementation notes:\n1. A naïve implementation would be to shuffle the whole array starting from `start`. We\n   simply modify the modern version of Fisher-Yates algorithm doing it to stop once we reach\n   the `end`, so the results returned on the slice from `start` to `end` are statistically\n   indistinguishable from the results returned by the naïve implementation.\n2. Thus due to the properties of the original Fisher-Yates shuffle, the sampling would be\n   unbiased, meaning that the probability of any given shuffle order is the same as that of\n   any other, provided the random function has no bias itself, that is, is uniform.\n3. The actual pseudorandom function we use (from `seedrandom`), plus the modulo operation,\n   are not perfectly uniform, but are good enough, so the bias are negligible for our purposes.\n\nReference:\n  - https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle, especially bias description.\n\nExamples:\n  - shuffle the whole array: partialShuffleArray(arr)\n  - shuffle the first 5 elements: partialShuffleArray(arr, 0, 5)\n  - keep the first element, shuffle the rest: partialShuffleArray(arr, 1)\n  - shuffle the last 5 elements: partialShuffleArray(arr, arr.length - 5)\n"
-        ],
+        "label": "normalizeLogLinesForUpload",
+        "description": [],
         "signature": [
-          "(arr: T[], start: number, end: number, seed: string) => void"
+          "(lines: readonly string[]) => ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.NormalizeLogSamplesResult",
+            "text": "NormalizeLogSamplesResult"
+          }
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
-        "lineNumber": 12,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "automaticImport",
-            "id": "def-common.partialShuffleArray.$1",
-            "type": "Array",
+            "id": "def-common.normalizeLogLinesForUpload.$1",
+            "type": "Object",
             "tags": [],
-            "label": "arr",
-            "description": [
-              "- The array to be partially shuffled."
-            ],
+            "label": "lines",
+            "description": [],
             "signature": [
-              "T[]"
+              "readonly string[]"
             ],
-            "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
-            "lineNumber": 56,
-            "columnNumber": 3,
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
+            "lineNumber": 31,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.normalizeLogSamplesFromFileContent",
+        "type": "Function",
+        "tags": [],
+        "label": "normalizeLogSamplesFromFileContent",
+        "description": [],
+        "signature": [
+          "(content: string) => ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.NormalizeLogSamplesResult",
+            "text": "NormalizeLogSamplesResult"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "automaticImport",
-            "id": "def-common.partialShuffleArray.$2",
-            "type": "number",
-            "tags": [],
-            "label": "start",
-            "description": [
-              "- The number of elements in the beginning of the array to keep in place."
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
-            "lineNumber": 57,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "automaticImport",
-            "id": "def-common.partialShuffleArray.$3",
-            "type": "number",
-            "tags": [],
-            "label": "end",
-            "description": [
-              "- The number of elements to be shuffled."
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
-            "lineNumber": 58,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "automaticImport",
-            "id": "def-common.partialShuffleArray.$4",
+            "id": "def-common.normalizeLogSamplesFromFileContent.$1",
             "type": "string",
             "tags": [],
-            "label": "seed",
+            "label": "content",
             "description": [],
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
-            "lineNumber": 59,
-            "columnNumber": 3,
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
+            "lineNumber": 18,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -302,32 +824,610 @@
     "interfaces": [
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.ESProcessorItem",
+        "id": "def-common.AnalyzeLogsTriggeredPayload",
         "type": "Interface",
         "tags": [],
-        "label": "ESProcessorItem",
-        "description": [
-          "\nProcessor item for the Elasticsearch processor."
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
-        "lineNumber": 93,
+        "label": "AnalyzeLogsTriggeredPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "automaticImport",
-            "id": "def-common.ESProcessorItem.Unnamed",
-            "type": "IndexSignature",
+            "id": "def-common.AnalyzeLogsTriggeredPayload.sessionId",
+            "type": "string",
             "tags": [],
-            "label": "[key: string]: ESProcessorOptions",
+            "label": "sessionId",
             "description": [],
             "signature": [
-              "[key: string]:  ",
-              "ESProcessorOptions"
+              "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
-            "lineNumber": 97,
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.AnalyzeLogsTriggeredPayload.logsSource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "logsSource",
+            "description": [],
+            "signature": [
+              "\"index\" | \"file\""
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.CodeEditorCopyClickedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "CodeEditorCopyClickedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.CodeEditorCopyClickedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.CreateIntegrationPageLoadedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateIntegrationPageLoadedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.CreateIntegrationPageLoadedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStreamCreationCompletePayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStreamCreationCompletePayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.integrationName",
+            "type": "string",
+            "tags": [],
+            "label": "integrationName",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.dataStreamName",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamName",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.durationMs",
+            "type": "number",
+            "tags": [],
+            "label": "durationMs",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.errorMessage",
+            "type": "string",
+            "tags": [],
+            "label": "errorMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStreamDeleteConfirmedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStreamDeleteConfirmedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamDeleteConfirmedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStreamFlyoutOpenedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStreamFlyoutOpenedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamFlyoutOpenedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamFlyoutOpenedPayload.isFirstDataStream",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFirstDataStream",
+            "description": [
+              "Boolean flag if this is the first data stream being created for a new integration"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStreamRefreshConfirmedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStreamRefreshConfirmedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamRefreshConfirmedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.EditDataStreamFlyoutOpenedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditDataStreamFlyoutOpenedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditDataStreamFlyoutOpenedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.EditPipelineTabOpenedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditPipelineTabOpenedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditPipelineTabOpenedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.IntegrationInstalledPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationInstalledPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.IntegrationInstalledPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.IntegrationInstalledPayload.integrationName",
+            "type": "string",
+            "tags": [],
+            "label": "integrationName",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.IntegrationInstalledPayload.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.IntegrationInstalledPayload.dataStreamCount",
+            "type": "number",
+            "tags": [],
+            "label": "dataStreamCount",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.IntegrationInstalledPayload.dataStreamName",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamName",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.NormalizeLogSamplesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "NormalizeLogSamplesResult",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.NormalizeLogSamplesResult.samples",
+            "type": "Array",
+            "tags": [],
+            "label": "samples",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.NormalizeLogSamplesResult.linesOmittedOverLimit",
+            "type": "number",
+            "tags": [],
+            "label": "linesOmittedOverLimit",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.PipelineEditedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "PipelineEditedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.PipelineEditedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.PipelineEditedPayload.linesAdded",
+            "type": "number",
+            "tags": [],
+            "label": "linesAdded",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.PipelineEditedPayload.linesRemoved",
+            "type": "number",
+            "tags": [],
+            "label": "linesRemoved",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.PipelineEditedPayload.netLineChange",
+            "type": "number",
+            "tags": [],
+            "label": "netLineChange",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -336,350 +1436,39 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.AutomaticImportTelemetryEventType",
+        "type": "Enum",
+        "tags": [],
+        "label": "AutomaticImportTelemetryEventType",
+        "description": [
+          "\nAutomatic Import telemetry event types\n\nThese events are sent to Elastic's telemetry cluster (BigQuery) for analytics."
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.ANALYZE_API_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "ANALYZE_API_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 23,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.ANALYZE_LOGS_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "ANALYZE_LOGS_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 21,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeApiRequestBody",
+        "id": "def-common.AllIntegrationsResponseIntegration",
         "type": "Type",
         "tags": [],
-        "label": "AnalyzeApiRequestBody",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
-        "lineNumber": 23,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeApiRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "AnalyzeApiRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
-        "lineNumber": 24,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeApiResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "AnalyzeApiResponse",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
-        "lineNumber": 32,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeApiResponse",
-        "type": "Any",
-        "tags": [],
-        "label": "AnalyzeApiResponse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
-        "lineNumber": 33,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeLogsRequestBody",
-        "type": "Type",
-        "tags": [],
-        "label": "AnalyzeLogsRequestBody",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
-        "lineNumber": 30,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeLogsRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "AnalyzeLogsRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
-        "lineNumber": 31,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeLogsResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "AnalyzeLogsResponse",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
-        "lineNumber": 42,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AnalyzeLogsResponse",
-        "type": "Any",
-        "tags": [],
-        "label": "AnalyzeLogsResponse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
-        "lineNumber": 43,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AUTOMATIC_IMPORT_APP_ROUTE",
-        "type": "string",
-        "tags": [],
-        "label": "AUTOMATIC_IMPORT_APP_ROUTE",
-        "description": [],
-        "signature": [
-          "\"/app/automatic_import\""
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 14,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.AUTOMATIC_IMPORT_BASE_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "AUTOMATIC_IMPORT_BASE_PATH",
-        "description": [],
-        "signature": [
-          "\"/internal/automatic_import\""
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 17,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.BuildIntegrationRequestBody",
-        "type": "Type",
-        "tags": [],
-        "label": "BuildIntegrationRequestBody",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/build_integration/build_integration.gen.ts",
-        "lineNumber": 21,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.BuildIntegrationRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "BuildIntegrationRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/build_integration/build_integration.gen.ts",
-        "lineNumber": 22,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CATEGORIZATION_GRAPH_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "CATEGORIZATION_GRAPH_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 20,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CategorizationRequestBody",
-        "type": "Type",
-        "tags": [],
-        "label": "CategorizationRequestBody",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
-        "lineNumber": 30,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CategorizationRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "CategorizationRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
-        "lineNumber": 31,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CategorizationResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "CategorizationResponse",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
-        "lineNumber": 42,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CategorizationResponse",
-        "type": "Any",
-        "tags": [],
-        "label": "CategorizationResponse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
-        "lineNumber": 43,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CEL_INPUT_GRAPH_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "CEL_INPUT_GRAPH_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 24,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CelAuthType",
-        "type": "Type",
-        "tags": [],
-        "label": "CelAuthType",
+        "label": "AllIntegrationsResponseIntegration",
         "description": [
-          "\nThe type of auth utilized for the input."
+          "\nThe integration object with its settings."
         ],
         "signature": [
-          "z.infer<any>"
+          "{ integrationId: string; title: string; totalDataStreamCount: number; successfulDataStreamCount: number; createdBy: string; status: any; logo?: string | undefined; version?: string | undefined; createdByProfileUid?: string | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 22,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 207,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -687,35 +1476,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.CelAuthType",
-        "type": "Any",
-        "tags": [],
-        "label": "CelAuthType",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 26,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CelInput",
+        "id": "def-common.ApproveAutoImportIntegrationRequestBody",
         "type": "Type",
         "tags": [],
-        "label": "CelInput",
-        "description": [
-          "\nOptional CEL input details."
-        ],
+        "label": "ApproveAutoImportIntegrationRequestBody",
+        "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ version: string; categories: string[]; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 62,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -723,33 +1493,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.CelInput",
-        "type": "Any",
-        "tags": [],
-        "label": "CelInput",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 66,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CelInputRequestBody",
+        "id": "def-common.ApproveAutoImportIntegrationRequestParams",
         "type": "Type",
         "tags": [],
-        "label": "CelInputRequestBody",
+        "label": "ApproveAutoImportIntegrationRequestParams",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ integration_id: string; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
-        "lineNumber": 23,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -757,33 +1510,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.CelInputRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "CelInputRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
-        "lineNumber": 24,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CelInputResponse",
+        "id": "def-common.ApproveIntegrationRequest",
         "type": "Type",
         "tags": [],
-        "label": "CelInputResponse",
+        "label": "ApproveIntegrationRequest",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ version: string; categories: string[]; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
-        "lineNumber": 32,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -791,47 +1527,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.CelInputResponse",
-        "type": "Any",
-        "tags": [],
-        "label": "CelInputResponse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
-        "lineNumber": 33,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CHECK_PIPELINE_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "CHECK_PIPELINE_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 25,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CheckPipelineRequestBody",
+        "id": "def-common.ApproveModalApproveClickedPayload",
         "type": "Type",
         "tags": [],
-        "label": "CheckPipelineRequestBody",
+        "label": "ApproveModalApproveClickedPayload",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ [x: string]: never; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
-        "lineNumber": 22,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -839,33 +1544,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.CheckPipelineRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "CheckPipelineRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
-        "lineNumber": 23,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.CheckPipelineResponse",
+        "id": "def-common.ApproveModalCancelClickedPayload",
         "type": "Type",
         "tags": [],
-        "label": "CheckPipelineResponse",
+        "label": "ApproveModalCancelClickedPayload",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ [x: string]: never; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
-        "lineNumber": 29,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -873,216 +1561,302 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.CheckPipelineResponse",
-        "type": "Any",
-        "tags": [],
-        "label": "CheckPipelineResponse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
-        "lineNumber": 30,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.DataStream",
+        "id": "def-common.AutomaticImportTelemetryEventPayload",
         "type": "Type",
         "tags": [],
-        "label": "DataStream",
-        "description": [
-          "\nThe dataStream object."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 168,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.DataStream",
-        "type": "Any",
-        "tags": [],
-        "label": "DataStream",
+        "label": "AutomaticImportTelemetryEventPayload",
         "description": [],
         "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 172,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.Docs",
-        "type": "Type",
-        "tags": [],
-        "label": "Docs",
-        "description": [
-          "\nAn array of processed documents."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 70,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.Docs",
-        "type": "Any",
-        "tags": [],
-        "label": "Docs",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 74,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.ECS_GRAPH_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "ECS_GRAPH_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.EcsMappingRequestBody",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsMappingRequestBody",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
-        "lineNumber": 31,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.EcsMappingRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "EcsMappingRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
-        "lineNumber": 32,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.EcsMappingResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "EcsMappingResponse",
-        "description": [],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
-        "lineNumber": 44,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.EcsMappingResponse",
-        "type": "Any",
-        "tags": [],
-        "label": "EcsMappingResponse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
-        "lineNumber": 45,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.ESProcessorItem",
-        "type": "Any",
-        "tags": [],
-        "label": "ESProcessorItem",
-        "description": [],
-        "signature": [
-          "z.ZodType<",
+          "T extends ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
             "docId": "kibAutomaticImportPluginApi",
-            "section": "def-common.ESProcessorItem",
-            "text": "ESProcessorItem"
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
           },
-          ", ",
-          "ESProcessorItemInput",
-          ">"
+          ".CreateIntegrationPageLoaded ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.CreateIntegrationPageLoadedPayload",
+            "text": "CreateIntegrationPageLoadedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".DataStreamFlyoutOpened ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.DataStreamFlyoutOpenedPayload",
+            "text": "DataStreamFlyoutOpenedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".EditDataStreamFlyoutOpened ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.EditDataStreamFlyoutOpenedPayload",
+            "text": "EditDataStreamFlyoutOpenedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".AnalyzeLogsTriggered ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AnalyzeLogsTriggeredPayload",
+            "text": "AnalyzeLogsTriggeredPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".EditPipelineTabOpened ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.EditPipelineTabOpenedPayload",
+            "text": "EditPipelineTabOpenedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".CodeEditorCopyClicked ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.CodeEditorCopyClickedPayload",
+            "text": "CodeEditorCopyClickedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".CancelButtonClicked ? ",
+          "CancelButtonClickedPayload",
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".DoneButtonClicked ? ",
+          "DoneButtonClickedPayload",
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".DataStreamCreationComplete ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.DataStreamCreationCompletePayload",
+            "text": "DataStreamCreationCompletePayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".IntegrationInstalled ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.IntegrationInstalledPayload",
+            "text": "IntegrationInstalledPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".ManageIntegrationsTableViewed ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.ManageIntegrationsTableViewedPayload",
+            "text": "ManageIntegrationsTableViewedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".UploadIntegrationClicked ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.UploadIntegrationClickedPayload",
+            "text": "UploadIntegrationClickedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".ReviewApproveMenuClicked ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.ReviewApproveMenuClickedPayload",
+            "text": "ReviewApproveMenuClickedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".IntegrationDownloadZipClicked ? ",
+          "IntegrationDownloadZipClickedPayload",
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".ApproveModalCancelClicked ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.ApproveModalCancelClickedPayload",
+            "text": "ApproveModalCancelClickedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".ApproveModalApproveClicked ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.ApproveModalApproveClickedPayload",
+            "text": "ApproveModalApproveClickedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".DataStreamDeleteConfirmed ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.DataStreamDeleteConfirmedPayload",
+            "text": "DataStreamDeleteConfirmedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".DataStreamRefreshConfirmed ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.DataStreamRefreshConfirmedPayload",
+            "text": "DataStreamRefreshConfirmedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".PipelineEdited ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.PipelineEditedPayload",
+            "text": "PipelineEditedPayload"
+          },
+          " : never"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
-        "lineNumber": 102,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.InputType",
-        "type": "Type",
-        "tags": [],
-        "label": "InputType",
-        "description": [
-          "\nThe input type for the dataStream to pull logs from."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 145,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1090,17 +1864,193 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.InputType",
-        "type": "Any",
+        "id": "def-common.CreateAutoImportIntegrationRequestBody",
+        "type": "Type",
         "tags": [],
-        "label": "InputType",
+        "label": "CreateAutoImportIntegrationRequestBody",
         "description": [],
         "signature": [
-          "any"
+          "{ connectorId: string; integrationId: string; title: string; description: string; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; logo?: string | undefined; dataStreams?: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; }[] | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.CreateAutoImportIntegrationResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAutoImportIntegrationResponse",
+        "description": [],
+        "signature": [
+          "{ integration_id?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStream",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStream",
+        "description": [
+          "\nThe data stream object with its settings."
+        ],
+        "signature": [
+          "{ dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStreamResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStreamResponse",
+        "description": [
+          "\nThe data stream response object with its settings."
+        ],
+        "signature": [
+          "{ dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DeleteAutoImportIntegrationRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DeleteDataStreamRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; data_stream_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DownloadAutoImportIntegrationRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "DownloadAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.GetAllAutoImportIntegrationsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAllAutoImportIntegrationsResponse",
+        "description": [],
+        "signature": [
+          "{ integrationId: string; title: string; totalDataStreamCount: number; successfulDataStreamCount: number; createdBy: string; status: any; logo?: string | undefined; version?: string | undefined; createdByProfileUid?: string | undefined; }[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 144,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.GetAutoImportIntegrationRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
         "lineNumber": 149,
-        "columnNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.GetAutoImportIntegrationResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAutoImportIntegrationResponse",
+        "description": [],
+        "signature": [
+          "{ integrationResponse: { integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 162,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.InputType",
+        "type": "Type",
+        "tags": [],
+        "label": "InputType",
+        "description": [
+          "\nThe input type object with its settings."
+        ],
+        "signature": [
+          "{ name: any; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1112,13 +2062,13 @@
         "tags": [],
         "label": "Integration",
         "description": [
-          "\nThe integration object."
+          "\nThe integration object with its settings."
         ],
         "signature": [
-          "z.infer<any>"
+          "{ integrationId: string; description: string; title: string; dataStreams?: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; }[] | undefined; logo?: string | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 211,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1126,31 +2076,19 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.Integration",
-        "type": "Any",
+        "id": "def-common.IntegrationResponse",
+        "type": "Type",
         "tags": [],
-        "label": "Integration",
-        "description": [],
-        "signature": [
-          "any"
+        "label": "IntegrationResponse",
+        "description": [
+          "\nThe integration response object with its settings."
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 215,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.INTEGRATION_BUILDER_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "INTEGRATION_BUILDER_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 26,
-        "columnNumber": 14,
+        "signature": [
+          "{ integrationId: string; title: string; description: string; dataStreams: { dataStreamId: string; title: string; description: string; inputTypes: { name: any; }[]; status: any; }[]; status: any; logo?: string | undefined; version?: string | undefined; createdBy?: string | undefined; createdByProfileUid?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1165,10 +2103,10 @@
           "\nThe LangSmith options object."
         ],
         "signature": [
-          "z.infer<any>"
+          "{ projectName: string; apiKey: string; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 238,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 250,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1176,35 +2114,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.LangSmithOptions",
-        "type": "Any",
-        "tags": [],
-        "label": "LangSmithOptions",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 242,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.Pipeline",
+        "id": "def-common.ManageIntegrationsTableViewedPayload",
         "type": "Type",
         "tags": [],
-        "label": "Pipeline",
-        "description": [
-          "\nThe pipeline object."
-        ],
+        "label": "ManageIntegrationsTableViewedPayload",
+        "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ [x: string]: never; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 118,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 87,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1212,16 +2131,54 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.Pipeline",
+        "id": "def-common.OriginalSource",
+        "type": "Type",
+        "tags": [],
+        "label": "OriginalSource",
+        "description": [
+          "\nThe original source of the samples."
+        ],
+        "signature": [
+          "{ sourceType: any; sourceValue: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.OriginalSourceType",
+        "type": "Type",
+        "tags": [],
+        "label": "OriginalSourceType",
+        "description": [
+          "\nThe type of the original source."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.OriginalSourceType",
         "type": "Any",
         "tags": [],
-        "label": "Pipeline",
+        "label": "OriginalSourceType",
         "description": [],
         "signature": [
           "any"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 122,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 102,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1229,15 +2186,189 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.PLUGIN_ID",
-        "type": "string",
+        "id": "def-common.ReanalyzeDataStreamRequestBody",
+        "type": "Type",
         "tags": [],
-        "label": "PLUGIN_ID",
+        "label": "ReanalyzeDataStreamRequestBody",
         "description": [],
         "signature": [
-          "\"automaticImport\""
+          "{ connectorId: string; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ReanalyzeDataStreamRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ReanalyzeDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; data_stream_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ReviewApproveMenuClickedPayload",
+        "type": "Type",
+        "tags": [],
+        "label": "ReviewApproveMenuClickedPayload",
+        "description": [],
+        "signature": [
+          "{ [x: string]: never; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.TaskStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "TaskStatus",
+        "description": [
+          "\nThe status of the task"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.TaskStatus",
+        "type": "Any",
+        "tags": [],
+        "label": "TaskStatus",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 125,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.TaskStatusEnum",
+        "type": "Type",
+        "tags": [],
+        "label": "TaskStatusEnum",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.TaskStatusEnum",
+        "type": "Any",
+        "tags": [],
+        "label": "TaskStatusEnum",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 135,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UpdateAutoImportIntegrationRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateAutoImportIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "{ description?: string | undefined; logo?: string | undefined; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: any; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 182,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UpdateAutoImportIntegrationRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 169,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UpdateDataStreamPipelineRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateDataStreamPipelineRequestBody",
+        "description": [],
+        "signature": [
+          "{ ingest_pipeline: any; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 136,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UPLOAD_SAMPLES_MAX_LINES",
+        "type": "number",
+        "tags": [],
+        "label": "UPLOAD_SAMPLES_MAX_LINES",
+        "description": [
+          "\nMaximum number of log lines in a single upload request."
+        ],
+        "signature": [
+          "1000"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/upload_samples_limits.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -1246,30 +2377,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.RELATED_GRAPH_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "RELATED_GRAPH_PATH",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
-        "lineNumber": 22,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.RelatedRequestBody",
+        "id": "def-common.UploadIntegrationClickedPayload",
         "type": "Type",
         "tags": [],
-        "label": "RelatedRequestBody",
+        "label": "UploadIntegrationClickedPayload",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ [x: string]: never; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
-        "lineNumber": 30,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 88,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1277,33 +2394,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.RelatedRequestBody",
-        "type": "Any",
-        "tags": [],
-        "label": "RelatedRequestBody",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
-        "lineNumber": 31,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.RelatedResponse",
+        "id": "def-common.UploadSamplesToDataStreamRequestBody",
         "type": "Type",
         "tags": [],
-        "label": "RelatedResponse",
+        "label": "UploadSamplesToDataStreamRequestBody",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ originalSource: { sourceType: any; sourceValue: string; }; samples?: string[] | undefined; sourceIndex?: string | undefined; langSmithOptions?: { projectName: string; apiKey: string; } | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
-        "lineNumber": 42,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 183,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1311,35 +2411,16 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.RelatedResponse",
-        "type": "Any",
-        "tags": [],
-        "label": "RelatedResponse",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
-        "lineNumber": 43,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.SamplesFormat",
+        "id": "def-common.UploadSamplesToDataStreamRequestParams",
         "type": "Type",
         "tags": [],
-        "label": "SamplesFormat",
-        "description": [
-          "\nFormat of the provided log samples."
-        ],
+        "label": "UploadSamplesToDataStreamRequestParams",
+        "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ integration_id: string; data_stream_id: string; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 94,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 166,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1347,58 +2428,939 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.SamplesFormat",
-        "type": "Any",
-        "tags": [],
-        "label": "SamplesFormat",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 98,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.SamplesFormatName",
+        "id": "def-common.UploadSamplesToDataStreamResponse",
         "type": "Type",
         "tags": [],
-        "label": "SamplesFormatName",
-        "description": [
-          "\nThe name of the log samples format."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 76,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.SamplesFormatName",
-        "type": "Any",
-        "tags": [],
-        "label": "SamplesFormatName",
+        "label": "UploadSamplesToDataStreamResponse",
         "description": [],
         "signature": [
-          "any"
+          "{ success?: boolean | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 80,
-        "columnNumber": 14,
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 210,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.AllIntegrationsResponseIntegration",
+        "type": "Object",
+        "tags": [],
+        "label": "AllIntegrationsResponseIntegration",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integrationId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; totalDataStreamCount: ",
+          "ZodNumber",
+          "; successfulDataStreamCount: ",
+          "ZodNumber",
+          "; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodString",
+          "; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 211,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ApproveAutoImportIntegrationRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "ApproveAutoImportIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ version: ",
+          "ZodString",
+          "; categories: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ApproveAutoImportIntegrationRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "ApproveAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ApproveIntegrationRequest",
+        "type": "Object",
+        "tags": [],
+        "label": "ApproveIntegrationRequest",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ version: ",
+          "ZodString",
+          "; categories: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.CreateAutoImportIntegrationRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "CreateAutoImportIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ connectorId: ",
+          "ZodString",
+          "; integrationId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>>; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; dataStreams: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ dataStreamId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; inputTypes: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.CreateAutoImportIntegrationResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "CreateAutoImportIntegrationResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 109,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStream",
+        "type": "Object",
+        "tags": [],
+        "label": "DataStream",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ dataStreamId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; inputTypes: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DataStreamResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "DataStreamResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ dataStreamId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; inputTypes: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 141,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DeleteAutoImportIntegrationRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "DeleteAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 121,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DeleteDataStreamRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "DeleteDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; data_stream_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DownloadAutoImportIntegrationRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "DownloadAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 134,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.GetAllAutoImportIntegrationsResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetAllAutoImportIntegrationsResponse",
+        "description": [],
+        "signature": [
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ integrationId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; totalDataStreamCount: ",
+          "ZodNumber",
+          "; successfulDataStreamCount: ",
+          "ZodNumber",
+          "; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodString",
+          "; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 147,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.GetAutoImportIntegrationRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "GetAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 152,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.GetAutoImportIntegrationResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetAutoImportIntegrationResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integrationResponse: ",
+          "ZodObject",
+          "<{ integrationId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; description: ",
+          "ZodString",
+          "; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; dataStreams: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ dataStreamId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; inputTypes: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 163,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.InputType",
+        "type": "Object",
+        "tags": [],
+        "label": "InputType",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.Integration",
+        "type": "Object",
+        "tags": [],
+        "label": "Integration",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integrationId: ",
+          "ZodString",
+          "; dataStreams: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ dataStreamId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; inputTypes: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>>; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; description: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.IntegrationResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "IntegrationResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integrationId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; description: ",
+          "ZodString",
+          "; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; dataStreams: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ dataStreamId: ",
+          "ZodString",
+          "; title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; inputTypes: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; status: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 168,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.LangSmithOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "LangSmithOptions",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 254,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.OriginalSource",
+        "type": "Object",
+        "tags": [],
+        "label": "OriginalSource",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ sourceType: any; sourceValue: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/common_attributes.gen.ts",
+        "lineNumber": 110,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ReanalyzeDataStreamRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "ReanalyzeDataStreamRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ connectorId: ",
+          "ZodString",
+          "; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ReanalyzeDataStreamRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "ReanalyzeDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; data_stream_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UpdateAutoImportIntegrationRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "UpdateAutoImportIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>>; dataStreams: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; inputTypes: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>>; rawSamples: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 185,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UpdateAutoImportIntegrationRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "UpdateAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 172,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UpdateDataStreamPipelineRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "UpdateDataStreamPipelineRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ ingest_pipeline: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 139,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UploadSamplesToDataStreamRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "UploadSamplesToDataStreamRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ samples: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">>; sourceIndex: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; originalSource: ",
+          "ZodObject",
+          "<{ sourceType: any; sourceValue: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 186,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UploadSamplesToDataStreamRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "UploadSamplesToDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodString",
+          "; data_stream_id: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 169,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.UploadSamplesToDataStreamResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "UploadSamplesToDataStreamResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ success: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strict>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 211,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

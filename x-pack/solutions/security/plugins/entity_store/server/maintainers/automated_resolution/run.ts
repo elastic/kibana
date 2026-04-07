@@ -118,7 +118,9 @@ async function collectNewEmailValues(
   ];
 
   if (state.lastProcessedTimestamp) {
-    filters.push({ range: { '@timestamp': { gt: state.lastProcessedTimestamp } } });
+    filters.push({
+      range: { 'entity.lifecycle.last_seen': { gt: state.lastProcessedTimestamp } },
+    });
   }
 
   do {
@@ -137,7 +139,7 @@ async function collectNewEmailValues(
             ...(afterKey ? { after: afterKey } : {}),
           },
         },
-        max_timestamp: { max: { field: '@timestamp' } },
+        max_timestamp: { max: { field: 'entity.lifecycle.last_seen' } },
       },
     });
 

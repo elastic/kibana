@@ -37,16 +37,12 @@ let resultPromise: Promise<{
 export async function setLensBuilder(
   useApiFormat: LensFeatureFlags['apiFormat']
 ): Promise<LensConfigBuilder | null> {
-  if (useApiFormat) {
-    resultPromise = import('@kbn/lens-embeddable-utils');
-    const { LensConfigBuilder } = await resultPromise;
-    const builder = new LensConfigBuilder(undefined, useApiFormat);
-    setBuilder(builder);
-    resultPromise = null;
-    return builder;
-  }
-
-  return null;
+  resultPromise = import('@kbn/lens-embeddable-utils');
+  const { LensConfigBuilder } = await resultPromise;
+  const builder = new LensConfigBuilder(undefined, useApiFormat);
+  setBuilder(builder);
+  resultPromise = null;
+  return builder;
 }
 
 export async function ensureBuilderIsInitialized(): Promise<void> {

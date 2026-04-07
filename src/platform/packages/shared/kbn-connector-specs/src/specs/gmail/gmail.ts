@@ -9,7 +9,6 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 const DEFAULT_MAX_RESULTS = 10;
 const MAX_PAGE_SIZE = 100;
@@ -32,10 +31,26 @@ export const GmailConnector: ConnectorSpec = {
     displayName: 'Gmail',
     description: 'Search and read emails from Gmail',
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { disabled: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },

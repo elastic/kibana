@@ -80,7 +80,7 @@ describe('Header', () => {
       ])
     );
     component.update();
-    const rootNode = component.getDOMNode();
+    const rootNode = component.find('[data-test-subj="headerGlobalNav"]').getDOMNode();
     expect(rootNode.querySelector('.my-extension1')).toBeTruthy();
     expect(rootNode.querySelector('.my-extension2')).toBeTruthy();
   });
