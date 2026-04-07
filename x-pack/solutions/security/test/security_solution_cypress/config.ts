@@ -56,8 +56,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
-        // Suppress announcement popups that can block UI interactions in tests.
-        '--uiSettings.globalOverrides.hideAnnouncements=true',
+        // Suppress Agent Builder announcement modal in tests.
+        '--uiSettings.defaults.agentBuilder:announcementModalSeen=true',
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,

@@ -21,4 +21,3 @@ export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
 export { AgentBuilderAnnouncementModal } from './announcement_modal/agent_builder_announcement_modal';
 export type { AgentBuilderAnnouncementModalProps } from './announcement_modal/agent_builder_announcement_modal';
-export { getAgentBuilderAnnouncementState } from './announcement_modal/agent_builder_announcement_state';

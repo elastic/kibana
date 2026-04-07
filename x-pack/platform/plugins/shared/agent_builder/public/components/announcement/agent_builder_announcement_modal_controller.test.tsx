@@ -12,29 +12,37 @@ import { BehaviorSubject } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
+import {
+  HIDE_ANNOUNCEMENTS_ID,
+  AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID,
+} from '@kbn/management-settings-ids';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { AgentBuilderAnnouncementModalController } from './agent_builder_announcement_modal_controller';
 
 const SPACE_ID = 'test-space';
-const STORAGE_KEY = `agentBuilder.announcementModal.${SPACE_ID}`;
 
 function buildServices({
   hideAnnouncements = false,
+  announcementModalSeen = false,
   spaceId = SPACE_ID,
 }: {
   hideAnnouncements?: boolean;
+  announcementModalSeen?: boolean;
   spaceId?: string;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
   const navigateToApp = jest.fn();
+  const settingsSet = jest.fn().mockResolvedValue(undefined);
 
   const services = {
     settings: {
       client: {
-        get: jest.fn(),
+        get: jest.fn((key: string) =>
+          key === AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID ? announcementModalSeen : undefined
+        ),
         get$: jest.fn(),
+        set: settingsSet,
       },
       globalClient: {
         get: (key: string) => (key === HIDE_ANNOUNCEMENTS_ID ? hideAnnouncements : undefined),
@@ -48,7 +56,7 @@ function buildServices({
     application: { navigateToApp },
   };
 
-  return { services, reportEvent, navigateToApp };
+  return { services, reportEvent, navigateToApp, settingsSet };
 }
 
 function renderController(services: ReturnType<typeof buildServices>['services']) {
@@ -65,7 +73,6 @@ function renderController(services: ReturnType<typeof buildServices>['services']
 
 describe('AgentBuilderAnnouncementModalController', () => {
   beforeEach(() => {
-    localStorage.clear();
     jest.clearAllMocks();
   });
 
@@ -81,8 +88,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
   });
 
   it('does not render the modal when the user has already seen it', async () => {
-    localStorage.setItem(STORAGE_KEY, 'true');
-    const { services } = buildServices();
+    const { services } = buildServices({ announcementModalSeen: true });
     renderController(services);
 
     await waitFor(() => {
@@ -101,9 +107,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
-  it('calls markAsSeen, reports OptInAction telemetry, and hides the modal on continue', async () => {
+  it('calls settings.client.set, reports OptInAction telemetry, and hides the modal on continue', async () => {
     const user = userEvent.setup();
-    const { services, reportEvent } = buildServices();
+    const { services, reportEvent, settingsSet } = buildServices();
     renderController(services);
 
     await waitFor(() =>
@@ -112,7 +118,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
 
     await user.click(screen.getByTestId('agentBuilderAnnouncementContinueButton'));
 
-    expect(localStorage.getItem(STORAGE_KEY)).toBe('true');
+    expect(settingsSet).toHaveBeenCalledWith(AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID, true);
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
       action: 'confirmed',
       source: 'agent_builder_nav_control',
@@ -120,9 +126,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(screen.queryByTestId('agentBuilderAnnouncementContinueButton')).not.toBeInTheDocument();
   });
 
-  it('calls markAsSeen, reports OptOut telemetry, navigates to management, and hides the modal on revert', async () => {
+  it('calls settings.client.set, reports OptOut telemetry, navigates to management, and hides the modal on revert', async () => {
     const user = userEvent.setup();
-    const { services, reportEvent, navigateToApp } = buildServices();
+    const { services, reportEvent, navigateToApp, settingsSet } = buildServices();
     renderController(services);
 
     await waitFor(() =>
@@ -131,7 +137,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
 
     await user.click(screen.getByTestId('agentBuilderAnnouncementRevertButton'));
 
-    expect(localStorage.getItem(STORAGE_KEY)).toBe('true');
+    expect(settingsSet).toHaveBeenCalledWith(AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID, true);
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
       source: 'agent_builder_nav_control',
     });
