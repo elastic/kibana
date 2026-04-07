@@ -10,7 +10,8 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          machineType: n2-standard-4
+          machineType: n4-standard-4
+          diskType: hyperdisk-balanced
           diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 5
@@ -26,7 +27,8 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          machineType: n2-standard-4
+          machineType: n4-standard-4
+          diskType: hyperdisk-balanced
           diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 3
@@ -102,7 +104,8 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          machineType: n2-standard-4
+          machineType: n4-standard-4
+          diskType: hyperdisk-balanced
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -117,7 +120,8 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          machineType: n2-standard-4
+          machineType: n4-standard-4
+          diskType: hyperdisk-balanced
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -132,7 +136,8 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          machineType: n2-standard-4
+          machineType: n4-standard-4
+          diskType: hyperdisk-balanced
         timeout_in_minutes: 120
         retry:
           automatic:
