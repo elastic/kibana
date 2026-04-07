@@ -20,6 +20,7 @@ import {
   KibanaSection,
   StackSection,
   AISection,
+  ClusterPerformanceSection,
 } from './components/management_sections';
 
 import type {
@@ -51,6 +52,7 @@ export class ManagementSectionsService {
       kibana: this.registerSection(KibanaSection),
       ai: this.registerSection(AISection),
       stack: this.registerSection(StackSection),
+      clusterPerformance: this.registerSection(ClusterPerformanceSection),
     };
   }
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();

@@ -119,6 +119,7 @@
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-transforms",
     "@kbn/core-http-common",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-browser",

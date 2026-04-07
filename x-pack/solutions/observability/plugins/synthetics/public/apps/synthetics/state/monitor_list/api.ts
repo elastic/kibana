@@ -34,6 +34,7 @@ function toMonitorManagementListQueryArgs(
     projects: pageState.projects,
     schedules: pageState.schedules,
     monitorQueryIds: pageState.monitorQueryIds,
+    configIds: pageState.configIds,
     searchFields: [],
     internal: true,
     showFromAllSpaces: pageState.showFromAllSpaces,
