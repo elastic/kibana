@@ -399,6 +399,7 @@ export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetr
   meta: { id: 'metricChart', title: 'Metric Chart' },
   validate: ({ metrics, breakdown_by }) => {
     const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
     if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
       if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
         return 'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.';
