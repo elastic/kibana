@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isSmlRuleNotFoundError } from '@kbn/agent-builder-common';
-import { createSmlRulesService } from './sml_rules_service';
+import { SmlRulesServiceImpl } from './sml_rules_service';
 import type { SmlRulesClient } from './types';
 import type { SmlRuleCreateBody } from '../../../common/http_api/sml_rules';
 
@@ -79,7 +79,7 @@ describe('SmlRulesService', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-04-01T00:00:00.000Z'));
-    const service = createSmlRulesService({
+    const service = new SmlRulesServiceImpl({
       logger: createMockLogger(),
       elasticsearch: mockElasticsearch,
     });

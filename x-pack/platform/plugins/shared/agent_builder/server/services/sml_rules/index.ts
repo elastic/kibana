@@ -6,4 +6,4 @@
  */
 
 export type { SmlRulesService, SmlRulesClient } from './types';
-export { createSmlRulesService } from './sml_rules_service';
+export { SmlRulesServiceImpl } from './sml_rules_service';

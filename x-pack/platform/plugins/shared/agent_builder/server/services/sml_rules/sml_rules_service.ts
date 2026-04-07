@@ -104,17 +104,23 @@ const createSmlRulesClient = ({
   };
 };
 
-export const createSmlRulesService = ({
-  logger,
-  elasticsearch,
-}: {
-  logger: Logger;
-  elasticsearch: ElasticsearchServiceStart;
-}): SmlRulesService => {
-  return {
-    getScopedClient({ request }: { request: KibanaRequest }): SmlRulesClient {
-      const esClient = elasticsearch.client.asScoped(request).asInternalUser;
-      return createSmlRulesClient({ logger, esClient });
-    },
-  };
-};
+export class SmlRulesServiceImpl implements SmlRulesService {
+  private readonly logger: Logger;
+  private readonly elasticsearch: ElasticsearchServiceStart;
+
+  constructor({
+    logger,
+    elasticsearch,
+  }: {
+    logger: Logger;
+    elasticsearch: ElasticsearchServiceStart;
+  }) {
+    this.logger = logger;
+    this.elasticsearch = elasticsearch;
+  }
+
+  getScopedClient({ request }: { request: KibanaRequest }): SmlRulesClient {
+    const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
+    return createSmlRulesClient({ logger: this.logger, esClient });
+  }
+}
