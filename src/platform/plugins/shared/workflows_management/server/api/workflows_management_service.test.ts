@@ -3365,5 +3365,43 @@ steps:
       expect(result.disabled).toBe(0);
       expect(result.failures).toEqual([{ id: 'wf-1', error: 'cluster unavailable' }]);
     });
+
+    it('should paginate through all enabled workflows using search_after', async () => {
+      const makeHit = (id: string, sortValue: number) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: `Workflow ${id}`,
+          enabled: true,
+          yaml: `name: Workflow ${id}\nenabled: true`,
+        },
+        sort: [sortValue, 0],
+      });
+
+      const page1Hits = Array.from({ length: 1000 }, (_, i) => makeHit(`wf-${i}`, 1000 - i));
+      const page2Hits = [makeHit('wf-1000', 0), makeHit('wf-1001', -1)];
+
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: page1Hits, total: { value: 1002 } },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: page2Hits },
+        } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [],
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      const secondSearchCall = mockEsClient.search.mock.calls[1][0] as any;
+      expect(secondSearchCall.search_after).toEqual([1, 0]);
+
+      expect(result.total).toBe(1002);
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
+    });
   });
 });

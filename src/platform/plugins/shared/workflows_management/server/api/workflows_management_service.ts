@@ -928,74 +928,106 @@ export class WorkflowsService {
 
     const client = this.workflowStorage.getClient();
     const pageSize = 1000;
+    const MAX_PAGES = 50;
     const failures: Array<{ id: string; error: string }> = [];
     const disabledIds: string[] = [];
+    let totalHits = 0;
 
-    const searchResponse = await client.search({
-      query: {
-        bool: {
-          must: [{ term: { enabled: true } }],
-          must_not: [{ exists: { field: 'deleted_at' } }],
-        },
+    const query = {
+      bool: {
+        must: [{ term: { enabled: true } }],
+        must_not: [{ exists: { field: 'deleted_at' } }],
       },
-      size: pageSize,
-      _source: true,
-      track_total_hits: true,
-    });
+    };
+    const sort = [{ updated_at: { order: 'desc' as const } }, '_shard_doc'];
 
-    const hits = searchResponse.hits.hits.filter(
-      (hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
-        hit._id != null && hit._source != null
-    );
+    let searchAfter: estypes.SortResults | undefined;
+    let hasMore = true;
+    let pageCount = 0;
 
-    if (hits.length === 0) {
-      return { total: 0, disabled: 0, failures: [] };
+    while (hasMore && pageCount < MAX_PAGES) {
+      pageCount++;
+
+      const searchResponse = await client.search({
+        query,
+        size: pageSize,
+        sort,
+        _source: true,
+        track_total_hits: pageCount === 1,
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+
+      const hits = searchResponse.hits.hits.filter(
+        (hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+          hit._id != null && hit._source != null
+      );
+
+      if (hits.length === 0) {
+        break;
+      }
+
+      totalHits += hits.length;
+
+      const bulkOperations = hits.map((hit) => {
+        const source = hit._source;
+        const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
+        return {
+          index: {
+            _id: hit._id,
+            document: {
+              ...source,
+              enabled: false,
+              yaml: updatedYaml,
+            },
+          },
+        };
+      });
+
+      try {
+        const bulkResponse = await client.bulk({
+          operations: bulkOperations,
+          refresh: true,
+        });
+
+        bulkResponse.items.forEach((item) => {
+          const operation = item.index;
+          if (operation?.error) {
+            failures.push({
+              id: operation._id ?? 'unknown',
+              error:
+                typeof operation.error === 'object' && 'reason' in operation.error
+                  ? operation.error.reason ?? JSON.stringify(operation.error)
+                  : JSON.stringify(operation.error),
+            });
+          } else if (operation?._id) {
+            disabledIds.push(operation._id);
+          }
+        });
+
+        await this.unscheduleDeletedWorkflowTasks(disabledIds);
+      } catch (error) {
+        bulkOperations.forEach((op) => {
+          failures.push({
+            id: op.index._id ?? 'unknown',
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+      }
+
+      hasMore = hits.length >= pageSize;
+      if (hasMore) {
+        const lastHit = hits[hits.length - 1];
+        if (!lastHit.sort) {
+          break;
+        }
+        searchAfter = lastHit.sort;
+      }
     }
 
-    const bulkOperations = hits.map((hit) => {
-      const source = hit._source;
-      const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
-      return {
-        index: {
-          _id: hit._id,
-          document: {
-            ...source,
-            enabled: false,
-            yaml: updatedYaml,
-          },
-        },
-      };
-    });
-
-    try {
-      const bulkResponse = await client.bulk({
-        operations: bulkOperations,
-        refresh: true,
-      });
-
-      bulkResponse.items.forEach((item) => {
-        const operation = item.index;
-        if (operation?.error) {
-          failures.push({
-            id: operation._id ?? 'unknown',
-            error:
-              typeof operation.error === 'object' && 'reason' in operation.error
-                ? operation.error.reason ?? JSON.stringify(operation.error)
-                : JSON.stringify(operation.error),
-          });
-        } else if (operation?._id) {
-          disabledIds.push(operation._id);
-        }
-      });
-
-      await this.unscheduleDeletedWorkflowTasks(disabledIds);
-    } catch (error) {
-      bulkOperations.forEach((op) => {
-        failures.push({
-          id: op.index._id ?? 'unknown',
-          error: error instanceof Error ? error.message : String(error),
-        });
-      });
+    if (hasMore && pageCount >= MAX_PAGES) {
+      this.logger.warn(
+        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)`
+      );
     }
 
     this.logger.info(
@@ -1003,7 +1035,7 @@ export class WorkflowsService {
     );
 
     return {
-      total: hits.length,
+      total: totalHits,
       disabled: disabledIds.length,
       failures,
     };
