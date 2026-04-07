@@ -76,10 +76,21 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('GET /api/streams/logs.ecs returns the root stream', async () => {
-      const { body } = await supertest.get('/api/streams/logs.ecs').set(PUBLIC_HEADERS).expect(200);
+      // Wired root may materialize after _status; avoid 404 flakes on deferred startup.
+      await retry.tryForTime(
+        120_000,
+        async () => {
+          const { body } = await supertest
+            .get('/api/streams/logs.ecs')
+            .set(PUBLIC_HEADERS)
+            .expect(200);
 
-      expect(body).to.have.property('stream');
-      expect(body.stream).to.have.property('name', 'logs.ecs');
+          expect(body).to.have.property('stream');
+          expect(body.stream).to.have.property('name', 'logs.ecs');
+        },
+        undefined,
+        500
+      );
     });
 
     it('GET /internal/streams/_classic_status returns can_manage: true', async () => {
