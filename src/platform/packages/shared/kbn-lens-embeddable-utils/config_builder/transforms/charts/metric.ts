@@ -161,8 +161,8 @@ function convertStylingToStateFormat(
 
   return stripUndefined({
     valueFontMode:
-      primaryStyling?.value?.fit != null
-        ? primaryStyling.value.fit
+      primaryStyling?.value?.sizing != null
+        ? primaryStyling.value.sizing === 'fill'
           ? 'fit'
           : 'default'
         : undefined,
@@ -193,7 +193,7 @@ function convertStylingToAPIFormat(
         alignment: visualization.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT,
       },
       value: {
-        fit: visualization.valueFontMode === 'fit',
+        sizing: visualization.valueFontMode === 'fit' ? 'fill' : 'auto',
         alignment:
           visualization.primaryAlign ??
           visualization.valuesTextAlign ??

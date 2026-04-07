@@ -14,7 +14,7 @@ import {
   DEFAULT_PRIMARY_POSITION,
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
-  DEFAULT_PRIMARY_VALUE_FIT,
+  DEFAULT_PRIMARY_VALUE_SIZING,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
@@ -167,12 +167,18 @@ const metricStylingSchema = schema.object(
                 })
               ),
               /**
-               * Whether to fit the value
+               * Controls how the primary value text is sized within the panel.
+               * - 'auto': selects a font size from predefined breakpoints based on panel height,
+               *   then shrinks if the text overflows horizontally.
+               * - 'fill': scales the text to be as large as possible, filling all available space.
                */
-              fit: schema.maybe(
-                schema.boolean({
-                  meta: { description: 'Whether to fit the value' },
-                  defaultValue: DEFAULT_PRIMARY_VALUE_FIT,
+              sizing: schema.maybe(
+                schema.oneOf([schema.literal('auto'), schema.literal('fill')], {
+                  defaultValue: DEFAULT_PRIMARY_VALUE_SIZING,
+                  meta: {
+                    description:
+                      "Controls how the primary value text is sized within the panel. 'auto' selects a font size from predefined breakpoints based on panel height, then shrinks if the text overflows horizontally. 'fill' scales the text to be as large as possible, filling all available space.",
+                  },
                 })
               ),
             },

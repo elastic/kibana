@@ -249,7 +249,7 @@ describe('buildDatasourceStates', () => {
         ],
         styling: {
           primary: {
-            value: { fit: false },
+            value: { sizing: 'auto' },
           },
         },
         sampling: 1,
@@ -524,7 +524,7 @@ describe('filtersAndQueryToLensState', () => {
       ],
       styling: {
         primary: {
-          value: { fit: false },
+          value: { sizing: 'auto' },
         },
       },
       sampling: 1,
@@ -577,7 +577,7 @@ describe('filtersAndQueryToLensState', () => {
       ],
       styling: {
         primary: {
-          value: { fit: false },
+          value: { sizing: 'auto' },
           labels: { alignment: 'left' },
         },
       },
@@ -602,7 +602,7 @@ describe('filtersAndQueryToLensState', () => {
       },
       styling: {
         primary: {
-          value: { fit: false },
+          value: { sizing: 'auto' },
           labels: { alignment: 'left' },
         },
       },

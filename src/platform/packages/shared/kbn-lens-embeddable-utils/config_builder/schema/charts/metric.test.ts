@@ -43,7 +43,7 @@ describe('Metric Schema', () => {
         styling: {
           primary: {
             labels: { alignment: 'left' },
-            value: { fit: false, alignment: 'right' },
+            value: { sizing: 'auto', alignment: 'right' },
           },
         },
       } satisfies MetricInput;
@@ -70,7 +70,7 @@ describe('Metric Schema', () => {
               alignment: 'left',
             },
             labels: { alignment: 'left' },
-            value: { fit: false, alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
           },
         },
       } satisfies MetricInput;
@@ -103,7 +103,7 @@ describe('Metric Schema', () => {
         styling: {
           primary: {
             labels: { alignment: 'left' },
-            value: { fit: false, alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
           },
         },
       } satisfies MetricInput;
@@ -133,7 +133,7 @@ describe('Metric Schema', () => {
         styling: {
           primary: {
             labels: { alignment: 'left' },
-            value: { fit: false, alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
           },
         },
       } satisfies MetricInput;
@@ -557,7 +557,7 @@ describe('Metric Schema', () => {
         styling: {
           primary: {
             labels: { alignment: 'left' },
-            value: { fit: false, alignment: 'right' },
+            value: { sizing: 'auto', alignment: 'right' },
             icon: { name: 'star_empty', alignment: 'right' },
           },
           secondary: {
@@ -590,7 +590,7 @@ describe('Metric Schema', () => {
         styling: {
           primary: {
             labels: { alignment: 'left' },
-            value: { fit: false, alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
           },
         },
       } satisfies MetricInput;
