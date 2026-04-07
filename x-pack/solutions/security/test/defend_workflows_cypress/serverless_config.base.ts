@@ -29,6 +29,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
         '--serverless=security',
+        // Suppress the Agent Builder announcement modal so it cannot block UI interactions in tests.
+        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
       ],
     },
   };
