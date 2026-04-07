@@ -649,7 +649,6 @@ export const expectedUserEntities = [
   },
 ];
 
-/** First 16 user source rows under maxLogsPerCycle. Update if user filter ordering changes. */
 export const expectedUserEntitiesMaxLogsPerCycle = expectedUserEntities.slice(0, 17);
 
 export const expectedServiceEntities = [
