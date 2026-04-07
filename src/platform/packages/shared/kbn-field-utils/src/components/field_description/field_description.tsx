@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import {
   EuiText,
@@ -123,9 +124,16 @@ const StreamDescriptionItem: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
+      <EuiText size="s" className="eui-textBreakWord eui-textLeft">
+        <FormattedMessage
+          id="fieldUtils.fieldDescription.perStreamLabel"
+          defaultMessage="Per {streamName} stream:"
+          values={{ streamName: <strong>{streamName}</strong> }}
+        />
+      </EuiText>
       <EuiText color="subdued" size="xs" className="eui-textBreakWord eui-textLeft">
-        <strong>{streamName}</strong> <Markdown readOnly>{description}</Markdown>
+        <Markdown readOnly>{description}</Markdown>
       </EuiText>
     </>
   );
