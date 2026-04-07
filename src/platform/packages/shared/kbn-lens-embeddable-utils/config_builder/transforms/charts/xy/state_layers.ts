@@ -34,8 +34,8 @@ import {
   getIdForLayer,
   getAccessorNameForXY,
   isAPIDataLayer,
+  xyIconCompat,
 } from './helpers';
-import { xyIconCompat } from './helpers';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import { fromColorMappingAPIToLensState } from '../../coloring';
