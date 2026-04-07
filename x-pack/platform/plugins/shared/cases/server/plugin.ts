@@ -30,6 +30,7 @@ import type {
   CasesServerSetupDependencies,
   CasesServerStart,
   CasesServerStartDependencies,
+  CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeatures } from './features';
@@ -84,6 +85,7 @@ export class CasePlugin
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
   private casesEventBus?: CasesEventBus;
+  private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -235,6 +237,9 @@ export class CasePlugin
         },
       },
       config: this.caseConfig,
+      registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => {
+        this.closeReasonValidators.set(owner, validator);
+      },
     };
   }
 
@@ -307,6 +312,16 @@ export class CasePlugin
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
       casesEventBus: this.casesEventBus,
+      closeReasonValidator:
+        this.closeReasonValidators.size > 0
+          ? (closeReason, owner, request) => {
+              const ownerValidator = this.closeReasonValidators.get(owner);
+              if (ownerValidator) {
+                return ownerValidator(closeReason, request);
+              }
+              return Promise.resolve(false);
+            }
+          : undefined,
     });
 
     return {

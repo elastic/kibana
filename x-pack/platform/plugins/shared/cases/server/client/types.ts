@@ -71,6 +71,7 @@ export interface CasesClientArgs {
   readonly config: ConfigType;
   readonly casesEventBus?: CasesEventBus;
   readonly casesEventMetadata: CasesEventMetadata;
+  readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
 }
 
 export type CasesSearchParams = Partial<

@@ -82,6 +82,11 @@ interface CasesClientFactoryArgs {
   usageCounter?: IUsageCounter;
   config: ConfigType;
   casesEventBus?: CasesEventBus;
+  closeReasonValidator?: (
+    closeReason: string,
+    owner: string,
+    request: KibanaRequest
+  ) => Promise<boolean>;
 }
 
 /**
@@ -166,6 +171,10 @@ export class CasesClientFactory {
       request,
       spaceId,
     };
+    const { closeReasonValidator } = this.options;
+    const boundCloseReasonValidator = closeReasonValidator
+      ? (closeReason: string, owner: string) => closeReasonValidator(closeReason, owner, request)
+      : undefined;
 
     return createCasesClient({
       services,
@@ -187,6 +196,7 @@ export class CasesClientFactory {
       config: this.options.config,
       casesEventBus: this.options.casesEventBus,
       casesEventMetadata,
+      closeReasonValidator: boundCloseReasonValidator,
     });
   }
 
