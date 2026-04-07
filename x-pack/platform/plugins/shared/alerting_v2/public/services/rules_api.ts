@@ -12,6 +12,7 @@ import type {
   BulkOperationParams,
   BulkOperationResponse,
   CreateRuleData,
+  FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -30,7 +31,10 @@ export interface FindRulesResponse {
 export interface ListRulesParams {
   page?: number;
   perPage?: number;
+  filter?: string;
   search?: string;
+  sortField?: FindRulesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type { BulkOperationParams, BulkOperationResponse };
@@ -39,9 +43,20 @@ export type { BulkOperationParams, BulkOperationResponse };
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
+  public async listTags() {
+    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_RULE_API_PATH}/_tags`);
+  }
+
   public async listRules(params: ListRulesParams) {
     return this.http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-      query: { page: params.page, perPage: params.perPage, search: params.search },
+      query: {
+        page: params.page,
+        perPage: params.perPage,
+        filter: params.filter,
+        search: params.search,
+        sortField: params.sortField,
+        sortOrder: params.sortOrder,
+      },
     });
   }
 

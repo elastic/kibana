@@ -8,8 +8,9 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
+import { get } from 'lodash';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
@@ -27,7 +28,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
 
     await kbnClient.uiSettings.update({
@@ -39,7 +40,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
       ignore_unavailable: true,
     });
 
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -48,7 +49,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -66,7 +67,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, alias1);
     await seedEntity(apiClient, defaultHeaders, alias2);
 
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: targetId, entity_ids: [alias1, alias2] },
@@ -79,10 +80,10 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 
     // Verify via ES that resolved_to is set on alias docs
     const alias1Doc = await getEntitySource(esClient, alias1);
-    expect(alias1Doc[RESOLVED_TO_FIELD]).toBe(targetId);
+    expect(get(alias1Doc, RESOLVED_TO_FIELD)).toBe(targetId);
 
     const alias2Doc = await getEntitySource(esClient, alias2);
-    expect(alias2Doc[RESOLVED_TO_FIELD]).toBe(targetId);
+    expect(get(alias2Doc, RESOLVED_TO_FIELD)).toBe(targetId);
   });
 
   apiTest('Link: should skip already-linked entities', async ({ apiClient }) => {
@@ -93,7 +94,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, aliasId);
 
     // First link
-    const first = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const first = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: targetId, entity_ids: [aliasId] },
@@ -102,7 +103,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     expect(first.body.linked).toStrictEqual([aliasId]);
 
     // Second link — same alias should be skipped
-    const second = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const second = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: targetId, entity_ids: [aliasId] },
@@ -121,14 +122,14 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, alias1);
     await seedEntity(apiClient, defaultHeaders, alias2);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: targetId, entity_ids: [alias1, alias2] },
     });
 
     const response = await apiClient.get(
-      `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${targetId}&apiVersion=2`,
+      `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetId}&apiVersion=2`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -151,14 +152,14 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, targetId);
     await seedEntity(apiClient, defaultHeaders, aliasId);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: targetId, entity_ids: [aliasId] },
     });
 
     const response = await apiClient.get(
-      `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${aliasId}&apiVersion=2`,
+      `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${aliasId}&apiVersion=2`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -176,7 +177,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, entityId);
 
     const response = await apiClient.get(
-      `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityId}&apiVersion=2`,
+      `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityId}&apiVersion=2`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -198,13 +199,13 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, alias1);
     await seedEntity(apiClient, defaultHeaders, alias2);
 
-    await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: targetId, entity_ids: [alias1, alias2] },
     });
 
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_UNLINK, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { entity_ids: [alias1, alias2] },
@@ -215,14 +216,14 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 
     // Verify via ES that resolved_to is null
     const alias1Doc = await getEntitySource(esClient, alias1);
-    expect(alias1Doc[RESOLVED_TO_FIELD]).toBeNull();
+    expect(get(alias1Doc, RESOLVED_TO_FIELD)).toBeNull();
 
     const alias2Doc = await getEntitySource(esClient, alias2);
-    expect(alias2Doc[RESOLVED_TO_FIELD]).toBeNull();
+    expect(get(alias2Doc, RESOLVED_TO_FIELD)).toBeNull();
 
     // Group should show standalone
     const group = await apiClient.get(
-      `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${targetId}&apiVersion=2`,
+      `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetId}&apiVersion=2`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -236,7 +237,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 
     await seedEntity(apiClient, defaultHeaders, entityId);
 
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_UNLINK, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { entity_ids: [entityId] },
@@ -252,7 +253,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 
     await seedEntity(apiClient, defaultHeaders, entityId);
 
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: entityId, entity_ids: [entityId] },
@@ -262,7 +263,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest('Link: should return 404 for non-existent entities', async ({ apiClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: 'nonexistent-target-9', entity_ids: ['nonexistent-alias-9'] },
@@ -281,7 +282,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, entityC);
 
     // Link B → A
-    const link = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const link = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: entityA, entity_ids: [entityB] },
@@ -289,7 +290,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     expect(link.statusCode).toBe(200);
 
     // Try to link C → B (B is already an alias)
-    const chainLink = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const chainLink = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: entityB, entity_ids: [entityC] },
@@ -307,7 +308,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     await seedEntity(apiClient, defaultHeaders, entityC);
 
     // Link B → A
-    const link = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const link = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: entityA, entity_ids: [entityB] },
@@ -315,7 +316,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     expect(link.statusCode).toBe(200);
 
     // Try to link A → C (A has aliases pointing to it)
-    const hasAliasesLink = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+    const hasAliasesLink = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: entityC, entity_ids: [entityA] },
@@ -324,7 +325,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest('Unlink: should return 404 for non-existent entities', async ({ apiClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_UNLINK, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { entity_ids: ['nonexistent-12'] },
@@ -335,7 +336,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 
   apiTest('Group: should return 404 for non-existent entity', async ({ apiClient }) => {
     const response = await apiClient.get(
-      `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=nonexistent-13&apiVersion=2`,
+      `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=nonexistent-13&apiVersion=2`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -351,7 +352,7 @@ async function seedEntity(
   headers: Record<string, string>,
   entityId: string
 ): Promise<void> {
-  const response = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+  const response = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
     headers,
     responseType: 'json',
     body: { entity: { id: entityId } },

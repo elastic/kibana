@@ -17,4 +17,6 @@ export interface WorkflowExecutionEventDispatchMetadata {
   eventDispatchTimestamp?: string | number;
   /** Registered trigger id for the emission (e.g. cases.caseCreated) */
   eventTriggerId?: string;
+  /** UUID of the emission */
+  eventId?: string;
 }

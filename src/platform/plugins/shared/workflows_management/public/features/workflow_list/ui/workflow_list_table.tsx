@@ -29,6 +29,7 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
@@ -49,10 +50,6 @@ export interface WorkflowListTableProps {
   onExportWorkflow: (item: WorkflowListItemDto) => void;
   onRequestRun: (item: WorkflowListItemDto) => void;
   getEditHref: (item: WorkflowListItemDto) => string;
-  canCreateWorkflow: boolean;
-  canUpdateWorkflow: boolean;
-  canDeleteWorkflow: boolean;
-  canExecuteWorkflow: boolean;
 }
 
 export const WorkflowListTable = ({
@@ -69,11 +66,15 @@ export const WorkflowListTable = ({
   onExportWorkflow,
   onRequestRun,
   getEditHref,
-  canCreateWorkflow,
-  canUpdateWorkflow,
-  canDeleteWorkflow,
-  canExecuteWorkflow,
 }: WorkflowListTableProps) => {
+  const {
+    canCreateWorkflow,
+    canExecuteWorkflow,
+    canUpdateWorkflow,
+    canDeleteWorkflow,
+    canReadWorkflowExecution,
+  } = useWorkflowsCapabilities();
+
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
       {
@@ -148,11 +149,16 @@ export const WorkflowListTable = ({
           defaultMessage: 'Trigger',
         }),
         width: '12%',
-        render: (value: unknown, item: WorkflowListItemDto) => (
-          <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
-            <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-          </NextExecutionTime>
-        ),
+        render: (value: unknown, item: WorkflowListItemDto) => {
+          if (!item.history || item.history.length === 0) {
+            return <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />;
+          }
+          return (
+            <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
+              <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+            </NextExecutionTime>
+          );
+        },
       },
       {
         field: 'steps',
@@ -164,20 +170,27 @@ export const WorkflowListTable = ({
           <WorkflowsStepTypesList steps={item.definition?.steps ?? []} />
         ),
       },
-      {
-        name: i18n.translate('workflows.workflowList.column.lastRun', {
-          defaultMessage: 'Last run',
-        }),
-        field: 'runHistory',
-        width: '10%',
-        render: (value: unknown, item: WorkflowListItemDto) => {
-          if (!item.history || item.history.length === 0) return null;
-          const lastRun = item.history[0];
-          return (
-            <StatusBadge status={lastRun.status} date={lastRun.finishedAt || lastRun.startedAt} />
-          );
-        },
-      },
+      ...(canReadWorkflowExecution
+        ? [
+            {
+              name: i18n.translate('workflows.workflowList.column.lastRun', {
+                defaultMessage: 'Last run',
+              }),
+              field: 'runHistory',
+              width: '10%',
+              render: (value: unknown, item: WorkflowListItemDto) => {
+                if (!item.history || item.history.length === 0) return null;
+                const lastRun = item.history[0];
+                return (
+                  <StatusBadge
+                    status={lastRun.status}
+                    date={lastRun.finishedAt || lastRun.startedAt}
+                  />
+                );
+              },
+            },
+          ]
+        : []),
       {
         name: i18n.translate('workflows.workflowList.column.enabled', {
           defaultMessage: 'Enabled',
@@ -298,13 +311,14 @@ export const WorkflowListTable = ({
     ],
     [
       canUpdateWorkflow,
-      onToggleWorkflow,
       canExecuteWorkflow,
-      getEditHref,
       canCreateWorkflow,
+      canDeleteWorkflow,
+      canReadWorkflowExecution,
+      getEditHref,
+      onToggleWorkflow,
       onCloneWorkflow,
       onExportWorkflow,
-      canDeleteWorkflow,
       onDeleteWorkflow,
       onRequestRun,
     ]

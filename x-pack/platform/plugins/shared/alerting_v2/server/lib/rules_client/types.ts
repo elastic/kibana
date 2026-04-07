@@ -10,10 +10,11 @@ import type {
   CreateRuleData,
   UpdateRuleData,
   RuleResponse,
+  FindRulesSortField,
 } from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
-export type { BulkOperationResponse, CreateRuleData, UpdateRuleData, RuleResponse };
+export type { BulkOperationResponse, CreateRuleData, UpdateRuleData, RuleResponse, FindRulesSortField };
 
 export type BulkOperationError = BulkOperationResponse['errors'][number];
 
@@ -21,11 +22,14 @@ export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
+
 export interface FindRulesParams {
   page?: number;
   perPage?: number;
   filter?: string;
   search?: string;
+  sortField?: FindRulesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface FindRulesResponse {

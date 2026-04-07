@@ -17,6 +17,7 @@ import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
 } from '../shared/components/left_panel/left_panel_header';
+import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
@@ -77,11 +78,15 @@ export const useTabs = ({
           ]
         : [];
 
-    const resolutionTab = entityStoreEntityId
-      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'host' })]
+    const graphViewTab = entityStoreEntityId
+      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
       : [];
 
-    return [...riskScoreTab, ...insightsTab, ...resolutionTab];
+    const resolutionTab = entityStoreEntityId
+      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.host })]
+      : [];
+
+    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
     hostName,
