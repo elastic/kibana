@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -45,7 +45,12 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { getWatchlistName } from '../../../common/entity_analytics/watchlists/constants';
+import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
+import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
+import { LeadProvenanceFlyout } from '../components/threat_hunting/top_threat_hunting_leads/lead_provenance_flyout';
+import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
+import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -61,7 +66,22 @@ export const EntityAnalyticsHomePage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const leadDetailsEnabled = useIsExperimentalFeatureEnabled('leadGenerationDetailsEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
+
+  const {
+    leads,
+    totalCount,
+    isLoading: isLeadsLoading,
+    isGenerating,
+    generate,
+    isScheduled,
+    toggleSchedule,
+  } = useHuntingLeads();
+  const openAgentBuilderWithLead = useLeadAttachment();
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [provenanceLead, setProvenanceLead] = useState<HuntingLead | null>(null);
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -76,13 +96,23 @@ export const EntityAnalyticsHomePage = () => {
     return params.get('watchlistId') || undefined;
   }, [location.search]);
 
-  const setSelectedWatchlistId = useCallback(
-    (id?: string) => {
+  const selectedWatchlistName = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('watchlistName') || undefined;
+  }, [location.search]);
+
+  const setSelectedWatchlist = useCallback(
+    (id?: string, name?: string) => {
       const params = new URLSearchParams(location.search);
       if (id) {
         params.set('watchlistId', id);
       } else {
         params.delete('watchlistId');
+      }
+      if (name) {
+        params.set('watchlistName', name);
+      } else {
+        params.delete('watchlistName');
       }
       history.replace({ ...location, search: params.toString() });
     },
@@ -96,6 +126,25 @@ export const EntityAnalyticsHomePage = () => {
 
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
+
+  const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+
+  const handleOpenLeadInChat = useCallback(
+    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
+    [openAgentBuilderWithLead]
+  );
+
+  const handleLeadInfoClick = useCallback((lead: HuntingLead) => setProvenanceLead(lead), []);
+
+  const handleCloseProvenance = useCallback(() => setProvenanceLead(null), []);
+
+  const handleHuntInChat = useCallback(() => {
+    const firstLead = leads[0];
+    if (firstLead) {
+      openAgentBuilderWithLead(firstLead);
+    }
+  }, [leads, openAgentBuilderWithLead]);
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -126,7 +175,7 @@ export const EntityAnalyticsHomePage = () => {
           rightSideItems={[
             <WatchlistFilter
               selectedId={selectedWatchlistId ?? ''}
-              onChangeSelectedId={setSelectedWatchlistId}
+              onChangeSelectedId={setSelectedWatchlist}
             />,
           ]}
         />
@@ -136,6 +185,22 @@ export const EntityAnalyticsHomePage = () => {
         ) : (
           <EuiFlexGroup direction="column" gutterSize="l">
             <EuiFlexItem>
+              <TopThreatHuntingLeads
+                leads={leads}
+                totalCount={totalCount}
+                isLoading={isLeadsLoading}
+                isGenerating={isGenerating}
+                onSeeAll={handleOpenFlyout}
+                onLeadClick={handleOpenLeadInChat}
+                onHuntInChat={handleHuntInChat}
+                onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
+                onGenerate={generate}
+                isScheduled={isScheduled}
+                onToggleSchedule={toggleSchedule}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
               <EuiFlexGroup
                 direction={isXlScreen ? 'row' : 'column'}
                 responsive={false}
@@ -143,7 +208,10 @@ export const EntityAnalyticsHomePage = () => {
               >
                 <EuiFlexItem grow={1}>
                   <EuiPanel hasBorder>
-                    <DynamicRiskLevelPanel watchlistId={selectedWatchlistId} />
+                    <DynamicRiskLevelPanel
+                      watchlistId={selectedWatchlistId}
+                      watchlistName={selectedWatchlistName}
+                    />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
@@ -155,18 +223,43 @@ export const EntityAnalyticsHomePage = () => {
             </EuiFlexItem>
 
             <EuiPanel hasBorder>
-              <EntityAnalyticsEntitiesTable watchlistId={selectedWatchlistId} />
+              <EntityAnalyticsEntitiesTable
+                watchlistId={selectedWatchlistId}
+                watchlistName={selectedWatchlistName}
+              />
             </EuiPanel>
           </EuiFlexGroup>
         )}
       </SecuritySolutionPageWrapper>
+
+      {isFlyoutOpen && (
+        <ThreatHuntingLeadsFlyout
+          onClose={handleCloseFlyout}
+          onSelectLead={handleOpenLeadInChat}
+          onInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
+        />
+      )}
+
+      {provenanceLead && (
+        <LeadProvenanceFlyout
+          lead={provenanceLead}
+          onClose={handleCloseProvenance}
+          onInvestigateInChat={handleOpenLeadInChat}
+        />
+      )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
 };
 
-const EntityAnalyticsEntitiesTable = ({ watchlistId }: { watchlistId?: string }) => {
+const EntityAnalyticsEntitiesTable = ({
+  watchlistId,
+  watchlistName,
+}: {
+  watchlistId?: string;
+  watchlistName?: string;
+}) => {
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
@@ -190,7 +283,7 @@ const EntityAnalyticsEntitiesTable = ({ watchlistId }: { watchlistId?: string })
                 id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
                 defaultMessage="{watchlistName} entities"
                 values={{
-                  watchlistName: getWatchlistName(watchlistId),
+                  watchlistName: watchlistName ?? watchlistId,
                 }}
               />
             ) : (
@@ -217,8 +310,6 @@ const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: st
   const state = useMemo(() => {
     if (!watchlistId) return urlState;
 
-    const watchlistName = getWatchlistName(watchlistId);
-
     return {
       ...urlState,
       query: {
@@ -227,7 +318,7 @@ const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: st
           ...urlState.query?.bool,
           filter: [
             ...(urlState.query?.bool?.filter ?? []),
-            { term: { 'entity.attributes.watchlists': watchlistName } },
+            { term: { 'entity.attributes.watchlists': watchlistId } },
           ],
         },
       },
