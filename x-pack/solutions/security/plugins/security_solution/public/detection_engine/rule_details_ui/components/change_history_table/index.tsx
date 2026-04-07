@@ -68,11 +68,8 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
     },
   } = useRuleDetailsContext();
 
-  // Index for `add filter` action and toasts for errors
-  // const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
-
   // QueryString, Filters, and TimeRange state
-  const { data, isFetching } = useChangeHistory({
+  const { data } = useChangeHistory({
     id: ruleId,
     rule,
     page: activePage + 1,
@@ -118,17 +115,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
     );
   });
 
-  //   // Callbacks
-  // const onTableChangeCallback = useCallback(
-  //   ({ page }: CriteriaWithPagination<ChangeHistoryResult>) => {
-  //     const { index, size } = page;
-  //     setPageIndex(index + 1);
-  //     setPageSize(size);
-  //   },
-  //   [setPageIndex, setPageSize]
-  // );
-
-  // Last item is the date change histories started.
+  // Last item shows that change histories started.
   // So we always have 1 item minimum.
   const maxItems = (data?.total ?? 0) + 1;
 

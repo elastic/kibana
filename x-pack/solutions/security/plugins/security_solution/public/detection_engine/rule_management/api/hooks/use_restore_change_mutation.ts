@@ -40,8 +40,8 @@ export const useRestoreChangeMutation = (
         invalidatePrebuiltRulesUpdateReview();
         invalidateFetchPrebuiltRuleBaseVerison();
 
+        // TODO: Review below
         // const [response] = args;
-
         // if (response) {
         //   updateRuleCache(response);
         // }

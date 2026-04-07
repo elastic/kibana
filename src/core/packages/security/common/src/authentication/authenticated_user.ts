@@ -47,7 +47,7 @@ export interface ApiKeyDescriptor {
 }
 
 /**
- * Represents the currently authenticated user. here
+ * Represents the currently authenticated user.
  */
 export interface AuthenticatedUser extends User {
   /**

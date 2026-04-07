@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IChangeHistoryClient, ObjectChange } from '@kbn/change-history';
-import { ChangeHistoryClient } from '@kbn/change-history';
 import type {
   CoreSetup,
   CoreStart,
@@ -67,12 +65,9 @@ export class WorkflowsPlugin
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
   private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
-  private kibanaVersion: string;
-  private changeHistoryClient?: IChangeHistoryClient = undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(
@@ -82,14 +77,6 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Setup');
 
     registerUISettings(core, plugins);
-
-    // TODO: REMOVE ME: This is only for testing multiple change history clients
-    this.changeHistoryClient = new ChangeHistoryClient({
-      module: 'security',
-      dataset: 'workflows',
-      logger: this.logger,
-      kibanaVersion: this.kibanaVersion,
-    });
 
     initializeTriggerEventsDataStream(core.dataStreams);
 
@@ -238,22 +225,6 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Start');
 
     void this.initializeTriggerEventsClient(core);
-
-    // TODO: REMOVE ME: This is only for testing multiple change history clients
-    this.changeHistoryClient?.initialize(core.elasticsearch.client.asInternalUser).then(() => {
-      const change: ObjectChange = {
-        objectType: 'workflow',
-        objectId: '123-abc',
-        after: {
-          name: 'my-dummy-workflow',
-        },
-      };
-      this.changeHistoryClient?.log(change, {
-        action: 'dummy_workflow_change',
-        username: 'bob',
-        spaceId: 'default',
-      });
-    });
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 

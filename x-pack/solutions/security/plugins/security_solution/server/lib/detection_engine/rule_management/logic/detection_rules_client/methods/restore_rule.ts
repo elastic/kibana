@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-// import { isEqual } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-// import { standardDiffDocCalculation } from '@kbn/change-history/src/utils';
 
 import { RuleTypeSolutions, SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
@@ -54,7 +52,9 @@ export const restoreRule = async ({
 
   const historicalRule = convertAlertingRuleToRuleResponse(change.rule);
 
-  // TODO: Review this. Possibly error out with "no changes" if it makes sense.
+  // TODO: Review this. Sometimes a rule can be restored to its exact same payload,
+  // which causes confusion when viewing history down the line.
+  // Possibly error out with "no changes" if it makes sense.
   // const equal = isEqual(previousRule, existingRule);
   // const diff = standardDiffDocCalculation({ a: previousRule, b: existingRule );
   // console.log('previousRule', JSON.stringify(previousRule, null, 2));
@@ -62,7 +62,8 @@ export const restoreRule = async ({
   // console.log('equal', equal);
   // console.log('diff', JSON.stringify(diff));
 
-  // TODO: Watch out for existing rule's values for `rule_source` and `immutable`, refer to importing rule's calculated values
+  // TODO: Watch out for existing rule's values for `rule_source` and `immutable`,
+  // refer to importing rule's calculated values
   const { enabled, exceptions_list, execution_summary } = existingRule;
   const ruleWithUpdates = {
     ...existingRule,
