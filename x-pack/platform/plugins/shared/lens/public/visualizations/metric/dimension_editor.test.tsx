@@ -18,7 +18,7 @@ import {
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { DataType, MetricVisualizationState } from '@kbn/lens-common';
 import {
@@ -1380,7 +1380,7 @@ describe('dimension editor', () => {
             color: undefined,
           },
         });
-        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorVis2.toUpperCase());
+        expect(staticColorPicker).toHaveValue(euiThemeVars.euiColorVis2.toUpperCase());
       });
 
       it('fills with default vis text color', async () => {

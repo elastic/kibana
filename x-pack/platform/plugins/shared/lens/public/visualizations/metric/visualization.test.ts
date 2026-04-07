@@ -12,7 +12,7 @@ import type {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FrameMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
@@ -1054,7 +1054,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorVis2);
+        ).toBe(euiThemeVars.euiColorVis2);
 
         expect(
           (
@@ -1067,7 +1067,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         expect(
           (
@@ -1081,7 +1081,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         // this case isn't currently relevant because other parts of the code don't allow showBar to be
         // set when there isn't a max dimension but this test covers the branch anyhow
@@ -1177,14 +1177,14 @@ describe('metric visualization', () => {
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
           expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
-            euiLightVars.euiColorBackgroundLightDanger,
-            euiLightVars.euiColorBackgroundLightText,
-            euiLightVars.euiColorBackgroundLightSuccess,
+            euiThemeVars.euiColorBackgroundLightDanger,
+            euiThemeVars.euiColorBackgroundLightText,
+            euiThemeVars.euiColorBackgroundLightSuccess,
           ]);
           expect(secondaryMetricAST.secondaryTrendTextPalette).toEqual([
-            euiLightVars.euiColorTextDanger,
-            euiLightVars.euiColorTextParagraph,
-            euiLightVars.euiColorTextSuccess,
+            euiThemeVars.euiColorTextDanger,
+            euiThemeVars.euiColorTextParagraph,
+            euiThemeVars.euiColorTextSuccess,
           ]);
         } else {
           fail('AST is not an object');
