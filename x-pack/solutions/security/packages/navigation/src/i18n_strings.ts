@@ -115,6 +115,12 @@ export const i18nStrings = {
       jobs: i18n.translate('securitySolutionPackages.navLinks.ml.anomalyDetection.jobs', {
         defaultMessage: 'Jobs',
       }),
+      manageJobs: i18n.translate(
+        'securitySolutionPackages.navLinks.ml.anomalyDetection.manageJobs',
+        {
+          defaultMessage: 'Manage jobs',
+        }
+      ),
       anomalyExplorer: i18n.translate(
         'securitySolutionPackages.navLinks.ml.anomalyDetection.anomalyExplorer',
         { defaultMessage: 'Anomaly explorer' }
