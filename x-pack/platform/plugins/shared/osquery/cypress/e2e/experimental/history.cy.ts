@@ -16,6 +16,7 @@ import {
   getPackSavedObject,
   loadScheduledResponse,
   cleanupScheduledResponse,
+  cleanupSavedQueryByName,
 } from '../../tasks/api_fixtures';
 import {
   UNIFIED_HISTORY_TABLE,
@@ -384,6 +385,8 @@ describe(
 
       navigateTo('/app/osquery/saved_queries');
       cy.contains(savedQueryId);
+
+      cleanupSavedQueryByName(savedQueryId);
     });
   }
 );

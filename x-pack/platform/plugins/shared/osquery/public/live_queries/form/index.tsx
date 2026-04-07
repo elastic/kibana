@@ -19,7 +19,6 @@ import {
 } from '../../../common/utils/replace_params_query';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
-import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
@@ -30,6 +29,7 @@ import type { AgentSelection } from '../../agents/types';
 import type { AddToTimelineHandler } from '../../types';
 import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
+import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 import { AlertAttachmentContext } from '../../common/contexts';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';

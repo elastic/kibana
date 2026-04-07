@@ -93,7 +93,7 @@ const LiveQueryDetailsPageComponent = () => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
 
-  const onSaveQuery = canSave ? handleShowSaveQueryFlyout : undefined;
+  const onSaveQuery = isHistoryEnabled && canSave ? handleShowSaveQueryFlyout : undefined;
 
   const tableBlock = (
     <div css={tableWrapperCss}>
@@ -141,11 +141,9 @@ const LiveQueryDetailsPageComponent = () => {
             agentIds={data?.agents}
             showResultsHeader
             tags={data?.tags}
-            onSaveQuery={onSaveQuery}
           />
         </EuiFlexItem>
       </WithHeaderLayout>
-      {savedQueryFlyout}
     </>
   );
 };
