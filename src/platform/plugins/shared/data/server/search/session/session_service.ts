@@ -72,6 +72,7 @@ interface TrackIdQueueEntry {
 
   searchInfo: SearchSessionRequestInfo;
   requestHash: string;
+  skipRealmCheck: boolean;
 }
 
 export class SearchSessionService implements ISearchSessionService {
@@ -337,7 +338,7 @@ export class SearchSessionService implements ISearchSessionService {
               queue[0].user,
               sessionId,
               { idMapping: batchedIdMapping },
-              skipRealmCheck
+              queue[0].skipRealmCheck
             )
               .then(() => {
                 queue.forEach((q) => q.resolve());
@@ -362,6 +363,7 @@ export class SearchSessionService implements ISearchSessionService {
       resolve: deferred.resolve,
       reject: deferred.reject,
       user,
+      skipRealmCheck,
     });
 
     scheduleProcessQueue();
