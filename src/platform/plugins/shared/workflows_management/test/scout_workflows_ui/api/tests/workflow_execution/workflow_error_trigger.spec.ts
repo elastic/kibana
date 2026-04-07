@@ -106,7 +106,8 @@ async function waitForExecution(
   });
 }
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/261498
+spaceTest.describe.skip(
   'Workflow error trigger (workflows.failed)',
   { tag: tags.deploymentAgnostic },
   () => {
@@ -165,7 +166,7 @@ spaceTest.describe(
 
         const firstHandlerExecution = handlerExecutions[0];
         expect(firstHandlerExecution).toBeDefined();
-        const handlerExecutionId = (firstHandlerExecution as (typeof handlerExecutions)[number]).id;
+        const handlerExecutionId = (firstHandlerExecution as typeof handlerExecutions[number]).id;
         const handlerExecution = await waitForExecution(workflowsApi, handlerExecutionId);
 
         expect(handlerExecution?.triggeredBy).toBe('workflows.failed');
@@ -244,7 +245,7 @@ spaceTest.describe(
 
         const firstHandlerExecution = handlerExecutions[0];
         expect(firstHandlerExecution).toBeDefined();
-        const handlerExecutionId = (firstHandlerExecution as (typeof handlerExecutions)[number]).id;
+        const handlerExecutionId = (firstHandlerExecution as typeof handlerExecutions[number]).id;
         const handlerExecution = await waitForExecution(workflowsApi, handlerExecutionId);
         expect(handlerExecution?.triggeredBy).toBe('workflows.failed');
         expect(handlerExecution?.status).toBe(ExecutionStatus.COMPLETED);
