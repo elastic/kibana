@@ -37,6 +37,10 @@ export interface ToolCall {
   args: Record<string, any>;
 }
 
+export interface ToolCallWithReasoning extends ToolCall {
+  reasoning?: string;
+}
+
 /**
  * Extracts the tool calls from a message.
  */
@@ -56,6 +60,17 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
     );
   }
   return [];
+};
+
+export const extractToolCallsWithReasoning = (message: BaseMessage): ToolCallWithReasoning[] => {
+  return extractToolCalls(message).map((toolCall) => {
+    const { _reasoning, ...toolCallArgs } = toolCall.args ?? {};
+    return {
+      ...toolCall,
+      args: toolCallArgs,
+      reasoning: typeof _reasoning === 'string' ? _reasoning : undefined,
+    };
+  });
 };
 
 /**

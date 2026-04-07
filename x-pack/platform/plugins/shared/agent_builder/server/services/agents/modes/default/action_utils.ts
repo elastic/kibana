@@ -7,7 +7,11 @@
 
 import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
-import { extractTextContent, extractToolCalls } from '@kbn/agent-builder-genai-utils/langchain';
+import {
+  extractTextContent,
+  extractToolCalls,
+  extractToolCallsWithReasoning,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
@@ -35,7 +39,7 @@ export const processResearchResponse = (
   message: AIMessageChunk
 ): ToolCallAction | HandoverAction | AgentErrorAction => {
   if (message.tool_calls?.length) {
-    return toolCallAction(extractToolCalls(message));
+    return toolCallAction(extractToolCallsWithReasoning(message));
   } else {
     const textContent = extractTextContent(message);
     if (textContent) {
