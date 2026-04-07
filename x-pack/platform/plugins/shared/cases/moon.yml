@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/securitysolution-rules'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cloud-plugin'
+  - '@kbn/response-ops-detections-close-reason'
   - '@kbn/response-ops-alerts-table'
   - '@kbn/field-formats-plugin'
   - '@kbn/core-http-server-mocks'
@@ -111,6 +112,7 @@ dependsOn:
   - '@kbn/resizable-layout'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/core-ui-settings-browser'
 tags:
   - plugin
   - prod

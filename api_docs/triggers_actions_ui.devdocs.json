@@ -9283,7 +9283,7 @@
       "label": "PluginStartContract",
       "description": [],
       "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/plugin.ts",
-      "lineNumber": 16,
+      "lineNumber": 30,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -9309,7 +9309,7 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/plugin.ts",
-          "lineNumber": 17,
+          "lineNumber": 31,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
