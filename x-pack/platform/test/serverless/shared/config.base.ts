@@ -194,7 +194,7 @@ export default async () => {
         `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
         '--xpack.security.uiam.ssl.verificationMode=none',
         // Suppress Agent Builder announcement modal in tests.
-        '--uiSettings.defaults.agentBuilder:announcementModalSeen=true',
+        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
       ],
     },
 

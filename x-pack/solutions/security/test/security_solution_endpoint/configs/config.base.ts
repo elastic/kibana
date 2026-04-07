@@ -88,7 +88,7 @@ export const generateConfig = async ({
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
         // Suppress Agent Builder announcement modal in tests.
-        '--uiSettings.defaults.agentBuilder:announcementModalSeen=true',
+        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
         ...kbnServerArgs,
       ],
     },
