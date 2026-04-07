@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/search-navigation'
   - '@kbn/search-api-keys-components'
+  - '@kbn/search-api-keys-server'
   - '@kbn/logging'
   - '@kbn/sample-data-ingest'
   - '@kbn/core-elasticsearch-server'
