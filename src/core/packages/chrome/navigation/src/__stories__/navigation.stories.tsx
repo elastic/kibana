@@ -196,6 +196,7 @@ const CUSTOM_TOOLS: NonNullable<PropsAndArgs['tools']> = {
       label: 'Current space',
       renderContent: () => <SpaceBadge />,
       renderPopover: (closePopover) => <SpacePicker closePopover={closePopover} />,
+      popoverWidth: 360,
     },
     { id: 'search', label: 'Search', iconType: 'search', onClick: () => {} },
   ],

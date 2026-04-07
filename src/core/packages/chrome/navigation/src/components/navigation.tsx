@@ -612,7 +612,7 @@ const renderToolItems = ({
   popoverItemPrefix,
 }: RenderToolItemsArgs) =>
   items.map((item) => {
-    const { onClick: itemOnClick, sections, renderContent, renderPopover, ...itemProps } = item;
+    const { onClick: itemOnClick, sections, renderContent, renderPopover, popoverWidth, ...itemProps } = item;
     const hasPopoverContent = getHasSubmenu(item);
     return (
       <SideNav.Popover
@@ -620,6 +620,7 @@ const renderToolItems = ({
         anchorPosition={anchorPosition}
         customContent={!!renderPopover}
         hasContent={hasPopoverContent}
+        popoverWidth={popoverWidth}
         isSidePanelOpen={false}
         isAnyPopoverLocked={isAnyPopoverLocked}
         label={item.label}

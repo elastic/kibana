@@ -57,6 +57,7 @@ export interface PopoverProps {
    */
   customContent?: boolean;
   hasContent: boolean;
+  popoverWidth?: number | string;
   isSidePanelOpen: boolean;
   isAnyPopoverLocked?: boolean;
   setIsLocked?: (isLocked: boolean) => void;
@@ -87,6 +88,7 @@ export const Popover = ({
   container,
   customContent = false,
   hasContent,
+  popoverWidth,
   isSidePanelOpen,
   isAnyPopoverLocked = false,
   setIsLocked = () => {},
@@ -274,9 +276,15 @@ export const Popover = ({
     width: 100%;
   `;
 
+  const resolvedWidth = popoverWidth
+    ? typeof popoverWidth === 'number'
+      ? `${popoverWidth}px`
+      : popoverWidth
+    : `${SIDE_PANEL_WIDTH}px`;
+
   const popoverContentStyles = css`
     --popover-max-height: 37.5rem;
-    width: ${SIDE_PANEL_WIDTH}px;
+    width: ${resolvedWidth};
     max-height: var(--popover-max-height);
     ${scrollStyles};
   `;

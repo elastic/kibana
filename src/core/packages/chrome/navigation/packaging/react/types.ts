@@ -88,6 +88,7 @@ export interface ToolItem {
   renderPopover?: (closePopover: () => void) => ReactNode;
   onClick?: () => void;
   sections?: SecondaryMenuSection[];
+  popoverWidth?: number | string;
   badgeType?: BadgeType;
   'data-test-subj'?: string;
 }

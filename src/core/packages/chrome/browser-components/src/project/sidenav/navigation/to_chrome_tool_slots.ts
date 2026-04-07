@@ -70,6 +70,7 @@ const getSpaceSelectorToolItem = (
     label: config.label,
     renderContent: () => config.renderAvatar(),
     renderPopover: (closePopover) => config.renderPopover(closePopover),
+    popoverWidth: 360,
     'data-test-subj': 'sideNavSpaceSelector',
   };
 };
