@@ -14,6 +14,7 @@ import { getDetectionRules } from '../../queries/get_detection_rules';
 import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
 import {
+  getInitialAiCreatedRulesUsage,
   getInitialEventLogUsage,
   getInitialRuleCustomizationStatus,
   getInitialRuleUpgradeStatus,
@@ -66,6 +67,7 @@ export const getRuleMetrics = async ({
         detection_rule_status: getInitialEventLogUsage(),
         elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+        ai_created_rules: getInitialAiCreatedRulesUsage(),
         spaces_usage: getInitialSpacesUsage(),
       };
     }
@@ -144,12 +146,25 @@ export const getRuleMetrics = async ({
       getInitialRulesUsage()
     );
 
+    const aiCreatedRulesUsage = rulesCorrelated.reduce((acc, rule) => {
+      if (rule.ai_created) {
+        acc.total += 1;
+        if (rule.enabled) {
+          acc.enabled += 1;
+        } else {
+          acc.disabled += 1;
+        }
+      }
+      return acc;
+    }, getInitialAiCreatedRulesUsage());
+
     return {
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
       elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
       elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
+      ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
     };
   } catch (e) {
@@ -163,6 +178,7 @@ export const getRuleMetrics = async ({
       detection_rule_status: getInitialEventLogUsage(),
       elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
       elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+      ai_created_rules: getInitialAiCreatedRulesUsage(),
       spaces_usage: getInitialSpacesUsage(),
     };
   }

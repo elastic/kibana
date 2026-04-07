@@ -35,4 +35,18 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
   detection_rule_status: ruleStatusMetricsSchema,
   elastic_detection_rule_upgrade_status: ruleUpgradeStatusSchema,
   elastic_detection_rule_customization_status: ruleCustomizedFieldsCounts,
+  ai_created_rules: {
+    total: {
+      type: 'long',
+      _meta: { description: 'Total number of rules created via AI rule creation' },
+    },
+    enabled: {
+      type: 'long',
+      _meta: { description: 'Number of AI-created rules that are enabled' },
+    },
+    disabled: {
+      type: 'long',
+      _meta: { description: 'Number of AI-created rules that are disabled' },
+    },
+  },
 };

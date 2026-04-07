@@ -6,9 +6,9 @@
  */
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import type { RuleMetric } from '../types';
+import type { PrebuiltRuleMetric } from '../types';
 
-export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
+export const ruleMetricsSchema: MakeSchemaFrom<PrebuiltRuleMetric> = {
   rule_name: {
     type: 'keyword',
     _meta: { description: 'The name of the detection rule' },

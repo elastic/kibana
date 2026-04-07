@@ -17,6 +17,8 @@ import type {
   RuleCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getStepsData } from '../../../../common/helpers';
+import { extractThreatTechniqueIds } from '../../../../common/telemetry_helpers';
+import { AiRuleCreationEventTypes } from '../../../../../common/lib/telemetry/types';
 import type { FormHook } from '../../../../../shared_imports';
 import type {
   DefineStepRule,
@@ -80,7 +82,7 @@ export const useAgentBuilderRuleCreation = ({
   onAiCreatedRuleAppliedRef,
 }: UseAgentBuilderRuleCreationParams): UseAgentBuilderRuleCreationResult => {
   const { services } = useKibana();
-  const { agentBuilder, aiRuleCreation } = services;
+  const { agentBuilder, aiRuleCreation, telemetry } = services;
   const { addSuccess } = useAppToasts();
   const isAiRuleUpdateRef = useRef(false);
   const [isSyncActive, setIsSyncActive] = useState(false);
@@ -113,6 +115,18 @@ export const useAgentBuilderRuleCreation = ({
     (rule: RuleResponse) => {
       const stepsData = getStepsData({ rule: { ...ruleDefaultMetadataFields, ...rule } });
 
+      const session = aiRuleCreation.getSession();
+      if (session) {
+        aiRuleCreation.incrementApplyCount();
+        telemetry.reportEvent(AiRuleCreationEventTypes.AppliedToForm, {
+          sessionId: session.sessionId,
+          ruleType: rule.type,
+          threatTechniques: extractThreatTechniqueIds(rule.threat),
+          durationSinceSessionStartMs: Date.now() - session.startTimestamp,
+          isRegeneration: session.applyCount > 0,
+        });
+      }
+
       isAiRuleUpdateRef.current = true;
       aiRuleCreation.activateFormSync();
       defineStepForm.updateFieldValues(stepsData.defineRuleData);
@@ -140,6 +154,7 @@ export const useAgentBuilderRuleCreation = ({
       actionsStepForm,
       addSuccess,
       aiRuleCreation,
+      telemetry,
       onAiCreatedRuleAppliedRef,
     ]
   );
