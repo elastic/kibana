@@ -16,7 +16,7 @@ import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
  * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
  * get the pinned panel schema from a pinned panel registry **independent** from controls
  */
-import { getControlsGroupSchema as getPinnedPanelsSchema  } from '@kbn/controls-schemas';
+import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
