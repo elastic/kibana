@@ -78,14 +78,14 @@ interface UseBulkSelectProps {
   /** Facet filter KQL, same as list-rules `filter` query param. */
   filter?: string;
   /** Debounced search string, same as list-rules `search` query param. */
-  listSearch?: string;
+  search?: string;
 }
 
 export const useBulkSelect = ({
   totalItemCount,
   items,
   filter,
-  listSearch,
+  search,
 }: UseBulkSelectProps) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
@@ -190,7 +190,7 @@ export const useBulkSelect = ({
   const getBulkParams = useCallback((): BulkOperationParams => {
     if (state.isAllSelected) {
       const listScope =
-        buildApiRulesListCombinedFilter({ filter, search: listSearch }) ?? '';
+        buildApiRulesListCombinedFilter({ filter, search }) ?? '';
       const excludedIds = [...state.selectedIds];
       if (excludedIds.length === 0) {
         return { filter: listScope };
@@ -203,7 +203,7 @@ export const useBulkSelect = ({
     }
 
     return { ids: [...state.selectedIds] };
-  }, [state, filter, listSearch]);
+  }, [state, filter, search]);
 
   return useMemo(
     () => ({

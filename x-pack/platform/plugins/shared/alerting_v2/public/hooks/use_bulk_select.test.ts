@@ -92,12 +92,12 @@ describe('useBulkSelect', () => {
     expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true' });
   });
 
-  it('scopes select-all bulk filter to listSearch', () => {
+  it('scopes select-all bulk filter to search', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: 10,
         items: pageItems,
-        listSearch: 'prod',
+        search: 'prod',
       })
     );
 
@@ -116,7 +116,7 @@ describe('useBulkSelect', () => {
         totalItemCount: 10,
         items: pageItems,
         filter: 'enabled: true',
-        listSearch: 'x',
+        search: 'x',
       })
     );
 

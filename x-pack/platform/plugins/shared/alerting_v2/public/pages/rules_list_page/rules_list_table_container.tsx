@@ -72,7 +72,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     totalItemCount,
     items,
     filter,
-    listSearch: search || undefined,
+    search: search || undefined,
   });
 
   const handleBulkDelete = () => {
