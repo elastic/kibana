@@ -48,7 +48,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -61,7 +61,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -82,7 +82,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-dup',
         label: 'Dup',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -101,7 +101,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        availableInEntityStore: false,
+        entity: { availableInEntityStore: false },
       };
 
       const { getByTestId, queryByTestId } = render(
@@ -126,7 +126,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        availableInEntityStore: false,
+        entity: { availableInEntityStore: false },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -142,6 +142,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-3',
         label: 'Entity Three',
+        entity: {},
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
