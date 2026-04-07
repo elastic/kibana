@@ -201,7 +201,12 @@ describe('dimension editor', () => {
         );
         fireEvent.change(iconInput, { target: { value: 'None' } });
         const noneOption = await within(optionsList).findByRole('option', { name: 'None' });
-        await userEvent.click(noneOption);
+        // Click the "None" option to clear the icon selection
+        if (noneOption) {
+          await userEvent.click(noneOption);
+        } else {
+          throw new Error(`none option not found`);
+        }
       };
 
       return {
