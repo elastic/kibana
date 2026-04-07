@@ -318,22 +318,15 @@ export class RenderingService {
     const bundlesHref = getBundlesHref(staticAssetsHrefBase);
     const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
 
-    // RSPack page-load optimizations: preload the 3 critical scripts (dll, src,
-    // bundle) plus named shared chunks, and the 3 most-used Inter font weights
-    // so the browser starts downloading them during HTML parsing instead of
-    // after bootstrap.js runs.  The shared chunk preloads eliminate the async
-    // chunk discovery waterfall (browser would otherwise need 2 round-trips to
-    // discover shared-plugins, shared-packages, etc.).
-    const chunkFilenames = useRspack ? this.getPreloadChunkFilenames() : [];
-    const preloadScripts = useRspack
-      ? [
-          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
-          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
-          `${bundlesHref}/kibana.bundle.js`,
-          ...chunkFilenames.map((f) => `${bundlesHref}/${f}`),
-        ]
-      : undefined;
-
+    // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
+    // (dev mode), <link rel="preload" as="script"> tags saturate the 6-connection
+    // limit and delay critical CSS, regressing FCP by ~4x. The bootstrap load()
+    // array already ensures all scripts are fetched with "High" priority via
+    // dynamic <script async=false> tags, so preloads provide no benefit and
+    // actively harm performance.
+    //
+    // Font preloads are kept: they are small, high-priority, and give the browser
+    // a head start on WOFF2 downloads during HTML parsing.
     const preloadFonts = useRspack
       ? [
           `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
@@ -352,7 +345,6 @@ export class RenderingService {
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
-      preloadScripts,
       preloadFonts,
       optimizeFontLoading: useRspack || undefined,
       customBranding: {
