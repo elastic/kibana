@@ -4951,6 +4951,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/change-point-chart-viewer@link:src/platform/packages/shared/kbn-change-point-chart-viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""

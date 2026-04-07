@@ -260,9 +260,16 @@ export const buildDatasourceStates = async (
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
     const layerId = `layer_${i}`;
+
+    // Annotation layers only exist in XY visualization state; they must not create a second
+    // text-based datasource (getValueColumns would be empty and breaks the chart + markers).
+    if ('type' in layer && (layer as LensAnnotationLayer).type === 'annotation') {
+      continue;
+    }
+
     const dataset = layer.dataset ?? mainDataset;
 
-    if (!dataset && 'type' in layer && (layer as LensAnnotationLayer).type !== 'annotation') {
+    if (!dataset) {
       throw Error('dataset must be defined');
     }
     if (dataset) {

@@ -20,6 +20,8 @@ export enum Position {
   AFTER_VALUE = 'after_value',
   ON_COLUMN = 'on_column',
   AFTER_ON_CLAUSE = 'after_on_clause',
+  BY_COLUMN = 'by_column',
+  AFTER_BY_CLAUSE = 'after_by_clause',
   AS_TYPE_COLUMN = 'as_type_clause',
   AS_P_VALUE_COLUMN = 'as_p_value_column',
   AFTER_AS_CLAUSE = 'after_as_clause',
@@ -45,6 +47,19 @@ export const getPosition = (query: string, command: ESQLAstAllCommands): Positio
   if (!Array.isArray(lastArg) && lastArg.name === 'on') {
     if (query.match(/on\s+\S+\s+$/i)) {
       return Position.AFTER_ON_CLAUSE;
+    }
+  }
+
+  if (query.match(/by\s+\S*$/i)) {
+    return Position.BY_COLUMN;
+  }
+
+  if (!Array.isArray(lastArg) && lastArg.name === 'by') {
+    if (query.match(/by\s+\S.*,\s*\S*$/i)) {
+      return Position.BY_COLUMN;
+    }
+    if (query.match(/by\s+\S+(\s*,\s*\S+)*\s+$/i)) {
+      return Position.AFTER_BY_CLAUSE;
     }
   }
 
@@ -83,6 +98,16 @@ export const asSuggestion: ISuggestionItem = withAutoSuggest({
   category: SuggestionCategory.LANGUAGE_KEYWORD,
 });
 
+export const bySuggestion: ISuggestionItem = withAutoSuggest({
+  label: 'BY',
+  text: 'BY ',
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.definitions.changePointByDoc', {
+    defaultMessage: 'Split change point detection by one or more group fields',
+  }),
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+});
+
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
@@ -94,13 +119,14 @@ export async function autocomplete(
   const pos = getPosition(innerText, command);
 
   switch (pos) {
-    case Position.VALUE:
+    case Position.VALUE: {
       const numericFields =
         (await callbacks?.getByType?.(ESQL_NUMBER_TYPES, [], {
           advanceCursor: true,
           openSuggestions: true,
         })) ?? [];
       return numericFields;
+    }
     case Position.AFTER_VALUE: {
       return [onSuggestion, asSuggestion, pipeCompleteItem];
     }
@@ -113,6 +139,16 @@ export async function autocomplete(
       return onFields;
     }
     case Position.AFTER_ON_CLAUSE:
+      return [bySuggestion, asSuggestion, pipeCompleteItem];
+    case Position.BY_COLUMN: {
+      const byFields =
+        (await callbacks?.getByType?.('any', [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        })) ?? [];
+      return byFields;
+    }
+    case Position.AFTER_BY_CLAUSE:
       return [asSuggestion, pipeCompleteItem];
     case Position.AS_TYPE_COLUMN: {
       // add comma and space
