@@ -102,4 +102,40 @@ export class FeatureSettingsPage {
   public get addModelSearch(): Locator {
     return this.page.testSubj.locator('add-model-search');
   }
+
+  // --- Copy To Modal ---
+
+  public getCopyToButton(featureId: string): Locator {
+    return this.page.testSubj.locator(`copy-to-${featureId}`);
+  }
+
+  public get firstCopyToButton(): Locator {
+    return this.content.locator('[data-test-subj^="copy-to-"]').locator('nth=0');
+  }
+
+  public get copyToModalApply(): Locator {
+    return this.page.testSubj.locator('copy-to-modal-apply');
+  }
+
+  public get copyToModalCancel(): Locator {
+    return this.page.testSubj.locator('copy-to-modal-cancel');
+  }
+
+  // --- Reset Defaults Modal ---
+
+  public get firstResetLink(): Locator {
+    return this.content.locator('[data-test-subj^="reset-"]').locator('nth=0');
+  }
+
+  public get resetDefaultsModal(): Locator {
+    return this.page.testSubj.locator('resetDefaultsModal');
+  }
+
+  public get resetDefaultsConfirmButton(): Locator {
+    return this.resetDefaultsModal.locator('[data-test-subj="confirmModalConfirmButton"]');
+  }
+
+  public get resetDefaultsCancelButton(): Locator {
+    return this.resetDefaultsModal.locator('[data-test-subj="confirmModalCancelButton"]');
+  }
 }

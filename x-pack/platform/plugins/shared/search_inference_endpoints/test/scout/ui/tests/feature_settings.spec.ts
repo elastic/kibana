@@ -96,4 +96,34 @@ test.describe('Feature Settings', { tag: tags.deploymentAgnostic }, () => {
       await expect(featureSettings.disabledRemoveButtons).not.toHaveCount(0);
     });
   });
+
+  test('reset to defaults modal', async ({ pageObjects }) => {
+    const { featureSettings } = pageObjects;
+
+    await test.step('click reset link opens confirmation modal', async () => {
+      await featureSettings.firstResetLink.click();
+      await expect(featureSettings.resetDefaultsModal).toBeVisible();
+    });
+
+    await test.step('cancel closes the modal without changes', async () => {
+      await featureSettings.resetDefaultsCancelButton.click();
+      await expect(featureSettings.resetDefaultsModal).toBeHidden();
+      await expect(featureSettings.saveButton).toBeDisabled();
+    });
+  });
+
+  test('copy to modal', async ({ pageObjects }) => {
+    const { featureSettings } = pageObjects;
+
+    await test.step('click copy to opens modal', async () => {
+      await featureSettings.firstCopyToButton.click();
+      await expect(featureSettings.copyToModalApply).toBeVisible();
+      await expect(featureSettings.copyToModalApply).toBeDisabled();
+    });
+
+    await test.step('cancel closes the modal', async () => {
+      await featureSettings.copyToModalCancel.click();
+      await expect(featureSettings.copyToModalApply).toBeHidden();
+    });
+  });
 });
