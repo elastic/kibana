@@ -8,40 +8,85 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
+import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/common';
+import { mockContextDependencies } from './__mock__/context_dependencies';
 import { resumeWorkflow } from './resume_workflow';
 import { setupDependencies } from './setup_dependencies';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 jest.mock('./setup_dependencies');
-jest.mock('../workflow_execution_loop', () => ({
-  workflowExecutionLoop: jest.fn().mockResolvedValue(undefined),
-}));
+jest.mock('../workflow_execution_loop');
 
-const setupDependenciesMock = setupDependencies as jest.MockedFunction<typeof setupDependencies>;
-const workflowExecutionLoopMock = workflowExecutionLoop as jest.MockedFunction<
+const mockSetupDependencies = setupDependencies as jest.MockedFunction<typeof setupDependencies>;
+const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
   typeof workflowExecutionLoop
 >;
 
 describe('resumeWorkflow', () => {
-  const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
-  } as unknown as Logger;
-  const fakeRequest = {} as KibanaRequest;
-  const dependencies = { coreStart: {} } as any;
-  const config = {} as any;
+  const workflowRunId = 'run-1';
+  const spaceId = 'default';
+  const logger = loggingSystemMock.create().get();
+  const fakeRequest = { headers: {} } as KibanaRequest;
+  let dependencies: ReturnType<typeof mockContextDependencies>;
+  let mockGetWorkflowExecutionById: jest.Mock;
+  let mockGetLastFailedStepContext: jest.Mock;
+  let mockGetWorkflowExecutionStatus: jest.Mock;
+  let mockGetWorkflowExecution: jest.Mock;
+  let mockStateGetWorkflowExecution: jest.Mock;
+  let mockEmitEvent: jest.Mock;
+
+  /** After a successful loop, `emitWorkflowExecutionFailedEventIfFailed` still runs in `finally`. */
+  const nonFailedRuntimeMethods = () => ({
+    getWorkflowExecutionStatus: jest.fn().mockReturnValue(ExecutionStatus.COMPLETED),
+    getWorkflowExecution: jest.fn().mockReturnValue({
+      isTestRun: false,
+      status: ExecutionStatus.COMPLETED,
+    }),
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    dependencies = mockContextDependencies();
+    mockEmitEvent = jest.fn().mockResolvedValue(undefined);
+    (
+      dependencies as unknown as { workflowsExtensions: { emitEvent: jest.Mock } }
+    ).workflowsExtensions = {
+      emitEvent: mockEmitEvent,
+    };
+    mockGetWorkflowExecutionById = jest.fn();
+    mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
+    mockGetWorkflowExecutionStatus = jest.fn();
+    mockGetWorkflowExecution = jest.fn();
+    mockStateGetWorkflowExecution = jest.fn().mockReturnValue({ status: ExecutionStatus.WAITING });
+
+    mockSetupDependencies.mockResolvedValue({
+      workflowRuntime: {
+        resume: jest.fn().mockResolvedValue(undefined),
+        getWorkflowExecutionStatus: mockGetWorkflowExecutionStatus,
+        getWorkflowExecution: mockGetWorkflowExecution,
+      },
+      stepExecutionRuntimeFactory: {},
+      workflowExecutionState: {
+        getLastFailedStepContext: mockGetLastFailedStepContext,
+        getWorkflowExecution: mockStateGetWorkflowExecution,
+      },
+      workflowLogger: {},
+      nodesFactory: {},
+      workflowExecutionGraph: {},
+      workflowTaskManager: {},
+      workflowExecutionRepository: {
+        getWorkflowExecutionById: mockGetWorkflowExecutionById,
+      },
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    } as never);
   });
 
   it('does not resume or run loop when execution is already terminal', async () => {
     const resume = jest.fn().mockResolvedValue(undefined);
-    setupDependenciesMock.mockResolvedValue({
-      workflowRuntime: { resume },
+    mockSetupDependencies.mockResolvedValue({
+      workflowRuntime: { resume, ...nonFailedRuntimeMethods() },
       stepExecutionRuntimeFactory: {},
       workflowExecutionState: {
         getWorkflowExecution: () => ({
@@ -54,26 +99,29 @@ describe('resumeWorkflow', () => {
       esClient: {},
       workflowTaskManager: {},
       workflowExecutionRepository: {},
-    } as any);
+    } as never);
 
     await resumeWorkflow({
-      workflowRunId: 'exec-1',
-      spaceId: 'default',
+      workflowRunId,
+      spaceId,
       taskAbortController: new AbortController(),
       dependencies,
-      logger,
-      config,
+      logger: logger as Logger,
+      config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
     });
 
     expect(resume).not.toHaveBeenCalled();
-    expect(workflowExecutionLoopMock).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
   });
 
   it('runs resume and loop when execution is not terminal', async () => {
     const resume = jest.fn().mockResolvedValue(undefined);
-    setupDependenciesMock.mockResolvedValue({
-      workflowRuntime: { resume },
+    mockSetupDependencies.mockResolvedValue({
+      workflowRuntime: {
+        resume,
+        ...nonFailedRuntimeMethods(),
+      },
       stepExecutionRuntimeFactory: {},
       workflowExecutionState: {
         getWorkflowExecution: () => ({
@@ -88,20 +136,20 @@ describe('resumeWorkflow', () => {
       workflowExecutionRepository: {
         getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
       },
-    } as any);
+    } as never);
 
     await resumeWorkflow({
-      workflowRunId: 'exec-1',
-      spaceId: 'default',
+      workflowRunId,
+      spaceId,
       taskAbortController: new AbortController(),
       dependencies,
-      logger,
-      config,
+      logger: logger as Logger,
+      config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
     });
 
     expect(resume).toHaveBeenCalledTimes(1);
-    expect(workflowExecutionLoopMock).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowExecutionLoop).toHaveBeenCalledTimes(1);
   });
 
   it.each([
@@ -112,8 +160,8 @@ describe('resumeWorkflow', () => {
     ['TIMED_OUT', ExecutionStatus.TIMED_OUT],
   ] as const)('skips resume when already %s (stale TM / duplicate resume)', async (_, status) => {
     const resume = jest.fn().mockResolvedValue(undefined);
-    setupDependenciesMock.mockResolvedValue({
-      workflowRuntime: { resume },
+    mockSetupDependencies.mockResolvedValue({
+      workflowRuntime: { resume, ...nonFailedRuntimeMethods() },
       stepExecutionRuntimeFactory: {},
       workflowExecutionState: {
         getWorkflowExecution: () => ({ status }),
@@ -124,26 +172,29 @@ describe('resumeWorkflow', () => {
       esClient: {},
       workflowTaskManager: {},
       workflowExecutionRepository: {},
-    } as any);
+    } as never);
 
     await resumeWorkflow({
-      workflowRunId: 'exec-1',
-      spaceId: 'default',
+      workflowRunId,
+      spaceId,
       taskAbortController: new AbortController(),
       dependencies,
-      logger,
-      config,
+      logger: logger as Logger,
+      config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
     });
 
     expect(resume).not.toHaveBeenCalled();
-    expect(workflowExecutionLoopMock).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
   });
 
   it('runs resume when status is RUNNING (e.g. mid-loop)', async () => {
     const resume = jest.fn().mockResolvedValue(undefined);
-    setupDependenciesMock.mockResolvedValue({
-      workflowRuntime: { resume },
+    mockSetupDependencies.mockResolvedValue({
+      workflowRuntime: {
+        resume,
+        ...nonFailedRuntimeMethods(),
+      },
       stepExecutionRuntimeFactory: {},
       workflowExecutionState: {
         getWorkflowExecution: () => ({
@@ -158,19 +209,116 @@ describe('resumeWorkflow', () => {
       workflowExecutionRepository: {
         getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
       },
-    } as any);
+    } as never);
 
     await resumeWorkflow({
-      workflowRunId: 'exec-1',
-      spaceId: 'default',
+      workflowRunId,
+      spaceId,
       taskAbortController: new AbortController(),
       dependencies,
-      logger,
-      config,
+      logger: logger as Logger,
+      config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
       fakeRequest,
     });
 
     expect(resume).toHaveBeenCalledTimes(1);
-    expect(workflowExecutionLoopMock).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowExecutionLoop).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits workflow_execution_failed event when resumed execution fails', async () => {
+    mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Step failed'));
+
+    const failedExecution = {
+      id: workflowRunId,
+      workflowId: 'wf-1',
+      spaceId,
+      status: ExecutionStatus.FAILED,
+      isTestRun: false,
+      workflowDefinition: { name: 'Resumed Workflow', steps: [] },
+      error: { type: 'Error', message: 'Step failed' },
+      createdAt: '2024-01-01T10:00:00.000Z',
+      finishedAt: '2024-01-01T10:05:00.000Z',
+      triggeredBy: 'manual',
+    };
+    mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
+    mockGetWorkflowExecution.mockReturnValue(failedExecution);
+    mockGetWorkflowExecutionById.mockResolvedValue(failedExecution);
+    mockGetLastFailedStepContext.mockReturnValue({
+      stepId: 'step_1',
+      stepName: 'Resume step',
+      stepExecutionId: 'se-1',
+    });
+
+    await expect(
+      resumeWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        fakeRequest,
+        dependencies,
+      })
+    ).rejects.toThrow('Step failed');
+
+    expect(mockGetWorkflowExecutionStatus).toHaveBeenCalled();
+    expect(mockGetWorkflowExecution).toHaveBeenCalled();
+    expect(mockEmitEvent).toHaveBeenCalledTimes(1);
+    expect(mockEmitEvent).toHaveBeenCalledWith({
+      triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
+      spaceId,
+      payload: expect.objectContaining({
+        workflow: expect.objectContaining({
+          id: 'wf-1',
+          name: 'Resumed Workflow',
+          isErrorHandler: false,
+        }),
+        error: expect.objectContaining({
+          message: 'Step failed',
+          stepId: 'step_1',
+          stepName: 'Resume step',
+        }),
+      }),
+      request: fakeRequest,
+    });
+  });
+
+  it('emits workflow_execution_failed with no step fields when failure was not due to a step', async () => {
+    mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Runtime error'));
+
+    const failedExecution = {
+      id: workflowRunId,
+      workflowId: 'wf-1',
+      spaceId,
+      status: ExecutionStatus.FAILED,
+      isTestRun: false,
+      workflowDefinition: { name: 'Resumed Workflow', steps: [] },
+      error: { type: 'Error', message: 'Runtime error' },
+      createdAt: '2024-01-01T10:00:00.000Z',
+      finishedAt: '2024-01-01T10:05:00.000Z',
+      triggeredBy: 'manual',
+    };
+    mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
+    mockGetWorkflowExecution.mockReturnValue(failedExecution);
+    mockGetWorkflowExecutionById.mockResolvedValue(failedExecution);
+    mockGetLastFailedStepContext.mockReturnValue(undefined);
+
+    await expect(
+      resumeWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        fakeRequest,
+        dependencies,
+      })
+    ).rejects.toThrow('Runtime error');
+
+    expect(mockEmitEvent).toHaveBeenCalledTimes(1);
+    const emittedPayload = mockEmitEvent.mock.calls[0][0].payload;
+    expect(emittedPayload.error.message).toBe('Runtime error');
+    expect(emittedPayload.error).not.toHaveProperty('stepId');
+    expect(emittedPayload.error).not.toHaveProperty('stepName');
   });
 });

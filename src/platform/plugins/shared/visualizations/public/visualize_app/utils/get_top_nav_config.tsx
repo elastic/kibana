@@ -718,7 +718,7 @@ export const getTopNavConfig = (
               }
             ),
             emphasize: true,
-            iconType: 'checkInCircleFilled',
+            iconType: 'checkCircleFill',
             description: i18n.translate(
               'visualizations.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {
