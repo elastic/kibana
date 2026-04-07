@@ -14,7 +14,9 @@ import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manage
 import { FIELD_MAPPING_TYPES } from '../state';
 
 const fieldMappingSchema = z.object({
-  name: z.string().describe('Flattened dot-notation path to the field (e.g. "myintegration.myds.src_port")'),
+  name: z
+    .string()
+    .describe('Flattened dot-notation path to the field (e.g. "myintegration.myds.src_port")'),
   type: z
     .enum(FIELD_MAPPING_TYPES)
     .describe(
@@ -24,7 +26,9 @@ const fieldMappingSchema = z.object({
 
 export const submitReviewTool = (): DynamicStructuredTool => {
   const schema = z.object({
-    content: z.string().describe('The complete review with all issues, details, and recommendations'),
+    content: z
+      .string()
+      .describe('The complete review with all issues, details, and recommendations'),
     summary: z
       .string()
       .describe(
