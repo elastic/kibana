@@ -117,8 +117,7 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables gap reason detection and display in the gaps table.
-   * When off, gap_reason is not calculated or passed to rule metrics/telemetry.
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
   gapReasonDetectionEnabled: false,
 
@@ -252,6 +251,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
