@@ -119,9 +119,11 @@ function getRequestUrl(config: InternalAxiosRequestConfig): {
   pathname: string;
   searchParams: Record<string, string>;
 } {
-  const base = config.baseURL ?? 'http://localhost';
-  const urlPath = config.url ?? '/';
-  const parsed = urlPath.startsWith('http') ? new URL(urlPath) : new URL(urlPath, base);
+  const urlPath = config.url;
+  if (!urlPath?.startsWith('http')) {
+    throw new Error('[azure-shared-key] an absolute URL is required for request signing');
+  }
+  const parsed = new URL(urlPath);
   const searchParams: Record<string, string> = {};
   parsed.searchParams.forEach((value, key) => {
     searchParams[key] = value;
