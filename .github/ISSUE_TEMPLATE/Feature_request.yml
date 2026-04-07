@@ -10,7 +10,7 @@ body:
     id: what
     attributes:
       label: What?
-      description: Describe what feature should be added.
+      description: Describe what feature should be added. If applicable, note what's explicitly out of scope.
       placeholder: "I want Kibana to..."
     validations:
       required: true
@@ -19,7 +19,7 @@ body:
     id: why
     attributes:
       label: Why?
-      description: Describe why this should be added, what use-case does this enable?
+      description: Describe why this should be added. What use-case does this enable? How do you work around this today? Who would use this?
       placeholder: "This allows me to..."
     validations:
       required: true
@@ -61,6 +61,15 @@ body:
         - Important (workaround exists)
         - Urgent (workaround exists, but is very painful)
         - Critical (blocking my workflow)
+    validations:
+      required: false
+
+  - type: input
+    id: blocked-by
+    attributes:
+      label: Blocked By
+      description: Issue(s) that must be resolved first (e.g., `#12345, #67890`).
+      placeholder: "#12345, #67890"
     validations:
       required: false
 

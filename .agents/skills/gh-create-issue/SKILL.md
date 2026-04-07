@@ -35,7 +35,7 @@ Read the template to know which fields to populate:
 
 Using the user's description as source material, populate as many template fields as you can. Apply reasonable inference:
 
-- For **feature requests**: synthesize a clear "What feature do you want added?" statement, derive a "Why?" from the use-case, draft initial Acceptance Criteria (happy path + edge cases) from the described behavior, and infer a priority if clues are present.
+- For **feature requests**: synthesize a clear "What feature do you want added?" statement (noting what's explicitly out of scope if apparent), derive a "Why?" from the use-case (including how users work around the gap today and who the target user is), draft initial Acceptance Criteria (happy path + edge cases) from the described behavior, infer a priority if clues are present, and note any blocking issues for the "Blocked By" field.
 - For **bug reports**: extract steps to reproduce, expected vs actual behavior, and any environment details mentioned.
 
 Leave fields blank where the description provides no basis for inference. Do **not** ask questions yet — draft first.
@@ -59,6 +59,12 @@ Guidelines:
 - For optional fields (`screenshots`, `logs`, `browser console errors`, `additional context`, `Priority`): ask once; accept "N/A" or "none" and move on.
 - If an answer is still vague after one follow-up, ask one more targeted clarifying question, then move on.
 - Once all fields are addressed, proceed to Step 7.
+
+For **feature requests**, also probe for these common gaps (even if the field is not empty, ensure the draft addresses them):
+- **Scope boundaries**: Is it clear what's *not* included? If the feature could be interpreted broadly, ask what's explicitly out of scope.
+- **Current workaround**: How do users accomplish this today? If the "Why?" doesn't describe the workaround, ask.
+- **Target user**: Who would use this — what role or persona? If not stated, ask.
+- **Dependencies**: Are there issues, features, or infrastructure changes that must land first? If so, capture them in the "Blocked By" field.
 
 ## Step 7 — Show the draft and confirm
 

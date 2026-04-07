@@ -36,7 +36,7 @@ Determine whether the issue is a **bug report** or a **feature request**:
 
 ## Step 3 — Extract what you can from the existing body
 
-Using the original `title` and `body` as source material, map existing content to the appropriate template fields. Leave fields blank where no information is available in the original issue.
+Using the original `title` and `body` as source material, map existing content to the appropriate template fields. For feature requests, look for scope boundaries, current workarounds, target user, and any mentioned blockers or dependencies. Leave fields blank where no information is available in the original issue.
 
 *** Bug report *** Read `.github/ISSUE_TEMPLATE/Bug_report.md` to get the required fields.
 
@@ -51,6 +51,12 @@ Guidelines:
 - For optional fields (e.g. screenshots, browser console errors, logs, additional context): ask once and accept "N/A" or "none" as a valid answer; do not press further.
 - If the user's answer is vague, ask one targeted follow-up question to clarify, then **end your response and wait** before moving on.
 - Once all empty fields have been addressed, proceed to Step 5.
+
+For **feature requests**, also probe for these common gaps (even if the field is not empty, ensure the draft addresses them):
+- **Scope boundaries**: Is it clear what's *not* included? If the feature could be interpreted broadly, ask what's explicitly out of scope.
+- **Current workaround**: How do users accomplish this today? If the "Why?" doesn't describe the workaround, ask.
+- **Target user**: Who would use this — what role or persona? If not stated, ask.
+- **Dependencies**: Are there issues, features, or infrastructure changes that must land first? If so, capture them in the "Blocked By" field.
 
 ## Step 5 — Show the diff and confirm
 
