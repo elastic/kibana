@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYPersistedState } from '@kbn/lens-common';
+import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
-import { capitalize } from 'lodash';
 import type { XYState } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
@@ -26,15 +25,11 @@ import {
 } from './api_layers';
 import { stripUndefined } from '../utils';
 import { axisLabelOrientationCompat } from '../common';
-import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
-
-function convertFittingToStateFormat(fitting: XYState['fitting']) {
-  return {
-    ...(fitting?.type ? { fittingFunction: capitalize(fitting.type) } : {}),
-    ...(fitting?.dotted ? { emphasizeFitting: fitting.dotted } : {}),
-    ...(fitting?.end_value ? { endValue: capitalize(fitting.end_value) } : {}),
-  };
-}
+import {
+  convertStylingToAPIFormat,
+  convertStylingToStateFormat,
+  type LayerPresence,
+} from './appearances';
 
 type AxisType = Required<NonNullable<XYState['axis']>>;
 type XAxisType = AxisType extends { x?: infer T } ? T : undefined;
@@ -148,6 +143,15 @@ function convertAxisSettingsToStateFormat(
   });
 }
 
+function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
+  const seriesTypes = new Set(dataLayers.map((layer) => layer.seriesType));
+  return {
+    hasBars: [...seriesTypes].some((t) => t.startsWith('bar')),
+    hasLines: seriesTypes.has('line'),
+    hasAreas: [...seriesTypes].some((t) => t.startsWith('area')),
+  };
+}
+
 type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
@@ -168,9 +172,8 @@ export function buildVisualizationState(
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
-    ...convertFittingToStateFormat(config.fitting),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.decorations ? convertAppearanceToStateFormat(config.decorations) : {}),
+    ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
     layers,
   };
 }
@@ -191,29 +194,15 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
-  const decorations = convertAppearanceToAPIFormat(config);
+  const layerPresence = getLayerPresence(dataLayers);
+
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
-    ...convertFittingToAPIFormat(config),
     ...convertAxisSettingsToAPIFormat(config, layers),
-    ...(decorations ? { decorations } : {}),
+    styling: convertStylingToAPIFormat(config, layerPresence),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
-}
-
-function convertFittingToAPIFormat(config: XYPersistedState): Pick<XYState, 'fitting'> | {} {
-  const fittingOptions = {
-    ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
-    ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
-    ...(config.endValue ? { end_value: config.endValue.toLowerCase() } : {}),
-  };
-
-  if (Object.keys(fittingOptions).length === 0) {
-    return {};
-  }
-
-  return { fitting: fittingOptions };
 }
 
 function convertExtendsToAPIFormat(extent: AxisExtentConfig | undefined): { extent?: ExtentsType } {

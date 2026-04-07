@@ -50,6 +50,8 @@ export interface WorkflowListTableProps {
   onRequestRun: (item: WorkflowListItemDto) => void;
   getEditHref: (item: WorkflowListItemDto) => string;
   canCreateWorkflow: boolean;
+  canReadWorkflow: boolean;
+  canReadWorkflowExecution: boolean;
   canUpdateWorkflow: boolean;
   canDeleteWorkflow: boolean;
   canExecuteWorkflow: boolean;
@@ -70,10 +72,14 @@ export const WorkflowListTable = ({
   onRequestRun,
   getEditHref,
   canCreateWorkflow,
+  canReadWorkflow,
+  canReadWorkflowExecution,
   canUpdateWorkflow,
   canDeleteWorkflow,
   canExecuteWorkflow,
 }: WorkflowListTableProps) => {
+  const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
+
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
       {
@@ -96,9 +102,26 @@ export const WorkflowListTable = ({
                       min-width: 0;
                     `}
                   >
-                    <EuiLink>
-                      <Link
-                        to={`/${item.id}`}
+                    {canReadWorkflow ? (
+                      <EuiLink>
+                        <Link
+                          to={`/${item.id}`}
+                          css={css`
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            display: block;
+                            max-width: 100%;
+                          `}
+                          title={name}
+                          data-test-subj="workflowNameLink"
+                        >
+                          {name}
+                        </Link>
+                      </EuiLink>
+                    ) : (
+                      <EuiText
+                        size="s"
                         css={css`
                           white-space: nowrap;
                           overflow: hidden;
@@ -107,11 +130,11 @@ export const WorkflowListTable = ({
                           max-width: 100%;
                         `}
                         title={name}
-                        data-test-subj="workflowNameLink"
+                        data-test-subj="workflowNameText"
                       >
                         {name}
-                      </Link>
-                    </EuiLink>
+                      </EuiText>
+                    )}
                   </EuiFlexItem>
                   <WorkflowTagsBadge tags={item.definition?.tags} />
                 </EuiFlexGroup>
@@ -148,11 +171,16 @@ export const WorkflowListTable = ({
           defaultMessage: 'Trigger',
         }),
         width: '12%',
-        render: (value: unknown, item: WorkflowListItemDto) => (
-          <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
-            <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-          </NextExecutionTime>
-        ),
+        render: (value: unknown, item: WorkflowListItemDto) => {
+          if (!item.history || item.history.length === 0) {
+            return <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />;
+          }
+          return (
+            <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
+              <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+            </NextExecutionTime>
+          );
+        },
       },
       {
         field: 'steps',
@@ -171,6 +199,15 @@ export const WorkflowListTable = ({
         field: 'runHistory',
         width: '10%',
         render: (value: unknown, item: WorkflowListItemDto) => {
+          if (!canReadWorkflowExecution) {
+            return (
+              <EuiText size="xs" color="subdued" data-test-subj="workflowLastRunRestricted">
+                {i18n.translate('workflows.workflowList.lastRun.restricted', {
+                  defaultMessage: '—',
+                })}
+              </EuiText>
+            );
+          }
           if (!item.history || item.history.length === 0) return null;
           const lastRun = item.history[0];
           return (
@@ -258,7 +295,7 @@ export const WorkflowListTable = ({
             href: (item: WorkflowListItemDto) => getEditHref(item),
           },
           {
-            enabled: () => canCreateWorkflow,
+            enabled: () => canCreateWorkflow && canReadWorkflow,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.clone', { defaultMessage: 'Clone' }),
@@ -270,7 +307,7 @@ export const WorkflowListTable = ({
             onClick: (item: WorkflowListItemDto) => onCloneWorkflow(item),
           },
           {
-            enabled: (item) => item.definition !== null,
+            enabled: (item) => item.definition !== null && canReadWorkflow,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.export', { defaultMessage: 'Export' }),
@@ -297,14 +334,16 @@ export const WorkflowListTable = ({
       },
     ],
     [
+      canReadWorkflow,
+      canReadWorkflowExecution,
       canUpdateWorkflow,
-      onToggleWorkflow,
       canExecuteWorkflow,
-      getEditHref,
       canCreateWorkflow,
+      canDeleteWorkflow,
+      getEditHref,
+      onToggleWorkflow,
       onCloneWorkflow,
       onExportWorkflow,
-      canDeleteWorkflow,
       onDeleteWorkflow,
       onRequestRun,
     ]
@@ -334,11 +373,15 @@ export const WorkflowListTable = ({
       onChange={({
         page: { index: pageIndex, size: pageSize },
       }: CriteriaWithPagination<WorkflowListItemDto>) => onPageChange(pageIndex, pageSize)}
-      selection={{
-        onSelectionChange,
-        selectable: () => true,
-        selected: selectedItems,
-      }}
+      {...(allowRowSelection
+        ? {
+            selection: {
+              onSelectionChange,
+              selectable: () => true,
+              selected: selectedItems,
+            },
+          }
+        : {})}
       pagination={{
         pageSize: size,
         pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,

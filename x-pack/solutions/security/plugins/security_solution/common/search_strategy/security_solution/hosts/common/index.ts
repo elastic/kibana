@@ -38,6 +38,8 @@ export interface HostItem {
   lastSeen?: Maybe<string[]>;
   risk?: string;
   criticality?: string;
+  /** Canonical Entity Store id when the row comes from the entity store hosts list. */
+  entityId?: Maybe<string>;
 }
 
 export interface HostValue {

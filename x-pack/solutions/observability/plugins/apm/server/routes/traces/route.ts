@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
@@ -143,6 +143,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
       t.partial({
         serviceName: t.string,
         entryTransactionId: t.string,
+        ecsOnly: toBooleanRt,
       }),
     ]),
   }),
@@ -164,7 +165,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end, serviceName, entryTransactionId } = params.query;
+    const { start, end, serviceName, entryTransactionId, ecsOnly } = params.query;
     const maxTraceItems = config.ui.maxTraceItems;
 
     const [{ traceItems, agentMarks, unifiedTraceErrors, traceDocsTotal }, entryTransaction] =
@@ -177,6 +178,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
           end,
           maxTraceItems,
           serviceName,
+          ecsOnly: ecsOnly ?? false,
         }),
         entryTransactionId
           ? getTransaction({

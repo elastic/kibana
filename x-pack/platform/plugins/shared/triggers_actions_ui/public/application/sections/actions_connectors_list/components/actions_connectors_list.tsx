@@ -418,7 +418,9 @@ const ActionsConnectorsList = ({
       loading={isLoadingActions || isLoadingActionTypes}
       items={actionConnectorTableItems}
       sorting={true}
-      itemId="id"
+      itemId={(item: ActionConnectorTableItem) =>
+        item.isPreconfigured ? `preconfigured_${item.id}` : item.id
+      }
       columns={actionsTableColumns}
       css={disabledActConnectorCss}
       tableCaption={i18n.translate(
@@ -517,7 +519,8 @@ const ActionsConnectorsList = ({
           onDeleted={(deleted: string[]) => {
             if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
               const updatedActions = actions.filter(
-                (action) => action.id && !connectorsToDelete.includes(action.id)
+                (action) =>
+                  action.id && !(connectorsToDelete.includes(action.id) && !action.isPreconfigured)
               );
               setActions(updatedActions);
               setSelectedItems([]);
