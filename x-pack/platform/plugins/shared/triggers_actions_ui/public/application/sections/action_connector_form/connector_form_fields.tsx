@@ -37,7 +37,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
 
   return (
     <>
-      <ConnectorFormFieldsGlobal canSave={canSave} />
+      <ConnectorFormFieldsGlobal canSave={canSave} isEdit={isEdit} />
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
         <>

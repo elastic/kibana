@@ -10,8 +10,12 @@ import type {
   AgentResearchStepConfiguration,
 } from '@kbn/agent-builder-common';
 
-export type ResolvedAnswerStepConfiguration = Required<AgentAnswerStepConfiguration>;
-export type ResolvedResearchStepConfiguration = Required<AgentResearchStepConfiguration>;
+export type ResolvedAnswerStepConfiguration = Required<
+  Omit<AgentAnswerStepConfiguration, 'replace_default_instructions'>
+>;
+export type ResolvedResearchStepConfiguration = Required<
+  Omit<AgentResearchStepConfiguration, 'replace_default_instructions'>
+>;
 
 export interface ResolvedConfiguration {
   research: ResolvedResearchStepConfiguration;

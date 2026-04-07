@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import type { UserService } from '../services/user_service/user_service';
+import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { BulkCreateAlertActionItemBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
-import { createQueryService } from '../services/query_service/query_service.mock';
-import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
-import { AlertActionsClient } from './alert_actions_client';
+import type { AlertActionsClient } from './alert_actions_client';
+import { createAlertActionsClient } from './alert_actions_client.mock';
 import {
   getBulkAlertEventsESQLResponse,
   getAlertEventESQLResponse,
@@ -21,17 +20,19 @@ import {
 
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
-  const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
-  const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
-  let userService: UserService;
-  let userProfile: jest.Mocked<UserProfileServiceStart>;
   let client: AlertActionsClient;
+  let queryServiceEsClient: DeeplyMockedApi<ElasticsearchClient>;
+  let storageServiceEsClient: jest.Mocked<ElasticsearchClient>;
+  let userProfileService: jest.Mocked<UserProfileServiceStart>;
 
   beforeEach(() => {
-    ({ userService, userProfile } = createUserService());
-    userProfile.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
+    ({
+      alertActionsClient: client,
+      queryServiceEsClient,
+      storageServiceEsClient,
+      userProfileService,
+    } = createAlertActionsClient());
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
-    client = new AlertActionsClient(queryService, storageService, userService);
   });
 
   afterEach(() => {
@@ -136,15 +137,9 @@ describe('AlertActionsClient', () => {
 
     it('should handle null profile uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+      userProfileService.getCurrent.mockResolvedValueOnce(null);
 
-      userProfile.getCurrent.mockResolvedValueOnce(null);
-      const clientWithoutSecurity = new AlertActionsClient(
-        queryService,
-        storageService,
-        userService
-      );
-
-      await clientWithoutSecurity.createAction({
+      await client.createAction({
         groupHash: 'test-group-hash',
         action: actionData,
       });
