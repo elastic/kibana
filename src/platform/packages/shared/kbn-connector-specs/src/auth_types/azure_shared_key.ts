@@ -167,10 +167,15 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
 
     axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
       const msDate = formatMsDate();
-      const headers: Record<string, string> = {
-        ...(config.headers as Record<string, string>),
-        'x-ms-date': msDate,
-      };
+      const existingHeaders: Record<string, string> = {};
+      if (config.headers) {
+        for (const [key, value] of Object.entries(config.headers.toJSON())) {
+          if (typeof value === 'string') {
+            existingHeaders[key] = value;
+          }
+        }
+      }
+      const headers = { ...existingHeaders, 'x-ms-date': msDate };
 
       const { pathname, searchParams } = getRequestUrl(config);
       const canonicalizedHeaders = buildCanonicalizedHeaders(headers);
@@ -185,9 +190,8 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
       const signature = computeSignature(stringToSign, accountKey);
       const authHeader = `SharedKey ${accountName}:${signature}`;
 
-      config.headers = config.headers ?? {};
-      config.headers['x-ms-date'] = msDate;
-      config.headers.Authorization = authHeader;
+      config.headers.set('x-ms-date', msDate);
+      config.headers.set('Authorization', authHeader);
 
       return config;
     });
