@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
-  'GET /api/console/api_server',
+  'GET /api/console/es_config',
   {
     tag: [
       ...tags.stateful.classic,
@@ -23,28 +23,23 @@ apiTest.describe(
     ],
   },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let credentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('viewer');
+      credentials = await requestAuth.getApiKey('viewer');
     });
 
-    apiTest('returns autocomplete definitions', async ({ apiClient }) => {
-      const { body, statusCode } = await apiClient.get('api/console/api_server', {
+    apiTest('returns es host', async ({ apiClient }) => {
+      const response = await apiClient.get('api/console/es_config', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...credentials.apiKeyHeader,
         },
         responseType: 'json',
       });
-      expect(statusCode).toBe(200);
-      expect(body.es).toBeDefined();
-      const {
-        es: { name, globals, endpoints },
-      } = body;
-      expect(name).toBe('es');
-      expect(Object.keys(globals).length).toBeGreaterThan(0);
-      expect(Object.keys(endpoints).length).toBeGreaterThan(0);
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.host).toBeDefined();
     });
   }
 );
