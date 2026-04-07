@@ -168,7 +168,7 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
           const base = transformFindAlerts(rules, warnings);
           const body: FindRulesWithFacetsResponse = {
             ...base,
-            ...counts,
+            ...(counts !== undefined ? { counts } : {}),
           };
 
           return response.ok({ body });

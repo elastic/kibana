@@ -10,7 +10,7 @@ import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
-import type { GranularRulesSearch } from '../../../../../common/api/detection_engine/rule_management';
+import type { GranularRulesSearchMode } from '../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../common/constants';
 import type { PaginationOptions } from '../../logic';
 import { fetchRulesWithFacets } from '../api';
@@ -18,7 +18,8 @@ import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
   filter?: string;
-  search?: GranularRulesSearch;
+  searchMode?: GranularRulesSearchMode;
+  searchTerm?: string;
   sort?: string;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   schedulerId?: string;
@@ -58,7 +59,7 @@ export const useFindRulesQuery = (
       const response = await fetchRulesWithFacets({
         signal,
         ...queryArgs,
-        includeCountsCategories: [],
+        includeCountsCategories: ['tags'],
       });
 
       return { rules: response.data, total: response.total, warnings: response.warnings };
