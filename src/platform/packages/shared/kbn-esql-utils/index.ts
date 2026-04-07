@@ -19,6 +19,7 @@ export {
   getESQLWithSafeLimit,
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
+  escapeStringValue,
   appendStatsByToQuery,
   appendLimitToQuery,
   buildMetricsInfoQuery,
