@@ -53,7 +53,7 @@ export const basicRegionMapWithDataView = {
   type: 'region_map',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'test-id',
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'percentile',
@@ -148,7 +148,7 @@ export const comprehensiveRegionMapWithDataView = {
   type: 'region_map',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'my-custom-data-view-id',
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'count',

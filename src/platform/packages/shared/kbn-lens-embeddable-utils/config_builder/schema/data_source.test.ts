@@ -21,7 +21,7 @@ describe('DataSource Schema', () => {
     it('validates a valid dataView configuration', () => {
       const input = {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'my-data-view',
+        ref_id: 'my-data-view',
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataViewSchema.validate(input);
@@ -35,7 +35,7 @@ describe('DataSource Schema', () => {
       } satisfies DataSourceTypeNoESQL;
 
       expect(() => dataViewSchema.validate(input)).toThrow(
-        `[id]: expected value of type [string] but got [undefined]`
+        `[ref_id]: expected value of type [string] but got [undefined]`
       );
     });
   });
@@ -142,7 +142,7 @@ describe('DataSource Schema', () => {
     it('validates datasource property with valid configuration', () => {
       const input = {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'my-data-view',
+        ref_id: 'my-data-view',
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataSourceSchema.data_source.validate(input);

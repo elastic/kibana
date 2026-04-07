@@ -15,7 +15,7 @@ export const breakdownMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Breakdown',
   description: 'Metric with breakdown',
-  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -44,7 +44,7 @@ export const complexMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Complex case',
   description: 'Metric with background chart and breakdown',
-  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -91,7 +91,7 @@ export const simpleMetricAPIAttributes = {
   type: 'metric',
   title: 'Simple Metric',
   description: 'A simple metric visualization',
-  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -143,7 +143,7 @@ export const metricAPIWithTermsRankedBySecondary = {
   type: 'metric',
   title: 'Metric - Breakdown ranked by secondary',
   description: 'Metric with breakdown ranked by secondary metric',
-  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'testId' },
+  data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'testId' },
   ignore_global_filters: false,
   sampling: 1,
   metrics: [

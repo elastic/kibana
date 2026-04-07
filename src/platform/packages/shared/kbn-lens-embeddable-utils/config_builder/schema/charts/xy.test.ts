@@ -18,7 +18,7 @@ import {
 
 describe('XY', () => {
   const minimalLayer = {
-    data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+    data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
     type: 'bar',
     y: [{ operation: 'count' }],
   };
@@ -55,7 +55,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -74,7 +74,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -95,7 +95,7 @@ describe('XY', () => {
             title: `${type} Chart`,
             layers: [
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
                 type,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -146,7 +146,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -165,7 +165,7 @@ describe('XY', () => {
               },
             },
             {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type: 'referenceLines',
               ignore_global_filters: false,
               sampling: 1,
@@ -191,7 +191,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -210,7 +210,7 @@ describe('XY', () => {
               ignore_global_filters: false,
               data_source: {
                 type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-                id: 'metrics-*',
+                ref_id: 'metrics-*',
               },
               events: [
                 {
@@ -244,7 +244,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -262,7 +262,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'companyBIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -294,7 +294,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -312,7 +312,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'companyBIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -330,7 +330,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
                 type: 'referenceLines',
                 ignore_global_filters: false,
                 sampling: 1,
@@ -356,7 +356,7 @@ describe('XY', () => {
                 ignore_global_filters: false,
                 data_source: {
                   type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-                  id: 'metrics-*',
+                  ref_id: 'metrics-*',
                 },
                 events: [
                   {
@@ -420,7 +420,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -448,7 +448,7 @@ describe('XY', () => {
                 },
               },
               {
-                data_source: { type: 'dataView', ref_id: 'companyBIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -615,7 +615,7 @@ describe('XY', () => {
           title: `Faulty Chart`,
           layers: [
             {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type: 'bar',
               ignore_global_filters: false,
               sampling: 1,
@@ -662,7 +662,7 @@ describe('XY', () => {
           title: 'Mixed mode chart',
           layers: [
             {
-              dataset: { type: 'dataView', id: 'companyAIndex' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
               type: 'bar',
               ignore_global_filters: false,
               sampling: 1,

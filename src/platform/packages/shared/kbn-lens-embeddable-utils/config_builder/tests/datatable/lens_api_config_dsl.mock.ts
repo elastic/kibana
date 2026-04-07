@@ -283,7 +283,7 @@ export const fullConfigDatatableWithDataView: DatatableState = {
   type: 'data_table',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'my-custom-data-view-id',
+    ref_id: 'my-custom-data-view-id',
   },
   sampling: 1,
   ignore_global_filters: false,
@@ -446,7 +446,7 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
   type: 'data_table',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+    ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,
   ignore_global_filters: false,
@@ -615,7 +615,7 @@ export const sortedByRowDatatable: DatatableState = {
   type: 'data_table',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+    ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,
   ignore_global_filters: false,

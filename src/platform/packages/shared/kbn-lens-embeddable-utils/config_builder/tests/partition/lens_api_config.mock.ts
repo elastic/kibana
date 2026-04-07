@@ -48,7 +48,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'auto',
@@ -100,7 +100,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'auto',
@@ -153,7 +153,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'auto',
@@ -199,7 +199,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'auto',
@@ -247,7 +247,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'auto',
@@ -307,7 +307,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -372,7 +372,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -438,7 +438,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'auto',
@@ -499,7 +499,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'auto',
@@ -571,7 +571,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -648,7 +648,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -712,7 +712,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -773,7 +773,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -845,7 +845,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -955,7 +955,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -1027,7 +1027,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -1137,7 +1137,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -1235,7 +1235,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -1329,7 +1329,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -1410,7 +1410,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',
@@ -1569,7 +1569,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     ],
     data_source: {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
       visibility: 'visible',

@@ -285,7 +285,7 @@ describe('XY', () => {
             {
               ignore_global_filters: false,
               sampling: 1,
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               y: [{ operation: 'count', empty_as_null: false }],
             },
@@ -395,8 +395,8 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'companyAIndex' },
-                type: type1,
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
+                type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
                 x: {
@@ -423,39 +423,11 @@ describe('XY', () => {
                 },
               },
               {
-                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
-                type: type2,
-                ignore_global_filters: false,
-                sampling: 1,
-                x: {  
-                  operation: 'date_histogram',
-                  field: 'order_date',
-                  include_empty_rows: false,
-                  suggested_interval: 'auto',
-                  use_original_time_range: true,
-                  drop_partial_intervals: false,
-                },
-                y: [
-                  { operation: 'count', empty_as_null: false },
-                  { operation: 'average', field: 'price' },
-                ],
-                breakdown_by: {
-                  operation: 'terms',
-                  fields: ['product', 'category'],
-                  limit: 5,
-                  rank_by: {
-                    direction: 'desc',
-                    metric: 0,
-                    type: 'column',
-                  },
-                },
-              },
-              {
                 data_source: {
                   type: AS_CODE_DATA_VIEW_SPEC_TYPE,
                   index_pattern: 'companyIndex',
                   time_field: '@timestamp',
-                },  
+                },
                 type: 'referenceLines',
                 ignore_global_filters: false,
                 sampling: 1,
@@ -483,7 +455,7 @@ describe('XY', () => {
                 ignore_global_filters: false,
                 data_source: {
                   type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-                  id: 'metrics-*',
+                  ref_id: 'metrics-*',
                 },
                 events: [
                   {
@@ -561,7 +533,7 @@ describe('XY', () => {
           title: 'Chart with by-ref annotation',
           layers: [
             {
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type: 'line',
               ignore_global_filters: false,
               sampling: 1,

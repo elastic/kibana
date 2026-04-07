@@ -19,7 +19,7 @@ describe('Waffle Schema', () => {
       sampling: 1,
       data_source: {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'test-data-view',
+        ref_id: 'test-data-view',
       },
     } satisfies Partial<WaffleStateNoESQL>;
 

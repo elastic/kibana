@@ -400,7 +400,7 @@ describe('buildDataSourceState', () => {
     const result = buildDataSourceState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "id": "my-dataview-id",
+        "ref_id": "my-dataview-id",
         "type": "data_view_reference",
       }
     `);

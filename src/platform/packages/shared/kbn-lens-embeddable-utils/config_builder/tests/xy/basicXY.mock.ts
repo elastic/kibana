@@ -1121,7 +1121,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       type: 'bar_stacked',
       data_source: {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
       ignore_global_filters: false,
@@ -1214,7 +1214,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       type: 'bar_stacked',
       data_source: {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
       ignore_global_filters: false,
@@ -1302,7 +1302,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       type: 'bar_stacked',
       data_source: {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
       ignore_global_filters: false,

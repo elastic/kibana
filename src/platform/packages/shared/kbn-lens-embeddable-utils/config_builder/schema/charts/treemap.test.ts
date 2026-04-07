@@ -17,7 +17,7 @@ describe('Treemap Schema', () => {
       type: 'treemap',
       data_source: {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'test-data-view',
+        ref_id: 'test-data-view',
       },
       ignore_global_filters: false,
       sampling: 1,

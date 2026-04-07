@@ -236,13 +236,13 @@ export function buildDataSourceStateNoESQL(
   if (reference) {
     return {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: reference.id,
+      ref_id: reference.id,
     };
   }
 
   return {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
+    ref_id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
   };
 }
 
@@ -305,7 +305,7 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
       };
     case AS_CODE_DATA_VIEW_REFERENCE_TYPE:
       return {
-        index: dataSource.id,
+        index: dataSource.ref_id,
         timeFieldName,
       };
     case 'table':
@@ -465,7 +465,7 @@ export const buildDatasourceStates = (
       for (const id of newLayerIds) {
         usedDataviews[id] =
           dataSource.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE
-            ? { type: 'dataView', id: (dataSource as AsCodeDataViewReference).id }
+            ? { type: 'dataView', id: (dataSource as AsCodeDataViewReference).ref_id }
             : {
                 type: 'adHocDataView',
                 ...dataSourceIndex,

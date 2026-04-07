@@ -438,7 +438,7 @@ export function buildAPIAnnotationsLayer(
         }
       : {
           type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-          id: referencedDataView ?? indexPatternId,
+          ref_id: referencedDataView ?? indexPatternId,
         }
   ) satisfies Extract<
     DataSourceType,

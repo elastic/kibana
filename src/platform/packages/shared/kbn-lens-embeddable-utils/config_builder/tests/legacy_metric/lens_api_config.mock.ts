@@ -42,7 +42,7 @@ export const basicLegacyMetricWithDataView: LegacyMetricState = {
   description: 'A test metric chart',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'test-id',
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'count',
@@ -114,7 +114,7 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
   description: 'A comprehensive metric chart with all features',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'my-custom-data-view-id',
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
@@ -178,7 +178,7 @@ export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricState = {
   description: 'A comprehensive metric chart with all features',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'my-custom-data-view-id',
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
@@ -202,7 +202,7 @@ export const legacyMetricWithColorWithoutApplyColorTo: LegacyMetricState = {
   description: 'A comprehensive metric chart with all features',
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'my-custom-data-view-id',
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
