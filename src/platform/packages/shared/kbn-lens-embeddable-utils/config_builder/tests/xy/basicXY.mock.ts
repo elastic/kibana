@@ -1145,8 +1145,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1238,8 +1238,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1326,8 +1326,8 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,

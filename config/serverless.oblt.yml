@@ -107,5 +107,9 @@ xpack.ml.nlp:
         max: 128
 xpack.ml.compatibleModuleType: 'observability'
 
+# ES|QL Views API is not available in serverless Elasticsearch builds
+uiSettings.overrides:
+  observability:streamsEnableWiredStreamViews: false
+
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false

@@ -172,7 +172,7 @@ export function HeaderActions({
                 <EuiButtonEmpty
                   size="s"
                   color="text"
-                  iconType="eyeClosed"
+                  iconType="eyeSlash"
                   onClick={handleUntrackAlert}
                   data-test-subj="untrack-alert-button"
                   disabled={alertStatus !== ALERT_STATUS_ACTIVE}
