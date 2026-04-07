@@ -7,18 +7,20 @@
 
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
+import type { AppDispatch } from '../types';
 import { deleteIndices as request } from '../../services';
 import { notificationService } from '../../services/notification';
 import { clearRowStatus } from '.';
+import { getHttpErrorToastMessage } from '../http_error';
 
 export const deleteIndicesSuccess = createAction('INDEX_MANAGEMENT_DELETE_INDICES_SUCCESS');
 export const deleteIndices =
-  ({ indexNames }) =>
-  async (dispatch) => {
+  ({ indexNames }: { indexNames: string[] }) =>
+  async (dispatch: AppDispatch) => {
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.body.message);
+      notificationService.showDangerToast(getHttpErrorToastMessage(error));
       return dispatch(clearRowStatus({ indexNames }));
     }
     notificationService.showSuccessToast(

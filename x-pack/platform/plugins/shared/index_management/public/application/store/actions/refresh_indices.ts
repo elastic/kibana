@@ -11,16 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { refreshIndices as request } from '../../services';
 import { clearRowStatus, reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
+import type { AppDispatch } from '../types';
+import { getHttpErrorToastMessage } from '../http_error';
 
 export const refreshIndicesStart = createAction('INDEX_MANAGEMENT_REFRESH_INDICES_START');
 export const refreshIndices =
-  ({ indexNames }) =>
-  async (dispatch) => {
+  ({ indexNames }: { indexNames: string[] }) =>
+  async (dispatch: AppDispatch) => {
     dispatch(refreshIndicesStart({ indexNames }));
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.body.message);
+      notificationService.showDangerToast(getHttpErrorToastMessage(error));
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));

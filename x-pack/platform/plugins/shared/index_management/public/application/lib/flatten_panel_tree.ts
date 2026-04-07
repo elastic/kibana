@@ -5,17 +5,52 @@
  * 2.0.
  */
 
-export const flattenPanelTree = (tree, array = []) => {
-  array.push(tree);
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelItemDescriptorEntry,
+  EuiContextMenuPanelItemSeparator,
+  EuiContextMenuPanelItemRenderCustom,
+} from '@elastic/eui/src/components/context_menu/context_menu';
 
-  if (tree.items) {
-    tree.items.forEach((item) => {
-      if (item.panel) {
+type PanelTreeItem =
+  | (Omit<EuiContextMenuPanelItemDescriptorEntry, 'panel'> & {
+      panel?: PanelTree | number;
+    })
+  | EuiContextMenuPanelItemSeparator
+  | EuiContextMenuPanelItemRenderCustom;
+
+type PanelTree = Omit<EuiContextMenuPanelDescriptor, 'items'> & { items?: PanelTreeItem[] };
+type FlattenedPanelTreeItem =
+  | EuiContextMenuPanelItemDescriptorEntry
+  | EuiContextMenuPanelItemSeparator
+  | EuiContextMenuPanelItemRenderCustom;
+
+const isEntryItem = (
+  item: PanelTreeItem
+): item is Omit<EuiContextMenuPanelItemDescriptorEntry, 'panel'> & {
+  panel?: PanelTree | number;
+} => {
+  return 'name' in item && !('renderItem' in item);
+};
+
+export const flattenPanelTree = (
+  tree: PanelTree,
+  array: EuiContextMenuPanelDescriptor[] = []
+): EuiContextMenuPanelDescriptor[] => {
+  const items = tree.items?.map((item): FlattenedPanelTreeItem => {
+    if (isEntryItem(item)) {
+      if (item.panel && typeof item.panel !== 'number') {
         flattenPanelTree(item.panel, array);
-        item.panel = item.panel.id;
       }
-    });
-  }
+
+      const panel = typeof item.panel === 'number' ? item.panel : item.panel?.id;
+      return { ...item, panel };
+    }
+    return item;
+  });
+
+  const { items: _items, ...panel } = tree;
+  array.push(items ? { ...panel, items } : panel);
 
   return array;
 };

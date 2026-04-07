@@ -7,6 +7,7 @@
 
 import { combineReducers } from 'redux';
 import { handleActions } from 'redux-actions';
+import type { Index } from '../../../../common';
 import {
   deleteIndicesSuccess,
   loadIndicesSuccess,
@@ -15,14 +16,23 @@ import {
   loadIndicesError,
   loadIndicesEnrichmentError,
 } from '../actions';
+import type { HttpError } from '../types';
 
-const byId = handleActions(
+type IndicesByIdPayload = { indexNames: string[] } | { indices: Index[] };
+
+type IndicesAllIdsPayload = IndicesByIdPayload;
+
+const byId = handleActions<Record<string, Index>, IndicesByIdPayload>(
   {
-    [deleteIndicesSuccess](state, action) {
+    [String(deleteIndicesSuccess)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
+
       const { indexNames } = action.payload;
 
-      const newState = {};
-      Object.values(state).forEach((index) => {
+      const newState: Record<string, Index> = {};
+      Object.values(state).forEach((index: Index) => {
         if (!indexNames.includes(index.name)) {
           newState[index.name] = index;
         }
@@ -30,20 +40,28 @@ const byId = handleActions(
 
       return newState;
     },
-    [loadIndicesSuccess](state, action) {
+    [String(loadIndicesSuccess)](state, action) {
+      if (!('indices' in action.payload)) {
+        return state;
+      }
+
       const { indices } = action.payload;
-      const newState = {};
-      indices.forEach((index) => {
+      const newState: Record<string, Index> = {};
+      indices.forEach((index: Index) => {
         newState[index.name] = index;
       });
 
       return newState;
     },
-    [reloadIndicesSuccess](state, action) {
+    [String(reloadIndicesSuccess)](state, action) {
+      if (!('indices' in action.payload)) {
+        return state;
+      }
+
       const { indices } = action.payload;
 
-      const newState = {};
-      indices.forEach((index) => {
+      const newState: Record<string, Index> = {};
+      indices.forEach((index: Index) => {
         newState[index.name] = index;
       });
 
@@ -56,23 +74,31 @@ const byId = handleActions(
   {}
 );
 
-const allIds = handleActions(
+const allIds = handleActions<string[], IndicesAllIdsPayload>(
   {
-    [deleteIndicesSuccess](state, action) {
+    [String(deleteIndicesSuccess)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
+
       const { indexNames } = action.payload;
-      const newState = [];
-      state.forEach((indexName) => {
+      const newState: string[] = [];
+      state.forEach((indexName: string) => {
         if (!indexNames.includes(indexName)) {
           newState.push(indexName);
         }
       });
       return newState;
     },
-    [loadIndicesSuccess](state, action) {
+    [String(loadIndicesSuccess)](state, action) {
+      if (!('indices' in action.payload)) {
+        return state;
+      }
+
       const { indices } = action.payload;
-      return indices.map((index) => index.name);
+      return indices.map((index: Index) => index.name);
     },
-    [reloadIndicesSuccess](state) {
+    [String(reloadIndicesSuccess)](state) {
       // the set of IDs should never change when refreshing indexes.
       return state;
     },
@@ -82,42 +108,40 @@ const allIds = handleActions(
 
 const loading = handleActions(
   {
-    [loadIndicesStart]() {
+    [String(loadIndicesStart)]() {
       return true;
     },
-    [loadIndicesSuccess]() {
+    [String(loadIndicesSuccess)]() {
       return false;
     },
-    [loadIndicesError]() {
+    [String(loadIndicesError)]() {
       return false;
     },
   },
   true
 );
 
-const error = handleActions(
+const error = handleActions<false | HttpError, HttpError>(
   {
-    [loadIndicesError](state, action) {
-      const error = action.payload;
-      const newState = { ...error };
-      return newState;
+    [String(loadIndicesError)](_state, action) {
+      return action.payload;
     },
-    [loadIndicesStart]() {
+    [String(loadIndicesStart)]() {
       return false;
     },
-    [loadIndicesSuccess]() {
+    [String(loadIndicesSuccess)]() {
       return false;
     },
   },
   false
 );
 
-const enrichmentErrors = handleActions(
+const enrichmentErrors = handleActions<string[], { source: string }>(
   {
-    [loadIndicesStart]() {
+    [String(loadIndicesStart)]() {
       return [];
     },
-    [loadIndicesEnrichmentError](state, action) {
+    [String(loadIndicesEnrichmentError)](state, action) {
       const { source } = action.payload;
       if (!source) return state;
       if (state.includes(source)) return state;

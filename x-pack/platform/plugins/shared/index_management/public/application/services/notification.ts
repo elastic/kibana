@@ -8,7 +8,7 @@
 import type { NotificationsStart } from '@kbn/core/public';
 
 export class NotificationService {
-  private _toasts: any;
+  private _toasts!: NotificationsStart['toasts'];
 
   public setup(notifications: NotificationsStart): void {
     this._toasts = notifications.toasts;
@@ -20,7 +20,7 @@ export class NotificationService {
 
   private addToasts = (
     title: string,
-    type: 'danger' | 'warning' | 'success' | 'info',
+    type: 'danger' | 'warning' | 'success' | 'primary',
     text?: string
   ) => {
     this._toasts.add({
@@ -43,7 +43,7 @@ export class NotificationService {
   }
 
   public showInfoToast(title: string, text?: string) {
-    this.addToasts(title, 'info', text);
+    this.addToasts(title, 'primary', text);
   }
 }
 

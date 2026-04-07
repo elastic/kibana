@@ -7,6 +7,8 @@
 
 import { createAction } from 'redux-actions';
 import { loadIndices as request } from '../../services';
+import type { AppDispatch } from '../types';
+import { toHttpError } from '../http_error';
 
 export const loadIndicesStart = createAction('INDEX_MANAGEMENT_LOAD_INDICES_START');
 export const loadIndicesSuccess = createAction('INDEX_MANAGEMENT_LOAD_INDICES_SUCCESS');
@@ -15,9 +17,9 @@ export const loadIndicesEnrichmentError = createAction(
   'INDEX_MANAGEMENT_LOAD_INDICES_ENRICHMENT_ERROR'
 );
 
-let abortController;
+let abortController: AbortController | undefined;
 
-export const loadIndices = () => async (dispatch) => {
+export const loadIndices = () => async (dispatch: AppDispatch) => {
   if (abortController && !abortController.signal.aborted) {
     abortController.abort();
   }
@@ -32,6 +34,6 @@ export const loadIndices = () => async (dispatch) => {
       abortController.signal
     );
   } catch (error) {
-    return dispatch(loadIndicesError(error));
+    return dispatch(loadIndicesError(toHttpError(error)));
   }
 };

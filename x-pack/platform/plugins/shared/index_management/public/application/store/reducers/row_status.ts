@@ -6,6 +6,8 @@
  */
 
 import { handleActions } from 'redux-actions';
+import type { Index } from '../../../../common';
+import type { RowStatusState } from '../types';
 import {
   clearCacheIndicesStart,
   clearRowStatus,
@@ -27,9 +29,14 @@ import {
   INDEX_REFRESHING,
 } from '../../../../common/constants';
 
-export const rowStatus = handleActions(
+type RowStatusPayload = { indexNames: string[] } | { indices: Index[] };
+
+export const rowStatus = handleActions<RowStatusState, RowStatusPayload>(
   {
-    [clearRowStatus](state, action) {
+    [String(clearRowStatus)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
       const { indexNames } = action.payload;
       const newState = { ...state };
       indexNames.forEach((indexName) => {
@@ -37,10 +44,13 @@ export const rowStatus = handleActions(
       });
       return newState;
     },
-    [closeIndicesStart](state, action) {
+    [String(closeIndicesStart)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
       const { indexNames } = action.payload;
 
-      const statuses = {};
+      const statuses: RowStatusState = {};
       indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_CLOSING;
       });
@@ -50,10 +60,13 @@ export const rowStatus = handleActions(
         ...statuses,
       };
     },
-    [openIndicesStart](state, action) {
+    [String(openIndicesStart)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
       const { indexNames } = action.payload;
 
-      const statuses = {};
+      const statuses: RowStatusState = {};
       indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_OPENING;
       });
@@ -63,10 +76,13 @@ export const rowStatus = handleActions(
         ...statuses,
       };
     },
-    [refreshIndicesStart](state, action) {
+    [String(refreshIndicesStart)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
       const { indexNames } = action.payload;
 
-      const statuses = {};
+      const statuses: RowStatusState = {};
       indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_REFRESHING;
       });
@@ -76,10 +92,13 @@ export const rowStatus = handleActions(
         ...statuses,
       };
     },
-    [flushIndicesStart](state, action) {
+    [String(flushIndicesStart)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
       const { indexNames } = action.payload;
 
-      const statuses = {};
+      const statuses: RowStatusState = {};
       indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_FLUSHING;
       });
@@ -89,10 +108,13 @@ export const rowStatus = handleActions(
         ...statuses,
       };
     },
-    [forcemergeIndicesStart](state, action) {
+    [String(forcemergeIndicesStart)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
       const { indexNames } = action.payload;
 
-      const statuses = {};
+      const statuses: RowStatusState = {};
       indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_FORCEMERGING;
       });
@@ -102,10 +124,13 @@ export const rowStatus = handleActions(
         ...statuses,
       };
     },
-    [clearCacheIndicesStart](state, action) {
+    [String(clearCacheIndicesStart)](state, action) {
+      if (!('indexNames' in action.payload)) {
+        return state;
+      }
       const { indexNames } = action.payload;
 
-      const statuses = {};
+      const statuses: RowStatusState = {};
       indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_CLEARING_CACHE;
       });
@@ -115,9 +140,12 @@ export const rowStatus = handleActions(
         ...statuses,
       };
     },
-    [reloadIndicesSuccess](state, action) {
+    [String(reloadIndicesSuccess)](state, action) {
+      if (!('indices' in action.payload)) {
+        return state;
+      }
       const { indices } = action.payload;
-      const indicesByName = indices.reduce((acc, index) => {
+      const indicesByName = indices.reduce<Record<string, Index>>((acc, index) => {
         acc[index.name] = index;
         return acc;
       }, {});
@@ -125,58 +153,39 @@ export const rowStatus = handleActions(
       const newState = { ...state };
       // eslint-disable-next-line guard-for-in
       for (const indexName in state) {
-        if (
-          state[indexName] === INDEX_CLOSING &&
-          indicesByName[indexName].status === INDEX_CLOSED
-        ) {
+        const index = indicesByName[indexName];
+        if (!index) {
+          delete newState[indexName];
+          continue;
+        }
+        if (state[indexName] === INDEX_CLOSING && index.status === INDEX_CLOSED) {
           delete newState[indexName];
         }
-        if (state[indexName] === INDEX_OPENING && indicesByName[indexName].status === INDEX_OPEN) {
+        if (state[indexName] === INDEX_OPENING && index.status === INDEX_OPEN) {
           delete newState[indexName];
         }
-        if (
-          state[indexName] === INDEX_REFRESHING &&
-          indicesByName[indexName].status === INDEX_OPEN
-        ) {
+        if (state[indexName] === INDEX_REFRESHING && index.status === INDEX_OPEN) {
           delete newState[indexName];
         }
-        if (
-          state[indexName] === INDEX_REFRESHING &&
-          indicesByName[indexName].status === INDEX_CLOSED
-        ) {
+        if (state[indexName] === INDEX_REFRESHING && index.status === INDEX_CLOSED) {
           delete newState[indexName];
         }
-        if (state[indexName] === INDEX_FLUSHING && indicesByName[indexName].status === INDEX_OPEN) {
+        if (state[indexName] === INDEX_FLUSHING && index.status === INDEX_OPEN) {
           delete newState[indexName];
         }
-        if (
-          state[indexName] === INDEX_FLUSHING &&
-          indicesByName[indexName].status === INDEX_CLOSED
-        ) {
+        if (state[indexName] === INDEX_FLUSHING && index.status === INDEX_CLOSED) {
           delete newState[indexName];
         }
-        if (
-          state[indexName] === INDEX_FORCEMERGING &&
-          indicesByName[indexName].status === INDEX_OPEN
-        ) {
+        if (state[indexName] === INDEX_FORCEMERGING && index.status === INDEX_OPEN) {
           delete newState[indexName];
         }
-        if (
-          state[indexName] === INDEX_FORCEMERGING &&
-          indicesByName[indexName].status === INDEX_CLOSED
-        ) {
+        if (state[indexName] === INDEX_FORCEMERGING && index.status === INDEX_CLOSED) {
           delete newState[indexName];
         }
-        if (
-          state[indexName] === INDEX_CLEARING_CACHE &&
-          indicesByName[indexName].status === INDEX_OPEN
-        ) {
+        if (state[indexName] === INDEX_CLEARING_CACHE && index.status === INDEX_OPEN) {
           delete newState[indexName];
         }
-        if (
-          state[indexName] === INDEX_CLEARING_CACHE &&
-          indicesByName[indexName].status === INDEX_CLOSED
-        ) {
+        if (state[indexName] === INDEX_CLEARING_CACHE && index.status === INDEX_CLOSED) {
           delete newState[indexName];
         }
       }

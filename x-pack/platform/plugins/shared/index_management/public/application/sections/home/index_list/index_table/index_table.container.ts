@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
+import type { History, Location } from 'history';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import type { ConnectedProps } from 'react-redux';
+import type { Query } from '@elastic/eui';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import {
   getPageOfIndices,
   getPager,
@@ -30,12 +34,13 @@ import {
 } from '../../../../store/actions';
 
 import { IndexTable as PresentationComponent } from './index_table';
+import type { IndexManagementState, AppDispatch } from '../../../../store/types';
 
-const mapStateToProps = (state, props) => {
+const mapStateToProps = (state: IndexManagementState) => {
   return {
     allIndices: getIndicesAsArray(state),
-    indices: getPageOfIndices(state, props),
-    pager: getPager(state, props),
+    indices: getPageOfIndices(state),
+    pager: getPager(state),
     filter: getFilter(state),
     sortField: getSortField(state),
     isSortAscending: isSortAscending(state),
@@ -46,32 +51,54 @@ const mapStateToProps = (state, props) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: AppDispatch) => {
   return {
-    filterChanged: (filter) => {
+    filterChanged: (filter: string | Query) => {
       dispatch(filterChanged({ filter }));
     },
-    pageChanged: (pageNumber) => {
+    pageChanged: (pageNumber: number) => {
       dispatch(pageChanged({ pageNumber }));
     },
-    pageSizeChanged: (pageSize) => {
+    pageSizeChanged: (pageSize: number) => {
       dispatch(pageSizeChanged({ pageSize }));
     },
-    sortChanged: (sortField, isSortAscending) => {
-      dispatch(sortChanged({ sortField, isSortAscending }));
+    sortChanged: (sortFieldVal: string, isSortAsc: boolean) => {
+      dispatch(
+        sortChanged({
+          sortField: sortFieldVal,
+          isSortAscending: isSortAsc,
+        })
+      );
     },
-    toggleChanged: (toggleName, toggleValue) => {
+    toggleChanged: (toggleName: string, toggleValue: boolean) => {
       dispatch(toggleChanged({ toggleName, toggleValue }));
     },
     loadIndices: () => {
       dispatch(loadIndices());
     },
-    performExtensionAction: (requestMethod, successMessage, indexNames) => {
-      dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));
+    performExtensionAction: (
+      requestMethod: (indexNames: string[], http: HttpSetup) => Promise<void>,
+      successMessage: string,
+      indexNames: string[]
+    ) => {
+      dispatch(
+        performExtensionAction({
+          requestMethod,
+          successMessage,
+          indexNames,
+        })
+      );
     },
   };
 };
 
-export const IndexTable = withRouter(
-  connect(mapStateToProps, mapDispatchToProps)(PresentationComponent)
-);
+const connector = connect(mapStateToProps, mapDispatchToProps);
+export type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export interface IndexTableOwnProps {
+  history: History;
+  location: Location;
+  http: HttpSetup;
+}
+
+export const IndexTable: ComponentType<IndexTableOwnProps> = connector(PresentationComponent);

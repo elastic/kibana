@@ -12,16 +12,18 @@ import { clearCacheIndices as request } from '../../services';
 import { notificationService } from '../../services/notification';
 
 import { clearRowStatus, reloadIndices } from '.';
+import type { AppDispatch } from '../types';
+import { getHttpErrorToastMessage } from '../http_error';
 
 export const clearCacheIndicesStart = createAction('INDEX_MANAGEMENT_CLEAR_CACHE_INDICES_START');
 export const clearCacheIndices =
-  ({ indexNames }) =>
-  async (dispatch) => {
+  ({ indexNames }: { indexNames: string[] }) =>
+  async (dispatch: AppDispatch) => {
     dispatch(clearCacheIndicesStart({ indexNames }));
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.body.message);
+      notificationService.showDangerToast(getHttpErrorToastMessage(error));
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));

@@ -7,18 +7,33 @@
 
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
+import type { Store } from 'redux';
+import type { AppDependencies } from '../app_context';
 import { defaultTableState } from './reducers/table_state';
 
 import { getReducer } from './reducers';
+import type { IndexManagementState } from './types';
 
-export function indexManagementStore(services) {
-  const toggleNameToVisibleMap = {};
+type ReduxDevToolsExtension = () => ReturnType<typeof applyMiddleware>;
+
+declare global {
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION__?: ReduxDevToolsExtension;
+  }
+}
+
+export function indexManagementStore(
+  services: AppDependencies['services']
+): Store<IndexManagementState> {
+  const toggleNameToVisibleMap: Record<string, boolean> = {};
   services.extensionsService.toggles.forEach((toggleExtension) => {
     toggleNameToVisibleMap[toggleExtension.name] = false;
   });
   const initialState = { tableState: { ...defaultTableState, toggleNameToVisibleMap } };
   const enhancers = [applyMiddleware(thunk)];
 
-  window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+  if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+    enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+  }
   return createStore(getReducer(), initialState, compose(...enhancers));
 }

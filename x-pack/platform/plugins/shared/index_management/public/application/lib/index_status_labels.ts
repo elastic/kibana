@@ -17,7 +17,7 @@ import {
   INDEX_FORCEMERGING,
 } from '../../../common/constants';
 
-export const indexStatusLabels = {
+export const indexStatusLabels: Record<string, string> = {
   [INDEX_CLEARING_CACHE]: i18n.translate(
     'xpack.idxMgmt.indexStatusLabels.clearingCacheStatusLabel',
     {

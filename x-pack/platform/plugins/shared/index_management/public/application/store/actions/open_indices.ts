@@ -10,17 +10,19 @@ import { i18n } from '@kbn/i18n';
 import { openIndices as request } from '../../services';
 import { clearRowStatus, reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
+import type { AppDispatch } from '../types';
+import { getHttpErrorToastMessage } from '../http_error';
 
 export const openIndicesStart = createAction('INDEX_MANAGEMENT_OPEN_INDICES_START');
 
 export const openIndices =
-  ({ indexNames }) =>
-  async (dispatch) => {
+  ({ indexNames }: { indexNames: string[] }) =>
+  async (dispatch: AppDispatch) => {
     dispatch(openIndicesStart({ indexNames }));
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.body.message);
+      notificationService.showDangerToast(getHttpErrorToastMessage(error));
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));

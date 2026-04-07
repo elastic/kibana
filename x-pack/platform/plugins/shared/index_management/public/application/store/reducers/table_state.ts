@@ -6,6 +6,7 @@
  */
 
 import { handleActions } from 'redux-actions';
+import type { TableState } from '../types';
 import {
   filterChanged,
   pageChanged,
@@ -14,7 +15,14 @@ import {
   toggleChanged,
 } from '../actions';
 
-export const defaultTableState = {
+type TableStatePayload =
+  | { filter: TableState['filter'] }
+  | { toggleName: string; toggleValue: boolean }
+  | { sortField: string; isSortAscending: boolean }
+  | { pageNumber: number }
+  | { pageSize: number };
+
+export const defaultTableState: TableState = {
   filter: '',
   pageSize: 10,
   currentPage: 0,
@@ -23,9 +31,12 @@ export const defaultTableState = {
   toggleNameToVisibleMap: {},
 };
 
-export const tableState = handleActions(
+export const tableState = handleActions<TableState, TableStatePayload>(
   {
-    [filterChanged](state, action) {
+    [String(filterChanged)](state, action) {
+      if (!('filter' in action.payload)) {
+        return state;
+      }
       const { filter } = action.payload;
       return {
         ...state,
@@ -33,7 +44,10 @@ export const tableState = handleActions(
         currentPage: 0,
       };
     },
-    [toggleChanged](state, action) {
+    [String(toggleChanged)](state, action) {
+      if (!('toggleName' in action.payload)) {
+        return state;
+      }
       const { toggleName, toggleValue } = action.payload;
       const toggleNameToVisibleMap = { ...state.toggleNameToVisibleMap };
       toggleNameToVisibleMap[toggleName] = toggleValue;
@@ -42,7 +56,10 @@ export const tableState = handleActions(
         toggleNameToVisibleMap,
       };
     },
-    [sortChanged](state, action) {
+    [String(sortChanged)](state, action) {
+      if (!('sortField' in action.payload)) {
+        return state;
+      }
       const { sortField, isSortAscending } = action.payload;
 
       return {
@@ -51,14 +68,20 @@ export const tableState = handleActions(
         isSortAscending,
       };
     },
-    [pageChanged](state, action) {
+    [String(pageChanged)](state, action) {
+      if (!('pageNumber' in action.payload)) {
+        return state;
+      }
       const { pageNumber } = action.payload;
       return {
         ...state,
         currentPage: pageNumber,
       };
     },
-    [pageSizeChanged](state, action) {
+    [String(pageSizeChanged)](state, action) {
+      if (!('pageSize' in action.payload)) {
+        return state;
+      }
       const { pageSize } = action.payload;
       return {
         ...state,

@@ -5,17 +5,28 @@
  * 2.0.
  */
 
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
 import { httpService } from '../../services/http';
+import type { AppDispatch } from '../types';
+import { getHttpErrorToastMessage } from '../http_error';
 
 export const performExtensionAction =
-  ({ requestMethod, indexNames, successMessage }) =>
-  async (dispatch) => {
+  ({
+    requestMethod,
+    indexNames,
+    successMessage,
+  }: {
+    requestMethod: (indexNames: string[], http: HttpSetup) => Promise<void>;
+    indexNames: string[];
+    successMessage: string;
+  }) =>
+  async (dispatch: AppDispatch) => {
     try {
       await requestMethod(indexNames, httpService.httpClient);
     } catch (error) {
-      notificationService.showDangerToast(error.body.message);
+      notificationService.showDangerToast(getHttpErrorToastMessage(error));
       return;
     }
     dispatch(reloadIndices(indexNames));

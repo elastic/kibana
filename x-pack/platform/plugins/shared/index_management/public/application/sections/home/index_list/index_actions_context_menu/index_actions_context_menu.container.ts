@@ -6,7 +6,10 @@
  */
 
 import { connect } from 'react-redux';
+import type { ConnectedProps } from 'react-redux';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
+import type { IndexActionsContextMenuProps as PresentationComponentProps } from './index_actions_context_menu';
 import {
   clearCacheIndices,
   closeIndices,
@@ -20,9 +23,14 @@ import {
 } from '../../../../store/actions';
 
 import { getIndexStatusByIndexName, getIndicesByName } from '../../../../store/selectors';
+import type { IndexManagementState, AppDispatch } from '../../../../store/types';
 
-const mapStateToProps = (state, ownProps) => {
-  const indexStatusByName = {};
+interface OwnProps {
+  indexNames: string[];
+}
+
+const mapStateToProps = (state: IndexManagementState, ownProps: OwnProps) => {
+  const indexStatusByName: PresentationComponentProps['indexStatusByName'] = {};
   const { indexNames } = ownProps;
 
   indexNames.forEach((indexName) => {
@@ -35,39 +43,48 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-const mapDispatchToProps = (dispatch, { indexNames }) => {
+const mapDispatchToProps = (dispatch: AppDispatch, { indexNames }: OwnProps) => {
   return {
-    clearCacheIndices: () => {
-      dispatch(clearCacheIndices({ indexNames }));
+    clearCacheIndices: async () => {
+      await dispatch(clearCacheIndices({ indexNames }));
     },
-    closeIndices: () => {
-      dispatch(closeIndices({ indexNames }));
+    closeIndices: async () => {
+      await dispatch(closeIndices({ indexNames }));
     },
-    flushIndices: () => {
-      dispatch(flushIndices({ indexNames }));
+    flushIndices: async () => {
+      await dispatch(flushIndices({ indexNames }));
     },
-    openIndices: () => {
-      dispatch(openIndices({ indexNames }));
+    openIndices: async () => {
+      await dispatch(openIndices({ indexNames }));
     },
-    refreshIndices: () => {
-      dispatch(refreshIndices({ indexNames }));
+    refreshIndices: async () => {
+      await dispatch(refreshIndices({ indexNames }));
     },
-    forcemergeIndices: (maxNumSegments) => {
-      dispatch(forcemergeIndices({ indexNames, maxNumSegments }));
+    forcemergeIndices: async (maxNumSegments: string) => {
+      await dispatch(forcemergeIndices({ indexNames, maxNumSegments }));
     },
-    deleteIndices: () => {
-      dispatch(deleteIndices({ indexNames }));
+    deleteIndices: async () => {
+      await dispatch(deleteIndices({ indexNames }));
     },
     reloadIndices: () => {
       dispatch(reloadIndices(indexNames));
     },
-    performExtensionAction: (requestMethod, successMessage) => {
-      dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));
+    performExtensionAction: async (
+      requestMethod: (indexNames: string[], http: HttpSetup) => Promise<void>,
+      successMessage: string
+    ) => {
+      await dispatch(
+        performExtensionAction({
+          requestMethod,
+          successMessage,
+          indexNames,
+        })
+      );
     },
   };
 };
 
-export const IndexActionsContextMenu = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PresentationComponent);
+const connector = connect(mapStateToProps, mapDispatchToProps);
+export type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const IndexActionsContextMenu = connector(PresentationComponent);

@@ -8,36 +8,44 @@
 import { Pager, EuiSearchBar } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
+import type { Index } from '../../../../common';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
 import { extensionsService } from './extension_service';
+import type { IndexManagementState, RowStatusState, TableState } from '../types';
 
 export { extensionsService };
+export { setExtensionsService } from './extension_service';
 
-export const getIndices = (state) => state.indices.byId;
-export const indicesLoading = (state) => state.indices.loading;
-export const indicesError = (state) => state.indices.error;
-export const indicesEnrichmentErrors = (state) => state.indices.enrichmentErrors;
-export const getIndicesAsArray = (state) => Object.values(state.indices.byId);
-export const getIndicesByName = (state, indexNames) => {
+export const getIndices = (state: IndexManagementState) => state.indices.byId;
+export const indicesLoading = (state: IndexManagementState) => state.indices.loading;
+export const indicesError = (state: IndexManagementState) => state.indices.error;
+export const indicesEnrichmentErrors = (state: IndexManagementState) =>
+  state.indices.enrichmentErrors;
+export const getIndicesAsArray = (state: IndexManagementState) => Object.values(state.indices.byId);
+export const getIndicesByName = (state: IndexManagementState, indexNames: string[]) => {
   const indices = getIndices(state);
   return indexNames.map((indexName) => indices[indexName]);
 };
-export const getIndexByIndexName = (state, name) => getIndices(state)[name];
-export const getFilteredIds = (state) => state.indices.filteredIds;
-export const getRowStatuses = (state) => state.rowStatus;
-export const getTableState = (state) => state.tableState;
-export const getTableLocationProp = (_, props) => props.location;
-export const getAllIds = (state) => state.indices.allIds;
-export const getIndexStatusByIndexName = (state, indexName) => {
+export const getIndexByIndexName = (state: IndexManagementState, name: string) =>
+  getIndices(state)[name];
+export const getFilteredIds = (state: IndexManagementState) => state.indices.allIds;
+export const getRowStatuses = (state: IndexManagementState): RowStatusState => state.rowStatus;
+export const getTableState = (state: IndexManagementState): TableState => state.tableState;
+export const getTableLocationProp = (_: IndexManagementState, props: { location: Location }) =>
+  props.location;
+export const getAllIds = (state: IndexManagementState) => state.indices.allIds;
+export const getIndexStatusByIndexName = (state: IndexManagementState, indexName: string) => {
   const indices = getIndices(state);
   const { status } = indices[indexName] || {};
   return status;
 };
 const defaultFilterFields = ['name'];
 
-const filterByToggles = (indices, toggleNameToVisibleMap) => {
-  const togglesByName = extensionsService.toggles.reduce(
+const filterByToggles = (indices: Index[], toggleNameToVisibleMap: Record<string, boolean>) => {
+  const togglesByName = extensionsService.toggles.reduce<
+    Record<string, (typeof extensionsService.toggles)[number]>
+  >(
     (byName, toggle) => ({
       ...byName,
       [toggle.name]: toggle,
@@ -122,7 +130,7 @@ export const getFilter = createSelector(getTableState, ({ filter }) => filter);
 
 export const isSortAscending = createSelector(
   getTableState,
-  ({ isSortAscending }) => isSortAscending
+  ({ isSortAscending: ascending }) => ascending
 );
 
 export const getSortField = createSelector(getTableState, ({ sortField }) => sortField);
