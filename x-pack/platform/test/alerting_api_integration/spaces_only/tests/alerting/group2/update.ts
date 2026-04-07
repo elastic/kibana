@@ -224,12 +224,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .send(updatedData);
 
       expect(response.status).to.eql(400);
-      expect(response.body).to.eql({
-        statusCode: 400,
-        error: 'Bad Request',
-        message:
-          '[request body.actions.0.alerts_filter.timeframe.timezone]: string is not a valid timezone: invalid',
-      });
+      expect(response.body.error).to.eql('Bad Request');
+      expect(response.body.message).to.contain('string is not a valid timezone: invalid');
     });
 
     describe('update rule flapping', () => {

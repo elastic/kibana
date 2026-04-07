@@ -143,18 +143,8 @@ describe('rule params schemas', () => {
       ).not.toThrow();
     });
 
-    it('rejects an object that does not match any of the allowed update schemas', () => {
-      expect(() =>
-        ruleParamsSchemaForUpdate.validate({
-          foo: 'bar',
-          searchType: 'searchSource',
-          threshold: [0],
-          thresholdComparator: '>',
-          size: 100,
-          timeWindowUnit: 'm',
-          timeWindowSize: 5,
-        })
-      ).toThrow();
+    it('accepts an empty object as default params via the permissive fallback', () => {
+      expect(() => ruleParamsSchemaForUpdate.validate({})).not.toThrow();
     });
   });
 

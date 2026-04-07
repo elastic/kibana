@@ -125,9 +125,12 @@ export const ruleParamsSchemasForCreate = (
   });
 };
 
-export const ruleParamsSchemaForUpdate = schema.oneOf(variantsWithoutRuleTypeId, {
-  meta: { description: 'The parameters for the rule.' },
-});
+export const ruleParamsSchemaForUpdate = schema.oneOf(
+  [...variantsWithoutRuleTypeId, ruleParamsSchemaWithDefaultValue] as unknown as [
+    Type<Record<string, unknown>>
+  ],
+  { meta: { description: 'The parameters for the rule.' } }
+);
 
 export const createRuleParamsExamples = () =>
   path.join(__dirname, 'examples_create_rule_params.yaml');
