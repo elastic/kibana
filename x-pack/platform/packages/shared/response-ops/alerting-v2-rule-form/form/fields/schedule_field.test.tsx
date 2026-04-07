@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ScheduleField } from './schedule_field';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 describe('ScheduleField', () => {
   it('renders the schedule label', () => {
@@ -28,6 +28,14 @@ describe('ScheduleField', () => {
 
     // The EuiIconTip renders a span with "Info" text
     expect(screen.getByText('Info')).toBeInTheDocument();
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<ScheduleField />, {
+      wrapper: createFormWrapper({}, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByText('Schedule')).toBeInTheDocument();
   });
 
   it('displays initial schedule value', () => {

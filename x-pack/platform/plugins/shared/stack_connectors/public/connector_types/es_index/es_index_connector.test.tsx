@@ -17,6 +17,12 @@ import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_ut
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 jest.mock('lodash', () => {
   const module = jest.requireActual('lodash');
@@ -333,7 +339,7 @@ describe('IndexActionConnectorFields', () => {
     test('connector validation succeeds when connector config is valid', async () => {
       const actionConnector = {
         secrets: {},
-        id: 'test',
+        id: 'es-index',
         actionTypeId: '.index',
         name: 'es_index',
         config: {
@@ -356,29 +362,31 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.index',
-          config: {
-            index: 'test_es_index',
-            executionTimeField: '1',
-            refresh: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.index',
+            config: {
+              index: 'test_es_index',
+              executionTimeField: '1',
+              refresh: false,
+            },
+            id: 'es-index',
+            isDeprecated: false,
+            __internal__: {
+              hasTimeFieldCheckbox: true,
+            },
+            name: 'es_index',
           },
-          id: 'test',
-          isDeprecated: false,
-          __internal__: {
-            hasTimeFieldCheckbox: true,
-          },
-          name: 'es_index',
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
     test('connector validation succeeds when connector config is valid with minimal config', async () => {
       const actionConnector = {
         secrets: {},
-        id: 'test',
+        id: 'es-index',
         actionTypeId: '.index',
         name: 'es_index',
         config: {
@@ -399,17 +407,19 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.index',
-          config: {
-            index: 'test_es_index',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.index',
+            config: {
+              index: 'test_es_index',
+            },
+            id: 'es-index',
+            isDeprecated: false,
+            name: 'es_index',
           },
-          id: 'test',
-          isDeprecated: false,
-          name: 'es_index',
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -437,9 +447,11 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
@@ -467,9 +479,11 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
 
       expect(
@@ -501,9 +515,11 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
 
       expect(
@@ -537,9 +553,11 @@ describe('IndexActionConnectorFields', () => {
 
         await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-        expect(onSubmit).toBeCalledWith({
-          data: {},
-          isValid: false,
+        await waitFor(() => {
+          expect(onSubmit).toBeCalledWith({
+            data: {},
+            isValid: false,
+          });
         });
 
         expect(
@@ -572,9 +590,11 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
 
       expect(await screen.findByText('The index pattern must be lowercase.')).toBeInTheDocument();
@@ -606,9 +626,11 @@ describe('IndexActionConnectorFields', () => {
 
         await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-        expect(onSubmit).toBeCalledWith({
-          data: {},
-          isValid: false,
+        await waitFor(() => {
+          expect(onSubmit).toBeCalledWith({
+            data: {},
+            isValid: false,
+          });
         });
 
         expect(
@@ -641,9 +663,11 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
 
       expect(await screen.findByText(`The index pattern cannot be ${char}`)).toBeInTheDocument();
@@ -673,9 +697,11 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
 
       expect(
