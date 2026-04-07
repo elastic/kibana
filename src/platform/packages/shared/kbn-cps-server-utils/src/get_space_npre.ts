@@ -10,9 +10,26 @@
 import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-utils';
 
 /**
+ * Derive the CPS space NPRE from the per-request base path (e.g. from the core
+ * HTTP `basePath.get(request)` value) and the server base path.
+ *
+ * After the Spaces `onPreRouting` interceptor, `request.url.pathname` no longer
+ * contains `/s/:spaceId`; the space URL context lives on the HTTP base path
+ * instead. This helper matches Spaces service space-id resolution.
+ */
+export function getSpaceNPREFromBasePath(requestBasePath: string, serverBasePath: string): string {
+  const { spaceId } = getSpaceIdFromPath(requestBasePath, serverBasePath);
+  return `@kibana_space_${spaceId}_default`;
+}
+
+/**
  * Get the NPRE for a given space ID or a request carrying a URL.
  *
  * When a request object is provided, the space is extracted from the URL pathname.
+ *
+ * **Note**: For HTTP requests that have been rewritten by the Spaces plugin, the
+ * pathname no longer includes `/s/:spaceId`. Prefer {@link getSpaceNPREFromBasePath}
+ * with the HTTP base path service's `get(request)` and `serverBasePath` in that case.
  *
  * **Assumption**: this function assumes that the server base path is `/` (the
  * default). If Kibana is configured with a custom `server.basePath`, the base

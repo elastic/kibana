@@ -28,4 +28,7 @@ export {
   type OnRequestHandler,
   type OnRequestContext,
 } from './src/create_transport';
-export { getRequestHandlerFactory } from './src/cps_request_handler';
+export {
+  getRequestHandlerFactory,
+  type GetRequestHandlerFactoryDeps,
+} from './src/cps_request_handler';

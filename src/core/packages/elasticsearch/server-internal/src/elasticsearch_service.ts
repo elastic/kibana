@@ -119,7 +119,9 @@ export class ElasticsearchService
         ).cpsEnabled ?? false
       : false;
     this.esTimingEnabled = deps.http.config.serverTimingElasticsearch;
-    this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled, this.esTimingEnabled);
+    this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled, this.esTimingEnabled, {
+      basePath: deps.http.basePath,
+    });
 
     const agentManager = this.getAgentManager(config);
 

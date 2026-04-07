@@ -7,13 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSpaceNPRE, PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
+import {
+  getSpaceNPRE,
+  getSpaceNPREFromBasePath,
+  PROJECT_ROUTING_ORIGIN,
+} from '@kbn/cps-server-utils';
+import type { IBasePath } from '@kbn/core-http-server';
 import { isKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { OnRequestHandlerFactory, OnRequestHandler } from '../cluster_client';
 import { getCpsRequestHandler } from './cps_request_handler';
 import { getTimingRequestHandler } from '../timing';
 
 const noopHandler: OnRequestHandler = () => undefined;
+
+export interface GetRequestHandlerFactoryDeps {
+  /**
+   * When set, space CPS routing uses {@link IBasePath#get} to resolve the active
+   * space (same as Spaces), so rewritten URLs still get the correct NPRE.
+   */
+  basePath?: Pick<IBasePath, 'get' | 'serverBasePath'>;
+}
 
 /**
  * Returns an {@link OnRequestHandlerFactory} that maps routing options to the
@@ -24,7 +37,8 @@ const noopHandler: OnRequestHandler = () => undefined;
  */
 export function getRequestHandlerFactory(
   cpsEnabled: boolean,
-  esTimingEnabled: boolean = true
+  esTimingEnabled: boolean = true,
+  factoryDeps?: GetRequestHandlerFactoryDeps
 ): OnRequestHandlerFactory {
   return (opts) => {
     const request = 'request' in opts && isKibanaRequest(opts.request) ? opts.request : undefined;
@@ -34,8 +48,17 @@ export function getRequestHandlerFactory(
 
     // Get the CPS handler based on routing options
     const cpsHandler =
-      'projectRouting' in opts && opts.projectRouting === 'space'
-        ? getCpsRequestHandler(cpsEnabled, getSpaceNPRE(opts.request), opts.logger)
+      'projectRouting' in opts && opts.projectRouting === 'space' && request
+        ? getCpsRequestHandler(
+            cpsEnabled,
+            factoryDeps?.basePath
+              ? getSpaceNPREFromBasePath(
+                  factoryDeps.basePath.get(request),
+                  factoryDeps.basePath.serverBasePath
+                )
+              : getSpaceNPRE(request),
+            opts.logger
+          )
         : getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ORIGIN, opts.logger);
 
     // Return a composed handler that calls both in sequence

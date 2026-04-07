@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSpaceNPRE } from './src/get_space_npre';
+export { getSpaceNPRE, getSpaceNPREFromBasePath } from './src/get_space_npre';
 export { PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL } from './src/constants';

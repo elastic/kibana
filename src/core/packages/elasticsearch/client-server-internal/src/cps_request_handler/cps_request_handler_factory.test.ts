@@ -53,6 +53,26 @@ describe('getRequestHandlerFactory', () => {
         getSpaceNPRE('my-space')
       );
     });
+
+    it('uses basePath when provided so rewritten URLs still resolve the space NPRE', () => {
+      const basePath = {
+        serverBasePath: '',
+        get: jest.fn().mockReturnValue('/s/from-base-path'),
+      };
+      const factory = getRequestHandlerFactory(true, true, { basePath });
+      const request = httpServerMock.createKibanaRequest({
+        path: '/api/detection_engine/rules/preview',
+      });
+      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
+      const params = makeSearchParams();
+
+      handler({ scoped: true }, params, {}, mockLogger);
+
+      expect((params.body as Record<string, unknown>).project_routing).toBe(
+        getSpaceNPRE('from-base-path')
+      );
+      expect(basePath.get).toHaveBeenCalledWith(request);
+    });
   });
 
   describe('timing context', () => {

@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSpaceNPRE } from './get_space_npre';
+import { getSpaceNPRE, getSpaceNPREFromBasePath } from './get_space_npre';
 
 const mockRequest = (pathname: string) => ({ url: new URL(`http://localhost:5601${pathname}`) });
+
+describe('getSpaceNPREFromBasePath', () => {
+  it('extracts the space id using the same rules as getSpaceIdFromPath', () => {
+    expect(getSpaceNPREFromBasePath('/s/my-space', '')).toBe('@kibana_space_my-space_default');
+    expect(getSpaceNPREFromBasePath('/server/s/my-space', '/server')).toBe(
+      '@kibana_space_my-space_default'
+    );
+    expect(getSpaceNPREFromBasePath('/api/foo', '')).toBe('@kibana_space_default_default');
+  });
+});
 
 describe('getSpaceNPRE', () => {
   describe('when called with a spaceId string', () => {

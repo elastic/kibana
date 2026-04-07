@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getRequestHandlerFactory } from './cps_request_handler_factory';
+export {
+  getRequestHandlerFactory,
+  type GetRequestHandlerFactoryDeps,
+} from './cps_request_handler_factory';
