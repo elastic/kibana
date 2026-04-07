@@ -12,7 +12,7 @@
         "label": "ClassicNavItem",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-        "lineNumber": 44,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -28,7 +28,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -51,7 +51,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -67,7 +67,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -80,7 +80,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -103,7 +103,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +119,7 @@
               "React.ReactNode"
             ],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 50,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -135,7 +135,7 @@
         "label": "ClassicNavItemDeepLink",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-        "lineNumber": 39,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -148,10 +148,10 @@
             "label": "link",
             "description": [],
             "signature": [
-              "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"rules\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:spaces\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:evals\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:elastic_inference_service\" | \"management:inference_endpoints\" | \"management:model_settings\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:alerts_v2\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:cases_templates\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:ai_rule_creation\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:script_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-watchlists\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-home_page\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"securitySolutionUI:space-rules-health\" | \"securitySolutionUI:rule-health\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"data_sources\" | \"workflows:workflows\""
+              "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"rules\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:spaces\" | \"management:rules\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:evals\" | \"management:filesManagement\" | \"management:notification_policies\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:queryActivity\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:elastic_inference_service\" | \"management:inference_endpoints\" | \"management:model_settings\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"ingestHub\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:alerts_v2\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:artifacts\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:cases_templates\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:script_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:siem_migrations-manage\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-home_page\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"securitySolutionUI:space-rules-health\" | \"securitySolutionUI:rule-health\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"workflows:workflows\""
             ],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -167,7 +167,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -177,7 +177,25 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "searchNavigation",
+        "id": "def-public.SEARCH_INDEX_MANAGEMENT_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_INDEX_MANAGEMENT_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"SEARCH_INDEX_MANAGEMENT_LOCATOR_ID\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_navigation/public/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "searchNavigation",
@@ -187,7 +205,7 @@
       "label": "SearchNavigationPluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-      "lineNumber": 15,
+      "lineNumber": 18,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -203,7 +221,7 @@
       "label": "SearchNavigationPluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-      "lineNumber": 17,
+      "lineNumber": 20,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -219,7 +237,7 @@
             "(onAppMount: () => Promise<void>) => void"
           ],
           "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-          "lineNumber": 18,
+          "lineNumber": 21,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -235,7 +253,7 @@
                 "() => Promise<void>"
               ],
               "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-              "lineNumber": 18,
+              "lineNumber": 21,
               "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
@@ -255,7 +273,7 @@
             "() => Promise<void>"
           ],
           "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-          "lineNumber": 19,
+          "lineNumber": 22,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -281,7 +299,7 @@
             "[]"
           ],
           "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-          "lineNumber": 20,
+          "lineNumber": 23,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -309,7 +327,7 @@
             " | undefined"
           ],
           "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-          "lineNumber": 21,
+          "lineNumber": 24,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -326,7 +344,7 @@
                 "<unknown>"
               ],
               "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-              "lineNumber": 21,
+              "lineNumber": 24,
               "columnNumber": 26,
               "deprecated": false,
               "trackAdoption": false,
@@ -350,7 +368,7 @@
             " | undefined) => void; clearBreadcrumbs: () => void; }"
           ],
           "path": "x-pack/solutions/search/plugins/search_navigation/public/types.ts",
-          "lineNumber": 22,
+          "lineNumber": 25,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

@@ -465,174 +465,6 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.deleteItem",
-            "type": "Function",
-            "tags": [],
-            "label": "deleteItem",
-            "description": [
-              "\nRemove a menu item by ID."
-            ],
-            "signature": [
-              "(id: string) => void"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 98,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.deleteItem.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "The ID of the menu item to remove"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 102,
-                "columnNumber": 21,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.getItem",
-            "type": "Function",
-            "tags": [],
-            "label": "getItem",
-            "description": [
-              "\nGet a menu item by ID."
-            ],
-            "signature": [
-              "(id: string) => ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DiscoverAppMenuItemType",
-                "text": "DiscoverAppMenuItemType"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 106,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.getItem.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "The ID of the menu item to retrieve"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 111,
-                "columnNumber": 18,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "The menu item or undefined if not found"
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.mergePopoverItems",
-            "type": "Function",
-            "tags": [],
-            "label": "mergePopoverItems",
-            "description": [
-              "\nMerge popover items from a source menu into a target submenu."
-            ],
-            "signature": [
-              "(targetMenuId: string, targetSubmenuId: string, sourceMenuId: string) => void"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 120,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.mergePopoverItems.$1",
-                "type": "string",
-                "tags": [],
-                "label": "targetMenuId",
-                "description": [
-                  "The ID of the target menu item"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 127,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.mergePopoverItems.$2",
-                "type": "string",
-                "tags": [],
-                "label": "targetSubmenuId",
-                "description": [
-                  "The ID of the submenu within the target menu to merge items into"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 128,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.mergePopoverItems.$3",
-                "type": "string",
-                "tags": [],
-                "label": "sourceMenuId",
-                "description": [
-                  "The ID of the source menu item whose items should be merged"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 129,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.AppMenuRegistry.getAppMenuConfig",
             "type": "Function",
             "tags": [],
@@ -651,7 +483,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 155,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1761,12 +1593,14 @@
         "type": "Function",
         "tags": [],
         "label": "escapeAndPreserveHighlightTags",
-        "description": [],
+        "description": [
+          "\nEscapes HTML in a string while preserving field-format highlight <mark> tags.\nUsed for values already processed by formatFieldValue / getHighlightHtml (e.g. resource badges)."
+        ],
         "signature": [
           "(value: string) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/escape_preserve_highlight_tags.ts",
-        "lineNumber": 20,
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1781,8 +1615,8 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/escape_preserve_highlight_tags.ts",
-            "lineNumber": 20,
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
+            "lineNumber": 27,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -2917,6 +2751,62 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getHighlightedFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getHighlightedFieldValue",
+        "description": [
+          "\nMerges ES highlight snippets into a field value, producing safe HTML with <mark> tags.\nReplicates the logic of getHighlightHtml from @kbn/field-formats-plugin, which packages\ncannot import directly.\n\nEach snippet in the highlights array is the full field value with ES highlight tags\naround matched terms. The function iterates over all snippets (handling multi-valued\nfields), strips the ES tags to find the matching text, and replaces those occurrences\nin the escaped field value with properly tagged <mark> elements."
+        ],
+        "signature": [
+          "(fieldValue: string, highlights: string[] | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getHighlightedFieldValue.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fieldValue",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getHighlightedFieldValue.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "highlights",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/highlight_utils.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

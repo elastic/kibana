@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export { isLensAttributes, dashboardStateToAttachment } from './to_attachment';
+export { isLensAttributes, dashboardStateToAttachmentData } from './to_attachment';
 
-export { attachmentToDashboardState, DEFAULT_TIME_RANGE } from './from_attachment';
+export { attachmentDataToDashboardState, DEFAULT_TIME_RANGE } from './from_attachment';
 
 export {
   toEmbeddablePanel,

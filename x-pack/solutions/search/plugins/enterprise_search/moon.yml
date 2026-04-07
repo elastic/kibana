@@ -83,10 +83,10 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/search-shared-ui'
-  - '@kbn/search-indices'
   - '@kbn/charts-theme'
   - '@kbn/licensing-types'
   - '@kbn/deeplinks-management'
+  - '@kbn/react-kibana-context-render'
 tags:
   - plugin
   - prod

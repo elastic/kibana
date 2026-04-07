@@ -49,6 +49,7 @@ import type {
   ChildWorkflowExecutionItem,
   ConnectorInstanceConfig,
   GetAvailableConnectorsResponse,
+  WorkflowListItemDto,
   WorkflowPartialDetailDto,
 } from '@kbn/workflows/types/v1';
 import type {
@@ -785,6 +786,7 @@ export class WorkflowsService {
       total: ids.length,
       deleted: ids.length - failures.length,
       failures,
+      successfulIds,
     };
   }
 
@@ -843,6 +845,7 @@ export class WorkflowsService {
     failures: Array<{ id: string; error: string }>
   ): Promise<DeleteWorkflowsResponse> {
     const now = new Date();
+    const successfulIds: string[] = [];
 
     const bulkOperations = hits.map((hit) => ({
       index: {
@@ -862,7 +865,6 @@ export class WorkflowsService {
           refresh: true,
         });
 
-        const successfulIds: string[] = [];
         bulkResponse.items.forEach((item) => {
           const operation = item.index;
           if (operation?.error) {
@@ -893,6 +895,7 @@ export class WorkflowsService {
       total: ids.length,
       deleted: ids.length - failures.length,
       failures,
+      successfulIds,
     };
   }
 
@@ -1017,7 +1020,11 @@ export class WorkflowsService {
     }
   }
 
-  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
+  public async getWorkflows(
+    params: GetWorkflowsParams,
+    spaceId: string,
+    options?: { includeExecutionHistory?: boolean }
+  ): Promise<WorkflowListDto> {
     await this.ensureInitialized();
 
     const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
@@ -1131,7 +1138,7 @@ export class WorkflowsService {
     });
 
     const workflows = searchResponse.hits.hits
-      .map((hit) => {
+      .map<WorkflowListItemDto>((hit) => {
         if (!hit._source) {
           throw new Error('Missing _source in search result');
         }
@@ -1140,17 +1147,13 @@ export class WorkflowsService {
           ...workflow,
           description: workflow.description || '',
           definition: workflow.definition,
-          history: [] as WorkflowExecutionHistoryModel[], // Will be populated below
         };
       })
       .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
 
-    // Fetch recent execution history for all workflows
-    if (workflows.length > 0) {
+    if (options?.includeExecutionHistory && workflows.length > 0) {
       const workflowIds = workflows.map((w) => w.id);
       const executionHistory = await this.getRecentExecutionsForWorkflows(workflowIds, spaceId);
-
-      // Populate history for each workflow
       workflows.forEach((workflow) => {
         workflow.history = executionHistory[workflow.id] || [];
       });
@@ -1167,7 +1170,10 @@ export class WorkflowsService {
     };
   }
 
-  public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto> {
+  public async getWorkflowStats(
+    spaceId: string,
+    options?: { includeExecutionStats?: boolean }
+  ): Promise<WorkflowStatsDto> {
     await this.ensureInitialized();
 
     const statsResponse = await this.workflowStorage.getClient().search({
@@ -1192,17 +1198,19 @@ export class WorkflowsService {
     });
 
     const aggs = statsResponse.aggregations;
-
-    // Get execution history stats for the last 30 days
-    const executionStats = await this.getExecutionHistoryStats(spaceId);
-
-    return {
+    const workflowsStats: WorkflowStatsDto = {
       workflows: {
         enabled: aggs?.enabled_count.doc_count ?? 0,
         disabled: aggs?.disabled_count.doc_count ?? 0,
       },
-      executions: executionStats,
     };
+
+    if (options?.includeExecutionStats) {
+      // Get execution history stats for the last 30 days
+      workflowsStats.executions = await this.getExecutionHistoryStats(spaceId);
+    }
+
+    return workflowsStats;
   }
 
   private async getExecutionHistoryStats(spaceId: string) {

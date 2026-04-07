@@ -14,7 +14,7 @@ import {
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
   LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
-  LENS_TERMS_SIZE_DEFAULT,
+  LENS_TERMS_LIMIT_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
@@ -94,11 +94,11 @@ export const bucketTermsOperationSchema = schema.object(
       { minSize: 1, maxSize: 4 }
     ),
     /**
-     * Size of the terms
+     * Maximum number of terms.
      */
-    size: schema.number({
-      defaultValue: LENS_TERMS_SIZE_DEFAULT,
-      meta: { description: 'Size of the terms' },
+    limit: schema.number({
+      defaultValue: LENS_TERMS_LIMIT_DEFAULT,
+      meta: { description: 'Maximum number of terms' },
     }),
     /**
      * Whether to increase accuracy
@@ -195,20 +195,21 @@ export const bucketTermsOperationSchema = schema.object(
           type: schema.literal('significant'),
         }),
         schema.object({
-          type: schema.literal('column'),
-          /**
-           * Metric to be used for the column by index number (0 based)
-           */
-          metric: schema.number({
+          type: schema.literal('metric'),
+          metric_index: schema.number({
+            defaultValue: 0,
+            min: 0,
             meta: {
-              description: 'Metric to be used for the column by index number (0 based)',
+              description:
+                "0-based index into the metrics array (layer's metrics array if XY chart) identifying which metric to rank by. Defaults to 0 (first metric).",
             },
           }),
-          /**
-           * Direction of the column
-           */
+
           direction: builderEnums.direction({
-            meta: { id: 'termsRankByColumnDirection' },
+            meta: {
+              id: 'termsRankByMetricDirection',
+              description: 'Sort direction for metric-based ranking',
+            },
           }),
         }),
         schema.object({
