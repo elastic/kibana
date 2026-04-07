@@ -8,7 +8,7 @@
  */
 
 import type { StateComparators } from '@kbn/presentation-publishing';
-import { isEqual, isUndefined, omitBy } from 'lodash';
+import { isEqual, isUndefined, omit, omitBy } from 'lodash';
 import type {
   EditableSavedSearchAttributes,
   SearchEmbeddableBaseState,
@@ -73,6 +73,16 @@ export function getDiscoverSessionEmbeddableComparators(
         // until the user explicitly applies a tab change.
         selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
         discover_session_id: 'skip',
-        overrides: 'deepEquality',
+        overrides: (prev = {}, next = {}) => {
+          return (
+            isEqual(prev.column_order ?? [], next.column_order ?? []) &&
+            isEqual(prev.column_settings ?? {}, next.column_settings ?? {}) &&
+            isEqual(prev.sort ?? [], next.sort ?? []) &&
+            isEqual(
+              omit(prev, ['column_order', 'column_settings', 'sort']),
+              omit(next, ['column_order', 'column_settings', 'sort'])
+            )
+          );
+        },
       };
 }

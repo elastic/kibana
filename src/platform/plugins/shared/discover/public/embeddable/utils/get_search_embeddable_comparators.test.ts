@@ -82,51 +82,18 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
     view_mode: VIEW_MODE.DOCUMENT_LEVEL,
   };
 
-  it('treats tab arrays as equal when each tab is deeply equal', () => {
-    const c = getDiscoverSessionEmbeddableComparators(true, false);
-    const tab = { ...baseTab };
-    expect('tabs' in c).toBe(true);
-    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [baseTab], [tab])).toBe(true);
-  });
-
-  it('treats omitted optional fields as equal to explicit undefined (e.g. query)', () => {
-    const c = getDiscoverSessionEmbeddableComparators(true, false);
-    const { query, ...tabWithoutQuery } = baseTab;
-    const tabA = { ...tabWithoutQuery };
-    const tabB = { ...tabWithoutQuery, query: undefined };
-    expect('tabs' in c).toBe(true);
-    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [tabA], [tabB])).toBe(true);
-  });
-
-  it('treats tab arrays as not equal when a tab differs', () => {
-    const c = getDiscoverSessionEmbeddableComparators(true, false);
-    const tabA = { ...baseTab, query: { language: 'kuery', query: 'a' } };
-    const tabB = { ...baseTab, query: { language: 'kuery', query: 'b' } };
-    expect('tabs' in c).toBe(true);
-    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [tabA], [tabB])).toBe(false);
-  });
-
-  it('treats tab arrays as not equal when lengths differ', () => {
-    const c = getDiscoverSessionEmbeddableComparators(true, false);
-    const tab = { ...baseTab };
-    expect('tabs' in c).toBe(true);
-    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [tab], [tab, tab])).toBe(
-      false
-    );
-  });
-
   it('returns by-reference comparators when not by-value', () => {
     const c = getDiscoverSessionEmbeddableComparators(false, false);
     expect('discover_session_id' in c && c.discover_session_id).toBe('skip');
-    expect('overrides' in c && c.overrides).toBe('deepEquality');
     expect('selected_tab_id' in c && c.selected_tab_id).toBe('referenceEquality');
+    expect('overrides' in c && typeof c.overrides).toBe('function');
   });
 
   it('skips selected_tab_id when tab comparators should be skipped', () => {
     const c = getDiscoverSessionEmbeddableComparators(false, true);
-    expect('selected_tab_id' in c && c.selected_tab_id).toBe('skip');
     expect('discover_session_id' in c && c.discover_session_id).toBe('skip');
-    expect('overrides' in c && c.overrides).toBe('deepEquality');
+    expect('selected_tab_id' in c && c.selected_tab_id).toBe('skip');
+    expect('overrides' in c && typeof c.overrides).toBe('function');
   });
 
   it('treats selected_tab_id as always equal when skipped', () => {
@@ -145,5 +112,139 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
     expect(
       'selected_tab_id' in c && runComparator(c.selected_tab_id, undefined, undefined, 'x', 'y')
     ).toBe(false);
+  });
+
+  describe('tabs comparator', () => {
+    const getTabsComparator = () => {
+      const c = getDiscoverSessionEmbeddableComparators(true, false);
+      if (!('tabs' in c) || typeof c.tabs !== 'function') {
+        throw new Error('expected tabs function comparator');
+      }
+      return c.tabs;
+    };
+
+    it('treats tab arrays as equal when each tab is deeply equal', () => {
+      const cmp = getTabsComparator();
+      const tab = { ...baseTab };
+      expect(runComparator(cmp, undefined, undefined, [baseTab], [tab])).toBe(true);
+    });
+
+    it('treats omitted optional fields as equal to explicit undefined (e.g. query)', () => {
+      const cmp = getTabsComparator();
+      const { query, ...tabWithoutQuery } = baseTab;
+      const tabA = { ...tabWithoutQuery };
+      const tabB = { ...tabWithoutQuery, query: undefined };
+      expect(runComparator(cmp, undefined, undefined, [tabA], [tabB])).toBe(true);
+    });
+
+    it('treats tab arrays as not equal when a tab differs', () => {
+      const cmp = getTabsComparator();
+      const tabA = { ...baseTab, query: { language: 'kuery', query: 'a' } };
+      const tabB = { ...baseTab, query: { language: 'kuery', query: 'b' } };
+      expect(runComparator(cmp, undefined, undefined, [tabA], [tabB])).toBe(false);
+    });
+
+    it('treats tab arrays as not equal when lengths differ', () => {
+      const cmp = getTabsComparator();
+      const tab = { ...baseTab };
+      expect(runComparator(cmp, undefined, undefined, [tab], [tab, tab])).toBe(false);
+    });
+  });
+
+  describe('overrides comparator', () => {
+    const getOverridesComparator = () => {
+      const c = getDiscoverSessionEmbeddableComparators(false, false);
+      if (!('overrides' in c) || typeof c.overrides !== 'function') {
+        throw new Error('expected overrides function comparator');
+      }
+      return c.overrides;
+    };
+
+    it('treats {} and { sort: [] } as equal (default sort is empty)', () => {
+      const cmp = getOverridesComparator();
+      expect(runComparator(cmp, undefined, undefined, {}, { sort: [] })).toBe(true);
+      expect(runComparator(cmp, undefined, undefined, { sort: [] }, {})).toBe(true);
+    });
+
+    it('treats {} and { column_order: [] } as equal', () => {
+      const cmp = getOverridesComparator();
+      expect(runComparator(cmp, undefined, undefined, {}, { column_order: [] })).toBe(true);
+    });
+
+    it('treats {} and { column_settings: {} } as equal', () => {
+      const cmp = getOverridesComparator();
+      expect(runComparator(cmp, undefined, undefined, {}, { column_settings: {} })).toBe(true);
+    });
+
+    it('treats explicit defaults together as equal to {}', () => {
+      const cmp = getOverridesComparator();
+      expect(
+        runComparator(
+          cmp,
+          undefined,
+          undefined,
+          {},
+          { sort: [], column_order: [], column_settings: {} }
+        )
+      ).toBe(true);
+    });
+
+    it('detects different sort', () => {
+      const cmp = getOverridesComparator();
+      expect(
+        runComparator(
+          cmp,
+          undefined,
+          undefined,
+          {},
+          { sort: [{ name: '@timestamp', direction: 'desc' }] }
+        )
+      ).toBe(false);
+      expect(
+        runComparator(
+          cmp,
+          undefined,
+          undefined,
+          { sort: [] },
+          { sort: [{ name: '@timestamp', direction: 'desc' }] }
+        )
+      ).toBe(false);
+    });
+
+    it('detects different column_order', () => {
+      const cmp = getOverridesComparator();
+      expect(
+        runComparator(cmp, undefined, undefined, { column_order: ['a'] }, { column_order: ['b'] })
+      ).toBe(false);
+    });
+
+    it('detects different column_settings', () => {
+      const cmp = getOverridesComparator();
+      expect(
+        runComparator(
+          cmp,
+          undefined,
+          undefined,
+          { column_settings: { a: { width: 100 } } },
+          { column_settings: { a: { width: 200 } } }
+        )
+      ).toBe(false);
+    });
+
+    it('compares other override keys with deep equality', () => {
+      const cmp = getOverridesComparator();
+      expect(
+        runComparator(cmp, undefined, undefined, { sample_size: 500 }, { sample_size: 500 })
+      ).toBe(true);
+      expect(
+        runComparator(cmp, undefined, undefined, { sample_size: 500 }, { sample_size: 100 })
+      ).toBe(false);
+    });
+
+    it('treats undefined overrides as {}', () => {
+      const cmp = getOverridesComparator();
+      expect(runComparator(cmp, undefined, undefined, undefined, { sort: [] })).toBe(true);
+      expect(runComparator(cmp, undefined, undefined, { sort: [] }, undefined)).toBe(true);
+    });
   });
 });
