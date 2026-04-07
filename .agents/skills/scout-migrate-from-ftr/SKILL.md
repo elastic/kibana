@@ -63,14 +63,14 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
 - Parallel UI: avoid hardcoded saved object IDs (they can differ per space) and make names unique when needed (often suffix with `scoutSpace.id`).
 
-#### Tags when the FTR suite was “deployment agnostic”
+#### Tags when the FTR suite was "deployment agnostic"
 
 FTR **deployment-agnostic** configs often load the same files under both stateful and serverless. In Scout, **do not assume** `tags.deploymentAgnostic` is the right default for every migrated spec—it selects **many** targets (including stateful/search/security and serverless/search/security, etc.).
 
 - **Tests colocated under a solution plugin or package** (`x-pack/solutions/observability|security|search/...`, using `@kbn/scout-oblt`, `@kbn/scout-security`, or `@kbn/scout-search`): Prefer **explicit solution targets** instead of `tags.deploymentAgnostic`, so CI only runs where that solution is present and supported. Typical pattern (adjust domain to your solution):
   - Observability: `{ tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }` (and add `tags.serverless.observability.logs_essentials` only if the feature is meant to run on that project type).
   - Security / Search: use the corresponding `tags.serverless.*` and `tags.stateful.*` entries from the same Scout package—**match sibling specs** in that module.
-- **Tests colocated under platform** (`src/platform/**`, `x-pack/platform/**`, `@kbn/scout` only): If the original intent was “run everywhere the deployment-agnostic FTR job runs”, **`tags.deploymentAgnostic`** is still appropriate.
+- **Tests colocated under platform** (`src/platform/**`, `x-pack/platform/**`, `@kbn/scout` only): If the original intent was "run everywhere the deployment-agnostic FTR job runs", **`tags.deploymentAgnostic`** is still appropriate.
 
 API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
 
@@ -141,7 +141,7 @@ await apiClient.post('internal/my_plugin/flow', {
 
 **When API keys are still appropriate**
 
-- Public `api/*` routes, or internal routes that **do not** create nested keys and were explicitly tested with API key in FTR (e.g. some “terminal” step reporters).
+- Public `api/*` routes, or internal routes that **do not** create nested keys and were explicitly tested with API key in FTR (e.g. some "terminal" step reporters).
 - Use `requestAuth.getApiKey('admin')` / `getApiKeyForCustomRole` per `scout-api-testing`; combine with `cookieHeader` in the **same** spec when different calls need different auth modes.
 
 ### 5) Split loadTestFile suites
@@ -159,7 +159,7 @@ await apiClient.post('internal/my_plugin/flow', {
 
 #### Synthtrace in Scout **API** tests
 
-Import the fixture from **`@kbn/scout-synthtrace`** (not from `@kbn/scout` / `@kbn/scout-oblt` alone). Merge it into your module’s `apiTest` in `test/scout*/api/fixtures/index.ts`:
+Import the fixture from **`@kbn/scout-synthtrace`** (not from `@kbn/scout` / `@kbn/scout-oblt` alone). Merge it into your module's `apiTest` in `test/scout*/api/fixtures/index.ts`:
 
 ```ts
 import { apiTest as baseApiTest, mergeTests } from '@kbn/scout-oblt'; // or '@kbn/scout' for platform-only modules
@@ -174,19 +174,7 @@ Add the same Scout **`kbn_references`** on **whichever `tsconfig.json` includes 
 
 #### Where Scout tests are typechecked (choose one)
 
-**Pattern A — plugin `tsconfig` includes Scout (recommended when tests import `server/` or `common/`)**
-
-- Extend the plugin **`tsconfig.json`** with e.g. **`test/scout/**/*`** (or **`test/**/*`** like `discover_enhanced`).
-- Add solution Scout packages to **`kbn_references`** on that same file (e.g. **`@kbn/scout-oblt`**; for API + synthtrace also **`@kbn/scout-synthtrace`**, **`@kbn/synthtrace-client`**). Platform-only tests use **`@kbn/scout`** instead of `scouting-oblt` where appropriate.
-- **Do not** add `test/scout/ui/tsconfig.json` or `test/scout/api/tsconfig.json`; `yarn kbn bootstrap` should not list separate Scout tsconfigs for this plugin.
-- **Relative imports** from specs/fixtures into **`server/`** or **`common/`** are valid: tests share one TS program with the plugin (same `rootDir` / `include` story as FTR-style colocated tests).
-
-**Pattern B — dedicated `test/scout/{ ui, api }/tsconfig.json`**
-
-- Keeps the **plugin** `type_check` graph smaller; matches many existing modules (e.g. SLO, `data_views` API, infra Scout UI).
-- The Scout folder is its **own** composite project with `rootDir` under `test/scout/...` only.
-- **Do not** use relative imports that reach **`../../../../server/...`** or **`public/...`** from those specs—the importer’s project will try to own `server/**/*.ts` and CI **`check_types`** will explode with **`TS6059` / `TS6307`** (see `tsc --listFilesOnly`).
-- **Do instead:** constants in **`fixtures/constants.ts`** (with a “must match …” comment), **`@kbn/*`** imports covered by that project’s `kbn_references`, or **`common/`** modules that typecheck inside the Scout project.
+See **TypeScript layout** in the `scout-create-scaffold` skill for full **Pattern A** / **Pattern B** details (what to add to `tsconfig.json`, `kbn_references`, and the `yarn kbn bootstrap` / `type_check` steps).
 
 **Choosing:** Prefer **Pattern A** when migrating FTR tests that already imported registration constants or server helpers. Prefer **Pattern B** when you want minimal plugin compile cost and can keep imports boundary-safe.
 
@@ -195,9 +183,9 @@ Add the same Scout **`kbn_references`** on **whichever `tsconfig.json` includes 
 If the module uses **Pattern B**, treat the Scout API directory as isolated:
 
 - Avoid relative imports into plugin **`server/`** / **`public/`** just to reuse a string constant—use **`api/fixtures/constants.ts`** or move the constant to **`common/`** if both prod and tests should share it.
-- Prefer **`@kbn/scout*`** / **`@kbn/synthtrace-client`** per that folder’s **`kbn_references`**.
+- Prefer **`@kbn/scout*`** / **`@kbn/synthtrace-client`** per that folder's **`kbn_references`**.
 
-**FTR migration tip:** FTR often imported server files because tests sat in the plugin program. **Pattern A** preserves that. **Pattern B** matches “thin” e2e deps—duplicate small literals or use fixtures when adding `server/` to the Scout `tsconfig` graph is wrong.
+**FTR migration tip:** FTR often imported server files because tests sat in the plugin program. **Pattern A** preserves that. **Pattern B** matches "thin" e2e deps—duplicate small literals or use fixtures when adding `server/` to the Scout `tsconfig` graph is wrong.
 
 ### 7) Extract component/unit tests where possible
 
@@ -226,7 +214,7 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 - Each test must include assertions in the test body (not hidden inside page objects; page objects should return state).
 - UI tests must have at least one supported tag (Scout validates UI tags at runtime). API tests should also be tagged.
 - Avoid checking raw data in UI tests; prefer page object methods over direct selectors.
-- Preserve or update tags for deployment targets when needed; for **solution** modules, prefer **stateful + solution serverless** tags over `tags.deploymentAgnostic` (see **Tags when the FTR suite was “deployment agnostic”** under step 2).
+- Preserve or update tags for deployment targets when needed; for **solution** modules, prefer **stateful + solution serverless** tags over `tags.deploymentAgnostic` (see **Tags when the FTR suite was "deployment agnostic"** under step 2).
 - Run Scout tests in both stateful and serverless if the plugin supports both.
 
 ### 10) Review against Scout best practices
@@ -253,7 +241,7 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 - Placing Scout tests outside `test/scout*/{ui,api}/{tests,parallel_tests}`.
 - Ignoring existing parallel Scout config (mixing `tests/` with `parallel_tests/`).
 - Using the wrong Scout package (solution tests in security/observability/search must import from their solution Scout package, not `@kbn/scout`).
-- Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only “deployment agnostic” in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
+- Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only "deployment agnostic" in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
 - Importing `expect` from the wrong entrypoint (use `/ui` for UI, `/api` for API).
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs instead).
@@ -263,4 +251,4 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 - Using **`requestAuth.getApiKey('admin')`** for **internal** routes whose handlers **create nested API keys**—often **HTTP 500**; use **`samlAuth.asInteractiveUser`** and merge **`cookieHeader`** (see step 4).
 - Using **`getApiKeyForCustomRole`** for FTR parity on **scoped saved-object / RBAC** assertions that used **cookie + custom role**—prefer **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`** so outcomes match FTR (e.g. **404** vs **200**).
 - **Pattern B** + relative imports from `test/scout*/api/` into **`server/`** / **`public/`** (e.g. `server/saved_objects/...`). Fix by **Pattern A** (`test/scout/**/*` in the plugin `tsconfig` + Scout `kbn_references`) or duplicate constants in **`api/fixtures/constants.ts`** (step 6).
-- **Pattern A** but forgetting to add **`test/scout/**/*`** to **`include`** or omitting **`@kbn/scout-oblt`** / synthtrace **`kbn_references`**—Scout files won’t typecheck in **`check_types`**.
+- **Pattern A** but forgetting to add **`test/scout/**/*`** to **`include`** or omitting **`@kbn/scout-oblt`** / synthtrace **`kbn_references`**—Scout files won't typecheck in **`check_types`**.
