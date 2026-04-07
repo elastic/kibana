@@ -45,13 +45,18 @@ const rewriteBodyRes: RewriteRequestCase<
 export async function createActionConnector({
   http,
   connector,
+  id,
 }: {
   http: HttpSetup;
   connector: Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>;
+  id?: string;
 }): Promise<ActionConnector> {
-  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
-    `${BASE_ACTION_API_PATH}/connector`,
-    { body: JSON.stringify(rewriteBodyRequest(connector)) }
-  );
+  const path = id
+    ? `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`
+    : `${BASE_ACTION_API_PATH}/connector`;
+
+  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(path, {
+    body: JSON.stringify(rewriteBodyRequest(connector)),
+  });
   return rewriteBodyRes(res) as ActionConnector;
 }

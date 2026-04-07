@@ -47,6 +47,7 @@ export const AlertConditionsFieldGroup = () => {
       title={i18n.translate('xpack.alertingV2.ruleForm.alertConditions', {
         defaultMessage: 'Alert conditions',
       })}
+      defaultOpen
     >
       <AlertDelayField />
       <EuiSpacer size="m" />
