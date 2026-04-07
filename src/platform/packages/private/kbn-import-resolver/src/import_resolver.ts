@@ -130,6 +130,12 @@ export class ImportResolver {
       return true;
     }
 
+    // @cypress/grep v5 uses package.json "exports" which Resolve.sync doesn't support.
+    // These imports only run in Cypress's Node.js context, not in Kibana's webpack build.
+    if (req === '@cypress/grep' || req.startsWith('@cypress/grep/')) {
+      return true;
+    }
+
     return false;
   }
 
