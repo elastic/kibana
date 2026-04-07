@@ -322,5 +322,17 @@ export const bulkOperationResponseSchema = z
         })
       )
       .describe('Errors encountered during the bulk operation.'),
+    truncated: z
+      .boolean()
+      .optional()
+      .describe(
+        'True when the request used a filter that matched more rules than were included in this operation.'
+      ),
+    totalMatched: z
+      .number()
+      .optional()
+      .describe('Total number of rules matching the filter when truncated is true.'),
   })
   .describe('Result of a bulk rule operation.');
+
+export type BulkOperationResponse = z.infer<typeof bulkOperationResponseSchema>;
