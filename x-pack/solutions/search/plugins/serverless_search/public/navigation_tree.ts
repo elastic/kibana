@@ -51,6 +51,13 @@ const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.
   defaultMessage: 'AI',
 });
 
+const PROJECT_PERFORMANCE_TITLE = i18n.translate(
+  'xpack.serverlessSearch.nav.adminAndSettings.projectPerformance.title',
+  {
+    defaultMessage: 'Project performance',
+  }
+);
+
 export function createNavigationTree({
   isAppRegistered,
   showAiAssistant = true,
@@ -142,18 +149,7 @@ export function createNavigationTree({
         children: [
           {
             children: [
-              {
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return (
-                    pathNameSerialized.startsWith(
-                      prepend('/app/elasticsearch/index_management/indices')
-                    ) ||
-                    pathNameSerialized.startsWith(prepend('/app/management/data/index_management'))
-                  );
-                },
-                link: 'management:index_management',
-                breadcrumbStatus: 'hidden',
-              },
+              { link: 'management:index_management', breadcrumbStatus: 'hidden' },
               { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
               { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
               { link: 'management:transform', breadcrumbStatus: 'hidden' },
@@ -279,27 +275,44 @@ export function createNavigationTree({
             ],
           },
           {
+            id: 'settings_project_performance',
+            title: PROJECT_PERFORMANCE_TITLE,
+            breadcrumbStatus: 'hidden',
+            children: [
+              {
+                link: 'management:queryActivity',
+                breadcrumbStatus: 'hidden',
+                badgeType: 'new',
+              },
+            ],
+          },
+          {
             id: 'settings_ml',
             title: MACHINE_LEARNING_TITLE,
             children: [
               { link: 'management:trained_models', breadcrumbStatus: 'hidden' },
+              { link: 'management:anomaly_detection' },
+              { link: 'management:analytics' },
+            ],
+          },
+          {
+            id: 'settings_model_management',
+            title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.modelManagement', {
+              defaultMessage: 'Model Management',
+            }),
+            children: [
+              {
+                id: 'searchInferenceEndpointsElasticInferenceService',
+                link: 'management:elastic_inference_service',
+              },
               {
                 id: 'searchInferenceEndpoints',
                 link: 'management:inference_endpoints',
-                breadcrumbStatus: 'hidden',
               },
               {
                 id: 'searchInferenceEndpointsModelSettings',
                 link: 'management:model_settings',
-                breadcrumbStatus: 'hidden',
               },
-              {
-                id: 'searchInferenceEndpointsElasticInferenceService',
-                link: 'management:elastic_inference_service',
-                breadcrumbStatus: 'hidden',
-              },
-              { link: 'management:anomaly_detection' },
-              { link: 'management:analytics' },
             ],
           },
           {
