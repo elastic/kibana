@@ -99,10 +99,17 @@ const useNavigationItems = (): NavigationState | null => {
     const emptyToolSlots: ToolSlots = { headerTools: [], footerTools: [] };
 
     const toolSlots$ = isNextChrome
-      ? combineLatest([chrome.next.globalSearch.get$(), helpLinks$]).pipe(
-          map(([searchConfig, helpLinks]) =>
+      ? combineLatest([
+          chrome.next.globalSearch.get$(),
+          chrome.next.spaceSelector.get$(),
+          chrome.next.userMenu.get$(),
+          helpLinks$,
+        ]).pipe(
+          map(([searchConfig, spaceSelectorConfig, userMenuConfig, helpLinks]) =>
             buildToolSlots({
               globalSearch: searchConfig,
+              spaceSelector: spaceSelectorConfig,
+              userMenu: userMenuConfig,
               helpLinks,
             })
           )

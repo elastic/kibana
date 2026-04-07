@@ -193,6 +193,14 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
         get$: () => state.globalSearch.$,
         set: state.globalSearch.set,
       },
+      userMenu: {
+        get$: () => state.userMenu.$,
+        set: state.userMenu.set,
+      },
+      spaceSelector: {
+        get$: () => state.spaceSelector.$,
+        set: state.spaceSelector.set,
+      },
     },
 
     sidebar,

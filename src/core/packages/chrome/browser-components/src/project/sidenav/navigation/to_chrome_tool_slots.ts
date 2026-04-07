@@ -8,7 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChromeNextGlobalSearchConfig } from '@kbn/core-chrome-browser';
+import type {
+  ChromeNextGlobalSearchConfig,
+  ChromeNextSpaceSelectorConfig,
+  ChromeNextUserMenuConfig,
+} from '@kbn/core-chrome-browser';
 import type {
   SecondaryMenuItem,
   SecondaryMenuSection,
@@ -19,34 +23,99 @@ import type { HelpLinks, HelpMenuLinkItem } from '../../../shared/help_menu_link
 
 export interface ToolSlotsInput {
   globalSearch?: ChromeNextGlobalSearchConfig;
+  spaceSelector?: ChromeNextSpaceSelectorConfig;
+  userMenu?: ChromeNextUserMenuConfig;
   helpLinks: HelpLinks;
 }
 
 export const buildToolSlots = (input: ToolSlotsInput): ToolSlots => ({
-  headerTools: getHeaderTools(input.globalSearch),
-  footerTools: getFooterTools(input.helpLinks),
+  headerTools: getHeaderTools(input.globalSearch, input.spaceSelector),
+  footerTools: getFooterTools(input.userMenu, input.helpLinks),
 });
 
-const getHeaderTools = (globalSearch?: ChromeNextGlobalSearchConfig): ToolItem[] => {
-  if (!globalSearch) {
-    return [];
+const getHeaderTools = (
+  globalSearch?: ChromeNextGlobalSearchConfig,
+  spaceSelector?: ChromeNextSpaceSelectorConfig
+): ToolItem[] => {
+  const tools: ToolItem[] = [];
+
+  const spaceSelectorItem = getSpaceSelectorToolItem(spaceSelector);
+  if (spaceSelectorItem) {
+    tools.push(spaceSelectorItem);
   }
 
-  return [
-    {
+  if (globalSearch) {
+    tools.push({
       id: 'globalSearch',
       label: i18n.translate('core.chrome.projectSideNav.globalSearchLabel', {
         defaultMessage: 'Search',
       }),
       iconType: 'search',
       onClick: globalSearch.onClick,
-    },
-  ];
+    });
+  }
+
+  return tools;
 };
 
-const getFooterTools = (helpLinks: HelpLinks): ToolItem[] => {
+const getSpaceSelectorToolItem = (
+  config: ChromeNextSpaceSelectorConfig | undefined
+): ToolItem | undefined => {
+  if (!config) {
+    return undefined;
+  }
+
+  return {
+    id: 'spaceSelector',
+    label: config.label,
+    renderContent: () => config.renderAvatar(),
+    renderPopover: (closePopover) => config.renderPopover(closePopover),
+    'data-test-subj': 'sideNavSpaceSelector',
+  };
+};
+
+const getFooterTools = (
+  userMenu: ChromeNextUserMenuConfig | undefined,
+  helpLinks: HelpLinks
+): ToolItem[] => {
+  const tools: ToolItem[] = [];
+  const userMenuItem = getUserMenuToolItem(userMenu);
+  if (userMenuItem) {
+    tools.push(userMenuItem);
+  }
   const helpItem = getHelpToolItem(helpLinks);
-  return helpItem ? [helpItem] : [];
+  if (helpItem) {
+    tools.push(helpItem);
+  }
+  return tools;
+};
+
+const getUserMenuToolItem = (
+  config: ChromeNextUserMenuConfig | undefined
+): ToolItem | undefined => {
+  if (!config) {
+    return undefined;
+  }
+
+  const items: SecondaryMenuItem[] = config.items.map((item) => ({
+    id: item.id,
+    label: item.label,
+    href: item.href,
+    isExternal: item.isExternal,
+    'data-test-subj': item['data-test-subj'],
+  }));
+
+  if (items.length === 0) {
+    return undefined;
+  }
+
+  return {
+    id: 'userMenu',
+    label: config.label,
+    renderContent: () => config.renderAvatar(),
+    sections: [{ id: 'userMenuLinks', items }],
+    'data-test-subj': 'sideNavUserMenu',
+  };
 };
 
 const getHelpToolItem = (helpLinks: HelpLinks): ToolItem | undefined => {

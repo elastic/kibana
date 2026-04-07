@@ -10,9 +10,11 @@
 import type { ChromeNextAiButton } from './ai_button';
 import type { ChromeNextGlobalSearchConfig } from './global_search';
 import type { ChromeNextHeaderConfig } from './header';
+import type { ChromeNextSpaceSelectorConfig } from './space_selector';
+import type { ChromeNextUserMenuConfig } from './user_menu';
 
 /**
- * Chrome-Next APIs: header configuration, AI button slot, global search, and future slots.
+ * Chrome-Next APIs: header configuration, AI button slot, global search, user menu, and space selector.
  * @public
  */
 export interface ChromeNext {
@@ -43,5 +45,21 @@ export interface ChromeNext {
      * Pass `undefined` to remove the button. Global — persists across app changes.
      */
     set(config?: ChromeNextGlobalSearchConfig): void;
+  };
+  userMenu: {
+    /**
+     * Set the user menu configuration for the Chrome-Next sidenav.
+     * Chrome renders a user avatar in the sidenav footer with a popover listing the provided items.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(config?: ChromeNextUserMenuConfig): void;
+  };
+  spaceSelector: {
+    /**
+     * Set the space selector configuration for the Chrome-Next sidenav.
+     * Chrome renders a space avatar in the sidenav header with a custom popover.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(config?: ChromeNextSpaceSelectorConfig): void;
   };
 }

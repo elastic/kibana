@@ -14,6 +14,8 @@ import type {
   ChromeBreadcrumb,
   ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
+  ChromeNextSpaceSelectorConfig,
+  ChromeNextUserMenuConfig,
 } from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
@@ -31,6 +33,10 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 const createStartContractMock = () => {
   const nextHeaderState$ = new BehaviorSubject<ChromeNextHeaderConfig | undefined>(undefined);
   const nextGlobalSearchState$ = new BehaviorSubject<ChromeNextGlobalSearchConfig | undefined>(
+    undefined
+  );
+  const nextUserMenuState$ = new BehaviorSubject<ChromeNextUserMenuConfig | undefined>(undefined);
+  const nextSpaceSelectorState$ = new BehaviorSubject<ChromeNextSpaceSelectorConfig | undefined>(
     undefined
   );
 
@@ -123,6 +129,18 @@ const createStartContractMock = () => {
         get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
         set: jest.fn((config?: ChromeNextGlobalSearchConfig) => {
           nextGlobalSearchState$.next(config);
+        }),
+      }),
+      userMenu: lazyObject({
+        get$: jest.fn().mockReturnValue(nextUserMenuState$),
+        set: jest.fn((config?: ChromeNextUserMenuConfig) => {
+          nextUserMenuState$.next(config);
+        }),
+      }),
+      spaceSelector: lazyObject({
+        get$: jest.fn().mockReturnValue(nextSpaceSelectorState$),
+        set: jest.fn((config?: ChromeNextSpaceSelectorConfig) => {
+          nextSpaceSelectorState$.next(config);
         }),
       }),
     }),
