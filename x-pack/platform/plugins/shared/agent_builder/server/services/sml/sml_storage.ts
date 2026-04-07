@@ -30,6 +30,7 @@ const smlStorageSchemaProperties = {
   updated_at: types.date({}),
   spaces: types.keyword({}),
   permissions: types.keyword({}),
+  readonly: types.boolean({}),
 };
 
 const storageSettings = {
