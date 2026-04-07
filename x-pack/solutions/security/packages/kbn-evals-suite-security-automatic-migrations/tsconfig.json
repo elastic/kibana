@@ -7,7 +7,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/evals",
-    "@kbn/inference-common",
     "@kbn/scout",
     "@kbn/tooling-log"
   ]
