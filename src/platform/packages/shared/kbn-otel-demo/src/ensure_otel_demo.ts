@@ -185,9 +185,7 @@ export async function deployDemo({
 
   log.info(`Kibana: ${kibanaUrl}`);
   log.info(`Elasticsearch: ${elasticsearchHost}`);
-  if (useVanillaCollector) {
-    log.info(`Logs index: ${logsIndex}`);
-  }
+  log.info(`Logs index: ${logsIndex}`);
 
   await enableStreams({
     kibanaUrl,
@@ -265,6 +263,7 @@ export async function deployDemo({
         password: kibanaCredentials.password,
         namespace: demoConfig.namespace,
         demoId: demoConfig.id,
+        logsIndex,
       });
 
   // Resolve host gateway IP so pods can reach host.minikube.internal via hostAliases.
@@ -332,9 +331,7 @@ export async function deployDemo({
         );
       }
 
-      if (useVanillaCollector) {
-        log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
-      }
+      log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
 
       if (activeScenarios.length > 0) {
         log.write(

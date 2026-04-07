@@ -21,12 +21,14 @@ export function getEdotK8sCollectorConfig({
   password,
   namespace = 'otel-demo',
   demoId = 'otel-demo',
+  logsIndex = 'logs.otel',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
   namespace?: string;
   demoId?: string;
+  logsIndex?: string;
 }): string {
   const base = getEdotCollectorConfig({ elasticsearchEndpoint, username, password }) as {
     extensions: Record<string, unknown>;
@@ -278,6 +280,12 @@ export function getEdotK8sCollectorConfig({
     ],
   };
 
+  // Route logs to the configured index via the elasticsearch.index attribute
+  // (same approach used by the onboarding flow's Helm chart)
+  base.processors['resource/wired_streams'] = {
+    attributes: [{ key: 'elasticsearch.index', value: logsIndex, action: 'upsert' }],
+  };
+
   base.processors.cumulativetodelta = {};
 
   // -- Exporters -----------------------------------------------------------
@@ -296,13 +304,19 @@ export function getEdotK8sCollectorConfig({
 
   pipelines['logs/k8s'] = {
     receivers: ['filelog/k8s'],
-    processors: ['k8sattributes', 'resourcedetection', 'resource', 'batch'],
+    processors: [
+      'k8sattributes',
+      'resourcedetection',
+      'resource',
+      'resource/wired_streams',
+      'batch',
+    ],
     exporters: ['elasticsearch', 'debug'],
   };
 
   pipelines['logs/k8s_events'] = {
     receivers: ['k8sobjects'],
-    processors: ['resourcedetection', 'resource', 'batch'],
+    processors: ['resourcedetection', 'resource', 'resource/wired_streams', 'batch'],
     exporters: ['elasticsearch', 'debug'],
   };
 

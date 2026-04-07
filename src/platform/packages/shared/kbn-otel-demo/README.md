@@ -47,7 +47,7 @@ node scripts/otel_demo.js --teardown
 | Infrastructure metrics (host/pod/container) | Yes | No |
 | Container logs | Yes | Yes |
 | K8s events | Yes | No |
-| Custom `logsIndex` | No (dynamic indexing) | Yes |
+| Custom `logsIndex` | Yes (via `elasticsearch.index` attribute) | Yes (via fixed `logs_index`) |
 
 ## Log Collection
 
