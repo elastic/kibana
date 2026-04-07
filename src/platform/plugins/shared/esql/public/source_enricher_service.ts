@@ -25,20 +25,15 @@ export class SourceEnricherService {
     this.enrichers.push(enricher);
   }
 
-  getComposedEnricher(): SourceEnricher | undefined {
-    if (this.enrichers.length === 0) {
-      return undefined;
-    }
-    return async (sources: ESQLSourceResult[]) => {
-      let enriched = sources;
-      for (const enricher of this.enrichers) {
-        try {
-          enriched = await enricher(enriched);
-        } catch (error) {
-          this.logger.error(error);
-        }
+  async enrich(sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> {
+    let enriched = sources;
+    for (const enricher of this.enrichers) {
+      try {
+        enriched = await enricher(enriched);
+      } catch (error) {
+        this.logger.error(error);
       }
-      return enriched;
-    };
+    }
+    return enriched;
   }
 }

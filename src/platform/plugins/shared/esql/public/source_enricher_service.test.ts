@@ -24,14 +24,10 @@ describe('SourceEnricherService', () => {
     service = new SourceEnricherService(logger);
   });
 
-  describe('getComposedEnricher', () => {
-    it('returns undefined when no enrichers are registered', () => {
-      expect(service.getComposedEnricher()).toBeUndefined();
-    });
-
-    it('returns a function when at least one enricher is registered', () => {
-      service.register(async (sources) => sources);
-      expect(typeof service.getComposedEnricher()).toBe('function');
+  describe('enrich', () => {
+    it('returns sources unchanged when no enrichers are registered', async () => {
+      const sources = makeSources('my-index');
+      expect(await service.enrich(sources)).toBe(sources);
     });
   });
 
@@ -40,8 +36,7 @@ describe('SourceEnricherService', () => {
       const extra = makeSources('extra-index');
       service.register(async (sources) => [...sources, ...extra]);
 
-      const enricher = service.getComposedEnricher()!;
-      const result = await enricher(makeSources('my-index'));
+      const result = await service.enrich(makeSources('my-index'));
 
       expect(result).toEqual([...makeSources('my-index'), ...extra]);
     });
@@ -57,8 +52,7 @@ describe('SourceEnricherService', () => {
         return [...sources, ...makeSources('from-enricher-2')];
       });
 
-      const enricher = service.getComposedEnricher()!;
-      const result = await enricher(makeSources('base'));
+      const result = await service.enrich(makeSources('base'));
 
       expect(order).toEqual([1, 2]);
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-1', 'from-enricher-2']);
@@ -68,8 +62,7 @@ describe('SourceEnricherService', () => {
       service.register(async (sources) => sources.map((s) => ({ ...s, name: `${s.name}-a` })));
       service.register(async (sources) => sources.map((s) => ({ ...s, name: `${s.name}-b` })));
 
-      const enricher = service.getComposedEnricher()!;
-      const result = await enricher(makeSources('index'));
+      const result = await service.enrich(makeSources('index'));
 
       expect(result.map((s) => s.name)).toEqual(['index-a-b']);
     });
@@ -83,8 +76,7 @@ describe('SourceEnricherService', () => {
       });
       service.register(async (sources) => [...sources, ...makeSources('from-enricher-2')]);
 
-      const enricher = service.getComposedEnricher()!;
-      const result = await enricher(makeSources('base'));
+      const result = await service.enrich(makeSources('base'));
 
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-2']);
       expect(logger.error).toHaveBeenCalledWith(failure);
@@ -97,8 +89,7 @@ describe('SourceEnricherService', () => {
       });
       service.register(async (sources) => [...sources, ...makeSources('from-enricher-3')]);
 
-      const enricher = service.getComposedEnricher()!;
-      const result = await enricher(makeSources('base'));
+      const result = await service.enrich(makeSources('base'));
 
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-1', 'from-enricher-3']);
       expect(logger.error).toHaveBeenCalledTimes(1);

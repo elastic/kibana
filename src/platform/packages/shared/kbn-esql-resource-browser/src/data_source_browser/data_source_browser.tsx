@@ -40,7 +40,7 @@ interface DataSourceBrowserKibanaServices {
   core: Pick<CoreStart, 'application' | 'http'>;
   esql?: {
     getLicense?: () => Promise<ILicense | undefined>;
-    enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+    enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   };
 }
 

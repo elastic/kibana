@@ -105,7 +105,7 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   isServerless: boolean;
-  enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 }
 
 export interface ESQLEditorDeps {

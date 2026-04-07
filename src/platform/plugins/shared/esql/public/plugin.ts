@@ -62,7 +62,7 @@ export interface EsqlPluginSetup {
 export interface EsqlPluginStart {
   variablesService: EsqlVariablesService;
   isServerless: boolean;
-  enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 }
 
 export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
@@ -145,7 +145,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
-      enrichSources: this.sourceEnricherService.getComposedEnricher(),
+      enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
     };
 
     setKibanaServices(
