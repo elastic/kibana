@@ -136,6 +136,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable<EvaluatorStats>
+          tableCaption={i18n.SECTION_EVALUATOR_STATS}
           items={group.stats}
           columns={statsColumns}
           loading={runLoading || (isOpen && examplesLoading)}
