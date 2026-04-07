@@ -387,7 +387,7 @@ describe('XY', () => {
       }
     );
     it.each(anyType.map((type) => anyType.map((anotherType) => [type, anotherType])).flat(1))(
-      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations with mixed datasets',
+      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations (DSL layers only)',
       (type1, type2) => {
         validateAPIConverter(
           {
@@ -423,20 +423,39 @@ describe('XY', () => {
                 },
               },
               {
-                data_source: { type: 'esql', query: 'FROM company_index' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { column: 'order_date' },
-                y: [{ column: 'value' }, { column: 'price' }],
-                breakdown_by: { column: 'product' },
+                x: {  
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  include_empty_rows: false,
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  drop_partial_intervals: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: {
+                  operation: 'terms',
+                  fields: ['product', 'category'],
+                  limit: 5,
+                  rank_by: {
+                    direction: 'desc',
+                    metric: 0,
+                    type: 'column',
+                  },
+                },
               },
               {
                 data_source: {
                   type: AS_CODE_DATA_VIEW_SPEC_TYPE,
                   index_pattern: 'companyIndex',
                   time_field: '@timestamp',
-                },
+                },  
                 type: 'referenceLines',
                 ignore_global_filters: false,
                 sampling: 1,
