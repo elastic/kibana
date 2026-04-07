@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { OnDoneLoadJsonHandler } from './modal_provider';
 import { ModalProvider } from './modal_provider';
 
@@ -40,7 +41,7 @@ jest.mock('@kbn/code-editor', () => {
 });
 
 const setup = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
-  render(
+  renderWithI18n(
     <KibanaContextProvider services={{ uiSettings: uiSettingsServiceMock.createSetupContract() }}>
       <ModalProvider onDone={onDone}>
         {(openModal) => {
@@ -165,9 +166,7 @@ describe('Load from JSON ModalProvider', () => {
           "script": {
             "description": "add a test_field",
             "lang": "painless",
-            "source": """
-              ctx['test_field'] = 'This is a test'
-            """
+            "source": """ctx['test_field'] = 'This is a test'"""
           }
         }
       ]
@@ -187,9 +186,7 @@ describe('Load from JSON ModalProvider', () => {
             "script": Object {
               "description": "add a test_field",
               "lang": "painless",
-              "source": "
-                    ctx['test_field'] = 'This is a test'
-                  ",
+              "source": "ctx['test_field'] = 'This is a test'",
             },
           },
         ],
