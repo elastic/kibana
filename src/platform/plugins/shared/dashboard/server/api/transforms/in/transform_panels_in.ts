@@ -18,8 +18,7 @@ import type {
 } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService } from '../../../kibana_services';
-import { TransformPanelInError } from './transform_panel_in_error';
-import { TransformPanelsInError } from './transform_panels_in_error';
+import { TransformPanelsInError, TransformPanelInError } from './transform_panels_in_error';
 
 export function transformPanelsIn(
   widgets: Required<DashboardState>['panels'],

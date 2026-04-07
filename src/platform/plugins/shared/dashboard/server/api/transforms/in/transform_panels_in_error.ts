@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TransformPanelInError } from './transform_panel_in_error';
+/* eslint-disable max-classes-per-file */
 
 export class TransformPanelsInError extends Error {
   public readonly panelErrors: TransformPanelInError[];
@@ -16,5 +16,17 @@ export class TransformPanelsInError extends Error {
     super(message);
     this.name = 'TransformPanelsInError';
     this.panelErrors = panelErrors;
+  }
+}
+
+export class TransformPanelInError extends Error {
+  public readonly type: string;
+  public readonly config: object;
+
+  constructor(message: string, type: string, config: object) {
+    super(message);
+    this.name = 'TransformPanelInError';
+    this.type = type;
+    this.config = config;
   }
 }
