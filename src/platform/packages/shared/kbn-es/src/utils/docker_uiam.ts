@@ -154,6 +154,8 @@ export const UIAM_CONTAINERS = [
       '--env',
       `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
       '--env',
+      `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
       'quarkus.log.console.json.enabled=false',
       '--env',
       `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
