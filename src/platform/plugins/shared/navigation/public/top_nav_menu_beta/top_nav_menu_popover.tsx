@@ -11,6 +11,7 @@ import React, { useMemo, type ReactElement } from 'react';
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from './utils';
+import { i18n } from '@kbn/i18n';
 import type {
   TopNavMenuPopoverItem,
   TopNavMenuPrimaryActionItem,
@@ -76,6 +77,10 @@ export const TopNavMenuPopover = ({
       panelStyle={{
         width: popoverWidth,
       }}
+      aria-label={i18n.translate('core.chrome.appMenu.popoverAriaLabel', {
+        defaultMessage: 'App menu',
+      })}
+    >
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
