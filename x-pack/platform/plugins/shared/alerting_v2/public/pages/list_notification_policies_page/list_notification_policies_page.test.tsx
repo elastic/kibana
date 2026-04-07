@@ -119,6 +119,10 @@ jest.mock('../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
 
+jest.mock('../../hooks/use_fetch_tags', () => ({
+  useFetchTags: () => ({ data: [], isLoading: false }),
+}));
+
 jest.mock('../../components/notification_policy/delete_confirmation_modal', () => ({
   DeleteNotificationPolicyConfirmModal: () => null,
 }));
@@ -151,6 +155,7 @@ const createPolicy = (
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   groupBy: null,
+  tags: null,
   groupingMode: null,
   throttle: { strategy: undefined, interval: undefined },
   snoozedUntil: null,
@@ -246,6 +251,7 @@ describe('ListNotificationPoliciesPage', () => {
     expect(columnHeaders).toEqual([
       'Name',
       'Destinations',
+      'Tags',
       'Last update',
       'Updated by',
       'State',

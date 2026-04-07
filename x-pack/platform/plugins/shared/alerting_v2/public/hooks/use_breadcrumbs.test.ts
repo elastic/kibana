@@ -21,12 +21,9 @@ const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
 describe('useBreadcrumbs', () => {
   const mockDocTitleChange = jest.fn();
-  const mockGetUrlForApp = jest.fn().mockReturnValue('/app/management/alertingV2/rules');
-  const mockNavigateToUrl = jest.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetUrlForApp.mockReturnValue('/app/management/alertingV2/rules');
 
     mockCoreStart.mockImplementation((key: string) => key as any);
 
@@ -34,12 +31,6 @@ describe('useBreadcrumbs', () => {
       if (service === 'chrome') {
         return {
           docTitle: { change: mockDocTitleChange },
-        } as any;
-      }
-      if (service === 'application') {
-        return {
-          getUrlForApp: mockGetUrlForApp,
-          navigateToUrl: mockNavigateToUrl,
         } as any;
       }
       return undefined as any;
@@ -64,8 +55,7 @@ describe('useBreadcrumbs', () => {
     expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
     expect(breadcrumbs[1]).toMatchObject({
       text: 'Rules',
-      href: '/app/management/alertingV2/rules',
-      onClick: expect.any(Function),
+      href: '/',
     });
     expect(breadcrumbs[2]).toMatchObject({ text: 'Create' });
   });
@@ -76,7 +66,8 @@ describe('useBreadcrumbs', () => {
     const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
     expect(breadcrumbs).toHaveLength(3);
     expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
-    expect(breadcrumbs[1].href).toBe('/app/management/alertingV2/rules');
+    expect(breadcrumbs[1]).toMatchObject({ text: 'Rules', href: '/' });
+    expect(breadcrumbs[2]).toMatchObject({ text: 'Edit' });
   });
 
   it('should set breadcrumbs for rule_details with the rule name', () => {
@@ -105,52 +96,23 @@ describe('useBreadcrumbs', () => {
     expect(docTitle).toHaveLength(3);
   });
 
-  it('should call navigateToUrl when a breadcrumb link is clicked', () => {
+  it('should include href on rules list breadcrumb for sub-pages', () => {
     renderHook(() => useBreadcrumbs('create'));
 
     const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
     const rulesListBreadcrumb = breadcrumbs[1];
-
-    rulesListBreadcrumb.onClick({
-      preventDefault: jest.fn(),
-      metaKey: false,
-      altKey: false,
-      ctrlKey: false,
-      shiftKey: false,
-    });
-
-    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules');
+    expect(rulesListBreadcrumb.href).toBe('/');
   });
 
-  it('should not navigate when a modifier key is held', () => {
-    renderHook(() => useBreadcrumbs('create'));
+  it('should not include href on rules list breadcrumb when on the list page itself', () => {
+    renderHook(() => useBreadcrumbs('rules_list'));
 
     const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
     const rulesListBreadcrumb = breadcrumbs[1];
-    const preventDefault = jest.fn();
-
-    rulesListBreadcrumb.onClick({
-      preventDefault,
-      metaKey: true,
-      altKey: false,
-      ctrlKey: false,
-      shiftKey: false,
-    });
-
-    expect(preventDefault).not.toHaveBeenCalled();
-    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(rulesListBreadcrumb.href).toBeUndefined();
   });
 
   describe('notification policy pages', () => {
-    beforeEach(() => {
-      mockGetUrlForApp.mockImplementation((_appId: string, opts?: { path?: string }) => {
-        if (opts?.path && opts.path.includes('notification_policies')) {
-          return '/app/management/alertingV2/notification_policies';
-        }
-        return '/app/management/alertingV2/rules';
-      });
-    });
-
     it('should set breadcrumbs for notification_policies_list with root', () => {
       renderHook(() => useBreadcrumbs('notification_policies_list'));
 
@@ -168,8 +130,7 @@ describe('useBreadcrumbs', () => {
       expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
       expect(breadcrumbs[1]).toMatchObject({
         text: 'Notification Policies',
-        href: '/app/management/alertingV2/notification_policies',
-        onClick: expect.any(Function),
+        href: '/',
       });
       expect(breadcrumbs[2]).toMatchObject({ text: 'Create' });
     });
@@ -182,28 +143,9 @@ describe('useBreadcrumbs', () => {
       expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
       expect(breadcrumbs[1]).toMatchObject({
         text: 'Notification Policies',
-        href: '/app/management/alertingV2/notification_policies',
+        href: '/',
       });
       expect(breadcrumbs[2]).toMatchObject({ text: 'Edit' });
-    });
-
-    it('should navigate to notification policies list when breadcrumb link is clicked', () => {
-      renderHook(() => useBreadcrumbs('notification_policy_create'));
-
-      const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
-      const policiesListBreadcrumb = breadcrumbs[1];
-
-      policiesListBreadcrumb.onClick({
-        preventDefault: jest.fn(),
-        metaKey: false,
-        altKey: false,
-        ctrlKey: false,
-        shiftKey: false,
-      });
-
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/notification_policies'
-      );
     });
 
     it('should set the document title for notification policy pages', () => {

@@ -236,7 +236,7 @@ describe('dimension editor', () => {
     });
 
     describe('icon select', () => {
-      it('sets icon with deafult iconAlign', async () => {
+      it('sets icon with default iconAlign', async () => {
         const setState = jest.fn();
         const { setIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: undefined, iconAlign: undefined },

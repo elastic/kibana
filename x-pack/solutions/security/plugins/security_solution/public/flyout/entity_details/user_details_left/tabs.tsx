@@ -27,6 +27,7 @@ import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_ent
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
+import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -43,6 +44,7 @@ export const useTabs = (
 
   return useMemo(() => {
     const tabs: LeftPanelTabsType = [];
+
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
@@ -76,8 +78,13 @@ export const useTabs = (
       );
     }
 
-    if (entityStoreEntityId && hasEntityResolutionLicense) {
-      tabs.push(getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'user' }));
+    if (entityStoreEntityId) {
+      tabs.push(getGraphViewTab({ entityId: entityStoreEntityId, scopeId }));
+      if (hasEntityResolutionLicense) {
+        tabs.push(
+          getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.user })
+        );
+      }
     }
 
     return tabs;
