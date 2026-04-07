@@ -8,6 +8,7 @@
 import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
+import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -172,8 +173,9 @@ export const useBulkActionItems = ({
     return data
       .filter((item) => eventIds.includes(item._id))
       .map((item) => {
+        const flattened = flattenObject(item.ecs);
         const fields: Record<string, unknown> = {};
-        for (const { field, value } of item.data) {
+        for (const [field, value] of Object.entries(flattened)) {
           fields[field] = value;
         }
         return {
@@ -243,18 +245,19 @@ export const useBulkActionItems = ({
         }, [])
       : [];
 
-    return [...actionItems, ...runWorkflowMenuItem, ...additionalItems];
+    return [...actionItems, ...(data ? runWorkflowMenuItem : []), ...additionalItems];
   }, [
-    hasAlertsUpdate,
-    alertClosingReasonItem,
-    closePopover,
-    currentStatus,
-    customBulkActions,
-    eventIds,
-    onClickUpdate,
-    query,
-    runWorkflowMenuItem,
     showAlertStatusActions,
+    hasAlertsUpdate,
+    customBulkActions,
+    data,
+    runWorkflowMenuItem,
+    currentStatus,
+    closePopover,
+    onClickUpdate,
+    alertClosingReasonItem,
+    query,
+    eventIds,
   ]);
 
   const panels = useMemo(
@@ -270,9 +273,9 @@ export const useBulkActionItems = ({
             }),
           };
         }),
-        ...runDocumentWorkflowPanel,
+        ...(data ? runDocumentWorkflowPanel : []),
       ] as EuiContextMenuPanelDescriptor[],
-    [alertClosingReasonPanels, runDocumentWorkflowPanel]
+    [alertClosingReasonPanels, data, runDocumentWorkflowPanel]
   );
 
   return useMemo(() => ({ items, panels }), [items, panels]);

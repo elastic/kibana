@@ -10,6 +10,7 @@ import { mount } from 'enzyme';
 import { set } from '@kbn/safer-lodash-set';
 import { waitFor } from '@testing-library/react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { SearchHit } from '../../../../../common/search_strategy';
 import type { TakeActionDropdownProps } from './take_action_dropdown';
 import { TakeActionDropdown } from './take_action_dropdown';
 import { mockAlertDetailsData } from '../../../../common/components/event_details/mocks';
@@ -113,6 +114,7 @@ describe('take action dropdown', () => {
       refetchFlyoutData: jest.fn(),
       scopeId: TimelineId.active,
       onOsqueryClick: jest.fn(),
+      searchHit: { _index: 'test-index', _id: 'test-id' } as SearchHit,
     };
 
     mockStartServicesMock = createStartServicesMock();
