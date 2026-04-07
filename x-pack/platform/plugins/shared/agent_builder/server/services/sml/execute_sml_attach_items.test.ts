@@ -195,8 +195,53 @@ describe('resolveSmlAttachItems', () => {
         type: 'visualization',
         data: { layers: [] },
         origin: 'custom-origin',
+        description: 'Test Viz',
       });
       expect(results[0].chunk_id).toBe('chunk-1');
+    }
+  });
+
+  it('uses description from toAttachment when provided', async () => {
+    const smlDoc = createSmlDoc();
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockGetTypeDefinition.mockReturnValue({
+      id: 'visualization',
+      list: jest.fn(),
+      getSmlData: jest.fn(),
+      toAttachment: jest.fn().mockResolvedValue({
+        type: 'visualization',
+        data: {},
+        description: 'Custom Description',
+      }),
+    });
+    const results = await resolveSmlAttachItems({
+      ...baseParams,
+      chunkIds: ['chunk-1'],
+    });
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment.description).toBe('Custom Description');
+    }
+  });
+
+  it('falls back to smlDoc.title when toAttachment omits description', async () => {
+    const smlDoc = createSmlDoc({ title: 'My Dashboard' });
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockGetTypeDefinition.mockReturnValue({
+      id: 'visualization',
+      list: jest.fn(),
+      getSmlData: jest.fn(),
+      toAttachment: jest.fn().mockResolvedValue({ type: 'visualization', data: {} }),
+    });
+    const results = await resolveSmlAttachItems({
+      ...baseParams,
+      chunkIds: ['chunk-1'],
+    });
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment.description).toBe('My Dashboard');
     }
   });
 
@@ -268,6 +313,7 @@ describe('resolveSmlAttachItems', () => {
         type: 'visualization',
         data: {},
         origin: 'r-ok',
+        description: 'Test Viz',
       });
     }
   });
