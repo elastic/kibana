@@ -81,6 +81,11 @@ API and UI specs should both carry tags that match the intended `run-tests` / CI
 - `beforeEach/afterEach` -> `test.beforeEach/test.afterEach`.
 - Keep **one suite per file** and a flat hierarchy (avoid nested `describe`; use `test.step()` inside a test for structure).
 - If a single FTR file contains multiple top-level `describe` blocks, split into multiple Scout specs (one describe per file).
+- **Nested `describe` blocks**: if the FTR file has nested describes, prefer splitting into separate Scout spec files. However, if the file is small and the nested describes are lightweight, flatten them into a single `test.describe` with individual `test(...)` blocks using `test.step(...)` for sub-structure instead of creating many tiny spec files.
+
+#### Combine duplicate stateful / serverless FTR tests
+
+FTR often has **separate but near-identical** test files under `test/*api_integration*/` (stateful) and `test/serverless/` (or similar directories). Before migrating each file individually, compare them: if the test flow is identical or almost identical, **combine into a single Scout spec** with tags covering both deployment targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`). Extract any deployment-specific differences into conditional helpers or small branching within the spec. Only keep separate specs when the flows genuinely diverge.
 
 #### `it` blocks are sometimes steps (not full test cases)
 
@@ -108,9 +113,10 @@ test('create and edit entity', async () => {
 
 ### 4) Replace FTR dependencies
 
-- Replace `supertest` calls with Scout `apiClient` (endpoint under test) + `requestAuth`/`samlAuth` (auth).
+- Replace `supertest` calls with Scout `apiClient` (endpoint under test) + `requestAuth`/`samlAuth` (auth). FTR stateful tests often use `supertest` with an implicit **admin** role—don't carry that over blindly. Research whether a lower default role like `editor` or `viewer` is sufficient; comparing the roles used in the **serverless** version of the same test (if one exists) is a good starting point.
 - Replace other FTR services with Scout fixtures (`pageObjects`, `browserAuth`, `apiServices`, `kbnClient`, `esArchiver`).
 - Use `apiServices`/`kbnClient` for setup/teardown and verifying side effects.
+- **Audit FTR before/after hooks carefully**—don't copy them verbatim. Review every call in `before`/`beforeEach`/`after`/`afterEach` and verify it is still correct for Scout: replace FTR-specific APIs with their Scout equivalents, remove unnecessary calls (e.g. FTR service initialization that Scout fixtures handle automatically), and add any missing setup or cleanup that the FTR suite neglected. Ensure every resource created in `beforeAll`/`beforeEach` has matching cleanup in `afterAll`/`afterEach`—FTR suites frequently lack proper teardown. Place `kbnClient.savedObjects.cleanStandardList()` (or `scoutSpace.savedObjects.cleanStandardList()`) in **`afterAll`**, not `beforeAll`; `beforeAll` cleanup masks missing teardown and hides leaked state from previous runs.
 - Replace webdriver waits with Playwright/page object methods.
 - Move UI selectors/actions into Scout page objects; register new page objects in the plugin fixtures index.
 - If the test needs API setup/cleanup, add a scoped API service and use it in `beforeAll/afterAll`.
@@ -229,7 +235,8 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 - Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only “deployment agnostic” in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
 - Importing `expect` from the wrong entrypoint (use `/ui` for UI, `/api` for API).
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
-- Using nested `describe` blocks or `*.describe.configure()` (split into separate specs instead).
+- Using nested `describe` blocks or `*.describe.configure()` (split into separate specs, or flatten small files into `test` + `test.step`—see step 3).
+- Migrating near-identical stateful and serverless FTR files as two separate Scout specs instead of combining them into one spec with appropriate tags (see step 3).
 - Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
 - Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
 - Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
