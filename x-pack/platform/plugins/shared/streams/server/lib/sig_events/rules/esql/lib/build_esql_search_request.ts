@@ -8,6 +8,15 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { MAX_ALERTS_PER_EXECUTION } from '../common';
 
+/**
+ * Builds the ES|QL search request for match-type rule execution.
+ *
+ * IMPORTANT: Results are hard-capped at {@link MAX_ALERTS_PER_EXECUTION}
+ * (currently 1 000). During large incidents this means additional matching
+ * documents in the same lookback window are silently dropped. If under-
+ * reporting during spikes becomes a problem, consider paging, raising the
+ * cap with explicit cost bounds, or aggregating high-cardinality bursts.
+ */
 export const buildEsqlSearchRequest = ({
   query,
   timestampField,

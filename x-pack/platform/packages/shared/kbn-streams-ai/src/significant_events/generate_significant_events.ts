@@ -35,7 +35,12 @@ import {
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
 
-interface Query {
+/**
+ * Intermediate representation of a query as produced by the LLM tool output.
+ * Uses a flat `esql` string (vs the wrapped `EsqlQuery` in the wire type)
+ * and carries the `category` from the tool schema.
+ */
+interface ParsedToolQuery {
   type: QueryType;
   esql: string;
   title: string;
@@ -74,7 +79,7 @@ export async function generateSignificantEvents({
   logger: Logger;
   systemPrompt: string;
 }): Promise<{
-  queries: Query[];
+  queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
@@ -213,7 +218,7 @@ export async function generateSignificantEvents({
     })
   );
 
-  const queries: Query[] = response.input.flatMap((message) => {
+  const queries: ParsedToolQuery[] = response.input.flatMap((message) => {
     if (message.role === MessageRole.Tool && message.name === 'add_queries') {
       return message.response.queries.flatMap(({ valid, query }) => {
         if (!valid) return [];

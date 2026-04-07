@@ -101,7 +101,7 @@ export const LAST_OCCURRED_COLUMN = i18n.translate(
 export const OCCURRENCES_COLUMN = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesColumn',
   {
-    defaultMessage: 'Activity',
+    defaultMessage: 'Trend',
   }
 );
 

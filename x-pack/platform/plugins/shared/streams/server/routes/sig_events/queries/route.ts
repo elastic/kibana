@@ -7,7 +7,7 @@
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
 import {
-  streamQuerySchema,
+  bulkStreamQueryInputSchema,
   upsertStreamQueryRequestSchema,
   deriveQueryType,
 } from '@kbn/streams-schema';
@@ -201,9 +201,7 @@ const bulkQueriesRoute = createServerRoute({
       operations: z.array(
         z.union([
           z.object({
-            // Note: `type` is accepted by the schema (defaults to 'match') but
-            // always overwritten server-side via deriveQueryType below.
-            index: streamQuerySchema,
+            index: bulkStreamQueryInputSchema,
           }),
           z.object({
             delete: z.object({ id: z.string() }),
@@ -229,26 +227,24 @@ const bulkQueriesRoute = createServerRoute({
     const definition = await streamsClient.getStream(streamName);
 
     const validationErrors: Array<{ id: string; message: string }> = [];
-    const typedOperations = operations.map((operation) => {
+    const typedOperations: Array<{ index?: StreamQuery; delete?: { id: string } }> = [];
+
+    for (const operation of operations) {
       if ('index' in operation && operation.index) {
+        const { id, title, description, esql, severity_score, evidence } = operation.index;
         try {
-          validateEsqlQueryForStreamOrThrow({
-            esqlQuery: operation.index.esql.query,
-            stream: definition,
-          });
+          validateEsqlQueryForStreamOrThrow({ esqlQuery: esql.query, stream: definition });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          validationErrors.push({ id: operation.index.id, message });
+          validationErrors.push({ id, message });
         }
-        return {
-          index: {
-            ...operation.index,
-            type: deriveQueryType(operation.index.esql.query),
-          },
-        };
+        typedOperations.push({
+          index: { id, title, description, esql, severity_score, evidence, type: deriveQueryType(esql.query) },
+        });
+      } else if ('delete' in operation) {
+        typedOperations.push(operation);
       }
-      return operation;
-    });
+    }
 
     if (validationErrors.length > 0) {
       throw new EsqlQueryValidationError('One or more ES|QL queries are invalid', {

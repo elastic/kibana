@@ -425,6 +425,12 @@ export class QueryClient {
 
     assetsResponse.hits.hits.forEach((hit) => {
       const name = hit._source[STREAM_NAME];
+      if (!queriesPerName[name]) {
+        this.dependencies.logger.warn(
+          `Skipping query asset with unexpected stream_name "${name}" (requested: ${names.join(', ')})`
+        );
+        return;
+      }
       const asset = fromStorage(hit._source, this.dependencies.logger);
       queriesPerName[name].push(asset);
     });
@@ -771,11 +777,26 @@ export class QueryClient {
       ...demotedToStats,
     ]);
     const isRuleBacked = (link: QueryLink) => link.rule_backed;
-    await this.installQueries(
-      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(isRuleBacked),
-      nextQueriesUpdatedWithoutBreakingChange.filter(isRuleBacked),
-      definition
+    const toCreate = [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(
+      isRuleBacked
     );
+    const toUpdate = nextQueriesUpdatedWithoutBreakingChange.filter(isRuleBacked);
+
+    try {
+      await this.installQueries(toCreate, toUpdate, definition);
+    } catch (installError) {
+      this.dependencies.logger.error(
+        `installQueries failed during syncQueries for stream "${definition.name}". ` +
+          `Attempting to uninstall partially created rules before re-throwing.`
+      );
+      await this.uninstallQueries(toCreate).catch((compensateError) => {
+        this.dependencies.logger.error(
+          `Failed to compensate after installQueries failure for stream "${definition.name}": ` +
+            `${compensateError instanceof Error ? compensateError.message : String(compensateError)}`
+        );
+      });
+      throw installError;
+    }
 
     await this.syncQueryList(
       definition,
@@ -983,6 +1004,8 @@ export class QueryClient {
       return { demoted: 0 };
     }
 
+    await this.uninstallQueries(toDemote);
+
     await this.bulkStorage(
       definition,
       toDemote.map((link) => ({
@@ -997,8 +1020,6 @@ export class QueryClient {
         },
       }))
     );
-
-    await this.uninstallQueries(toDemote);
 
     return { demoted: toDemote.length };
   }
@@ -1048,12 +1069,15 @@ export class QueryClient {
       return;
     }
 
-    const { rulesClient } = this.dependencies;
+    const { rulesClient, logger } = this.dependencies;
     const ruleIds = queries.map((q) => q.rule_id);
     await rulesClient
       .bulkDeleteRules({ ids: ruleIds, ignoreInternalRuleTypes: false })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 400) {
+          logger.warn(
+            `bulkDeleteRules returned 400 for ${ruleIds.length} rule(s) — some rules may not have existed: ${error.message}`
+          );
           return;
         }
         throw error;

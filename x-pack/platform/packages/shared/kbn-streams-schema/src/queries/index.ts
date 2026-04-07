@@ -73,6 +73,15 @@ export const upsertStreamQueryRequestSchema = z.object({
   description: z.string().default(''),
 });
 
+/**
+ * Wire schema for the bulk endpoint index operations.
+ * Same as {@link upsertStreamQueryRequestSchema} but with `id` included,
+ * and `type` intentionally omitted — derived server-side.
+ */
+export const bulkStreamQueryInputSchema = upsertStreamQueryRequestSchema.extend({
+  id: NonEmptyString,
+});
+
 export interface QueriesGetResponse {
   queries: SignificantEventsResponse[];
   page: number;

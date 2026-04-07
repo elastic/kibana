@@ -222,22 +222,22 @@ export function QueryDetailsFlyout({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          {queryType === QUERY_TYPE_STATS && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                title={STATS_CALLOUT_TITLE}
+                color="primary"
+                iconType="info"
+                size="s"
+              >
+                <p>{STATS_CALLOUT_DESCRIPTION}</p>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
           {!isEditMode && (
             <EuiFlexGroup direction="column" gutterSize="m">
-              {queryType === QUERY_TYPE_STATS && (
-                <EuiFlexItem grow={false}>
-                  <EuiCallOut
-                    announceOnMount
-                    title={STATS_CALLOUT_TITLE}
-                    color="primary"
-                    iconType="info"
-                    size="s"
-                  >
-                    <p>{STATS_CALLOUT_DESCRIPTION}</p>
-                  </EuiCallOut>
-                  <EuiSpacer size="s" />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem>
                 <InfoPanel title={QUERY_INFORMATION_TITLE}>
                   {infoListItems.map((listItem, index) => (

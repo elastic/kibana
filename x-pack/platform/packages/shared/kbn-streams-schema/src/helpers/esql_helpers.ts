@@ -89,7 +89,8 @@ export function buildMetadataOption() {
  * is present (or the argument is an unexpected array).
  */
 export function extractWhereExpression(esql: string): ESQLSingleAstItem | undefined {
-  const { root } = Parser.parse(esql);
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return undefined;
   const whereCmd = root.commands.find(
     (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'where'
   );

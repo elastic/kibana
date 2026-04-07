@@ -132,6 +132,7 @@ export {
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
+  bulkStreamQueryInputSchema,
   streamQuerySchema,
 } from './src/queries';
 
