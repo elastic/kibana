@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/evals-extensions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Advanced evaluation capabilities - standalone extensions for @kbn/evals. Features ported from cursor-plugin-evals and home for Phases 3-5 of evals roadmap.",
+  "license": "Elastic License 2.0",
+  "main": "./index.ts"
+}

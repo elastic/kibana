@@ -115,8 +115,7 @@ const setupTest = async ({
 
 // Testing buildEsqlFetchSubscribe through the state container
 // since the logic is pretty intertwined with the state management
-// FLAKY: https://github.com/elastic/kibana/issues/258030
-describe.skip('buildEsqlFetchSubscribe', () => {
+describe('buildEsqlFetchSubscribe', () => {
   test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest();
 
@@ -243,12 +242,15 @@ describe.skip('buildEsqlFetchSubscribe', () => {
       // non transformational command, different index
       query: { esql: 'from the-data-view-title2 | where field1 > 0' },
     });
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1', 'field2'] },
-      });
-    });
+    await waitFor(
+      () => {
+        expect(replaceUrlState).toHaveBeenCalledWith({
+          tabId,
+          appState: { columns: ['field1', 'field2'] },
+        });
+      },
+      { timeout: 5000 }
+    );
   });
 
   test('only changing an ES|QL query with same result columns should not change columns', async () => {

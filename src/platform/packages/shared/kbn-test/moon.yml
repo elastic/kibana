@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-test
 dependsOn:
   - '@kbn/kbn-client'
+  - '@kbn/dev-validation-runner'
   - '@kbn/std'
   - '@kbn/test-es-server'
   - '@kbn/tooling-log'
@@ -29,8 +30,10 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/es'
   - '@kbn/dev-proc-runner'
+  - '@kbn/test-kibana-server'
   - '@kbn/jest-serializers'
   - '@kbn/stdio-dev-helpers'
+  - '@kbn/test-docker-servers'
   - '@kbn/babel-register'
   - '@kbn/repo-packages'
   - '@kbn/test-saml-auth'
@@ -56,26 +59,6 @@ fileGroups:
     - '!types/**/*'
     - '!**/__fixtures__/**/*'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

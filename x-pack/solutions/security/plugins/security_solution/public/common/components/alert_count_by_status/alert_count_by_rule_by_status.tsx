@@ -28,6 +28,7 @@ import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../inspect';
 import { LastUpdatedAt } from '../last_updated_at';
 import { SecuritySolutionLinkAnchor } from '../links';
 import { useLocalStorage } from '../local_storage';
+import { resolveEntityIdentifiers } from '../../utils/resolve_entity_identifiers_for_alerts';
 import { MultiSelectPopover } from './components';
 import * as i18n from './translations';
 import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
@@ -36,9 +37,15 @@ import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status
 interface EntityFilter {
   field: string;
   value: string;
+  entityType?: string;
 }
 interface AlertCountByStatusProps {
   entityFilter: EntityFilter;
+  /**
+   * When set (e.g. host/user details from entity resolution), preferred over legacy `entityFilter.field`.
+   * Same semantics as `AlertsByStatus` `identityFields`.
+   */
+  identityFields?: Record<string, string> | null;
   additionalFilters?: ESBoolQuery[];
   signalIndexName: string | null;
 }
@@ -64,8 +71,28 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 `;
 
 export const AlertCountByRuleByStatus = React.memo(
-  ({ entityFilter, signalIndexName, additionalFilters }: AlertCountByStatusProps) => {
-    const { field, value } = entityFilter;
+  ({
+    entityFilter,
+    identityFields,
+    signalIndexName,
+    additionalFilters,
+  }: AlertCountByStatusProps) => {
+    const { field, value, entityType } = entityFilter;
+
+    const entityIdentifiersResolved = useMemo(
+      () => resolveEntityIdentifiers(identityFields, entityFilter),
+      [identityFields, entityFilter]
+    );
+
+    const entityFiltersForTimeline: Filter[] = useMemo(() => {
+      if (entityIdentifiersResolved != null && Object.keys(entityIdentifiersResolved).length > 0) {
+        return Object.entries(entityIdentifiersResolved).map(([entityField, entityValue]) => ({
+          field: entityField,
+          value: entityValue,
+        }));
+      }
+      return [{ field, value }];
+    }, [entityIdentifiersResolved, field, value]);
 
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
@@ -88,7 +115,7 @@ export const AlertCountByRuleByStatus = React.memo(
 
         for (const status of selectedStatusesByField[field]) {
           timelineFilters.push([
-            entityFilter,
+            ...entityFiltersForTimeline,
             { field: SIGNAL_RULE_NAME_FIELD_NAME, value: ruleName },
             {
               field: SIGNAL_STATUS_FIELD_NAME,
@@ -98,7 +125,7 @@ export const AlertCountByRuleByStatus = React.memo(
         }
         openTimelineWithFilters(timelineFilters);
       });
-    }, [entityFilter, field, openTimelineWithFilters, selectedStatusesByField]);
+    }, [entityFiltersForTimeline, field, openTimelineWithFilters, selectedStatusesByField]);
 
     const updateSelection = useCallback(
       (selection: Status[]) => {
@@ -112,8 +139,10 @@ export const AlertCountByRuleByStatus = React.memo(
 
     const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
       additionalFilters,
+      identityFields: entityIdentifiersResolved,
       field,
       value,
+      entityType,
       queryId,
       statuses: selectedStatusesByField[field] as Status[],
       skip: !toggleStatus,

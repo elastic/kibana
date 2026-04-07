@@ -263,6 +263,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         name: i18n.translate('xpack.osquery.packs.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
+        width: '50%',
         truncateText: true,
         render: (_: unknown, item: PackSavedObject) => (
           <PackName id={item.saved_object_id} name={item.name} />
@@ -277,6 +278,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
           defaultMessage: 'Scheduled policies',
         }),
         truncateText: true,
+        width: '10%',
         render: (policyIds: string[]) => <>{policyIds?.length ?? 0}</>,
       });
     }
@@ -287,7 +289,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         name: i18n.translate('xpack.osquery.packs.table.numberOfQueriesColumnTitle', {
           defaultMessage: 'Number of queries',
         }),
-        width: '150px',
+        width: '10%',
         render: (queries: PackSavedObject['queries']) => <>{Object.keys(queries).length}</>,
       });
     }
@@ -300,7 +302,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         }),
         sortable: true,
         render: renderCreatedByColumn,
-        width: '200px',
+        width: '12%',
       });
     }
 
@@ -312,7 +314,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         }),
         sortable: true,
         render: renderUpdatedAt,
-        width: '180px',
+        width: '10%',
       });
     }
 
@@ -322,7 +324,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         name: i18n.translate('xpack.osquery.packs.table.enableColumnTitle', {
           defaultMessage: 'Enable',
         }),
-        width: '100px',
+        width: '80px',
         render: (_: unknown, item: PackSavedObject) => <ActiveStateSwitch item={item} />,
       });
     }
@@ -375,12 +377,13 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
   const actionButtons = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <LoadIntegrationAssetsButton />
-        </EuiFlexItem>
+        {hasAssetsToInstall && (
+          <EuiFlexItem grow={false}>
+            <LoadIntegrationAssetsButton />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
-            fill
             {...newPackLinkProps}
             iconType="plusInCircle"
             isDisabled={!permissions.writePacks}
@@ -393,7 +396,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [permissions.writePacks, newPackLinkProps]
+    [permissions.writePacks, newPackLinkProps, hasAssetsToInstall]
   );
 
   if (isLoading) {

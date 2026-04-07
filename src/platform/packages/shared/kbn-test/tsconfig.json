@@ -9,6 +9,7 @@
   "exclude": ["types/**/*", "**/__fixtures__/**/*", "target/**/*"],
   "kbn_references": [
     "@kbn/kbn-client",
+    "@kbn/dev-validation-runner",
     "@kbn/std",
     "@kbn/test-es-server",
     "@kbn/tooling-log",
@@ -20,8 +21,10 @@
     "@kbn/repo-info",
     "@kbn/es",
     "@kbn/dev-proc-runner",
+    "@kbn/test-kibana-server",
     "@kbn/jest-serializers",
     "@kbn/stdio-dev-helpers",
+    "@kbn/test-docker-servers",
     "@kbn/babel-register",
     "@kbn/repo-packages",
     "@kbn/test-saml-auth",

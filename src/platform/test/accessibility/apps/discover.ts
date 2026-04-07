@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on inspector panel', async () => {
-      await inspector.open();
+      await discover.openInspectorFromTabMenu();
       await a11y.testAppSnapshot();
       await inspector.close();
     });

@@ -8,6 +8,12 @@
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { generateLeadsRoute } from './generate_leads';
 import { getLeadsRoute } from './get_leads';
+import { getLeadByIdRoute } from './get_lead_by_id';
+import { getLeadGenerationStatusRoute } from './get_lead_generation_status';
+import { dismissLeadRoute } from './dismiss_lead';
+import { bulkUpdateLeadsRoute } from './bulk_update_leads';
+import { enableLeadGenerationRoute } from './enable_lead_generation';
+import { disableLeadGenerationRoute } from './disable_lead_generation';
 
 export const registerLeadGenerationRoutes = ({
   router,
@@ -16,4 +22,10 @@ export const registerLeadGenerationRoutes = ({
 }: EntityAnalyticsRoutesDeps) => {
   generateLeadsRoute(router, logger, getStartServices);
   getLeadsRoute(router, logger);
+  getLeadByIdRoute(router, logger);
+  getLeadGenerationStatusRoute(router, logger, getStartServices);
+  dismissLeadRoute(router, logger);
+  bulkUpdateLeadsRoute(router, logger);
+  enableLeadGenerationRoute(router, logger, getStartServices);
+  disableLeadGenerationRoute(router, logger, getStartServices);
 };

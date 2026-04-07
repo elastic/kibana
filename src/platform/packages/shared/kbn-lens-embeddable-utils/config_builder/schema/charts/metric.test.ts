@@ -37,7 +37,7 @@ describe('Metric Schema', () => {
             operation: 'count',
             field: 'test_field',
             fit: false,
-            sub_label: 'Count of records',
+            subtitle: 'Count of records',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: {
               alignment: 'left',
@@ -64,7 +64,7 @@ describe('Metric Schema', () => {
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             icon: {
-              name: 'visMetric',
+              name: 'chartMetric',
               alignment: 'left',
             },
             labels: { alignment: 'left' },
@@ -188,7 +188,7 @@ describe('Metric Schema', () => {
             operation: 'terms',
             fields: ['category'],
             columns: 3,
-            size: 5,
+            limit: 5,
           },
         };
 
@@ -312,7 +312,7 @@ describe('Metric Schema', () => {
           fields: ['category'],
           columns: 3,
           collapse_by: 'sum',
-          size: 5,
+          limit: 5,
         },
       } satisfies MetricInput;
 
@@ -320,7 +320,7 @@ describe('Metric Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        breakdown_by: { ...input.breakdown_by, size: 5 },
+        breakdown_by: { ...input.breakdown_by, limit: 5 },
       });
     });
 
@@ -510,7 +510,7 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'sales',
-            sub_label: 'Total Sales',
+            subtitle: 'Total Sales',
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: {
@@ -520,7 +520,7 @@ describe('Metric Schema', () => {
               alignment: 'right',
             },
             icon: {
-              name: 'visMetric',
+              name: 'chartMetric',
               alignment: 'right',
             },
             color: {
@@ -552,7 +552,7 @@ describe('Metric Schema', () => {
           fields: ['category'],
           columns: 4,
           collapse_by: 'sum',
-          size: 5,
+          limit: 5,
         },
       } satisfies MetricInput;
 
@@ -560,7 +560,7 @@ describe('Metric Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        breakdown_by: { ...input.breakdown_by, size: 5 },
+        breakdown_by: { ...input.breakdown_by, limit: 5 },
       });
     });
 
@@ -574,7 +574,6 @@ describe('Metric Schema', () => {
         metrics: [
           {
             type: 'primary',
-            operation: 'value',
             column: 'unique_count',
             fit: false,
             labels: { alignment: 'left' },

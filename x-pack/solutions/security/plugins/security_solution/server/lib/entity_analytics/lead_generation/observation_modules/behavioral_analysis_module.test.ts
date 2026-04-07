@@ -17,7 +17,6 @@ const createEntity = (type: string, name: string, email?: string): LeadEntity =>
   } as never,
   type,
   name,
-  id: `euid-${name}`,
 });
 
 const createAlertAggResponse = (
@@ -47,7 +46,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
     by_host: {
@@ -59,7 +58,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
   },
@@ -298,8 +297,8 @@ describe('BehavioralAnalysisModule', () => {
     });
   });
 
-  it('includes user.email in the query when available', async () => {
-    const entity = createEntity('user', 'alice', 'alice@example.com');
+  it('queries by entity name field for the given type', async () => {
+    const entity = createEntity('user', 'alice');
     esClient.search.mockResolvedValue(createAlertAggResponse() as never);
 
     const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
@@ -307,8 +306,8 @@ describe('BehavioralAnalysisModule', () => {
 
     const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
     const queryStr = JSON.stringify(searchCall.query);
-    expect(queryStr).toContain('user.email');
-    expect(queryStr).toContain('alice@example.com');
+    expect(queryStr).toContain('user.name');
+    expect(queryStr).toContain('alice');
   });
 
   it('returns empty observations when no alerts match', async () => {

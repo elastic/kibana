@@ -126,7 +126,7 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
         button={
           <EuiHeaderLink
             color="primary"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setPopoverOpen((prevState) => !prevState)}
             data-test-subj="apmSlosHeaderLink"

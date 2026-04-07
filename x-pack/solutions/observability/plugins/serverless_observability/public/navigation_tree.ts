@@ -24,11 +24,13 @@ export const createNavigationTree = ({
   overviewAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
+  showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
+  showAlertingV2?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -63,12 +65,29 @@ export const createNavigationTree = ({
       {
         link: 'workflows',
       },
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-        getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
-      },
+      showAlertingV2
+        ? {
+            id: 'alerting',
+            renderAs: 'panelOpener',
+            title: i18n.translate('xpack.serverlessObservability.nav.alerts', {
+              defaultMessage: 'Alerts',
+            }),
+            icon: 'warning',
+            children: [
+              {
+                link: 'observability-overview:alerts',
+              },
+              {
+                link: 'observability-overview:alerts_v2',
+              },
+            ],
+          }
+        : {
+            link: 'observability-overview:alerts',
+            icon: 'warning',
+            getIsActive: ({ pathNameSerialized, prepend }) =>
+              pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
+          },
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
@@ -89,7 +108,7 @@ export const createNavigationTree = ({
           defaultMessage: 'SLOs',
         }),
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...filterForFeatureAvailability(
         {
@@ -389,7 +408,7 @@ export const createNavigationTree = ({
           defaultMessage: 'Add data',
         }),
         link: 'observabilityOnboarding',
-        icon: 'plusInCircle',
+        icon: 'plusCircle',
       },
       {
         id: 'devTools',
@@ -476,6 +495,24 @@ export const createNavigationTree = ({
               },
             ],
           },
+          ...filterForFeatureAvailability(
+            {
+              id: 'v2_alerting_preview',
+              title: i18n.translate(
+                'xpack.serverlessObservability.nav.projectSettings.v2AlertingPreview',
+                {
+                  defaultMessage: 'V2 Alerting Preview',
+                }
+              ),
+              renderAs: 'panelOpener' as const,
+              breadcrumbStatus: 'hidden',
+              children: [
+                { link: 'management:rules', breadcrumbStatus: 'hidden' },
+                { link: 'management:notification_policies', breadcrumbStatus: 'hidden' },
+              ],
+            },
+            showAlertingV2
+          ),
           {
             id: 'alerts_and_insights',
             title: i18n.translate(
@@ -491,6 +528,17 @@ export const createNavigationTree = ({
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],
+          },
+          {
+            id: 'project_performance',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.projectSettings.projectPerformance',
+              {
+                defaultMessage: 'Project performance',
+              }
+            ),
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'management:queryActivity', badgeType: 'new' }],
           },
           ...filterForFeatureAvailability(
             {
@@ -512,6 +560,20 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
+          {
+            id: 'model_management',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.projectSettings.modelManagement',
+              {
+                defaultMessage: 'Model Management',
+              }
+            ),
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
+            ],
+          },
           {
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
               defaultMessage: 'AI',
