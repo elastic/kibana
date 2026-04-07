@@ -22,7 +22,7 @@ import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import noSigEventsImage from './no_sig_events.svg';
 
-const ML_MODEL_SETTINGS_PATH = '/ml/model_settings';
+const ML_MODEL_SETTINGS_PATH = '/modelManagement/model_settings';
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export function EmptyState({
