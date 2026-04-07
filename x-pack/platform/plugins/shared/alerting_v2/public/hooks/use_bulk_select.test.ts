@@ -67,9 +67,7 @@ describe('useBulkSelect', () => {
   });
 
   it('returns match-all filter when select-all with no exclusions', () => {
-    const { result } = renderHook(() =>
-      useBulkSelect({ totalItemCount: 10, items: pageItems })
-    );
+    const { result } = renderHook(() => useBulkSelect({ totalItemCount: 10, items: pageItems }));
 
     act(() => {
       result.current.onSelectAll();
@@ -78,10 +76,65 @@ describe('useBulkSelect', () => {
     expect(result.current.getBulkParams()).toEqual({ filter: '' });
   });
 
-  it('returns zero selectedCount when totalItemCount is zero', () => {
+  it('scopes select-all bulk filter to filter', () => {
     const { result } = renderHook(() =>
-      useBulkSelect({ totalItemCount: 0, items: [] })
+      useBulkSelect({
+        totalItemCount: 10,
+        items: pageItems,
+        filter: 'enabled: true',
+      })
     );
+
+    act(() => {
+      result.current.onSelectAll();
+    });
+
+    expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true' });
+  });
+
+  it('scopes select-all bulk filter to listSearch', () => {
+    const { result } = renderHook(() =>
+      useBulkSelect({
+        totalItemCount: 10,
+        items: pageItems,
+        listSearch: 'prod',
+      })
+    );
+
+    act(() => {
+      result.current.onSelectAll();
+    });
+
+    expect(result.current.getBulkParams()).toEqual({
+      filter: '(metadata.name: prod* OR metadata.tags: prod*)',
+    });
+  });
+
+  it('combines list scope with NOT exclusions when select-all with deselected rows', () => {
+    const { result } = renderHook(() =>
+      useBulkSelect({
+        totalItemCount: 10,
+        items: pageItems,
+        filter: 'enabled: true',
+        listSearch: 'x',
+      })
+    );
+
+    act(() => {
+      result.current.onSelectAll();
+    });
+    act(() => {
+      result.current.onSelectRow('rule-1');
+    });
+
+    expect(result.current.getBulkParams()).toEqual({
+      filter:
+        '((enabled: true) AND ((metadata.name: x* OR metadata.tags: x*))) AND NOT (id: "rule-1")',
+    });
+  });
+
+  it('returns zero selectedCount when totalItemCount is zero', () => {
+    const { result } = renderHook(() => useBulkSelect({ totalItemCount: 0, items: [] }));
 
     act(() => {
       result.current.onSelectAll();

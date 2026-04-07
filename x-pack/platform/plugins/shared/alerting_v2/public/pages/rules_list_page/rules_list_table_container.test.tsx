@@ -394,5 +394,35 @@ describe('RulesListTableContainer', () => {
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
+
+    it('scopes bulk enable filter to filter when select all', async () => {
+      renderContainer({ filter: 'kind: alert' });
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkEnableRules'));
+
+      expect(mockBulkEnableMutate).toHaveBeenCalledWith(
+        { filter: 'kind: alert' },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
   });
 });
