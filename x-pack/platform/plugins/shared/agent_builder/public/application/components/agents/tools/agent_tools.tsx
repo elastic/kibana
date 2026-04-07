@@ -23,6 +23,8 @@ import {
 import type { ToolDefinition, ToolSelection } from '@kbn/agent-builder-common';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useQueryState } from '../../../hooks/use_query_state';
+import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -118,7 +120,7 @@ export const AgentTools: React.FC = () => {
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
+  const [selectedToolId, setSelectedToolId] = useQueryState<string>(searchParamNames.toolId);
   const [mutatingToolId, setMutatingToolId] = useState<string | null>(null);
   const {
     isOpen: isLibraryOpen,
@@ -151,6 +153,8 @@ export const AgentTools: React.FC = () => {
   }, [activeToolIdSet, enableElasticCapabilities, defaultToolIdSet]);
 
   useEffect(() => {
+    if (agentLoading || toolsLoading) return;
+
     if (!selectedToolId) {
       if (activeTools.length > 0) {
         setSelectedToolId(activeTools[0].id);
@@ -161,7 +165,7 @@ export const AgentTools: React.FC = () => {
         setSelectedToolId(activeTools[0]?.id ?? null);
       }
     }
-  }, [activeTools, selectedToolId]);
+  }, [activeTools, selectedToolId, setSelectedToolId, agentLoading, toolsLoading]);
 
   const filteredActiveTools = useMemo(() => {
     if (!searchQuery.trim()) return activeTools;
@@ -210,7 +214,7 @@ export const AgentTools: React.FC = () => {
         onSettled: () => setMutatingToolId(null),
       });
     },
-    [agentToolSelections, allTools, updateToolsMutation, addSuccessToast]
+    [agentToolSelections, allTools, updateToolsMutation, addSuccessToast, setSelectedToolId]
   );
 
   const handleToggleTool = useCallback(

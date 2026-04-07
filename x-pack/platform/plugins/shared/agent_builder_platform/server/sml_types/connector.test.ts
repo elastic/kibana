@@ -11,43 +11,16 @@ import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
 
-const WORKFLOW_YAML_WITH_TAG = `
-name: test.workflow
-description: A test workflow tool
-tags:
-  - agent-builder-tool
-steps:
-  - id: step1
-    type: action
-`;
-
-const WORKFLOW_YAML_WITHOUT_TAG = `
-name: test.other
-description: Not an AB tool
-tags:
-  - some-other-tag
-steps:
-  - id: step1
-    type: action
-`;
-
 jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),
-  getWorkflowTemplatesForConnector: jest.fn(),
 }));
 
-const { getConnectorSpec, getWorkflowTemplatesForConnector } =
-  jest.requireMock('@kbn/connector-specs');
+const { getConnectorSpec } = jest.requireMock('@kbn/connector-specs');
 
 const mockSavedObjectsClient = {
   get: jest.fn(),
 };
 
-const mockToolRegistry = {
-  list: jest.fn(),
-};
-
-const mockGetToolRegistry = jest.fn().mockResolvedValue(mockToolRegistry);
 const mockGetActionSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
 const mockLogger = loggingSystemMock.createLogger();
 
@@ -71,7 +44,6 @@ async function collectPages(iterable: AsyncIterable<SmlListItem[]>): Promise<Sml
 
 describe('connectorSmlType', () => {
   const connectorSmlType = createConnectorSmlType({
-    getToolRegistry: mockGetToolRegistry,
     getActionSavedObjectsClient: mockGetActionSavedObjectsClient,
     logger: mockLogger,
   });
@@ -94,7 +66,7 @@ describe('connectorSmlType', () => {
   });
 
   describe('getSmlData', () => {
-    it('returns chunk with connector name, description, and tool descriptions in content', async () => {
+    it('returns chunk with connector name and description in content', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
         type: 'action',
@@ -108,12 +80,8 @@ describe('connectorSmlType', () => {
           displayName: 'MCP',
           description: 'Model Context Protocol connector',
         },
+        actions: {},
       });
-
-      getWorkflowTemplatesForConnector.mockReturnValue([
-        WORKFLOW_YAML_WITH_TAG,
-        WORKFLOW_YAML_WITHOUT_TAG,
-      ]);
 
       const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
 
@@ -123,8 +91,7 @@ describe('connectorSmlType', () => {
           {
             type: 'connector',
             title: 'My MCP Connector',
-            content:
-              'My MCP Connector\nMCP\nModel Context Protocol connector\nA test workflow tool',
+            content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
             permissions: ['action:execute'],
           },
         ],
@@ -165,14 +132,53 @@ describe('connectorSmlType', () => {
           displayName: 'MCP',
           description: 'Model Context Protocol connector',
         },
+        actions: {},
       });
-
-      getWorkflowTemplatesForConnector.mockReturnValue([]);
 
       const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
 
       // 'MCP' should appear only once even though name === displayName
       expect(result!.chunks[0].content).toBe('MCP\nModel Context Protocol connector');
+    });
+
+    it('includes sub-action descriptions when spec has isTool actions', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'conn-1',
+        type: 'action',
+        attributes: { name: 'My Slack', actionTypeId: '.slack2' },
+        references: [],
+      });
+
+      getConnectorSpec.mockReturnValue({
+        metadata: {
+          id: '.slack2',
+          displayName: 'Slack',
+          description: 'Search and send Slack messages',
+        },
+        actions: {
+          searchMessages: {
+            isTool: true,
+            description: 'Search Slack messages',
+            handler: jest.fn(),
+          },
+          sendMessage: {
+            isTool: true,
+            description: 'Send a message to a channel',
+            handler: jest.fn(),
+          },
+          internalAction: {
+            isTool: false,
+            description: 'Internal only',
+            handler: jest.fn(),
+          },
+        },
+      });
+
+      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+
+      expect(result!.chunks[0].content).toContain('searchMessages: Search Slack messages');
+      expect(result!.chunks[0].content).toContain('sendMessage: Send a message to a channel');
+      expect(result!.chunks[0].content).not.toContain('internalAction');
     });
 
     it('handles missing optional fields gracefully', async () => {
@@ -184,21 +190,20 @@ describe('connectorSmlType', () => {
       });
 
       getConnectorSpec.mockReturnValue(undefined);
-      getWorkflowTemplatesForConnector.mockReturnValue([WORKFLOW_YAML_WITH_TAG]);
 
       const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
 
       expect(result!.chunks[0]).toEqual({
         type: 'connector',
         title: 'Basic Connector',
-        content: 'Basic Connector\n.unknown\nA test workflow tool',
+        content: 'Basic Connector\n.unknown',
         permissions: ['action:execute'],
       });
     });
   });
 
   describe('toAttachment', () => {
-    it('returns connector attachment with correct shape and tools from registry', async () => {
+    it('returns connector attachment data', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
         type: 'action',
@@ -206,49 +211,17 @@ describe('connectorSmlType', () => {
         references: [],
       });
 
-      mockToolRegistry.list.mockResolvedValue([
-        {
-          id: 'mcp.my-mcp.search',
-          type: 'workflow',
-          description: 'Search tool',
-          readonly: false,
-          tags: ['connector', 'mcp', 'connector:conn-1'],
-          configuration: { workflow_id: 'wf-1' },
-        },
-        {
-          id: 'mcp.my-mcp.fetch',
-          type: 'workflow',
-          description: 'Fetch tool',
-          readonly: false,
-          tags: ['connector', 'mcp', 'connector:conn-1'],
-          configuration: { workflow_id: 'wf-2' },
-        },
-      ]);
-
       const result = await connectorSmlType.toAttachment!(
         { origin_id: 'conn-1' } as never,
         createAttachmentContext() as never
       );
 
-      expect(mockToolRegistry.list).toHaveBeenCalledWith({ tags: ['connector:conn-1'] });
       expect(result).toEqual({
         type: AttachmentType.connector,
         data: {
           connector_id: 'conn-1',
           connector_name: 'My MCP Connector',
           connector_type: '.mcp',
-          tools: [
-            {
-              tool_id: 'mcp.my-mcp.search',
-              description: 'Search tool',
-              configuration: { workflow_id: 'wf-1' },
-            },
-            {
-              tool_id: 'mcp.my-mcp.fetch',
-              description: 'Fetch tool',
-              configuration: { workflow_id: 'wf-2' },
-            },
-          ],
         },
       });
     });
@@ -267,15 +240,13 @@ describe('connectorSmlType', () => {
       );
     });
 
-    it('returns attachment with empty tools when no tools match the connector tag', async () => {
+    it('defaults connector_name to origin_id when name attribute is missing', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
         type: 'action',
-        attributes: { name: 'My Connector', actionTypeId: '.mcp' },
+        attributes: { actionTypeId: '.mcp' },
         references: [],
       });
-
-      mockToolRegistry.list.mockResolvedValue([]);
 
       const result = await connectorSmlType.toAttachment!(
         { origin_id: 'conn-1' } as never,
@@ -286,70 +257,10 @@ describe('connectorSmlType', () => {
         type: AttachmentType.connector,
         data: {
           connector_id: 'conn-1',
-          connector_name: 'My Connector',
+          connector_name: 'conn-1',
           connector_type: '.mcp',
-          tools: [],
         },
       });
-    });
-
-    it('defaults workflow_id to empty string when tool configuration is missing it', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'conn-1',
-        type: 'action',
-        attributes: { name: 'Conn', actionTypeId: '.mcp' },
-        references: [],
-      });
-
-      mockToolRegistry.list.mockResolvedValue([
-        {
-          id: 'mcp.tool',
-          type: 'workflow',
-          description: 'Tool without workflow_id',
-          readonly: false,
-          tags: ['connector:conn-1'],
-          configuration: {},
-        },
-      ]);
-
-      const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
-        createAttachmentContext() as never
-      );
-
-      expect(result).toEqual({
-        type: AttachmentType.connector,
-        data: {
-          connector_id: 'conn-1',
-          connector_name: 'Conn',
-          connector_type: '.mcp',
-          tools: [
-            {
-              tool_id: 'mcp.tool',
-              description: 'Tool without workflow_id',
-              configuration: { workflow_id: '' },
-            },
-          ],
-        },
-      });
-    });
-
-    it('uses the correct tool registry scoped to request', async () => {
-      mockSavedObjectsClient.get.mockResolvedValue({
-        id: 'conn-1',
-        type: 'action',
-        attributes: { name: 'Conn', actionTypeId: '.mcp' },
-        references: [],
-      });
-      mockToolRegistry.list.mockResolvedValue([]);
-
-      const attachmentContext = createAttachmentContext();
-      await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
-        attachmentContext as never
-      );
-
-      expect(mockGetToolRegistry).toHaveBeenCalledWith(attachmentContext.request);
     });
   });
 });

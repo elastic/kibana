@@ -169,6 +169,24 @@ export interface CascadeVirtualizerReturnValue
   childController: ChildVirtualizerController | null;
 }
 
+/**
+ * Narrowed return type for {@link useCascadeVirtualizer} when `isRoot` is `true`.
+ * Guarantees that `childController` is always defined.
+ */
+export type CascadeRootVirtualizerReturnValue = Omit<
+  CascadeVirtualizerReturnValue,
+  'childController'
+> & {
+  childController: ChildVirtualizerController;
+};
+
+interface UseCascadeVirtualizer {
+  <G extends GroupNode>(
+    props: Omit<CascadeVirtualizerProps<G>, 'isRoot'> & { isRoot: true }
+  ): CascadeRootVirtualizerReturnValue;
+  <G extends GroupNode>(props: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue;
+}
+
 export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
   rows: Row<G>[];
   enableStickyGroupHeader: boolean;
@@ -249,7 +267,7 @@ export const useAnchorVirtualizerToItemIndex = (
     // paddingStart + scrollMargin to the first item, and chains from there),
     // so it is the absolute position within the shared scroll container.
     const targetOffset = offsetItemCache.start;
-    const scrollOffset = virtualizer.scrollOffset!;
+    const scrollOffset = virtualizer.scrollOffset ?? 0;
     const adjustments = targetOffset - scrollOffset;
 
     // This approach forces the layout the determined scrolled offset, without remeasuring
@@ -350,7 +368,7 @@ const useDeferredOverscan = (overscan: number | undefined, skip: boolean) => {
   return { initialOverscan, applyDeferredOverscan };
 };
 
-export const useCascadeVirtualizer = <G extends GroupNode>({
+export const useCascadeVirtualizer = (<G extends GroupNode>({
   overscan,
   enableStickyGroupHeader,
   estimatedRowHeight = 0,
@@ -534,7 +552,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   virtualizerReturnValueRef.current = returnValue;
 
   return returnValue;
-};
+}) as UseCascadeVirtualizer;
 
 /**
  * @description returns the position style for the grid row, in relation to the scrolled virtualized row.

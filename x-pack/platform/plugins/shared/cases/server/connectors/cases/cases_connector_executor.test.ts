@@ -1431,7 +1431,10 @@ describe('CasesConnectorExecutor', () => {
           });
 
           casesClientMock.cases.bulkUpdate.mockResolvedValue([
-            { ...cases[0], status: CaseStatuses.open },
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
           ]);
 
           await connectorExecutor.execute({
@@ -3533,7 +3536,10 @@ describe('CasesConnectorExecutor', () => {
           });
 
           casesClientMock.cases.bulkUpdate.mockResolvedValue([
-            { ...cases[0], status: CaseStatuses.open },
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
           ]);
 
           await connectorExecutor.execute({

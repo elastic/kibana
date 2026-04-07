@@ -58,6 +58,7 @@ import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/document_flyout_wrapper';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -124,6 +125,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const dispatch = useDispatch();
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
@@ -153,6 +155,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     }, []);
 
     const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+
     useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
@@ -198,12 +201,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 />
               ),
             }),
-            {
-              ownFocus: false,
-              resizable: true,
-              size: 's',
-              type: 'overlay',
-            }
+            { ...defaultFlyoutProperties }
           );
         } else {
           const isAttackRow = isAttackDiscoveryRow(eventData);
@@ -234,6 +232,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         }
       },
       [
+        defaultFlyoutProperties,
         newFlyoutSystemEnabled,
         overlays,
         services,

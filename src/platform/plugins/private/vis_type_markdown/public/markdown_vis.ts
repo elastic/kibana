@@ -19,7 +19,7 @@ export const markdownVisType = {
   name: 'markdown',
   title: 'Markdown',
   isAccessible: true,
-  icon: 'visText',
+  icon: 'text',
   group: VisGroups.TOOLS,
   disableEdit: true,
   titleInWizard: i18n.translate('visTypeMarkdown.markdownTitleInWizard', {
