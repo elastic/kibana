@@ -22,7 +22,6 @@
     "@kbn/config-schema",
     "@kbn/search-shared-ui",
     "@kbn/search-code-examples",
-    "@kbn/try-in-console",
     "@kbn/search-navigation",
     "@kbn/cloud-plugin",
     "@kbn/serverless",

@@ -102,9 +102,11 @@ const metricStatePrimaryMetricOptionsSchema = {
   // to avoid default injection in the wrong type
   type: schema.literal('primary'),
   /**
-   * Sub label
+   * Subtitle
    */
-  sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
+  subtitle: schema.maybe(
+    schema.string({ meta: { description: 'Subtitle below the primary metric value' } })
+  ),
   labels: schema.object(
     {
       /**

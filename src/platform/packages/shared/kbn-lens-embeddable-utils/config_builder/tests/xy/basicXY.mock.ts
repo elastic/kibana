@@ -1080,9 +1080,6 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     placement: 'inside',
     position: 'top_right',
   },
-  fitting: {
-    type: 'linear',
-  },
   axis: {
     x: {
       title: {
@@ -1115,8 +1112,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
     },
   },
-  decorations: {
-    values: { visible: false },
+  styling: {
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {
@@ -1176,9 +1173,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
   },
-  fitting: {
-    type: 'linear',
-  },
   axis: {
     x: {
       title: {
@@ -1211,8 +1205,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
   },
-  decorations: {
-    values: { visible: false },
+  styling: {
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {
@@ -1267,9 +1261,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     placement: 'outside',
     position: 'bottom',
   },
-  fitting: {
-    type: 'linear',
-  },
   axis: {
     x: {
       title: {
@@ -1302,8 +1293,8 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
     },
   },
-  decorations: {
-    values: { visible: false },
+  styling: {
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {

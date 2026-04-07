@@ -8,6 +8,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
@@ -115,27 +116,47 @@ export const WorkflowExecuteManualForm = ({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      css={css`
+        min-height: 0;
+      `}
+    >
       {errors && (
         <EuiFlexItem grow={false}>
           <InputValidationCallout errors={errors} />
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          overflow: hidden;
+        `}
+      >
         <EuiFormRow
           label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
             defaultMessage: 'Input Data',
           })}
           fullWidth
+          css={css`
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            .euiFormRow__fieldWrapper {
+              flex: 1;
+              min-height: 0;
+              display: flex;
+              flex-direction: column;
+            }
+          `}
         >
           <CodeEditor
             languageId="json"
             value={value}
-            fitToContent={{
-              minLines: 5,
-              maxLines: 15,
-            }}
+            width="100%"
+            height="100%"
             onChange={setValue}
             editorDidMount={handleMount}
             dataTestSubj={'workflow-manual-json-editor'}
