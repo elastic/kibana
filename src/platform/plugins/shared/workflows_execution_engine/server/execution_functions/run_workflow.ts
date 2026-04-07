@@ -151,6 +151,7 @@ export async function runWorkflow({
     fakeRequest,
     workflowExecutionRepository,
     internalResumeWorkflowExecution: workflowsExecutionEngine?.internalResumeWorkflowExecution,
+    workflowTaskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });

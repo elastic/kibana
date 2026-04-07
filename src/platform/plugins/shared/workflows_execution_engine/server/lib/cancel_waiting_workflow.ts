@@ -13,15 +13,10 @@ import type { StepExecutionRepository } from '../repositories/step_execution_rep
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 /**
- * Directly cancels a workflow that is in WAITING_FOR_INPUT status.
+ * Cancels a workflow in WAITING_FOR_INPUT or WAITING_FOR_CHILD.
  *
- * Unlike RUNNING workflows (where we set cancelRequested and let the
- * execution loop handle it), WAITING_FOR_INPUT workflows have no active
- * task — so we must transition both the workflow *and* its paused step
- * executions to CANCELLED immediately.
- *
- * For steps that are waiting on a sync child workflow (workflow.execute),
- * the child execution is also cancelled via the provided callback.
+ * The execution loop is not active, so persist CANCELLED on the workflow and waiting steps here
+ * instead of relying on onCancel. For WAITING_FOR_CHILD, also cancels the nested child execution.
  */
 export const cancelWaitingWorkflow = async ({
   workflowExecution,

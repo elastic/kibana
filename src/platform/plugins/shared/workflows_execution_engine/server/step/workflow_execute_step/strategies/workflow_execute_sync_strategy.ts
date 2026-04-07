@@ -57,11 +57,7 @@ export class WorkflowExecuteSyncStrategy {
     return this.readChildExecutionFromEs(currentState, spaceId);
   }
 
-  /**
-   * Returns true when the step has persisted wait state (e.g. after entering
-   * WAITING_FOR_CHILD). Used by the step impl to decide resume vs full run
-   * without coupling to node type or state shape.
-   */
+  /** True when wait state exists (e.g. after entering WAITING_FOR_CHILD). */
   canResume(): boolean {
     const state = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
@@ -69,11 +65,7 @@ export class WorkflowExecuteSyncStrategy {
     return !!state?.executionId;
   }
 
-  /**
-   * Returns the child execution id if this step is in a state that can be cancelled
-   * (waiting on sub-workflow). Used by the step impl for onCancel without knowing
-   * the strategy's state shape.
-   */
+  /** Child execution id when waiting on a sub-workflow (for onCancel). */
   getExecutionIdForCancel(): string | undefined {
     const state = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
@@ -81,11 +73,7 @@ export class WorkflowExecuteSyncStrategy {
     return state?.executionId;
   }
 
-  /**
-   * Resume after the child workflow completed. The step entered
-   * WAITING_FOR_CHILD on initiation and is now resumed by the child's
-   * completion callback; reads the child execution from ES.
-   */
+  /** Re-read child execution from ES after child completion resumed the parent. */
   async resume(spaceId: string): Promise<StrategyResult> {
     const currentState = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
@@ -142,6 +130,9 @@ export class WorkflowExecuteSyncStrategy {
         return { status: 'cancelled' };
       }
 
+      // Note: while the parent workflow is WAITING_FOR_CHILD, the execution loop exits and
+      // in-loop step timeout monitoring (enter-timeout-zone) does not run. A dedicated
+      // scheduled timeout path would be needed to enforce step timeouts during this wait; see PR discussion.
       this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_CHILD);
       return { status: 'waiting' };
     } catch (error) {
@@ -149,9 +140,6 @@ export class WorkflowExecuteSyncStrategy {
     }
   }
 
-  /**
-   * Read the child execution from ES and map its terminal state to a StrategyResult.
-   */
   private async readChildExecutionFromEs(
     state: SubWorkflowWaitState,
     spaceId: string

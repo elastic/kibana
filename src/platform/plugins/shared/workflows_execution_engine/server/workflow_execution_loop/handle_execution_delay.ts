@@ -25,9 +25,7 @@ export async function handleExecutionDelay(
     stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
     stepStatus === ExecutionStatus.WAITING_FOR_CHILD
   ) {
-    // Propagate the indefinite-wait status to the workflow level so the execution loop exits.
-    // WAITING_FOR_INPUT: HITL — resumed externally via the resume API.
-    // WAITING_FOR_CHILD: sync child workflow — resumed by the child's completion callback.
+    // Indefinite wait: exit the loop. Step timeout zones do not advance until a later resume.
     params.workflowExecutionState.updateWorkflowExecution({
       status: stepStatus,
     });

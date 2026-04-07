@@ -90,6 +90,7 @@ export async function resumeWorkflow({
     fakeRequest,
     workflowExecutionRepository,
     internalResumeWorkflowExecution: workflowsExecutionEngine?.internalResumeWorkflowExecution,
+    workflowTaskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });

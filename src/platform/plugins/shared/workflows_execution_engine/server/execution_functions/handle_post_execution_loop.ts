@@ -13,6 +13,7 @@ import { isSyncParentInvocation, isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsMeteringService } from '../metering';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution } from '../types';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function handlePostExecutionLoop({
   workflowRunId,
@@ -21,6 +22,7 @@ export async function handlePostExecutionLoop({
   fakeRequest,
   workflowExecutionRepository,
   internalResumeWorkflowExecution,
+  workflowTaskManager,
   meteringService,
   cloudSetup,
 }: {
@@ -30,6 +32,7 @@ export async function handlePostExecutionLoop({
   fakeRequest: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
+  workflowTaskManager?: WorkflowTaskManager;
   meteringService?: WorkflowsMeteringService;
   cloudSetup?: CloudSetup;
 }): Promise<void> {
@@ -61,18 +64,34 @@ export async function handlePostExecutionLoop({
       logger.warn(
         `Failed to resume parent after child completion (parent=${parentExecId}, child=${workflowRunId}): ${reason}`
       );
+      if (workflowTaskManager) {
+        try {
+          await workflowTaskManager.scheduleImmediateResume({
+            executionId: parentExecId,
+            spaceId,
+            fakeRequest,
+          });
+          logger.info(
+            `Scheduled immediate Task Manager resume as fallback for parent ${parentExecId} after inline resume failure`
+          );
+        } catch (scheduleErr) {
+          const scheduleReason =
+            scheduleErr instanceof Error ? scheduleErr.message : String(scheduleErr);
+          logger.warn(
+            `Fallback scheduleImmediateResume also failed (parent=${parentExecId}): ${scheduleReason}`
+          );
+        }
+      }
     }
   }
 
   if (meteringService && finalExecution) {
-    try {
-      void meteringService.reportWorkflowExecution(finalExecution, cloudSetup);
-    } catch (err) {
+    void meteringService.reportWorkflowExecution(finalExecution, cloudSetup).catch((err) => {
       logger.warn(
         `Failed to report metering (execution=${workflowRunId}): ${
           err instanceof Error ? err.message : String(err)
         }`
       );
-    }
+    });
   }
 }

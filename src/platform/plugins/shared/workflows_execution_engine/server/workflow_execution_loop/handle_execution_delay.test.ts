@@ -123,6 +123,14 @@ describe('handleExecutionDelay', () => {
   });
 
   describe('short wait (< 5s) in-process', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('sleeps in-process and sets RUNNING without TM task', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() + 100).toISOString();
@@ -134,30 +142,9 @@ describe('handleExecutionDelay', () => {
         } as any,
       });
 
-      await handleExecutionDelay(params, stepRuntime);
-
-      expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        status: ExecutionStatus.RUNNING,
-      });
-    });
-
-    it('on step abort during sleep sets RUNNING and returns (cancel / interrupt path)', async () => {
-      const params = makeParams();
-      const resumeAt = new Date(Date.now() + 3000).toISOString();
-      const ac = new AbortController();
-      const stepRuntime = makeStepRuntime({
-        node: { stepType: 'wait' } as any,
-        abortController: ac,
-        stepExecution: {
-          status: ExecutionStatus.WAITING,
-          state: { resumeAt },
-        } as any,
-      });
-
-      queueMicrotask(() => ac.abort());
-
-      await handleExecutionDelay(params, stepRuntime);
+      const delayPromise = handleExecutionDelay(params, stepRuntime);
+      await jest.advanceTimersByTimeAsync(100);
+      await delayPromise;
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
       expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
@@ -175,6 +162,33 @@ describe('handleExecutionDelay', () => {
           state: { resumeAt },
         } as any,
       });
+
+      const delayPromise = handleExecutionDelay(params, stepRuntime);
+      await jest.advanceTimersByTimeAsync(100);
+      await delayPromise;
+
+      expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
+      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.RUNNING,
+      });
+    });
+  });
+
+  describe('short wait — abort during in-process sleep (real timers)', () => {
+    it('on step abort during sleep sets RUNNING and returns (cancel / interrupt path)', async () => {
+      const params = makeParams();
+      const resumeAt = new Date(Date.now() + 3000).toISOString();
+      const ac = new AbortController();
+      const stepRuntime = makeStepRuntime({
+        node: { stepType: 'wait' } as any,
+        abortController: ac,
+        stepExecution: {
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt },
+        } as any,
+      });
+
+      queueMicrotask(() => ac.abort());
 
       await handleExecutionDelay(params, stepRuntime);
 
