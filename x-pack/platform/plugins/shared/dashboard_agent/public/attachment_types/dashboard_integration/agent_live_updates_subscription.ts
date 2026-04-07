@@ -9,7 +9,6 @@ import { filter, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common';
 import { attachmentDataToDashboardState, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 
@@ -27,18 +26,24 @@ export const createAgentLiveUpdatesSubscription = ({
   api,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.chat$.pipe(filter(isRoundCompleteEvent)).subscribe((event) => {
-    const incomingAttachment = event.data.attachments?.find((attachment) => {
-      return (
-        isDashboardAttachment(attachment) &&
-        event.data.round.input.attachment_refs?.some(
-          (ref) =>
-            ref.attachment_id === attachment.id &&
-            (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
-              ref.operation === ATTACHMENT_REF_OPERATION.created)
-        ) === true
-      );
-    });
+    const incomingAttachments = event.data.attachments
+      ?.filter(isDashboardAttachment)
+      .filter((attachment) => {
+        return (
+          event.data.round.input.attachment_refs?.some(
+            (ref) =>
+              ref.attachment_id === attachment.id &&
+              (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
+                ref.operation === ATTACHMENT_REF_OPERATION.created)
+          ) === true
+        );
+      });
 
+    if (!incomingAttachments) {
+      return;
+    }
+    // TODO: handle multiple attachments in the future
+    const incomingAttachment = incomingAttachments.at(0);
     if (!incomingAttachment) {
       return;
     }
@@ -50,9 +55,8 @@ export const createAgentLiveUpdatesSubscription = ({
       return;
     }
 
-    const latestVersionData = getLatestVersion(incomingAttachment)?.data as
-      | DashboardAttachment['data']
-      | undefined;
+    const latestVersionData = getLatestVersion(incomingAttachment)?.data;
+
     if (!latestVersionData) {
       return;
     }

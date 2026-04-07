@@ -25,10 +25,10 @@ interface UseRegisterCanvasActionButtonsParams {
   timeRange: { from: string; to: string };
   dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
   attachmentOrigin: string | undefined;
-  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   isSidebar: boolean;
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
+  savedObjectStatus: SavedObjectStatus;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -40,13 +40,14 @@ export const useRegisterCanvasActionButtons = ({
   timeRange,
   dashboardState,
   attachmentOrigin,
-  checkSavedDashboardExist,
   isSidebar,
+  savedObjectStatus,
 }: UseRegisterCanvasActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
   const attachmentOriginRef = useLatest(attachmentOrigin);
   const dashboardStateRef = useLatest(dashboardState);
   const openSidebarConversationRef = useLatest(openSidebarConversation);
+  const savedObjectStatusRef = useLatest(savedObjectStatus);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -64,9 +65,14 @@ export const useRegisterCanvasActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
+          const existingAttachmentOrigin =
+            savedObjectStatusRef.current.status === 'resolved' &&
+            savedObjectStatusRef.current.exists
+              ? attachmentOriginRef.current
+              : undefined;
           await locator.navigate({
             ...dashboardStateRef.current,
-            dashboardId: attachmentOriginRef.current,
+            dashboardId: existingAttachmentOrigin,
             time_range: timeRangeRef.current,
             viewMode: 'edit',
           });
@@ -84,7 +90,10 @@ export const useRegisterCanvasActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
-        const existingAttachmentOrigin = attachmentOriginRef.current;
+        const existingAttachmentOrigin =
+          savedObjectStatusRef.current.status === 'resolved' && savedObjectStatusRef.current.exists
+            ? attachmentOriginRef.current
+            : undefined;
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
           await updateOrigin(existingAttachmentOrigin);
@@ -101,12 +110,12 @@ export const useRegisterCanvasActionButtons = ({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
-    checkSavedDashboardExist,
     closeCanvas,
     openSidebarConversationRef,
     timeRangeRef,
     attachmentOriginRef,
     dashboardStateRef,
+    savedObjectStatusRef,
     isSidebar,
   ]);
 };

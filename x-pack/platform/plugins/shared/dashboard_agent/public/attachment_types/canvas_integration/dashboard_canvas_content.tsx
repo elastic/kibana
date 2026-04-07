@@ -138,7 +138,7 @@ export const DashboardCanvasContent = ({
     timeRange,
     dashboardState,
     attachmentOrigin,
-    checkSavedDashboardExist,
+    savedObjectStatus,
     isSidebar,
   });
 

@@ -17,6 +17,7 @@ export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   getAttachment: () => DashboardAttachment;
+  getSyncAttachment: (currentSavedObjectId: string | undefined) => DashboardAttachment | undefined;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   updateOrigin: (origin: string) => Promise<unknown>;
 }
@@ -25,12 +26,14 @@ export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
   getAttachment,
+  getSyncAttachment,
   checkSavedDashboardExist,
   updateOrigin,
 }: DashboardAppIntegrationParams): (() => void) => {
   const originSyncSubscription = createOriginSyncSubscription({
     api,
-    attachmentOrigin: getAttachment().origin,
+    getAttachment,
+    getSyncAttachment,
     checkSavedDashboardExist,
     updateOrigin,
   });
@@ -42,6 +45,7 @@ export const registerDashboardAppIntegration = ({
     agentBuilder,
     api,
     getAttachment,
+    getSyncAttachment,
   });
 
   return () => {

@@ -30,6 +30,7 @@ export interface ManualChangesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   getAttachment: () => DashboardAttachment | undefined;
+  getSyncAttachment: (currentSavedObjectId: string | undefined) => DashboardAttachment | undefined;
 }
 
 /**
@@ -40,6 +41,7 @@ export const createManualChangesSubscription = ({
   agentBuilder,
   api,
   getAttachment,
+  getSyncAttachment,
 }: ManualChangesSubscriptionParams): Subscription => {
   // TODO: we should get it directly from the dashboard plugin
   // Collect observables for all trackable dashboard state
@@ -72,9 +74,10 @@ export const createManualChangesSubscription = ({
         }
 
         const currentSavedObjectId = api.savedObjectId$.getValue();
+        const syncAttachment = getSyncAttachment(currentSavedObjectId);
 
-        // Only sync if: no saved dashboard OR saved dashboard matches attachment's origin
-        if (currentSavedObjectId && currentSavedObjectId !== currentAttachment.origin) {
+        // Only the attachment selected for the current dashboard should own sync.
+        if (!syncAttachment || syncAttachment.id !== currentAttachment.id) {
           return undefined;
         }
         const currentDashboardState = api.getSerializedState().attributes;

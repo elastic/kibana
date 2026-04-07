@@ -181,6 +181,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
     return {
       agentBuilder,
+      addAttachment: mockAddAttachment,
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,

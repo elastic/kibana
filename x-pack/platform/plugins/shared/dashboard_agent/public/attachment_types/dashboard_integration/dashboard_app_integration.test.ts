@@ -102,6 +102,7 @@ const createMockAttachment = (overrides?: Partial<DashboardAttachment>): Dashboa
 describe('registerDashboardAppIntegration', () => {
   let mockApi: MockDashboardApi;
   let getAttachment: jest.Mock;
+  let getSyncAttachment: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
   let updateOrigin: jest.Mock;
   let addAttachment: jest.Mock;
@@ -112,6 +113,9 @@ describe('registerDashboardAppIntegration', () => {
     jest.useFakeTimers();
     mockApi = createMockDashboardApi();
     getAttachment = jest.fn().mockReturnValue(createMockAttachment());
+    getSyncAttachment = jest
+      .fn()
+      .mockImplementation((_savedObjectId: string | undefined) => getAttachment());
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
     updateOrigin = jest.fn().mockResolvedValue(undefined);
     addAttachment = jest.fn();
@@ -133,6 +137,7 @@ describe('registerDashboardAppIntegration', () => {
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
       getAttachment,
+      getSyncAttachment,
       checkSavedDashboardExist,
       updateOrigin,
     });
@@ -156,7 +161,30 @@ describe('registerDashboardAppIntegration', () => {
 
   it('skips syncing when viewing a different saved dashboard', () => {
     getAttachment.mockReturnValue(createMockAttachment({ origin: 'attachment-dashboard-id' }));
+    getSyncAttachment.mockReturnValue(undefined);
     mockApi.savedObjectId$.next('different-dashboard-id');
+
+    register();
+
+    mockApi.title$.next('New Title');
+    jest.advanceTimersByTime(200);
+
+    expect(addAttachment).not.toHaveBeenCalled();
+  });
+
+  it('skips syncing when another attachment owns the current dashboard', () => {
+    const currentAttachment = createMockAttachment({
+      id: 'current-attachment-id',
+      origin: 'dashboard-a',
+    });
+    getAttachment.mockReturnValue(currentAttachment);
+    getSyncAttachment.mockReturnValue(
+      createMockAttachment({
+        id: 'other-attachment-id',
+        origin: 'dashboard-a',
+      })
+    );
+    mockApi.savedObjectId$.next('dashboard-a');
 
     register();
 
@@ -270,6 +298,31 @@ describe('registerDashboardAppIntegration', () => {
 
     expect(checkSavedDashboardExist).toHaveBeenCalledWith('deleted-dashboard');
     expect(updateOrigin).toHaveBeenCalledWith('current-dashboard');
+  });
+
+  it('does not relink when another attachment owns the current dashboard', async () => {
+    const currentAttachment = createMockAttachment({
+      id: 'current-attachment-id',
+      origin: undefined,
+    });
+    getAttachment.mockReturnValue(currentAttachment);
+    getSyncAttachment.mockReturnValue(
+      createMockAttachment({
+        id: 'other-attachment-id',
+        origin: undefined,
+      })
+    );
+
+    register();
+
+    mockApi.onSave$.next({
+      previousDashboardId: undefined,
+      dashboardId: 'new-dashboard-id',
+      dashboardState: mockSavedDashboardState,
+    });
+    await Promise.resolve();
+
+    expect(updateOrigin).not.toHaveBeenCalled();
   });
 
   it('unsubscribes from manual and origin subscriptions on cleanup', async () => {
