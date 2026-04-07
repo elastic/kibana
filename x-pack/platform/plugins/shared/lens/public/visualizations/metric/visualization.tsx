@@ -406,9 +406,7 @@ const cleanupMetricState = (
   ) {
     return {
       ...updatedState,
-      secondaryLabel: undefined,
       secondaryTrend: getDefaultConfigForMode(colorMode),
-      secondaryLabelPosition: 'before',
     };
   }
 

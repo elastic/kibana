@@ -341,6 +341,15 @@ function createNavTree({
             breadcrumbStatus: 'hidden',
             children: [
               {
+                link: 'management:anomaly_detection',
+                title: i18n.translate(
+                  'xpack.observability.obltNav.ml.anomaly_detection.manage_jobs',
+                  {
+                    defaultMessage: 'Manage jobs',
+                  }
+                ),
+              },
+              {
                 link: 'ml:anomalyExplorer',
               },
               {
