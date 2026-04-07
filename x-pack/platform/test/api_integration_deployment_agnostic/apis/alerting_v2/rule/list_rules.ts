@@ -242,21 +242,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.items[0].metadata.name).to.be('owned-rule');
       });
 
-      it('should filter rules by metadata.labels', async () => {
-        await createRule(roleAuthc, 'labeled-rule', {
-          metadata: { name: 'labeled-rule', labels: ['production', 'critical'] },
+      it('should filter rules by metadata.tags', async () => {
+        await createRule(roleAuthc, 'tagged-rule', {
+          metadata: { name: 'tagged-rule', tags: ['production', 'critical'] },
         });
-        await createRule(roleAuthc, 'unlabeled-rule');
+        await createRule(roleAuthc, 'untagged-rule');
 
         const response = await supertestWithoutAuth
           .get(RULE_API_PATH)
-          .query({ perPage: 1000, filter: 'metadata.labels: "critical"' })
+          .query({ perPage: 1000, filter: 'metadata.tags: "critical"' })
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader());
 
         expect(response.status).to.be(200);
         expect(response.body.items.length).to.be(1);
-        expect(response.body.items[0].metadata.name).to.be('labeled-rule');
+        expect(response.body.items[0].metadata.name).to.be('tagged-rule');
       });
 
       it('should filter rules by grouping.fields', async () => {
@@ -279,22 +279,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should support compound filters', async () => {
         await createRule(roleAuthc, 'alert-prod', {
           kind: 'alert',
-          metadata: { name: 'alert-prod', labels: ['production'] },
+          metadata: { name: 'alert-prod', tags: ['production'] },
         });
         await createRule(roleAuthc, 'signal-prod', {
           kind: 'signal',
-          metadata: { name: 'signal-prod', labels: ['production'] },
+          metadata: { name: 'signal-prod', tags: ['production'] },
         });
         await createRule(roleAuthc, 'alert-dev', {
           kind: 'alert',
-          metadata: { name: 'alert-dev', labels: ['development'] },
+          metadata: { name: 'alert-dev', tags: ['development'] },
         });
 
         const response = await supertestWithoutAuth
           .get(RULE_API_PATH)
           .query({
             perPage: 1000,
-            filter: 'kind: alert AND metadata.labels: "production"',
+            filter: 'kind: alert AND metadata.tags: "production"',
           })
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader());

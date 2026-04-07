@@ -86,34 +86,34 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
     expect(response.body.items[0].metadata.name).toBe('rule-with-desc');
   });
 
-  apiTest('should find rules by label prefix', async ({ apiClient }) => {
-    const labeledRes = await apiClient.post(RULE_API_PATH, {
+  apiTest('should find rules by tag prefix', async ({ apiClient }) => {
+    const taggedRes = await apiClient.post(RULE_API_PATH, {
       headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
       body: {
         kind: 'alert',
-        metadata: { name: 'labeled-rule', labels: ['production', 'critical'] },
+        metadata: { name: 'tagged-rule', tags: ['production', 'critical'] },
         time_field: '@timestamp',
         schedule: { every: '5m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
       },
       responseType: 'json',
     });
-    expect(labeledRes.statusCode).toBe(200);
-    ruleIds.push(labeledRes.body.id);
+    expect(taggedRes.statusCode).toBe(200);
+    ruleIds.push(taggedRes.body.id);
 
-    const unlabeledRes = await apiClient.post(RULE_API_PATH, {
+    const untaggedRes = await apiClient.post(RULE_API_PATH, {
       headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
       body: {
         kind: 'alert',
-        metadata: { name: 'unlabeled-rule' },
+        metadata: { name: 'untagged-rule' },
         time_field: '@timestamp',
         schedule: { every: '5m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
       },
       responseType: 'json',
     });
-    expect(unlabeledRes.statusCode).toBe(200);
-    ruleIds.push(unlabeledRes.body.id);
+    expect(untaggedRes.statusCode).toBe(200);
+    ruleIds.push(untaggedRes.body.id);
 
     const response = await apiClient.get(`${RULE_API_PATH}?search=critical&perPage=100`, {
       headers: { ...adminCredentials.apiKeyHeader },
@@ -122,7 +122,7 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.items).toHaveLength(1);
-    expect(response.body.items[0].metadata.name).toBe('labeled-rule');
+    expect(response.body.items[0].metadata.name).toBe('tagged-rule');
   });
 
   apiTest('should find rules by grouping field prefix', async ({ apiClient }) => {
@@ -167,16 +167,16 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
 
   apiTest('should AND multiple search terms together', async ({ apiClient }) => {
     const rules = [
-      { name: 'prod-cpu-alert', labels: ['production'] },
-      { name: 'dev-cpu-alert', labels: ['development'] },
+      { name: 'prod-cpu-alert', tags: ['production'] },
+      { name: 'dev-cpu-alert', tags: ['development'] },
     ];
 
-    for (const { name, labels } of rules) {
+    for (const { name, tags } of rules) {
       const res = await apiClient.post(RULE_API_PATH, {
         headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
         body: {
           kind: 'alert',
-          metadata: { name, labels },
+          metadata: { name, tags },
           time_field: '@timestamp',
           schedule: { every: '5m' },
           evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
