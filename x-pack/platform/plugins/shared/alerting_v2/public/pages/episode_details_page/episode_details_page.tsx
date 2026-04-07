@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -56,7 +56,12 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { EpisodeLifecycleHeatmap } from './components/episode_lifecycle_heatmap';
+
+const EpisodeLifecycleHeatmap = React.lazy(() =>
+  import('./components/episode_lifecycle_heatmap').then((module) => ({
+    default: module.EpisodeLifecycleHeatmap,
+  }))
+);
 
 const episodeDetailsBreadcrumbFallback = i18n.translate(
   'xpack.alertingV2.breadcrumbs.episodeDetailsFallback',
@@ -554,7 +559,9 @@ export function EpisodeDetailsPage() {
           <KibanaPageTemplate.Section paddingSize="none" grow>
             <EuiSplitPanel.Outer direction="row" hasBorder={false} hasShadow={false} grow>
               <EuiSplitPanel.Inner grow paddingSize="l">
-                <EpisodeLifecycleHeatmap eventRows={eventRows} />
+                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                  <EpisodeLifecycleHeatmap eventRows={eventRows} />
+                </Suspense>
                 <EuiSpacer size="l" />
                 {rule ? (
                   <EuiAccordion
