@@ -59,7 +59,16 @@ export function extendEsArchiver({
         }
         if (globalDefaults) {
           await retry.try(async () => {
-            await kibanaServer.uiSettings.updateGlobal(globalDefaults);
+            try {
+              await kibanaServer.uiSettings.updateGlobal(globalDefaults);
+            } catch (err) {
+              // If a setting is already enforced via server-level globalOverrides, the API returns 400.
+              // That's fine — the override achieves the same goal.
+              if (err?.message?.includes('because it is overridden')) {
+                return;
+              }
+              throw err;
+            }
           });
         }
       }
