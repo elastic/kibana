@@ -13,6 +13,8 @@ export interface ExecuteEsqlQueryOptions<Input> {
   query: string;
   abortSignal?: AbortSignal;
   input: Input;
+  /** When true, passes `allowCache: false` to `expressions.execute` to bypass expression-layer caching. */
+  noCache?: boolean;
 }
 
 /** Time field used for the time range filter (must match the expression's timeField argument). */
@@ -28,9 +30,11 @@ export const executeEsqlQuery = <Input = unknown>({
   query,
   input,
   abortSignal,
+  noCache,
 }: ExecuteEsqlQueryOptions<Input>) => {
   const expression = `esql '${query.replace(/'/g, "\\'")}' timeField='${ESQL_TIME_FIELD}'`;
-  const executionContract = expressions.execute<Input, Datatable>(expression, input);
+  const options = noCache ? { allowCache: false } : undefined;
+  const executionContract = expressions.execute<Input, Datatable>(expression, input, options);
   abortSignal?.addEventListener('abort', (e) => {
     executionContract.cancel((e.target as AbortSignal)?.reason);
   });
