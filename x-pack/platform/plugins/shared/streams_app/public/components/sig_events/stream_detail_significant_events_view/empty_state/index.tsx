@@ -53,7 +53,7 @@ export function EmptyState({
       title={
         <h2>
           {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
-            defaultMessage: 'This stream\'s knowledge indicators have not been extracted yet',
+            defaultMessage: "This stream's knowledge indicators have not been extracted yet",
           })}
         </h2>
       }
