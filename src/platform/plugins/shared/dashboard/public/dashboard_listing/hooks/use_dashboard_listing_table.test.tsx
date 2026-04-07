@@ -8,13 +8,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices } from '../../services/kibana_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import type { DashboardSavedObjectUserContent } from '../types';
 import { useDashboardListingTable } from './use_dashboard_listing_table';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();
