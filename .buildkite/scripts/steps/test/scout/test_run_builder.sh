@@ -69,7 +69,7 @@ else
     AFFECTED_FLAG=(--affected-modules "$AFFECTED_MODULES_FILE")
   fi
   SELECTIVE_SCOUT_DISCOVERY_FLAG=()
-  if [[ -n "$AFFECTED_MODULES_FILE" ]]; then
+  if [[ -n "$AFFECTED_MODULES_FILE" ]] && ! is_pr_with_label "scout:run-all-tests"; then
     SELECTIVE_SCOUT_DISCOVERY_FLAG=(--selective-testing)
   fi
   node scripts/scout discover-playwright-configs \
