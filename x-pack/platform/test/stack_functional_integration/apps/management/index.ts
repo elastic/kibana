@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('settings / management app', function () {
     loadTestFile(require.resolve('./_index_pattern_create'));
   });
