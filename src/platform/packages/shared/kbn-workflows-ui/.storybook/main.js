@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export default function ({ loadTestFile }) {
-  describe('management plugin', () => {
-    loadTestFile(require.resolve('./management_plugin'));
-  });
-}
+module.exports = require('@kbn/storybook').defaultConfig;
