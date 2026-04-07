@@ -206,13 +206,19 @@ function convertStylingToAPIFormat(
     }),
     secondary: hasSecondary
       ? {
-          label: {
-            visible:
-              visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
-                ? false
-                : DEFAULT_SECONDARY_LABEL_VISIBLE,
-            placement: visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
-          },
+          ...(visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
+            ? {
+                label: {
+                  visible: false,
+                },
+              }
+            : {
+                label: {
+                  visible: DEFAULT_SECONDARY_LABEL_VISIBLE,
+                  placement:
+                    visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+                },
+              }),
           value: {
             alignment: visualization.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT,
           },
