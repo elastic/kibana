@@ -31,6 +31,7 @@ describe('service_details_left useTabs', () => {
 
     expect(result.current).toEqual([
       expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+      expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       expect.objectContaining({
         id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
         'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
@@ -47,6 +48,7 @@ describe('service_details_left useTabs', () => {
 
     expect(result.current).toEqual([
       expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+      expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
     ]);
   });
 
