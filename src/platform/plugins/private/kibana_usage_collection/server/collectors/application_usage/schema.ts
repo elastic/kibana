@@ -130,6 +130,7 @@ export const applicationUsageSchema = {
   status: commonSchema,
   kibanaOverview: commonSchema,
   r: commonSchema,
+  workflows: commonSchema,
 
   // X-Pack
   agent_builder: commonSchema,
