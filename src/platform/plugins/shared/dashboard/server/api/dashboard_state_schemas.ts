@@ -16,7 +16,7 @@ import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
  * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
  * get the pinned panel schema from a pinned panel registry **independent** from controls
  */
-import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
+import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
@@ -203,7 +203,7 @@ export const accessControlSchema = schema.maybe(
 export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object(
     {
-      pinned_panels: pinnedPanelsSchema,
+      pinned_panels: getPinnedPanelsSchema(),
       description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
       filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
       options: optionsSchema,
