@@ -1,0 +1,7 @@
+steps:
+  - name: Trigger DRA Staging Build
+    key: trigger-dra-staging
+    trigger: kibana-artifacts-staging
+    async: false
+    build:
+      branch: '$BRANCH'

@@ -1,11 +1,11 @@
 notify:
   - slack:
       channels:
-        - "#kibana-operations"
+        - '#kibana-operations'
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
-        - "#kibana-operations"
+        - '#kibana-operations'
       message: |
         🚦 Pipeline waiting for approval 🚦
         Repo: `${REPO}`
@@ -16,6 +16,13 @@ notify:
         Workflow: `${WORKFLOW}`
         ${BUILDKITE_BUILD_URL}
     if: build.state == "blocked"
+  - slack:
+      channels:
+        - '#mission-control'
+      message: |
+        Kibana has been bumped to `${NEW_VERSION}` on branch `${BRANCH}` and a DRA build has begun.
+        Build: ${BUILDKITE_BUILD_URL}
+    if: build.state == "passed"
 
 steps:
   - command: .buildkite/scripts/version_bump/bump.sh
@@ -23,7 +30,7 @@ steps:
 
   - wait
 
-  - label: "Fetch DRA Artifacts"
+  - label: 'Fetch DRA Artifacts'
     key: fetch-dra-artifacts
     depends_on: block-get-dra-artifacts
     agents:
@@ -36,19 +43,19 @@ steps:
     timeout_in_minutes: 240
     retry:
       automatic:
-        - exit_status: "*"
+        - exit_status: '*'
           limit: 2
       manual:
         permit_on_passed: true
 
     plugins:
       - elastic/json-watcher#v1.0.0:
-          url: "https://artifacts-staging.elastic.co/kibana/latest/${BRANCH}.json"
-          field: ".version"
-          expected_value: "${NEW_VERSION}"
-          polling_interval: "30"
+          url: 'https://artifacts-staging.elastic.co/kibana/latest/${BRANCH}.json'
+          field: '.version'
+          expected_value: '${NEW_VERSION}'
+          polling_interval: '30'
       - elastic/json-watcher#v1.0.0:
-          url: "https://storage.googleapis.com/elastic-artifacts-snapshot/kibana/latest/${BRANCH}.json"
-          field: ".version"
-          expected_value: "${NEW_VERSION}-SNAPSHOT"
-          polling_interval: "30"
+          url: 'https://storage.googleapis.com/elastic-artifacts-snapshot/kibana/latest/${BRANCH}.json'
+          field: '.version'
+          expected_value: '${NEW_VERSION}-SNAPSHOT'
+          polling_interval: '30'

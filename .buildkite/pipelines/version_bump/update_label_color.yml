@@ -1,0 +1,4 @@
+steps:
+  - name: 'Update Label Color'
+    key: update-label-color
+    command: .buildkite/scripts/steps/version_bump/update_label_color.sh

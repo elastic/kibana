@@ -1,0 +1,7 @@
+steps:
+  - name: Trigger DRA Snapshot Build
+    key: trigger-dra-snapshot
+    trigger: kibana-artifacts-snapshot
+    async: false
+    build:
+      branch: '$BRANCH'

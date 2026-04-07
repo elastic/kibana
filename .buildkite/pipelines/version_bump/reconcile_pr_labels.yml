@@ -1,0 +1,4 @@
+steps:
+  - name: 'Reconcile PR Labels'
+    key: reconcile-pr-labels
+    command: .buildkite/scripts/steps/version_bump/reconcile_pr_labels.sh
