@@ -57,7 +57,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
         // Suppress Agent Builder announcement modal in tests.
-        '--uiSettings.defaults.agentBuilder:announcementModalSeen=true',
+        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,

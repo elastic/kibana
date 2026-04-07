@@ -47,7 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         '--csp.strict=false',
         // Suppress Agent Builder announcement modal in tests.
-        '--uiSettings.defaults.agentBuilder:announcementModalSeen=true',
+        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
