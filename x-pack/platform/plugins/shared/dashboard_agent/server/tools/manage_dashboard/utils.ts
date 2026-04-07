@@ -8,7 +8,7 @@
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
@@ -161,15 +161,13 @@ export const retrieveLatestVersion = (
     throw new Error(`Dashboard attachment "${attachmentId}" not found.`);
   }
 
-  if (attachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
+  if (!isDashboardAttachment(attachment)) {
     throw new Error(
       `Attachment "${attachmentId}" is not a ${DASHBOARD_ATTACHMENT_TYPE} attachment.`
     );
   }
 
-  const latestVersion = getLatestVersion(
-    attachment
-  ) as unknown as AttachmentVersion<DashboardAttachmentData>;
+  const latestVersion = getLatestVersion(attachment);
   if (!latestVersion) {
     throw new Error(`Could not retrieve latest version of dashboard attachment "${attachmentId}".`);
   }

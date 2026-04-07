@@ -6,7 +6,10 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
-import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  dashboardStateToAttachmentData,
+} from '@kbn/dashboard-agent-common';
 import type {
   DashboardPanel,
   DashboardPluginStart,
@@ -121,7 +124,7 @@ export const createDashboardSmlType = ({
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardStateToAttachment(dashboard.data),
+        data: dashboardStateToAttachmentData(dashboard.data),
         origin: dashboard.id,
       };
     } catch (error) {
