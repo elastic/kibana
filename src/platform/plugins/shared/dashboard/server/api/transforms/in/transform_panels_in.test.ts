@@ -54,8 +54,8 @@ describe('transformPanelsIn', () => {
         uid: 'bcebc09a-270f-42ef-8d45-daf5f5f4f511',
       },
     ];
-    const results = transformPanelsIn(panels);
-    expect(JSON.parse(results.panelsJSON)).toMatchInlineSnapshot(`
+    const { panelsJSON, sections } = transformPanelsIn(panels);
+    expect(JSON.parse(panelsJSON)).toMatchInlineSnapshot(`
       Array [
         Object {
           "embeddableConfig": Object {
@@ -88,7 +88,7 @@ describe('transformPanelsIn', () => {
         },
       ]
     `);
-    expect(results.sections).toMatchInlineSnapshot(`
+    expect(sections).toMatchInlineSnapshot(`
       Array [
         Object {
           "collapsed": true,
@@ -134,7 +134,7 @@ describe('transformPanelsIn', () => {
         },
       ];
       expect(() => transformPanelsIn(panels, true)).toThrowErrorMatchingInlineSnapshot(
-        `"Panel config validation failed. Panel uid: panel1, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
+        `"Unable to transform 1 panels"`
       );
     });
 
@@ -153,8 +153,8 @@ describe('transformPanelsIn', () => {
           type: TEST_EMBEDDABLE_TYPE,
         },
       ];
-      const results = transformPanelsIn(panels);
-      expect(JSON.parse(results.panelsJSON)[0].embeddableConfig).toMatchInlineSnapshot(`
+      const { panelsJSON } = transformPanelsIn(panels);
+      expect(JSON.parse(panelsJSON)[0].embeddableConfig).toMatchInlineSnapshot(`
         Object {
           "lessThan10": 7,
         }
