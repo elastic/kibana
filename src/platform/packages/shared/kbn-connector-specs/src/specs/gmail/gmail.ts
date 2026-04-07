@@ -9,11 +9,6 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import getAttachmentWorkflow from './workflows/get_attachment.yaml';
-import getMessageWorkflow from './workflows/get_message.yaml';
-import listMessagesWorkflow from './workflows/list_messages.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 const DEFAULT_MAX_RESULTS = 10;
 const MAX_PAGE_SIZE = 100;
@@ -232,10 +227,4 @@ export const GmailConnector: ConnectorSpec = {
       }
     },
   },
-  agentBuilderWorkflows: [
-    getAttachmentWorkflow,
-    getMessageWorkflow,
-    listMessagesWorkflow,
-    searchWorkflow,
-  ],
 };

@@ -22,7 +22,7 @@
       "encryptedSavedObjects",
       "workflowsManagement"
     ],
-    "optionalPlugins": ["management"],
+    "optionalPlugins": ["management", "usageCollection"],
     "requiredBundles": ["alerting"],
     "extraPublicDirs": []
   }
