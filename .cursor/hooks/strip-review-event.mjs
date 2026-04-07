@@ -37,6 +37,10 @@ try {
 if (!input || typeof input !== 'object') process.exit(0);
 let cmd = input?.tool_input?.command ?? '';
 
+// Avoid rewriting multi-line commands (e.g. heredocs) where `gh api ...` may
+// appear as text rather than an actual invocation.
+if (cmd.includes('\n')) process.exit(0);
+
 if (!reviewEndpoint.test(cmd)) process.exit(0);
 if (submissionEndpoint.test(cmd)) process.exit(0);
 

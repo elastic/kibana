@@ -9,7 +9,7 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 
 - Use `gh` CLI for all GitHub interactions.
 - Set `GH_PAGER=cat` for all `gh` calls to avoid interactive pagers.
-- The repo is `elastic/kibana`; use `-R elastic/kibana` when not inside a local clone.
+- The repo is `elastic/kibana`; when not inside a local clone, prefer `-R elastic/kibana` for `gh` subcommands. For `gh api`, `-R` is not supported; use explicit `repos/elastic/kibana/...` endpoints or set `GH_REPO=elastic/kibana` when using `{owner}/{repo}` placeholders.
 - Follow repository merge settings (squash/rebase/merge); do not enforce a merge strategy.
 - Never merge into the base branch via CLI; merges happen via the GitHub UI.
 

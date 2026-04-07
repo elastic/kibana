@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(gh api *)",
+            "if": "Bash(*gh api *)",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/strip-review-event.mjs"
           }
         ]
