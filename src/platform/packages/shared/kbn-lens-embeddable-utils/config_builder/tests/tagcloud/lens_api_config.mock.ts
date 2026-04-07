@@ -91,8 +91,9 @@ export const comprehensiveTagcloudWithAdHocDataView = {
   title: 'Comprehensive Test Tagcloud',
   type: 'tag_cloud',
   data_source: {
-    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    id: 'my-custom-data-view-id',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
+    time_field: '@timestamp',
   },
   orientation: 'angled',
   font_size: {
