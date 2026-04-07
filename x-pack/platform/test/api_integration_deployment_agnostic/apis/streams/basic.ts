@@ -176,17 +176,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (!isServerless) {
           it('creates ES|QL views for wired root streams', async () => {
             if (!viewsApiAvailable) return;
-            for (const streamName of ['logs.otel', 'logs.ecs']) {
-              const response = await esClient.transport.request<{
-                views: Array<{ name: string; query: string }>;
-              }>({
-                method: 'GET',
-                path: `/_query/view/%24.${streamName}`,
-              });
-              expect(response.views).to.have.length(1);
-              expect(response.views[0].name).to.eql(`$.${streamName}`);
-              expect(response.views[0].query).to.eql(`FROM ${streamName}`);
-            }
+            // Wired roots may be enabled asynchronously after Kibana starts; poll until status settles.
+            await retry.tryForTime(120_000, async () => {
+              for (const streamName of ['logs.otel', 'logs.ecs']) {
+                const response = await esClient.transport.request<{
+                  views: Array<{ name: string; query: string }>;
+                }>({
+                  method: 'GET',
+                  path: `/_query/view/%24.${streamName}`,
+                });
+                expect(response.views).to.have.length(1);
+                expect(response.views[0].name).to.eql(`$.${streamName}`);
+                expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+              }
+            });
           });
         }
 
