@@ -158,6 +158,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               <>
                 {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
                   <CaseViewAlerts
+                    key={caseWithFilteredAttachments.updatedAt}
                     caseData={caseWithFilteredAttachments}
                     renderAlertsTable={renderAlertsTable}
                     onAlertsTableLoaded={onAlertsTableLoaded}

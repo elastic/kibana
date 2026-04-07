@@ -211,7 +211,9 @@ describe('check_contracts', () => {
     mockParseOasdiff.mockReturnValue(changes);
     mockCheckTerraformImpact.mockReturnValue({
       hasImpact: true,
-      impactedChanges: [{ change: changes[0], terraformResource: 'elasticstack_kibana_space' }],
+      impactedChanges: [
+        { change: changes[0], terraformResource: 'elasticstack_kibana_space', owners: [] },
+      ],
     });
     mockLoadAllowlist.mockReturnValue({ entries: [] });
     mockApplyAllowlist.mockReturnValue({ breakingChanges: [], allowlistedChanges: changes });
@@ -229,7 +231,9 @@ describe('check_contracts', () => {
     ];
     const terraformImpact = {
       hasImpact: true,
-      impactedChanges: [{ change: changes[0], terraformResource: 'elasticstack_kibana_space' }],
+      impactedChanges: [
+        { change: changes[0], terraformResource: 'elasticstack_kibana_space', owners: [] },
+      ],
     };
     mockRunOasdiff.mockReturnValue([]);
     mockParseOasdiff.mockReturnValue(changes);
@@ -403,7 +407,11 @@ describe('check_contracts', () => {
     mockParseOasdiff.mockReturnValue(changes);
     mockCheckTerraformImpact.mockReturnValue({
       hasImpact: true,
-      impactedChanges: changes.map((c) => ({ change: c, terraformResource: 'test_resource' })),
+      impactedChanges: changes.map((c) => ({
+        change: c,
+        terraformResource: 'test_resource',
+        owners: [],
+      })),
     });
     mockLoadAllowlist.mockReturnValue({ entries: [] });
     mockApplyAllowlist.mockReturnValue({
