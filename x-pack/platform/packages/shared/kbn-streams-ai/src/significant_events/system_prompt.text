@@ -561,7 +561,7 @@ Fields to look for: `log.level`, `log.severity`, `event.severity`, `severity`, `
 Template:
 ```
 FROM <stream>
-| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error"),
+| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical"),
         total = COUNT(*) WHERE <severity_field> IS NOT NULL
   BY bucket = BUCKET(@timestamp, 5 minutes)
 | EVAL error_rate = errors * 100.0 / total

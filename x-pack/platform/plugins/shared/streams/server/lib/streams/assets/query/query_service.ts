@@ -134,9 +134,11 @@ export class QueryService {
             migrated = { ...migrated, [RULE_ID]: computeRuleId(uuid, kqlQuery) };
           }
 
-          // Pre-existing queries were all rule-backed; back-fill the flag so it is persisted.
+          // Pre-existing queries were all rule-backed; back-fill the flag.
+          // STATS queries (introduced alongside the type field) are never
+          // rule-backed, so force false to avoid orphaned rule state.
           if (!(RULE_BACKED in migrated)) {
-            migrated = { ...migrated, [RULE_BACKED]: true };
+            migrated = { ...migrated, [RULE_BACKED]: derivedType !== QUERY_TYPE_STATS };
           }
 
           // Back-fill description for queries created before the field was introduced.

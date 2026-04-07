@@ -11,6 +11,15 @@ export const getPromoteAllSuccessToast = (
   promoted: number,
   skippedStats: number
 ): { text: string; severity: 'success' | 'info' } => {
+  if (promoted === 0 && skippedStats === 0) {
+    return {
+      text: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllNothingToPromote',
+        { defaultMessage: 'No queries available for promotion' }
+      ),
+      severity: 'info',
+    };
+  }
   if (promoted === 0 && skippedStats > 0) {
     return {
       text: i18n.translate(

@@ -19,6 +19,7 @@ import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import {
+  deriveQueryType,
   LOGS_ROOT_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   LOGS_ECS_STREAM_NAME,
@@ -1006,7 +1007,10 @@ export class StreamsClient {
         })),
         'rule'
       ),
-      this.dependencies.queryClient.syncQueries(definition, queries),
+      this.dependencies.queryClient.syncQueries(
+        definition,
+        queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
+      ),
     ]);
   }
 }

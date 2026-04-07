@@ -41,7 +41,7 @@ export async function getRuleExecutor(
       `Rule "${rule.id}" attempted to execute a STATS query which cannot produce document-level alerts. ` +
         `The rule should have been uninstalled when the query type changed. Skipping execution.`
     );
-    return { state: { previousOriginalDocumentIds: [] } };
+    return { state: { previousOriginalDocumentIds: state.previousOriginalDocumentIds ?? [] } };
   }
 
   const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];

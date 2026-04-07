@@ -89,10 +89,12 @@ export function KnowledgeIndicatorActionsCell({
     },
     onSuccess: async (result) => {
       await invalidateKnowledgeIndicatorsData();
-      if (result.skipped_stats > 0) {
+      if (result.promoted > 0) {
+        toasts.addSuccess({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
+      } else if (result.skipped_stats > 0) {
         toasts.addInfo({ title: KI_STATS_PROMOTE_DISABLED_TOOLTIP });
       } else {
-        toasts.addSuccess({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
+        toasts.addInfo({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
       }
     },
     onError: (error) => {

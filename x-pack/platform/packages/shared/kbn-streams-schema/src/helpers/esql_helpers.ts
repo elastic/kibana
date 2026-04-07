@@ -181,23 +181,33 @@ export function deriveQueryType(esql: string): QueryType {
 // Detects `<var> * <number> / <var>` — a rate computation — regardless of variable names.
 const RATE_PATTERN = /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b/i;
 
+// Rate computations and statistical aggregations that require a minimum
+// sample size to produce meaningful results. Simple COUNT thresholds are
+// excluded because the count itself acts as the sample size.
+const NEEDS_SAMPLE_FLOOR_PATTERN =
+  /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b|\bPERCENTILE\b|\bAVG\b|\bMEDIAN\b/i;
+
 const COMPARISON_PATTERN = /\b\w+\s*>=?\s*\d+(?:\.\d+)?/gi;
 
 function checkSampleSizeFloor(esql: string, hints: string[]): void {
-  if (!RATE_PATTERN.test(esql)) return;
+  if (!NEEDS_SAMPLE_FLOOR_PATTERN.test(esql)) return;
 
-  const statsIdx = esql.search(/\|\s*STATS\b/i);
-  const postStats = statsIdx >= 0 ? esql.slice(statsIdx) : esql;
-  const postStatsWhere = postStats.match(/\bWHERE\b(.*)/is);
+  // Find the last pipe-delimited WHERE command (the post-STATS threshold),
+  // not an inner WHERE inside a STATS aggregation like `COUNT(*) WHERE …`.
+  const pipeWhereMatch = esql.match(/\|\s*WHERE\b((?:(?!\|).)*)/gis);
+  if (!pipeWhereMatch) return;
 
-  // A rate query needs at least two comparisons in the post-STATS WHERE:
-  // one for the volume floor (e.g. total > 20) and one for the metric
-  // threshold (e.g. error_rate > 10). A single comparison is likely just
-  // the threshold without a floor.
-  const matches = postStatsWhere?.[1].match(COMPARISON_PATTERN);
+  const lastWhereBody = pipeWhereMatch[pipeWhereMatch.length - 1]
+    .replace(/^\|\s*WHERE\b/i, '');
+
+  // A threshold clause needs at least two comparisons: one for the volume
+  // floor (e.g. total > 20) and one for the metric threshold (e.g.
+  // error_rate > 10). A single comparison is likely just the threshold
+  // without a floor.
+  const matches = lastWhereBody.match(COMPARISON_PATTERN);
   if (!matches || matches.length < 2) {
     hints.push(
-      'Warning: This query computes a rate but has no sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance rates that trigger false alerts.'
+      'Warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts.'
     );
   }
 }
