@@ -28,7 +28,7 @@
       "management",
       "kibanaUtils"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }
