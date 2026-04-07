@@ -288,7 +288,7 @@ function convertYDomainStateToAPIFormat(
 
 type YAccessorAnchorPositions = Map<string, 'left' | 'right'>;
 
-export function getYAccessorsAxisPosition(
+export function getYAccessorsAxisPositions(
   layer: XYDataLayerConfig,
   accessorKey: (accessor: string) => string
 ): YAccessorAnchorPositions {
@@ -314,10 +314,10 @@ function getYAccessorToAxisPositionMap(config: XYPersistedState): YAccessorAncho
   config.layers.find((layer) => {
     const { layerId } = layer;
     if (isLensStateDataLayer(layer)) {
-      const layerPositions = getYAccessorsAxisPosition(layer, (accessor) =>
+      const accessorsPositions = getYAccessorsAxisPositions(layer, (accessor) =>
         JSON.stringify([layerId, accessor])
       );
-      layerPositions.forEach((value, key) => {
+      accessorsPositions.forEach((value, key) => {
         axisPositionPerAccessor.set(key, value);
       });
     }
@@ -380,7 +380,7 @@ function convertAxisSettingsToAPIFormat(
   } satisfies XAxisSchemaType;
 
   const yAccessorToAxisPositionMap = getYAccessorToAxisPositionMap(config);
-  const usedAxes = [...yAccessorToAxisPositionMap.values()];
+  const usedAxes = new Set(yAccessorToAxisPositionMap.values());
 
   const leftAxis = {
     type: 'y',
@@ -455,8 +455,8 @@ function convertAxisSettingsToAPIFormat(
 
   return {
     x: xAxis,
-    ...(usedAxes.includes('left') ? { left: leftAxis } : {}),
-    ...(usedAxes.includes('right') ? { right: rightAxis } : {}),
+    ...(usedAxes.has('left') ? { left: leftAxis } : {}),
+    ...(usedAxes.has('right') ? { right: rightAxis } : {}),
   };
 }
 

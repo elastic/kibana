@@ -58,7 +58,7 @@ import {
   operationFromColumn,
 } from '../../utils';
 import { stripUndefined } from '../utils';
-import { getYAccessorsAxisPosition } from './chart';
+import { getYAccessorsAxisPositions } from './chart';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
@@ -73,7 +73,7 @@ function convertDataLayerToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
 ): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'> | Omit<DataLayerTypeESQL, 'type' | 'dataset'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
-  const yAccessorToAxisPositionMap = getYAccessorsAxisPosition(
+  const yAccessorToAxisPositionMap = getYAccessorsAxisPositions(
     visualization,
     (accessor) => accessor
   );
