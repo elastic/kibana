@@ -26,3 +26,11 @@ export {
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';
 export { SERVERLESS_ROLES_ROOT_PATH, STATEFUL_ROLES_ROOT_PATH } from './src/paths';
+export {
+  EIS_QA_URL,
+  EIS_ES_ARG,
+  resolveCcmApiKey,
+  setCcmApiKey,
+  eisHttpRequest,
+} from './src/eis/eis_setup';
+export type { EisElasticsearchConnection } from './src/eis/eis_setup';

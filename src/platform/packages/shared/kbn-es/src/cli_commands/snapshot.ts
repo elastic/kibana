@@ -15,6 +15,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
 import { createCliError } from '../errors';
+import { EIS_ES_ARG, resolveCcmApiKey, setCcmApiKey } from '../eis/eis_setup';
 import type { Command } from './types';
 
 export const snapshot: Command = {
@@ -43,10 +44,12 @@ export const snapshot: Command = {
       --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
       --plugins         Comma seperated list of Elasticsearch plugins to install
       --secure-files     Comma seperated list of secure_setting_name=/path pairs
+      --eis             Enable EIS mode: sets trial license, EIS inference URL, resolves and sets CCM API key
 
     Example:
 
       es snapshot --version 5.6.8 -E cluster.name=test -E path.data=/tmp/es-data
+      es snapshot --eis
   `;
   },
   run: async (defaults = {}) => {
@@ -72,10 +75,20 @@ export const snapshot: Command = {
       },
 
       string: ['version', 'ready-timeout', 'es-log-level'],
-      boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill'],
+      boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill', 'eis'],
 
       default: defaults,
     });
+
+    if (options.eis) {
+      options.license = 'trial';
+      const userEsArgs = options.esArgs
+        ? Array.isArray(options.esArgs)
+          ? options.esArgs
+          : [options.esArgs]
+        : [];
+      options.esArgs = [EIS_ES_ARG, ...userEsArgs];
+    }
 
     const cluster = new Cluster({ ssl: options.ssl });
 
@@ -121,13 +134,46 @@ export const snapshot: Command = {
         ...options,
       });
 
-      await cluster.run(installPath, {
-        reportTime,
-        startTime: runStartTime,
-        ...options,
-        esStdoutLogLevel: options.esLogLevel || 'info',
-        readyTimeout: parseTimeoutToMs(options.readyTimeout),
-      });
+      if (options.eis) {
+        await cluster.start(installPath, {
+          reportTime,
+          startTime: runStartTime,
+          ...options,
+          esStdoutLogLevel: options.esLogLevel || 'info',
+          readyTimeout: parseTimeoutToMs(options.readyTimeout),
+          onEarlyExit: (msg) => {
+            log.error(`ES exited unexpectedly: ${msg}`);
+            process.exit(1);
+          },
+        });
+
+        const protocol = options.ssl ? 'https' : 'http';
+        const es = {
+          baseUrl: `${protocol}://localhost:${options.port || 9200}`,
+          credentials: { username: 'elastic', password: options.password || 'changeme' },
+          ssl: !!options.ssl,
+        };
+
+        const apiKey = await resolveCcmApiKey(log);
+        await setCcmApiKey(apiKey, es, log);
+        log.success('EIS: CCM API key set in Elasticsearch');
+
+        await new Promise<void>((resolve) => {
+          const shutdown = () => {
+            cluster.stop().finally(resolve);
+          };
+          process.on('SIGINT', shutdown);
+          process.on('SIGTERM', shutdown);
+        });
+      } else {
+        await cluster.run(installPath, {
+          reportTime,
+          startTime: runStartTime,
+          ...options,
+          esStdoutLogLevel: options.esLogLevel || 'info',
+          readyTimeout: parseTimeoutToMs(options.readyTimeout),
+        });
+      }
     }
   },
 };

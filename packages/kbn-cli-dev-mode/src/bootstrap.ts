@@ -25,6 +25,15 @@ interface BootstrapArgs {
 export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   const log = new CliLog(!!cliArgs.silent);
 
+  if (cliArgs.eis) {
+    const { discoverEisConnectors } = await import('./eis_dev_orchestrator');
+    const result = await discoverEisConnectors(log);
+
+    if (Object.keys(result.preconfiguredConnectors).length > 0) {
+      process.env.__KIBANA_EIS_CONNECTORS = JSON.stringify(result.preconfiguredConnectors);
+    }
+  }
+
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,

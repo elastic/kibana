@@ -204,6 +204,19 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
+  const eisConnectorsJson = process.env.__KIBANA_EIS_CONNECTORS;
+  if (eisConnectorsJson) {
+    try {
+      const eisConnectors = JSON.parse(eisConnectorsJson);
+      if (eisConnectors && typeof eisConnectors === 'object' && !Array.isArray(eisConnectors)) {
+        const existing = get('xpack.actions.preconfigured', {});
+        set('xpack.actions.preconfigured', { ...existing, ...eisConnectors });
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
+
   _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
   _.merge(rawConfig, keystoreConfig);
 
@@ -281,6 +294,10 @@ export default function (program) {
       .option(
         '--no-uiam',
         'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
+      )
+      .option(
+        '--eis',
+        'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis)'
       );
   }
 
@@ -324,6 +341,7 @@ export default function (program) {
       dist: !!opts.dist,
       serverless: isServerlessMode,
       uiam: isServerlessSamlSupported && opts.uiam !== false,
+      eis: !!opts.eis,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
