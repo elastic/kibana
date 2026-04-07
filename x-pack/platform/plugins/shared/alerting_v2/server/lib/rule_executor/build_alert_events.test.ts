@@ -67,6 +67,7 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(doc1.status).toBe('breached');
     expect(doc1.source).toBe('internal');
     expect(doc1.type).toBe('signal');
+    expect(doc1.space_id).toBe('default');
 
     expect(doc2.group_hash).toEqual(expect.any(String));
     expect(doc2.data).toEqual({ 'host.name': 'host-b', region: 'eu-west', count: 5 });
@@ -90,6 +91,7 @@ describe('buildRecoveryAlertEvents', () => {
     const events = buildRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
+      spaceId: 'default',
       activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
       breachedGroupHashes: new Set(['hash-a']),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
@@ -105,6 +107,7 @@ describe('buildRecoveryAlertEvents', () => {
       status: 'recovered',
       source: 'internal',
       type: 'signal',
+      space_id: 'default',
     });
   });
 
@@ -112,6 +115,7 @@ describe('buildRecoveryAlertEvents', () => {
     const events = buildRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
+      spaceId: 'default',
       activeGroupHashes: [{ group_hash: 'hash-a' }],
       breachedGroupHashes: new Set(['hash-a']),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
@@ -124,6 +128,7 @@ describe('buildRecoveryAlertEvents', () => {
     const events = buildRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
+      spaceId: 'default',
       activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
       breachedGroupHashes: new Set(),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
@@ -138,6 +143,7 @@ describe('buildRecoveryAlertEvents', () => {
     const events = buildRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
+      spaceId: 'default',
       activeGroupHashes: [],
       breachedGroupHashes: new Set(['hash-a']),
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
@@ -201,6 +207,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       status: 'recovered',
       source: 'internal',
       type: 'signal',
+      space_id: 'default',
     });
   });
 

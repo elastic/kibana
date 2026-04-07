@@ -16,6 +16,7 @@ import {
   createAlertEpisode,
   createNotificationGroup,
   createNotificationPolicy,
+  createRule,
 } from '../fixtures/test_utils';
 
 const createMockStorageService = (): jest.Mocked<StorageServiceContract> => ({
@@ -94,6 +95,7 @@ describe('StoreActionsStep', () => {
       suppressed: [{ ...episode, reason: 'user acknowledged' }],
       throttled: [],
       dispatch: [],
+      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
     });
 
     const result = await step.execute(state);
@@ -112,6 +114,7 @@ describe('StoreActionsStep', () => {
           rule_id: 'rule-1',
           source: 'internal',
           reason: 'user acknowledged',
+          space_id: 'default',
         },
       ],
     });
@@ -137,6 +140,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [group],
       dispatch: [],
+      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
     });
 
     const result = await step.execute(state);
@@ -155,6 +159,7 @@ describe('StoreActionsStep', () => {
           rule_id: 'rule-1',
           source: 'internal',
           reason: 'suppressed by throttled policy policy-1',
+          space_id: 'default',
         },
       ],
     });
@@ -180,6 +185,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [],
       dispatch: [group],
+      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
     });
 
     const result = await step.execute(state);
@@ -197,6 +203,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-1',
       source: 'internal',
       reason: 'dispatched by policy policy-1',
+      space_id: 'default',
     });
     expect(callArgs.docs[1]).toEqual({
       '@timestamp': mockDate.toISOString(),
@@ -209,6 +216,7 @@ describe('StoreActionsStep', () => {
       source: 'internal',
       reason: 'notified by policy policy-1',
       episode_status: 'active',
+      space_id: 'default',
     });
   });
 
@@ -234,6 +242,7 @@ describe('StoreActionsStep', () => {
       policies: new Map([
         ['policy-1', createNotificationPolicy({ id: 'policy-1', throttle: { interval: '1h' } })],
       ]),
+      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
     });
 
     const result = await step.execute(state);
@@ -251,6 +260,7 @@ describe('StoreActionsStep', () => {
         notification_group_id: 'group-1',
         episode_status: 'recovering',
         reason: 'notified by policy policy-1',
+        space_id: 'default',
       })
     );
   });
@@ -283,6 +293,7 @@ describe('StoreActionsStep', () => {
           }),
         ],
       ]),
+      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
     });
 
     const result = await step.execute(state);
@@ -343,6 +354,11 @@ describe('StoreActionsStep', () => {
           createNotificationPolicy({ id: 'dispatch-policy', throttle: { interval: '1h' } }),
         ],
       ]),
+      rules: new Map([
+        ['rule-suppressed', createRule({ id: 'rule-suppressed' })],
+        ['rule-throttled', createRule({ id: 'rule-throttled' })],
+        ['rule-dispatch', createRule({ id: 'rule-dispatch' })],
+      ]),
     });
 
     const result = await step.execute(state);
@@ -363,6 +379,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-suppressed',
       source: 'internal',
       reason: 'manually suppressed',
+      space_id: 'default',
     });
 
     expect(callArgs.docs[1]).toEqual({
@@ -374,6 +391,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-throttled',
       source: 'internal',
       reason: 'suppressed by throttled policy throttle-policy',
+      space_id: 'default',
     });
 
     expect(callArgs.docs[2]).toEqual({
@@ -385,6 +403,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-dispatch',
       source: 'internal',
       reason: 'dispatched by policy dispatch-policy',
+      space_id: 'default',
     });
 
     expect(callArgs.docs[3]).toEqual(
@@ -395,6 +414,7 @@ describe('StoreActionsStep', () => {
         notification_group_id: 'dispatch-group',
         episode_status: 'active',
         reason: 'notified by policy dispatch-policy',
+        space_id: 'default',
       })
     );
   });
@@ -415,6 +435,7 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [],
       dispatch: [],
+      rules: new Map([['rule-unmatched', createRule({ id: 'rule-unmatched' })]]),
     });
 
     const result = await step.execute(state);
@@ -433,6 +454,7 @@ describe('StoreActionsStep', () => {
           rule_id: 'rule-unmatched',
           source: 'internal',
           reason: 'no matching notification policy',
+          space_id: 'default',
         },
       ],
     });
@@ -459,6 +481,10 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [],
       dispatch: [],
+      rules: new Map([
+        ['rule-1', createRule({ id: 'rule-1' })],
+        ['rule-2', createRule({ id: 'rule-2' })],
+      ]),
     });
 
     const result = await step.execute(state);
@@ -514,6 +540,11 @@ describe('StoreActionsStep', () => {
       suppressed: [],
       throttled: [throttledGroup],
       dispatch: [dispatchGroup],
+      rules: new Map([
+        ['rule-dispatch', createRule({ id: 'rule-dispatch' })],
+        ['rule-throttled', createRule({ id: 'rule-throttled' })],
+        ['rule-unmatched', createRule({ id: 'rule-unmatched' })],
+      ]),
     });
 
     const result = await step.execute(state);
@@ -542,6 +573,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-unmatched',
       source: 'internal',
       reason: 'no matching notification policy',
+      space_id: 'default',
     });
   });
 
@@ -571,6 +603,7 @@ describe('StoreActionsStep', () => {
 
     const state = createDispatcherPipelineState({
       dispatch: [group],
+      rules: new Map([['rule-1', createRule({ id: 'rule-1' })]]),
     });
 
     const result = await step.execute(state);
