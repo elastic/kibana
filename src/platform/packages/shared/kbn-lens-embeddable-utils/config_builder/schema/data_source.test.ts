@@ -31,7 +31,7 @@ describe('DataSource Schema', () => {
     it('throws on missing name', () => {
       const input = {
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        // @ts-expect-error
+        // @ts-expect-error - ignore required name for test purposes
       } satisfies DataSourceTypeNoESQL;
 
       expect(() => dataViewSchema.validate(input)).toThrow(
@@ -78,7 +78,7 @@ describe('DataSource Schema', () => {
       const input = {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         time_field: '@timestamp',
-        // @ts-expect-error
+        // @ts-expect-error - ignore required fields for test purposes
       } satisfies DataSourceTypeNoESQL;
 
       expect(() => dataViewSchema.validate(input)).toThrow(
@@ -101,7 +101,7 @@ describe('DataSource Schema', () => {
     it('throws on missing query', () => {
       const input = {
         type: 'esql',
-        // @ts-expect-error
+        // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
       expect(() => dataSourceEsqlTableTypeSchema.validate(input)).toThrow(
