@@ -19,20 +19,21 @@ import type { StreamsRepositoryClient } from '../api';
  * streams page, and a visual indicator of the stream type (wired vs classic).
  *
  * @param repositoryClient - Streams repository client for fetching stream definitions
- * @param application - Core Application service for generating app-relative URLs
+ * @param application - Promise resolving to the Core Application service
  */
 export function createStreamsSourceEnricher(
   repositoryClient: StreamsRepositoryClient,
-  application: ApplicationStart
+  application: Promise<ApplicationStart>
 ): (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]> {
   return async (sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> => {
     try {
-      const response = await repositoryClient.fetch('GET /api/streams 2023-10-31', {
+      const app = await application;
+      const { streams } = await repositoryClient.fetch('GET /api/streams 2023-10-31', {
         signal: new AbortController().signal,
       });
 
       // Build a lookup map by stream name for O(1) matching
-      const streamsByName = new Map(response.streams.map((stream) => [stream.name, stream]));
+      const streamsByName = new Map(streams.map((stream) => [stream.name, stream]));
 
       return sources.map((source) => {
         const stream = streamsByName.get(source.name);
@@ -42,7 +43,7 @@ export function createStreamsSourceEnricher(
 
         const isWired = Streams.WiredStream.Definition.is(stream);
 
-        const streamUrl = application.getUrlForApp('streams', {
+        const streamUrl = app.getUrlForApp('streams', {
           path: `/${stream.name}/management/overview`,
         });
 
