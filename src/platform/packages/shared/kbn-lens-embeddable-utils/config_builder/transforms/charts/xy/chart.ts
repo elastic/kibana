@@ -11,7 +11,7 @@ import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
-import type { XYState } from '../../../schema';
+import type { XYLayer, XYState } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
@@ -202,7 +202,7 @@ export function buildVisualizationAPI(
     ...convertAxisSettingsToAPIFormat(config, layers),
     styling: convertStylingToAPIFormat(config, layerPresence),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
-  };
+  } as XYState;
 }
 
 function convertExtendsToAPIFormat(extent: AxisExtentConfig | undefined): { extent?: ExtentsType } {
@@ -374,8 +374,8 @@ function buildXYLayerAPI(
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): XYState['layers'] {
-  const apiLayers: XYState['layers'] = [];
+): XYLayer[] {
+  const apiLayers: XYLayer[] = [];
   for (const visLayer of visualization.layers) {
     if (visLayer.layerType === 'referenceLine') {
       const datasourceLayer = layers[visLayer.layerId];

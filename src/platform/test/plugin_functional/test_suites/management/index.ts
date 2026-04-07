@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export default function ({ loadTestFile }) {
+import type { PluginFunctionalProviderContext } from '../../services';
+
+export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('management plugin', () => {
     loadTestFile(require.resolve('./management_plugin'));
   });

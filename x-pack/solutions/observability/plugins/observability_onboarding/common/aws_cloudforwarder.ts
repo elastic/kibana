@@ -27,3 +27,9 @@ export const CLOUDFORMATION_STACK_CONFIGS = {
 } as const;
 
 export type LogType = keyof typeof CLOUDFORMATION_STACK_CONFIGS;
+
+export const CLOUDFORWARDER_INDEX_PATTERNS: Record<LogType, string> = {
+  vpcflow: 'logs-aws.vpcflow.otel-*',
+  elbaccess: 'logs-aws.elbaccess.otel-*',
+  cloudtrail: 'logs-aws.cloudtrail.otel-*',
+};
