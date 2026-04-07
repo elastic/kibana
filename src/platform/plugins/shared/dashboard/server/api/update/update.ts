@@ -24,13 +24,12 @@ export async function update(
   isDashboardAppRequest: boolean = false
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const { access_control: accessControl, ...restOfData } = updateBody;
 
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(restOfData, isDashboardAppRequest);
+  } = transformDashboardIn(updateBody, isDashboardAppRequest);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
