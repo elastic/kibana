@@ -71,7 +71,7 @@ export function EmptyState({
             <EuiText size="s" textAlign="center" color="subdued">
               {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
                 defaultMessage:
-                  'Significant events runs on generated content which we use for context to create meaningful insights. You can onboard this stream.',
+                  'Generate knowledge indicators to teach the system about this stream. These indicators are the foundation for detecting significant events.',
               })}
             </EuiText>
           </EuiFlexItem>
