@@ -60,6 +60,10 @@ export class GenAiSettingsPlugin
     const hasAnonymizationPrivilege =
       capabilities.anonymization?.show === true || capabilities.anonymization?.manage === true;
 
+    // --- TEMPORARY: force the race window open ---
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    // --- END TEMPORARY ---
+
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
     if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
       management.sections.section.ai.registerApp({
