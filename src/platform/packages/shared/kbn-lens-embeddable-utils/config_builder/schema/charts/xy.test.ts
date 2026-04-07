@@ -8,7 +8,7 @@
  */
 
 import type { DatasetTypeESQL } from '../dataset';
-import type { XYState, XYStateESQL } from './xy';
+import type { XYState } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
 
 describe('XY', () => {
@@ -405,7 +405,7 @@ describe('XY', () => {
     );
 
     it.each(anyType.map((type) => anyType.map((anotherType) => [type, anotherType])).flat(1))(
-      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations with mixed datasets',
+      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations (DSL layers only)',
       (type1, type2) => {
         expect(() =>
           xyStateSchema.validate({
@@ -435,19 +435,38 @@ describe('XY', () => {
                   limit: 5,
                   rank_by: {
                     direction: 'desc',
-                    metric: 0,
-                    type: 'column',
+                    metric_index: 0,
+                    type: 'metric',
                   },
                 },
               },
               {
-                dataset: { type: 'esql', query: 'FROM company_index' },
+                dataset: { type: 'dataView', id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { column: 'order_date' },
-                y: [{ column: 'value' }, { column: 'price' }],
-                breakdown_by: { column: 'product' },
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  include_empty_rows: false,
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  drop_partial_intervals: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: {
+                  operation: 'terms',
+                  fields: ['product', 'category'],
+                  limit: 5,
+                  rank_by: {
+                    direction: 'desc',
+                    metric_index: 0,
+                    type: 'metric',
+                  },
+                },
               },
               {
                 dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
@@ -621,7 +640,41 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState | XYStateESQL)
+        } satisfies XYState)
+      ).toThrow();
+    });
+
+    it('should reject mixing ES|QL and DSL layers in one chart', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: 'Mixed mode chart',
+          layers: [
+            {
+              dataset: { type: 'dataView', id: 'companyAIndex' },
+              type: 'bar',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                include_empty_rows: false,
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                drop_partial_intervals: false,
+              },
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+            {
+              dataset: { type: 'esql', query: 'FROM company_index' },
+              type: 'line',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: { operation: 'value', column: 'order_date' },
+              y: [{ operation: 'value', column: 'value' }],
+            },
+          ],
+        } as XYState)
       ).toThrow();
     });
 
@@ -643,12 +696,19 @@ describe('XY', () => {
           layers: [minimalLayer],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[legend]: types that failed validation:
-        - [legend.0.position]: types that failed validation:
-         - [legend.position.0]: expected value to equal [top]
-         - [legend.position.1]: expected value to equal [bottom]
-        - [legend.1.layout.type]: expected value to equal [grid]
-        - [legend.2.placement]: expected value to equal [inside]"
+        "types that failed validation:
+        - [0.legend]: types that failed validation:
+         - [legend.0.position]: types that failed validation:
+          - [legend.position.0]: expected value to equal [top]
+          - [legend.position.1]: expected value to equal [bottom]
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]
+        - [1.legend]: types that failed validation:
+         - [legend.0.position]: types that failed validation:
+          - [legend.position.0]: expected value to equal [top]
+          - [legend.position.1]: expected value to equal [bottom]
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]"
       `);
     });
 
@@ -671,12 +731,19 @@ describe('XY', () => {
           layers: [minimalLayer],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "[legend]: types that failed validation:
-        - [legend.0.layout]: types that failed validation:
-         - [legend.layout.0.type]: expected value to equal [grid]
-         - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
-        - [legend.1.layout.type]: expected value to equal [grid]
-        - [legend.2.placement]: expected value to equal [inside]"
+        "types that failed validation:
+        - [0.legend]: types that failed validation:
+         - [legend.0.layout]: types that failed validation:
+          - [legend.layout.0.type]: expected value to equal [grid]
+          - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]
+        - [1.legend]: types that failed validation:
+         - [legend.0.layout]: types that failed validation:
+          - [legend.layout.0.type]: expected value to equal [grid]
+          - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]"
       `);
     });
   });

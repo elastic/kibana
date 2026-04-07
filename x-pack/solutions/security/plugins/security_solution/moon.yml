@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/timelines-plugin'
   - '@kbn/es-query'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/utility-types'
   - '@kbn/securitysolution-list-utils'
   - '@kbn/securitysolution-io-ts-list-types'
@@ -221,6 +222,7 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/response-ops-alerts-fields-browser'
   - '@kbn/response-ops-alerts-table'
+  - '@kbn/response-ops-detections-close-reason'
   - '@kbn/alerting-types'
   - '@kbn/index-adapter'
   - '@kbn/core-http-server-utils'
@@ -290,6 +292,7 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/core-overlays-browser'
 tags:
   - plugin
   - prod
