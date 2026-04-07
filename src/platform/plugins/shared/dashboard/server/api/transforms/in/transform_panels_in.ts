@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -19,7 +18,8 @@ import type {
   SavedDashboardSection,
 } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
-import { embeddableService, logger } from '../../../kibana_services';
+import { embeddableService } from '../../../kibana_services';
+import { TransformPanelsInError, TransformPanelInError } from './transform_panels_in_error';
 
 export function transformPanelsIn(
   widgets: Required<DashboardState>['panels'],
@@ -29,6 +29,7 @@ export function transformPanelsIn(
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
 } {
+  const panelErrors: TransformPanelInError[] = [];
   const panels: SavedDashboardPanel[] = [];
   const sections: SavedDashboardSection[] = [];
   const panelReferences: SavedObjectReference[] = [];
@@ -39,20 +40,35 @@ export function transformPanelsIn(
       const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
-        const { storedPanel, references } = transformPanelIn(panel, isDashboardAppRequest);
-        panels.push({
-          ...storedPanel,
-          gridData: { ...storedPanel.gridData, sectionId: idx },
-        });
-        panelReferences.push(...references);
+        try {
+          const { storedPanel, references } = transformPanelIn(panel, isDashboardAppRequest);
+          panels.push({
+            ...storedPanel,
+            gridData: { ...storedPanel.gridData, sectionId: idx },
+          });
+          panelReferences.push(...references);
+        } catch (e) {
+          panelErrors.push(new TransformPanelInError(e.message, panel.type, panel.config));
+        }
       });
     } else {
       // widget is a panel
-      const { storedPanel, references } = transformPanelIn(widget, isDashboardAppRequest);
-      panels.push(storedPanel);
-      panelReferences.push(...references);
+      try {
+        const { storedPanel, references } = transformPanelIn(widget, isDashboardAppRequest);
+        panels.push(storedPanel);
+        panelReferences.push(...references);
+      } catch (e) {
+        panelErrors.push(new TransformPanelInError(e.message, widget.type, widget.config));
+      }
     }
   });
+
+  if (panelErrors.length) {
+    throw new TransformPanelsInError(
+      `Unable to transform ${panelErrors.length} panels`,
+      panelErrors
+    );
+  }
   return { panelsJSON: JSON.stringify(panels), sections, references: panelReferences };
 }
 
@@ -81,9 +97,7 @@ function transformPanelIn(
     try {
       panelSchema.validate(config);
     } catch (error) {
-      throw Boom.badRequest(
-        `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`
-      );
+      throw new Error(`Validation error: ${error.message}`);
     }
   }
 
@@ -96,10 +110,7 @@ function transformPanelIn(
       references = transformed.references;
     }
   } catch (transformInError) {
-    // do not prevent save if transformIn throws
-    logger.warn(
-      `Unable to transform "${panel.type}" embeddable state on save. Error: ${transformInError.message}`
-    );
+    throw new Error(`Transform error: ${transformInError.message}`);
   }
 
   return {
