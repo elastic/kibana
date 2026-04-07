@@ -30,7 +30,13 @@ export const createEntityMaintainerHelpers = (agent: supertest.Agent) => {
     if (ids && ids.length > 0) {
       req = req.query({ ids });
     }
-    const response = await withHeaders(req);
+    const response = await withHeaders(req).expect((res) => {
+      if (res.status !== 200) {
+        throw new Error(
+          `getMaintainers failed with status ${res.status}. Body: ${JSON.stringify(res.body)}`
+        );
+      }
+    });
     return response.body as { maintainers: Array<{ id: string; runs: number }> };
   };
 
@@ -145,12 +151,19 @@ export const createEntityMaintainerHelpers = (agent: supertest.Agent) => {
 
     // 3. Poll until all engines are started (up to 60s)
     const enginePollDeadline = Date.now() + 60_000;
+    let enginesStarted = false;
     while (Date.now() < enginePollDeadline) {
       const res = await withHeaders(agent.get(`${ENTITY_STORE_BASE_ROUTE}/engines`));
       const engines: Array<{ type: string; status: string }> = res.body.engines ?? [];
       const allStarted = engines.length > 0 && engines.every((e) => e.status === 'started');
-      if (allStarted) break;
+      if (allStarted) {
+        enginesStarted = true;
+        break;
+      }
       await new Promise((resolve) => setTimeout(resolve, 3_000));
+    }
+    if (!enginesStarted) {
+      throw new Error('Entity store engines did not reach "started" status within 60 seconds');
     }
 
     // 4. Force log extraction for each entity type so transforms pick up seeded docs
