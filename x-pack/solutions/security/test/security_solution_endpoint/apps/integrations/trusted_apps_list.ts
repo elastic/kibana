@@ -6,29 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'trustedApps']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
-  const endpointTestResources = getService('endpointTestResources');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/251545
+  // Failing: See https://github.com/elastic/kibana/issues/261829
   describe.skip('When on the Trusted Apps list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
-    let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
-      indexedData = await endpointTestResources.loadEndpointData();
-      await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
-    });
-    after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     it('should not show page title if there is no trusted app', async () => {

@@ -8,6 +8,7 @@
  */
 
 import type { MetricState } from '../../schema';
+import { DEFAULT_PRIMARY_VALUE_ALIGNMENT } from '../../transforms/charts/metric/defaults';
 
 export const breakdownMetricAPIAttributes = {
   type: 'metric',
@@ -61,7 +62,6 @@ export const complexMetricAPIAttributes = {
           percentile: 95,
         },
       },
-      position: 'top',
     },
     {
       type: 'secondary',
@@ -73,15 +73,18 @@ export const complexMetricAPIAttributes = {
         palette: 'status',
         value: false,
       },
-      value: {
-        alignment: 'left',
-      },
     },
   ],
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
     limit: 5,
+  },
+  styling: {
+    primary: {
+      position: 'top',
+      value: { alignment: DEFAULT_PRIMARY_VALUE_ALIGNMENT },
+    },
   },
 } as MetricState;
 
