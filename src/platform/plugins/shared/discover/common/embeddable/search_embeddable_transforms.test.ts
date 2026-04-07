@@ -60,7 +60,7 @@ describe('searchEmbeddableTransforms', () => {
         title: 'Test Title',
         description: 'Test Description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-123',
+        ref_id: 'session-123',
         selected_tab_id: undefined,
         overrides: {},
       });
@@ -161,7 +161,7 @@ describe('searchEmbeddableTransforms', () => {
       expect(result).toMatchObject({
         title: 'Test Title',
         description: 'Test Description',
-        discover_session_id: 'session-xyz',
+        ref_id: 'session-xyz',
       });
     });
   });
@@ -173,7 +173,7 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Test Search',
           description: 'Test Description',
           time_range: { from: 'now-15m', to: 'now' },
-          discover_session_id: 'test-saved-object-id',
+          ref_id: 'test-saved-object-id',
           selected_tab_id: undefined,
           overrides: {},
         };
@@ -201,7 +201,7 @@ describe('searchEmbeddableTransforms', () => {
           title: 'My Search',
           description: 'My description',
           time_range: { from: 'now-1h', to: 'now' },
-          discover_session_id: 'session-456',
+          ref_id: 'session-456',
           selected_tab_id: 'tab-1',
           overrides: {},
         };
