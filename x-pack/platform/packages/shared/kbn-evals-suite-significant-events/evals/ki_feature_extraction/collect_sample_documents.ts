@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import {
@@ -16,6 +16,22 @@ import {
 } from '../../src/datasets';
 
 const SAMPLE_DOCS_MAX = 50;
+const ERROR_SAMPLE_BUDGET = 5;
+
+const LOG_MESSAGE_FIELDS = ['body.text', 'message'];
+const ERROR_KEYWORDS = ['error', 'exception'];
+
+const ERROR_FILTER: QueryDslQueryContainer = {
+  bool: {
+    should: [
+      { term: { 'log.level': 'error' } },
+      ...LOG_MESSAGE_FIELDS.flatMap((field) =>
+        ERROR_KEYWORDS.map((keyword) => ({ match_phrase: { [field]: keyword } }))
+      ),
+    ],
+    minimum_should_match: 1,
+  },
+};
 
 const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
   const app = fields['resource.attributes.app'];
@@ -118,6 +134,60 @@ export const collectSampleDocuments = async ({
     uniqueApps,
   });
 
+  const representativeCount = docs.length;
+
+  // Per-app error sampling: fetch 1 error-specific doc per required app so failure
+  // signals aren't drowned out by higher-volume normal operation logs.
+  const requiredAppErrorResults = await Promise.all(
+    requiredApps.map((app) =>
+      getSampleDocuments({
+        esClient,
+        index: MANAGED_STREAM_SEARCH_PATTERN,
+        start: 0,
+        end: Date.now(),
+        filter: [
+          ...query,
+          { term: { 'resource.attributes.app': app } },
+          ERROR_FILTER,
+          ...(seen.size > 0 ? [{ bool: { must_not: [{ ids: { values: [...seen] } }] } }] : []),
+        ],
+        size: 1,
+      })
+    )
+  );
+
+  addUniqueHitsToSample({
+    hits: requiredAppErrorResults.flatMap(({ hits }) => hits),
+    docs,
+    seen,
+    uniqueApps,
+  });
+
+  const perAppErrorCount = docs.length - representativeCount;
+
+  // General error fill: additional error docs across all apps for cross-cutting patterns.
+  if (docs.length < SAMPLE_DOCS_MAX) {
+    const errorBudget = Math.min(
+      Math.max(ERROR_SAMPLE_BUDGET - perAppErrorCount, 0),
+      SAMPLE_DOCS_MAX - docs.length
+    );
+
+    if (errorBudget > 0) {
+      const { hits } = await getSampleDocuments({
+        esClient,
+        index: MANAGED_STREAM_SEARCH_PATTERN,
+        start: 0,
+        end: Date.now(),
+        filter: [...query, ERROR_FILTER, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
+        size: errorBudget,
+      });
+
+      addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
+    }
+  }
+
+  const totalErrorCount = docs.length - representativeCount;
+
   if (docs.length < SAMPLE_DOCS_MAX) {
     const { hits } = await getSampleDocuments({
       esClient,
@@ -131,10 +201,15 @@ export const collectSampleDocuments = async ({
     addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
   }
 
+  const generalCount = docs.length - representativeCount - totalErrorCount;
+
   log.info(
     `Collected ${docs.length} sample document(s) across ${uniqueApps.size} app(s): ${[
       ...uniqueApps,
-    ].join(', ')}`
+    ].join(', ')} ` +
+      `(${representativeCount} representative, ${totalErrorCount} error [${perAppErrorCount} per-app + ${
+        totalErrorCount - perAppErrorCount
+      } general], ${generalCount} general fill)`
   );
 
   const missingApps = requiredApps.filter((app) => !uniqueApps.has(app));
