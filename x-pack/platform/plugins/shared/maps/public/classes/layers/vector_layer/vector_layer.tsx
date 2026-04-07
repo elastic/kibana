@@ -135,7 +135,7 @@ export interface IVectorLayer extends ILayer {
   getMasks(): Mask[];
 }
 
-export const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
+export const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusCircle" />;
 export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
   icon: noResultsIcon,
   tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {

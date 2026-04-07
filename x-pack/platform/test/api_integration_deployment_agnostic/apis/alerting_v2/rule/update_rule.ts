@@ -24,11 +24,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       .set(samlAuth.getInternalRequestHeader())
       .send({
         kind: 'alert',
-        metadata: { name: 'original-rule', owner: 'team-a', labels: ['prod'] },
+        metadata: { name: 'original-rule', owner: 'team-a', tags: ['prod'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '10m' },
         evaluation: {
-          query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+          query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
         },
         grouping: { fields: ['host.name'] },
       });
@@ -92,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Original fields should be preserved
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
       expect(response.body.evaluation).to.eql({
-        query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+        query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
       });
       expect(response.body.grouping).to.eql({ fields: ['host.name'] });
     });

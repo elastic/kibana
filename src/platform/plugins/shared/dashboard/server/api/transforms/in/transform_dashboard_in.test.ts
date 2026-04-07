@@ -31,7 +31,7 @@ describe('transformDashboardIn', () => {
         } as unknown as PinnedControlState,
       ],
       description: 'description',
-      query: { query: 'test', language: 'KQL' },
+      query: { expression: 'test', language: 'kql' as const },
       options: {
         ...DEFAULT_DASHBOARD_OPTIONS,
         hide_panel_titles: true,
@@ -68,7 +68,7 @@ describe('transformDashboardIn', () => {
         "attributes": Object {
           "description": "description",
           "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
+            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"kuery\\"}}",
           },
           "optionsJSON": "{\\"hidePanelTitles\\":true,\\"hidePanelBorders\\":false,\\"useMargins\\":false,\\"autoApplyFilters\\":true,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false}",
           "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",

@@ -18,7 +18,8 @@ import {
 
 const { PAGE_SIZE } = PAGINATION;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/261198
+spaceTest.describe.skip(
   'Metrics in Discover - Fullscreen Mode',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,

@@ -5,55 +5,53 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { createActivateAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import type { AlertActionsClient } from '../../lib/alert_actions_client';
+import { createAlertActionsClientMock } from '../../lib/alert_actions_client/alert_actions_client.mock';
 import { CreateActivateAlertActionRoute } from './create_activate_alert_action_route';
+import { createRouteDependencies } from '../test_utils';
 
 describe('CreateActivateAlertActionRoute', () => {
   const groupHash = 'group-1';
-  const noContentResult = { noContent: true };
-  const customErrorResult = { customError: true };
-
-  const createDeps = (body: Record<string, unknown>) => {
-    const request = { params: { group_hash: groupHash }, body };
-    const response = {
-      noContent: jest.fn().mockReturnValue(noContentResult),
-      customError: jest.fn().mockReturnValue(customErrorResult),
-    };
-    const alertActionsClient = { createAction: jest.fn() };
-    return { request, response, alertActionsClient };
-  };
 
   it('injects action_type and returns noContent', async () => {
     const body = { reason: 'manual override' };
-    const { request, response, alertActionsClient } = createDeps(body);
+    const { ctx } = createRouteDependencies();
+    const request = { params: { group_hash: groupHash }, body } as unknown as KibanaRequest;
+    const alertActionsClient = createAlertActionsClientMock();
     const route = new CreateActivateAlertActionRoute(
-      request as any,
-      response as any,
-      alertActionsClient as any
+      ctx,
+      request,
+      alertActionsClient as unknown as AlertActionsClient
     );
 
-    const result = await route.handle();
+    await route.handle();
 
     expect(alertActionsClient.createAction).toHaveBeenCalledWith({
       groupHash,
       action: { action_type: 'activate', ...body },
     });
-    expect(result).toBe(noContentResult);
+    expect(ctx.response.noContent).toHaveBeenCalled();
   });
 
   it('returns customError on failure', async () => {
-    const { request, response, alertActionsClient } = createDeps({ reason: 'x' });
+    const { ctx } = createRouteDependencies();
+    const request = {
+      params: { group_hash: groupHash },
+      body: { reason: 'x' },
+    } as unknown as KibanaRequest;
+    const alertActionsClient = createAlertActionsClientMock();
     alertActionsClient.createAction.mockRejectedValueOnce(new Error('boom'));
     const route = new CreateActivateAlertActionRoute(
-      request as any,
-      response as any,
-      alertActionsClient as any
+      ctx,
+      request,
+      alertActionsClient as unknown as AlertActionsClient
     );
 
-    const result = await route.handle();
+    await route.handle();
 
-    expect(response.customError).toHaveBeenCalledTimes(1);
-    expect(result).toBe(customErrorResult);
+    expect(ctx.response.customError).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -37,6 +37,7 @@ const mockApplication = {
     workflowsManagement: {
       deleteWorkflow: true,
       updateWorkflow: true,
+      readWorkflow: true,
     },
   },
 };
@@ -184,6 +185,19 @@ describe('useWorkflowBulkActions', () => {
         (item) => 'key' in item && item.key === 'workflows-bulk-action-export'
       );
       expect(exportItem).toBeUndefined();
+    });
+
+    it('does not include export action when user lacks read workflow capability', () => {
+      mockApplication.capabilities.workflowsManagement.readWorkflow = false;
+      const { result } = renderHook(() => useWorkflowBulkActions(defaultProps), { wrapper });
+
+      const mainPanel = result.current.panels[0];
+      const exportItem = mainPanel.items?.find(
+        (item) => 'key' in item && item.key === 'workflows-bulk-action-export'
+      );
+      expect(exportItem).toBeUndefined();
+
+      mockApplication.capabilities.workflowsManagement.readWorkflow = true;
     });
 
     it('disables actions when no workflows are selected', () => {
