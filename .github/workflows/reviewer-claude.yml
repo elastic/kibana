@@ -10,6 +10,9 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
 
+env:
+  CLAUDE_MODEL: llm-gateway/claude-opus-4-5
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
   cancel-in-progress: true
@@ -32,7 +35,7 @@ jobs:
         with:
           base-url: ${{ secrets.LITELLM_BASE_URL }}
           master-key: ${{ secrets.LITELLM_MASTER_API_KEY }}
-          models: llm-gateway/claude-opus-4-5
+          models: ${{ env.CLAUDE_MODEL }}
           key-ttl: 15m
           max-budget: '5'
 
@@ -59,9 +62,8 @@ jobs:
           prompt: '/review'
           claude_args: '--max-turns 5'
         env:
-          # TODO: limit tools / internet access?
           ANTHROPIC_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
-          ANTHROPIC_MODEL: 'llm-gateway/claude-opus-4-5'
+          ANTHROPIC_MODEL: ${{ env.CLAUDE_MODEL }}
 
   claude-review-comment:
     needs: mint-token
@@ -85,6 +87,9 @@ jobs:
         with:
           anthropic_api_key: ${{ needs.mint-token.outputs.api_key }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          ANTHROPIC_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          ANTHROPIC_MODEL: ${{ env.CLAUDE_MODEL }}
 
   revoke-token:
     if: ${{ always() }}
@@ -96,7 +101,7 @@ jobs:
         id: revoke
         uses: elastic/github-actions/litellm-token@cd6ed0cb2ac3e8c6d84a5ffed58eda02f4165faa # v3.0.0
         with:
+          operation: revoke
           base-url: ${{ secrets.LITELLM_BASE_URL }}
           master-key: ${{ secrets.LITELLM_MASTER_API_KEY }}
-          operation: revoke
           api-key: ${{ needs.mint-token.outputs.api_key }}
