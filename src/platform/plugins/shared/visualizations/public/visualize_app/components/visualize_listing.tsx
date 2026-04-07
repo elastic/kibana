@@ -411,7 +411,8 @@ export const VisualizeListing = () => {
               getDetailViewLink={getVisualizeListItemLink}
               tableCaption={visualizeLibraryPageTitle}
               {...tableViewProps}
-              {...propsFromParent}
+              onFetchSuccess={propsFromParent.onFetchSuccess}
+              setPageDataTestSubject={propsFromParent.setPageDataTestSubject}
             />
           </div>
         </>
