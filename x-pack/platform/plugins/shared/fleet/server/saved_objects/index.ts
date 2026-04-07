@@ -845,7 +845,13 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: schema.object({}, { unknowns: 'ignore' }),
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_exporter_config_yaml: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
             create: schema.object({}, { unknowns: 'allow' }),
           },
         },
