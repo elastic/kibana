@@ -29,21 +29,24 @@ export const useSaveQueryFromDetails = ({ data }: UseSaveQueryFromDetailsProps) 
   const savedQueryId = singleQuery?.saved_query_id;
   const canSave = !!permissions.writeSavedQueries && !data?.pack_id && data?.queries?.length === 1;
 
+  // The action document stores the custom "id" field (e.g. "my-query"), not the
+  // Kibana saved object UUID. Use the find endpoint with exact id filter.
   const { data: savedQueryData } = useQuery<
-    { data: SavedQuerySOFormData },
+    { data: SavedQuerySOFormData[] },
     unknown,
-    SavedQuerySOFormData
+    SavedQuerySOFormData | undefined
   >(
     ['savedQueryEnrichment', savedQueryId],
     () =>
-      http.get(`/api/osquery/saved_queries/${savedQueryId}`, {
+      http.get('/api/osquery/saved_queries', {
         version: API_VERSIONS.public.v1,
+        query: { id: savedQueryId, pageSize: 1 },
       }),
     {
       enabled: !!savedQueryId,
       retry: false,
       refetchOnWindowFocus: false,
-      select: (response) => response.data,
+      select: (response) => response.data?.[0],
     }
   );
 
