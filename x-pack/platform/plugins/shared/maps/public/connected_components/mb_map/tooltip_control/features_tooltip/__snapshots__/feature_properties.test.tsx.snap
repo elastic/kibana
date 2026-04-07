@@ -151,7 +151,7 @@ exports[`FeatureProperties should show view actions button when there are availa
               title="View filter actions"
             >
               <EuiIcon
-                type="arrowRight"
+                type="chevronSingleRight"
               />
             </EuiButtonEmpty>
           </span>
