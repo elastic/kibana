@@ -42,7 +42,7 @@ export const EventRenderer: FC<EventRendererProps> = ({
   const { euiTheme } = useEuiTheme();
 
   // This fetches the document for the Discover flyout that does not provide `dataAsNestedObject`.
-  // Eventually we should update all the row renderes to use a `hit` instead.
+  // Eventually we should update all the row renderers to use a `hit` instead.
   // Also this is skipped for the old flyout, as we have `dataAsNestedObject` available.
   const { dataAsNestedObject: fetchedData, loading } = useEventDetails({
     eventId: hit.raw._id,
