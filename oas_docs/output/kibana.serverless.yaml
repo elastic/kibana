@@ -42688,6 +42688,103 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/dependencies:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/dependencies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+      operationId: get-fleet-epm-packages-pkgname-pkgversion-dependencies
+      parameters:
+        - description: Package name
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - description: Package version
+          in: path
+          name: pkgVersion
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                dependenciesResponse:
+                  value:
+                    items:
+                      - name: aws
+                        title: AWS
+                        version: ^2.0.0
+                      - name: system
+                        title: System
+                        version: ^1.0.0
+                noDependenciesResponse:
+                  value:
+                    items: []
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        title:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - name
+                        - version
+                        - title
+                    maxItems: 1000
+                    type: array
+                required:
+                  - items
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                packageNotFoundResponse:
+                  value:
+                    message: '[my-package-1.0.0] package not found in registry'
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get package dependencies
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets:
     delete:
       description: |-
