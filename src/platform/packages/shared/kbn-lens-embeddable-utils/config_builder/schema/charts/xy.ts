@@ -1015,7 +1015,7 @@ export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLin
 export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = TypeOf<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = TypeOf<typeof annotationLayerByValueSchema>;
-export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
+export type LayerTypeESQL = TypeOf<typeof xyLayerUnionESQL>;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
