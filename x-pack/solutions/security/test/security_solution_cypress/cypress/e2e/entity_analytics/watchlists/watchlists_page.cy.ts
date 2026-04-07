@@ -310,7 +310,7 @@ describe(
       cy.contains('Managed Data Sources').should('exist');
       cy.contains('Rule Based Data Sources').should('exist');
       cy.get('input[name="WatchlistName"]').should('have.value', managedWatchlist.name);
-      cy.get('[data-test-subj="watchlist-flyout-cancel"]').click();
+      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     });
   }
 );
