@@ -1,6 +1,54 @@
 {
-  "sha1": "b07b6881fb6bec39b439305f20645bd956432f31",
+  "sha1": "8e004de590abdbfeae54a3567a290d6dadee85f0",
   "tests": [
+    {
+      "id": "8065d296c26f2cd-b37771106c4b8c3",
+      "title": "Breadcrumb navigation clicking the \"Rules\" breadcrumb navigates to the rules list without duplicating the path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/breadcrumb_navigation.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "9034fd33949a2e3-87b7e121e6cd59a",
+      "title": "Discover Alerts menu with alerting v2 should show Alerts menu with v2 ES|QL rule row and New badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_alerts_menu.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "db2a783d1c9ca06-9be44a4fb742275",
+      "title": "Discover query sync — Rule flyout flyout query updates when the Discover query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
     {
       "id": "7aeb81062562639-a7d0ae7c38928c4",
       "title": "Rule name validation — Discover flyout opens rule form flyout and displays default placeholder name",
