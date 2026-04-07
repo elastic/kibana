@@ -135,7 +135,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
-    subtitle: primaryMetric.sub_label ?? '',
+    subtitle: primaryMetric.subtitle ?? '',
     showBar: false,
     valueFontMode: primaryMetric.fit ? 'fit' : 'default',
     ...(primaryMetric.labels?.alignment || primaryMetric.value?.alignment
@@ -145,7 +145,6 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
         }
       : {}),
     ...(primaryMetric.position ? { primaryPosition: primaryMetric.position } : {}),
-    ...(primaryMetric.title_weight ? { titleWeight: primaryMetric.title_weight } : {}),
     ...(primaryMetric.icon
       ? {
           icon: primaryMetric.icon.name,
@@ -368,7 +367,7 @@ function enrichConfigurationWithVisualizationProperties(
   }
   if (primaryMetric) {
     if (visualization.subtitle) {
-      primaryMetric.sub_label = visualization.subtitle;
+      primaryMetric.subtitle = visualization.subtitle;
     }
 
     if (visualization.trendlineLayerType) {
@@ -421,10 +420,6 @@ function enrichConfigurationWithVisualizationProperties(
 
     if (visualization.primaryPosition) {
       primaryMetric.position = visualization.primaryPosition;
-    }
-
-    if (visualization.titleWeight) {
-      primaryMetric.title_weight = visualization.titleWeight;
     }
   }
 

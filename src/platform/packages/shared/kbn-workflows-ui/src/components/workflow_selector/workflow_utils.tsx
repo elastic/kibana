@@ -49,6 +49,13 @@ export interface WorkflowSelectorConfig {
   label?: string;
   placeholder?: string;
   createWorkflowLinkText?: string;
+  listView?: boolean;
+  listViewMaxHeight?: number;
+  // hides the 'Select workflow' label and 'Create new' link
+  hideTopRowHeader?: boolean;
+  hideViewWorkflowLink?: boolean;
+  // When true (default), the selected workflow's name is displayed in the search input.
+  showSelectedInSearch?: boolean;
 
   // Error Messages
   errorMessages?: {
@@ -75,11 +82,13 @@ export function processWorkflowsToOptions(
   return processedWorkflows.map((workflow) => {
     const validationResult = config.validationFunction ? config.validationFunction(workflow) : null;
     return {
+      key: workflow.id,
       id: workflow.id,
       name: workflow.name,
       description: workflow.description,
       tags: workflow.definition?.tags || [],
-      label: workflow.name,
+      label: workflow.id,
+      searchableLabel: workflow.name,
       disabled: !workflow.enabled,
       checked: workflow.id === selectedWorkflowId ? 'on' : undefined,
       append: <TagsBadge tags={workflow.definition?.tags || []} />,

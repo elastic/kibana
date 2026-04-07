@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYDataLayerConfig, XYPersistedState } from '@kbn/lens-common';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { capitalize } from 'lodash';
+import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
@@ -25,7 +24,6 @@ import {
 } from './api_layers';
 import { stripUndefined } from '../utils';
 import { axisLabelOrientationCompat } from '../common';
-import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
 import type { YAxisSchemaType, XAxisSchemaType, YScaleSchemaType } from '../../../schema/charts/xy';
 import {
   DEFAULT_AXIS_GRID_VISIBLE,
@@ -37,13 +35,11 @@ import {
 } from './constants';
 import type { XScaleSchemaType } from '../../../schema/charts/shared';
 
-function convertFittingToStateFormat(fitting: XYState['fitting']) {
-  return {
-    ...(fitting?.type ? { fittingFunction: capitalize(fitting.type) } : {}),
-    ...(fitting?.dotted ? { emphasizeFitting: fitting.dotted } : {}),
-    ...(fitting?.end_value ? { endValue: capitalize(fitting.end_value) } : {}),
-  };
-}
+import {
+  convertStylingToAPIFormat,
+  convertStylingToStateFormat,
+  type LayerPresence,
+} from './appearances';
 
 type DomainType = XAxisSchemaType['domain'] | YAxisSchemaType['domain'];
 
@@ -166,6 +162,15 @@ function convertAxisSettingsToStateFormat(
   });
 }
 
+function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
+  const seriesTypes = new Set(dataLayers.map((layer) => layer.seriesType));
+  return {
+    hasBars: [...seriesTypes].some((t) => t.startsWith('bar')),
+    hasLines: seriesTypes.has('line'),
+    hasAreas: [...seriesTypes].some((t) => t.startsWith('area')),
+  };
+}
+
 type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
@@ -187,9 +192,8 @@ export function buildVisualizationState(
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
-    ...convertFittingToStateFormat(config.fitting),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.decorations ? convertAppearanceToStateFormat(config.decorations) : {}),
+    ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
     layers,
   };
 }
@@ -210,14 +214,10 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
-  const decorations = convertAppearanceToAPIFormat(config);
+  const layerPresence = getLayerPresence(dataLayers);
   const { resolveAxisId, usedModes } = resolveAxisLayout(config);
   return {
     type: 'xy',
-    ...convertLegendToAPIFormat(config.legend),
-    ...convertFittingToAPIFormat(config),
-    axis: convertAxisSettingsToAPIFormat(config, layers, usedModes),
-    ...(decorations ? { decorations } : {}),
     layers: buildXYLayerAPI(
       config,
       layers,
@@ -226,21 +226,10 @@ export function buildVisualizationAPI(
       internalReferences,
       resolveAxisId
     ),
+    axis: convertAxisSettingsToAPIFormat(config, layers, usedModes),
+    styling: convertStylingToAPIFormat(config, layerPresence),
+    ...convertLegendToAPIFormat(config.legend),
   };
-}
-
-function convertFittingToAPIFormat(config: XYPersistedState): Pick<XYState, 'fitting'> | {} {
-  const fittingOptions = {
-    ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
-    ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
-    ...(config.endValue ? { end_value: config.endValue.toLowerCase() } : {}),
-  };
-
-  if (Object.keys(fittingOptions).length === 0) {
-    return {};
-  }
-
-  return { fitting: fittingOptions };
 }
 
 function convertDomainStateToAPIFormat(

@@ -35,14 +35,14 @@ exports[`TOCEntry is rendered 1`] = `
     >
       <EuiButtonIcon
         aria-label="Hide layer"
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Fit to data"
-        iconType="expand"
+        iconType="maximize"
         key="fitToBounds"
         onClick={[Function]}
         title="Fit to data"
@@ -58,7 +58,7 @@ exports[`TOCEntry is rendered 1`] = `
       <EuiButtonIcon
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
-        iconType="grab"
+        iconType="dragVertical"
         key="reorder"
         title="Reorder layer"
       />
@@ -76,7 +76,7 @@ exports[`TOCEntry is rendered 1`] = `
       <EuiIcon
         className="eui-alignBaseline"
         size="s"
-        type="arrowDown"
+        type="chevronSingleDown"
       />
     </button>
   </span>
@@ -122,14 +122,14 @@ exports[`TOCEntry props Should indent child layer 1`] = `
     >
       <EuiButtonIcon
         aria-label="Hide layer"
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Fit to data"
-        iconType="expand"
+        iconType="maximize"
         key="fitToBounds"
         onClick={[Function]}
         title="Fit to data"
@@ -145,7 +145,7 @@ exports[`TOCEntry props Should indent child layer 1`] = `
       <EuiButtonIcon
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
-        iconType="grab"
+        iconType="dragVertical"
         key="reorder"
         title="Reorder layer"
       />
@@ -163,7 +163,7 @@ exports[`TOCEntry props Should indent child layer 1`] = `
       <EuiIcon
         className="eui-alignBaseline"
         size="s"
-        type="arrowDown"
+        type="chevronSingleDown"
       />
     </button>
   </span>
@@ -205,14 +205,14 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
     >
       <EuiButtonIcon
         aria-label="Hide layer"
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Fit to data"
-        iconType="expand"
+        iconType="maximize"
         key="fitToBounds"
         onClick={[Function]}
         title="Fit to data"
@@ -228,7 +228,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       <EuiButtonIcon
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
-        iconType="grab"
+        iconType="dragVertical"
         key="reorder"
         title="Reorder layer"
       />
@@ -246,7 +246,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       <EuiIcon
         className="eui-alignBaseline"
         size="s"
-        type="arrowDown"
+        type="chevronSingleDown"
       />
     </button>
   </span>
@@ -288,14 +288,14 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
     >
       <EuiButtonIcon
         aria-label="Hide layer"
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Fit to data"
-        iconType="expand"
+        iconType="maximize"
         key="fitToBounds"
         onClick={[Function]}
         title="Fit to data"
@@ -311,7 +311,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       <EuiButtonIcon
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
-        iconType="grab"
+        iconType="dragVertical"
         key="reorder"
         title="Reorder layer"
       />
@@ -329,7 +329,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       <EuiIcon
         className="eui-alignBaseline"
         size="s"
-        type="arrowDown"
+        type="chevronSingleDown"
       />
     </button>
   </span>
@@ -371,14 +371,14 @@ exports[`TOCEntry props isReadOnly 1`] = `
     >
       <EuiButtonIcon
         aria-label="Hide layer"
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Fit to data"
-        iconType="expand"
+        iconType="maximize"
         key="fitToBounds"
         onClick={[Function]}
         title="Fit to data"
@@ -397,7 +397,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       <EuiIcon
         className="eui-alignBaseline"
         size="s"
-        type="arrowDown"
+        type="chevronSingleDown"
       />
     </button>
   </span>
@@ -439,14 +439,14 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
     >
       <EuiButtonIcon
         aria-label="Hide layer"
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
       />
       <EuiButtonIcon
         aria-label="Fit to data"
-        iconType="expand"
+        iconType="maximize"
         key="fitToBounds"
         onClick={[Function]}
         title="Fit to data"
@@ -462,7 +462,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       <EuiButtonIcon
         aria-label="Reorder layer"
         className="mapTocEntry__grab"
-        iconType="grab"
+        iconType="dragVertical"
         key="reorder"
         title="Reorder layer"
       />
@@ -502,7 +502,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       <EuiIcon
         className="eui-alignBaseline"
         size="s"
-        type="arrowUp"
+        type="chevronSingleUp"
       />
     </button>
   </span>

@@ -62,12 +62,22 @@ const buildAnalyzerContext: ContextBuilder = (taskDescription, _state, samples) 
   );
 };
 
-const buildGeneratorContext: ContextBuilder = (taskDescription, state) => {
+const buildGeneratorContext: ContextBuilder = (taskDescription, state, samples) => {
   const isReviewIteration = Boolean(state.review);
   const parts: string[] = ['<task>', taskDescription, '</task>'];
 
   if (!isReviewIteration && state.analysis) {
     parts.push('', '<log_format_analysis>', state.analysis, '</log_format_analysis>');
+  }
+
+  if (!isReviewIteration && samples && samples.length > 0) {
+    const slice = samples.slice(0, MAX_INJECTED_SAMPLES);
+    parts.push(
+      '',
+      `<log_samples count="${slice.length}" total_available="${samples.length}">`,
+      slice.map((s, i) => `### Sample ${i + 1}\n\`\`\`\n${s}\n\`\`\``).join('\n\n'),
+      '</log_samples>'
+    );
   }
 
   if (isReviewIteration && state.review) {
@@ -273,6 +283,7 @@ export const createTaskTool = (params: TaskToolParams) => {
           'pipeline_generation_results',
           'pipeline_validation_results',
           'failure_count',
+          'field_mappings',
         ] as const;
         for (const field of propagatedFields) {
           if (parentState[field] != null) {
