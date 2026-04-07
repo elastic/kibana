@@ -191,6 +191,10 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
+export const ARTIFACTS = i18n.translate('xpack.securitySolution.navigation.artifacts', {
+  defaultMessage: 'Artifacts',
+});
+
 export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
   'xpack.securitySolution.navigation.responseActionsHistory',
   {
