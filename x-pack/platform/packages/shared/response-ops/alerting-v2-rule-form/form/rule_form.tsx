@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useRef, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
 import { SubmissionButtons } from './components/submission_buttons';
@@ -22,7 +23,6 @@ import {
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
-import { NameField } from './fields/name_field';
 import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
@@ -134,28 +134,30 @@ const RuleFormContent = ({
   const formContent = (
     <>
       <ErrorCallOut />
-      {isYamlMode ? (
-        includeYaml && (
-          <EditModeToggle
-            editMode={editMode}
-            onChange={handleModeChange}
-            disabled={isDisabled || isSubmitting}
-          />
-        )
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem>
-            <NameField />
+      {includeYaml && (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          gutterSize="m"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleForm.ruleConfigurationHeading"
+                  defaultMessage="Rule configuration"
+                />
+              </h3>
+            </EuiTitle>
           </EuiFlexItem>
-          {includeYaml && (
-            <EuiFlexItem grow={false}>
-              <EditModeToggle
-                editMode={editMode}
-                onChange={handleModeChange}
-                disabled={isDisabled || isSubmitting}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EditModeToggle
+              editMode={editMode}
+              onChange={handleModeChange}
+              disabled={isDisabled || isSubmitting}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
       <EuiSpacer size="m" />
