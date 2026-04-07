@@ -6,7 +6,6 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client/rules_client';
-import { RuleTypeSolutions } from '@kbn/alerting-types';
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server/rules_client/lib/change_tracking';
 import type {
   Page,
@@ -35,7 +34,7 @@ export const getRuleHistory = async ({
   page = 1,
 }: GetRuleHistoryOptions): Promise<GetRuleHistoryResponse> => {
   const history = await client.getHistoryForRule({
-    module: RuleTypeSolutions.security,
+    module: 'security',
     ruleId,
     page,
     perPage,

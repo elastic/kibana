@@ -8,7 +8,7 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
-import { RuleTypeSolutions, SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
+import { SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
@@ -43,7 +43,7 @@ export const restoreRule = async ({
 
   await validateMlAuth(mlAuthz, existingRule.type);
 
-  const module = RuleTypeSolutions.security;
+  const module = 'security';
   const history = await rulesClient.getHistoryForRule({ module, ruleId, changeId });
   const change = history.items.at(0);
   if (!change?.rule) {

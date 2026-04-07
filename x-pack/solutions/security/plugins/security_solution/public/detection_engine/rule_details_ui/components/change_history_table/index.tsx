@@ -83,6 +83,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
       CHANGE_HISTORY_ACTION_TEMPLATE[RuleChangeTrackingAction.ruleUpdate];
     return (
       <EuiTimelineItem
+        key={item.id}
         icon={<EuiAvatar name="User" iconType="user" color={backgroundBaseSubdued} />}
       >
         <EuiText
