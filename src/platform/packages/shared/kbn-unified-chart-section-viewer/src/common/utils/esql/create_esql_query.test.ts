@@ -525,7 +525,7 @@ TS metrics-*
       );
     });
 
-    it('should cast conflicting exponential_histogram types', () => {
+    it('should return graceful no-op for incompatible histogram types', () => {
       const mockMetricWithConflictingHistogram: ParsedMetricItem = {
         metricName: 'request.duration',
         fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, ES_FIELD_TYPES.TDIGEST],
@@ -538,10 +538,10 @@ TS metrics-*
       const query = createESQLQuery({
         metricItem: mockMetricWithConflictingHistogram,
       });
-      // Note: EXPONENTIAL_HISTOGRAM is the primary type, so PERCENTILE is used
-      // The cast would wrap the primary field type handling
-      expect(query).toContain('PERCENTILE');
-      expect(query).toContain('request.duration');
+      // Incompatible types produce an empty aggregation, resulting in
+      // a STATS clause with no metric (graceful no-op)
+      expect(query).toContain('STATS');
+      expect(query).not.toContain('PERCENTILE');
     });
   });
 });

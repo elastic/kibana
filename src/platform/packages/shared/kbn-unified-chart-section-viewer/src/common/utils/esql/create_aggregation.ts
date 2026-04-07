@@ -59,9 +59,11 @@ function buildAggregationNode(
       if (castFunction) {
         castedField = synth.exp`${synth.kwd(castFunction)}(${field})`;
       }
-    } else {
+    } else if (new Set(fieldTypesArray).size > 1) {
       // Incompatible types (e.g., keyword + double) — return undefined
-      // so callers can gracefully produce a no-op instead of a broken query
+      // so callers can gracefully produce a no-op instead of a broken query.
+      // When resolvedType is undefined but all types are the same (duplicates),
+      // no cast is needed and we proceed normally.
       return undefined;
     }
   }
