@@ -7,16 +7,16 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition, StreamlangDSL, StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { conditionToPainless, isConditionBlock, transpileIngestPipeline } from '@kbn/streamlang';
+import {
+  combineConditionsAsAnd,
+  combineConditionsForElseBranch,
+  conditionToPainless,
+  isConditionBlock,
+  transpileIngestPipeline,
+} from '@kbn/streamlang';
 import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 
 type StreamlangStep = StreamlangDSL['steps'][number];
-
-function combineConditionsAsAnd(condA?: Condition, condB?: Condition): Condition | undefined {
-  if (!condA) return condB;
-  if (!condB) return condA;
-  return { and: [condA, condB] };
-}
 
 function createConditionNoopProcessor({
   conditionId,
@@ -100,7 +100,7 @@ async function buildSimulationProcessorsFromSteps({
 
       // Process else-branch steps with negated condition
       if (elseSteps && elseSteps.length > 0) {
-        const negatedCondition = combineConditionsAsAnd(parentCondition, { not: restCondition });
+        const negatedCondition = combineConditionsForElseBranch(parentCondition, restCondition);
 
         // Emit noop for else-branch condition tracking
         if (conditionId && negatedCondition) {

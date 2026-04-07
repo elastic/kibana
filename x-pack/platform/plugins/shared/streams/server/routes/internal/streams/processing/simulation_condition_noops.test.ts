@@ -113,6 +113,34 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     expect(childSetIf).toBe(conditionToPainless({ and: [parentCondition, childCondition] }));
   });
 
+  it('does not inject else-branch no-ops when else is an empty array', async () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'cond-1',
+          condition: {
+            field: 'foo',
+            eq: 'bar',
+            steps: [],
+            else: [],
+          },
+        },
+      ],
+    };
+
+    const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
+
+    expect(processors).toHaveLength(2);
+    expect(processors[0]!.set?.tag).toBe('cond-1');
+    expect(processors[1]!.remove?.tag).toBe('cond-1:noop-cleanup');
+    const tags = processors.flatMap((p) => {
+      const k = Object.keys(p)[0] as keyof typeof p;
+      const cfg = p[k] as { tag?: string };
+      return cfg.tag ? [cfg.tag] : [];
+    });
+    expect(tags.some((t) => t.includes(':else'))).toBe(false);
+  });
+
   it('processes else-branch steps with negated condition', async () => {
     const dsl: StreamlangDSL = {
       steps: [
@@ -213,6 +241,48 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     expect(processors[6]!.remove?.tag).toBe('cond-inner:noop-cleanup');
     // Inner if-branch processor
     expect(processors[7]!.set?.tag).toBe('proc-inner-if');
+  });
+
+  it('composes else-branch noop conditions with the negated outer condition (nested else)', async () => {
+    const outer: Condition = { field: 'a', eq: '1' };
+    const inner: Condition = { field: 'b', eq: '2' };
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'cond-outer',
+          condition: {
+            ...outer,
+            steps: [],
+            else: [
+              {
+                customIdentifier: 'cond-inner',
+                condition: {
+                  ...inner,
+                  steps: [],
+                  else: [
+                    {
+                      customIdentifier: 'proc-inner-else',
+                      action: 'set',
+                      to: 't',
+                      value: 'v',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
+    const innerElseNoopIf = processors.find((p) => p.set?.tag === 'cond-inner:else')?.set?.if;
+
+    expect(innerElseNoopIf).toBe(
+      conditionToPainless({
+        and: [{ not: outer }, { not: inner }],
+      })
+    );
   });
 
   it('transpiles enrich steps when an enrich policy resolver is provided', async () => {

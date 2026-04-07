@@ -9,16 +9,10 @@ import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import type { Condition } from '../../../types/conditions';
 import type { StreamlangStep } from '../../../types/streamlang';
 import { isConditionBlock } from '../../../types/streamlang';
-
-/**
- * Helper to combine two conditions as an "and" logical condition.
- * Accepts two condition objects and returns a new condition object.
- */
-function combineConditionsAsAnd(condA?: Condition, condB?: Condition) {
-  if (!condA) return condB;
-  if (!condB) return condA;
-  return { and: [condA, condB] };
-}
+import {
+  combineConditionsAsAnd,
+  combineConditionsForElseBranch,
+} from '../../conditions/combine_conditions';
 
 /**
  * Flattens Streamlang steps. Nested where blocks are recursively processed,
@@ -40,7 +34,7 @@ export function flattenSteps(
       const ifResult = flattenSteps(nestedSteps, combinedCondition);
       // Flatten else-branch steps with the negated condition
       const elseResult = elseSteps?.length
-        ? flattenSteps(elseSteps, combineConditionsAsAnd(parentCondition, { not: rest }))
+        ? flattenSteps(elseSteps, combineConditionsForElseBranch(parentCondition, rest))
         : [];
       return [...ifResult, ...elseResult];
     }
