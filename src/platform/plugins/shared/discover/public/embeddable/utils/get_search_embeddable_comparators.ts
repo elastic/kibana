@@ -8,6 +8,7 @@
  */
 
 import type { StateComparators } from '@kbn/presentation-publishing';
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import type {
   EditableSavedSearchAttributes,
   SearchEmbeddableBaseState,
@@ -58,7 +59,13 @@ export function getDiscoverSessionEmbeddableComparators(
 > {
   return isByValue
     ? {
-        tabs: 'deepEquality',
+        tabs: (prev, next) => {
+          if (prev == null || next == null) return prev == null && next == null;
+          if (prev.length !== next.length) return false;
+          return prev.every((tab, i) =>
+            isEqual(omitBy(prev[i], isUndefined), omitBy(next[i], isUndefined))
+          );
+        },
       }
     : {
         // While the selected tab is missing or inline editing is in progress,

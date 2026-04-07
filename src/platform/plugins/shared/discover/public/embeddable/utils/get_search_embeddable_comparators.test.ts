@@ -12,6 +12,8 @@ import {
   getDiscoverSessionEmbeddableComparators,
   getSearchEmbeddableComparators,
 } from './get_search_embeddable_comparators';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 const sharedSavedSearchComparators = {
   sort: 'deepEquality',
@@ -67,9 +69,50 @@ describe('getSearchEmbeddableComparators', () => {
 });
 
 describe('getDiscoverSessionEmbeddableComparators', () => {
-  it('returns only tabs comparator for by-value discover session panels', () => {
+  const baseTab = {
+    query: { language: 'kuery', query: '*' },
+    filters: [],
+    sort: [],
+    column_order: [],
+    header_row_height: 3,
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+    },
+    view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+  };
+
+  it('treats tab arrays as equal when each tab is deeply equal', () => {
     const c = getDiscoverSessionEmbeddableComparators(true, false);
-    expect(c).toEqual({ tabs: 'deepEquality' });
+    const tab = { ...baseTab };
+    expect('tabs' in c).toBe(true);
+    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [baseTab], [tab])).toBe(true);
+  });
+
+  it('treats omitted optional fields as equal to explicit undefined (e.g. query)', () => {
+    const c = getDiscoverSessionEmbeddableComparators(true, false);
+    const { query, ...tabWithoutQuery } = baseTab;
+    const tabA = { ...tabWithoutQuery };
+    const tabB = { ...tabWithoutQuery, query: undefined };
+    expect('tabs' in c).toBe(true);
+    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [tabA], [tabB])).toBe(true);
+  });
+
+  it('treats tab arrays as not equal when a tab differs', () => {
+    const c = getDiscoverSessionEmbeddableComparators(true, false);
+    const tabA = { ...baseTab, query: { language: 'kuery', query: 'a' } };
+    const tabB = { ...baseTab, query: { language: 'kuery', query: 'b' } };
+    expect('tabs' in c).toBe(true);
+    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [tabA], [tabB])).toBe(false);
+  });
+
+  it('treats tab arrays as not equal when lengths differ', () => {
+    const c = getDiscoverSessionEmbeddableComparators(true, false);
+    const tab = { ...baseTab };
+    expect('tabs' in c).toBe(true);
+    expect('tabs' in c && runComparator(c.tabs, undefined, undefined, [tab], [tab, tab])).toBe(
+      false
+    );
   });
 
   it('returns by-reference comparators when not by-value', () => {
