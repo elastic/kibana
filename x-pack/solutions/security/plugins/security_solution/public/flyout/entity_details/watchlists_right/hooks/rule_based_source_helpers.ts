@@ -134,14 +134,16 @@ export const buildEntitySources = (
     return [buildSource(type, states[type], watchlistName)];
   }
 
-  const sources: EntitySourceInput[] = [];
-  if (states.store.dirty) {
-    sources.push(buildStoreSource(states.store, watchlistName));
-  }
-  if (states.index.dirty) {
-    sources.push(buildIndexSource(states.index, watchlistName));
-  }
-  return sources.length > 0 ? sources : undefined;
+  const builders = [
+    [states.store, buildStoreSource],
+    [states.index, buildIndexSource],
+  ] as const;
+
+  const sources = builders
+    .filter(([state]) => state.dirty)
+    .map(([state, build]) => build(state, watchlistName));
+
+  return sources.length ? sources : undefined;
 };
 
 export const getToggleButtons = (
