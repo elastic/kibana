@@ -38,10 +38,13 @@ import {
 export const processResearchResponse = (
   message: AIMessageChunk
 ): ToolCallAction | HandoverAction | AgentErrorAction => {
+  const textContent = extractTextContent(message);
   if (message.tool_calls?.length) {
-    return toolCallAction(extractToolCallsWithReasoning(message));
+    return toolCallAction(
+      extractToolCallsWithReasoning(message),
+      textContent.trim().length ? textContent : undefined
+    );
   } else {
-    const textContent = extractTextContent(message);
     if (textContent) {
       return handoverAction(textContent);
     } else {
