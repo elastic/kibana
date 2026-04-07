@@ -44,6 +44,7 @@ import {
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateGetState,
+  useInternalStateSubscribe,
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -76,6 +77,7 @@ export const useTopNavLinks = ({
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
+  const subscribe = useInternalStateSubscribe();
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -129,6 +131,7 @@ export const useTopNavLinks = ({
         services,
         tabId: currentTab.id,
         getState,
+        subscribe,
         showCreateRuleV2,
       });
       items.push(alertsAppMenuItem);
@@ -206,6 +209,7 @@ export const useTopNavLinks = ({
     appId,
     dispatch,
     getState,
+    subscribe,
     isEsqlMode,
     currentDataView,
     currentTab,
