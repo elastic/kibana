@@ -12,7 +12,7 @@ import { useNavigateToRuleEventsInDiscover } from './use_rule_events_in_discover
 
 jest.mock('@kbn/core-di-browser');
 jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
+  PluginStart: jest.fn((key: string) => key),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
@@ -60,6 +60,20 @@ describe('useNavigateToRuleEventsInDiscover', () => {
 
     expect(mockNavigate).toHaveBeenCalledWith({
       query: { esql: 'FROM .rule-events | WHERE rule.id == "rule-abc"' },
+    });
+  });
+
+  it('escapes the rule id in the ESQL passed to Discover when it contains quotes', async () => {
+    mockLocatorsGet.mockReturnValue(mockLocator);
+
+    const { result } = renderHook(() => useNavigateToRuleEventsInDiscover('abc"def'));
+
+    await act(async () => {
+      await result.current!();
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith({
+      query: { esql: 'FROM .rule-events | WHERE rule.id == "abc\\"def"' },
     });
   });
 
