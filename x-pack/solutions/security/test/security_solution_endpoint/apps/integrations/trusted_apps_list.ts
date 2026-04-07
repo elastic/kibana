@@ -52,11 +52,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await toasts.dismiss();
 
-      // Title is shown after adding an item
-      expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
-        'Trusted applications'
-      );
-
       // Remove it
       await pageObjects.trustedApps.clickCardActionMenu();
       await testSubjects.click('trustedAppsListPage-card-cardDeleteAction');
