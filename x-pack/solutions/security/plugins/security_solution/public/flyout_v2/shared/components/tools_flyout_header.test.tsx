@@ -10,10 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from './tools_flyout_header';
-import {
-  TOOLS_FLYOUT_HEADER_TEST_ID,
-  TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID,
-} from './test_ids';
+import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID } from './test_ids';
 
 const mockOpenSystemFlyout = jest.fn();
 
