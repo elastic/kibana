@@ -136,6 +136,7 @@ describe('useMonitorIntegrationHealth', () => {
       expect(result.current.getUnhealthyConfigIdsForLocation('loc-1')).toEqual(['mon-2']);
     });
   });
+
   describe('resetMonitor', () => {
     it('calls resetMonitorAPI and re-fetches health', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
@@ -199,8 +200,7 @@ describe('useMonitorIntegrationHealth', () => {
     it('returns error and does not refetch when top-level errors are present', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorBulkAPI.mockResolvedValue({
-        result: [{ id: 'mon-2', reset: true }],
-        errors: [{ message: 'partial failure' }],
+        result: [{ id: 'mon-2', reset: false }],
       });
 
       const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));

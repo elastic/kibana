@@ -146,7 +146,8 @@ export class MonitorIntegrationHealthApi {
               loc.id,
               existingPrivateLocation.label,
               PrivateLocationHealthStatusValue.MissingAgents,
-              resolvedPolicyId
+              resolvedPolicyId,
+              expectedAgentPolicyId,
             );
           }
           if (agentStatus.online === 0) {
@@ -154,7 +155,8 @@ export class MonitorIntegrationHealthApi {
               loc.id,
               existingPrivateLocation.label,
               PrivateLocationHealthStatusValue.UnhealthyAgent,
-              resolvedPolicyId
+              resolvedPolicyId,
+              expectedAgentPolicyId,
             );
           }
         }

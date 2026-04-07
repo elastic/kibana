@@ -182,7 +182,7 @@ export async function mountApp(
       tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save visualizations to the library',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   coreStart.chrome.docTitle.change(
@@ -214,6 +214,11 @@ export async function mountApp(
       initialContext && 'originatingApp' in initialContext ? initialContext.originatingApp : null;
     const mergedOriginatingApp =
       embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
+    const mergedOriginatingPath =
+      embeddableEditorIncomingState?.originatingPath ??
+      (initialContext && 'originatingPath' in initialContext
+        ? initialContext.originatingPath
+        : undefined);
     if (!mergedOriginatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
@@ -226,7 +231,7 @@ export async function mountApp(
       stateTransfer.navigateToWithEmbeddablePackages<LensSerializedAPIConfig>(
         mergedOriginatingApp,
         {
-          path: embeddableEditorIncomingState?.originatingPath,
+          path: mergedOriginatingPath,
           state: [
             {
               embeddableId: isCopied ? undefined : embeddableId,
@@ -239,7 +244,7 @@ export async function mountApp(
       );
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
-        path: embeddableEditorIncomingState?.originatingPath,
+        path: mergedOriginatingPath,
       });
     }
   };
@@ -437,6 +442,11 @@ export async function mountApp(
     lensServices.inspector.closeInspector();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
-    stateTransfer.clearEditorState?.(APP_ID);
+    // Only clear editor state on intentional programmatic navigation,
+    // not on browser back/forward. `POP` must preserve the state so that
+    // navigating forward again restores the originating app breadcrumb context.
+    if (params.history.action !== 'POP') {
+      stateTransfer.clearEditorState?.(APP_ID);
+    }
   };
 }

@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { getStatusLabel } from '../../common/hooks/status_labels';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import { PrivateLocationHealthStatusValue } from '@kbn/synthetics-plugin/common/runtime_types';
 
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
   const {
@@ -27,13 +26,6 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
   const isMissing = hasMissingIntegrations(configId);
   const canReset = isFixableByReset(configId);
   const missingStatuses = getMissingStatuses(configId);
-  const allAgentLevelIssues = missingStatuses.every(({ status }) =>{
-    return (
-      status === PrivateLocationHealthStatusValue.MissingAgents ||
-      status === PrivateLocationHealthStatusValue.UnhealthyAgent
-    );
-  }, []);
-
 
   const handleReset = useCallback(async () => {
     const { error } = await resetMonitor(configId);
@@ -57,7 +49,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
   return (
     <>
       <EuiCallOut
-        title={allAgentLevelIssues ? AGENT_ISSUE_CALLOUT_TITLE : CALLOUT_TITLE}
+        title={CALLOUT_TITLE}
         color="warning"
         iconType="warning"
         data-test-subj="syntheticsMissingIntegrationCallout"
@@ -99,13 +91,6 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
 const CALLOUT_TITLE = i18n.translate('xpack.synthetics.missingIntegration.callout.title', {
   defaultMessage: 'Missing Fleet integration',
 });
-
-const AGENT_ISSUE_CALLOUT_TITLE = i18n.translate(
-  'xpack.synthetics.missingIntegration.callout.agentIssueTitle',
-  {
-    defaultMessage: 'Agent issue detected',
-  }
-);
 
 const RESET_BUTTON_LABEL = i18n.translate('xpack.synthetics.missingIntegration.resetButton', {
   defaultMessage: 'Reset monitor',

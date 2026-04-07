@@ -208,8 +208,7 @@ export const useMonitorIntegrationHealth = (
       try {
         const response = await resetMonitorBulkAPI({ ids });
         const hasFailures = response.result.some((r) => !r.reset);
-        const hasTopLevelErrors = response.errors && response.errors.length > 0;
-        if (hasFailures || hasTopLevelErrors) {
+        if (hasFailures) {
           return { error: new Error('Failed to reset one or more monitors') };
         }
         refetchHealth();
