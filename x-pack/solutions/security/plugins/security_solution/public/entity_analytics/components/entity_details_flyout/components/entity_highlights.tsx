@@ -161,6 +161,7 @@ export const EntityHighlightsAccordion: React.FC<{
   );
 
   if (disabled) {
+    console.log('hi');
     return null;
   }
 
