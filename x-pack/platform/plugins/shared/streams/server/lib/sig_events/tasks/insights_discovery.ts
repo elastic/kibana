@@ -144,7 +144,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                     await taskClient.schedule<MemoryGenerationTaskParams>({
                       task: {
                         type: MEMORY_GENERATION_TASK_TYPE,
-                        id: MEMORY_GENERATION_TASK_TYPE,
+                        id: uuidv4(),
                         space: '*',
                       },
                       params: { insights },

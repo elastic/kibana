@@ -303,6 +303,7 @@ export class MemoryServiceImpl implements MemoryService {
 
   async search(params: SearchMemoryParams): Promise<MemorySearchResult[]> {
     const { query, tags, categories, references, size = 10 } = params;
+    const escapedQuery = query.toLowerCase().replace(/[*?]/g, '\\$&');
 
     const filters: QueryDslQueryContainer[] = [];
     if (tags && tags.length > 0) {
@@ -334,17 +335,17 @@ export class MemoryServiceImpl implements MemoryService {
                   },
                   {
                     wildcard: {
-                      name: { value: `*${query.toLowerCase()}*`, boost: 2 },
+                      name: { value: `*${escapedQuery}*`, boost: 2 },
                     },
                   },
                   {
                     wildcard: {
-                      categories: { value: `*${query.toLowerCase()}*`, boost: 2 },
+                      categories: { value: `*${escapedQuery}*`, boost: 2 },
                     },
                   },
                   {
                     wildcard: {
-                      tags: { value: `*${query.toLowerCase()}*`, boost: 2 },
+                      tags: { value: `*${escapedQuery}*`, boost: 2 },
                     },
                   },
                 ],

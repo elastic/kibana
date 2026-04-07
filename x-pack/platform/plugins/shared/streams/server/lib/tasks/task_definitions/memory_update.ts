@@ -64,6 +64,11 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
               );
               if (!useMemory) {
                 taskLogger.info('Memory is disabled, skipping memory update');
+                await taskClient.complete<MemoryUpdateTaskParams, MemoryUpdateTaskResult>(
+                  _task,
+                  { triggerId, payload },
+                  { triggerId, success: true }
+                );
                 return;
               }
 

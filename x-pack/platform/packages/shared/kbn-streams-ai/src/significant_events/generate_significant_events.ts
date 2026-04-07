@@ -102,7 +102,6 @@ export async function generateSignificantEvents({
       prompt,
       inferenceClient,
       toolCallbacks: {
-        ...(additionalToolCallbacks ?? {}),
         get_stream_features: async (toolCall) => {
           toolUsage.get_stream_features.calls += 1;
           const startTime = Date.now();
@@ -187,6 +186,7 @@ export async function generateSignificantEvents({
             },
           };
         },
+        ...(additionalToolCallbacks ?? {}),
       },
       abortSignal: signal,
     })
