@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export default function ({ getService, getPageObjects }) {
+import type { PluginFunctionalProviderContext } from '../../services';
+
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
