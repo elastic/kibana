@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/features-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/data-plugin'
 tags:
   - plugin
   - prod
