@@ -34,5 +34,3 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     await use(extendedPageObjects);
   },
 });
-
-export * as testData from './constants';
