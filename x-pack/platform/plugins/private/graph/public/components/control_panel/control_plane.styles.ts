@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const gphFormGroupSmallStyles = ({ euiTheme }: UseEuiTheme) =>
+export const gphSidebarSectionSpacingStyles = ({ euiTheme }: UseEuiTheme) =>
   css`
     margin-bottom: ${euiTheme.size.s};
   `;

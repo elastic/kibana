@@ -808,7 +808,7 @@ class TimeseriesChartIntl extends Component {
       focusChart
         .select('.area.bounds')
         .attr('d', this.focusBoundedArea(data))
-        .classed('hidden', !showModelBounds);
+        .style('display', !showModelBounds ? 'none' : null);
     }
 
     const { focusChartHeight: focusChartIncoming, focusHeight: focusHeightIncoming } = this.props
@@ -961,11 +961,11 @@ class TimeseriesChartIntl extends Component {
       focusChart
         .select('.area.forecast')
         .attr('d', this.focusBoundedArea(focusForecastData))
-        .classed('hidden', !showForecast);
+        .style('display', !showForecast ? 'none' : null);
       focusChart
         .select('.values-line.forecast')
         .attr('d', this.focusValuesLine(focusForecastData))
-        .classed('hidden', !showForecast);
+        .style('display', !showForecast ? 'none' : null);
 
       const forecastDots = chartElement
         .select('.focus-chart-markers.forecast')
@@ -993,7 +993,7 @@ class TimeseriesChartIntl extends Component {
           return this.focusYScale(d.value);
         })
         .attr('class', 'metric-value')
-        .classed('hidden', !showForecast);
+        .style('display', !showForecast ? 'none' : null);
     }
   }
 
@@ -2032,6 +2032,12 @@ class TimeseriesChartIntl extends Component {
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
               anchorPosition="upLeft"
+              aria-label={i18n.translate(
+                'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}

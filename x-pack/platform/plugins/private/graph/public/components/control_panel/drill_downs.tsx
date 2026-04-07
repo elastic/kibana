@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import type { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles, noUserSelectStyles } from '../../styles';
@@ -21,7 +21,7 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
   return (
     <div>
       <div css={gphSidebarHeaderStyles}>
-        <EuiIcon type="info" />{' '}
+        <EuiIcon type="info" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.drillDownsTitle', {
           defaultMessage: 'Drill-downs',
         })}
@@ -29,29 +29,37 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
 
       <div css={gphSidebarPanelStyles}>
         {urlTemplates.length === 0 && (
-          <p className="help-block">
-            {i18n.translate('xpack.graph.sidebar.drillDowns.noDrillDownsHelpText', {
-              defaultMessage: 'Configure drill-downs from the settings menu',
-            })}
-          </p>
+          <EuiText color="subdued" size="s">
+            <p>
+              {i18n.translate('xpack.graph.sidebar.drillDowns.noDrillDownsHelpText', {
+                defaultMessage: 'Configure drill-downs from the settings menu',
+              })}
+            </p>
+          </EuiText>
         )}
 
-        <ul className="list-group">
+        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
           {urlTemplates.map((urlTemplate) => {
             const onOpenUrlTemplate = () => openUrlTemplate(urlTemplate);
 
             return (
-              <li className="list-group-item">
-                {urlTemplate.icon && (
-                  <>
-                    <IconRenderer icon={urlTemplate.icon} css={noUserSelectStyles} />{' '}
-                  </>
-                )}
-                <EuiLink onClick={onOpenUrlTemplate}>{urlTemplate.description}</EuiLink>
-              </li>
+              <EuiFlexItem grow={false} key={urlTemplate.url}>
+                <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    {urlTemplate.icon && (
+                      <EuiFlexItem grow={false}>
+                        <IconRenderer icon={urlTemplate.icon} css={noUserSelectStyles} />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>
+                      <EuiLink onClick={onOpenUrlTemplate}>{urlTemplate.description}</EuiLink>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiFlexItem>
             );
           })}
-        </ul>
+        </EuiFlexGroup>
       </div>
     </div>
   );

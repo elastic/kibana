@@ -28,8 +28,7 @@ export const gphSidebarHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
 export const gphSidebarPanelStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
     maxHeight: `calc(${euiTheme.size.l} * 10)`,
-    // Invalid property hidden auto;
-    overflowY: 'hidden',
+    overflowY: 'auto',
   });
 
 export const noUserSelectStyles = css({
