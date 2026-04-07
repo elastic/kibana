@@ -55,6 +55,10 @@ import {
   type VisualizeUserContent,
 } from '../../utils/to_table_list_view_saved_object';
 
+const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
+  defaultMessage: 'Visualize library',
+});
+
 const visualizeListingStyles = {
   table: getVisualizationListingTableStyles,
   calloutLink: css`
@@ -82,6 +86,7 @@ const useTableListViewProps = (
       application,
       history,
       savedObjectsTagging,
+      stateTransferService,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
@@ -93,8 +98,18 @@ const useTableListViewProps = (
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
 
   const createNewVis = useCallback(() => {
-    closeNewVisModal.current = showNewVisModal();
-  }, [closeNewVisModal]);
+    closeNewVisModal.current = showNewVisModal({
+      originatingApp: VisualizeConstants.APP_ID,
+      breadcrumbs: [
+        {
+          text: visualizeLibraryPageTitle,
+          href: application.getUrlForApp(VisualizeConstants.APP_ID, {
+            path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+          }),
+        },
+      ],
+    });
+  }, [closeNewVisModal, application]);
 
   const editItem = useCallback(
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
@@ -105,13 +120,16 @@ const useTableListViewProps = (
 
       const { editApp, editUrl } = editor;
       if (editApp) {
-        application.navigateToApp(editApp, { path: editUrl });
+        await stateTransferService.navigateToEditor(editApp, {
+          path: editUrl,
+          state: { originatingApp: VisualizeConstants.APP_ID },
+        });
         return;
       }
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history]
+    [history, stateTransferService]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -314,16 +332,12 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize library',
-          }),
+          text: visualizeLibraryPageTitle,
         },
       ]);
     }
 
-    chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
-    );
+    chrome.docTitle.change(visualizeLibraryPageTitle);
   });
   useUnmount(() => closeNewVisModal.current());
 
@@ -336,10 +350,6 @@ export const VisualizeListing = () => {
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
-
-  const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize library',
-  });
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -399,9 +409,10 @@ export const VisualizeListing = () => {
                   : () => tableViewProps.editItem?.(item)
               }
               getDetailViewLink={getVisualizeListItemLink}
-              tableCaption={visualizeLibraryTitle}
+              tableCaption={visualizeLibraryPageTitle}
               {...tableViewProps}
-              {...propsFromParent}
+              onFetchSuccess={propsFromParent.onFetchSuccess}
+              setPageDataTestSubject={propsFromParent.setPageDataTestSubject}
             />
           </div>
         </>
@@ -413,7 +424,6 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    visualizeLibraryTitle,
     tableViewProps,
     getVisualizeListItemLink,
   ]);
@@ -428,7 +438,7 @@ export const VisualizeListing = () => {
   return (
     <TabbedTableListView
       headingId="visualizeListingHeading"
-      title={visualizeLibraryTitle}
+      title={visualizeLibraryPageTitle}
       tabs={tabs}
       activeTabId={activeTab}
       changeActiveTab={(id) => {

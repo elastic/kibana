@@ -13,8 +13,13 @@ import type {
   SavedObjectReference,
 } from '@kbn/core/server';
 import type { SetOptional } from 'type-fest';
+import type {
+  AggregationsStringTermsAggregate,
+  AggregationsStringTermsBucket,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import { validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
@@ -103,6 +108,9 @@ export class WatchlistConfigClient {
 
   async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
+
+    validateWatchlistUpdate(id, attrs, existing);
+
     const existingAttrs = omitWatchlistMeta(existing);
     const attrsNoMeta = omitWatchlistMeta(attrs);
     const update: Partial<WatchlistSavedObjectAttributes> = {
@@ -118,16 +126,27 @@ export class WatchlistConfigClient {
     return this.get(id);
   }
 
+  /**
+   * List all watchlists and populate entity counts for each watchlist
+   * @returns List of watchlists with entity counts
+   */
   async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
-    return this.deps.soClient
-      .find<WatchlistObject>({
-        type: watchlistConfigTypeName,
-        namespaces: [this.deps.namespace],
-        perPage: limit,
-      })
-      .then((response) => {
-        return response.saved_objects.map((so) => toWatchlistObject(so) as WatchlistObjectWithId);
-      });
+    const response = await this.deps.soClient.find<WatchlistObject>({
+      type: watchlistConfigTypeName,
+      namespaces: [this.deps.namespace],
+      perPage: limit,
+    });
+    const watchlists = response.saved_objects.map(
+      (so) => toWatchlistObject(so) as WatchlistObjectWithId
+    );
+    const watchlistIds = watchlists.map((w) => w.id);
+    if (watchlistIds.length > 0) {
+      const countsMap = await this.getEntityCounts(watchlistIds);
+      for (const w of watchlists) {
+        w.entityCount = countsMap[w.id] ?? 0;
+      }
+    }
+    return watchlists;
   }
 
   async get(id: string) {
@@ -136,7 +155,9 @@ export class WatchlistConfigClient {
         watchlistConfigTypeName,
         id
       );
-      return toWatchlistObject(so);
+      const watchlist = toWatchlistObject(so);
+      watchlist.entityCount = await this.getEntityCount(id);
+      return watchlist;
     } catch (e) {
       if (e.output && e.output.statusCode === 404) {
         throw new Error(`Watchlist config '${id}' not found`);
@@ -245,5 +266,60 @@ export class WatchlistConfigClient {
     );
 
     return extractEntitySourceIds(so.references ?? []);
+  }
+
+  async getEntityCount(id: string): Promise<number> {
+    const counts = await this.getEntityCounts([id]);
+    return counts[id] ?? 0;
+  }
+
+  /**
+   * Bulk fetch entity counts for a list of watchlists
+   * @param ids List of watchlist IDs to fetch entity counts for
+   * @returns Map of watchlist IDs to entity counts
+   */
+  async getEntityCounts(ids: string[]): Promise<Record<string, number>> {
+    if (ids.length === 0) return {};
+
+    const index = getIndexForWatchlist(this.deps.namespace);
+    const counts: Record<string, number> = {};
+
+    // Initialize all requested IDs to 0 so they are guaranteed to exist in the response
+    for (const id of ids) {
+      counts[id] = 0;
+    }
+
+    try {
+      const countResponse = await this.deps.esClient.search({
+        index,
+        ignore_unavailable: true,
+        size: 0,
+        query: {
+          terms: {
+            'watchlist.id': ids,
+          },
+        },
+        aggs: {
+          watchlist_counts: {
+            terms: {
+              field: 'watchlist.id',
+              size: ids.length,
+            },
+          },
+        },
+      });
+
+      const watchlistCountsAgg = countResponse.aggregations?.watchlist_counts as
+        | AggregationsStringTermsAggregate
+        | undefined;
+      const buckets = (watchlistCountsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
+      for (const bucket of buckets) {
+        counts[String(bucket.key)] = bucket.doc_count;
+      }
+    } catch (err) {
+      this.deps.logger.warn(`Failed to fetch watchlist entity counts: ${(err as Error).message}`);
+    }
+
+    return counts;
   }
 }

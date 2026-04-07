@@ -37,6 +37,13 @@ export const GCP_CREDENTIALS_CLOUD_CONNECTOR_ID = 'gcp_credentials_cloud_connect
 // Cloud connector support flag
 export const SUPPORTS_CLOUD_CONNECTORS_VAR_NAME = 'supports_cloud_connectors';
 
+// OTel Verifier package constants
+export const VERIFIER_PKG_NAME = 'verifier_otel';
+export const VERIFIER_POLICY_TEMPLATE = 'verifierreceiver';
+export const VERIFIER_INPUT_TYPE = 'otelcol';
+export const VERIFIER_DATA_STREAM_TYPE = 'logs';
+export const VERIFIER_DATASET = `${VERIFIER_PKG_NAME}.${VERIFIER_POLICY_TEMPLATE}`;
+
 // Account type variable names for different cloud providers
 export const AWS_ACCOUNT_TYPE_VAR_NAME = 'aws.account_type';
 export const AZURE_ACCOUNT_TYPE_VAR_NAME = 'azure.account_type';

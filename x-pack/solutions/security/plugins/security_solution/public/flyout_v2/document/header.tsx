@@ -10,21 +10,18 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { ALERT_RULE_UUID, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
-import { SecurityPageName } from '@kbn/deeplinks-security';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from './constants/event_kinds';
 import { Assignees } from './components/assignees';
 import { Title } from './components/title';
 import { Status } from './components/status';
 import { Notes } from '../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
+import { Timestamp } from './components/timestamp';
 import { RiskScore } from './components/risk_score';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../shared/components/cell_actions';
-import { useKibana } from '../../common/lib/kibana';
-import { getRuleDetailsUrl } from '../../common/components/link_to';
-import { PreferenceFormattedDate } from '../../common/components/formatted_date';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -57,33 +54,18 @@ export interface HeaderProps {
  */
 export const Header: FC<HeaderProps> = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
-    const { services } = useKibana();
-    const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
-    const ruleId = useMemo(
-      () => (getFieldValue(hit, ALERT_RULE_UUID) as string | null) ?? null,
-      [hit]
-    );
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
 
-    const ruleDetailsHref = useMemo(() => {
-      if (!ruleId) return undefined;
-      const path = getRuleDetailsUrl(ruleId);
-      return services.application.getUrlForApp('securitySolutionUI', {
-        deepLinkId: SecurityPageName.rules,
-        path,
-      });
-    }, [ruleId, services.application]);
-
     return (
       <>
         <DocumentSeverity hit={hit} />
         <EuiSpacer size="m" />
-        {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+        <Timestamp hit={hit} />
         <EuiSpacer size="xs" />
-        <Title hit={hit} titleHref={ruleDetailsHref} />
+        <Title hit={hit} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />

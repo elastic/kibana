@@ -97,6 +97,7 @@
     "@kbn/cps-utils",
     "@kbn/cps",
     "@kbn/security-plugin",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
