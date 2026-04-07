@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent } from 'react';
+import React, { type MouseEvent, type ReactNode } from 'react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
   type EuiThemeComputed,
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { AppMenuBadge } from './components/app_menu_badge';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
   AppMenuConfig,
@@ -139,9 +142,23 @@ export const mapAppMenuItemToPanelItem = (
       ? getRouterLinkProps({ href: item.href, onClick: handleClick })
       : { onClick: hasClickHandler ? handleClick : undefined };
 
+  const itemName: ReactNode = item.labelBadgeText ? (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AppMenuBadge
+          text={item.labelBadgeText}
+          data-test-subj={item.testId ? `${item.testId}-badge` : undefined}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    upperFirst(item.label)
+  );
+
   return {
     key: item.id,
-    name: upperFirst(item.label),
+    name: itemName,
     icon: item?.iconType,
     ...routerLinkProps,
     href: item?.href,

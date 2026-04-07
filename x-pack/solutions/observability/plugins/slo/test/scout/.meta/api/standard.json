@@ -1,6 +1,86 @@
 {
-  "sha1": "866eac9961c3e22096e0e08cc4a70cc859c7412e",
+  "sha1": "cd94dbca504005c0f40ce1f4cb571e1910aea9fc",
   "tests": [
+    {
+      "id": "f68be9083a5aaaa-c0035bbeaed0391",
+      "title": "SLO Alerts Embeddable creates a dashboard with an SLO alerts embeddable panel via REST API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "f68be9083a5aaaa-a8f817d431d6862",
+      "title": "SLO Alerts Embeddable creates a dashboard with an SLO alerts embeddable panel with multiple SLOs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "f68be9083a5aaaa-cfe4a6d18e835c6",
+      "title": "SLO Alerts Embeddable creates a dashboard with an SLO alerts embeddable panel with empty slos array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
+        "line": 125,
+        "column": 12
+      }
+    },
+    {
+      "id": "f68be9083a5aaaa-c4ad1375b9a4204",
+      "title": "SLO Alerts Embeddable rejects invalid alerts panel config when slo_id is missing from a slos item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
+        "line": 157,
+        "column": 12
+      }
+    },
+    {
+      "id": "f68be9083a5aaaa-9681248c16a03cd",
+      "title": "SLO Alerts Embeddable defaults slo_instance_id to * when omitted from a slos item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
+        "line": 188,
+        "column": 12
+      }
+    },
     {
       "id": "d0c4190d5fea69f-02ea6d842da42ca",
       "title": "Create SLOs creates a new slo and transforms",
