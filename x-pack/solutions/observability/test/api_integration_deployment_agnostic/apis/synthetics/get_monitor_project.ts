@@ -396,7 +396,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitors = [];
       const project = 'test-suite';
       const perPage = 10;
-      for (let i = 0; i < TOTAL_MONITORS; i++) {
+      const totalMonitors = 25; // not evenly divisible by perPage so the last page is partial
+      for (let i = 0; i < totalMonitors; i++) {
         monitors.push({
           ...icmpProjectMonitors.monitors[0],
           id: `test-id-${i}`,
@@ -407,11 +408,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       try {
         await createProjectMonitors(monitors, project);
 
-        let count = Number.MAX_VALUE;
         let afterId;
         const fullResponse: ProjectMonitorMetaData[] = [];
         let page = 1;
-        while (count >= perPage) {
+        let count: number;
+        do {
           const response: SuperTest.Response = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
             .set(editorUser.apiKeyHeader)
@@ -424,19 +425,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             .expect(200);
 
           const { monitors: monitorsResponse, after_key: afterKey, total } = response.body;
-          expect(total).to.eql(TOTAL_MONITORS);
+          expect(total).to.eql(totalMonitors);
           count = monitorsResponse.length;
           fullResponse.push(...monitorsResponse);
           if (page < 3) {
             expect(count).to.eql(perPage);
           } else {
-            expect(count).to.eql(TOTAL_MONITORS - perPage * 2);
+            expect(count).to.eql(totalMonitors - perPage * 2);
           }
           page++;
 
           afterId = afterKey;
-        }
-        expect(fullResponse.length).to.eql(TOTAL_MONITORS);
+        } while (count === perPage);
+        expect(fullResponse.length).to.eql(totalMonitors);
         checkFields(fullResponse, monitors);
       } finally {
         try {
