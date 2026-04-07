@@ -12,9 +12,9 @@ import {
 } from '../common/constants';
 
 export function isModelSettingsEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(MODEL_SETTINGS_FEATURE_FLAG_ID, false);
+  return uiSettings.get<boolean>(MODEL_SETTINGS_FEATURE_FLAG_ID, true);
 }
 
 export function isElasticInferenceServiceEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID, false);
+  return uiSettings.get<boolean>(ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID, true);
 }

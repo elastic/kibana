@@ -132,7 +132,13 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         expect(body.items.length).to.eql(1);
-        const { id, updated_at: updatedAt, version, ...rest } = body.items[0];
+        const {
+          id,
+          updated_at: updatedAt,
+          created_at: createdAt,
+          version,
+          ...rest
+        } = body.items[0];
         expectSnapshot(rest).toMatch();
       });
 
@@ -901,7 +907,7 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
-        const { id, updated_at, version, ...newPolicy } = item;
+        const { id, updated_at, created_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
@@ -1414,7 +1420,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1474,7 +1480,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1634,7 +1640,7 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(200);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
         expect(newPolicy).to.eql({
@@ -1694,7 +1700,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1811,7 +1817,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -2130,6 +2136,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           package_policies: packagePolicies,
           id,
+          created_at: createdAt,
           space_ids: spaceIds,
           updated_at: updatedAt,
           version: policyVersion,

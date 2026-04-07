@@ -13,7 +13,7 @@ import type {
   DashboardAttachmentData,
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { panelGridSchema } from '@kbn/dashboard-agent-common';
+import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { toEmbeddablePanel } from '@kbn/dashboard-agent-common';
@@ -54,10 +54,6 @@ const attachmentWithGridSchema = z.object({
   grid: panelGridSchema.describe(
     'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
   ),
-});
-
-const sectionGridSchema = z.object({
-  y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
 });
 
 export const addPanelsFromAttachmentsOperationSchema = z.object({
@@ -161,10 +157,14 @@ const editVisualizationPanelSchema = z.object({
     ),
 });
 
-export const editVisualizationPanelsOperationSchema = z.object({
-  operation: z.literal('edit_visualization_panels'),
-  panels: z.array(editVisualizationPanelSchema).min(1),
-});
+export const editVisualizationPanelsOperationSchema = z
+  .object({
+    operation: z.literal('edit_visualization_panels'),
+    panels: z.array(editVisualizationPanelSchema).min(1),
+  })
+  .describe(
+    'Update existing ES|QL-backed Lens visualization panels by panelId. DSL, form-based, and other non-ES|QL panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+  );
 
 export const updatePanelLayoutsOperationSchema = z.object({
   operation: z.literal('update_panel_layouts'),
