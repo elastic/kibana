@@ -29,9 +29,21 @@ export class DashboardsTab extends ServiceDetailsTab {
   }
 
   public async linkDashboardByTitle(dashboardTitle: string) {
+    await this.addServiceDashboardButton.waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.click();
+
+    await this.page.getByTestId('apmSelectDashboardButton').waitFor({ timeout: EXTENDED_TIMEOUT });
+
+    await this.page
+      .getByTestId('apmSelectServiceDashboard')
+      .getByTestId('comboBoxInput')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.page.getByTestId('apmSelectServiceDashboard').getByTestId('comboBoxInput').click();
+
+    await this.page.getByText(dashboardTitle).waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.page.getByText(dashboardTitle).click();
+
+    await this.page.getByTestId('apmSelectDashboardButton').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.page.getByTestId('apmSelectDashboardButton').click();
   }
 
