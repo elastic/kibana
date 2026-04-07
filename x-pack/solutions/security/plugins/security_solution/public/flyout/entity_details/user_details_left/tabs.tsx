@@ -26,6 +26,7 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
+import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -40,15 +41,17 @@ export const useTabs = (
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
+
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
-    if (isRiskScoreExist) {
+    if (isRiskScoreExist || entityStoreEntityId) {
       tabs.push(
         getRiskInputTab({
           entityName: name,
           entityType: EntityType.user,
           scopeId,
+          entityId: entityStoreEntityId,
         })
       );
     }
@@ -74,7 +77,10 @@ export const useTabs = (
     }
 
     if (entityStoreEntityId) {
-      tabs.push(getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'user' }));
+      tabs.push(getGraphViewTab({ entityId: entityStoreEntityId, scopeId }));
+      tabs.push(
+        getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.user })
+      );
     }
 
     return tabs;

@@ -68,6 +68,7 @@ export interface PatchCase extends IndexRefresh {
   caseId: string;
   updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs & AttachmentStatsAttributes>;
   originalCase: CaseSavedObjectTransformed;
+  closeReason?: string;
   version?: string;
 }
 

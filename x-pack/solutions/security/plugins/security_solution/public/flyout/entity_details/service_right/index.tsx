@@ -36,6 +36,7 @@ export interface ServicePanelProps extends Record<string, unknown> {
   scopeId: string;
   entityId: string;
   serviceName: string;
+  isPreviewMode?: boolean;
 }
 
 export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -49,7 +50,14 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: ServicePanelProps) => {
+export const ServicePanel = ({
+  contextID,
+  scopeId,
+  entityId,
+  serviceName,
+  isPreviewMode = false,
+}: ServicePanelProps) => {
+  const safeContextID = contextID ?? scopeId ?? 'service-panel';
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
@@ -120,7 +128,10 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
     serviceName,
     entityId,
     scopeId,
+    contextID: safeContextID,
     isRiskScoreExist,
+    identityFields: documentEntityIdentifiers,
+    isPreviewMode,
     entityStoreEntityId,
   });
 
@@ -147,6 +158,7 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
       <FlyoutNavigation
         flyoutIsExpandable={isRiskScoreExist || !!entityStoreEntityId}
         expandDetails={openPanelFirstTab}
+        isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
       <ServicePanelHeader serviceName={serviceName} observedService={observedService} />
@@ -157,9 +169,10 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
-        contextID={contextID}
+        contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
+        isPreviewMode={isPreviewMode}
         entityStoreEntityId={entityStoreEntityId}
       />
     </>

@@ -21,7 +21,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
-import { useWorkflowsApi, type WorkflowApi } from '@kbn/workflows-ui';
+import { useWorkflowsApi, useWorkflowsCapabilities, type WorkflowApi } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../../common';
 import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
@@ -144,6 +144,7 @@ const WorkflowYamlCanvasContent: React.FC<{
   useWorkflowsMonacoTheme();
 
   const workflowApi = useWorkflowsApi();
+  const { canCreateWorkflow, canUpdateWorkflow, canReadWorkflow } = useWorkflowsCapabilities();
   const { notifications } = useKibana<{ notifications: CoreStart['notifications'] }>().services;
 
   // Defer button registration past the initial mount cycle so the parent
@@ -208,23 +209,27 @@ const WorkflowYamlCanvasContent: React.FC<{
     const buttons: ActionButton[] = [];
 
     if (workflowId) {
-      buttons.push({
-        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
-          defaultMessage: 'Override',
-        }),
-        icon: 'save',
-        type: ActionButtonType.PRIMARY,
-        handler: handleSave,
-      });
-      buttons.push({
-        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
-          defaultMessage: 'Save as new',
-        }),
-        icon: 'copy',
-        type: ActionButtonType.SECONDARY,
-        handler: handleSaveAsNew,
-      });
-    } else {
+      if (canUpdateWorkflow) {
+        buttons.push({
+          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
+            defaultMessage: 'Override',
+          }),
+          icon: 'save',
+          type: ActionButtonType.PRIMARY,
+          handler: handleSave,
+        });
+      }
+      if (canCreateWorkflow) {
+        buttons.push({
+          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
+            defaultMessage: 'Save as new',
+          }),
+          icon: 'copy',
+          type: ActionButtonType.SECONDARY,
+          handler: handleSaveAsNew,
+        });
+      }
+    } else if (canCreateWorkflow) {
       buttons.push({
         label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.save', {
           defaultMessage: 'Save',
@@ -235,7 +240,7 @@ const WorkflowYamlCanvasContent: React.FC<{
       });
     }
 
-    if (workflowId && !isOnWorkflowPage(workflowId)) {
+    if (workflowId && !isOnWorkflowPage(workflowId) && canReadWorkflow) {
       buttons.push({
         label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.openInEditor', {
           defaultMessage: 'Open in editor',
@@ -258,6 +263,9 @@ const WorkflowYamlCanvasContent: React.FC<{
     isOnWorkflowPage,
     application,
     registerActionButtons,
+    canCreateWorkflow,
+    canUpdateWorkflow,
+    canReadWorkflow,
   ]);
 
   return (
