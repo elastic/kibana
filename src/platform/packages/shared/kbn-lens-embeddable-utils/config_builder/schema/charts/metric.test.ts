@@ -64,7 +64,7 @@ describe('Metric Schema', () => {
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             icon: {
-              name: 'visMetric',
+              name: 'chartMetric',
               alignment: 'left',
             },
             labels: { alignment: 'left' },
@@ -520,7 +520,7 @@ describe('Metric Schema', () => {
               alignment: 'right',
             },
             icon: {
-              name: 'visMetric',
+              name: 'chartMetric',
               alignment: 'right',
             },
             color: {
