@@ -306,6 +306,52 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
 
+    it('should use useRunAlertWorkflowPanel menu items for alert documents', () => {
+      const alertWorkflowItem = { name: 'Alert workflow', onClick: jest.fn() };
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [alertWorkflowItem],
+        runAlertWorkflowPanel: [],
+      });
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [{ name: 'Document workflow', onClick: jest.fn() }],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const alertHit = createMockHit({ 'event.kind': 'signal' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Alert workflow')).toBeInTheDocument();
+      expect(queryByText('Document workflow')).not.toBeInTheDocument();
+    });
+
+    it('should use useRunDocumentWorkflowPanel menu items for non-alert documents', () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [{ name: 'Alert workflow', onClick: jest.fn() }],
+        runAlertWorkflowPanel: [],
+      });
+      const documentWorkflowItem = { name: 'Document workflow', onClick: jest.fn() };
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [documentWorkflowItem],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const eventHit = createMockHit({ 'event.kind': 'event' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Document workflow')).toBeInTheDocument();
+      expect(queryByText('Alert workflow')).not.toBeInTheDocument();
+    });
+
     it('should exclude some items when event.kind is not set', () => {
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
         ...defaultProps,

@@ -107,7 +107,7 @@ export interface TakeActionDropdownProps {
   /**
    * The raw ES search hit containing the full document source
    */
-  searchHit?: SearchHit;
+  searchHit: SearchHit;
 }
 
 /**

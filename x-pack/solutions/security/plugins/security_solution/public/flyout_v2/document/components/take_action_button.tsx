@@ -83,7 +83,7 @@ export const TakeActionButton = memo(
 
     const isInSecurityApp = useIsInSecurityApp();
 
-    const eventId = hit.raw._id as string;
+    const documentId = hit.raw._id as string;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -103,7 +103,7 @@ export const TakeActionButton = memo(
     const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
       alertStatus,
       closePopover: closePopoverHandler,
-      eventId,
+      eventId: documentId,
       scopeId: '',
       refetch: onAlertUpdated,
     });
@@ -156,7 +156,7 @@ export const TakeActionButton = memo(
         closePopover: closePopoverHandler,
         documents: [
           {
-            _id: eventId,
+            _id: documentId,
             _index: hit.raw._index ?? '',
             ...hit.flattened,
           },
