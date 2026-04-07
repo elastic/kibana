@@ -24,13 +24,11 @@ interface TranslationCache {
 export const registerTranslationsRoute = ({
   router,
   locale,
-  translationHash,
   isDist,
   supportedLocales,
 }: {
   router: IRouter;
   locale: string;
-  translationHash: string;
   isDist: boolean;
   supportedLocales: readonly string[];
 }) => {

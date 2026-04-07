@@ -14,14 +14,12 @@ export const registerRoutes = ({
   router,
   locale,
   isDist,
-  translationHash,
   supportedLocales,
 }: {
   router: IRouter;
   locale: string;
   isDist: boolean;
-  translationHash: string;
   supportedLocales: readonly string[];
 }) => {
-  registerTranslationsRoute({ router, locale, isDist, translationHash, supportedLocales });
+  registerTranslationsRoute({ router, locale, isDist, supportedLocales });
 };

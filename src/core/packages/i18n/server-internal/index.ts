@@ -10,4 +10,3 @@
 export type { I18nConfigType, InternalI18nServicePreboot } from './src';
 export { config, I18nService } from './src';
 export { getKibanaTranslationFiles } from './src/get_kibana_translation_files';
-export { supportedLocales as supportedLocale } from './src/constants';
