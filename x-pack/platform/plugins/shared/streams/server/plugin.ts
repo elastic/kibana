@@ -63,6 +63,10 @@ import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer'
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import {
+  createContinuousKiExtractionWorkflowService,
+  type ContinuousKiExtractionWorkflowService,
+} from './lib/workflows/continuous_extraction_workflow';
 import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -149,12 +153,12 @@ export class StreamsPlugin
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-        coreStart.savedObjects.getScopedClient(request)
-      );
+      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
+      const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
       const licensing = pluginsStart.licensing;
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
@@ -209,6 +213,7 @@ export class StreamsPlugin
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
+        globalUiSettingsClient,
         taskClient,
         isSecurityEnabled,
       };
@@ -237,6 +242,15 @@ export class StreamsPlugin
         .catch((err) => {
           this.logger.error(`Failed to register agent builder: ${err.message}`);
         });
+    }
+
+    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
+
+    if (plugins.workflowsManagement) {
+      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
+        this.logger,
+        plugins.workflowsManagement.management
+      );
     }
 
     const telemetryClient = this.ebtTelemetryService.getClient();
@@ -308,20 +322,21 @@ export class StreamsPlugin
 
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
-    registerRoutes({
-      repository: streamsRouteRepository,
+    const routeRegistrationOptions = {
       dependencies: {
-        features: featureService,
         server: this.server,
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
+        continuousKiExtractionWorkflowService,
       },
       core,
       logger: this.logger,
       runDevModeChecks: this.isDev,
-    });
+    };
+
+    registerRoutes({ repository: streamsRouteRepository, ...routeRegistrationOptions });
 
     registerFeatureFlags(core, this.logger);
 

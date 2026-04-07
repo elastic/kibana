@@ -89,5 +89,7 @@
     "@kbn/datemath",
     "@kbn/setup-node-env",
     "@kbn/core-security-server",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows"
   ]
 }
