@@ -124,7 +124,8 @@ export const createEntityMaintainerHelpers = (agent: supertest.Agent) => {
         },
       })
     ).expect((res) => {
-      if (res.status !== 200 && res.status !== 409) {
+      // 400 is returned when the data view already exists ("Duplicate data view")
+      if (res.status !== 200 && res.status !== 400) {
         throw new Error(
           `createDataView failed with status ${res.status}. Body: ${JSON.stringify(res.body)}`
         );
