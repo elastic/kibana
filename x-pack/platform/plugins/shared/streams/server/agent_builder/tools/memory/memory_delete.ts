@@ -6,10 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformStreamsMemoryTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import { platformStreamsMemoryTools } from './tool_ids';
 import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
 

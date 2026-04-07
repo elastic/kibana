@@ -42,22 +42,6 @@ export const platformStreamsSigEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_kis`,
 } as const;
 
-const platformStreamsMemoryTool = <TName extends string>(
-  toolName: TName
-): `${typeof internalNamespaces.platformStreams}.memory.${TName}` => {
-  return `${internalNamespaces.platformStreams}.memory.${toolName}`;
-};
-
-export const platformStreamsMemoryTools = {
-  memorySearch: platformStreamsMemoryTool('search'),
-  memoryRead: platformStreamsMemoryTool('read'),
-  memoryWrite: platformStreamsMemoryTool('write'),
-  memoryPatch: platformStreamsMemoryTool('patch'),
-  memoryList: platformStreamsMemoryTool('list'),
-  memoryDelete: platformStreamsMemoryTool('delete'),
-  memoryRecentChanges: platformStreamsMemoryTool('recent_changes'),
-} as const;
-
 export const attachmentTools = {
   read: `${internalNamespaces.attachments}.read`,
   update: `${internalNamespaces.attachments}.update`,

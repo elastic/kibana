@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { platformStreamsMemoryTools } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { platformStreamsMemoryTools } from './tool_ids';
 import { createMemorySearchTool } from './memory_search';
 import { createMemoryReadTool } from './memory_read';
 import { createMemoryWriteTool } from './memory_write';
