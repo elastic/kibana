@@ -120,26 +120,29 @@ const metricStylingSchema = schema.object(
           })
         ),
         /**
-         * Labels configuration
+         * Title and subtitle text configuration for the primary metric.
          */
         labels: schema.maybe(
           schema.object(
             {
               /**
-               * Alignment for labels. Possible values:
-               * - 'left': Align label to the left
-               * - 'center': Align label to the center
-               * - 'right': Align label to the right
+               * Horizontal alignment for the title and subtitle text. Possible values:
+               * - 'left': Align to the left
+               * - 'center': Align to the center
+               * - 'right': Align to the right
                */
               alignment: schema.maybe(
                 horizontalAlignmentSchema({
-                  meta: { description: 'Alignment for labels' },
+                  meta: {
+                    description:
+                      'Horizontal alignment for the title and subtitle text (left, center or right)',
+                  },
                   defaultValue: DEFAULT_PRIMARY_LABELS_ALIGNMENT,
                 })
               ),
             },
             {
-              meta: { description: 'Labels configuration' },
+              meta: { description: 'Labels (title and subtitle) configuration' },
             }
           )
         ),
@@ -157,7 +160,9 @@ const metricStylingSchema = schema.object(
                */
               alignment: schema.maybe(
                 horizontalAlignmentSchema({
-                  meta: { description: 'Alignment for values' },
+                  meta: {
+                    description: 'Alignment for the primary metric value (left, center or right)',
+                  },
                   defaultValue: DEFAULT_PRIMARY_VALUE_ALIGNMENT,
                 })
               ),
@@ -172,7 +177,7 @@ const metricStylingSchema = schema.object(
               ),
             },
             {
-              meta: { description: 'Values configuration' },
+              meta: { description: 'Primary metric value configuration' },
             }
           )
         ),
@@ -223,7 +228,7 @@ const metricStylingSchema = schema.object(
               meta: {
                 id: 'metricIconConfig',
                 title: 'Icon Configuration',
-                description: 'Icon configuration for primary metric',
+                description: 'Icon configuration for the primary metric',
               },
             }
           )
@@ -253,7 +258,10 @@ const metricStylingSchema = schema.object(
              */
             placement: schema.maybe(
               placementSchema({
-                meta: { description: 'Label placement relative to the secondary metric value' },
+                meta: {
+                  description:
+                    'Label placement relative to the secondary metric value (before or after)',
+                },
                 defaultValue: DEFAULT_SECONDARY_LABEL_PLACEMENT,
               })
             ),
@@ -270,12 +278,12 @@ const metricStylingSchema = schema.object(
                */
               alignment: schema.maybe(
                 horizontalAlignmentSchema({
-                  meta: { description: 'Alignment for secondary values' },
+                  meta: { description: 'Alignment for secondary values (left, center or right)' },
                   defaultValue: DEFAULT_SECONDARY_VALUE_ALIGNMENT,
                 })
               ),
             },
-            { meta: { description: 'Value configuration' } }
+            { meta: { description: 'Secondary metric value configuration' } }
           )
         ),
       })
