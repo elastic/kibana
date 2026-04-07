@@ -60,11 +60,16 @@ describe('Internal Routes', () => {
       },
     } as unknown as jest.Mocked<IRouter>;
 
-    registerInternalRoutes({
-      router: mockRouter as any,
-      getWorkflowExecutionEngine: mockGetWorkflowExecutionEngine,
-      api: mockApi as any,
-    });
+    registerInternalRoutes(
+      {
+        router: mockRouter as any,
+        api: mockApi as any,
+        logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
+        spaces: {} as any,
+        audit: {} as any,
+      },
+      mockGetWorkflowExecutionEngine
+    );
   });
 
   it('should register the config route handler', () => {
