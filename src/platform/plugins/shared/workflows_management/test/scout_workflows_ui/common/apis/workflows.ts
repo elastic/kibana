@@ -173,6 +173,19 @@ export class WorkflowsApiService {
     return response.data;
   }
 
+  async rawRun(
+    id: string,
+    inputs: Record<string, unknown>
+  ): Promise<{ data: { workflowExecutionId: string }; status: number }> {
+    const response = await this.kbnClient.request<{ workflowExecutionId: string }>({
+      method: 'POST',
+      path: `/s/${this.spaceId}/api/workflows/workflow/${id}/run`,
+      body: { inputs },
+      ignoreErrors: [404],
+    });
+    return response;
+  }
+
   async getExecution(
     workflowExecutionId: string,
     options: GetWorkflowExecutionOptions = {}

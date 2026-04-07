@@ -179,6 +179,28 @@ describe('WorkflowsService', () => {
       expect(result).toBeNull();
     });
 
+    it('should exclude soft-deleted workflows via must_not on deleted_at', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+      } as any);
+
+      const result = await service.getWorkflow('soft-deleted-id', 'default');
+
+      expect(result).toBeNull();
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must_not: [{ exists: { field: 'deleted_at' } }],
+            }),
+          }),
+        })
+      );
+    });
+
     it('should throw error for other ES errors', async () => {
       mockEsClient.search.mockRejectedValue({ statusCode: 500, message: 'Server error' });
 
@@ -2007,7 +2029,7 @@ steps:
 
       expect(result).toEqual({
         total: 1,
-        deleted: 1,
+        deleted: 0,
         failures: [],
         successfulIds: [],
       });

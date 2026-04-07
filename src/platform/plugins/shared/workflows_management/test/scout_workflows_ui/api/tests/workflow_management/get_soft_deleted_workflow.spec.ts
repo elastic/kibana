@@ -25,6 +25,19 @@ steps:
       message: "hello"
 `;
 
+const ENABLED_WORKFLOW_YAML = `
+name: Soft Delete Run Test Workflow
+enabled: true
+description: Used for soft delete run tests
+triggers:
+  - type: manual
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "hello"
+`;
+
 spaceTest.describe(
   'GET workflow should not return soft-deleted workflows',
   { tag: tags.deploymentAgnostic },
@@ -62,6 +75,15 @@ spaceTest.describe(
 
       const listAfter = await workflowsApi.list();
       expect(listAfter.results.map((w) => w.id)).not.toContain(created.id);
+    });
+
+    spaceTest('POST run should return 404 for a soft-deleted workflow', async () => {
+      const created = await workflowsApi.create(ENABLED_WORKFLOW_YAML);
+
+      await workflowsApi.bulkDelete([created.id]);
+
+      const runResult = await workflowsApi.rawRun(created.id, {});
+      expect(runResult.status).toBe(404);
     });
   }
 );
