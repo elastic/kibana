@@ -8,7 +8,7 @@
 import React from 'react';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -22,6 +22,12 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 jest.mock('../lib/gen_ai/use_get_dashboard');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -29,7 +35,7 @@ const mockDashboard = useGetDashboard as jest.Mock;
 const openAiConnector = {
   actionTypeId: '.gen-ai',
   name: 'OpenAI',
-  id: '123',
+  id: 'openai',
   config: {
     apiUrl: 'https://openaiurl.com',
     apiProvider: OpenAiProviderType.OpenAi,
@@ -272,7 +278,7 @@ describe('ConnectorFields renders', () => {
       const testFormData = {
         actionTypeId: '.gen-ai',
         name: 'OpenAI',
-        id: '123',
+        id: 'openai',
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
@@ -299,7 +305,7 @@ describe('ConnectorFields renders', () => {
           data: {
             actionTypeId: '.gen-ai',
             name: 'OpenAI',
-            id: '123',
+            id: 'openai',
             isDeprecated: false,
             config: {
               apiUrl: 'https://openaiurl.com',
@@ -321,7 +327,7 @@ describe('ConnectorFields renders', () => {
       const testFormData = {
         actionTypeId: '.gen-ai',
         name: 'OpenAI',
-        id: '123',
+        id: 'openai',
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
@@ -353,7 +359,7 @@ describe('ConnectorFields renders', () => {
           data: {
             actionTypeId: '.gen-ai',
             name: 'OpenAI',
-            id: '123',
+            id: 'openai',
             isDeprecated: false,
             config: {
               apiUrl: 'https://openaiurl.com',
@@ -409,7 +415,7 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
       fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
-      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/openai`);
     });
   });
   describe('Validation', () => {
@@ -426,17 +432,13 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
-
-      expect(onSubmit).toBeCalledWith({
-        data: openAiConnector,
-        isValid: true,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: openAiConnector,
+          isValid: true,
+        });
       });
     });
 
@@ -455,14 +457,11 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
 
     const tests: Array<[string, string]> = [
@@ -492,11 +491,10 @@ describe('ConnectorFields renders', () => {
       }
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 
