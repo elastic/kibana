@@ -297,19 +297,6 @@ function setKibanaVersion(url: URL) {
 }
 
 function setSpecVersion(url: URL) {
-  const config = appContextService.getConfig();
-  const logger = appContextService.getLogger();
-
-  const disableVersionCheck =
-    (config?.developer?.disableRegistryVersionCheck ?? false) ||
-    config?.internal?.registry?.kibanaVersionCheckEnabled === false;
-
-  if (disableVersionCheck) {
-    logger.debug(
-      '[DEBUG] setSpecVersion: version check disabled, skipping spec.min/max constraints'
-    );
-    return;
-  }
   const specMin = appContextService.getConfig()?.internal?.registry?.spec?.min;
   const specMax = appContextService.getConfig()?.internal?.registry?.spec?.max;
 
