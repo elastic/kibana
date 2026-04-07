@@ -19,12 +19,18 @@ import { useAddToCaseActions } from '../../../detections/components/alerts_table
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
+});
+
+const ADD_NOTE = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeAction.addNoteLabel', {
+  defaultMessage: 'Add note',
 });
 
 export interface TakeActionButtonProps {
@@ -48,6 +54,10 @@ export interface TakeActionButtonProps {
    * Callback invoked after alert mutations to refresh flyout data.
    */
   onAlertUpdated: () => void;
+  /**
+   * Callback to open the notes flyout. Shown in the dropdown only for raw events (not alerts).
+   */
+  onShowNotes: () => void;
 }
 
 /**
@@ -55,7 +65,14 @@ export interface TakeActionButtonProps {
  * // TODO: refactor all actions to take a DataTableRecord as input.
  */
 export const TakeActionButton = memo(
-  ({ hit, ecsData, nonEcsData, refetchFlyoutData, onAlertUpdated }: TakeActionButtonProps) => {
+  ({
+    hit,
+    ecsData,
+    nonEcsData,
+    refetchFlyoutData,
+    onAlertUpdated,
+    onShowNotes,
+  }: TakeActionButtonProps) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen((open) => !open);
@@ -64,10 +81,17 @@ export const TakeActionButton = memo(
       setIsPopoverOpen(false);
     }, []);
 
+    const isInSecurityApp = useIsInSecurityApp();
+
     const eventId = hit.raw._id as string;
-    const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
-    const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
-    const alertStatus = (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
+    const isAlert = useMemo(
+      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
+    );
+    const alertStatus = useMemo(() => {
+      const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
+      return (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
+    }, [hit]);
 
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
@@ -101,11 +125,31 @@ export const TakeActionButton = memo(
       refetch: onAssigneesUpdate,
     });
 
-    const { runWorkflowMenuItem: alertWorkflowMenuItem, runAlertWorkflowPanel } =
-      useRunAlertWorkflowPanel({
-        closePopover: closePopoverHandler,
-        ecsRowData: ecsData,
-      });
+    const { investigateInTimelineActionItems } = useInvestigateInTimeline({
+      ecsRowData: ecsData,
+      onInvestigateInTimelineAlertClick: closePopoverHandler,
+    });
+
+    const noteItems = useMemo(
+      () => [
+        {
+          'data-test-subj': 'add-note-action',
+          key: 'add-note-action',
+          name: ADD_NOTE,
+          size: 's' as const,
+          onClick: () => {
+            closePopoverHandler();
+            onShowNotes();
+          },
+        },
+      ],
+      [closePopoverHandler, onShowNotes]
+    );
+
+    const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
+      ecsRowData: ecsData,
+      closePopover: closePopoverHandler,
+    });
 
     const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
@@ -126,15 +170,20 @@ export const TakeActionButton = memo(
         ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
         ...(isAlert ? alertAssigneesItems : []),
         ...(isAlert ? alertTagsItems : []),
+        ...(isAlert ? runWorkflowMenuItem : []),
+        ...(isAlert ? [] : noteItems),
+        ...(isInSecurityApp ? investigateInTimelineActionItems : []),
       ],
       [
         addToCaseActionItems,
         alertTagsItems,
+        investigateInTimelineActionItems,
         isAlert,
+        isInSecurityApp,
+        noteItems,
+        runWorkflowMenuItem,
         statusActionItems,
         alertAssigneesItems,
-        alertWorkflowMenuItem,
-        documentWorkflowMenuItem,
       ]
     );
 
@@ -147,13 +196,12 @@ export const TakeActionButton = memo(
         ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
       ],
       [
+        alertAssigneesPanels,
         alertTagsPanels,
         isAlert,
         items,
         statusActionPanels,
-        alertAssigneesPanels,
         runAlertWorkflowPanel,
-        runDocumentWorkflowPanel,
       ]
     );
 
