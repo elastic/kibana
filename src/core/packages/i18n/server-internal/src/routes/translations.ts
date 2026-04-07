@@ -25,13 +25,14 @@ export const registerTranslationsRoute = ({
   router,
   locale,
   isDist,
-  supportedLocales,
+  translationHashes,
 }: {
   router: IRouter;
   locale: string;
   isDist: boolean;
-  supportedLocales: readonly string[];
+  translationHashes: Record<string, string>;
 }) => {
+  const supportedLocales = Object.keys(translationHashes);
   const translationCaches = new Map<string, TranslationCache>();
 
   ['/translations/{locale}.json', `/translations/{translationHash}/{locale}.json`].forEach(
