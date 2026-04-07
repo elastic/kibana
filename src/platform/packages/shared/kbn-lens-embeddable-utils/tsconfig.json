@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/as-code-filters-schema",
+    "@kbn/as-code-data-views-schema",
     "@kbn/as-code-filters-transforms",
     "@kbn/data-views-plugin",
     "@kbn/event-annotation-common",

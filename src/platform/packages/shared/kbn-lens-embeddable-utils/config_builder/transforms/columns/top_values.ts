@@ -31,7 +31,7 @@ function getOrderByValue(
     return { type: 'custom' };
   }
 
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   if (!refId) {
     return { type: 'alphabetical', fallback: true };
   }
@@ -45,7 +45,7 @@ function getOrderDirection(
   if (rankBy && 'direction' in rankBy && rankBy.direction) {
     return rankBy.direction;
   }
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   return refId ? 'desc' : 'asc';
 }
 
@@ -135,8 +135,8 @@ function getRankByConfig(
       );
     if (index > -1) {
       return {
-        type: 'column',
-        metric: index,
+        type: 'metric',
+        metric_index: index,
         direction: params.orderDirection,
       };
     }
