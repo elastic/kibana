@@ -20,6 +20,7 @@ import { AlertsTab } from './alerts_tab';
 import { MetadataTab } from './metadata_tab';
 import { ProcessTab } from './process_tab';
 import { useKibana } from '../../../common/lib/kibana';
+import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 
 export const SESSION_VIEW_DETAILS_TEST_ID = `${PREFIX}SessionViewDetails` as const;
 
@@ -76,6 +77,7 @@ export const SessionViewDetails = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const onShowAlertDetails = useCallback(
       (alertId: string, alertIndex: string) => {
@@ -93,15 +95,18 @@ export const SessionViewDetails = memo(
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         );
       },
-      [history, onAlertUpdated, overlays, renderCellActions, services, store]
+      [
+        defaultFlyoutProperties,
+        history,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const handleJumpToEvent = useCallback(

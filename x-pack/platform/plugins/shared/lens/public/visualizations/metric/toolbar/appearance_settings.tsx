@@ -313,21 +313,21 @@ const alignmentOptions: Array<EuiButtonGroupOptionProps & { id: Alignment }> = [
     label: i18n.translate('xpack.lens.shared.left', {
       defaultMessage: 'Left',
     }),
-    iconType: 'editorAlignLeft',
+    iconType: 'textAlignLeft',
   },
   {
     id: 'center',
     label: i18n.translate('xpack.lens.shared.center', {
       defaultMessage: 'Center',
     }),
-    iconType: 'editorAlignCenter',
+    iconType: 'textAlignCenter',
   },
   {
     id: 'right',
     label: i18n.translate('xpack.lens.shared.right', {
       defaultMessage: 'Right',
     }),
-    iconType: 'editorAlignRight',
+    iconType: 'textAlignRight',
   },
 ];
 

@@ -94,8 +94,8 @@ describe('Bucket Operation Schemas', () => {
           type: 'significant' as const,
         },
         {
-          type: 'column' as const,
-          metric: 1,
+          type: 'metric' as const,
+          metric_index: 1,
           direction: 'desc' as const,
         },
         {
@@ -199,8 +199,8 @@ describe('Bucket Operation Schemas', () => {
           {
             label: 'My Filter',
             filter: {
-              language: 'kuery',
-              query: 'category: "electronics"',
+              language: 'kql',
+              expression: 'category: "electronics"',
             },
           },
         ],
@@ -293,7 +293,7 @@ describe('Bucket Operation Schemas', () => {
           filters: [
             {
               label: 'Filter',
-              filter: { language: 'kuery', query: 'status:active' },
+              filter: { language: 'kql', expression: 'status:active' },
             },
           ],
         },
