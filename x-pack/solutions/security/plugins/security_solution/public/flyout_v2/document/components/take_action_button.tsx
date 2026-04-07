@@ -147,7 +147,8 @@ export const TakeActionButton = memo(
         ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
       ],
       [
-        alertTagsPanels,isAlert,
+        alertTagsPanels,
+        isAlert,
         items,
         statusActionPanels,
         alertAssigneesPanels,
