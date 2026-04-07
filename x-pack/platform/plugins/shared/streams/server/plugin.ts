@@ -329,12 +329,14 @@ export class StreamsPlugin
       );
     }
 
-    if (this.config.preconfigured.enabled) {
-      core
-        .getStartServices()
-        .then(async ([coreStart]) => {
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
+    core
+      .getStartServices()
+      .then(async ([coreStart]) => {
+        const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+        const startupUiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+        const esClient = coreStart.elasticsearch.client.asInternalUser;
 
+        if (this.config.preconfigured.enabled) {
           const streamsSettingsStorageClient = createStreamsSettingsStorageClient(
             esClient,
             this.logger
@@ -357,7 +359,6 @@ export class StreamsPlugin
             return;
           }
 
-          const soClient = coreStart.savedObjects.getUnsafeInternalClient();
           // Since the RulesClient cannot be unscoped, we provide a stub client that
           // will throw an error if rules or queries exist in the stream definition.
           // This is a limitation of the config-based streams for now.
@@ -414,11 +415,26 @@ export class StreamsPlugin
             }))
           );
           this.logger.info('Streams preconfigured successfully');
-        })
-        .catch((error) => {
-          this.logger.error(`Error preconfiguring streams: ${error}`);
-        });
-    }
+        }
+
+        startupUiSettingsClient
+          .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS)
+          .then((isWiredStreamViewsEnabled) =>
+            backfillWiredStreamViews({
+              esClient,
+              logger: this.logger,
+              isWiredStreamViewsEnabled,
+            })
+          )
+          .catch((err: Error) => {
+            this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
+              error: err,
+            });
+          });
+      })
+      .catch((error) => {
+        this.logger.error(`Error preconfiguring streams: ${error}`);
+      });
 
     return {};
   }
@@ -437,24 +453,6 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
-
-    const soClient = core.savedObjects.getUnsafeInternalClient();
-    const startupUiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-
-    startupUiSettingsClient
-      .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS)
-      .then((isWiredStreamViewsEnabled) =>
-        backfillWiredStreamViews({
-          esClient: core.elasticsearch.client.asInternalUser,
-          logger: this.logger,
-          isWiredStreamViewsEnabled,
-        })
-      )
-      .catch((err: Error) => {
-        this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
-          error: err,
-        });
-      });
 
     return {};
   }
