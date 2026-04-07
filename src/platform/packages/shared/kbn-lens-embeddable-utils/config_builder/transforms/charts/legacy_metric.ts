@@ -84,7 +84,7 @@ function reverseBuildVisualizationState(
 
   const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
-  if (!dataset || dataset.type == null) {
+  if (!dataset || dataset.type == null || isEsqlTableTypeDataset(dataset)) {
     throw new Error('Unsupported dataset type');
   }
 
