@@ -61,7 +61,7 @@ apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentA
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.clean({ types: ['visualization'] });
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   apiTest('returns the correct count for each included types', async ({ apiClient }) => {
