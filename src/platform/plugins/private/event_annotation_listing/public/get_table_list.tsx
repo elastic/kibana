@@ -9,6 +9,8 @@
 
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { type TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -60,11 +62,30 @@ export const getTableList = (
           queryInputServices={services.queryInputServices}
           navigateToLens={async () => {
             const currentApp = await firstValueFrom(services.core.application.currentAppId$);
-            await services.embeddable.getStateTransfer().navigateToEditor('lens', {
+            if (!currentApp) return;
+            const stateTransfer = services.embeddable.getStateTransfer();
+            const annotationGroupsTabTitle = i18n.translate(
+              'eventAnnotationListing.listingViewTitle',
+              { defaultMessage: 'Annotation groups' }
+            );
+            const breadcrumbs: EmbeddableEditorBreadcrumb[] = [
+              {
+                text: stateTransfer.getAppNameFromId(currentApp) ?? currentApp,
+                href: services.core.application.getUrlForApp(currentApp),
+              },
+              {
+                text: annotationGroupsTabTitle,
+                href: services.core.application.getUrlForApp(currentApp, {
+                  path: window.location.hash,
+                }),
+              },
+            ];
+            await stateTransfer.navigateToEditor('lens', {
               path: '',
               state: {
-                originatingApp: currentApp ?? 'dashboards',
+                originatingApp: currentApp,
                 originatingPath: window.location.hash,
+                breadcrumbs,
               },
             });
           }}

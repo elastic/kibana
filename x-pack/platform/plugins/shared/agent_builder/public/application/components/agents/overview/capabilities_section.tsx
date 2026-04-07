@@ -11,39 +11,27 @@ import { labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
 import pluginsImage from './assets/projects-folder.svg';
-import connectorsImage from './assets/handshake.svg';
-
 const { agentOverview: overviewLabels } = labels;
 
 export interface CapabilitiesSectionProps {
   skillsCount: number;
   pluginsCount: number;
-  connectorsCount: number;
   enableElasticCapabilities: boolean;
   isExperimentalFeaturesEnabled: boolean;
-  isConnectorsEnabled: boolean;
-  hasConnectorsPrivileges: boolean;
   skillsHref: string;
   pluginsHref: string;
-  connectorsHref: string;
   onNavigateToSkills: () => void;
   onNavigateToPlugins: () => void;
-  onNavigateToConnectors: () => void;
 }
 
 export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   skillsCount,
   pluginsCount,
-  connectorsCount,
   isExperimentalFeaturesEnabled,
-  isConnectorsEnabled,
-  hasConnectorsPrivileges,
   skillsHref,
   pluginsHref,
-  connectorsHref,
   onNavigateToSkills,
   onNavigateToPlugins,
-  onNavigateToConnectors,
 }) => (
   <>
     <EuiTitle size="s">
@@ -72,20 +60,6 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
             image={pluginsImage}
             href={pluginsHref}
             onClick={onNavigateToPlugins}
-          />
-        </EuiFlexItem>
-      )}
-
-      {isConnectorsEnabled && (
-        <EuiFlexItem grow={1}>
-          <CapabilityCard
-            count={connectorsCount}
-            title={overviewLabels.connectorsLabel(connectorsCount)}
-            description={overviewLabels.connectorsDescription}
-            emptyDescription={overviewLabels.connectorsOnboardingDescription}
-            image={connectorsImage}
-            href={hasConnectorsPrivileges ? connectorsHref : undefined}
-            onClick={hasConnectorsPrivileges ? onNavigateToConnectors : undefined}
           />
         </EuiFlexItem>
       )}

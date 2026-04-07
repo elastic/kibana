@@ -529,6 +529,17 @@ export const createNavigationTree = ({
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],
           },
+          {
+            id: 'project_performance',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.projectSettings.projectPerformance',
+              {
+                defaultMessage: 'Project performance',
+              }
+            ),
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'management:queryActivity', badgeType: 'new' }],
+          },
           ...filterForFeatureAvailability(
             {
               id: 'machine_learning',
