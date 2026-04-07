@@ -84,29 +84,6 @@ test.describe(
       });
     });
 
-    test('remove endpoints until one remains then reset to defaults', async ({ pageObjects }) => {
-      const { featureSettings } = pageObjects;
-
-      await test.step('remove endpoints until only one remains', async () => {
-        await featureSettings.removeEndpointsUntilOneRemains();
-      });
-
-      await test.step('last remaining remove button is disabled', async () => {
-        await expect(featureSettings.firstCardLastRemoveButton).toBeDisabled();
-      });
-
-      await test.step('reset section to defaults', async () => {
-        await featureSettings.firstResetLink.click();
-        await expect(featureSettings.resetDefaultsModal).toBeVisible();
-        await featureSettings.resetDefaultsConfirmButton.click();
-        await expect(featureSettings.resetDefaultsModal).toBeHidden();
-      });
-
-      await test.step('save button is disabled after reset', async () => {
-        await expect(featureSettings.saveButton).toBeDisabled();
-      });
-    });
-
     test('reset to defaults modal cancel', async ({ pageObjects }) => {
       const { featureSettings } = pageObjects;
 

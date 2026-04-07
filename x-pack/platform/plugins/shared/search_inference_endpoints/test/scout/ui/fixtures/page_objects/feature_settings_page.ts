@@ -104,33 +104,7 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator('resetDefaultsModal');
   }
 
-  public get resetDefaultsConfirmButton(): Locator {
-    return this.resetDefaultsModal.locator('[data-test-subj="confirmModalConfirmButton"]');
-  }
-
   public get resetDefaultsCancelButton(): Locator {
     return this.resetDefaultsModal.locator('[data-test-subj="confirmModalCancelButton"]');
-  }
-
-  /**
-   * Removes endpoints from the first sub-feature card until only one remains.
-   * Returns the initial count of endpoints before removal.
-   */
-  public async removeEndpointsUntilOneRemains(): Promise<number> {
-    const firstCard = this.allSubFeatureCards.first();
-    const endpointRows = firstCard.locator('[data-test-subj^="endpoint-row-"]');
-    const initialCount = await endpointRows.count();
-
-    for (let remaining = initialCount; remaining > 1; remaining--) {
-      const lastRemoveBtn = firstCard.locator('[data-test-subj^="remove-endpoint-"]').last();
-      await lastRemoveBtn.click();
-      await lastRemoveBtn.waitFor({ state: 'detached' });
-    }
-
-    return initialCount;
-  }
-
-  public get firstCardLastRemoveButton(): Locator {
-    return this.allSubFeatureCards.first().locator('[data-test-subj^="remove-endpoint-"]').last();
   }
 }
