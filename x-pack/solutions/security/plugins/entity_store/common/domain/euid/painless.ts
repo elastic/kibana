@@ -127,8 +127,9 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
 
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
-  if (identityField.fieldEvaluations?.length) {
-    const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const result = buildFieldEvaluationsPreamble(fieldEvaluations);
     preamble = result.preamble + ' ';
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
@@ -299,6 +300,10 @@ function escapePainlessString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function toPainlessNullableStringLiteral(value: string | null): string {
+  return value === null ? 'null' : `"${escapePainlessString(value)}"`;
+}
+
 function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
 }
@@ -327,18 +332,42 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
         );
       }
     }
-    stmts.push(`if (_src != null) {`);
-    let first = true;
+
+    let branchFirst = true;
     for (const clause of ev.whenClauses) {
-      const conds = clause.sourceMatchesAny
-        .map((v) => `_src == "${escapePainlessString(v)}"`)
-        .join(' || ');
-      const prefix = first ? '  if ' : '  else if ';
-      stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
-      first = false;
+      if ('sourceMatchesAny' in clause) {
+        const conds = clause.sourceMatchesAny
+          .map((v) => `_src == "${escapePainlessString(v)}"`)
+          .join(' || ');
+        const prefix = branchFirst ? 'if' : 'else if';
+        stmts.push(
+          `${prefix} (_src != null && (${conds})) { ${varName} = "${escapePainlessString(
+            clause.then
+          )}"; }`
+        );
+        branchFirst = false;
+      } else {
+        const cond = streamlangConditionToPainlessDoc(clause.condition);
+        const prefix = branchFirst ? 'if' : 'else if';
+        stmts.push(`${prefix} (${cond}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
+        branchFirst = false;
+      }
     }
-    stmts.push(`  else { ${varName} = _src; }`);
-    stmts.push(`} else { ${varName} = "${escapePainlessString(ev.fallbackValue)}"; }`);
+
+    if (branchFirst) {
+      stmts.push(
+        `if (_src != null) { ${varName} = _src; } else { ${varName} = ${toPainlessNullableStringLiteral(
+          ev.fallbackValue
+        )}; }`
+      );
+    } else {
+      stmts.push(
+        `else if (_src != null) { ${varName} = _src; } else { ${varName} = ${toPainlessNullableStringLiteral(
+          ev.fallbackValue
+        )}; }`
+      );
+    }
+
     parts.push(stmts.join(' '));
   }
   const preamble = parts.join(' ');

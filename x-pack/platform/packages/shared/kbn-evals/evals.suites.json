@@ -40,16 +40,16 @@
       ]
     },
     {
-      "id": "streams/significant-events",
-      "name": "Streams Significant Events",
+      "id": "significant-events",
+      "name": "Significant Events",
       "slackChannel": "#significant-events-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/significant_events/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events/playwright.config.ts",
       "tags": [
         "platform",
-        "streams"
+        "significant-events"
       ],
       "ciLabels": [
-        "evals:streams-sigevents"
+        "evals:significant-events"
       ]
     },
     {
@@ -138,6 +138,18 @@
         "evals:entity-analytics-v2"
       ],
       "serverConfigSet": "evals_entity_analytics_v2"
+    },
+    {
+      "id": "attack-discovery",
+      "name": "Attack Discovery",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:attack-discovery"
+      ]
     }
   ]
 }

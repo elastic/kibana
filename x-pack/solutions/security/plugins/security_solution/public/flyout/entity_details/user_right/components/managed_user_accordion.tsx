@@ -67,7 +67,7 @@ export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
       data-test-subj={`managed-user-accordion-${tableType}`}
       header={{
         title,
-        iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
         headerContent: timestamp && (
           <span
             css={css`

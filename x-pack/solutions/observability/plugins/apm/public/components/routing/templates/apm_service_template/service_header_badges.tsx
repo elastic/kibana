@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -33,6 +33,7 @@ export function ServiceHeaderBadges({
   onSloClick,
   alertsTabHref,
 }: ServiceHeaderBadgesProps) {
+  const { euiTheme } = useEuiTheme();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
@@ -79,7 +80,12 @@ export function ServiceHeaderBadges({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      css={{ marginBottom: euiTheme.size.m }}
+    >
       {showAlertsBadge && (
         <EuiFlexItem grow={false}>
           <EuiToolTip

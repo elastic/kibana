@@ -9,7 +9,7 @@ import type { Ast } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { XYState } from './xy_visualization';
+import type { XYVisualizationState } from './xy_visualization';
 import { getXyVisualization } from './xy_visualization';
 import type { OperationDescriptor } from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -768,7 +768,7 @@ describe('#toExpression', () => {
         return { label: `col_${col}`, dataType: 'date', scale: 'interval' } as OperationDescriptor;
       return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
     });
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',
@@ -807,7 +807,7 @@ describe('#toExpression', () => {
   });
 
   it('ignores set current time marker visibility settings if the chart is not time-based', () => {
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',

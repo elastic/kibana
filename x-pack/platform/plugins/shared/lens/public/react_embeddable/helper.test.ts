@@ -20,7 +20,7 @@ import type {
   StructuredDatasourceStates,
   XYByReferenceAnnotationLayerConfig,
   XYDataLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
@@ -157,12 +157,12 @@ describe('Embeddable helpers', () => {
       };
     }
 
-    function makeVizState(layers: XYState['layers']): XYState {
+    function makeVizState(layers: XYVisualizationState['layers']): XYVisualizationState {
       return {
         preferredSeriesType: 'bar_stacked',
         legend: { isVisible: true, position: 'right' },
         layers,
-      } as XYState;
+      } as XYVisualizationState;
     }
 
     beforeEach(() => {
@@ -233,7 +233,8 @@ describe('Embeddable helpers', () => {
         mockEventAnnotationService
       );
 
-      const updatedLayer = (result as XYState).layers[0] as XYByReferenceAnnotationLayerConfig;
+      const updatedLayer = (result as XYVisualizationState)
+        .layers[0] as XYByReferenceAnnotationLayerConfig;
       expect(updatedLayer.__lastSaved.annotations).toEqual(byRefLayer.annotations);
     });
 

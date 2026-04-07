@@ -243,11 +243,11 @@ describe('buildDatasourceStates', () => {
         metrics: [
           {
             type: 'primary',
-            operation: 'value',
             label: 'test',
             column: 'test',
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
         sampling: 1,
@@ -516,11 +516,11 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
@@ -567,11 +567,11 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
@@ -596,11 +596,11 @@ describe('filtersAndQueryToLensState', () => {
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
@@ -687,8 +687,8 @@ describe('filtersAndQueryToApiFormat', () => {
           },
         ],
         "query": Object {
-          "language": "kuery",
-          "query": "brand: \\"apple\\"",
+          "expression": "brand: \\"apple\\"",
+          "language": "kql",
         },
       }
     `);

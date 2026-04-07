@@ -41,7 +41,9 @@ import {
 import type { LayerSettingsSchema } from '../schema/shared';
 import type { LensApiFilterType } from '../schema/filter';
 import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
-import type { LayerTypeESQL, XScaleSchemaType } from '../schema/charts/xy';
+import type { LayerTypeESQL } from '../schema/charts/xy';
+import type { XScaleSchemaType } from '../schema/charts/shared';
+import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
 export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -397,7 +399,7 @@ export const buildDatasourceStates = (
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   // XY charts have dataset encoded per layer not at the root level
-  const mainDataset = 'dataset' in config && config.dataset;
+  const mainDataset = ('dataset' in config && config.dataset) || undefined;
   const usedDataviews: Record<string, APIDataView | APIAdHocDataView> = {};
   // a few charts types support multiple layers
   const hasMultipleLayers = 'layers' in config;
@@ -412,6 +414,10 @@ export const buildDatasourceStates = (
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
+      if ('type' in layer && layer.type === 'annotation_group' && 'group_id' in layer) {
+        // by-ref annotation layers don't require a dataset
+        continue;
+      }
       throw Error('dataset must be defined');
     }
 
@@ -535,16 +541,6 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   };
 };
 
-export const queryToApiFormat = (query: Query): LensApiFilterType | undefined => {
-  if (typeof query.query !== 'string') {
-    return;
-  }
-  return {
-    query: query.query,
-    language: query.language as 'kuery' | 'lucene',
-  };
-};
-
 function injectFilterReferences(filters: Filter[], references: SavedObjectReference[]): Filter[] {
   const dataViewReferences = references.filter((r) => r.type === INDEX_PATTERN_ID);
 
@@ -614,7 +610,10 @@ function extractFilterReferences(filters: Filter[], references: SavedObjectRefer
 }
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
-  return { query: query.query, language: query.language as 'kuery' | 'lucene' };
+  return {
+    query: query.expression,
+    language: toLensStateFilterLanguage(query.language),
+  };
 };
 
 export const filtersAndQueryToApiFormat = (
@@ -627,13 +626,16 @@ export const filtersAndQueryToApiFormat = (
     state.state.filters ?? [],
     state.references ?? []
   );
-  const asCodeFilters = fromStoredFilters(injectedStoredFilters) ?? [];
+  const filters = fromStoredFilters(injectedStoredFilters) ?? [];
+
+  const query =
+    state.state.query && !isOfAggregateQueryType(state.state.query)
+      ? fromFilterLensStateToAPI(state.state.query)
+      : undefined;
 
   return {
-    ...(asCodeFilters.length ? { filters: asCodeFilters } : {}),
-    ...(state.state.query && !isOfAggregateQueryType(state.state.query)
-      ? { query: queryToApiFormat(state.state.query) }
-      : {}),
+    ...(filters.length ? { filters } : {}),
+    ...(query?.expression.length ? { query } : {}),
   };
 };
 
@@ -644,7 +646,7 @@ function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query |
   if ('layers' in state && Array.isArray(state.layers)) {
     // pick only the first one for now
     const esqlLayer = state.layers.find(
-      (layer): layer is LayerTypeESQL => layer.dataset?.type === 'esql'
+      (layer): layer is LayerTypeESQL => 'dataset' in layer && layer.dataset?.type === 'esql'
     );
     if (esqlLayer && 'query' in esqlLayer.dataset) {
       return { esql: esqlLayer.dataset.query };

@@ -153,7 +153,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         {ruleTypesList.length === 0 && (
           <EuiEmptyPrompt
             color="subdued"
-            iconType="search"
+            iconType="magnify"
             title={
               <h2>
                 {i18n.translate(

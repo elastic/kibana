@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-
 const buildBaseUrl = (ctx: ActionContext): string =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
 

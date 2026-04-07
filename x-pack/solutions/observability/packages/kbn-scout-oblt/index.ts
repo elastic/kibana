@@ -64,6 +64,7 @@ export type {
 
 // Re-exported fixture types
 export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
+export type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker/api_client';
 
 // Re-exported service & configuration types
 export type {
@@ -78,7 +79,7 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported authentication types
-export type { RoleApiCredentials } from '@kbn/scout';
+export type { RoleApiCredentials, RequestAuthFixture } from '@kbn/scout';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from '@kbn/scout';

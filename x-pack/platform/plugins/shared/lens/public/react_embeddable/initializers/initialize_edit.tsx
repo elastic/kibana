@@ -28,6 +28,7 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
@@ -49,11 +50,15 @@ function getSupportedTriggers(
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return [
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
+      ];
     }
-    return [];
+    return panelTriggers;
   };
 }
 

@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import { xyStateSchema } from '../../schema/charts/xy';
 import type { LensAttributes } from '../../types';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   apiXYWithNoTitleAndCustomOutsideLegend,
   apiXYWithNoYTitleAndInsideLegend,
+  apiXYWithTopListWithTruncationLegend,
   barWithTwoLayersAttributes,
   breakdownXY,
   fullBasicXY,
@@ -23,7 +24,7 @@ import {
   xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
-import { annotationXY } from './annotations.mock';
+import { annotationXY, byRefAnnotationXY } from './annotations.mock';
 import {
   esqlChart,
   esqlChartWithBreakdownColorMapping,
@@ -36,8 +37,8 @@ function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 
     state: {
       ...attributes.state,
       visualization: {
-        ...(attributes.state.visualization as XYLensState),
-        layers: (attributes.state.visualization as XYLensState).layers.map((layer) => {
+        ...(attributes.state.visualization as XYVisualizationState),
+        layers: (attributes.state.visualization as XYVisualizationState).layers.map((layer) => {
           if (!layer.layerType || layer.layerType === 'data') {
             return {
               ...layer,
@@ -108,6 +109,12 @@ describe('XY', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
           validateConverter(setSeriesType(annotationXY, type), xyStateSchema);
+        });
+      }
+
+      for (const type of ['bar', 'line', 'area'] as const) {
+        it(`should work for a by-reference annotation with a ${type} chart`, () => {
+          validateConverter(setSeriesType(byRefAnnotationXY, type), xyStateSchema);
         });
       }
     });
@@ -299,9 +306,9 @@ describe('XY', () => {
               type,
               ignore_global_filters: false,
               sampling: 1,
-              x: { operation: 'value', column: 'order_date' },
-              y: [{ operation: 'value', column: 'count' }],
-              breakdown_by: { operation: 'value', column: 'product' },
+              x: { column: 'order_date' },
+              y: [{ column: 'count' }],
+              breakdown_by: { column: 'product' },
             },
           ],
         },
@@ -325,9 +332,9 @@ describe('XY', () => {
                 type,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: '@timestamp' },
-                y: [{ operation: 'value', column: 'bytes' }],
-                breakdown_by: { operation: 'value', column: 'agent', collapse_by: 'max' },
+                x: { column: '@timestamp' },
+                y: [{ column: 'bytes' }],
+                breakdown_by: { column: 'agent', collapse_by: 'max' },
               },
             ],
           },
@@ -353,10 +360,9 @@ describe('XY', () => {
                 type,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: 'buckets' },
-                y: [{ operation: 'value', column: 'count' }],
+                x: { column: 'buckets' },
+                y: [{ column: 'count' }],
                 breakdown_by: {
-                  operation: 'value',
                   column: 'category',
                   color: {
                     mode: 'categorical',
@@ -404,11 +410,11 @@ describe('XY', () => {
                 breakdown_by: {
                   operation: 'terms',
                   fields: ['product', 'category'],
-                  size: 5,
+                  limit: 5,
                   rank_by: {
                     direction: 'desc',
-                    metric: 0,
-                    type: 'column',
+                    metric_index: 0,
+                    type: 'metric',
                   },
                 },
               },
@@ -417,12 +423,9 @@ describe('XY', () => {
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: 'order_date' },
-                y: [
-                  { operation: 'value', column: 'value' },
-                  { operation: 'value', column: 'price' },
-                ],
-                breakdown_by: { operation: 'value', column: 'product' },
+                x: { column: 'order_date' },
+                y: [{ column: 'value' }, { column: 'price' }],
+                breakdown_by: { column: 'product' },
               },
               {
                 dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
@@ -435,7 +438,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
-                    text: 'label',
+                    text: { visible: true },
                     axis: 'left',
                   },
                   {
@@ -443,7 +446,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
-                    text: 'none',
+                    text: { visible: false },
                     axis: 'left',
                   },
                 ],
@@ -460,7 +463,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'New Year',
                     timestamp: '2023-01-01T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -470,7 +473,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'Christmas',
                     timestamp: '2023-12-25T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -492,9 +495,12 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: { type: 'field', field: 'order_id' },
+                    text: {
+                      visible: true,
+                      field: 'order_id',
+                    },
                     color: {
                       type: 'static',
                       color: '#0000ff',
@@ -513,8 +519,35 @@ describe('XY', () => {
       validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
     });
 
+    it('should correctly transform top list layout with pixel truncation', () => {
+      validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyStateSchema);
+    });
+
     it('should correctly transform with custom position legend - bug 248611', () => {
       validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyStateSchema);
+    });
+
+    it('should convert API with by-reference annotation layer', () => {
+      validateAPIConverter(
+        {
+          type: 'xy',
+          title: 'Chart with by-ref annotation',
+          layers: [
+            {
+              dataset: { type: 'dataView', id: 'myDataView' },
+              type: 'line',
+              ignore_global_filters: false,
+              sampling: 1,
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+            {
+              type: 'annotation_group',
+              group_id: 'my-library-annotation-group',
+            },
+          ],
+        },
+        xyStateSchema
+      );
     });
 
     describe('XY axis scale support (text-based)', () => {
@@ -538,8 +571,8 @@ describe('XY', () => {
                     'FROM kibana_sample_data_logs | STATS count = count() BY buckets = BUCKET(@timestamp, 1 hour)',
                 },
                 type: 'bar',
-                x: { operation: 'value', column: 'buckets' },
-                y: [{ operation: 'value', column: 'count' }],
+                x: { column: 'buckets' },
+                y: [{ column: 'count' }],
               },
             ],
           },
@@ -566,8 +599,8 @@ describe('XY', () => {
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
                 type: 'line',
-                x: { operation: 'value', column: 'bytes' },
-                y: [{ operation: 'value', column: 'count' }],
+                x: { column: 'bytes' },
+                y: [{ column: 'count' }],
               },
             ],
           },
@@ -589,7 +622,7 @@ describe('XY', () => {
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
                 type: 'bar',
-                y: [{ operation: 'value', column: 'count' }],
+                y: [{ column: 'count' }],
               },
             ],
           },
@@ -604,8 +637,8 @@ describe('XY', () => {
             title: 'XY Chart with Y-Axis Only',
             axis: {
               left: {
-                ticks: true,
-                grid: true,
+                ticks: { visible: true },
+                grid: { visible: true },
               },
             },
             layers: [
@@ -617,7 +650,7 @@ describe('XY', () => {
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
                 type: 'bar',
-                y: [{ operation: 'value', column: 'count' }],
+                y: [{ column: 'count' }],
               },
             ],
           },

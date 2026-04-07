@@ -11,7 +11,7 @@ import {
   OutputSchema,
   createCaseStepCommonDefinition,
 } from './create_case';
-import { createCaseRequestFixture, createCaseResponseFixture } from '../../fixtures/create_case';
+import { createCaseRequestFixture, createCaseResponseFixture } from './test_fixtures';
 
 describe('create_case common step definition', () => {
   it('exposes the expected step id', () => {

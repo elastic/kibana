@@ -7,6 +7,7 @@
 
 import { RuleMonitoringService } from './rule_monitoring_service';
 import { getDefaultMonitoring } from '../lib/monitoring';
+import { gapReasonType } from '../../common/constants';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 
@@ -135,7 +136,7 @@ describe('RuleMonitoringService', () => {
       expect(metrics.gap_duration_s).toEqual(567);
     });
 
-    it('should set gapRange', () => {
+    it('should set gap range', () => {
       const ruleMonitoringService = new RuleMonitoringService();
       const { setMetric } = ruleMonitoringService.getSetters();
 
@@ -153,13 +154,31 @@ describe('RuleMonitoringService', () => {
       expect(metrics.gap_range?.lte).toEqual('2020-01-01T01:00:00.000Z');
     });
 
+    it('should set gap reason', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('gap_reason', { type: gapReasonType.RULE_DISABLED });
+
+      const {
+        run: {
+          last_run: { metrics },
+        },
+      } = ruleMonitoringService.getMonitoring();
+      expect(metrics.gap_reason).toEqual({ type: gapReasonType.RULE_DISABLED });
+    });
+
     it('should clear the previously set gapRange', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setMetric, clearGapRange } = ruleMonitoringService.getSetters();
+      const { setMetric, clearGap } = ruleMonitoringService.getSetters();
 
       setMetric('gap_range', {
         gte: '2020-01-01T00:00:00.000Z',
         lte: '2020-01-01T01:00:00.000Z',
+      });
+
+      setMetric('gap_reason', {
+        type: gapReasonType.RULE_DISABLED,
       });
 
       const {
@@ -170,7 +189,7 @@ describe('RuleMonitoringService', () => {
 
       expect(metricBeforeClearing.gap_range).toBeDefined();
 
-      clearGapRange();
+      clearGap();
 
       const {
         run: {

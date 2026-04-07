@@ -104,6 +104,11 @@ export const isEntityRelationshipExpandedForScope = (
   return store?.isEntityRelationshipExpanded(entityId) ?? false;
 };
 
+export const isInitialEntityForScope = (scopeId: string, entityId: string): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isInitialEntity(entityId) ?? false;
+};
+
 /**
  * Check if a filter is active for the given scope, field, and value.
  * Returns false gracefully if no store exists (no warning logged).
@@ -142,6 +147,7 @@ const stores = new Map<string, FilterStore>();
 export class FilterStore {
   readonly scopeId: string;
   private dataViewId?: string;
+  private initialEntityIds: Array<{ id: string; isOrigin: boolean }> = [];
   private readonly filters$ = new BehaviorSubject<Filter[]>([]);
   private readonly expandedEntityIds$ = new BehaviorSubject<Set<string>>(new Set());
   private readonly filterEventSubscription: Subscription;
@@ -172,6 +178,10 @@ export class FilterStore {
     if (dataViewId) {
       this.dataViewId = dataViewId;
     }
+  }
+
+  setInitialEntityIds(initialEntityIds: Array<{ id: string; isOrigin: boolean }>): void {
+    this.initialEntityIds = initialEntityIds;
   }
 
   /**
@@ -244,7 +254,14 @@ export class FilterStore {
    * Check if an entity's relationships are currently expanded.
    */
   isEntityRelationshipExpanded(entityId: string): boolean {
-    return this.expandedEntityIds$.value.has(entityId);
+    return this.expandedEntityIds$.value.has(entityId) || this.isInitialEntity(entityId);
+  }
+
+  /**
+   * Check if an entity ID is part of the initial set of entities (e.g. from the original graph request).
+   */
+  isInitialEntity(entityId: string): boolean {
+    return this.initialEntityIds.find((entity) => entity.id === entityId)?.isOrigin ?? false;
   }
 
   /**

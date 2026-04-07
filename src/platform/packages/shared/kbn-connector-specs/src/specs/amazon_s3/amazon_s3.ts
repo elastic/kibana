@@ -24,7 +24,6 @@ import type {
   AmazonS3BucketObjectListing,
   AmazonS3Object,
 } from './amazon_s3_types';
-
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
  * If the user requests a file larger than this, we will return a pre-signed URL for them to download the file directly from S3 instead of through Kibana.
@@ -39,7 +38,8 @@ export const AmazonS3: ConnectorSpec = {
       defaultMessage: 'List buckets and download files from Amazon S3',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: ['aws_credentials'],

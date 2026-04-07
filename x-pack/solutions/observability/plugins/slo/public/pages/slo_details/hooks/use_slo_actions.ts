@@ -67,9 +67,9 @@ export const useSloActions = ({
         const basePath = http.basePath.get(); // "/kibana/s/my-space"
         const url = await locator.getUrl({ params: { sloId: slo.id } }); // "/kibana/s/my-space/app/rules/123"
         // since basePath is already included in the locatorUrl, we need to remove it from the start of url
-        const urlWithoutBasePath = url?.replace(basePath, ''); // "/app/rules/123"
+        const urlWithoutBasePath = url?.replace(basePath, ''); // "/app/rules/rule/123"
         const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-        const remoteUrl = new URL(path.join(spacePath, urlWithoutBasePath), slo.remote.kibanaUrl); // "kibanaUrl/s/my-space/app/rules/123"
+        const remoteUrl = new URL(path.join(spacePath, urlWithoutBasePath), slo.remote.kibanaUrl); // "kibanaUrl/s/my-space/app/rules/rule/123"
         window.open(remoteUrl, '_blank');
       } else {
         locator.navigate({ params: { sloId: slo.id } }, { replace: false });

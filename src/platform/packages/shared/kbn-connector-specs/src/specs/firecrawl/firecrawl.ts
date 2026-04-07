@@ -18,7 +18,6 @@ import {
   CrawlAndWaitInputSchema,
   GetCrawlStatusInputSchema,
 } from './types';
-
 const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
 
 /** Max characters of markdown to include per page in crawlAndWait output. */

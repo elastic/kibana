@@ -91,7 +91,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { services } = useKibana();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { manageAgents, isAdmin } = useUiPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -157,8 +157,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const canEditAgent = !manageAgents
     ? false
-    : !isExperimentalFeaturesEnabled
-    ? true
     : hasAgentWriteAccess({
         visibility: agentState?.visibility,
         owner: agentState?.created_by,
@@ -215,7 +213,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      deferNavigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+      deferNavigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: data.id }));
     },
     [deferNavigateToAgentBuilderUrl, handleSave]
   );
@@ -300,34 +298,34 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
+      {
+        id: 'skills',
+        name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
+          defaultMessage: 'Skills',
+        }),
+        content: (
+          <SkillsTab
+            control={control}
+            skills={skills}
+            isLoading={isLoading}
+            isFormDisabled={isFormDisabled || !manageAgents}
+          />
+        ),
+        append: (
+          <EuiNotificationBadge
+            color="subdued"
+            css={css`
+              block-size: 20px;
+              min-inline-size: ${euiTheme.size.l};
+              padding: 0 ${euiTheme.size.xs};
+            `}
+          >
+            {activeSkillsCount}
+          </EuiNotificationBadge>
+        ),
+      },
       ...(isExperimentalFeaturesEnabled
         ? [
-            {
-              id: 'skills',
-              name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
-                defaultMessage: 'Skills',
-              }),
-              content: (
-                <SkillsTab
-                  control={control}
-                  skills={skills}
-                  isLoading={isLoading}
-                  isFormDisabled={isFormDisabled || !manageAgents}
-                />
-              ),
-              append: (
-                <EuiNotificationBadge
-                  color="subdued"
-                  css={css`
-                    block-size: 20px;
-                    min-inline-size: ${euiTheme.size.l};
-                    padding: 0 ${euiTheme.size.xs};
-                  `}
-                >
-                  {activeSkillsCount}
-                </EuiNotificationBadge>
-              ),
-            },
             {
               id: 'plugins',
               name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
@@ -431,7 +429,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         <EuiButton
           {...commonProps}
           onClick={() =>
-            navigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: editingAgentId }))
+            navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: editingAgentId }))
           }
         >
           {i18n.translate('xpack.agentBuilder.agents.form.chatButton', {

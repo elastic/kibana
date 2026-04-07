@@ -7,10 +7,23 @@
 
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
+export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPrivilege` as const;
+
 /* Header */
 
-export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
-export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+export const TIMESTAMP_TEST_ID = `${PREFIX}HeaderTimestamp` as const;
+export const TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
+export const TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+export const EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
+export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
+export const STATUS_TITLE_TEST_ID = `${PREFIX}HeaderStatusTitle` as const;
+export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
+export const RISK_SCORE_TITLE_TEST_ID = `${PREFIX}HeaderRiskScoreTitle` as const;
+export const RISK_SCORE_VALUE_TEST_ID = `${PREFIX}HeaderRiskScoreValue` as const;
+export const ASSIGNEES_EMPTY_TEST_ID = `${PREFIX}HeaderAssigneesEmpty` as const;
+export const ASSIGNEES_TEST_ID = `${PREFIX}HeaderAssignees` as const;
+export const ASSIGNEES_TITLE_TEST_ID = `${PREFIX}HeaderAssigneesTitle` as const;
+export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${PREFIX}HeaderAssigneesAddButton` as const;
 
 /* About */
 
@@ -37,6 +50,37 @@ export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as 
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
+
+const HIGHLIGHTED_FIELDS_TEST_ID = `${PREFIX}HighlightedFields` as const;
+export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Title` as const;
+export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Details` as const;
+export const HIGHLIGHTED_FIELDS_CELL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Cell` as const;
+export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}BasicCell` as const;
+export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}LinkedCell` as const;
+export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}AgentStatusCell` as const;
+
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}EditButton` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Loading` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Tooltip` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Modal` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Title` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DESCRIPTION_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Description` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}DefaultFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CustomFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}SaveButton` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CancelButton` as const;
 
 /* Visualizations */
 
@@ -78,3 +122,7 @@ export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTest
 export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
 export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
+
+/* Footer */
+
+export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID = `${PREFIX}FooterDropdownButton` as const;

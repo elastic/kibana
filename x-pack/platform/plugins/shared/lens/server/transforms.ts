@@ -22,6 +22,7 @@ import {
   ON_APPLY_FILTER,
   ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 import { isByRefLensConfig } from '../common/transforms/utils';
 import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
@@ -83,9 +84,7 @@ const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnTyp
       ...getSharedPanelSchema(getDrilldownsSchema),
     },
     {
-      meta: {
-        description: 'Lens by-value embeddable schema',
-      },
+      meta: BY_VALUE_SCHEMA_META,
     }
   );
 
@@ -96,9 +95,7 @@ const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType)
       ...getSharedPanelSchema(getDrilldownsSchema),
     },
     {
-      meta: {
-        description: 'Lens by-ref embeddable schema',
-      },
+      meta: BY_REF_SCHEMA_META,
     }
   );
 

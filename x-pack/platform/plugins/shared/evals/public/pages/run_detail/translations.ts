@@ -24,6 +24,26 @@ export const STAT_REPETITIONS = i18n.translate('xpack.evals.runDetail.stat.repet
   defaultMessage: 'Repetitions',
 });
 
+export const STAT_BRANCH = i18n.translate('xpack.evals.runDetail.stat.branch', {
+  defaultMessage: 'Branch',
+});
+
+export const STAT_CI = i18n.translate('xpack.evals.runDetail.stat.ci', {
+  defaultMessage: 'CI',
+});
+
+export const STAT_PULL_REQUEST = i18n.translate('xpack.evals.runDetail.stat.pullRequest', {
+  defaultMessage: 'PR',
+});
+
+export const CI_BUILD_LINK = i18n.translate('xpack.evals.runDetail.ciBuildLink', {
+  defaultMessage: 'Build',
+});
+
+export const PR_LINK = i18n.translate('xpack.evals.runDetail.prLink', {
+  defaultMessage: 'PR',
+});
+
 export const SECTION_DATASETS = i18n.translate('xpack.evals.runDetail.section.datasets', {
   defaultMessage: 'Datasets',
 });
@@ -72,13 +92,13 @@ export const getExampleCountLabel = (count: number) =>
 
 export const getPageTitle = (runId: string) =>
   i18n.translate('xpack.evals.runDetail.pageTitle', {
-    defaultMessage: 'Run: {runId}...',
+    defaultMessage: 'Run: {runId}',
     values: { runId },
   });
 
 export const getBreadcrumbRun = (runId: string) =>
   i18n.translate('xpack.evals.runDetail.breadcrumbRun', {
-    defaultMessage: 'Run {runId}...',
+    defaultMessage: 'Run {runId}',
     values: { runId },
   });
 
