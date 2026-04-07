@@ -52,7 +52,7 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
-  const { isResponseLoading } = useSendMessage();
+  const { isResponseLoading, isExternalRoundLoading } = useSendMessage();
   const conversationRounds = useConversationRounds();
   const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
@@ -109,6 +109,15 @@ export const Conversation: React.FC<{}> = () => {
       });
     }
   }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
+
+  // Scroll to bottom when an external question arrives (ask_conversation tool targeting this pane).
+  useEffect(() => {
+    if (isExternalRoundLoading) {
+      requestAnimationFrame(() => {
+        stickToBottom();
+      });
+    }
+  }, [isExternalRoundLoading, stickToBottom]);
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}

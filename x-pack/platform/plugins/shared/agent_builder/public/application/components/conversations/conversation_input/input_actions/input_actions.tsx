@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
 
@@ -15,13 +16,21 @@ interface InputActionsProps {
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
   agentId?: string;
+  onFork?: () => void;
+  isForkLoading?: boolean;
 }
+
+const forkLabel = i18n.translate('xpack.agentBuilder.conversationInput.forkButton.label', {
+  defaultMessage: 'Fork conversation',
+});
 
 export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   resetToPendingMessage,
   agentId,
+  onFork,
+  isForkLoading,
 }) => (
   <EuiFlexItem grow={false}>
     <EuiFlexGroup
@@ -35,6 +44,25 @@ export const InputActions: React.FC<InputActionsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          {onFork && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={forkLabel}>
+                {isForkLoading ? (
+                  <EuiLoadingSpinner size="s" aria-label={forkLabel} />
+                ) : (
+                  <EuiButtonIcon
+                    aria-label={forkLabel}
+                    data-test-subj="agentBuilderConversationForkButton"
+                    iconType="branch"
+                    size="s"
+                    color="text"
+                    onClick={onFork}
+                    disabled={isForkLoading}
+                  />
+                )}
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ConversationActionButton
               onSubmit={onSubmit}

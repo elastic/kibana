@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
@@ -14,6 +14,9 @@ import { useConnectorSelection } from '../../hooks/chat/use_connector_selection'
 interface SendMessageState {
   sendMessage: ({ message }: { message: string }) => void;
   isResponseLoading: boolean;
+  /** True while an externally-triggered round (ask_conversation) is awaiting the LLM. */
+  isExternalRoundLoading: boolean;
+  setExternalRoundLoading: (loading: boolean) => void;
   pendingMessage: string | undefined;
   error: unknown;
   errorSteps: ConversationRoundStep[];
@@ -36,7 +39,14 @@ interface SendMessageState {
 
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
-export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+export const SendMessageProvider = ({
+  children,
+  preferredConnectorId,
+}: {
+  children: React.ReactNode;
+  preferredConnectorId?: string;
+}) => {
+  const [isExternalRoundLoading, setExternalRoundLoading] = useState(false);
   const connectorSelection = useConnectorSelection();
 
   const {
@@ -53,7 +63,10 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     removeError,
     regenerate,
     isRegenerating,
-  } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
+    // Use the preferred connector if provided, otherwise fall back to global selection
+  } = useSendMessageMutation({
+    connectorId: preferredConnectorId ?? connectorSelection.selectedConnector,
+  });
 
   const {
     resumeRound,
@@ -71,6 +84,8 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
       value={{
         sendMessage,
         isResponseLoading: isResponseLoading || isResuming || isRegenerating,
+        isExternalRoundLoading,
+        setExternalRoundLoading,
         pendingMessage,
         error,
         errorSteps,
@@ -85,7 +100,9 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         regenerate,
         isRegenerating,
         connectorSelection: {
-          selectedConnector: connectorSelection.selectedConnector,
+          // When this pane was spawned with a specific connector, show it in the selector
+          // so the UI reflects which model is actually being used for this pane.
+          selectedConnector: preferredConnectorId ?? connectorSelection.selectedConnector,
           selectConnector: connectorSelection.selectConnector,
           defaultConnectorId: connectorSelection.defaultConnectorId,
         },

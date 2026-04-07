@@ -35,6 +35,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
       ...otherDeps,
       savedObjects,
       uiSettings,
+      inference,
       trackingService,
       analyticsService,
       hooks,

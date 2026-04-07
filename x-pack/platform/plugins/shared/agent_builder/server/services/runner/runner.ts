@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
@@ -58,6 +59,7 @@ export interface CreateScopedRunnerDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   // external plugin deps
+  inference: InferenceServerStart;
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
   // internal service deps

@@ -203,6 +203,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       resetAttachments,
       removeAttachment,
       conversationActions,
+      onFork: contextProps.onFork,
     }),
     [
       conversationId,
@@ -219,6 +220,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       resetAttachments,
       removeAttachment,
       conversationActions,
+      contextProps.onFork,
     ]
   );
 
@@ -229,7 +231,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <ConversationContext.Provider value={conversationContextValue}>
-                <SendMessageProvider>{children}</SendMessageProvider>
+                <SendMessageProvider preferredConnectorId={contextProps.connectorId}>
+                  {children}
+                </SendMessageProvider>
               </ConversationContext.Provider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>

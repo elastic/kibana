@@ -40,6 +40,8 @@ import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
+import { createAskConversationTool } from './services/tools/builtin/ask_conversation';
+import { createSpawnConversationTool } from './services/tools/builtin/spawn_conversation';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 
 export class AgentBuilderPlugin
@@ -208,6 +210,36 @@ export class AgentBuilderPlugin
     smlTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
+
+    const getConversationsService = () => {
+      const services = this.serviceManager.internalStart;
+      if (!services) {
+        throw new Error('Conversation service not available — plugin has not started');
+      }
+      return services.conversations;
+    };
+
+    const getExecutionService = () => {
+      const services = this.serviceManager.internalStart;
+      if (!services) {
+        throw new Error('Execution service not available — plugin has not started');
+      }
+      return services.execution;
+    };
+
+    const getInference = () => {
+      const inf = this.serviceManager.inference;
+      if (!inf) {
+        throw new Error('Inference service not available — plugin has not started');
+      }
+      return inf;
+    };
+
+    const askConversationTool = createAskConversationTool({ getConversationsService, getExecutionService });
+    serviceSetups.tools.register(askConversationTool);
+
+    const spawnConversationTool = createSpawnConversationTool({ getConversationsService, getInference });
+    serviceSetups.tools.register(spawnConversationTool);
 
     // Register connector lifecycle listener to auto-create workflows/tools
     // when connectors with workflow definitions are created.

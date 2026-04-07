@@ -39,13 +39,6 @@ export class BrowserToolExecutor {
       try {
         const validatedParams = tool.schema.parse(call.params);
         await tool.handler(validatedParams);
-
-        if (this.toasts) {
-          this.toasts.addSuccess({
-            title: `Executed: ${tool.description}`,
-            toastLifeTimeMs: 3000,
-          });
-        }
       } catch (error) {
         if (this.toasts) {
           this.toasts.addDanger({

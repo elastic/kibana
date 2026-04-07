@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { isToolResultEvent, platformCoreTools } from '@kbn/agent-builder-common';
 import { createEmbeddableConversation } from '../embeddable/create_embeddable_conversation';
 import { sidebarServices$, sidebarRuntimeContext$ } from './sidebar_context';
 import { SidebarTabBar } from './sidebar_tab_bar';
-import { useSidebarTabs, getSessionTag } from './use_sidebar_tabs';
+import { useSidebarTabs, getSessionTag, generateTabId } from './use_sidebar_tabs';
 
 const outerStyles = css`
   display: flex;
@@ -37,11 +38,24 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
   const services = useObservable(sidebarServices$);
   const runtimeContext = useObservable(sidebarRuntimeContext$);
 
-  const { tabs, activeTabId, addTab, closeTab, setActiveTab, updateTabTitle, markTabDone, setTabLoading } =
-    useSidebarTabs();
+  const {
+    tabs,
+    activeTabId,
+    addTab,
+    addTabWithId,
+    spawnTab,
+    closeTab,
+    setActiveTab,
+    updateTabTitle,
+    markTabDone,
+    setTabLoading,
+  } = useSidebarTabs();
 
   // Track per-tab loading state so we can detect when a background tab finishes
   const tabLoadingRef = React.useRef<Record<string, boolean>>({});
+  // Stable ref so the EventsService subscription always calls the latest spawnTab
+  const spawnTabRef = useRef(spawnTab);
+  spawnTabRef.current = spawnTab;
 
   const ConversationComponent = useMemo(
     () =>
@@ -77,6 +91,26 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services]);
 
+  // Listen for spawn_conversation tool results and open new background tabs.
+  useEffect(() => {
+    if (!services) return;
+    const sub = services.services.eventsService.obs$.subscribe((event) => {
+      if (!isToolResultEvent(event)) return;
+      if (event.data.tool_id !== platformCoreTools.spawnConversation) return;
+      const result = event.data.results?.[0];
+      if (!result) return;
+      const data = result.data as Record<string, unknown> | undefined;
+      if (!data) return;
+      const initialMessage =
+        typeof data.initial_message === 'string' ? data.initial_message : undefined;
+      const title = typeof data.title === 'string' ? data.title : undefined;
+      const forkedConversationId =
+        typeof data.conversation_id === 'string' ? data.conversation_id : undefined;
+      const connectorId = typeof data.connector_id === 'string' ? data.connector_id : undefined;
+      spawnTabRef.current({ initialMessage, title, forkedConversationId, connectorId });
+    });
+    return () => sub.unsubscribe();
+  }, [services]);
 
   if (!services || !runtimeContext || !ConversationComponent) {
     return null;
@@ -113,13 +147,13 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
           >
             <ConversationComponent
               sessionTag={getSessionTag(tab.id)}
-              // Only start fresh for brand-new tabs; restored tabs reload their last conversation
               newConversation={tab.isNew}
+              initialMessage={tab.initialMessage}
+              autoSendInitialMessage={tab.autoSendInitialMessage}
+              connectorId={tab.connectorId}
               onClose={handleOnClose}
               ariaLabelledBy={`agent-builder-sidebar-tab-${tab.id}`}
-              // Pass external props (agentId, attachments, etc.) only to the primary tab
               {...(idx === 0 ? restOptions : {})}
-              // Only the first tab registers callbacks so the plugin can route addAttachment() etc.
               {...(idx === 0 ? { onRegisterCallbacks } : {})}
               onLoadingStateChange={(isLoading) => {
                 const wasLoading = tabLoadingRef.current[tab.id];
@@ -131,6 +165,38 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
                 }
               }}
               onTitleChange={(title) => updateTabTitle(tab.id, title)}
+              onRoundComplete={(conversationId) => {
+                if (!services) return;
+                services.services.conversationsService
+                  .summarize({ conversationId })
+                  .then(({ summary }) => {
+                    try {
+                      localStorage.setItem(
+                        `agentBuilder.sidebar.tab.${tab.id}.summary`,
+                        JSON.stringify(summary)
+                      );
+                    } catch {
+                      // ignore storage errors
+                    }
+                  })
+                  .catch(() => {});
+              }}
+              onFork={(forkedConversationId) => {
+                if (forkedConversationId) {
+                  // Fork of an existing conversation: pre-seed localStorage so the new tab
+                  // restores it on mount. Must be JSON.stringify'd — react-use reads via JSON.parse.
+                  const newTabId = generateTabId();
+                  const sessionTag = getSessionTag(newTabId);
+                  localStorage.setItem(
+                    `agentBuilder.lastConversation.${sessionTag}.default`,
+                    JSON.stringify(forkedConversationId)
+                  );
+                  addTabWithId(newTabId);
+                } else {
+                  // No parent conversation — open a blank new tab
+                  addTab();
+                }
+              }}
             />
           </div>
         ))}

@@ -82,13 +82,14 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const {
     isResponseLoading,
+    isExternalRoundLoading,
     error,
     retry: retrySendMessage,
     resumeRound,
     isResuming,
   } = useSendMessage();
 
-  const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
+  const isLoadingCurrentRound = (isResponseLoading || isExternalRoundLoading) && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
   // Don't show prompt if we're already resuming (user already clicked confirm/cancel)
   // This prevents the prompt from reappearing when server data is refetched

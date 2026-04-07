@@ -34,6 +34,9 @@ export const platformCoreTools = {
   // SML tools
   smlSearch: platformCoreTool('sml_search'),
   smlAttach: platformCoreTool('sml_attach'),
+  // Inter-agent communication
+  askConversation: platformCoreTool('ask_conversation'),
+  spawnConversation: platformCoreTool('spawn_conversation'),
 } as const;
 
 export const platformStreamsSigEventsTools = {
@@ -84,6 +87,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
+  platformCoreTools.spawnConversation,
+  platformCoreTools.askConversation,
 ];
 
 /**

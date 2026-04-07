@@ -56,4 +56,16 @@ export class ConversationsService {
       }
     );
   }
+
+  async fork({ conversationId }: { conversationId: string }): Promise<{ conversation_id: string }> {
+    return await this.http.post<{ conversation_id: string }>(
+      `${internalApiPath}/conversations/${conversationId}/fork`
+    );
+  }
+
+  async summarize({ conversationId }: { conversationId: string }): Promise<{ summary: string }> {
+    return await this.http.post<{ summary: string }>(
+      `${internalApiPath}/conversations/${conversationId}/summarize`
+    );
+  }
 }

@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -33,6 +33,7 @@ import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const INPUT_MIN_HEIGHT = '150px';
 const useInputBorderStyles = () => {
@@ -156,8 +157,28 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
+  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage, onFork } =
     useConversationContext();
+  const { conversationsService } = useAgentBuilderServices();
+  const [isForking, setIsForking] = useState(false);
+
+  const handleFork = useCallback(async () => {
+    if (!onFork) return;
+    // No active conversation yet — open a blank parallel conversation
+    if (!conversationId) {
+      onFork('');
+      return;
+    }
+    setIsForking(true);
+    try {
+      const { conversation_id: forkedId } = await conversationsService.fork({ conversationId });
+      onFork(forkedId);
+    } catch {
+      // ignore — fork silently fails; user can retry
+    } finally {
+      setIsForking(false);
+    }
+  }, [conversationId, conversationsService, onFork]);
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -273,6 +294,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
             }
           }}
           agentId={agentId}
+          onFork={onFork ? handleFork : undefined}
+          isForkLoading={isForking}
         />
       )}
     </InputContainer>

@@ -20,6 +20,22 @@ interface WorkspacePaneProps {
   canClose: boolean;
   onSplit: () => void;
   onClose: () => void;
+  onForkPane?: (forkedConversationId: string) => void;
+  onSpawnPane?: (options: {
+    initialMessage?: string;
+    forkedConversationId?: string;
+    title?: string;
+  }) => void;
+  /** Sibling pane conversation IDs and summaries for cross-pane ask_conversation awareness */
+  siblingConversations?: Array<{
+    paneId: string;
+    conversationId: string;
+    title?: string;
+    summary?: string;
+  }>;
+  initialMessage?: string;
+  autoSendInitialMessage?: boolean;
+  connectorId?: string;
 }
 
 const TOOLBAR_HEIGHT = 36;
@@ -30,6 +46,12 @@ export const WorkspacePane: React.FC<WorkspacePaneProps> = ({
   canClose,
   onSplit,
   onClose,
+  onForkPane,
+  onSpawnPane,
+  initialMessage,
+  autoSendInitialMessage,
+  connectorId,
+  siblingConversations,
 }) => {
   const { euiTheme } = useEuiTheme();
   const services = useAgentBuilderServices();
@@ -133,8 +155,28 @@ export const WorkspacePane: React.FC<WorkspacePaneProps> = ({
           services={services}
           sessionTag={`split-pane-${paneId}`}
           newConversation={false}
+          initialMessage={initialMessage}
+          autoSendInitialMessage={autoSendInitialMessage}
+          connectorId={connectorId}
           onClose={() => {}}
           ariaLabelledBy={headingId}
+          onFork={onForkPane}
+          onRoundComplete={(conversationId) => {
+            // Fire-and-forget: update the summary artifact for this pane
+            services.conversationsService
+              .summarize({ conversationId })
+              .then(({ summary }) => {
+                try {
+                  localStorage.setItem(
+                    `agentBuilder.workspace.pane.${paneId}.summary`,
+                    JSON.stringify(summary)
+                  );
+                } catch {
+                  // ignore storage errors
+                }
+              })
+              .catch(() => {});
+          }}
         />
       </div>
     </div>

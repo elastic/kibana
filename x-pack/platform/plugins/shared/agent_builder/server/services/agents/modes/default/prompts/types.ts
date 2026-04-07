@@ -14,6 +14,12 @@ import type { ProcessedConversation } from '../../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../../utils/create_result_transformer';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 
+export interface AvailableConnector {
+  id: string;
+  name: string;
+  type: string;
+}
+
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
@@ -27,6 +33,8 @@ export interface PromptFactoryParams {
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
+  /** Available LLM connectors — injected so spawn_conversation can use connector_id immediately. */
+  availableConnectors?: AvailableConnector[];
 }
 
 export interface ResearchAgentPromptRuntimeParams {

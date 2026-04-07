@@ -7,9 +7,11 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import { isToolResultEvent, platformCoreTools } from '@kbn/agent-builder-common';
 import { useLayoutContext } from '../../context/layout_context';
 import { WorkspacePane } from './workspace_pane';
 import { WorkspacePaneResizeHandle } from './workspace_pane_resize_handle';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 
 const MAX_PANES = 4;
 const STORAGE_KEY = 'agentBuilder.workspace.panes';
@@ -17,6 +19,11 @@ const STORAGE_KEY = 'agentBuilder.workspace.panes';
 interface PaneState {
   id: string;
   widthFraction: number;
+  /** Ephemeral — not persisted. Auto-sent as the first message when the pane first mounts. */
+  initialMessage?: string;
+  autoSendInitialMessage?: boolean;
+  /** Ephemeral — not persisted. Overrides the global connector for this pane's initial send. */
+  connectorId?: string;
 }
 
 const loadPanes = (): PaneState[] => {
@@ -36,7 +43,11 @@ const loadPanes = (): PaneState[] => {
 
 const savePanes = (panes: PaneState[]): void => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(panes));
+    // Only persist structural fields — omit ephemeral initialMessage so it doesn't re-fire on reload
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(panes.map(({ id, widthFraction }) => ({ id, widthFraction })))
+    );
   } catch {
     // ignore
   }
@@ -49,6 +60,26 @@ const normalise = (panes: PaneState[]): PaneState[] => {
 
 let paneCounter = Date.now();
 const nextPaneId = () => `pane-${++paneCounter}`;
+
+const readPaneConversationId = (paneId: string): string | undefined => {
+  try {
+    const stored = localStorage.getItem(
+      `agentBuilder.lastConversation.split-pane-${paneId}.default`
+    );
+    return stored ? JSON.parse(stored) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const readPaneSummary = (paneId: string): string | undefined => {
+  try {
+    const stored = localStorage.getItem(`agentBuilder.workspace.pane.${paneId}.summary`);
+    return stored ? JSON.parse(stored) : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const workspaceStyles = css`
   display: flex;
@@ -65,6 +96,7 @@ export const SplitPaneWorkspace: React.FC = () => {
   const [panes, setPanes] = useState<PaneState[]>(loadPanes);
   const containerRef = useRef<HTMLDivElement>(null);
   const { setIsCondensed } = useLayoutContext();
+  const services = useAgentBuilderServices();
 
   // Persist whenever panes change
   useEffect(() => {
@@ -91,6 +123,64 @@ export const SplitPaneWorkspace: React.FC = () => {
     });
   }, []);
 
+  const forkPane = useCallback((index: number, forkedConversationId: string) => {
+    setPanes((prev) => {
+      if (prev.length >= MAX_PANES) return prev;
+      const next = [...prev];
+      const newPaneId = nextPaneId();
+      if (forkedConversationId) {
+        // Pre-seed localStorage before the pane mounts so it restores the forked conversation.
+        // Must be JSON.stringify'd — useLocalStorage (react-use) reads via JSON.parse.
+        localStorage.setItem(
+          `agentBuilder.lastConversation.split-pane-${newPaneId}.default`,
+          JSON.stringify(forkedConversationId)
+        );
+      }
+      const half = next[index].widthFraction / 2;
+      next[index] = { ...next[index], widthFraction: half };
+      next.splice(index + 1, 0, { id: newPaneId, widthFraction: half });
+      return normalise(next);
+    });
+  }, []);
+
+  const spawnPane = useCallback(
+    ({
+      initialMessage,
+      forkedConversationId,
+      title: _title,
+      connectorId,
+    }: {
+      initialMessage?: string;
+      forkedConversationId?: string;
+      title?: string;
+      connectorId?: string;
+    }) => {
+      setPanes((prev) => {
+        if (prev.length >= MAX_PANES) return prev;
+        const newPaneId = nextPaneId();
+        if (forkedConversationId) {
+          localStorage.setItem(
+            `agentBuilder.lastConversation.split-pane-${newPaneId}.default`,
+            JSON.stringify(forkedConversationId)
+          );
+        }
+        const newFraction = 1 / (prev.length + 1);
+        const next = [
+          ...prev.map((p) => ({ ...p, widthFraction: newFraction })),
+          {
+            id: newPaneId,
+            widthFraction: newFraction,
+            initialMessage,
+            autoSendInitialMessage: !!initialMessage,
+            connectorId,
+          },
+        ];
+        return normalise(next);
+      });
+    },
+    []
+  );
+
   const closePane = useCallback((index: number) => {
     setPanes((prev) => {
       if (prev.length <= 1) return prev;
@@ -105,6 +195,26 @@ export const SplitPaneWorkspace: React.FC = () => {
       return normalise(next);
     });
   }, []);
+
+  // Listen for spawn_conversation tool results and open new panes automatically.
+  useEffect(() => {
+    const sub = services.eventsService.obs$.subscribe((event) => {
+      if (!isToolResultEvent(event)) return;
+      if (event.data.tool_id !== platformCoreTools.spawnConversation) return;
+      const result = event.data.results?.[0];
+      if (!result) return;
+      const data = result.data as Record<string, unknown> | undefined;
+      if (!data) return;
+      const initialMessage =
+        typeof data.initial_message === 'string' ? data.initial_message : undefined;
+      const title = typeof data.title === 'string' ? data.title : undefined;
+      const forkedConversationId =
+        typeof data.conversation_id === 'string' ? data.conversation_id : undefined;
+      const connectorId = typeof data.connector_id === 'string' ? data.connector_id : undefined;
+      spawnPane({ initialMessage, title, forkedConversationId, connectorId });
+    });
+    return () => sub.unsubscribe();
+  }, [services, spawnPane]);
 
   const handleFractionsChange = useCallback((newFractions: number[]) => {
     setPanes((prev) =>
@@ -125,6 +235,21 @@ export const SplitPaneWorkspace: React.FC = () => {
               canClose={panes.length > 1}
               onSplit={() => splitPane(index)}
               onClose={() => closePane(index)}
+              onForkPane={
+                panes.length < MAX_PANES ? (forkedId) => forkPane(index, forkedId) : undefined
+              }
+              onSpawnPane={panes.length < MAX_PANES ? spawnPane : undefined}
+              initialMessage={pane.initialMessage}
+              autoSendInitialMessage={pane.autoSendInitialMessage}
+              connectorId={pane.connectorId}
+              siblingConversations={panes
+                .filter((p) => p.id !== pane.id)
+                .map((p) => ({
+                  paneId: p.id,
+                  conversationId: readPaneConversationId(p.id) ?? '',
+                  summary: readPaneSummary(p.id),
+                }))
+                .filter((s) => s.conversationId !== '')}
             />
           </div>
           {index < panes.length - 1 && (

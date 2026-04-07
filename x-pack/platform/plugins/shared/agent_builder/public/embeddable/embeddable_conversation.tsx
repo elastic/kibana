@@ -21,6 +21,17 @@ import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
 import { useSendMessage } from '../application/context/send_message/send_message_context';
 import { useConversationContext } from '../application/context/conversation/conversation_context';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+import { useExternalRound } from '../application/hooks/use_external_round';
+
+/**
+ * Null-render component that subscribes to externally-triggered rounds (e.g. ask_conversation)
+ * and streams their response into this conversation's React Query cache in real time.
+ * Must be rendered inside EmbeddableConversationsProvider so it has access to the conversation context.
+ */
+const ExternalRoundWatcher: React.FC = () => {
+  useExternalRound();
+  return null;
+};
 
 /**
  * Null-render component that reports loading state and title changes upward via callbacks.
@@ -29,15 +40,23 @@ import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_
 const LoadingStateReporter: React.FC<{
   onLoadingStateChange?: (isLoading: boolean) => void;
   onTitleChange?: (title: string) => void;
-}> = ({ onLoadingStateChange, onTitleChange }) => {
+  onRoundComplete?: (conversationId: string) => void;
+}> = ({ onLoadingStateChange, onTitleChange, onRoundComplete }) => {
   const { isResponseLoading } = useSendMessage();
   const { conversationId } = useConversationContext();
   const { conversationsService } = useAgentBuilderServices();
   const prevConversationIdRef = useRef<string | undefined>(undefined);
+  const wasLoadingRef = useRef(false);
 
   useEffect(() => {
+    const wasLoading = wasLoadingRef.current;
+    wasLoadingRef.current = isResponseLoading;
     onLoadingStateChange?.(isResponseLoading);
-  }, [isResponseLoading, onLoadingStateChange]);
+    // Fire onRoundComplete on the loading true→false transition
+    if (wasLoading && !isResponseLoading && conversationId) {
+      onRoundComplete?.(conversationId);
+    }
+  }, [isResponseLoading, conversationId, onLoadingStateChange, onRoundComplete]);
 
   // When this tab's conversation ID is set or changes, fetch and report its title.
   // Using conversationId from context is per-tab — no cross-tab correlation needed.
@@ -61,7 +80,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   props
 ) => {
   const { euiTheme } = useEuiTheme();
-  const { onClose, ariaLabelledBy, onLoadingStateChange, onTitleChange } = props;
+  const { onClose, ariaLabelledBy, onLoadingStateChange, onTitleChange, onRoundComplete } = props;
 
   const wrapperStyles = css`
     display: flex;
@@ -108,9 +127,11 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
           </EuiFlyoutHeader>
           <EmbeddableWelcomeMessage />
           <EuiFlyoutBody css={bodyStyles}>
+            <ExternalRoundWatcher />
             <LoadingStateReporter
               onLoadingStateChange={onLoadingStateChange}
               onTitleChange={onTitleChange}
+              onRoundComplete={onRoundComplete}
             />
             <Conversation />
           </EuiFlyoutBody>

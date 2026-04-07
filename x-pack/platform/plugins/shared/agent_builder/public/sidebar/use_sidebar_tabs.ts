@@ -19,6 +19,11 @@ export interface SidebarTab {
   hasUnread: boolean;
   /** True while the agent is generating a response */
   isLoading: boolean;
+  /** Initial message to auto-send when the tab first mounts (used for agent-spawned conversations) */
+  initialMessage?: string;
+  autoSendInitialMessage?: boolean;
+  /** Optional connector to use for this tab's initial send (overrides global connector selection) */
+  connectorId?: string;
 }
 
 interface PersistedState {
@@ -26,7 +31,7 @@ interface PersistedState {
   activeTabId: string;
 }
 
-const generateTabId = () =>
+export const generateTabId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 export const getSessionTag = (tabId: string) => `${TAB_SESSION_PREFIX}${tabId}`;
@@ -68,10 +73,25 @@ const buildInitialTabs = (): { tabs: SidebarTab[]; activeTabId: string } => {
   };
 };
 
+export interface SpawnTabOptions {
+  /** If provided, the new tab restores this forked conversation. Otherwise starts fresh. */
+  forkedConversationId?: string;
+  /** Initial message to auto-send in the new tab. */
+  initialMessage?: string;
+  /** Custom title for the tab. */
+  title?: string;
+  /** Optional connector to use for the initial send in this tab. */
+  connectorId?: string;
+}
+
 export interface UseSidebarTabsReturn {
   tabs: SidebarTab[];
   activeTabId: string;
   addTab: () => void;
+  /** Add a tab with a specific pre-determined ID (used when forking). isNew=false means it will restore an existing conversation. */
+  addTabWithId: (id: string) => void;
+  /** Spawn a new background tab (no focus switch). Used by the agent's spawn_conversation tool. */
+  spawnTab: (options: SpawnTabOptions) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateTabTitle: (id: string, title: string) => void;
@@ -88,6 +108,18 @@ export const useSidebarTabs = (): UseSidebarTabsReturn => {
       activeTabId: nextActiveId,
     });
   }, []);
+
+  const addTabWithId = useCallback(
+    (id: string) => {
+      const forkedTab: SidebarTab = { id, title: 'New Chat', isNew: false, hasUnread: false, isLoading: false };
+      setTabsState((prev) => {
+        const next = { tabs: [...prev.tabs, forkedTab], activeTabId: id };
+        persist(next.tabs, next.activeTabId);
+        return next;
+      });
+    },
+    [persist]
+  );
 
   const addTab = useCallback(() => {
     const id = generateTabId();
@@ -162,5 +194,34 @@ export const useSidebarTabs = (): UseSidebarTabsReturn => {
     });
   }, []);
 
-  return { tabs, activeTabId, addTab, closeTab, setActiveTab, updateTabTitle, markTabDone, setTabLoading };
+  const spawnTab = useCallback(
+    ({ forkedConversationId, initialMessage, title: tabTitle, connectorId }: SpawnTabOptions) => {
+      const id = generateTabId();
+      if (forkedConversationId) {
+        localStorage.setItem(
+          `agentBuilder.lastConversation.${TAB_SESSION_PREFIX}${id}.default`,
+          JSON.stringify(forkedConversationId)
+        );
+      }
+      const spawnedTab: SidebarTab = {
+        id,
+        title: tabTitle ?? 'New Chat',
+        isNew: !forkedConversationId,
+        hasUnread: false,
+        isLoading: false,
+        initialMessage,
+        autoSendInitialMessage: !!initialMessage,
+        connectorId,
+      };
+      setTabsState((prev) => {
+        // Open in background — keep activeTabId unchanged
+        const nextTabs = [...prev.tabs, spawnedTab];
+        persist(nextTabs, prev.activeTabId);
+        return { tabs: nextTabs, activeTabId: prev.activeTabId };
+      });
+    },
+    [persist]
+  );
+
+  return { tabs, activeTabId, addTab, addTabWithId, spawnTab, closeTab, setActiveTab, updateTabTitle, markTabDone, setTabLoading };
 };

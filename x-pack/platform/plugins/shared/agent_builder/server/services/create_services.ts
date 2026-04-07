@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -47,6 +48,7 @@ export class ServiceManager {
   private services?: ServiceInstances;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
+  public inference?: InferenceServerStart;
   private readonly config: AgentBuilderConfig;
 
   constructor(config: AgentBuilderConfig) {
@@ -105,6 +107,8 @@ export class ServiceManager {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
+
+    this.inference = inference;
 
     // eslint-disable-next-line prefer-const
     let runner: Runner | undefined;

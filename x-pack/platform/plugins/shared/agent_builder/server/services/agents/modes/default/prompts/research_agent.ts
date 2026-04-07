@@ -41,6 +41,17 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
+const getConnectorsSection = (connectors: import('./types').AvailableConnector[] | undefined): string => {
+  if (!connectors || connectors.length === 0) return '';
+  const lines = connectors.map((c) => `- ${c.id}  →  ${c.name}`).join('\n');
+  return `## AVAILABLE LLM CONNECTORS (for spawn_conversation)
+When calling spawn_conversation with a specific model, use connector_id from this list directly.
+Do NOT call spawn_conversation without a connector_id first just to discover models — the list is already here.
+${lines}
+Example: user asks for "a cheap/fast model" → pick the smallest/fastest one above and pass it as connector_id immediately.
+`;
+};
+
 const getAgentSystemMessage = async ({
   configuration: {
     research: { instructions: customInstructions },
@@ -50,12 +61,15 @@ const getAgentSystemMessage = async ({
   outputSchema,
   filestore,
   experimentalFeatures,
+  availableConnectors,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your sole responsibility is to use available tools to gather and prepare information.
 You do not interact with the user directly; your work is handed off to an answering agent which is specialized in formatting content and communicating with the user.
 That answering agent will have access to the conversation history and to all information you gathered - you do not need to summarize your findings in the handover note.
+
+${getConnectorsSection(availableConnectors)}
 
 ## NON-NEGOTIABLE RULES
 1) You will execute a series of tool calls to find the required data or perform the requested task. During that phase, your output MUST be a tool call.

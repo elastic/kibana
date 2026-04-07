@@ -39,6 +39,8 @@ import {
 export interface ConversationActions {
   removeNewConversationQuery: () => void;
   invalidateConversation: () => void;
+  cancelCurrentQuery: () => void;
+  markQueryFresh: () => void;
   addOptimisticRound: ({
     userMessage,
     attachments,
@@ -130,6 +132,23 @@ const createConversationActions = ({
     },
     invalidateConversation: () => {
       queryClient.invalidateQueries({ queryKey });
+    },
+    cancelCurrentQuery: () => {
+      // Cancel any in-flight fetch for this query key so it cannot overwrite
+      // an optimistic cache update (addOptimisticRound) with stale server data.
+      queryClient.cancelQueries({ queryKey });
+    },
+    markQueryFresh: () => {
+      // After addOptimisticRound writes to the cache, staleTime:0 and refetchOnWindowFocus
+      // schedule a new background refetch that would overwrite the optimistic round with
+      // old server data. Setting updatedAt to 60s in the future marks the data as "fresh",
+      // blocking all automatic refetches until invalidateConversation() is explicitly called.
+      const current = queryClient.getQueryData<Conversation>(queryKey);
+      if (current) {
+        queryClient.setQueryData<Conversation>(queryKey, current, {
+          updatedAt: Date.now() + 60_000,
+        });
+      }
     },
 
     addOptimisticRound: ({

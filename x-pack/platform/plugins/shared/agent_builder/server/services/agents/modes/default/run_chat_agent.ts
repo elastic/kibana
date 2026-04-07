@@ -226,6 +226,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    availableConnectors: (context as Record<string, unknown>).availableConnectors as
+      | import('./prompts/types').AvailableConnector[]
+      | undefined,
   });
 
   const agentGraph = createAgentGraph({

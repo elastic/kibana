@@ -50,7 +50,21 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
+    inference,
   } = manager.deps;
+
+  // Pre-fetch available connectors so the system prompt can list them without an extra tool call.
+  let availableConnectors: Array<{ id: string; name: string; type: string }> = [];
+  try {
+    const connectors = await inference.getConnectorList(request);
+    availableConnectors = connectors.map((c) => ({
+      id: c.connectorId,
+      name: c.name,
+      type: c.type,
+    }));
+  } catch {
+    // Non-fatal — connector list is informational only
+  }
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
@@ -99,7 +113,11 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
     experimentalFeatures,
-  };
+    // Plugin-only extension: not part of the package AgentHandlerContext interface.
+    // run_chat_agent.ts reads this via (context as Record<string, unknown>).availableConnectors
+    // to inject connector info into the system prompt without requiring a discovery call.
+    availableConnectors,
+  } as AgentHandlerContext;
 };
 
 export const runAgent = async ({

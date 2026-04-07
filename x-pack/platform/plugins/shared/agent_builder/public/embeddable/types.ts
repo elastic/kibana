@@ -71,6 +71,13 @@ export interface EmbeddableConversationProps {
   attachments?: AttachmentInput[];
 
   /**
+   * Optional connector ID to use for this conversation's LLM calls.
+   * When set, overrides the globally selected connector for this pane only.
+   * Useful when spawning a conversation with a specific model (e.g. a faster/cheaper one).
+   */
+  connectorId?: string;
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
@@ -114,6 +121,17 @@ export interface EmbeddableConversationSidebarProps {
    * Useful for keeping external tab labels in sync with the conversation title.
    */
   onTitleChange?: (title: string) => void;
+  /**
+   * Called when the user clicks the fork button in the conversation input.
+   * In workspace mode this splits the current pane; in sidebar mode it opens a new tab.
+   * When undefined the fork button is hidden.
+   */
+  onFork?: (forkedConversationId: string) => void;
+  /**
+   * Called when a conversation round completes (loading transitions true→false).
+   * Receives the current conversationId so the caller can trigger a summary update.
+   */
+  onRoundComplete?: (conversationId: string) => void;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &

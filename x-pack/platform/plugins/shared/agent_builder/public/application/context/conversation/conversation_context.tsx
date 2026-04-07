@@ -27,6 +27,8 @@ interface ConversationContextValue {
   setConversationId?: (conversationId?: string) => void;
   setAgentId?: (agentId: string) => void;
   conversationActions: ConversationActions;
+  /** Opens a forked copy of this conversation (new pane in workspace, new tab in sidebar). */
+  onFork?: (forkedConversationId: string) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);
