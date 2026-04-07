@@ -10,6 +10,7 @@
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { MetricState } from '../../schema';
 import type { MetricStateNoESQL } from '../../schema/charts/metric';
+import { DEFAULT_PRIMARY_VALUE_ALIGNMENT } from '../../transforms/charts/metric/defaults';
 
 export const breakdownMetricAPIAttributes = {
   type: 'metric',
@@ -63,7 +64,6 @@ export const complexMetricAPIAttributes = {
           percentile: 95,
         },
       },
-      position: 'top',
     },
     {
       type: 'secondary',
@@ -75,15 +75,18 @@ export const complexMetricAPIAttributes = {
         palette: 'status',
         value: false,
       },
-      value: {
-        alignment: 'left',
-      },
     },
   ],
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
     limit: 5,
+  },
+  styling: {
+    primary: {
+      position: 'top',
+      value: { alignment: DEFAULT_PRIMARY_VALUE_ALIGNMENT },
+    },
   },
 } as MetricState;
 

@@ -27,9 +27,12 @@ export const getExampleLensBody = (
       operation: 'count',
       label: 'Count of records',
       empty_as_null: true,
-      labels: { alignment: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign },
-      value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign },
-      fit: false,
     },
   ],
+  styling: {
+    primary: {
+      labels: { alignment: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign },
+      value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, sizing: 'auto' },
+    },
+  },
 });

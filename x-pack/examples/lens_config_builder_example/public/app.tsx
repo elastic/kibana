@@ -59,11 +59,14 @@ export const App = (props: {
         type: 'primary',
         column: 'totalBytes',
         label: 'Total Bytes Value',
-        fit: false,
-        value: { alignment: 'left' },
-        labels: { alignment: 'left' },
       },
     ],
+    styling: {
+      primary: {
+        value: { alignment: 'left', sizing: 'auto' },
+        labels: { alignment: 'left' },
+      },
+    },
     ignore_global_filters: true,
     sampling: 1,
   } satisfies LensApiState);

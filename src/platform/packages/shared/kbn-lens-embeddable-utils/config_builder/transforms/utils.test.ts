@@ -246,11 +246,13 @@ describe('buildDatasourceStates', () => {
             type: 'primary',
             label: 'test',
             column: 'test',
-            fit: false,
-            labels: { alignment: 'left' },
-            value: { alignment: 'left' },
           },
         ],
+        styling: {
+          primary: {
+            value: { sizing: 'auto' },
+          },
+        },
         sampling: 1,
         ignore_global_filters: false,
       },
@@ -519,11 +521,13 @@ describe('filtersAndQueryToLensState', () => {
           type: 'primary',
           label: 'test',
           column: 'test',
-          fit: false,
-          labels: { alignment: 'left' },
-          value: { alignment: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
       filters: [
@@ -570,11 +574,14 @@ describe('filtersAndQueryToLensState', () => {
           type: 'primary',
           label: 'test',
           column: 'test',
-          fit: false,
-          labels: { alignment: 'left' },
-          value: { alignment: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto', alignment: 'left' },
+          labels: { alignment: 'left' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
     };
@@ -594,14 +601,17 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+          labels: { alignment: 'left' },
+        },
+      },
       metrics: [
         {
           type: 'primary',
           label: 'test',
           column: 'test',
-          fit: false,
-          labels: { alignment: 'left' },
-          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
