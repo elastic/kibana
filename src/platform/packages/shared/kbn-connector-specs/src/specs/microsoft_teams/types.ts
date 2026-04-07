@@ -99,6 +99,9 @@ export const SearchMessagesInputSchema = z.object({
     .max(25)
     .default(25)
     .describe('Number of results to return (max 25; default: 25 when omitted)'),
-  enableTopResults: z.boolean().default(false).describe('Sort results by relevance (default: false)'),
+  enableTopResults: z
+    .boolean()
+    .default(false)
+    .describe('Sort results by relevance (default: false)'),
 });
 export type SearchMessagesInput = z.infer<typeof SearchMessagesInputSchema>;
