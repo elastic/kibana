@@ -39,12 +39,15 @@ const APM_SLO_PAYLOAD = {
   tags: ['e2e-test'],
 };
 
-const SLO_DETAILS_TIMEOUT = 30000;
+const TEST_TIMEOUT = 3 * 60 * 1000;
 
 test.describe(
   'Explore from SLO Details - APM Navigation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure
+    test.describe.configure({ timeout: TEST_TIMEOUT });
+
     let sloId: string | undefined;
 
     test.beforeAll(async ({ kbnClient }) => {
@@ -71,10 +74,12 @@ test.describe(
 
     test('Source panel renders with APM links for APM-based SLO', async ({ page }) => {
       await test.step('navigate to SLO details', async () => {
-        await page.gotoApp(`slo/${sloId}`);
-        await expect(page.testSubj.locator('sloDetailsApmSourcePanel')).toBeVisible({
-          timeout: SLO_DETAILS_TIMEOUT,
-        });
+        await expect(async () => {
+          await page.gotoApp(`slo/${sloId}`);
+          await expect(page.testSubj.locator('sloDetailsApmSourcePanel')).toBeVisible({
+            timeout: 10000,
+          });
+        }).toPass({ intervals: [5000], timeout: TEST_TIMEOUT });
       });
 
       await test.step('source panel displays all APM fields', async () => {

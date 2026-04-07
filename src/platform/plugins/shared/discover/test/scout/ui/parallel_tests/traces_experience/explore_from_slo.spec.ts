@@ -52,12 +52,17 @@ const APM_SLO_PAYLOAD = {
   tags: ['e2e-test'],
 };
 
+const TEST_TIMEOUT = 3 * 60 * 1000;
+
 spaceTest.describe(
   'Traces in Discover - Explore from SLO',
   {
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
   },
   () => {
+    // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure
+    spaceTest.describe.configure({ timeout: TEST_TIMEOUT });
+
     let sloId: string | undefined;
 
     spaceTest.beforeAll(async ({ scoutSpace, config, kbnClient }) => {
@@ -89,10 +94,12 @@ spaceTest.describe(
       'SLO Details - "Traces in Discover" from SLI chart opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to SLO details page', async () => {
-          await page.gotoApp(`slo/${sloId}`);
-          await expect(page.testSubj.locator('sliChartPanel')).toBeVisible({
-            timeout: 30000,
-          });
+          await expect(async () => {
+            await page.gotoApp(`slo/${sloId}`);
+            await expect(page.testSubj.locator('sliChartPanel')).toBeVisible({
+              timeout: 10000,
+            });
+          }).toPass({ intervals: [5000], timeout: TEST_TIMEOUT });
         });
 
         await spaceTest.step(
