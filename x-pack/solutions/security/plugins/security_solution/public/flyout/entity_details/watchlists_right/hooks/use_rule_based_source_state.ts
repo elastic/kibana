@@ -77,19 +77,24 @@ export const useRuleBasedSourceState = ({
   const currentState = byType[currentType];
 
   // Core updater: patch one type, mark dirty, emit to parent form.
+  // Uses the functional updater form of setByType so that rapid calls
+  // (e.g. query + index patterns changing in the same React batch)
+  // each see the latest state instead of a stale closure value.
   const updateTypeAndEmit = useCallback(
     (type: SourceType, patch: Partial<PerTypeState>) => {
-      const next: Record<SourceType, PerTypeState> = {
-        ...byType,
-        [type]: { ...byType[type], ...patch, dirty: true },
-      };
-      setByType(next);
-      onFieldChange(
-        'entitySources',
-        buildEntitySources(next, activeToggle, isManaged, watchlistName)
-      );
+      setByType((prev) => {
+        const next: Record<SourceType, PerTypeState> = {
+          ...prev,
+          [type]: { ...prev[type], ...patch, dirty: true },
+        };
+        onFieldChange(
+          'entitySources',
+          buildEntitySources(next, activeToggle, isManaged, watchlistName)
+        );
+        return next;
+      });
     },
-    [byType, activeToggle, isManaged, watchlistName, onFieldChange]
+    [activeToggle, isManaged, watchlistName, onFieldChange]
   );
 
   const onToggleChange = useCallback(
