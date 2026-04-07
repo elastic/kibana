@@ -163,6 +163,7 @@ export function QueriesTable() {
 
   const promoteAllMutation = useMutation<{ promoted: number; skipped_stats: number }, Error>({
     mutationFn: promoteAll,
+    mutationKey: ['promoteAll'],
     onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
       const toast = getPromoteAllSuccessToast(promoted, skippedStats);
       if (toast.severity === 'info') {

@@ -112,17 +112,6 @@ export function KnowledgeIndicatorActionsCell({
     () =>
       knowledgeIndicator.kind === 'feature'
         ? [
-            <EuiContextMenuItem
-              key="feature-delete"
-              icon="trash"
-              disabled={isActionInProgress}
-              onClick={() => {
-                setIsActionsMenuOpen(false);
-                onDeleteRequest(knowledgeIndicator);
-              }}
-            >
-              {KI_ACTION_DELETE_LABEL}
-            </EuiContextMenuItem>,
             knowledgeIndicator.feature.excluded_at ? (
               <EuiContextMenuItem
                 key="feature-restore"
@@ -158,6 +147,18 @@ export function KnowledgeIndicatorActionsCell({
                 {KI_ACTION_EXCLUDE_LABEL}
               </EuiContextMenuItem>
             ),
+            <EuiContextMenuItem
+              key="feature-delete"
+              icon="trash"
+              color="danger"
+              disabled={isActionInProgress}
+              onClick={() => {
+                setIsActionsMenuOpen(false);
+                onDeleteRequest(knowledgeIndicator);
+              }}
+            >
+              {KI_ACTION_DELETE_LABEL}
+            </EuiContextMenuItem>,
           ]
         : [],
     [
@@ -197,6 +198,13 @@ export function KnowledgeIndicatorActionsCell({
     );
 
     return [
+      isStats ? (
+        <EuiToolTip key="query-promote-wrapper" content={KI_STATS_PROMOTE_DISABLED_TOOLTIP}>
+          <span>{promoteMenuItem}</span>
+        </EuiToolTip>
+      ) : (
+        promoteMenuItem
+      ),
       <EuiContextMenuItem
         key="query-delete"
         icon="trash"
@@ -207,14 +215,7 @@ export function KnowledgeIndicatorActionsCell({
         }}
       >
         {KI_ACTION_DELETE_LABEL}
-      </EuiContextMenuItem>,
-      isStats ? (
-        <EuiToolTip key="query-promote-wrapper" content={KI_STATS_PROMOTE_DISABLED_TOOLTIP}>
-          <span>{promoteMenuItem}</span>
-        </EuiToolTip>
-      ) : (
-        promoteMenuItem
-      ),
+      </EuiContextMenuItem>
     ];
   }, [isActionInProgress, knowledgeIndicator, onDeleteRequest, promoteAction, withActionLoading]);
 
