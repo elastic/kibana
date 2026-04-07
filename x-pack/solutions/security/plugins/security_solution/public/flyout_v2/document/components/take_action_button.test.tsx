@@ -16,7 +16,6 @@ import { useAlertAssigneesActions } from '../../../detections/components/alerts_
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -30,9 +29,6 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../common/hooks/is_in_security_app');
-jest.mock(
-  '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
-);
 
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
   runWorkflowMenuItem: [],
@@ -75,8 +71,6 @@ const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['tes
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
-const mockUseRunAlertWorkflowPanel = useRunAlertWorkflowPanel as jest.Mock;
-
 const defaultProps = {
   hit: createMockHit(),
   ecsData: mockEcsData,
