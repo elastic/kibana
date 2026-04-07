@@ -49,6 +49,8 @@ jest.mock('./logs_step', () => ({
   getLogsStep: () => ({ title: 'Logs', children: null }),
 }));
 
+const mockGetMLEnabled = jest.fn();
+
 const renderOverview = () =>
   renderWithI18n(
     <MemoryRouter>
@@ -58,10 +60,12 @@ const renderOverview = () =>
 
 describe('Overview', () => {
   beforeEach(() => {
+    mockGetMLEnabled.mockResolvedValue({ data: { mlEnabled: true } });
+
     mockUseAppContext.mockReturnValue({
       featureSet: { migrateSystemIndices: false },
       services: {
-        api: { getCloudStackVersionInfo: jest.fn() },
+        api: { getCloudStackVersionInfo: jest.fn(), getMLEnabled: mockGetMLEnabled },
         breadcrumbs: { setBreadcrumbs: jest.fn() },
         core: { docLinks: docLinksServiceMock.createStartContract() },
       },
@@ -152,6 +156,31 @@ describe('Overview', () => {
       const tooltip = document.querySelector('.euiToolTipPopover');
       expect(tooltip).not.toBeNull();
       expect(tooltip).toHaveTextContent('Upgrading to v9.3.2 requires v8.19.13.');
+    });
+  });
+
+  describe('Machine Learning callout', () => {
+    it('shows the ML disabled callout when ML is disabled', async () => {
+      mockGetMLEnabled.mockResolvedValue({ data: { mlEnabled: false } });
+
+      renderOverview();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mlDisabledCallout')).toBeInTheDocument();
+        expect(screen.getByTestId('mlDisabledCallout')).toHaveTextContent(
+          'Machine Learning is disabled'
+        );
+      });
+    });
+
+    it('does not show the ML disabled callout when ML is enabled', async () => {
+      mockGetMLEnabled.mockResolvedValue({ data: { mlEnabled: true } });
+
+      renderOverview();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('mlDisabledCallout')).not.toBeInTheDocument();
+      });
     });
   });
 });
