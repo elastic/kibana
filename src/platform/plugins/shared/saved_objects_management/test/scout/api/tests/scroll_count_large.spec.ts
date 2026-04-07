@@ -37,7 +37,7 @@ function generateVisualizationNdjson(startIdx: number, endIdx: number): string {
 apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentAgnostic }, () => {
   let adminCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
 
     for (const [start, end] of [
