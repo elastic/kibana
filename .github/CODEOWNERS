@@ -425,6 +425,7 @@ src/platform/packages/shared/as-code/filters-constants @elastic/kibana-presentat
 src/platform/packages/shared/as-code/filters-schema @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-presentation
 src/platform/packages/shared/as-code/shared-schemas @elastic/kibana-presentation
+src/platform/packages/shared/as-code/shared-transforms @elastic/kibana-presentation
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/chart-test-jest-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -1260,7 +1261,6 @@ x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_getting_started @elastic/search-kibana
 x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana
-x-pack/solutions/search/plugins/search_indices @elastic/search-kibana
 x-pack/solutions/search/plugins/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana

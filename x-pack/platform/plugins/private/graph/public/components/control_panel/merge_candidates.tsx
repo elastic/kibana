@@ -112,7 +112,7 @@ export const MergeCandidates = ({
             <span>
               <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="doubleArrowRight"
+                  iconType="chevronDoubleRight"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v1 }}
                   aria-label={mergeTerm1ToTerm2ButtonMsg}
@@ -129,7 +129,7 @@ export const MergeCandidates = ({
 
               <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="doubleArrowLeft"
+                  iconType="chevronDoubleLeft"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v2 }}
                   aria-label={mergeTerm2ToTerm1ButtonMsg}
