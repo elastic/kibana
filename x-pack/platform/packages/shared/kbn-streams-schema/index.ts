@@ -65,6 +65,7 @@ export {
   extractBucketColumnName,
   extractBucketIntervalMs,
   extractBucketTargetField,
+  extractStatsGroupColumns,
   extractWhereExpression,
   getFromSources,
   getStatsQueryHints,

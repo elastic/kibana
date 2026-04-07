@@ -46,6 +46,11 @@ const streamQueryBaseSchema = z.object({
   description: z.string(),
 }) satisfies z.Schema<StreamQueryBase>;
 
+/**
+ * The `type` default exists for backward compatibility with pre-migration
+ * stored documents that lack a type field. For all new writes the type MUST
+ * be derived server-side via {@link deriveQueryType} — never trust the default.
+ */
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
   type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),

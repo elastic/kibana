@@ -789,7 +789,7 @@ export class QueryClient {
         `installQueries failed during syncQueries for stream "${definition.name}". ` +
           `Attempting to uninstall partially created rules before re-throwing.`
       );
-      await this.uninstallQueries(toCreate).catch((compensateError) => {
+      await this.uninstallQueries([...toCreate, ...toUpdate]).catch((compensateError) => {
         this.dependencies.logger.error(
           `Failed to compensate after installQueries failure for stream "${definition.name}": ` +
             `${compensateError instanceof Error ? compensateError.message : String(compensateError)}`

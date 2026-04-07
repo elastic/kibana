@@ -237,6 +237,7 @@ const bulkQueriesRoute = createServerRoute({
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           validationErrors.push({ id, message });
+          continue;
         }
         typedOperations.push({
           index: { id, title, description, esql, severity_score, evidence, type: deriveQueryType(esql.query) },

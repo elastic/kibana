@@ -35,8 +35,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import { InfoPanel } from '../../../../info_panel';
@@ -111,7 +111,10 @@ export function QueryDetailsFlyout({
     setIsEditMode(false);
   };
 
-  const queryType = item.query.type ?? QUERY_TYPE_MATCH;
+  const queryType = useMemo(
+    () => (isEditMode && query.trim() ? deriveQueryType(query.trim()) : item.query.type ?? QUERY_TYPE_MATCH),
+    [isEditMode, query, item.query.type]
+  );
   const hasDetectedOccurrences = item.occurrences?.some((point) => point.y > 0) ?? false;
 
   const infoListItems = [

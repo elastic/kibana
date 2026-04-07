@@ -181,7 +181,7 @@ export function KnowledgeIndicatorActionsCell({
     const promoteMenuItem = (
       <EuiContextMenuItem
         key="query-promote"
-        icon="sortUp"
+        icon="plusInCircle"
         disabled={isPromoteDisabled}
         onClick={() =>
           withActionLoading(() =>

@@ -121,15 +121,14 @@ export class QueryService {
 
           migrated = { ...migrated, [QUERY_TYPE]: derivedType };
 
+          let metadataFailed = false;
           if (derivedType !== QUERY_TYPE_STATS) {
             try {
               migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
             } catch (metadataError) {
-              // Safe to continue: fromStorage re-derives the type from ES|QL,
-              // so the stored type value is never authoritative. The query will
-              // still work; metadata is only required for document-level alerting rules.
+              metadataFailed = true;
               this.logger.warn(
-                `ensureMetadata failed during migration for stream "${migrated[STREAM_NAME]}", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${metadataError instanceof Error ? metadataError.message : String(metadataError)}`
+                `ensureMetadata failed during migration for stream "${migrated[STREAM_NAME]}", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${metadataError instanceof Error ? metadataError.message : String(metadataError)}. Forcing rule_backed=false to prevent orphaned rule state.`
               );
             }
           }
@@ -146,11 +145,12 @@ export class QueryService {
           // Pre-existing queries were all rule-backed; back-fill the flag.
           // STATS queries (introduced alongside the type field) are never
           // rule-backed, so force false to avoid orphaned rule state.
-          // Corrupt/empty ES|QL also gets rule_backed=false as a safe default.
+          // Corrupt/empty ES|QL or failed metadata also gets rule_backed=false
+          // since the alerting rule can't function without metadata.
           if (!(RULE_BACKED in migrated)) {
             migrated = {
               ...migrated,
-              [RULE_BACKED]: !isCorruptEsql && derivedType !== QUERY_TYPE_STATS,
+              [RULE_BACKED]: !isCorruptEsql && !metadataFailed && derivedType !== QUERY_TYPE_STATS,
             };
           }
 

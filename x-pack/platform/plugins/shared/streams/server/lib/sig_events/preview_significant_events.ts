@@ -10,7 +10,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
-import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs, extractBucketTargetField, MS_PER_UNIT } from '@kbn/streams-schema';
+import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs, extractBucketTargetField, extractStatsGroupColumns, MS_PER_UNIT } from '@kbn/streams-schema';
 
 const PREVIEW_STATS_LIMIT = 10_000;
 
@@ -180,9 +180,14 @@ export async function previewSignificantEvents(
   const { scopedClusterClient, logger } = dependencies;
 
   const isStats = hasStatsCommand(esqlQuery);
-  const effectiveTimestampField = isStats
-    ? extractBucketTargetField(esqlQuery) ?? timestampField
-    : timestampField;
+  const resolvedBucketTarget = isStats ? extractBucketTargetField(esqlQuery) : null;
+  if (isStats && !resolvedBucketTarget) {
+    logger?.warn(
+      'STATS preview could not resolve a bucket target field from the ES|QL query; falling back to @timestamp. ' +
+        'Results may be incorrect if the query uses a custom temporal field.'
+    );
+  }
+  const effectiveTimestampField = resolvedBucketTarget ?? timestampField;
 
   const filter: QueryDslQueryContainer = {
     bool: {
@@ -305,6 +310,9 @@ async function previewStatsQuery(
 
   const firingCount = response.values.length;
   const truncated = firingCount >= PREVIEW_STATS_LIMIT;
+  const groupCols = extractStatsGroupColumns(esqlQuery);
+  const bucketName = extractBucketColumnName(esqlQuery);
+  const multiGroup = groupCols.filter((col) => col !== bucketName).length > 0;
 
   if (truncated) {
     logger?.warn(
@@ -312,7 +320,7 @@ async function previewStatsQuery(
     );
   }
 
-  const astBucketName = extractBucketColumnName(esqlQuery);
+  const astBucketName = bucketName;
   const bucketCol = astBucketName
     ? response.columns.find((col) => col.name === astBucketName)
     : response.columns.find((col) => col.name === '@timestamp' && col.type === 'date') ??
@@ -363,6 +371,7 @@ async function previewStatsQuery(
       occurrences,
       firing_count: firingCount,
       truncated,
+      multi_group: multiGroup || undefined,
     };
   }
 
@@ -372,5 +381,6 @@ async function previewStatsQuery(
     occurrences: [],
     firing_count: firingCount,
     truncated,
+    multi_group: multiGroup || undefined,
   };
 }

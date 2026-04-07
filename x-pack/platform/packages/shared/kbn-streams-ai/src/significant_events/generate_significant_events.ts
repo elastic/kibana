@@ -220,8 +220,10 @@ export async function generateSignificantEvents({
 
   const queries: ParsedToolQuery[] = response.input.flatMap((message) => {
     if (message.role === MessageRole.Tool && message.name === 'add_queries') {
-      return message.response.queries.flatMap(({ valid, query }) => {
-        if (!valid) return [];
+      const toolQueries = message.response?.queries;
+      if (!Array.isArray(toolQueries)) return [];
+      return toolQueries.flatMap(({ valid, query }) => {
+        if (!valid || !query?.esql) return [];
         const type: QueryType =
           query.type === QUERY_TYPE_MATCH || query.type === QUERY_TYPE_STATS
             ? query.type

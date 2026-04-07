@@ -63,6 +63,12 @@ type SignificantEventsPreviewResponse = Pick<
    * firing_count / sparkline data may be incomplete.
    */
   truncated?: boolean;
+  /**
+   * For STATS queries with multiple GROUP BY dimensions (beyond the bucket):
+   * true indicates the sparkline aggregates across entity groups, so each
+   * y-value represents firing group-cells per bucket rather than unique events.
+   */
+  multi_group?: boolean;
 };
 
 interface GeneratedSignificantEventQuery {
