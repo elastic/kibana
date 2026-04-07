@@ -185,7 +185,9 @@ export async function deployDemo({
 
   log.info(`Kibana: ${kibanaUrl}`);
   log.info(`Elasticsearch: ${elasticsearchHost}`);
-  log.info(`Logs index: ${logsIndex}`);
+  if (useVanillaCollector) {
+    log.info(`Logs index: ${logsIndex}`);
+  }
 
   await enableStreams({
     kibanaUrl,
@@ -330,7 +332,9 @@ export async function deployDemo({
         );
       }
 
-      log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
+      if (useVanillaCollector) {
+        log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
+      }
 
       if (activeScenarios.length > 0) {
         log.write(
