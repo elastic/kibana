@@ -2320,6 +2320,15 @@ components:
           items:
             type: string
           type: array
+        related_entities:
+          items:
+            type: object
+            properties:
+              entity_id:
+                type: string
+              relationship_type:
+                type: string
+          type: array
         score_type:
           description: Distinguishes base, propagated, and resolution scores.
           enum:
@@ -2989,6 +2998,9 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entityCount:
+          description: Number of entities in the watchlist
+          type: number
         entitySourceIds:
           description: List of entity source IDs associated with the watchlist
           items:

@@ -52,6 +52,7 @@ import type { EndpointAppContextService } from '../../../../endpoint/endpoint_ap
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
 import { entityStoreCrudClientMock } from '../../../entity_analytics/entity_store/entity_store_crud_client.mock';
+import { getMockRulesAuthz } from '../../rule_management/__mocks__/authz';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -203,6 +204,7 @@ const createSecuritySolutionRequestContextMock = (
     getEntityStoreApiKeyManager: jest.fn(),
     getPrivilegedUserMonitoringApiKeyManager: jest.fn(),
     getEntityStoreCrudClient: jest.fn(() => clients.entityStoreCrudClient),
+    getEntityStoreUpdateClient: jest.fn(() => clients.entityStoreCrudClient as never),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
     getPadPackageInstallationClient: jest.fn(() => clients.padPackageInstallationClient),
@@ -217,6 +219,7 @@ const createSecuritySolutionRequestContextMock = (
     getMlAuthz: jest.fn(() => ({
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
     })),
+    getRulesAuthz: jest.fn(() => getMockRulesAuthz()),
   };
 };
 

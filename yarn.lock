@@ -4719,6 +4719,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-fixture@link:x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
   version "0.0.0"
   uid ""
@@ -4872,10 +4876,6 @@
   uid ""
 
 "@kbn/automatic-import-plugin@link:x-pack/platform/plugins/shared/automatic_import":
-  version "0.0.0"
-  uid ""
-
-"@kbn/automatic-import-v2-plugin@link:x-pack/platform/plugins/shared/automatic_import_v2":
   version "0.0.0"
   uid ""
 
@@ -6359,10 +6359,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-catalog-plugin@link:x-pack/platform/plugins/shared/data_catalog":
-  version "0.0.0"
-  uid ""
-
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
@@ -6392,10 +6388,6 @@
   uid ""
 
 "@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
-  version "0.0.0"
-  uid ""
-
-"@kbn/data-sources-plugin@link:x-pack/platform/plugins/shared/data_sources":
   version "0.0.0"
   uid ""
 
@@ -6464,10 +6456,6 @@
   uid ""
 
 "@kbn/deeplinks-analytics@link:src/platform/packages/shared/deeplinks/analytics":
-  version "0.0.0"
-  uid ""
-
-"@kbn/deeplinks-data-sources@link:src/platform/packages/shared/deeplinks/data_sources":
   version "0.0.0"
   uid ""
 
@@ -8171,6 +8159,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/query-activity-plugin@link:x-pack/platform/plugins/shared/query_activity":
+  version "0.0.0"
+  uid ""
+
 "@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
   version "0.0.0"
   uid ""
@@ -8356,6 +8348,10 @@
   uid ""
 
 "@kbn/response-ops-alerts-table@link:x-pack/platform/packages/shared/response-ops/alerts-table":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-detections-close-reason@link:x-pack/platform/packages/shared/response-ops/detections-close-reason":
   version "0.0.0"
   uid ""
 
@@ -8616,10 +8612,6 @@
   uid ""
 
 "@kbn/search-index-documents@link:x-pack/platform/packages/shared/kbn-search-index-documents":
-  version "0.0.0"
-  uid ""
-
-"@kbn/search-indices@link:x-pack/solutions/search/plugins/search_indices":
   version "0.0.0"
   uid ""
 
@@ -17915,10 +17907,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@146.0.3:
-  version "146.0.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-146.0.3.tgz#546a156b5807e70263c6e9a6d5fa16ad22c5188a"
-  integrity sha512-RFhEoG3bmI+TaDm/9vDNntkxM76Sb/VIxvX3kHPzfQ3wvmE+PPSTw6gnD+Oa+dcJAc/kg/vQAwMrOUs8E1LdyQ==
+chromedriver@146.0.4:
+  version "146.0.4"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-146.0.4.tgz#7e58a376bf161600c992c0da22d276609550ded8"
+  integrity sha512-/yNqo99Xm0qgAjSh7DYy2KX6pfgyGnIM/k+2jUSc0T6CUCP5k26DWrAYU7Sy0t/dKCntMl45FDWfqP+yRWaCZQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.13.5"
