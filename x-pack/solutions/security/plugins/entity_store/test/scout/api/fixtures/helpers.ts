@@ -88,6 +88,7 @@ export const seedUserEntity = async (
   esClient: EsClient,
   { entityId, namespace, email, timestamp }: SeedUserEntityOptions
 ) => {
+  const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
     index: LATEST_ALIAS,
     id: hashEuid(entityId),
@@ -99,12 +100,16 @@ export const seedUserEntity = async (
         name: entityId,
         EngineMetadata: { Type: 'user' },
         namespace,
+        lifecycle: {
+          first_seen: ts,
+          last_seen: ts,
+        },
       },
       user: {
         email,
         name: entityId,
       },
-      '@timestamp': timestamp ?? new Date().toISOString(),
+      '@timestamp': ts,
     },
   });
 };

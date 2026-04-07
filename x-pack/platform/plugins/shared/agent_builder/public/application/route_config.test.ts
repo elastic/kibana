@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSidebarViewForRoute, getAgentIdFromPath } from './route_config';
+import { allRoutes, getSidebarViewForRoute, getAgentIdFromPath } from './route_config';
 
 describe('route_config', () => {
   describe('getSidebarViewForRoute', () => {
@@ -94,6 +94,22 @@ describe('route_config', () => {
       expect(getAgentIdFromPath('/manage/tools')).toBeUndefined();
       expect(getAgentIdFromPath('/')).toBeUndefined();
       expect(getAgentIdFromPath('/unknown')).toBeUndefined();
+    });
+  });
+
+  describe('route view ids', () => {
+    it('uses a stable prefixed viewId for every route', () => {
+      allRoutes.forEach((route) => {
+        expect(route.viewId).toBeTruthy();
+        expect(route.viewId.startsWith('agent_builder_')).toBe(true);
+      });
+    });
+
+    it('uses unique viewId values across all routes', () => {
+      const viewIds = allRoutes.map((route) => route.viewId);
+      const uniqueViewIds = new Set(viewIds);
+
+      expect(uniqueViewIds.size).toBe(viewIds.length);
     });
   });
 });
