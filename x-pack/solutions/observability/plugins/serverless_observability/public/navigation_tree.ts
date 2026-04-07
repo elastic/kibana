@@ -305,6 +305,15 @@ export const createNavigationTree = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  link: 'management:anomaly_detection',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.anomaly_detection.manage_jobs',
+                    {
+                      defaultMessage: 'Manage jobs',
+                    }
+                  ),
+                },
+                {
                   link: 'ml:anomalyExplorer',
                 },
                 {
@@ -529,6 +538,17 @@ export const createNavigationTree = ({
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],
           },
+          {
+            id: 'project_performance',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.projectSettings.projectPerformance',
+              {
+                defaultMessage: 'Project performance',
+              }
+            ),
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'management:queryActivity', badgeType: 'new' }],
+          },
           ...filterForFeatureAvailability(
             {
               id: 'machine_learning',
@@ -549,6 +569,20 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
+          {
+            id: 'model_management',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.projectSettings.modelManagement',
+              {
+                defaultMessage: 'Model Management',
+              }
+            ),
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
+            ],
+          },
           {
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
               defaultMessage: 'AI',
