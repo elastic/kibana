@@ -42,7 +42,8 @@ export const getNavCategories = (
   ];
 
   return securityClassicNavUpdate
-    ? [
+    ? categories
+    : [
         ...categories,
         {
           type: LinkCategoryType.separator,
@@ -52,6 +53,5 @@ export const getNavCategories = (
             SecurityPageName.siemMigrationsLanding,
           ],
         },
-      ]
-    : categories;
+      ];
 };
