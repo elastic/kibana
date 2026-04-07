@@ -30,6 +30,7 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
+          '--uiSettings.overrides.aiAssistant:preferredChatExperience=classic',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'preconfigured-openai': {
               name: 'preconfigured-openai',
