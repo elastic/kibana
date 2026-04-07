@@ -19,7 +19,7 @@ export interface GetNLToESQLQueryParams {
 export interface NLToESQLQueryInput {
   query: string;
   indexPattern?: string;
-  fieldsMetadata?: object;
+  knowledgeBase?: string;
 }
 
 export interface NLToESQLQueryOutput {
@@ -33,16 +33,24 @@ export const getNLToESQLQuery: NodeHelperCreator<
   NLToESQLQueryOutput
 > = ({ esqlKnowledgeBase, logger }) => {
   return async (input) => {
+    const { query, indexPattern, knowledgeBase: documentation = '' } = input;
+
     const mainPrompt = await NL_TO_ESQL_TRANSLATION_PROMPT.format({
-      nl_query: input.query,
+      nl_query: query,
     });
-    const indexPatternPrompt = await NL_TO_ESQL_INDEX_PATTERN_PROMPT.format({
-      index_pattern: input.indexPattern,
-      fields_metadata: JSON.stringify(input.fieldsMetadata ?? {}),
-    });
-    const response = await esqlKnowledgeBase.translate(
-      input.indexPattern ? `${indexPatternPrompt}\n${mainPrompt}` : mainPrompt
-    );
+
+    let finalPrompt = mainPrompt;
+
+    if (indexPattern) {
+      const indexPatternPrompt = await NL_TO_ESQL_INDEX_PATTERN_PROMPT.format({
+        index_pattern: indexPattern,
+        documentation,
+      });
+
+      finalPrompt = `${indexPatternPrompt}\n${mainPrompt}`;
+    }
+
+    const response = await esqlKnowledgeBase.translate(finalPrompt);
 
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
 

@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButton, EuiPanel, EuiFlexGroup } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   useRunWorkflow,
@@ -23,7 +23,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { AlertTriggerInput } from '@kbn/workflows-management-plugin/common/types/alert_types';
 import type { RenderingService } from '@kbn/core-rendering-browser';
-import { Loader } from '../../../../common/components/loader';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -46,6 +45,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
     services: { application, rendering },
   } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
   const { addSuccess: workflowTriggerSuccess, addError: workflowTriggerFailed } = useAppToasts();
+  const { euiTheme } = useEuiTheme();
 
   const runWorkflow = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
@@ -119,17 +119,20 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
     () => (
       <WorkflowSelector
         config={{
+          filterFunction: (workflows) => workflows.filter((w) => w.enabled),
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
-              const enabledDiff = Number(b.enabled) - Number(a.enabled);
-              if (enabledDiff !== 0) return enabledDiff;
-
               const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
               const bHasAlert = b.definition?.triggers?.some((t) => t.type === 'alert');
               if (aHasAlert && !bHasAlert) return -1;
               if (!aHasAlert && bHasAlert) return 1;
               return 0;
             }),
+          listView: true,
+          hideTopRowHeader: true,
+          hideViewWorkflowLink: true,
+          listViewMaxHeight: 240,
+          showSelectedInSearch: false,
         }}
         selectedWorkflowId={selectedId || undefined}
         onWorkflowChange={setSelectedId}
@@ -140,7 +143,25 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
 
   return (
     <>
-      <EuiPanel>{isLoading ? <Loader>{workflowSelector}</Loader> : workflowSelector}</EuiPanel>
+      <EuiPanel paddingSize={'none'} css={{ position: 'relative' }}>
+        {workflowSelector}
+        {isLoading && (
+          <div
+            css={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: euiTheme.colors.backgroundBasePlain,
+              opacity: 0.75,
+              zIndex: euiTheme.levels.header,
+            }}
+          >
+            <EuiLoadingSpinner size="m" />
+          </div>
+        )}
+      </EuiPanel>
       <EuiButton
         data-test-subj="execute-alert-workflow-button"
         fullWidth
@@ -156,6 +177,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
 
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
+export const RUN_WORKFLOWS_PANEL_WIDTH = 400;
 
 export interface UseRunAlertWorkflowPanelProps {
   /** ECS document for the selected alert row. */
@@ -202,6 +224,7 @@ export const useRunAlertWorkflowPanel = ({
         id: RUN_WORKFLOW_PANEL_ID,
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'alert-workflow-context-menu-panel',
+        width: RUN_WORKFLOWS_PANEL_WIDTH,
         content: (
           <AlertWorkflowsPanel
             alertIds={[{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }]}

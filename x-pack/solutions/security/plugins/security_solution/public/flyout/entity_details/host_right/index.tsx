@@ -54,6 +54,9 @@ import {
   type IdentityFields,
 } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
+import { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
+
+export { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID };
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -75,8 +78,6 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
-export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPanelRiskScoreQuery';
-export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPanelObservedHostQuery';
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -233,6 +234,10 @@ export const HostPanel = ({
     [http, queryClient, calculateEntityRiskScore]
   );
 
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? observedHost.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
     entityId: panelDisplayEntityId,
@@ -243,16 +248,26 @@ export const HostPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
     contextID: safeContextID,
+    entityStoreEntityId,
   });
 
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts)
+      return EntityDetailsLeftPanelTab.CSP_INSIGHTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+    entityStoreEntityId,
+  ]);
+
   const openDefaultPanel = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      }),
-    [isRiskScoreExist, openDetailsPanel]
+    () => openDetailsPanel({ tab: defaultTab }),
+    [openDetailsPanel, defaultTab]
   );
 
   const noEntityInStore =
@@ -265,7 +280,8 @@ export const HostPanel = ({
           isRiskScoreExist ||
           hasMisconfigurationFindings ||
           hasVulnerabilitiesFindings ||
-          hasNonClosedAlerts
+          hasNonClosedAlerts ||
+          !!entityStoreEntityId
         }
         expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}
@@ -274,7 +290,8 @@ export const HostPanel = ({
       <HostPanelHeader
         hostName={hostName}
         lastSeen={observedHost.lastSeen}
-        entityId={entityStoreV2Enabled ? panelDisplayEntityId : undefined}
+        entityId={panelDisplayEntityId}
+        identityFields={documentEntityIdentifiers}
       />
       {noEntityInStore && (
         <EuiCallOut
@@ -307,6 +324,7 @@ export const HostPanel = ({
             : undefined
         }
         skipRiskAndCriticality={noEntityInStore}
+        entityStoreEntityId={entityStoreEntityId}
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter

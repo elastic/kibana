@@ -20,6 +20,12 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
+import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+
+jest.mock('@kbn/discover-utils', () => ({
+  DiscoverFlyouts: { metricInsights: 'metricInsights' },
+  dismissAllFlyoutsExceptFor: jest.fn(),
+}));
 
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -384,6 +390,34 @@ describe('MetricsGrid', () => {
         expect(gridCells[1]).toHaveAttribute('tabindex', '0');
         expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
       });
+    });
+  });
+
+  describe('flyout dismissal on view details', () => {
+    it('should call dismissAllFlyoutsExceptFor with metricInsights when handleViewDetails is triggered', () => {
+      renderMetricsGrid();
+
+      // Get the onViewDetails callback passed to the first Chart
+      const chartCalls = (Chart as jest.Mock).mock.calls;
+      expect(chartCalls.length).toBeGreaterThan(0);
+
+      const firstChartProps = chartCalls[0][0];
+      expect(firstChartProps.onViewDetails).toBeDefined();
+
+      // Clear mock to isolate calls from handleViewDetails vs flyout mount useEffect
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
+
+      // Trigger the onViewDetails callback
+      act(() => {
+        firstChartProps.onViewDetails();
+      });
+
+      // Verify dismissAllFlyoutsExceptFor was called from handleViewDetails
+      // AND from the flyout's useEffect on mount (2 calls total).
+      // The first call is the early dismissal in handleViewDetails (before flyout mounts),
+      // the second is the safety-net useEffect inside MetricInsightsFlyout.
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(2);
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
     });
   });
 });

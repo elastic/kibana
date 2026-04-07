@@ -19,7 +19,10 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
+import type {
+  DashboardInitializationState,
+  DashboardInternalApi,
+} from '@kbn/dashboard-plugin/public/dashboard_api/types';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
@@ -29,9 +32,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<
-  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
->({});
+const initialInput = new BehaviorSubject<DashboardInitializationState>({});
 
 const DashboardRendererComponent = ({
   canReadDashboard,

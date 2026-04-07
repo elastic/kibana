@@ -113,9 +113,11 @@ const gaugeStateMetricOptionsSchema = {
     )
   ),
   /**
-   * Sub title
+   * Subtitle
    */
-  sub_title: schema.maybe(schema.string({ meta: { description: 'Sub title' } })),
+  subtitle: schema.maybe(
+    schema.string({ meta: { description: 'Subtitle below the gauge value' } })
+  ),
   /**
    * Color configuration
    */

@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { Request, Response } from '@kbn/core-di-server';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 
 @injectable()
-export class BulkEnableRulesRoute {
+export class BulkEnableRulesRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_enable`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk_enable`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = {
-    access: 'internal',
+  static routeOptions = {
     summary: 'Enable rules in bulk',
-    tags: ['oas-tag:alerting-v2'],
   } as const;
   static validate = {
     request: {
@@ -47,25 +45,21 @@ export class BulkEnableRulesRoute {
     },
   };
 
+  protected readonly routeName = 'bulk enable rules';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, BulkOperationParams>,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const { ids, filter } = this.request.body;
-      const params = ids ? { ids } : { filter: filter ?? '' };
-      const result = await this.rulesClient.bulkEnableRules(params);
-      return this.response.ok({ body: result });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  protected async execute() {
+    const { ids, filter } = this.request.body;
+    const params = ids ? { ids } : { filter: filter ?? '' };
+    const result = await this.rulesClient.bulkEnableRules(params);
+    return this.ctx.response.ok({ body: result });
   }
 }

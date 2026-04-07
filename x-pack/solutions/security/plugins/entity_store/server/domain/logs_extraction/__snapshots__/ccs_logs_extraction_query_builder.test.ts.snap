@@ -8,6 +8,11 @@ FROM remote:metrics-*
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(event.module),
+ _src_entity_source1 = MV_FIRST(event.dataset),
+ _src_entity_source2 = MV_FIRST(data_stream.dataset),
+ _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL entity.id = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\"), host.name,
 (host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
@@ -58,7 +63,6 @@ FROM remote:metrics-*
  agent.id = LAST(TO_STRING(agent.id), @timestamp) WHERE agent.id IS NOT NULL,
  agent.type = LAST(TO_STRING(agent.type), @timestamp) WHERE agent.type IS NOT NULL,
  endpoint.id = LAST(TO_STRING(endpoint.id), @timestamp) WHERE endpoint.id IS NOT NULL,
- entity.source = LAST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
  asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
  asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
  asset.owner = LAST(TO_STRING(asset.owner), @timestamp) WHERE asset.owner IS NOT NULL,
@@ -71,7 +75,10 @@ FROM remote:metrics-*
  entity.risk.calculated_level = LAST(TO_STRING(host.risk.calculated_level), @timestamp) WHERE host.risk.calculated_level IS NOT NULL,
  entity.risk.calculated_score = LAST(TO_DOUBLE(host.risk.calculated_score), @timestamp) WHERE host.risk.calculated_score IS NOT NULL,
  entity.risk.calculated_score_norm = LAST(TO_DOUBLE(host.risk.calculated_score_norm), @timestamp) WHERE host.risk.calculated_score_norm IS NOT NULL,
- entity.source = LAST(TO_STRING(host.entity.source), @timestamp) WHERE host.entity.source IS NOT NULL,
+ event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
+ event.dataset = MV_DEDUPE(TOP(TO_STRING(event.dataset), 10)) WHERE event.dataset IS NOT NULL,
+ data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE data_stream.dataset IS NOT NULL,
+ entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE entity.source IS NOT NULL,
  entity.type = LAST(TO_STRING(host.entity.type), @timestamp) WHERE host.entity.type IS NOT NULL,
  entity.sub_type = LAST(TO_STRING(host.entity.sub_type), @timestamp) WHERE host.entity.sub_type IS NOT NULL,
  entity.url = LAST(TO_STRING(host.entity.url), @timestamp) WHERE host.entity.url IS NOT NULL,
@@ -84,7 +91,7 @@ FROM remote:metrics-*
  entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE host.entity.lifecycle.last_activity IS NOT NULL,
  entity.behaviors.rule_names = MV_DEDUPE(TOP(TO_STRING(host.entity.behaviors.rule_names), 100)) WHERE host.entity.behaviors.rule_names IS NOT NULL,
  entity.behaviors.anomaly_job_ids = MV_DEDUPE(TOP(TO_STRING(host.entity.behaviors.anomaly_job_ids), 100)) WHERE host.entity.behaviors.anomaly_job_ids IS NOT NULL,
- entity.relationships.communicates_with = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with), 10)) WHERE host.entity.relationships.communicates_with IS NOT NULL,
+ entity.relationships.communicates_with = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.communicates_with), 50)) WHERE host.entity.relationships.communicates_with IS NOT NULL,
  entity.relationships.depends_on = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.depends_on), 10)) WHERE host.entity.relationships.depends_on IS NOT NULL,
  entity.relationships.owns_inferred = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.owns_inferred), 10)) WHERE host.entity.relationships.owns_inferred IS NOT NULL,
  entity.relationships.accesses_infrequently = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.accesses_infrequently), 10)) WHERE host.entity.relationships.accesses_infrequently IS NOT NULL,
@@ -102,6 +109,8 @@ cloud*,
 agent*,
 endpoint*,
 asset*,
+event*,
+data_stream*,
 @timestamp
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, entity.id ASC
 | LIMIT 5000"
@@ -115,12 +124,15 @@ FROM remote:logs-*
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND ((\`event.kind\` IS NULL OR \`event.kind\` != \\"enrichment\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")) AND (NOT(\`entity.id\` IS NULL) OR MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\")) OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")))
-| EVAL _src_entity_namespace0 = MV_FIRST(event.module),
+| EVAL _src_entity_source0 = MV_FIRST(event.module),
+ _src_entity_source1 = MV_FIRST(event.dataset),
+ _src_entity_source2 = MV_FIRST(data_stream.dataset),
+ _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
+ _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", _src_entity_namespace)
-| EVAL entity.namespace = CASE((NOT (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\"))) AND NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")), \\"local\\", entity.namespace),
-    entity.confidence = CASE((NOT (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\"))) AND NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")), \\"medium\\", entity.confidence)
+ entity.namespace = CASE((_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")), \\"local\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
 | EVAL entity.id = CONCAT(\\"user:\\", CASE((\`entity.namespace\` == \\"local\\"), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
 true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
@@ -130,8 +142,6 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     entity.name = LAST(TO_STRING(entity.name), @timestamp) WHERE entity.name IS NOT NULL,
- event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
- data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE data_stream.dataset IS NOT NULL,
  event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
  event.category = MV_DEDUPE(TOP(TO_STRING(event.category), 10)) WHERE event.category IS NOT NULL,
  event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
@@ -148,7 +158,6 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  user.group.domain = MV_DEDUPE(TOP(TO_STRING(user.group.domain), 10)) WHERE user.group.domain IS NOT NULL,
  user.group.id = MV_DEDUPE(TOP(TO_STRING(user.group.id), 10)) WHERE user.group.id IS NOT NULL,
  user.group.name = MV_DEDUPE(TOP(TO_STRING(user.group.name), 10)) WHERE user.group.name IS NOT NULL,
- entity.source = LAST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
  asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
  asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
  asset.owner = LAST(TO_STRING(asset.owner), @timestamp) WHERE asset.owner IS NOT NULL,
@@ -161,7 +170,10 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  entity.risk.calculated_level = LAST(TO_STRING(user.risk.calculated_level), @timestamp) WHERE user.risk.calculated_level IS NOT NULL,
  entity.risk.calculated_score = LAST(TO_DOUBLE(user.risk.calculated_score), @timestamp) WHERE user.risk.calculated_score IS NOT NULL,
  entity.risk.calculated_score_norm = LAST(TO_DOUBLE(user.risk.calculated_score_norm), @timestamp) WHERE user.risk.calculated_score_norm IS NOT NULL,
- entity.source = LAST(TO_STRING(user.entity.source), @timestamp) WHERE user.entity.source IS NOT NULL,
+ event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
+ event.dataset = MV_DEDUPE(TOP(TO_STRING(event.dataset), 10)) WHERE event.dataset IS NOT NULL,
+ data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE data_stream.dataset IS NOT NULL,
+ entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE entity.source IS NOT NULL,
  entity.type = LAST(TO_STRING(user.entity.type), @timestamp) WHERE user.entity.type IS NOT NULL,
  entity.sub_type = LAST(TO_STRING(user.entity.sub_type), @timestamp) WHERE user.entity.sub_type IS NOT NULL,
  entity.url = LAST(TO_STRING(user.entity.url), @timestamp) WHERE user.entity.url IS NOT NULL,
@@ -174,7 +186,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  entity.lifecycle.last_activity = LAST(TO_DATETIME(user.entity.lifecycle.last_activity), @timestamp) WHERE user.entity.lifecycle.last_activity IS NOT NULL,
  entity.behaviors.rule_names = MV_DEDUPE(TOP(TO_STRING(user.entity.behaviors.rule_names), 100)) WHERE user.entity.behaviors.rule_names IS NOT NULL,
  entity.behaviors.anomaly_job_ids = MV_DEDUPE(TOP(TO_STRING(user.entity.behaviors.anomaly_job_ids), 100)) WHERE user.entity.behaviors.anomaly_job_ids IS NOT NULL,
- entity.relationships.communicates_with = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.communicates_with), 10)) WHERE user.entity.relationships.communicates_with IS NOT NULL,
+ entity.relationships.communicates_with = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.communicates_with), 50)) WHERE user.entity.relationships.communicates_with IS NOT NULL,
  entity.relationships.depends_on = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.depends_on), 10)) WHERE user.entity.relationships.depends_on IS NOT NULL,
  entity.relationships.owns_inferred = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.owns_inferred), 10)) WHERE user.entity.relationships.owns_inferred IS NOT NULL,
  entity.relationships.accesses_infrequently = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.accesses_infrequently), 10)) WHERE user.entity.relationships.accesses_infrequently IS NOT NULL,
@@ -193,11 +205,12 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\" AND NOT (NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\")), TO_STRING(user.name), entity.name)
 | EVAL entity.name = CASE((\`entity.namespace\` != \\"local\\"), TO_STRING(user.name), entity.name),
     entity.confidence = CASE((\`entity.namespace\` != \\"local\\"), \\"high\\", entity.confidence)
+| EVAL entity.confidence = CASE((\`entity.namespace\` == \\"local\\"), \\"medium\\", entity.confidence)
 | KEEP entity*,
 event*,
-data_stream*,
 user*,
 asset*,
+data_stream*,
 host*,
 @timestamp
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, entity.id ASC
@@ -215,13 +228,21 @@ FROM remote_cluster:logs-*
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
+| EVAL _src_entity_source0 = MV_FIRST(event.module),
+ _src_entity_source1 = MV_FIRST(event.dataset),
+ _src_entity_source2 = MV_FIRST(data_stream.dataset),
+ _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL entity.id = entity.id
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     entity.id = LAST(TO_STRING(entity.id), @timestamp) WHERE entity.id IS NOT NULL,
  entity.name = LAST(TO_STRING(entity.name), @timestamp) WHERE entity.name IS NOT NULL,
- entity.source = LAST(TO_STRING(entity.source), @timestamp) WHERE entity.source IS NOT NULL,
+ event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
+ event.dataset = MV_DEDUPE(TOP(TO_STRING(event.dataset), 10)) WHERE event.dataset IS NOT NULL,
+ data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE data_stream.dataset IS NOT NULL,
+ entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE entity.source IS NOT NULL,
  entity.type = LAST(TO_STRING(entity.type), @timestamp) WHERE entity.type IS NOT NULL,
  entity.sub_type = LAST(TO_STRING(entity.sub_type), @timestamp) WHERE entity.sub_type IS NOT NULL,
  entity.url = LAST(TO_STRING(entity.url), @timestamp) WHERE entity.url IS NOT NULL,
@@ -234,7 +255,7 @@ FROM remote_cluster:logs-*
  entity.lifecycle.last_activity = LAST(TO_DATETIME(entity.lifecycle.last_activity), @timestamp) WHERE entity.lifecycle.last_activity IS NOT NULL,
  entity.behaviors.rule_names = MV_DEDUPE(TOP(TO_STRING(entity.behaviors.rule_names), 100)) WHERE entity.behaviors.rule_names IS NOT NULL,
  entity.behaviors.anomaly_job_ids = MV_DEDUPE(TOP(TO_STRING(entity.behaviors.anomaly_job_ids), 100)) WHERE entity.behaviors.anomaly_job_ids IS NOT NULL,
- entity.relationships.communicates_with = MV_DEDUPE(TOP(TO_STRING(entity.relationships.communicates_with), 10)) WHERE entity.relationships.communicates_with IS NOT NULL,
+ entity.relationships.communicates_with = MV_DEDUPE(TOP(TO_STRING(entity.relationships.communicates_with), 50)) WHERE entity.relationships.communicates_with IS NOT NULL,
  entity.relationships.depends_on = MV_DEDUPE(TOP(TO_STRING(entity.relationships.depends_on), 10)) WHERE entity.relationships.depends_on IS NOT NULL,
  entity.relationships.owns_inferred = MV_DEDUPE(TOP(TO_STRING(entity.relationships.owns_inferred), 10)) WHERE entity.relationships.owns_inferred IS NOT NULL,
  entity.relationships.accesses_infrequently = MV_DEDUPE(TOP(TO_STRING(entity.relationships.accesses_infrequently), 10)) WHERE entity.relationships.accesses_infrequently IS NOT NULL,
@@ -271,7 +292,6 @@ FROM remote_cluster:logs-*
  orchestrator.resource.parent.type = LAST(TO_STRING(orchestrator.resource.parent.type), @timestamp) WHERE orchestrator.resource.parent.type IS NOT NULL,
  orchestrator.resource.type = LAST(TO_STRING(orchestrator.resource.type), @timestamp) WHERE orchestrator.resource.type IS NOT NULL,
  orchestrator.type = LAST(TO_STRING(orchestrator.type), @timestamp) WHERE orchestrator.type IS NOT NULL,
- entity.source = LAST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
  asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
  asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
  asset.owner = LAST(TO_STRING(asset.owner), @timestamp) WHERE asset.owner IS NOT NULL,
@@ -286,6 +306,8 @@ FROM remote_cluster:logs-*
  entity.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.risk.calculated_score_norm), @timestamp) WHERE entity.risk.calculated_score_norm IS NOT NULL
     BY entity.id
 | KEEP entity*,
+event*,
+data_stream*,
 cloud*,
 orchestrator*,
 asset*,

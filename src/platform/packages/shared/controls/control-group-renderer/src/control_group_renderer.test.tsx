@@ -14,7 +14,7 @@ import {
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
-import type { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { act, render, waitFor } from '@testing-library/react';
 
 import { BehaviorSubject } from 'rxjs';
@@ -44,13 +44,13 @@ const getTestEmbeddableFactory = () =>
         serializeState: () => ({
           selection: initialState.selection,
         }),
+        applySerializedState: jest.fn(),
       });
       return {
         Component: () => <div data-test-subj="testControl">{initialState.selection}</div>,
         api: {
           ...api,
           hasUnsavedChanges$: new BehaviorSubject(false),
-          resetUnsavedChanges: jest.fn(),
         },
       };
     },
@@ -87,7 +87,7 @@ describe('control group renderer', () => {
     return { component, api: controlGroupApi! as ControlGroupRendererApi };
   };
 
-  test('calling `updateInput` forces each child to be reset', async () => {
+  test('calling `updateInput` applies the updated child state', async () => {
     const { api } = await mountControlGroupRenderer({
       getCreationOptions: jest.fn().mockResolvedValue({
         initialState: {
@@ -99,9 +99,9 @@ describe('control group renderer', () => {
         },
       }),
     });
-    const resetSpy = jest.spyOn(
-      api.children$.getValue().test as PublishesUnsavedChanges,
-      'resetUnsavedChanges'
+    const applySpy = jest.spyOn(
+      api.children$.getValue().test as HasSerializableState,
+      'applySerializedState'
     );
     act(() =>
       api.updateInput({
@@ -114,7 +114,10 @@ describe('control group renderer', () => {
       })
     );
 
-    expect(resetSpy).toBeCalledTimes(1);
+    expect(applySpy).toBeCalledWith({
+      type: 'testControl',
+      selection: 'test selection',
+    });
   });
 
   test('filter changes are dispatched to control parent API if they are different', async () => {

@@ -59,7 +59,7 @@ export const AuthorFilterButton: React.FC<AuthorFilterButtonProps> = React.memo(
     const triggerButton = (
       <EuiFilterButton
         grow
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={() => {
           setIsPopoverOpen(!isPopoverOpen);
         }}

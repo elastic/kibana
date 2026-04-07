@@ -244,6 +244,9 @@ export const topNavStrings = {
     description: i18n.translate('dashboard.topNave.exportConfigDescription', {
       defaultMessage: 'Export dashboard',
     }),
+    jsonLabel: i18n.translate('dashboard.topNave.exportJsonButtonAriaLabel', {
+      defaultMessage: 'Export JSON',
+    }),
     pngLabel: i18n.translate('dashboard.topNave.exportPngButtonAriaLabel', {
       defaultMessage: 'PNG reports',
     }),

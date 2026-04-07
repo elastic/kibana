@@ -5,62 +5,61 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { IndexStorageSettings, InternalIStorageClient } from '@kbn/storage-adapter';
-import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ConversationRound, VersionedAttachment } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 
-const conversationIndexName = chatSystemIndex('conversations');
+const CONVERSATION_INDEX_ALIAS = chatSystemIndex('conversations');
 
-// Must match agent_builder's conversation storage schema exactly so both plugins
-// write to the same concrete index (StorageIndexAdapter hashes the schema).
-const storageSettings = {
-  name: conversationIndexName,
-  schema: {
-    properties: {
-      user_id: types.keyword({}),
-      user_name: types.keyword({}),
-      agent_id: types.keyword({}),
-      space: types.keyword({}),
-      title: types.text({}),
-      created_at: types.date({}),
-      updated_at: types.date({}),
-      conversation_rounds: types.object({ dynamic: false, properties: {} }),
-      attachments: types.object({ dynamic: false, properties: {} }),
-      state: types.object({ dynamic: false, properties: {} }),
-    },
-  },
-} satisfies IndexStorageSettings;
-
+/**
+ * The Elasticsearch document shape for conversations, matching the schema
+ * that agent_builder reads and writes. Tool call results within rounds
+ * must be serialized to JSON strings before storage.
+ */
 export interface ConversationDocument {
-  _id?: string;
   user_id?: string;
-  user_name?: string;
-  agent_id?: string;
-  space?: string;
-  title?: string;
-  created_at?: string;
-  updated_at?: string;
-  conversation_rounds?: unknown[];
-  attachments?: unknown[];
+  user_name: string;
+  agent_id: string;
+  space: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  conversation_rounds: ConversationRound[];
+  attachments?: VersionedAttachment[];
   state?: Record<string, unknown>;
 }
 
-type ConversationStorageSettings = typeof storageSettings;
+/**
+ * Creates a thin conversation client that reads/writes directly to the
+ * agent_builder conversation index alias. This avoids duplicating the
+ * StorageIndexAdapter schema — agent_builder owns the index lifecycle,
+ * and elastic_console piggybacks on the alias it creates.
+ */
+export const createConversationClient = (esClient: ElasticsearchClient) => ({
+  /** Check whether the backing index exists (alias is resolvable). */
+  indexExists: async (): Promise<boolean> => {
+    return esClient.indices.existsAlias({ name: CONVERSATION_INDEX_ALIAS });
+  },
 
-export type ConversationStorageClient = InternalIStorageClient<ConversationDocument>;
+  search: (params: Omit<SearchRequest, 'index'>) =>
+    esClient.search<ConversationDocument>({ ...params, index: CONVERSATION_INDEX_ALIAS }),
 
-export const createConversationStorage = ({
-  esClient,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}): ConversationStorageClient => {
-  const adapter = new StorageIndexAdapter<ConversationStorageSettings, ConversationDocument>(
-    esClient,
-    logger,
-    storageSettings
-  );
-  return adapter.getClient();
-};
+  index: (params: { id: string; document: ConversationDocument }) =>
+    esClient.index({
+      index: CONVERSATION_INDEX_ALIAS,
+      id: params.id,
+      document: params.document,
+      require_alias: true,
+    }),
+
+  get: (params: { id: string }) =>
+    esClient.search<ConversationDocument>({
+      index: CONVERSATION_INDEX_ALIAS,
+      size: 1,
+      terminate_after: 1,
+      query: { term: { _id: params.id } },
+    }),
+});
+
+export type ConversationClient = ReturnType<typeof createConversationClient>;

@@ -258,8 +258,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         // TODO Handle data view without time fields.
         timeFieldName: dataView.timeFieldName ?? '',
         index: dataView.getIndexPattern(),
-        // Temporarily disable grouping until https://github.com/elastic/kibana/issues/232849 is resolved.
-        grouping: false,
+        grouping: true,
         flushFix: true,
         // If analysis type is `spike`, pass on window parameters as is,
         // if it's `dip`, swap baseline and deviation.

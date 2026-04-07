@@ -58,6 +58,7 @@ disabled:
 
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
+  - x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts
   - x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts
 
 defaultQueue: 'n2-4-spot'
@@ -190,6 +191,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group14/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group15/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group16/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
@@ -477,9 +479,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/watcher/config.ts
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
-  - x-pack/platform/test/automatic_import_api_integration/apis/config_basic.ts
-  - x-pack/platform/test/automatic_import_api_integration/apis/config_graphs.ts
-  - x-pack/platform/test/automatic_import_v2_api_integration/configs/config.stateful.ts
+  - x-pack/platform/test/automatic_import_api_integration/configs/config.stateful.ts
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
@@ -492,4 +492,6 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
     # stateful config files that run deployment-agnostic tests
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
+  - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.alerting_v2.stateful.config.ts

@@ -24,6 +24,7 @@ export const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector
   actionTypeId: connector.type,
   config: connector.config,
   secrets: {},
+  isEis: connector.isEis,
   isPreconfigured: connector.isPreconfigured,
   isSystemAction: false,
   isDeprecated: connector.isDeprecated ?? false,

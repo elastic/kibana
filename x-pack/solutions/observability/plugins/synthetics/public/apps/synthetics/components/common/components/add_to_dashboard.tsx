@@ -139,7 +139,7 @@ export const AddToDashboard = ({
             <EuiButtonIcon
               color="text"
               data-test-subj="syntheticsEmbeddablePanelWrapperButton"
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               aria-label={i18n.translate(
                 'xpack.synthetics.embeddablePanelWrapper.shareButtonAriaLabel',

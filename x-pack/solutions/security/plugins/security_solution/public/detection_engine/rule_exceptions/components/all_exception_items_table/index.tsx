@@ -30,6 +30,7 @@ import {
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
@@ -505,18 +506,53 @@ const ExceptionsViewerComponent = ({
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
-  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
-  const hasUserOptedInForPerPolicyUse = true;
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
-  const showEndpointExceptionsMovedCallout =
-    isEndpointExceptionsMovedFFEnabled &&
-    (isEndpointSecurityRule ||
-      (isDetectionRuleWithEndpointExceptions && !hasUserOptedInForPerPolicyUse));
+  const endpointExceptionsMovedCallout = useMemo(() => {
+    if (!isEndpointExceptionsMovedFFEnabled) {
+      return null;
+    }
 
-  const showEndpointExceptionNoLongerEvaluatedCallout =
-    isEndpointExceptionsMovedFFEnabled &&
-    isDetectionRuleWithEndpointExceptions &&
-    hasUserOptedInForPerPolicyUse;
+    if (
+      isEndpointSecurityRule &&
+      (endpointPerPolicyOptIn?.status === false || endpointPerPolicyOptIn?.reason === 'userOptedIn')
+    ) {
+      return (
+        <EndpointExceptionsMovedCallout
+          id="exceptionsViewer-EndpointSecurityRule"
+          dismissable={false}
+          title="moved"
+        />
+      );
+    }
+
+    if (isDetectionRuleWithEndpointExceptions) {
+      if (endpointPerPolicyOptIn?.status === false) {
+        return (
+          <EndpointExceptionsMovedCallout
+            id="exceptionsViewer-rulesWithEndpointExceptions-NotOptedIn"
+            dismissable={false}
+            title="moved"
+          />
+        );
+      } else if (endpointPerPolicyOptIn?.reason === 'userOptedIn') {
+        return (
+          <EndpointExceptionsMovedCallout
+            id={`exceptionsViewer-rulesWithEndpointExceptions-UserOptedIn`}
+            dismissable={true}
+            title="noLongerEvaluatedOnRules"
+          />
+        );
+      }
+    }
+
+    return null;
+  }, [
+    isEndpointExceptionsMovedFFEnabled,
+    isEndpointSecurityRule,
+    endpointPerPolicyOptIn,
+    isDetectionRuleWithEndpointExceptions,
+  ]);
 
   return (
     <>
@@ -549,20 +585,7 @@ const ExceptionsViewerComponent = ({
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
-          {showEndpointExceptionsMovedCallout && (
-            <EndpointExceptionsMovedCallout
-              id="exceptionsViewer-EndpointSecurityRule"
-              dismissable={false}
-              title="moved"
-            />
-          )}
-          {showEndpointExceptionNoLongerEvaluatedCallout && (
-            <EndpointExceptionsMovedCallout
-              id={`exceptionsViewer-rulesWithEndpointExceptions`}
-              dismissable={true}
-              title="noLongerEvaluatedOnRules"
-            />
-          )}
+          {endpointExceptionsMovedCallout}
 
           <StyledText size="s">
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
