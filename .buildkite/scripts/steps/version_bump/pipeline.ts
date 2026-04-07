@@ -42,9 +42,36 @@ const BUMP_TYPE = process.env.WORKFLOW;
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
     }
 
-    if (BUMP_TYPE === 'minor') {
-      // TODO: Implement minor bump workflow
-      console.error('Minor bump workflow is not yet implemented');
+    if (BUMP_TYPE === 'minor' || BUMP_TYPE === 'major') {
+      // Step 1: Trigger ES build and promote on main (synchronous)
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/version_bump/trigger_es_build_and_promote.yml', false)
+      );
+
+      // Step 2: Wait for ES build, then bump package.json on main
+      pipeline.push('  - wait');
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_main.yml')
+      );
+
+      // Step 3: Wait, then bump versions.json and .backportrc.json on main
+      pipeline.push('  - wait');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
+
+      // Step 4: Wait, then create the new release branch off main
+      pipeline.push('  - wait');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/create_new_branch.yml'));
+
+      // Step 5: Wait, then trigger DRA snapshot and staging on main (synchronous),
+      //         and update the release branch config (remove CODEOWNERS, set branch field)
+      pipeline.push('  - wait');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
+
+      // Step 6: Wait, then ensure the version label exists for the new version
+      pipeline.push('  - wait');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/ensure_version_label.yml'));
     }
 
     emitPipeline(pipeline);

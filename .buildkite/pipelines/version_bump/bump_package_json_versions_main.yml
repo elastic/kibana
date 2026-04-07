@@ -1,0 +1,6 @@
+steps:
+  - name: 'Bump package.json versions (main)'
+    key: bump-package-json-versions-main
+    command: .buildkite/scripts/steps/version_bump/bump_package_json_versions.sh
+    env:
+      PR_BASE_BRANCH: main
