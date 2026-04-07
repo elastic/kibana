@@ -359,6 +359,28 @@ const textAttachmentType: AttachmentTypeDefinition = {
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
 for the full list of available configuration options.
 
+#### `getAgentDescription` — describing inline rendering to the agent
+
+When your attachment type supports inline rendering, `getAgentDescription` should tell
+the agent **what** it looks like when rendered inline. This description is injected into the
+`ATTACHMENT TYPES` prompt block whenever an attachment of your type is present in the
+conversation.
+
+Keep the description focused on the **user-visible outcome** of rendering — not on when or why:
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition = {
+  id: 'image',
+  validate: ...,
+  format: ...,
+  getAgentDescription: () =>
+    'Represents an image attachment. Rendering this attachment inline displays the image inside the conversation UI.',
+};
+```
+
+Do **not** include guidance on *when* to render inline — that is the responsibility of the
+skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
+
 ### Browser-side registration
 
 Register a UI definition for your attachment type using the `attachments.addAttachmentType` API from the `agentBuilder` plugin's start contract:
@@ -857,6 +879,28 @@ agentBuilder.skills.register({
 });
 ```
 
+### Inline rendering guidance in skills
+
+Whether and when the agent should render an attachment inline depends on the task it is
+performing. Skills that create or modify attachments should therefore include explicit
+guidance on this in their instructions.
+
+**Rule of thumb:** tell the agent exactly which attachment to render and at what point in
+the task.
+
+**Examples:**
+
+- A skill that creates a single visualization:
+  > "Once you have created the visualization, render it inline so the user can see it."
+
+- A skill that builds a dashboard (composed of multiple visualizations):
+  > "Render the dashboard attachment inline once you have finished building it. Do NOT
+  >  render each individual visualization inline — only the final dashboard."
+
+This per-skill guidance is what controls inline rendering behaviour across different tasks:
+the attachment type definition (via `getAgentDescription`) tells the agent *what* rendering
+does; the skill tells it *when* to do it.
+
 ### Marking a skill as experimental
 
 Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
@@ -924,7 +968,7 @@ attach them to a conversation.
 | **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
 | **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
-| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert an SML search result into a conversation attachment (e.g. a rendered Lens visualization). |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `chunk_ids` from `sml_search`;  `chunk_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
 
 #### Data flow
@@ -938,9 +982,7 @@ attach them to a conversation.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
    the data index, filtering by the user's current space and checking Kibana
    privileges against each result's `permissions` array.
-4. **Attach**: When the AI agent calls `sml_attach`, the service resolves
-   the saved object via your `toAttachment()` hook and adds the result as a
-   conversation attachment.
+4. **Attach**: When the AI agent calls `sml_attach` with `chunk_ids`, the service loads each chunk, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 

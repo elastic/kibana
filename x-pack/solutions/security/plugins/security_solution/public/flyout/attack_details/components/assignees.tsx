@@ -42,7 +42,7 @@ const AssigneesButton: FC<{
         { defaultMessage: 'Update assignees' }
       )}
       data-test-subj={HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={onClick}
       isDisabled={isDisabled}
     />

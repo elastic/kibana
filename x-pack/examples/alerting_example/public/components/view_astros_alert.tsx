@@ -59,7 +59,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
 
   return alert && alertState ? (
     <Fragment>
-      <EuiCallOut announceOnMount title={`Rule "${alert.name}"`} iconType="search">
+      <EuiCallOut announceOnMount title={`Rule "${alert.name}"`} iconType="magnify">
         <p>
           This is a specific view for all
           <EuiTextColor color="accent"> example.people-in-space </EuiTextColor> Rules created by the

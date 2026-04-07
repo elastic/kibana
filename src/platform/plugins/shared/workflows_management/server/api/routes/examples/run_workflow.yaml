@@ -1,0 +1,40 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        runWorkflowRequestExample:
+          description: 'Example request to execute a workflow with inputs'
+          value:
+            inputs:
+              message: 'hello from the API'
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          runWorkflowResponseExample:
+            description: 'Example response returning the execution ID'
+            value:
+              workflowExecutionId: exec-a1b2c3d4-e5f6-7890
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/workflow/{id}/run" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "inputs": {
+            "message": "hello from the API"
+          }
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/workflow/{id}/run
+      {
+        "inputs": {
+          "message": "hello from the API"
+        }
+      }

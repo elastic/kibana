@@ -129,6 +129,66 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     return FieldsMetadataDictionary.create(fields);
   }
 
+  /**
+   * Checks if any of the expected types are included in the allowed values for the event category.
+   */
+  async matchesAnyTypeForEventCategory(
+    categories: string[],
+    expectedTypes: string[]
+  ): Promise<boolean> {
+    const eventCategoryField = await this.getByName('event.category', { source: ['ecs'] });
+    if (!eventCategoryField || !eventCategoryField.allowed_values) {
+      return false;
+    }
+
+    return expectedTypes.some((expectedType) => {
+      return categories.some((category) => {
+        return (
+          eventCategoryField.allowed_values
+            ?.find((allowedValue) => allowedValue.name === category)
+            ?.expected_event_types?.includes(expectedType) ?? false
+        );
+      });
+    });
+  }
+
+  /**
+   * Returns immediate child fields of `fieldName` (one extra dot segment only).
+   * e.g. for `host`, includes `host.name` but not `host.name.grandchild`.
+   */
+  async getFieldChildren(
+    fieldName: FieldName,
+    { source = [] }: GetFieldsMetadataOptions = {}
+  ): Promise<FieldsMetadataDictionary> {
+    const fullDictionary = await this.find({ source });
+    const allFields = fullDictionary.getFields();
+    const children: Record<string, FieldMetadata> = {};
+
+    for (const [key, field] of Object.entries(allFields)) {
+      if (isDirectChildFieldName(fieldName, key)) {
+        children[key] = field;
+      }
+    }
+
+    return FieldsMetadataDictionary.create(children);
+  }
+
+  /**
+   * Lists distinct root ECS field set names from the static ECS schema (e.g. `agent`, `host`, `event`, and `base` for root-level fields such as `@timestamp` / `message`).
+   * @see https://www.elastic.co/docs/reference/ecs/ecs-field-reference
+   */
+  async getECSFieldsets(): Promise<string[]> {
+    const ecsFields = this.ecsFieldsRepository.find().getFields();
+    const fieldsets = new Set<string>();
+
+    for (const field of Object.values(ecsFields)) {
+      const flatName = field.flat_name ?? field.name;
+      fieldsets.add(ecsFlatNameToRootFieldsetName(flatName));
+    }
+
+    return [...fieldsets].sort((a, b) => a.localeCompare(b));
+  }
+
   private hasFleetPermissions(capabilities: FleetCapabilities) {
     const { fleet, fleetv2 } = capabilities;
 
@@ -159,4 +219,26 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       otelFieldsRepository
     );
   }
+}
+
+/** True if `fieldKey` is exactly one segment below `parentFieldName` (e.g. `host.name` under `host`). */
+export function isDirectChildFieldName(parentFieldName: string, fieldKey: string): boolean {
+  const prefix = `${parentFieldName}.`;
+  if (!fieldKey.startsWith(prefix)) {
+    return false;
+  }
+  const remainder = fieldKey.slice(prefix.length);
+  return remainder.length > 0 && !remainder.includes('.');
+}
+
+/**
+ * Maps an ECS `flat_name` to its root field set: the segment before the first `.`, or `base` for
+ * fields defined at the root of the event (no dots), per the ECS field reference.
+ */
+export function ecsFlatNameToRootFieldsetName(flatName: string): string {
+  const dot = flatName.indexOf('.');
+  if (dot === -1) {
+    return 'base';
+  }
+  return flatName.slice(0, dot);
 }

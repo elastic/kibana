@@ -57,19 +57,16 @@ export const App = (props: {
     metrics: [
       {
         type: 'primary',
-        operation: 'value',
         column: 'totalBytes',
         label: 'Total Bytes Value',
         fit: false,
-        alignments: {
-          value: 'left',
-          labels: 'left',
-        },
+        value: { alignment: 'left' },
+        labels: { alignment: 'left' },
       },
     ],
     ignore_global_filters: true,
     sampling: 1,
-  });
+  } satisfies LensApiState);
   const [lensConfigString, setLensConfigString] = useState(JSON.stringify(lensConfig));
 
   const LensComponent = props.plugins.lens.EmbeddableComponent;

@@ -71,11 +71,9 @@ export const basicEsqlTagcloud = {
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   tag_by: {
-    operation: 'value',
     column: 'geo.dest',
   },
   sampling: 1,
@@ -97,16 +95,16 @@ export const comprehensiveTagcloudWithAdHocDataView = {
     min: 35,
     max: 58,
   },
+  caption: { visible: false },
   metric: {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    show_metric_label: false,
   },
   tag_by: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 10,
+    limit: 10,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -160,16 +158,16 @@ export const comprehensiveTagcloudWithDataView = {
     min: 35,
     max: 58,
   },
+  caption: { visible: false },
   metric: {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    show_metric_label: false,
   },
   tag_by: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 10,
+    limit: 10,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -223,13 +221,11 @@ export const comprehensiveEsqlTagcloud = {
     min: 35,
     max: 58,
   },
+  caption: { visible: false },
   metric: {
-    operation: 'value',
     column: 'bytes',
-    show_metric_label: false,
   },
   tag_by: {
-    operation: 'value',
     column: 'geo.dest',
     color: {
       mode: 'categorical',

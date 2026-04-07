@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { InferenceConnector } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -19,20 +20,8 @@ const OLD_STORAGE_KEY = 'xpack.observabilityAiAssistant.lastUsedConnector';
 // TODO: Import from gen-ai-settings-plugin (package) once available
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
-export interface Connector {
-  id: string;
-  name: string;
-  actionTypeId: string;
-  config?: Record<string, unknown>;
-  isPreconfigured?: boolean;
-  isDeprecated?: boolean;
-  isSystemAction?: boolean;
-  isMissingSecrets?: boolean;
-  referencedByCount?: number;
-}
-
 export interface UseGenAIConnectorsResult {
-  connectors: Connector[] | undefined;
+  connectors: InferenceConnector[] | undefined;
   selectedConnector: string | undefined;
   loading: boolean;
   error: Error | undefined;
@@ -49,7 +38,7 @@ export function useGenAIConnectors({
   streamsRepositoryClient: StreamsRepositoryClient;
   uiSettings: IUiSettingsClient;
 }): UseGenAIConnectorsResult {
-  const [connectors, setConnectors] = useState<Connector[] | undefined>();
+  const [connectors, setConnectors] = useState<InferenceConnector[] | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>();
 
@@ -85,7 +74,7 @@ export function useGenAIConnectors({
 
       // If connector selection is restricted, only return the default connector
       if (isConnectorSelectionRestricted) {
-        const defaultC = results.find((con) => con.id === defaultConnector);
+        const defaultC = results.find((con) => con.connectorId === defaultConnector);
         results = defaultC ? [defaultC] : [];
       }
 
@@ -93,7 +82,10 @@ export function useGenAIConnectors({
 
       // Clear lastUsedConnector if it's no longer in the list
       setLastUsedConnector((connectorId) => {
-        if (connectorId && results.findIndex((result) => result.id === connectorId) === -1) {
+        if (
+          connectorId &&
+          results.findIndex((result) => result.connectorId === connectorId) === -1
+        ) {
           return undefined;
         }
         return connectorId;
@@ -148,7 +140,7 @@ export function useGenAIConnectors({
 
   // If the selected connector is no longer available, select the first available connector
   useEffect(() => {
-    const availableConnectors = connectors?.map((connector) => connector.id);
+    const availableConnectors = connectors?.map((connector) => connector.connectorId);
 
     if (
       selectedConnector &&
@@ -161,7 +153,7 @@ export function useGenAIConnectors({
 
   return {
     connectors,
-    selectedConnector: selectedConnector || connectors?.[0]?.id,
+    selectedConnector: selectedConnector || connectors?.[0]?.connectorId,
     loading,
     error,
     selectConnector,

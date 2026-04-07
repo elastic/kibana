@@ -21,11 +21,12 @@ import { alertDetectionsLinks, alertSummaryLink, alertsLink } from '../../detect
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
 import { links as timelinesLinks } from '../../timelines/links';
-import { getCasesLinks } from '../../cases/links';
+import { links as casesLinks } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
 import { exploreLinks } from '../../explore/links';
 import { onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
 import { entityAnalyticsLinks } from '../../entity_analytics/links';
@@ -36,7 +37,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   alertSummaryLink,
   attackDiscoveryLinks,
   findingsLinks,
-  getCasesLinks(false),
+  casesLinks,
   configurationsLinks,
   timelinesLinks,
   indicatorsLinks,
@@ -53,9 +54,14 @@ export const appLinks: AppLinkItems = Object.freeze([
 
 export const getFilteredLinks = async (
   core: CoreStart,
-  plugins: StartPlugins
+  plugins: StartPlugins,
+  experimentalFeatures: ExperimentalFeatures
 ): Promise<AppLinkItems> => {
-  const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
+  const managementFilteredLinks = await getManagementFilteredLinks(
+    core,
+    plugins,
+    experimentalFeatures
+  );
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
@@ -63,9 +69,6 @@ export const getFilteredLinks = async (
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
-
-  const templatesEnabled = plugins.cases.config.templatesEnabled;
-  const filteredCasesLinks = getCasesLinks(templatesEnabled);
 
   return Object.freeze([
     dashboardsLinks,
@@ -75,7 +78,7 @@ export const getFilteredLinks = async (
     alertSummaryLink,
     attackDiscoveryLinks,
     findingsLinks,
-    filteredCasesLinks,
+    casesLinks,
     filteredConfigurationsLinks,
     timelinesLinks,
     indicatorsLinks,

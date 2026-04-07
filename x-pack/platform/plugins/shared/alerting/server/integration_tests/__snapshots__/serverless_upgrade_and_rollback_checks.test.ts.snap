@@ -5884,6 +5884,9 @@ Object {
       },
       "type": "object",
     },
+    "__schema5": Object {
+      "type": "string",
+    },
   },
   "allOf": Array [
     Object {
@@ -6258,7 +6261,7 @@ Object {
           "type": "string",
         },
         "ruleSource": Object {
-          "anyOf": Array [
+          "oneOf": Array [
             Object {
               "properties": Object {
                 "customizedFields": Object {
@@ -6486,7 +6489,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "type": "string",
+                "$ref": "#/$defs/__schema5",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -6623,6 +6626,43 @@ Object {
       "items": Object {},
       "type": "array",
     },
+    "__schema7": Object {
+      "properties": Object {
+        "entries": Object {
+          "items": Object {
+            "properties": Object {
+              "field": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+              "negate": Object {
+                "type": "boolean",
+              },
+              "type": Object {
+                "const": "mapping",
+                "type": "string",
+              },
+              "value": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+            },
+            "required": Array [
+              "field",
+              "type",
+              "value",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+      },
+      "required": Array [
+        "entries",
+      ],
+      "type": "object",
+    },
+    "__schema8": Object {
+      "type": "string",
+    },
   },
   "allOf": Array [
     Object {
@@ -6997,7 +7037,7 @@ Object {
           "type": "string",
         },
         "ruleSource": Object {
-          "anyOf": Array [
+          "oneOf": Array [
             Object {
               "properties": Object {
                 "customizedFields": Object {
@@ -7225,7 +7265,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "type": "string",
+                "$ref": "#/$defs/__schema8",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -7292,38 +7332,7 @@ Object {
         },
         "threatMapping": Object {
           "items": Object {
-            "properties": Object {
-              "entries": Object {
-                "items": Object {
-                  "properties": Object {
-                    "field": Object {
-                      "$ref": "#/$defs/__schema0",
-                    },
-                    "negate": Object {
-                      "type": "boolean",
-                    },
-                    "type": Object {
-                      "const": "mapping",
-                      "type": "string",
-                    },
-                    "value": Object {
-                      "$ref": "#/$defs/__schema0",
-                    },
-                  },
-                  "required": Array [
-                    "field",
-                    "type",
-                    "value",
-                  ],
-                  "type": "object",
-                },
-                "type": "array",
-              },
-            },
-            "required": Array [
-              "entries",
-            ],
-            "type": "object",
+            "$ref": "#/$defs/__schema7",
           },
           "minItems": 1,
           "type": "array",
@@ -7412,6 +7421,9 @@ Object {
       },
       "type": "object",
     },
+    "__schema5": Object {
+      "type": "string",
+    },
   },
   "allOf": Array [
     Object {
@@ -7786,7 +7798,7 @@ Object {
           "type": "string",
         },
         "ruleSource": Object {
-          "anyOf": Array [
+          "oneOf": Array [
             Object {
               "properties": Object {
                 "customizedFields": Object {
@@ -8014,7 +8026,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "type": "string",
+                "$ref": "#/$defs/__schema5",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -8122,6 +8134,12 @@ Object {
       },
       "type": "object",
     },
+    "__schema5": Object {
+      "type": "string",
+    },
+    "__schema6": Object {
+      "type": "string",
+    },
   },
   "allOf": Array [
     Object {
@@ -8496,7 +8514,7 @@ Object {
           "type": "string",
         },
         "ruleSource": Object {
-          "anyOf": Array [
+          "oneOf": Array [
             Object {
               "properties": Object {
                 "customizedFields": Object {
@@ -8724,7 +8742,7 @@ Object {
             },
             "groupBy": Object {
               "items": Object {
-                "type": "string",
+                "$ref": "#/$defs/__schema6",
               },
               "maxItems": 3,
               "minItems": 1,
@@ -8769,7 +8787,7 @@ Object {
         },
         "newTermsFields": Object {
           "items": Object {
-            "type": "string",
+            "$ref": "#/$defs/__schema5",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -8866,7 +8884,7 @@ Object {
         },
         "groupBy": Object {
           "items": Object {
-            "type": "string",
+            "$ref": "#/$defs/__schema12",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -8884,6 +8902,9 @@ Object {
         "groupBy",
       ],
       "type": "object",
+    },
+    "__schema12": Object {
+      "type": "string",
     },
     "__schema2": Object {
       "enum": Array [
@@ -9332,7 +9353,7 @@ Object {
           "type": "string",
         },
         "ruleSource": Object {
-          "anyOf": Array [
+          "oneOf": Array [
             Object {
               "properties": Object {
                 "customizedFields": Object {
@@ -9651,7 +9672,7 @@ Object {
         },
         "groupBy": Object {
           "items": Object {
-            "type": "string",
+            "$ref": "#/$defs/__schema12",
           },
           "maxItems": 3,
           "minItems": 1,
@@ -9669,6 +9690,9 @@ Object {
         "groupBy",
       ],
       "type": "object",
+    },
+    "__schema12": Object {
+      "type": "string",
     },
     "__schema2": Object {
       "enum": Array [
@@ -10117,7 +10141,7 @@ Object {
           "type": "string",
         },
         "ruleSource": Object {
-          "anyOf": Array [
+          "oneOf": Array [
             Object {
               "properties": Object {
                 "customizedFields": Object {
@@ -10831,7 +10855,7 @@ Object {
           "type": "string",
         },
         "ruleSource": Object {
-          "anyOf": Array [
+          "oneOf": Array [
             Object {
               "properties": Object {
                 "customizedFields": Object {

@@ -1359,7 +1359,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
-        "lineNumber": 744,
+        "lineNumber": 746,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1382,7 +1382,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
-            "lineNumber": 744,
+            "lineNumber": 746,
             "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
@@ -1405,7 +1405,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
-            "lineNumber": 744,
+            "lineNumber": 746,
             "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false,

@@ -25,6 +25,7 @@ export type LayoutConfig = Pick<
   | 'sidebarWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
+  | 'applicationMarginTop'
   | 'applicationMarginBottom'
   | 'applicationMarginRight'
 > & {

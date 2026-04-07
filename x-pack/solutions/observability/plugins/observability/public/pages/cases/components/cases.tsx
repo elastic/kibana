@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CasesPermissions } from '@kbn/cases-plugin/common';
+import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
@@ -15,7 +16,7 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
 import { ObservabilityAlertsTable } from '../../..';
-import { CASES_PATH, paths } from '../../../../common/locators/paths';
+import { CASES_PATH } from '../../../../common/locators/paths';
 
 export interface CasesProps {
   permissions: CasesPermissions;
@@ -70,9 +71,12 @@ export function Cases({ permissions }: CasesProps) {
         owner={[observabilityFeatureId]}
         permissions={permissions}
         ruleDetailsNavigation={{
-          href: (ruleId) => http.basePath.prepend(paths.observability.ruleDetails(ruleId || '')),
+          href: (ruleId) =>
+            http.basePath.prepend(`${rulesAppRoute}${getRulesAppDetailsRoute(ruleId || '')}`),
           onClick: (ruleId, ev) => {
-            const ruleLink = http.basePath.prepend(paths.observability.ruleDetails(ruleId || ''));
+            const ruleLink = http.basePath.prepend(
+              `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId || '')}`
+            );
 
             if (ev != null) {
               ev.preventDefault();

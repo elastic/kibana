@@ -11,7 +11,7 @@ import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-com
 import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../../types';
 import { revert } from './revert_changes_action';
 
@@ -70,7 +70,7 @@ describe('revert changes routine', () => {
     revert({
       setState,
       layer: byRefLayer,
-      state: { layers: [byRefLayer] } as XYState,
+      state: { layers: [byRefLayer] } as XYVisualizationState,
       modal,
       toasts,
     });
@@ -84,7 +84,7 @@ describe('revert changes routine', () => {
     `);
     expect(modal.close).toHaveBeenCalled();
 
-    const newState = setState.mock.calls[0][0] as XYState;
+    const newState = setState.mock.calls[0][0] as XYVisualizationState;
 
     expect(
       (newState.layers[0] as XYByReferenceAnnotationLayerConfig).ignoreGlobalFilters

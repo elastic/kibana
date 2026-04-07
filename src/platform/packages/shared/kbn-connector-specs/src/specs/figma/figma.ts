@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Figma from './types';
-
 const FIGMA_API_BASE = 'https://api.figma.com';
 
 const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as const;
@@ -28,11 +27,26 @@ export const FigmaConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
-    types: [{ type: 'api_key_header', defaults: { headerField: 'X-Figma-Token' } }],
+    types: [
+      { type: 'api_key_header', defaults: { headerField: 'X-Figma-Token' } },
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { disabled: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://www.figma.com/oauth',
+          tokenUrl: 'https://api.figma.com/v1/oauth/token',
+          scope: 'current_user:read file_content:read projects:read',
+        },
+      },
+    ],
   },
 
   actions: {

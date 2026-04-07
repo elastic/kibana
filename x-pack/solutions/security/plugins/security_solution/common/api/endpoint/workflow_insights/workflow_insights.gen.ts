@@ -19,9 +19,37 @@ import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SuccessResponse } from '../model/schema/common.gen';
 
+export type WorkflowInsightType = z.infer<typeof WorkflowInsightType>;
+export const WorkflowInsightType = z.enum([
+  'incompatible_antivirus',
+  'policy_response_failure',
+  'custom',
+]);
+export type WorkflowInsightTypeEnum = typeof WorkflowInsightType.enum;
+export const WorkflowInsightTypeEnum = WorkflowInsightType.enum;
+
+export type WorkflowInsightCategory = z.infer<typeof WorkflowInsightCategory>;
+export const WorkflowInsightCategory = z.literal('endpoint');
+
+export type WorkflowInsightSourceType = z.infer<typeof WorkflowInsightSourceType>;
+export const WorkflowInsightSourceType = z.literal('llm-connector');
+
+export type WorkflowInsightTargetType = z.infer<typeof WorkflowInsightTargetType>;
+export const WorkflowInsightTargetType = z.literal('endpoint');
+
+export type WorkflowInsightActionType = z.infer<typeof WorkflowInsightActionType>;
+export const WorkflowInsightActionType = z.enum([
+  'refreshed',
+  'remediated',
+  'suppressed',
+  'dismissed',
+]);
+export type WorkflowInsightActionTypeEnum = typeof WorkflowInsightActionType.enum;
+export const WorkflowInsightActionTypeEnum = WorkflowInsightActionType.enum;
+
 export type CreateWorkflowInsightRequestBody = z.infer<typeof CreateWorkflowInsightRequestBody>;
 export const CreateWorkflowInsightRequestBody = z.object({
-  insightType: z.enum(['incompatible_antivirus', 'policy_response_failure']),
+  insightType: WorkflowInsightType,
 });
 export type CreateWorkflowInsightRequestBodyInput = z.input<
   typeof CreateWorkflowInsightRequestBody
@@ -36,7 +64,7 @@ export type GetPendingWorkflowInsightsRequestQuery = z.infer<
   typeof GetPendingWorkflowInsightsRequestQuery
 >;
 export const GetPendingWorkflowInsightsRequestQuery = z.object({
-  insightType: z.enum(['incompatible_antivirus', 'policy_response_failure']).optional(),
+  insightType: WorkflowInsightType.optional(),
 });
 export type GetPendingWorkflowInsightsRequestQueryInput = z.input<
   typeof GetPendingWorkflowInsightsRequestQuery
@@ -59,13 +87,13 @@ export const GetWorkflowInsightsRequestQuery = z.object({
   size: z.coerce.number().int().optional(),
   from: z.coerce.number().int().optional(),
   ids: ArrayFromString(z.string()).optional(),
-  categories: ArrayFromString(z.literal('endpoint')).optional(),
-  types: ArrayFromString(z.enum(['incompatible_antivirus', 'policy_response_failure'])).optional(),
-  sourceTypes: ArrayFromString(z.literal('llm-connector')).optional(),
+  categories: ArrayFromString(WorkflowInsightCategory).optional(),
+  types: ArrayFromString(WorkflowInsightType).optional(),
+  sourceTypes: ArrayFromString(WorkflowInsightSourceType).optional(),
   sourceIds: ArrayFromString(z.string()).optional(),
-  targetTypes: ArrayFromString(z.literal('endpoint')).optional(),
+  targetTypes: ArrayFromString(WorkflowInsightTargetType).optional(),
   targetIds: ArrayFromString(z.string()).optional(),
-  actionTypes: ArrayFromString(z.enum(['refreshed', 'remediated', 'suppressed', 'dismissed'])),
+  actionTypes: ArrayFromString(WorkflowInsightActionType),
 });
 export type GetWorkflowInsightsRequestQueryInput = z.input<typeof GetWorkflowInsightsRequestQuery>;
 
@@ -84,11 +112,11 @@ export type UpdateWorkflowInsightRequestBody = z.infer<typeof UpdateWorkflowInsi
 export const UpdateWorkflowInsightRequestBody = z.object({
   '@timestamp': z.string().optional(),
   message: z.string().optional(),
-  category: z.literal('endpoint').optional(),
-  type: z.enum(['incompatible_antivirus', 'policy_response_failure']).optional(),
+  category: WorkflowInsightCategory.optional(),
+  type: WorkflowInsightType.optional(),
   source: z
     .object({
-      type: z.literal('llm-connector').optional(),
+      type: WorkflowInsightSourceType.optional(),
       id: z.string().optional(),
       data_range_start: z.string().optional(),
       data_range_end: z.string().optional(),
@@ -96,13 +124,13 @@ export const UpdateWorkflowInsightRequestBody = z.object({
     .optional(),
   target: z
     .object({
-      type: z.literal('endpoint').optional(),
+      type: WorkflowInsightTargetType.optional(),
       ids: z.array(z.string()).optional(),
     })
     .optional(),
   action: z
     .object({
-      type: z.enum(['refreshed', 'remediated', 'suppressed', 'dismissed']).optional(),
+      type: WorkflowInsightActionType.optional(),
       timestamp: z.string().optional(),
     })
     .optional(),

@@ -65,6 +65,7 @@ describe('deleteDuplicatePackagePolicies', () => {
     expect(deleteMock).toHaveBeenCalledTimes(1);
     expect(deleteMock).toHaveBeenCalledWith(soClient, esClient, packages, {
       force: true,
+      ignoreMissing: true,
       spaceIds: ['*'],
     });
   });
@@ -98,14 +99,17 @@ describe('deleteDuplicatePackagePolicies', () => {
 
     expect(deleteMock).toHaveBeenNthCalledWith(1, soClient, esClient, firstBatch, {
       force: true,
+      ignoreMissing: true,
       spaceIds: ['*'],
     });
     expect(deleteMock).toHaveBeenNthCalledWith(2, soClient, esClient, secondBatch, {
       force: true,
+      ignoreMissing: true,
       spaceIds: ['*'],
     });
     expect(deleteMock).toHaveBeenNthCalledWith(3, soClient, esClient, thirdBatch, {
       force: true,
+      ignoreMissing: true,
       spaceIds: ['*'],
     });
   });

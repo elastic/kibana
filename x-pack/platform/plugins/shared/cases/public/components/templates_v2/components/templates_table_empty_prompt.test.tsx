@@ -52,7 +52,7 @@ describe('TemplatesTableEmptyPrompt', () => {
       );
 
       expect(await screen.findByTestId('templates-table-add-template')).toBeInTheDocument();
-      expect(screen.getByText('Create template')).toBeInTheDocument();
+      expect(screen.getByText('Create')).toBeInTheDocument();
     });
 
     it('calls onCreateTemplate when create button is clicked', async () => {

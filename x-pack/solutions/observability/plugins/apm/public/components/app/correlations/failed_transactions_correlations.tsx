@@ -306,7 +306,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.filterDescription',
               { defaultMessage: 'Filter by value' }
             ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -323,7 +323,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.excludeDescription',
               { defaultMessage: 'Filter out value' }
             ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -451,7 +451,10 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         <EuiFlexItem grow={false}>
           <OpenInDiscover
             dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
-            variant="button"
+            label={i18n.translate('xpack.apm.failedTransactionsCorrelations.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+            variant="emptyButton"
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

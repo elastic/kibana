@@ -15,21 +15,10 @@ describe('getWorkflowTemplatesForConnector', () => {
   });
 
   it('returns empty array for connector without agentBuilderWorkflows', () => {
-    expect(getWorkflowTemplatesForConnector('.github')).toEqual([]);
+    expect(getWorkflowTemplatesForConnector('.one_password')).toEqual([]);
   });
 
-  it('returns workflow YAML strings for .slack2', () => {
-    const templates = getWorkflowTemplatesForConnector('.slack2');
-    expect(templates.length).toBeGreaterThan(0);
-    for (const yaml of templates) {
-      expect(typeof yaml).toBe('string');
-      expect(yaml).toContain('version:');
-    }
-  });
-
-  it('returns YAML with template placeholders intact', () => {
-    const templates = getWorkflowTemplatesForConnector('.slack2');
-    const hasPlaceholder = templates.some((yaml) => yaml.includes('<%='));
-    expect(hasPlaceholder).toBe(true);
+  it('returns empty array for connector whose workflows were removed', () => {
+    expect(getWorkflowTemplatesForConnector('.slack2')).toEqual([]);
   });
 });

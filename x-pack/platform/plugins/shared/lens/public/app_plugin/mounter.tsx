@@ -182,7 +182,7 @@ export async function mountApp(
       tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save visualizations to the library',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   coreStart.chrome.docTitle.change(
@@ -194,7 +194,7 @@ export async function mountApp(
       return embeddableEditorIncomingState?.valueInput as LensSerializedState;
     }
     if (id) {
-      return { savedObjectId: id } as LensSerializedState;
+      return { ref_id: id };
     }
   };
 

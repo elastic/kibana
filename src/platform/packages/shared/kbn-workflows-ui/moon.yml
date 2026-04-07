@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-application-browser'
   - '@kbn/core-ui-settings-browser'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
@@ -40,26 +41,6 @@ fileGroups:
     - '**/*.tsx'
     - index.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

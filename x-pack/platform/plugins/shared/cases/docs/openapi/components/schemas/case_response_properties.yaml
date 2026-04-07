@@ -42,12 +42,16 @@ properties:
     maxItems: 10000
     items:
       oneOf:
+        - $ref: 'actions_comment_response_properties.yaml'
         - $ref: 'alert_comment_response_properties.yaml'
+        - $ref: 'event_comment_response_properties.yaml'
         - $ref: 'user_comment_response_properties.yaml'
       discriminator:
         propertyName: type
         mapping:
+          actions: 'actions_comment_response_properties.yaml'
           alert: 'alert_comment_response_properties.yaml'
+          event: 'event_comment_response_properties.yaml'
           user: 'user_comment_response_properties.yaml'
   connector:
     title: Case response properties for connectors
@@ -121,6 +125,10 @@ properties:
     example: 0
   totalComment:
     type: integer
+    example: 0
+  totalEvents:
+    type: integer
+    description: The number of events attached to the case.
     example: 0
   updated_at:
     type: string

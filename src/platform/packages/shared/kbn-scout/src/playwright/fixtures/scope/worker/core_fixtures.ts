@@ -9,7 +9,7 @@
 
 import { test as base } from '@playwright/test';
 import type { KbnClient } from '@kbn/kbn-client';
-import type { SamlSessionManager } from '@kbn/test';
+import type { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   KibanaUrl,
@@ -32,7 +32,7 @@ import type { ScoutTestConfig } from '.';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient } from '@kbn/kbn-client';
-export type { SamlSessionManager } from '@kbn/test';
+export type { SamlSessionManager } from '@kbn/test-saml-auth';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../../types';
@@ -258,12 +258,6 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       // Hide the announcements (including the sidenav tour) in advance to prevent
       // it from interfering with test flows
       await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
-
-      // disable solution tour on ECH
-      if (config.isCloud && !config.serverless) {
-        log.info('Disabling Space Solution Tour globally on ECH deployment');
-        await kbnClient.uiSettings.updateGlobal({ showSpaceSolutionTour: false });
-      }
 
       await use({
         session,
