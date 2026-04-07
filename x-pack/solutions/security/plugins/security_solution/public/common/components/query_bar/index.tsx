@@ -152,8 +152,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     useEffect(() => {
       let dv: DataView;
+      let cancelled = false;
       if (isDataView(indexPattern)) {
         setDataView(indexPattern);
+        setIsCreatingDataView(false);
       } else if (!isEsql && !isEmpty(indexPattern.title)) {
         const createDataView = async () => {
           setIsCreatingDataView(true);
@@ -162,14 +164,19 @@ export const QueryBar = memo<QueryBarComponentProps>(
               id: indexPattern.title,
               title: indexPattern.title,
             });
-            setDataView(dv);
+            if (!cancelled) {
+              setDataView(dv);
+            }
           } finally {
-            setIsCreatingDataView(false);
+            if (!cancelled) {
+              setIsCreatingDataView(false);
+            }
           }
         };
         createDataView();
       }
       return () => {
+        cancelled = true;
         // Cache needs to be cleared in certain instances where ad-hoc dataviews are created, like rule creation
         if (dv?.id && !preventCacheClearOnUnmount) {
           data.dataViews.clearInstanceCache(dv?.id);
