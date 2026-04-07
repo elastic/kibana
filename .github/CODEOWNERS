@@ -2837,6 +2837,7 @@ src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 /x-pack/platform/test/cases_api_integration/ @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/cases @elastic/kibana-cases
 /x-pack/platform/test/functional/fixtures/kbn_archives/cases @elastic/kibana-cases
+/x-pack/platform/test/functional/fixtures/kbn_archives/rules_scheduled_task_id @elastic/kibana-cases
 /x-pack/platform/test/functional/services/cases/ @elastic/kibana-cases
 /x-pack/platform/test/functional_with_es_ssl/apps/cases/ @elastic/kibana-cases
 /x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/kibana-cases
