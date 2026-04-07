@@ -411,11 +411,11 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       });
 
       // Auto-resolve: maintainer links A → B (okta wins as target)
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entityA, entityB);
 
       // Manual unlink: analyst removes A from B's group
-      const unlinkResponse = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_UNLINK, {
+      const unlinkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entity_ids: [entityA] },
@@ -437,7 +437,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       });
 
       // Run maintainer again — A should NOT be re-linked
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
 
       // A should stay unresolved (first_seen is behind watermark, so not collected)
       await assertNotResolved(esClient, entityA);
