@@ -2036,8 +2036,6 @@
       "@kbn/search-homepage/*": ["x-pack/solutions/search/plugins/search_homepage/*"],
       "@kbn/search-index-documents": ["x-pack/platform/packages/shared/kbn-search-index-documents"],
       "@kbn/search-index-documents/*": ["x-pack/platform/packages/shared/kbn-search-index-documents/*"],
-      "@kbn/search-indices": ["x-pack/solutions/search/plugins/search_indices"],
-      "@kbn/search-indices/*": ["x-pack/solutions/search/plugins/search_indices/*"],
       "@kbn/search-inference-endpoints": ["x-pack/platform/plugins/shared/search_inference_endpoints"],
       "@kbn/search-inference-endpoints/*": ["x-pack/platform/plugins/shared/search_inference_endpoints/*"],
       "@kbn/search-navigation": ["x-pack/solutions/search/plugins/search_navigation"],
