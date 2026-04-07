@@ -18,7 +18,6 @@ export interface DocLinksMeta {
   docsWebsiteUrl: string;
   searchLabsUrl: string;
   apiDocsUrl: string;
-  cloudDeploymentUrl: string;
 }
 
 /**
@@ -100,10 +99,6 @@ export interface DocLinks {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
     readonly elasticTraining: string;
-    readonly cloudHome: string;
-    readonly cloudUsage: string;
-    readonly cloudOrganizationMembers: string;
-    readonly cloudManageSubscription: string;
   };
   readonly metricbeat: {
     readonly base: string;

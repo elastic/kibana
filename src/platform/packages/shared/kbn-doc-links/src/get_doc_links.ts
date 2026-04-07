@@ -25,7 +25,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const SEARCH_LABS_URL = meta.searchLabsUrl;
   const API_DOCS = meta.apiDocsUrl;
   const ELASTIC_DOCS = meta.docsWebsiteUrl;
-  const CLOUD_DEPLOYMENT_URL = meta.cloudDeploymentUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`;
@@ -215,10 +214,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
       notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
       elasticTraining: `${ELASTIC_WEBSITE_URL}training`,
-      cloudHome: `${CLOUD_DEPLOYMENT_URL}home`,
-      cloudUsage: `${CLOUD_DEPLOYMENT_URL}billing/usage`,
-      cloudOrganizationMembers: `${CLOUD_DEPLOYMENT_URL}account/members`,
-      cloudManageSubscription: `${CLOUD_DEPLOYMENT_URL}billing/overview`,
     },
     metricbeat: {
       base: `${ELASTIC_DOCS}reference/beats/metricbeat`,

@@ -8,16 +8,13 @@
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { cloudLinks } from './links';
 
-interface Props {
-  manageSubscriptionLink: string;
-}
-
-export const ManageSubscription: React.FC<Props> = ({ manageSubscriptionLink }) => {
+export const ManageSubscription = () => {
   return (
     <EuiFlexItem grow={false}>
       <EuiLink
-        href={manageSubscriptionLink}
+        href={cloudLinks.cloudManageSubscription}
         target="_blank"
         data-test-subj="gettingStartedManageSubscription"
       >

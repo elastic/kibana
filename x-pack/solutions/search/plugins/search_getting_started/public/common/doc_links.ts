@@ -15,10 +15,6 @@ class ESDocLinks {
   public serverlessReleaseNotes: string = '';
   public hostedCloudReleaseNotes: string = '';
   public askAnExpert: string = '';
-  public cloudHome: string = '';
-  public cloudUsage: string = '';
-  public cloudOrganizationMembers: string = '';
-  public cloudManageSubscription: string = '';
 
   constructor() {}
 
@@ -30,10 +26,6 @@ class ESDocLinks {
     this.serverlessReleaseNotes = newDocLinks.serverlessReleaseNotes;
     this.hostedCloudReleaseNotes = newDocLinks.hostedCloudReleaseNotes;
     this.askAnExpert = newDocLinks.searchHomepage.customerEngineerRequestForm;
-    this.cloudHome = newDocLinks.searchGettingStarted.cloudHome;
-    this.cloudUsage = newDocLinks.searchGettingStarted.cloudUsage;
-    this.cloudOrganizationMembers = newDocLinks.searchGettingStarted.cloudOrganizationMembers;
-    this.cloudManageSubscription = newDocLinks.searchGettingStarted.cloudManageSubscription;
   }
 }
 

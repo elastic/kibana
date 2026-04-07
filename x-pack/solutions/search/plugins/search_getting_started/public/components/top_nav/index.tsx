@@ -21,6 +21,7 @@ import { TopNavLinks } from './top_nav_links';
 import { AskExpert } from './ask_expert';
 import { ManageSubscription } from './manage_subscription';
 import { WelcomeMessage } from './welcome';
+import { cloudLinks } from './links';
 
 interface TopNavLinkItem {
   buttonLabel: string;
@@ -43,7 +44,7 @@ export const SearchGettingStartedSectionTopNavigation = () => {
       buttonLabel: i18n.translate('xpack.search.gettingStarted.topNav.buttonLabel.cloudHome', {
         defaultMessage: 'Elastic cloud',
       }),
-      buttonHref: docLinks.cloudHome,
+      buttonHref: cloudLinks.cloudHome,
       dataTestSubj: 'gettingStartedCloudHome',
     },
     ...(!shouldReduceLinks
@@ -53,7 +54,7 @@ export const SearchGettingStartedSectionTopNavigation = () => {
             buttonLabel: i18n.translate('xpack.search.gettingStarted.topNav.buttonLabel.usage', {
               defaultMessage: 'Usage',
             }),
-            buttonHref: docLinks.cloudUsage,
+            buttonHref: cloudLinks.cloudUsage,
             dataTestSubj: 'gettingStartedUsage',
           },
           {
@@ -64,7 +65,7 @@ export const SearchGettingStartedSectionTopNavigation = () => {
                 defaultMessage: 'Organization',
               }
             ),
-            buttonHref: docLinks.cloudOrganizationMembers,
+            buttonHref: cloudLinks.cloudOrganizationMembers,
             dataTestSubj: 'gettingStartedCloudOrganizationMembers',
           },
         ]
@@ -78,9 +79,7 @@ export const SearchGettingStartedSectionTopNavigation = () => {
           <span>
             <LicenseBadge licensing={licensing} />
           </span>
-          {!shouldReduceLinks && (
-            <ManageSubscription manageSubscriptionLink={docLinks.cloudManageSubscription} />
-          )}
+          {!shouldReduceLinks && <ManageSubscription />}
         </EuiFlexGroup>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" alignItems="baseline">
           {!isSmallScreen && <AskExpert askExpertLink={docLinks.askAnExpert} />}
