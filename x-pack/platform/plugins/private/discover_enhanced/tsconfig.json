@@ -9,7 +9,7 @@
     "@kbn/discover-plugin",
     "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/lens-plugin",
+    "@kbn/lens-common",
     "@kbn/usage-collection-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-plugin",
