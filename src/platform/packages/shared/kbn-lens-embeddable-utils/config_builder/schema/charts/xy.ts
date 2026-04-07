@@ -938,7 +938,7 @@ const xyLayerUnionNoESQL = schema.oneOf(
   }
 );
 
-const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL, referenceLineLayerSchemaESQL], {
+const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL], {
   meta: {
     id: 'xyLayersESQL',
     description: 'XY chart layer types for ES|QL queries',
