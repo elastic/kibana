@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
   type Criteria,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -48,12 +49,6 @@ const labelBadgeStyle = css`
 const overflowTooltipStyle = css`
   flex-shrink: 0;
   line-height: 0;
-`;
-
-const rulesListTableWithoutHeaderSortIconsStyle = css`
-  .euiTableSortIcon {
-    display: none;
-  }
 `;
 
 const descriptionTextStyle = css`
@@ -230,6 +225,19 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onToggleEnabled,
   onTableChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const hideMobileSortMenuOnWideScreensStyle = useMemo(
+    () => css`
+      @media (min-width: ${euiTheme.breakpoint.m}px) {
+        .euiTableSortMobile {
+          display: none;
+        }
+      }
+    `,
+    [euiTheme.breakpoint.m]
+  );
+
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
 
   const handleBulkEnable = () => {
@@ -586,7 +594,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
-        css={rulesListTableWithoutHeaderSortIconsStyle}
+        css={hideMobileSortMenuOnWideScreensStyle}
         items={items}
         itemId="id"
         columns={columns}
