@@ -429,6 +429,7 @@ enabled:
   - x-pack/performance/journeys_e2e/many_fields_discover_esql.ts
   - x-pack/performance/journeys_e2e/many_fields_lens_editor.ts
   - x-pack/performance/journeys_e2e/many_fields_transform.ts
+  - x-pack/performance/journeys_e2e/metrics_experience_grid.ts
   - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts
   - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard.ts
