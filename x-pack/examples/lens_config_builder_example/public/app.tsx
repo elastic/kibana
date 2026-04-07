@@ -57,7 +57,6 @@ export const App = (props: {
     metrics: [
       {
         type: 'primary',
-        operation: 'value',
         column: 'totalBytes',
         label: 'Total Bytes Value',
         fit: false,
