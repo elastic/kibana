@@ -11,12 +11,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPanel,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { AssetImage } from '../../../asset_image';
 import {
   useStreamRoutingEvents,
@@ -32,44 +30,37 @@ export const QueryModeEmptyPrompt = () => {
   return (
     <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
       <EuiFlexItem grow={false}>
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <strong>{titleText}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {descriptionText}
-                  </EuiText>
-                </EuiFlexItem>
-                {/* TODO: Add docs link back in when it's available */}
-                {/* <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <EuiLink
-                      href="https://www.elastic.co/docs/current/serverless/elasticsearch/query-streams"
-                      target="_blank"
-                      external
-                    >
-                      {docsLinkText}
-                    </EuiLink>
-                  </EuiText>
-                </EuiFlexItem> */}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                flex-shrink: 0;
-              `}
-            >
-              <AssetImage type="queryStreamsEmptyState" size={80} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>{titleText}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {descriptionText}
+                </EuiText>
+              </EuiFlexItem>
+              {/* TODO: Add docs link back in when it's available */}
+              {/* <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <EuiLink
+                    href="https://www.elastic.co/docs/current/serverless/elasticsearch/query-streams"
+                    target="_blank"
+                    external
+                  >
+                    {docsLinkText}
+                  </EuiLink>
+                </EuiText>
+              </EuiFlexItem> */}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AssetImage type="queryStreamsEmptyState" size={128} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
@@ -77,7 +68,8 @@ export const QueryModeEmptyPrompt = () => {
           content={
             !canManage
               ? i18n.translate('xpack.streams.queryModeEmptyPrompt.cannotCreateQueryStream', {
-                defaultMessage: "You don't have sufficient privileges to create query streams.",
+                defaultMessage:
+                  "You don't have sufficient privileges to create query streams.",
               })
               : undefined
           }
@@ -105,9 +97,9 @@ const descriptionText = i18n.translate('xpack.streams.queryModeEmptyPrompt.descr
     'Use an ES|QL query to define a sub-stream for exploration and analysis without altering ingestion or changing your data.',
 });
 
-const docsLinkText = i18n.translate('xpack.streams.queryModeEmptyPrompt.docsLink', {
-  defaultMessage: 'Query streams docs',
-});
+// const docsLinkText = i18n.translate('xpack.streams.queryModeEmptyPrompt.docsLink', {
+//   defaultMessage: 'Query streams docs',
+// });
 
 const createButtonText = i18n.translate('xpack.streams.queryModeEmptyPrompt.createButton', {
   defaultMessage: 'Create query sub-stream',
