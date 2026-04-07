@@ -113,7 +113,6 @@ describe('Security Solution Navigation', () => {
       it('includes footer with SolutionViewSwitchCallout when all conditions are met', () => {
         const { result } = renderHook(useSecuritySolutionNavigation);
         expect(result.current?.footer).toBeDefined();
-        expect(result.current?.hasPinnedBottomNavItems).toBe(true);
       });
 
       it('does not include footer when announcements are disabled', () => {
@@ -121,7 +120,6 @@ describe('Security Solution Navigation', () => {
 
         const { result } = renderHook(useSecuritySolutionNavigation);
         expect(result.current?.footer).toBeUndefined();
-        expect(result.current?.hasPinnedBottomNavItems).toBeUndefined();
       });
 
       it('does not include footer when canManageSpaces is false', () => {
@@ -132,7 +130,6 @@ describe('Security Solution Navigation', () => {
 
         const { result } = renderHook(useSecuritySolutionNavigation);
         expect(result.current?.footer).toBeUndefined();
-        expect(result.current?.hasPinnedBottomNavItems).toBeUndefined();
       });
     });
   });

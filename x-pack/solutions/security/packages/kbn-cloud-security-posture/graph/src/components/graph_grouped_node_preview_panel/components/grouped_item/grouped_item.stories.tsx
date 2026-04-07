@@ -57,6 +57,7 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
 }: EntityStoryProps) => {
   const item: EntityItemType = {
     itemType: DOCUMENT_TYPE_ENTITY,
+    entity: {},
     ...itemArgs,
   };
 
