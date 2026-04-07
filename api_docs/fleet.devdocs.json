@@ -1108,7 +1108,7 @@
         "label": "AwsCloudConnectorVars",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "lineNumber": 37,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1124,7 +1124,7 @@
               "CloudConnectorVar"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 38,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1140,7 +1140,7 @@
               "CloudConnectorSecretVar"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 39,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1243,7 +1243,7 @@
         "label": "CloudConnector",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "lineNumber": 59,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1256,7 +1256,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 60,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1269,7 +1269,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 61,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1285,7 +1285,7 @@
               "\"aws\" | \"azure\" | \"gcp\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 62,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1302,7 +1302,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 63,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1322,7 +1322,7 @@
               "GcpCloudConnectorVars"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 64,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1338,7 +1338,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 65,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1351,7 +1351,7 @@
             "label": "created_at",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 66,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1364,7 +1364,7 @@
             "label": "updated_at",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 67,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1380,7 +1380,56 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 68,
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.verification_status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verification_status",
+            "description": [],
+            "signature": [
+              "VerificationStatus",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.verification_started_at",
+            "type": "string",
+            "tags": [],
+            "label": "verification_started_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.verification_failed_at",
+            "type": "string",
+            "tags": [],
+            "label": "verification_failed_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1396,7 +1445,7 @@
         "label": "CloudConnectorListOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "lineNumber": 71,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1412,7 +1461,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 72,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1428,7 +1477,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 73,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1444,7 +1493,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 74,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1460,7 +1509,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 75,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1476,7 +1525,7 @@
         "label": "CloudConnectorSecretVar",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "lineNumber": 29,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1492,7 +1541,7 @@
               "\"password\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 32,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1508,7 +1557,7 @@
               "CloudConnectorSecretReference"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 33,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1524,7 +1573,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "lineNumber": 34,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1831,6 +1880,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.CreateCloudConnectorRequest.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.CreateCloudConnectorRequest.vars",
             "type": "CompoundType",
             "tags": [],
@@ -1844,7 +1909,7 @@
               "GcpCloudConnectorVars"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1860,7 +1925,7 @@
               "\"aws\" | \"azure\" | \"gcp\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1877,7 +1942,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5689,7 +5754,7 @@
           "\"single-account\" | \"organization-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "lineNumber": 17,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5848,7 +5913,7 @@
           "GcpCloudConnectorVars"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "lineNumber": 54,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5865,7 +5930,7 @@
           "\"aws\" | \"azure\" | \"gcp\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "lineNumber": 7,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10050,7 +10115,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 438,
+                "lineNumber": 458,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11054,7 +11119,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 439,
+                "lineNumber": 459,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11076,7 +11141,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 440,
+                "lineNumber": 460,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11096,7 +11161,7 @@
                   "<unknown, unknown, unknown, any> | undefined; skipDeploy?: boolean | undefined; hasFleetServer?: boolean | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 441,
+                "lineNumber": 461,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11187,7 +11252,7 @@
                   "<unknown, unknown, unknown, any> | undefined; force?: boolean | undefined; forcePackagePolicyCreation?: boolean | undefined; }; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 527,
+                "lineNumber": 547,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11232,7 +11297,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 702,
+                "lineNumber": 722,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11245,7 +11310,7 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 703,
+                "lineNumber": 723,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11258,7 +11323,7 @@
                 "label": "withPackagePolicies",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 704,
+                "lineNumber": 724,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11274,7 +11339,7 @@
                   "{ spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 705,
+                "lineNumber": 725,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11321,7 +11386,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 861,
+                "lineNumber": 881,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11339,7 +11404,7 @@
                   " | undefined; withAgentCount?: boolean | undefined; spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 862,
+                "lineNumber": 882,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -11388,7 +11453,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1572,
+                "lineNumber": 1592,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12392,7 +12457,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1573,
+                "lineNumber": 1593,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12405,7 +12470,7 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1574,
+                "lineNumber": 1594,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12423,7 +12488,7 @@
                   " | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1575,
+                "lineNumber": 1595,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12476,7 +12541,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2143,
+                "lineNumber": 2163,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12489,7 +12554,7 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2144,
+                "lineNumber": 2164,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12513,7 +12578,7 @@
                   " | undefined; agentVersion?: string | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2145,
+                "lineNumber": 2165,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12558,7 +12623,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 744,
+                "lineNumber": 764,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12574,7 +12639,7 @@
                   "(string | { id: string; spaceId?: string | undefined; })[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 745,
+                "lineNumber": 765,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12590,7 +12655,7 @@
                   "{ fields?: string[] | undefined; withPackagePolicies?: boolean | undefined; ignoreMissing?: boolean | undefined; spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 756,
+                "lineNumber": 776,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12637,7 +12702,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2299,
+                "lineNumber": 2319,
                 "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12676,7 +12741,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2379,
+                "lineNumber": 2399,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12700,7 +12765,7 @@
                   ", \"perPage\" | \"kuery\"> & { spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2380,
+                "lineNumber": 2400,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12747,7 +12812,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2409,
+                "lineNumber": 2429,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12771,7 +12836,7 @@
                   ", \"perPage\" | \"sortField\" | \"sortOrder\" | \"kuery\"> & { fields?: string[] | undefined; spaceId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 2410,
+                "lineNumber": 2430,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12816,7 +12881,7 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1717,
+                "lineNumber": 1737,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12829,7 +12894,7 @@
                 "label": "agentPolicyId",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1718,
+                "lineNumber": 1738,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12852,7 +12917,7 @@
                   " | null | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1719,
+                "lineNumber": 1739,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12868,7 +12933,7 @@
                   "{ throwOnAgentlessError?: boolean | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
-                "lineNumber": 1720,
+                "lineNumber": 1740,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -13815,7 +13880,7 @@
         "label": "FleetSetupDeps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-        "lineNumber": 172,
+        "lineNumber": 176,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13837,7 +13902,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 173,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13860,7 +13925,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 174,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13882,7 +13947,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 175,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13905,7 +13970,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 176,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13928,7 +13993,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 177,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13951,7 +14016,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 178,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13974,7 +14039,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 179,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13996,7 +14061,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 180,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14018,7 +14083,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-            "lineNumber": 181,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -24705,7 +24770,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-      "lineNumber": 237,
+      "lineNumber": 241,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -24722,7 +24787,7 @@
         "\nDescribes public Fleet plugin contract returned at the `startup` stage."
       ],
       "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-      "lineNumber": 255,
+      "lineNumber": 259,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -24740,7 +24805,7 @@
             "() => Promise<void>"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 259,
+          "lineNumber": 263,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24758,7 +24823,7 @@
             "{ enabled: boolean; }"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 265,
+          "lineNumber": 269,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24784,7 +24849,7 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 268,
+          "lineNumber": 272,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24806,7 +24871,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 271,
+          "lineNumber": 275,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24828,7 +24893,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 272,
+          "lineNumber": 276,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24852,7 +24917,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 273,
+          "lineNumber": 277,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24874,7 +24939,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 277,
+          "lineNumber": 281,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24890,7 +24955,7 @@
             "<T = any>(cb: () => Promise<T>) => Promise<T>"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 278,
+          "lineNumber": 282,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24933,7 +24998,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 279,
+          "lineNumber": 283,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24949,7 +25014,7 @@
             "CloudConnectorServiceInterface"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 280,
+          "lineNumber": 284,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -24975,7 +25040,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 281,
+          "lineNumber": 285,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24997,7 +25062,7 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 285,
+              "lineNumber": 289,
               "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
@@ -25026,7 +25091,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 287,
+          "lineNumber": 291,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25042,7 +25107,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 291,
+              "lineNumber": 295,
               "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
@@ -25080,7 +25145,7 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 293,
+          "lineNumber": 297,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25102,7 +25167,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 301,
+          "lineNumber": 305,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25118,7 +25183,7 @@
             "UninstallTokenServiceInterface"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 302,
+          "lineNumber": 306,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -25135,7 +25200,7 @@
             "FleetActionsClientInterface"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 303,
+          "lineNumber": 307,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25151,7 +25216,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 303,
+              "lineNumber": 307,
               "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
@@ -25171,7 +25236,7 @@
             "(spaceId: string, pkgName: string, tagName: string) => string"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 307,
+          "lineNumber": 311,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25187,7 +25252,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 307,
+              "lineNumber": 311,
               "columnNumber": 25,
               "deprecated": false,
               "trackAdoption": false,
@@ -25204,7 +25269,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 307,
+              "lineNumber": 311,
               "columnNumber": 42,
               "deprecated": false,
               "trackAdoption": false,
@@ -25221,7 +25286,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 307,
+              "lineNumber": 311,
               "columnNumber": 59,
               "deprecated": false,
               "trackAdoption": false,
@@ -25247,7 +25312,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-          "lineNumber": 309,
+          "lineNumber": 313,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -25264,7 +25329,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
-              "lineNumber": 313,
+              "lineNumber": 317,
               "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
@@ -26957,7 +27022,7 @@
           ", \"id\">"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 102,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26970,7 +27035,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 103,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -26986,7 +27051,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 104,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27002,7 +27067,7 @@
               "\"active\" | \"inactive\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 105,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27025,7 +27090,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 106,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27038,7 +27103,23 @@
             "label": "is_managed",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 107,
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27051,7 +27132,7 @@
             "label": "updated_at",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 108,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27064,7 +27145,7 @@
             "label": "updated_by",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 109,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27077,7 +27158,7 @@
             "label": "revision",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 110,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27093,7 +27174,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 111,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27109,7 +27190,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 112,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27125,7 +27206,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 113,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27141,7 +27222,7 @@
               "{ version: string; count: number; }[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 114,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27154,7 +27235,7 @@
             "label": "is_protected",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 115,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27170,7 +27251,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 116,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27186,7 +27267,7 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 117,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27203,7 +27284,7 @@
               "[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 118,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29478,7 +29559,7 @@
         "label": "FullAgentPolicy",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 231,
+        "lineNumber": 241,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29491,7 +29572,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 232,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29507,7 +29588,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 233,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29531,7 +29612,7 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 234,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29555,7 +29636,7 @@
               "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 237,
+            "lineNumber": 247,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29580,7 +29661,7 @@
               "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 240,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29603,7 +29684,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 245,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29619,7 +29700,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 246,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29639,7 +29720,7 @@
               "; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; logging?: { level?: string | undefined; to_files?: boolean | undefined; files?: { rotateeverybytes?: number | undefined; keepfiles?: number | undefined; interval?: string | undefined; } | undefined; } | undefined; limits?: { go_max_procs?: number | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 247,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29656,7 +29737,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 269,
+            "lineNumber": 279,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29672,7 +29753,7 @@
               "{ data: string; signature: string; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 270,
+            "lineNumber": 280,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29688,7 +29769,7 @@
         "label": "FullAgentPolicyInput",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 130,
+        "lineNumber": 140,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29701,7 +29782,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 131,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29714,7 +29795,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 132,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29727,7 +29808,7 @@
             "label": "revision",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 133,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29740,7 +29821,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 134,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29756,7 +29837,7 @@
               "{ namespace: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 135,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29769,7 +29850,7 @@
             "label": "use_output",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 136,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29782,7 +29863,7 @@
             "label": "package_policy_id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 137,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29800,7 +29881,7 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 138,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29823,7 +29904,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 142,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29840,7 +29921,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 143,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29857,7 +29938,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 144,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29873,7 +29954,7 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 145,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29889,7 +29970,7 @@
         "label": "FullAgentPolicyInputStream",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 121,
+        "lineNumber": 131,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29902,7 +29983,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 122,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29918,7 +29999,7 @@
               "{ dataset: string; type?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 123,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29934,7 +30015,7 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 127,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29950,7 +30031,7 @@
         "label": "FullAgentPolicyKibanaConfig",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 293,
+        "lineNumber": 303,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29966,7 +30047,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 294,
+            "lineNumber": 304,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29979,7 +30060,7 @@
             "label": "protocol",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 295,
+            "lineNumber": 305,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29995,7 +30076,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-            "lineNumber": 296,
+            "lineNumber": 306,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31977,6 +32058,22 @@
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
             "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.is_verifier",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_verifier",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36566,7 +36663,7 @@
           "\"aws.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 41,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -36600,7 +36697,7 @@
           "\"azure.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 42,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37338,7 +37435,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 169,
+        "lineNumber": 179,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37357,7 +37454,7 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 167,
+        "lineNumber": 177,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37374,7 +37471,7 @@
           "\"gcp.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 43,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37953,7 +38050,7 @@
           "\"organization-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 48,
+        "lineNumber": 55,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38459,7 +38556,7 @@
           "\"single-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 47,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38501,7 +38598,7 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
-        "lineNumber": 156,
+        "lineNumber": 166,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

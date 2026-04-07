@@ -121,7 +121,11 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
+<<<<<<< HEAD
   - '@kbn/lens-common'
+=======
+  - '@kbn/as-code-shared-transforms'
+>>>>>>> upstream/main
   - '@kbn/core-http-common'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-browser'

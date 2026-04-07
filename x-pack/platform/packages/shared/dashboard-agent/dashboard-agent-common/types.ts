@@ -71,7 +71,7 @@ export const isSection = (
 // ============================================================================
 
 const querySchema = z.object({
-  query: z.union([z.string(), z.record(z.string(), z.unknown())]),
+  expression: z.union([z.string(), z.record(z.string(), z.unknown())]),
   language: z.string(),
 });
 
