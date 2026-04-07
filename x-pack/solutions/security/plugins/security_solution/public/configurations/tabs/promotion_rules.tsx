@@ -11,8 +11,12 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { GapAutoFillSchedulerProvider } from '../../detection_engine/rule_gaps/context/gap_auto_fill_scheduler_context';
 import { RulesTableContextProvider } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { PromotionRulesTable } from './promotion_rules/promotion_rules_table';
+import { useBootstrapPromotionRules } from './promotion_rules/use_bootstrap_promotion_rules';
 
 export const PromotionRules: React.FC = () => {
+  // Bootstrap promotion rules when this EASE-specific component mounts
+  useBootstrapPromotionRules();
+
   return (
     <GapAutoFillSchedulerProvider>
       <RulesTableContextProvider>

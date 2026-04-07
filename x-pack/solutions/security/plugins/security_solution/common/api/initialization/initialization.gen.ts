@@ -20,7 +20,13 @@ import { z } from '@kbn/zod/v4';
  * Identifier for an initialization flow.
  */
 export type InitializationFlowId = z.infer<typeof InitializationFlowId>;
-export const InitializationFlowId = z.enum(['create-list-indices', 'security-data-views']);
+export const InitializationFlowId = z.enum([
+  'create-list-indices',
+  'security-data-views',
+  'install-prebuilt-rules-package',
+  'install-endpoint-package',
+  'install-ai-prompts-package',
+]);
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
 export const InitializationFlowIdEnum = InitializationFlowId.enum;
 
@@ -54,6 +60,19 @@ export const SecurityDataViewsReadyResult = z.object({
   }),
 });
 
+export type PackageInstallReadyResult = z.infer<typeof PackageInstallReadyResult>;
+export const PackageInstallReadyResult = z.object({
+  status: z.literal('ready'),
+  payload: z.object({
+    name: z.string(),
+    version: z.string(),
+    /**
+     * Fleet package installation status (e.g., installed, already_installed).
+     */
+    install_status: z.string(),
+  }),
+});
+
 /**
  * Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
  */
@@ -64,6 +83,15 @@ export const InitializationFlowsResult = z.object({
     .optional(),
   'security-data-views': z
     .union([SecurityDataViewsReadyResult, InitializationFlowErrorResult])
+    .optional(),
+  'install-prebuilt-rules-package': z
+    .union([PackageInstallReadyResult, InitializationFlowErrorResult])
+    .optional(),
+  'install-endpoint-package': z
+    .union([PackageInstallReadyResult, InitializationFlowErrorResult])
+    .optional(),
+  'install-ai-prompts-package': z
+    .union([PackageInstallReadyResult, InitializationFlowErrorResult])
     .optional(),
 });
 

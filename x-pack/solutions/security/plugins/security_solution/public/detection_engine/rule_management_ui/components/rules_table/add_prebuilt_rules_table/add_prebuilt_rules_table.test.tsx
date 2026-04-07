@@ -12,7 +12,7 @@ import { AddPrebuiltRulesTableContextProvider } from './add_prebuilt_rules_table
 
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import { useSecuritySolutionInitialization } from '../../../../../common/components/initialization/use_security_solution_initialization';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
@@ -68,8 +68,10 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../rule_management/logic/use_upgrade_security_packages', () => ({
-  useIsUpgradingSecurityPackages: jest.fn().mockImplementation(() => false),
+jest.mock('../../../../../common/components/initialization/use_security_solution_initialization', () => ({
+  useSecuritySolutionInitialization: jest.fn().mockReturnValue({
+    'install-prebuilt-rules-package': { loading: false, result: { status: 'ready' } },
+  }),
 }));
 
 jest.mock(
@@ -133,7 +135,9 @@ describe('AddPrebuiltRulesTable', () => {
       },
     });
 
-    (useIsUpgradingSecurityPackages as jest.Mock).mockReturnValueOnce(true);
+    (useSecuritySolutionInitialization as jest.Mock).mockReturnValueOnce({
+      'install-prebuilt-rules-package': { loading: true },
+    });
 
     render(
       <QueryClientProvider client={new QueryClient()}>

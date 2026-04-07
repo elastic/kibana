@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useEffect } from 'react';
+import { useIsMutating } from '@kbn/react-query';
+import {
+  INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  INITIALIZATION_FLOW_STATUS_READY,
+  INITIALIZATION_FLOW_STATUS_ERROR,
+} from '../../../../common/api/initialization';
+import { useSecuritySolutionInitialization } from '../../../common/components/initialization/use_security_solution_initialization';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import {
+  BOOTSTRAP_PROMOTION_RULES_KEY,
+  useBootstrapPromotionRulesMutation,
+} from '../../../detection_engine/rule_management/api/hooks/prebuilt_rules/use_bootstrap_promotion_rules';
+import * as i18n from '../../../detection_engine/rule_management/logic/translations';
+
+/**
+ * Bootstraps promotion rules after the prebuilt rules package is installed.
+ * Only runs when the user has rule edit privileges.
+ * Call this from EASE-specific components (e.g., the PromotionRules wrapper).
+ */
+export const useBootstrapPromotionRules = () => {
+  const { addError } = useAppToasts();
+  const { edit: canEditRules } = useUserPrivileges().rulesPrivileges.rules;
+
+  const initState = useSecuritySolutionInitialization([
+    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  ]);
+  const prebuiltRulesFlowState = initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE];
+  const prebuiltRulesPackageReady =
+    prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_READY;
+  const prebuiltRulesPackageFailed =
+    prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_ERROR;
+
+  const { mutate: bootstrapPromotionRules } = useBootstrapPromotionRulesMutation({
+    onError: (error) => {
+      addError(error, { title: i18n.BOOTSTRAP_PROMOTION_RULES_FAILURE });
+    },
+    onSuccess: ({ errors }) => {
+      if (errors.length) {
+        addError(new Error(errors.map((error) => error.message).join('; ')), {
+          title: i18n.BOOTSTRAP_PROMOTION_RULES_FAILURE,
+        });
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (prebuiltRulesPackageFailed) {
+      addError(
+        new Error(
+          prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_ERROR
+            ? prebuiltRulesFlowState.result.error ?? 'Unknown error'
+            : 'Unknown error'
+        ),
+        { title: i18n.BOOTSTRAP_PREBUILT_RULES_PACKAGE_FAILURE }
+      );
+    }
+  }, [prebuiltRulesPackageFailed, prebuiltRulesFlowState, addError]);
+
+  useEffect(() => {
+    if (prebuiltRulesPackageReady && canEditRules) {
+      bootstrapPromotionRules();
+    }
+  }, [prebuiltRulesPackageReady, canEditRules, bootstrapPromotionRules]);
+};
+
+/**
+ * @returns true if promotion rules are currently being bootstrapped
+ */
+export const useIsBootstrappingPromotionRules = () => {
+  return useIsMutating({ mutationKey: BOOTSTRAP_PROMOTION_RULES_KEY }) > 0;
+};

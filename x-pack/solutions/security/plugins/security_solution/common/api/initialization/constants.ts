@@ -19,6 +19,12 @@ export const INITIALIZATION_FLOW_CREATE_LIST_INDICES =
   InitializationFlowIdEnum['create-list-indices'];
 export const INITIALIZATION_FLOW_SECURITY_DATA_VIEWS =
   InitializationFlowIdEnum['security-data-views'];
+export const INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE =
+  InitializationFlowIdEnum['install-prebuilt-rules-package'];
+export const INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE =
+  InitializationFlowIdEnum['install-endpoint-package'];
+export const INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE =
+  InitializationFlowIdEnum['install-ai-prompts-package'];
 
 // Flow statuses
 export const INITIALIZATION_FLOW_STATUS_READY = CreateListIndicesReadyResult.shape.status.value;

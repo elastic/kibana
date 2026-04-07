@@ -31,9 +31,36 @@ jest.mock('./flows/initialize_security_data_views', () => ({
   },
 }));
 
+jest.mock('./flows/install_prebuilt_rules_package', () => ({
+  installPrebuiltRulesPackageFlow: {
+    id: 'install-prebuilt-rules-package' as const,
+    runFirst: true,
+    resolveProvisionContext: jest.fn().mockResolvedValue({}),
+    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+  },
+}));
+
+jest.mock('./flows/install_endpoint_package', () => ({
+  installEndpointPackageFlow: {
+    id: 'install-endpoint-package' as const,
+    resolveProvisionContext: jest.fn().mockResolvedValue({}),
+    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+  },
+}));
+
+jest.mock('./flows/install_ai_prompts_package', () => ({
+  installAiPromptsPackageFlow: {
+    id: 'install-ai-prompts-package' as const,
+    resolveProvisionContext: jest.fn().mockResolvedValue({}),
+    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+  },
+}));
+
 const createMockContext = (): InitializationFlowContext =>
   ({
-    requestHandlerContext: {},
+    requestHandlerContext: {
+      securitySolution: Promise.resolve({ getSpaceId: () => 'default' }),
+    },
   } as unknown as InitializationFlowContext);
 
 describe('runInitializationFlows', () => {

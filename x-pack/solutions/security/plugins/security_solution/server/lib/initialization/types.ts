@@ -10,6 +10,7 @@ import type {
   InitializationFlowId,
   InitializationFlowErrorResult,
   CreateListIndicesReadyResult,
+  PackageInstallReadyResult,
   SecurityDataViewsReadyResult,
 } from '../../../common/api/initialization';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -20,6 +21,12 @@ export interface InitializationFlowContext {
 
 export interface InitializationFlowDefinition<ProvisionContext> {
   id: InitializationFlowId;
+  /**
+   * When true, this flow is executed sequentially and must complete before any
+   * remaining (non-runFirst) flows start in parallel. Multiple runFirst flows
+   * are also executed one at a time, in the order they appear in the request.
+   */
+  runFirst?: boolean;
   resolveProvisionContext: (
     requestHandlerContext: InitializationFlowContext,
     logger: Logger
@@ -28,6 +35,9 @@ export interface InitializationFlowDefinition<ProvisionContext> {
     context: ProvisionContext,
     logger: Logger
   ) => Promise<
-    CreateListIndicesReadyResult | SecurityDataViewsReadyResult | InitializationFlowErrorResult
+    | CreateListIndicesReadyResult
+    | SecurityDataViewsReadyResult
+    | PackageInstallReadyResult
+    | InitializationFlowErrorResult
   >;
 }
