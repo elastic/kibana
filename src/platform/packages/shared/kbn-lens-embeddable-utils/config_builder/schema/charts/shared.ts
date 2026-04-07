@@ -139,14 +139,20 @@ export function mergeAllMetricsWithChartDimensionSchemaWithStaticOps<T extends P
   ]);
 }
 
-export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(baseSchema: T) {
-  return schema.oneOf([
-    bucketDateHistogramOperationSchema.extends(baseSchema),
-    bucketTermsOperationSchema.extends(baseSchema),
-    bucketHistogramOperationSchema.extends(baseSchema),
-    bucketRangesOperationSchema.extends(baseSchema),
-    bucketFiltersOperationSchema.extends(baseSchema),
-  ]);
+export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(
+  baseSchema: T,
+  oneOfOptions?: { meta?: { description?: string } }
+) {
+  return schema.oneOf(
+    [
+      bucketDateHistogramOperationSchema.extends(baseSchema),
+      bucketTermsOperationSchema.extends(baseSchema),
+      bucketHistogramOperationSchema.extends(baseSchema),
+      bucketRangesOperationSchema.extends(baseSchema),
+      bucketFiltersOperationSchema.extends(baseSchema),
+    ],
+    oneOfOptions
+  );
 }
 
 export const xScaleSchema = schema.maybe(

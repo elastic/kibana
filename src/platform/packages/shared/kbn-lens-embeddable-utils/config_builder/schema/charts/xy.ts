@@ -545,24 +545,48 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ...datasetSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema({
-        collapse_by: schema.maybe(collapseBySchema),
-        color: schema.maybe(colorMappingSchema),
-        aggregate_first: schema.maybe(
-          schema.boolean({
-            meta: { description: 'Whether to aggregate before splitting series' },
-          })
-        ),
-      })
+      mergeAllBucketsWithChartDimensionSchema(
+        {
+          collapse_by: schema.maybe(collapseBySchema),
+          color: schema.maybe(colorMappingSchema),
+          aggregate_first: schema.maybe(
+            schema.boolean({
+              meta: { description: 'Whether to aggregate before splitting series' },
+            })
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Splits each y metric into multiple series by the values of this dimension. For example, breaking down by a host.name field creates one series per host. Unlike x (which defines the domain axis), breakdown_by creates separate visual series within the same chart.',
+          },
+        }
+      )
     ),
     y: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
         axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
         color: schema.maybe(staticColorSchema),
       }),
-      { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
+      {
+        meta: {
+          description:
+            'Dependent axis (metric): the measured values. Always use y for metrics regardless of chart orientation — chart orientation is controlled by the type field (e.g. bar vs bar_horizontal), not by swapping x and y.',
+        },
+        maxSize: 100,
+      }
     ),
-    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({})),
+    x: schema.maybe(
+      mergeAllBucketsWithChartDimensionSchema(
+        {},
+        {
+          meta: {
+            description:
+              'Independent axis (dimension): the variable that data is grouped or bucketed by. Always use x for the dimension regardless of chart orientation — for horizontal bar charts, set type to bar_horizontal instead of swapping x and y.',
+          },
+        }
+      )
+    ),
   },
   {
     meta: {
@@ -587,7 +611,12 @@ const xyDataLayerSchemaESQL = schema.object(
           color: schema.maybe(colorMappingSchema),
           collapse_by: schema.maybe(collapseBySchema),
         },
-        { meta: { description: 'ES|QL column for breakdown' } }
+        {
+          meta: {
+            description:
+              'Splits each y metric into multiple series by the values of this ES|QL column. For example, breaking down by a host.name column creates one series per host. Unlike x (which defines the domain axis), breakdown_by creates separate visual series within the same chart.',
+          },
+        }
       )
     ),
     y: schema.arrayOf(
@@ -598,9 +627,25 @@ const xyDataLayerSchemaESQL = schema.object(
         },
         { meta: { description: 'ES|QL column for Y-axis metric' } }
       ),
-      { meta: { description: 'Array of ES|QL columns for Y-axis metrics' }, maxSize: 100 }
+      {
+        meta: {
+          description:
+            'Dependent axis (metric): the measured values. Always use y for metrics regardless of chart orientation — chart orientation is controlled by the type field (e.g. bar vs bar_horizontal), not by swapping x and y.',
+        },
+        maxSize: 100,
+      }
     ),
-    x: schema.maybe(esqlColumnWithFormatSchema),
+    x: schema.maybe(
+      esqlColumnWithFormatSchema.extends(
+        {},
+        {
+          meta: {
+            description:
+              'Independent axis (dimension): the variable that data is grouped or bucketed by. Always use x for the dimension regardless of chart orientation — for horizontal bar charts, set type to bar_horizontal instead of swapping x and y.',
+          },
+        }
+      )
+    ),
   },
   {
     meta: {
