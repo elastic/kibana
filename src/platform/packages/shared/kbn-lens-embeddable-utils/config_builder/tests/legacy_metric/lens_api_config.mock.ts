@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegacyMetricState } from '../../schema/charts/legacy_metric';
+import type { LegacyMetricState, LegacyMetricStateESQL } from '../../schema/charts/legacy_metric';
 
 /**
  * Basic legacy metric chart with ad hoc dataView
@@ -52,7 +52,7 @@ export const basicLegacyMetricWithDataView: LegacyMetricState = {
 /**
  * ESQL-based legacy metric chart
  */
-export const esqlLegacyMetric: LegacyMetricState = {
+export const esqlLegacyMetric: LegacyMetricStateESQL = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
@@ -137,7 +137,7 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
 /**
  * Comprehensive ESQL-based legacy metric chart
  */
-export const comprehensiveEsqlLegacyMetric: LegacyMetricState = {
+export const comprehensiveEsqlLegacyMetric: LegacyMetricStateESQL = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
