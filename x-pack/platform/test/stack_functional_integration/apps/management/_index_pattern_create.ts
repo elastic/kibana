@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default ({ getService, getPageObjects }) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   describe('creating default index', function describeIndexTests() {
     const PageObjects = getPageObjects(['common', 'settings']);
     const retry = getService('retry');
@@ -30,7 +31,7 @@ export default ({ getService, getPageObjects }) => {
       before(async () => {
         await retry.tryForTime(120000, async () => {
           log.debug('create Index Pattern');
-          await PageObjects.settings.createIndexPattern();
+          await PageObjects.settings.createIndexPattern('logstash-*');
         });
       });
 
