@@ -182,9 +182,6 @@ export const HeaderHelpMenu = () => {
       id="headerHelpMenu"
       isOpen={isOpen}
       repositionOnScroll
-      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAriaLabel', {
-        defaultMessage: 'Help menu',
-      })}
     >
       <EuiPopoverTitle>
         <EuiFlexGroup responsive={false}>
