@@ -42,8 +42,7 @@ export const useBulkEnableRules = () => {
       if (data.truncated) {
         toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.truncatedFilterMessage', {
-            defaultMessage:
-              'Enable applied to the first {maxRules, number} rules only.',
+            defaultMessage: 'Enable applied to the first {maxRules, number} rules only.',
             values: {
               maxRules: BULK_FILTER_MAX_RULES,
             },
@@ -90,8 +89,7 @@ export const useBulkDisableRules = () => {
       if (data.truncated) {
         toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.truncatedFilterMessage', {
-            defaultMessage:
-              'Disable applied to the first {maxRules, number} rules only.',
+            defaultMessage: 'Disable applied to the first {maxRules, number} rules only.',
             values: {
               maxRules: BULK_FILTER_MAX_RULES,
             },

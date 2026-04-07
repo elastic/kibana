@@ -14,7 +14,13 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
-export type { BulkOperationResponse, CreateRuleData, UpdateRuleData, RuleResponse, FindRulesSortField };
+export type {
+  BulkOperationResponse,
+  CreateRuleData,
+  UpdateRuleData,
+  RuleResponse,
+  FindRulesSortField,
+};
 
 export type BulkOperationError = BulkOperationResponse['errors'][number];
 
@@ -42,4 +48,3 @@ export interface FindRulesResponse {
 export type BulkRulesParams =
   | { ids: string[]; filter?: undefined }
   | { filter: string; ids?: undefined };
-

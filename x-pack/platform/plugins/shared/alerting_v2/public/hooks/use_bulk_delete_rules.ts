@@ -42,8 +42,7 @@ export const useBulkDeleteRules = () => {
       if (data.truncated) {
         toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkDeleteRules.truncatedFilterMessage', {
-            defaultMessage:
-              'Successfully deleted the first {maxRules, number} rules.',
+            defaultMessage: 'Successfully deleted the first {maxRules, number} rules.',
             values: {
               maxRules: BULK_FILTER_MAX_RULES,
             },

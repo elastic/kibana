@@ -67,9 +67,7 @@ describe('useBulkSelect', () => {
   });
 
   it('returns match-all filter when select-all with no exclusions', () => {
-    const { result } = renderHook(() =>
-      useBulkSelect({ totalItemCount: 10, items: pageItems })
-    );
+    const { result } = renderHook(() => useBulkSelect({ totalItemCount: 10, items: pageItems }));
 
     act(() => {
       result.current.onSelectAll();
@@ -79,9 +77,7 @@ describe('useBulkSelect', () => {
   });
 
   it('returns zero selectedCount when totalItemCount is zero', () => {
-    const { result } = renderHook(() =>
-      useBulkSelect({ totalItemCount: 0, items: [] })
-    );
+    const { result } = renderHook(() => useBulkSelect({ totalItemCount: 0, items: [] }));
 
     act(() => {
       result.current.onSelectAll();
