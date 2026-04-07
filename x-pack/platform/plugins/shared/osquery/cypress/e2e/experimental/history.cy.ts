@@ -374,7 +374,7 @@ describe(
       cy.getBySel('osquery-save-query-flyout').should('exist');
 
       cy.getBySel('osquery-save-query-flyout').within(() => {
-        cy.get('.euiCodeBlock').should('exist');
+        cy.get('.monaco-editor').should('exist');
         cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
         cy.get('input[name="description"]').type('Saved from detail page');
       });
