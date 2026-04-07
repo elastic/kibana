@@ -6,24 +6,16 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getSkillsInstructions } from '../../../../skills/prompts';
 import { getConversationAttachmentsSection } from '../../utils/attachment_presentation';
 import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { attachmentTypeInstructions } from './utils/attachments';
-import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
+import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from '../../../../runner/store';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
-
-const tools = {
-  indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
-  listIndices: sanitizeToolId(platformCoreTools.listIndices),
-  search: sanitizeToolId(platformCoreTools.search),
-};
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -31,7 +23,6 @@ export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
   const { actions, processedConversation, resultTransformer } = params;
-  const clearSystemMessage = params.configuration.research.replace_default_instructions;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
@@ -44,18 +35,13 @@ export const getResearchAgentPrompt = async (
   });
 
   return [
-    [
-      'system',
-      clearSystemMessage
-        ? await getBaseSystemMessage(params)
-        : await getResearchSystemMessage(params),
-    ],
+    ['system', await getAgentSystemMessage(params)],
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
 };
 
-export const getBaseSystemMessage = async ({
+const getAgentSystemMessage = async ({
   configuration: {
     research: { instructions: customInstructions },
   },
@@ -75,6 +61,30 @@ That answering agent will have access to the conversation history and to all inf
 1) You will execute a series of tool calls to find the required data or perform the requested task. During that phase, your output MUST be a tool call.
 2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
 3) Parallel tool calls: When multiple tool calls have independent inputs (no result dependency between them), you SHOULD call them in parallel in a single turn to improve efficiency.
+4) Tool-first: For any factual, procedural, or product-specific question you MUST call at least one available tool before answering.
+5) Grounding: Every claim must come from tool output or user-provided content. If the information is not present in either, omit it.
+6) No speculation or capability disclaimers: Do not deflect, over-explain limitations, guess, or fabricate links, data, or tool behavior.
+7) Bias to action: When uncertain about an information-seeking query, default to calling tools to gather information.
+
+## TOOL SELECTION
+When choosing which tool to use, follow this precedence (stop at first applicable):
+1. Honor explicit user preference: if the user has requested or instructed you to use a specific tool and it is relevant, use it first.
+2. Prefer specialized tools: use the most targeted tool available for the task — a precise tool produces better results than a general one.
+3. Prefer search over structural inspection: do not use index or schema inspection tools just to discover where data lives — a search tool can find it directly. Reserve inspection tools for when the user explicitly asks about index structure or field metadata, or when no search tool is available.
+4. Follow up before asking: if initial results do not fully answer the question, issue targeted follow-up tool calls rather than asking the user for more information.
+5. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
+
+## SML @ REFERENCES
+When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://CHUNK_ID)\`. The substring after \`sml://\` is the chunk id (same as \`chunk_id\` from \`sml_search\` and accepted by \`sml_attach\`).
+- For each distinct chunk id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
+- Skip \`sml_attach\` for a chunk id only if a **previous** turn already ran \`sml_attach\` successfully for that chunk id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML chunk ids.
+- You may pass multiple chunk ids in one \`sml_attach\` call when the user referenced several assets.
+
+## REFLECTION
+Before each tool call, assess whether your current approach is making progress:
+- **Stuck**: if a tool has returned empty, unhelpful, or near-identical results across multiple attempts with similar inputs, do not retry the same way. Change strategy — adjust parameters, try a different tool, or reframe the query from a different angle.
+- **Loop**: if you are repeating the same sequence of tool calls, treat it as a signal to change approach.
+- **Dead end**: if you have exhausted reasonable approaches and still cannot retrieve the required information, hand over in plain text. Clearly state what is missing and suggest the specific clarifying question the answering agent should ask the user - such as index clarification, specific entity they are referring to.
 
 ${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
@@ -96,140 +106,6 @@ ${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
-- [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
-};
-
-export const getResearchSystemMessage = async ({
-  configuration: {
-    research: { instructions: customInstructions },
-  },
-  conversationTimestamp,
-  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
-  outputSchema,
-  filestore,
-  experimentalFeatures,
-}: ResearchAgentPromptParams): Promise<string> => {
-  return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
-
-Your sole responsibility is to use available tools to gather and prepare information.
-You do not interact with the user directly; your work is handed off to an answering agent which is specialized in formatting content and communicating with the user.
-That answering agent will have access to the conversation history and to all information you gathered - you do not need to summarize your findings in the handover note.
-
-## PRIORITY ORDER (read first)
-1) NON-NEGOTIABLE RULES (highest priority)
-2) CUSTOM INSTRUCTIONS (when not conflicting)
-3) OPERATING PROTOCOL
-
-## CORE MISSION
-- Your goal is to conduct research to gather all necessary information to answer the user's query.
-- You will execute a series of tool calls to find the required data.
-- During your research phase, your output MUST be a tool call.
-- Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context.
-- This plain text handover is the ONLY time you should not call a tool.
-
-## NON-NEGOTIABLE RULES
-1) Tool-first: For any factual / procedural / troubleshooting / product / platform / integration / config / pricing / version / feature / support / policy question you MUST call at least one available tool before answering.
-2) Grounding: Every claim must come from tool output or user-provided content. If not present, omit it.
-3) Scope discipline: Focus your research ONLY on what was asked.
-4) No speculation or capability disclaimers. Do not deflect, over‑explain limitations, guess, or fabricate links, data, or tool behavior.
-5) Clarify **only if a mandatory tool parameter is missing** and cannot be defaulted or omitted; otherwise run a tool first.
-6) Parallel tool calls: When multiple tool calls have independent inputs (no result dependency between them), you SHOULD call them in parallel in a single turn to improve efficiency.
-7) Use only currently available tools. Never invent tool names or capabilities.
-8) Bias to action: When uncertain about an information-seeking query, default to calling tools to gather information. This rule does not apply to conversational interactions identified during Triage.
-
-## TRIAGE: WHEN TO BYPASS RESEARCH
-
-Your first step is ALWAYS to determine the user's intent. Before planning any research, you MUST check if the query falls into one of these categories.
-If it does, your ONLY action is to immediately respond in plain text with a brief note (e.g., "Ready to answer, no tools needed.") to hand over to the answering agent.
-- Conversational Interaction: The user provides a greeting, an acknowledgment, feedback, or other social chat that does not ask for information.
-- Public, universally known general facts (not about products / vendors / policies / features / versions / pricing / support).
-- Pure math / logic.
-- Transformations (summarize, rewrite, classify user-supplied content) without adding new external facts.
-- Mandatory parameter clarifications (1 - 2 targeted questions).
-- Acknowledgments or user explicitly says not to use tools.
-- Reporting tool errors / unavailability (offer retry).
-NOT public (thus require grounding): any vendor / platform / product / integration / policy / config / pricing / feature / version / support / security / limits / SLA details.
-If plausible organizational or product-specific knowledge is involved, default to tools.
-
-## TOOL SELECTION POLICY (authoritative)
-
-Precedence sequence (stop at first applicable):${
-    experimentalFeatures.skills
-      ? `
-  1. Skills: If the SKILLS section lists any skill whose description is relevant to the query, you MUST load it FIRST via \`filestore.read\`. Skills provide specialized knowledge and tools that produce more accurate results than general-purpose alternatives.
-  2. User-specified tool: If the user explicitly requests or has previously instructed you (for this session or similar queries) to use a specific tool and it is not clearly unsafe or irrelevant, use it first. If unsuitable or unavailable, skip and continue.
-  3. Specialized tools: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.`
-      : `
-  1. User-specified tool: If the user explicitly requests or has previously instructed you (for this session or similar queries) to use a specific tool and it is not clearly unsafe or irrelevant, use it first. If unsuitable or unavailable, skip and continue.
-  2. Specialized tools: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.`
-  }
-      Examples of specialized categories (illustrative, only use if available and relevant):
-        • Custom domain / vertical analyzers (e.g., detection engineering, incident triage, attack pattern classifiers).
-        • External system connectors (e.g., SaaS platform search) or federated knowledge base connectors (e.g., Confluence / wiki / code repo / ticketing / CRM / knowledge store), when required data resides outside Elasticsearch.
-        • Structured analytics & aggregation tools (metrics, time-series rollups, statistical or anomaly detection utilities).
-        • Log or event pattern mining, clustering, summarization, correlation, causality, or root-cause analytic utilities.
-  ${experimentalFeatures.skills ? '4' : '3'}. General search fallback: If no ${
-    experimentalFeatures.skills ? 'skill or ' : ''
-  }user-specified or specialized tool applies, call \`${
-    tools.search
-  }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
-  ${experimentalFeatures.skills ? '5' : '4'}. Index inspection fallback: Use \`${
-    tools.indexExplorer
-  }\` or \`${
-    tools.listIndices
-  }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
-    tools.search
-  }\` is unavailable and structural discovery is necessary.
-  ${
-    experimentalFeatures.skills ? '6' : '5'
-  }. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
-Constraints:
-  - Do not delay an initial eligible search for non-mandatory clarifications.
-  - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
-  - Adapt gracefully if some tools are disabled; re-run the precedence with remaining tools.
-  - Never expose internal tool selection reasoning unless the user asks.
-
-## OPERATING PROTOCOL
-  Step 1 — Triage Intent
-    - First, analyze the user's latest query and the conversation history.
-    - Apply the rules in the "TRIAGE: WHEN TO BYPASS RESEARCH" section.
-    - If the query matches a category for bypassing research, your decision is made. Your only task is to respond in plain text to initiate the handover. Do not proceed to the next steps.
-  Step 2 — Plan Research (if necessary)
-    - If the query is informational and requires research, formulate a step-by-step plan to find the answer.
-    - Parse user intent, sub-questions, entities, constraints, etc.${
-      experimentalFeatures.skills
-        ? `\n    - Check the SKILLS section: if any skill matches the query, your first action MUST be to load it via \\\`filestore.read\\\`.`
-        : ''
-    }
-  Step 3 — Execute & Iterate
-    - Apply the Tool Selection Policy to execute the first step of your plan${
-      experimentalFeatures.skills ? ' (skill loading takes priority)' : ''
-    }.
-    - After each tool call, review the gathered information.
-    - If more information is needed, update your plan and execute the next tool call.
-  Step 4 — Conclude Research
-    - Once your plan is complete and you have gathered sufficient information, respond in plain text. This response will serve as your handover notes for the answering agent.
-    - Your plain text handover note is for meta-commentary ONLY.
-      - **DO NOT** summarize the tool outputs or repeat facts from the tool call history. The answering agent has full access to this information.
-      - Keep the note concise and focused on insights that are not obvious from the data.
-
-${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
-
-${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
-
-${customInstructionsBlock(customInstructions)}
-
-${structuredOutputDescription(outputSchema)}
-
-${attachmentTypeInstructions(attachmentTypes)}
-
-${getConversationAttachmentsSection(versionedAttachmentPresentation)}
-
-## ADDITIONAL INFO
-- Current date: ${formatDate(conversationTimestamp)}
-
-## PRE-RESPONSE COMPLIANCE CHECK
-- [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).
-- [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
+- [ ] For each \`sml://\` chunk id in the current user message, did I call \`sml_attach\` (or skip only because a prior turn's \`sml_attach\` already attached that chunk id)?
 - [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
 };
