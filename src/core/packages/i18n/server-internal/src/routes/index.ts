@@ -21,7 +21,7 @@ export const registerRoutes = ({
   locale: string;
   isDist: boolean;
   translationHash: string;
-  supportedLocales: string[];
+  supportedLocales: readonly string[];
 }) => {
   registerTranslationsRoute({ router, locale, isDist, translationHash, supportedLocales });
 };

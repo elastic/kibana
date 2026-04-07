@@ -7,10 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  useUpdateUserProfile,
-  type LocaleValue as Locale,
-} from '@kbn/user-profile-components';
+import { useUpdateUserProfile, type LocaleValue as Locale } from '@kbn/user-profile-components';
 
 const DEFAULT_LOCALE = 'en';
 
@@ -40,8 +37,9 @@ export const useLanguage = (): LanguageAPI => {
     },
   });
 
-  const { userSettings: { locale: localeUserProfile = DEFAULT_LOCALE } = {} } =
-    userProfileData ?? { userSettings: {} };
+  const { userSettings: { locale: localeUserProfile = DEFAULT_LOCALE } = {} } = userProfileData ?? {
+    userSettings: {},
+  };
 
   const [locale, setLocale] = useState<Locale>(localeUserProfile);
   const [initialLocaleValue, setInitialLocaleValue] = useState<Locale>(localeUserProfile);

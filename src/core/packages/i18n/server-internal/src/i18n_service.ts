@@ -19,12 +19,12 @@ import type {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
 import type { I18nConfigType } from './i18n_config';
 import { config as i18nConfigDef } from './i18n_config';
 import { getAllKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
-import { supportedLocales } from './constants';
 
 export interface PrebootDeps {
   http: InternalHttpServicePreboot;
@@ -53,7 +53,12 @@ export class I18nService {
     const { locale, translationHash } = await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
-      registerRoutes({ router, locale, isDist, translationHash, supportedLocales })
+      registerRoutes({
+        router,
+        locale,
+        isDist,
+        supportedLocales: SUPPORTED_LOCALE_IDS,
+      })
     );
 
     return {
@@ -66,7 +71,12 @@ export class I18nService {
 
     const router = http.createRouter('');
     const { dist: isDist } = this.coreContext.env.packageInfo;
-    registerRoutes({ router, locale, isDist, translationHash, supportedLocales });
+    registerRoutes({
+      router,
+      locale,
+      isDist,
+      supportedLocales: SUPPORTED_LOCALE_IDS,
+    });
 
     return {
       getLocale: () => locale,

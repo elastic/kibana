@@ -34,7 +34,7 @@ import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import { i18n, SUPPORTED_LOCALES } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -277,14 +277,6 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
   );
 };
 
-const SUPPORTED_LOCALES: Array<{ value: string; text: string }> = [
-  { value: 'en', text: 'English' },
-  { value: 'fr-FR', text: 'Français' },
-  { value: 'ja-JP', text: '日本語' },
-  { value: 'zh-CN', text: '中文' },
-  { value: 'de-DE', text: 'Deutsch' },
-];
-
 const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
   if (!formik.values.data) {
     return null;
@@ -323,7 +315,7 @@ const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) 
         <FormField
           as={EuiSelect}
           name="data.userSettings.locale"
-          options={SUPPORTED_LOCALES}
+          options={SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }))}
           data-test-subj="localeSelect"
           fullWidth
         />

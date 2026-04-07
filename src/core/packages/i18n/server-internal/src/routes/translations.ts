@@ -32,7 +32,7 @@ export const registerTranslationsRoute = ({
   locale: string;
   translationHash: string;
   isDist: boolean;
-  supportedLocales: string[];
+  supportedLocales: readonly string[];
 }) => {
   const translationCaches = new Map<string, TranslationCache>();
 
@@ -64,7 +64,7 @@ export const registerTranslationsRoute = ({
             excludeFromRateLimiter: true,
           },
         },
-        async (ctx, req, res) => {
+        async (_ctx, req, res) => {
           const requestedLocale = req.params.locale.toLowerCase();
           if (!supportedLocales.some((supported) => supported.toLowerCase() === requestedLocale)) {
             return res.notFound({

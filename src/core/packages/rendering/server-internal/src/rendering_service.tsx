@@ -27,6 +27,7 @@ import {
   type UserProvidedValues,
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
+import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
 import { Template } from './views';
 import type {
   IRenderOptions,
@@ -50,10 +51,6 @@ import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 import { isThemeBundled } from './theme';
 
-// POC: Supported locales for Accept-Language matching.
-// TODO: Import from a shared location once this moves beyond POC.
-const SUPPORTED_LOCALES = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'];
-
 /**
  * Parse the Accept-Language header and return the best matching supported locale,
  * or undefined if no match is found.
@@ -75,7 +72,7 @@ function parseBrowserLocale(acceptLanguage: string | string[] | undefined): stri
 
   for (const { lang } of entries) {
     // Exact match (case-insensitive)
-    const exactMatch = SUPPORTED_LOCALES.find(
+    const exactMatch = SUPPORTED_LOCALE_IDS.find(
       (supported) => supported.toLowerCase() === lang.toLowerCase()
     );
     if (exactMatch) return exactMatch;
@@ -83,7 +80,7 @@ function parseBrowserLocale(acceptLanguage: string | string[] | undefined): stri
     // Language-only match (e.g. "fr" matches "fr-FR")
     const langPrefix = lang.split('-')[0].toLowerCase();
     if (!langPrefix) continue;
-    const prefixMatch = SUPPORTED_LOCALES.find((supported) =>
+    const prefixMatch = SUPPORTED_LOCALE_IDS.find((supported) =>
       supported.toLowerCase().startsWith(langPrefix)
     );
     if (prefixMatch) return prefixMatch;

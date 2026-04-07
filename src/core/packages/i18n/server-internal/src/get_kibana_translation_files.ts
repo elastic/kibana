@@ -11,8 +11,8 @@ import { basename } from 'path';
 import { fromRoot } from '@kbn/repo-info';
 import { asyncMapWithLimit } from '@kbn/std';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
+import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
 import { getTranslationPaths } from './get_translation_paths';
-import { supportedLocales } from './constants';
 
 const discoverAllTranslationPaths = async (pluginPaths: string[]): Promise<string[]> => {
   const translationPaths = await Promise.all([
@@ -50,6 +50,6 @@ export const getKibanaTranslationFiles = async (
 export const getAllKibanaTranslationFiles = async (pluginPaths: string[]): Promise<string[]> => {
   const allPaths = await discoverAllTranslationPaths(pluginPaths);
   return allPaths.filter((translationPath) =>
-    supportedLocales.includes(basename(translationPath, '.json'))
+    SUPPORTED_LOCALE_IDS.includes(basename(translationPath, '.json'))
   );
 };

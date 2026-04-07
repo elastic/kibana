@@ -18,17 +18,9 @@ import {
   EuiButtonEmpty,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n, SUPPORTED_LOCALES } from '@kbn/i18n';
 
 import { useLanguage } from './use_language_hook';
-
-const SUPPORTED_LOCALES = [
-  { value: 'en', text: 'English' },
-  { value: 'fr-FR', text: 'Français' },
-  { value: 'ja-JP', text: '日本語' },
-  { value: 'zh-CN', text: '中文' },
-  { value: 'de-DE', text: 'Deutsch' },
-];
 
 interface Props {
   closeModal: () => void;
@@ -59,7 +51,7 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
         >
           <EuiSelect
             id={selectId}
-            options={SUPPORTED_LOCALES}
+            options={SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }))}
             value={locale}
             onChange={(e) => onChange(e.target.value, false)}
             data-test-subj="languageSelect"
