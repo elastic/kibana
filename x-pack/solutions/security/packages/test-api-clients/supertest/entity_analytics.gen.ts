@@ -831,7 +831,7 @@ Each row will match up to 10,000 entities.
   /**
       * Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
 with a "type" column (user, host, service, or generic) and one or more ECS identity
-fields (for example: "user.name", "host.hostname") used to match entities in the entity store.
+fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
 
 Matched entities are added to the watchlist and their `entity.attributes.watchlists`
 field is updated in the entity store.
