@@ -124,6 +124,8 @@ export interface ConstructorOptions {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
+  getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
+  getCurrentUserProfileUid?: (request: KibanaRequest) => Promise<string | undefined>;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
@@ -151,10 +153,15 @@ export interface ActionsClientContext {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
+  getCurrentUser?: (request: KibanaRequest) => Promise<{ profile_uid?: string } | null>;
+  getCurrentUserProfileUid?: (request: KibanaRequest) => Promise<string | undefined>;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
+const getCurrentUserNoop = async (
+  _request: KibanaRequest
+): Promise<{ profile_uid?: string } | null> => null;
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -181,6 +188,8 @@ export class ActionsClient {
     spaces,
     isESOCanEncrypt,
     connectorLifecycleListeners,
+    getCurrentUser,
+    getCurrentUserProfileUid,
     getCurrentUserProfileIdFromAPIKey,
   }: ConstructorOptions) {
     this.context = {
@@ -205,6 +214,8 @@ export class ActionsClient {
       spaces,
       isESOCanEncrypt,
       connectorLifecycleListeners,
+      getCurrentUser: getCurrentUser ?? getCurrentUserNoop,
+      getCurrentUserProfileUid: getCurrentUserProfileUid ?? noop,
       getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
     };
   }
@@ -247,14 +258,10 @@ export class ActionsClient {
    */
   public async getAll({
     includeSystemActions = false,
-    profileUid,
-  }: { includeSystemActions?: boolean; profileUid?: string } = {}): Promise<
-    ConnectorWithExtraFindData[]
-  > {
+  }: { includeSystemActions?: boolean } = {}): Promise<ConnectorWithExtraFindData[]> {
     return getAll({
       context: this.context,
       includeSystemActions,
-      profileUid,
     });
   }
 

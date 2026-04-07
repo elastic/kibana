@@ -1262,13 +1262,19 @@ describe('getAll()', () => {
   });
 });
 
-describe('getAll() with profileUid', () => {
+describe('getAll() with resolved user profile', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
   });
 
-  function buildActionsClientWithAuthCode(inMemoryConnectors: InMemoryConnector[] = []) {
+  function buildActionsClientWithAuthCode({
+    inMemoryConnectors = [],
+    profileUid,
+  }: {
+    inMemoryConnectors?: InMemoryConnector[];
+    profileUid?: string;
+  } = {}) {
     return new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -1287,10 +1293,11 @@ describe('getAll() with profileUid', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getCurrentUser: async () => (profileUid ? { profile_uid: profileUid } : null),
     });
   }
 
-  test('does not call user token SO lookup when profileUid is not provided', async () => {
+  test('does not call user token SO lookup when user profile is not available', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 0,
       per_page: 10000,
@@ -1360,8 +1367,8 @@ describe('getAll() with profileUid', () => {
       { aggregations: { 'connector-per-user': { doc_count: 1 } } }
     );
 
-    actionsClient = buildActionsClientWithAuthCode();
-    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+    actionsClient = buildActionsClientWithAuthCode({ profileUid: 'test-profile-uid' });
+    const result = await actionsClient.getAll();
 
     const connector = result.find((c) => c.id === 'connector-per-user');
     expect(connector?.userAuthStatus).toBe('connected');
@@ -1401,14 +1408,14 @@ describe('getAll() with profileUid', () => {
       { aggregations: { 'connector-per-user': { doc_count: 0 } } }
     );
 
-    actionsClient = buildActionsClientWithAuthCode();
-    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+    actionsClient = buildActionsClientWithAuthCode({ profileUid: 'test-profile-uid' });
+    const result = await actionsClient.getAll();
 
     const connector = result.find((c) => c.id === 'connector-per-user');
     expect(connector?.userAuthStatus).toBe('not_connected');
   });
 
-  test('returns userAuthStatus "not_applicable" for shared connector even when profileUid is provided', async () => {
+  test('returns userAuthStatus "not_applicable" for shared connector', async () => {
     unsecuredSavedObjectsClient.find
       .mockResolvedValueOnce({
         total: 0,
@@ -1442,8 +1449,8 @@ describe('getAll() with profileUid', () => {
       { aggregations: { 'connector-shared': { doc_count: 0 } } }
     );
 
-    actionsClient = buildActionsClientWithAuthCode();
-    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+    actionsClient = buildActionsClientWithAuthCode({ profileUid: 'test-profile-uid' });
+    const result = await actionsClient.getAll();
 
     const connector = result.find((c) => c.id === 'connector-shared');
     expect(connector?.userAuthStatus).toBe('not_applicable');
@@ -1469,17 +1476,20 @@ describe('getAll() with profileUid', () => {
       { aggregations: { 'in-memory-connector': { doc_count: 0 } } }
     );
 
-    actionsClient = buildActionsClientWithAuthCode([
-      createMockInMemoryConnector({
-        id: 'in-memory-connector',
-        actionTypeId: '.slack',
-        isPreconfigured: true,
-        name: 'In-memory connector',
-        authMode: 'per-user',
-      }),
-    ]);
+    actionsClient = buildActionsClientWithAuthCode({
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'in-memory-connector',
+          actionTypeId: '.slack',
+          isPreconfigured: true,
+          name: 'In-memory connector',
+          authMode: 'per-user',
+        }),
+      ],
+      profileUid: 'test-profile-uid',
+    });
 
-    const result = await actionsClient.getAll({ profileUid: 'test-profile-uid' });
+    const result = await actionsClient.getAll();
 
     const connector = result.find((c) => c.id === 'in-memory-connector');
     expect(connector?.userAuthStatus).toBe('not_applicable');

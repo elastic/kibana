@@ -577,6 +577,18 @@ export class ActionsPlugin
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
         connectorLifecycleListeners: this.connectorLifecycleListeners,
+        getCurrentUser: async (requestWithAuth: KibanaRequest) =>
+          core.security.authc.getCurrentUser(requestWithAuth),
+        getCurrentUserProfileUid: async (requestWithAuth: KibanaRequest) => {
+          try {
+            const currentUserProfile = await core.userProfile.getCurrent({
+              request: requestWithAuth,
+            });
+            return currentUserProfile?.uid;
+          } catch {
+            return undefined;
+          }
+        },
         getCurrentUserProfileIdFromAPIKey,
       });
     };
@@ -884,8 +896,9 @@ export class ActionsPlugin
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
+      const [coreStart, { taskManager, encryptedSavedObjects, eventLog }] =
         await core.getStartServices();
+      const { savedObjects } = coreStart;
 
       const coreContext = await context.core;
       const inMemoryConnectors = getInMemoryConnectors();
@@ -939,6 +952,40 @@ export class ActionsPlugin
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
             connectorLifecycleListeners,
+            getCurrentUser: async (requestWithAuth: KibanaRequest) =>
+              coreStart.security.authc.getCurrentUser(requestWithAuth),
+            getCurrentUserProfileUid: async (requestWithAuth: KibanaRequest) => {
+              try {
+                const currentUserProfile = await coreStart.userProfile.getCurrent({
+                  request: requestWithAuth,
+                });
+                return currentUserProfile?.uid;
+              } catch {
+                return undefined;
+              }
+            },
+            getCurrentUserProfileIdFromAPIKey: async (requestWithAuth: KibanaRequest) => {
+              try {
+                const response = await coreStart.elasticsearch.client
+                  .asScoped(requestWithAuth)
+                  .asCurrentUser.security.getApiKey({
+                    with_profile_uid: true,
+                  });
+                if (response.api_keys && response.api_keys.length > 0) {
+                  return response.api_keys[0].profile_uid;
+                }
+                logger.debug(
+                  `No API keys were returned from query, cannot retrieve associated profile id.`
+                );
+              } catch (error) {
+                logger.debug(
+                  `Failed to retrieve API key for user profile retrieval: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
+                );
+              }
+              return undefined;
+            },
           });
         },
         listTypes: (featureId?: string) => {

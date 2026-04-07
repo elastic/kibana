@@ -20,12 +20,15 @@ import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
+import {
+  connectorFromSavedObject,
+  isConnectorDeprecated,
+  mergeUserTokenConnectorsForProfiles,
+  resolveProfileUidsForRequest,
+} from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
-import { getUserTokenConnectorsSo } from '../../../../data/connector/get_user_token_connectors_so';
-
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
@@ -35,13 +38,12 @@ interface GetAllHelperOpts {
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
   connectorTypeRegistry: ActionTypeRegistry;
-  profileUid?: string;
+  userTokenConnectors: GetUserTokenConnectorsSoResult;
 }
 
 export async function getAll({
   context,
   includeSystemActions = false,
-  profileUid,
 }: GetAllParams): Promise<ConnectorWithExtraFindData[]> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
@@ -55,6 +57,17 @@ export async function getAll({
     throw error;
   }
 
+  const profileUids = await resolveProfileUidsForRequest({
+    request: context.request,
+    getCurrentUser: context.getCurrentUser,
+    getCurrentUserProfileUid: context.getCurrentUserProfileUid,
+    getCurrentUserProfileIdFromAPIKey: context.getCurrentUserProfileIdFromAPIKey,
+  });
+  const userTokenConnectors = await mergeUserTokenConnectorsForProfiles({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    profileUids,
+  });
+
   return await getAllHelper({
     auditLogger: context.auditLogger,
     esClient: context.scopedClusterClient.asInternalUser,
@@ -65,7 +78,7 @@ export async function getAll({
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     connectorTypeRegistry: context.actionTypeRegistry,
-    profileUid,
+    userTokenConnectors,
   });
 }
 
@@ -89,6 +102,7 @@ export async function getAllUnsecured({
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
     connectorTypeRegistry,
+    userTokenConnectors: { connectorIds: [] },
   });
 }
 
@@ -101,19 +115,8 @@ async function getAllHelper({
   namespace,
   savedObjectsClient,
   connectorTypeRegistry,
-  profileUid,
+  userTokenConnectors,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
-  let userTokenConnectors: GetUserTokenConnectorsSoResult = {
-    connectorIds: [],
-  };
-
-  if (profileUid) {
-    userTokenConnectors = await getUserTokenConnectorsSo({
-      savedObjectsClient,
-      profileUid,
-    });
-  }
-
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {

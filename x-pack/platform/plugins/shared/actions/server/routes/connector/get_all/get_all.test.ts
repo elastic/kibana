@@ -231,7 +231,7 @@ describe('getAllConnectorsRoute', () => {
     expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
   });
 
-  it('passes profileUid from current user to actionsClient.getAll', async () => {
+  it('calls actionsClient.getAll without profile parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -242,31 +242,11 @@ describe('getAllConnectorsRoute', () => {
     const actionsClient = actionsClientMock.create();
     actionsClient.getAll.mockResolvedValueOnce([]);
 
-    const getCurrentUser = jest.fn().mockReturnValue({ profile_uid: 'test-profile-uid' });
-    const [context, req, res] = mockHandlerArguments({ actionsClient, getCurrentUser }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
 
     await handler(context, req, res);
 
-    expect(actionsClient.getAll).toHaveBeenCalledWith({ profileUid: 'test-profile-uid' });
-  });
-
-  it('passes undefined profileUid when getCurrentUser returns null', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    getAllConnectorsRoute(router, licenseState);
-
-    const [, handler] = router.get.mock.calls[0];
-
-    const actionsClient = actionsClientMock.create();
-    actionsClient.getAll.mockResolvedValueOnce([]);
-
-    const getCurrentUser = jest.fn().mockReturnValue(null);
-    const [context, req, res] = mockHandlerArguments({ actionsClient, getCurrentUser }, {}, ['ok']);
-
-    await handler(context, req, res);
-
-    expect(actionsClient.getAll).toHaveBeenCalledWith({ profileUid: undefined });
+    expect(actionsClient.getAll).toHaveBeenCalledWith();
   });
 
   it('includes user_auth_status in response body', async () => {

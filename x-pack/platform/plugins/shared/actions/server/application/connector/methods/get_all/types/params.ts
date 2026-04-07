@@ -16,7 +16,6 @@ import type { Connector } from '../../../types';
 export interface GetAllParams {
   includeSystemActions?: boolean;
   context: ActionsClientContext;
-  profileUid?: string;
 }
 
 export interface GetAllUnsecuredParams {
