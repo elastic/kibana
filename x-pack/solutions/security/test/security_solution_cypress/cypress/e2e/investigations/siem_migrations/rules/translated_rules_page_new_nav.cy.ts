@@ -65,7 +65,7 @@ describe(
       createBedrockConnector();
 
       role.login();
-      visit(GET_STARTED_URL);
+      visit(`${GET_STARTED_URL}/siem_migrations`);
       selectMigrationConnector();
       navigateToTranslatedRulesPage(true);
     });
