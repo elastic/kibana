@@ -6,6 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  DEFAULT_ARTIFACT_VALUE_LIMIT,
+  ARTIFACT_VALUE_LIMITS,
+  MAX_ARTIFACT_VALUE_LIMIT,
+  MAX_TAG_LENGTH,
+} from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration } from './validation';
 import { durationSchema } from './common';
 import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
@@ -40,7 +46,11 @@ const metadataSchema = z
       .optional()
       .describe('Optional human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
-    labels: z.array(z.string().max(64)).max(100).optional().describe('Labels for categorization.'),
+    tags: z
+      .array(z.string().max(MAX_TAG_LENGTH))
+      .max(100)
+      .optional()
+      .describe('Tags for categorization.'),
   })
   .strict()
   .describe('Rule metadata.');
@@ -69,12 +79,6 @@ const scheduleSchema = z
 const evaluationQuerySchema = z
   .object({
     base: esqlQuerySchema.describe('Base ES|QL query.'),
-    condition: z
-      .string()
-      .min(1)
-      .max(5000)
-      .optional()
-      .describe('Trigger condition (WHERE clause). Required when no_data is configured.'),
   })
   .strict();
 
@@ -97,12 +101,6 @@ const recoveryPolicySchema = z
     query: z
       .object({
         base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
-        condition: z
-          .string()
-          .min(1)
-          .max(5000)
-          .optional()
-          .describe('Recovery condition (WHERE clause) applied to the base query.'),
       })
       .strict()
       .optional()
@@ -178,9 +176,20 @@ const artifactSchema = z
   .object({
     id: z.string().min(1).max(256).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
-    value: z.string().min(1).max(1024).describe('Artifact value.'),
+    value: z.string().min(1).max(MAX_ARTIFACT_VALUE_LIMIT).describe('Artifact value.'),
   })
-  .strict();
+  .strict()
+  .check((ctx) => {
+    const limit = ARTIFACT_VALUE_LIMITS[ctx.value.type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT;
+    if (ctx.value.value.length > limit) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['value'],
+        message: `Artifact value must be at most ${limit} characters for type "${ctx.value.type}".`,
+        input: ctx.value.value,
+      });
+    }
+  });
 
 /** Create rule API schema */
 
@@ -221,14 +230,6 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine((data) => data.kind === 'alert' || data.evaluation.query.condition == null, {
-    message: 'evaluation.query.condition is only allowed when kind is "alert".',
-    path: ['evaluation', 'query', 'condition'],
-  })
-  .refine((data) => !data.no_data || data.evaluation.query.condition != null, {
-    message: 'evaluation.query.condition is required when no_data is configured.',
-    path: ['evaluation', 'query', 'condition'],
-  })
   .refine(
     (data) =>
       data.recovery_policy?.type !== 'query' ||
@@ -253,7 +254,6 @@ export const updateRuleDataSchema = z
         query: z
           .object({
             base: esqlQuerySchema.optional(),
-            condition: z.string().min(1).max(5000).optional(),
           })
           .strict()
           .optional(),
@@ -261,7 +261,7 @@ export const updateRuleDataSchema = z
       .strict()
       .optional(),
     recovery_policy: recoveryPolicySchema.optional().nullable(),
-    state_transition: stateTransitionSchema,
+    state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).optional().nullable(),
@@ -286,6 +286,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
+/** Sort field for find rules API. */
+export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
+
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z
   .object({
@@ -295,6 +299,13 @@ export const findRulesResponseSchema = z
     perPage: z.number().describe('The number of rules per page.'),
   })
   .describe('Paginated list of rules.');
+
+/** Rule tags response schema. */
+export const ruleTagsResponseSchema = z
+  .object({
+    tags: z.array(z.string()).describe('The list of unique rule tags.'),
+  })
+  .describe('All unique tags across rules.');
 
 /** Bulk operation response schema. */
 export const bulkOperationResponseSchema = z
