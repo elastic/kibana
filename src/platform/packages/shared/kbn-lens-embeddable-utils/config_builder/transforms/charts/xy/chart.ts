@@ -232,6 +232,12 @@ export function buildVisualizationAPI(
     internalReferences,
     resolveAxisId
   );
+  if (apiLayers.length === 0) {
+    throw new Error(
+      'No layers could be built: datasource layers may be missing or have incompatible types'
+    );
+  }
+
   const axis = convertAxisSettingsToAPIFormat(config, layers, usedModes);
   const styling = convertStylingToAPIFormat(config, layerPresence);
   const legend = convertLegendToAPIFormat(config.legend);
