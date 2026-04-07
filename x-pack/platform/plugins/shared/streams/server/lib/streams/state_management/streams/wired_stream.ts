@@ -762,48 +762,42 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'upsert_index_template',
-        request: generateIndexTemplate(this._definition.name),
-      },
-      existsAsManagedDataStream
-        ? {
-            type: 'rollover' as const,
-            request: {
-              name: this._definition.name,
-            },
-          }
-        : {
-            type: 'upsert_datastream' as const,
-            request: {
-              name: this._definition.name,
-            },
-          },
-      {
-        type: 'update_lifecycle',
-        request: {
-          name: this._definition.name,
-          lifecycle,
-        },
-      },
-      {
-        type: 'update_ingest_settings',
-        request: {
-          name: this._definition.name,
-          settings: formatSettings(settings, this.dependencies.isServerless),
-        },
-      },
-      {
-        type: 'update_failure_store',
-        request: {
-          name: this._definition.name,
-          failure_store: failureStore,
-          definition: this._definition,
-        },
+        request: generateIndexTemplate(this._definition.name, lifecycle),
       },
       {
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
     ];
+
+    const shouldDeferDataStream =
+      !existsAsManagedDataStream &&
+      this.dependencies.deferRootDataStreamMaterialization === true &&
+      isRootStreamDefinition(this._definition);
+
+    if (!shouldDeferDataStream) {
+      actions.push(
+        existsAsManagedDataStream
+          ? { type: 'rollover' as const, request: { name: this._definition.name } }
+          : { type: 'upsert_datastream' as const, request: { name: this._definition.name } },
+        { type: 'update_lifecycle', request: { name: this._definition.name, lifecycle } },
+        {
+          type: 'update_ingest_settings',
+          request: {
+            name: this._definition.name,
+            settings: formatSettings(settings, this.dependencies.isServerless),
+          },
+        },
+        {
+          type: 'update_failure_store',
+          request: {
+            name: this._definition.name,
+            failure_store: failureStore,
+            definition: this._definition,
+          },
+        }
+      );
+    }
 
     if (this.dependencies.isWiredStreamViewsEnabled) {
       actions.push({

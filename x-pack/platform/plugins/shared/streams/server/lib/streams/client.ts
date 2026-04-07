@@ -209,7 +209,7 @@ export class StreamsClient {
    *
    * If all required streams are already enabled, it is a noop.
    */
-  async enableStreams(): Promise<EnableStreamsResponse> {
+  async enableStreams({ defer = false }: { defer?: boolean } = {}): Promise<EnableStreamsResponse> {
     // Step 1: Check current state
     const [kibanaStreams, esStreams] = await Promise.all([
       this.checkRootStreamsExistence(),
@@ -257,6 +257,7 @@ export class StreamsClient {
         {
           ...this.dependencies,
           streamsClient: this,
+          deferRootDataStreamMaterialization: defer,
         }
       );
     }

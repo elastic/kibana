@@ -388,7 +388,7 @@ export class StreamsPlugin
               isSecurityEnabled: false,
             });
 
-            await streamsClient.enableStreams();
+            await streamsClient.enableStreams({ defer: true });
 
             await streamsClient.bulkUpsert(
               this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({

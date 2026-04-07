@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getAncestorsAndSelf } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { getAncestorsAndSelf, isDslLifecycle } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
@@ -16,7 +17,7 @@ import { getIndexTemplateName } from './name';
 // with the index pattern.
 export const MAX_PRIORITY = 9223372036854775807n;
 
-export function generateIndexTemplate(name: string) {
+export function generateIndexTemplate(name: string, lifecycle?: IngestStreamLifecycle) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
     return [...acc, `${ancestorName}@stream.layer`];
   }, [] as string[]);
@@ -50,6 +51,15 @@ export function generateIndexTemplate(name: string) {
           },
         },
       },
+      ...(lifecycle && isDslLifecycle(lifecycle)
+        ? {
+            lifecycle: {
+              ...(lifecycle.dsl.data_retention
+                ? { data_retention: lifecycle.dsl.data_retention }
+                : {}),
+            },
+          }
+        : {}),
     },
     allow_auto_create: true,
     // ignore missing component templates to be more robust against out-of-order syncs

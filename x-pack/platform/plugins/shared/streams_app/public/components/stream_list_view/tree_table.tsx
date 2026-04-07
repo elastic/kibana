@@ -19,6 +19,8 @@ import {
   EuiButtonIcon,
   EuiTourStep,
   EuiBetaBadge,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -28,6 +30,7 @@ import {
   type RootStreamName,
   LOGS_ROOT_STREAM_NAME,
   ROOT_STREAM_NAMES,
+  isRoot,
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
@@ -456,6 +459,26 @@ export function StreamsTreeTable({
                       css={{ display: 'block' }}
                     />
                   )}
+                  {isRoot(item.stream.name) &&
+                    item.stream.name !== LOGS_ROOT_STREAM_NAME &&
+                    !item.data_stream && (
+                      <EuiToolTip
+                        position="right"
+                        content={i18n.translate(
+                          'xpack.streams.streamsTable.pendingDataStream.tooltip',
+                          {
+                            defaultMessage:
+                              'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
+                          }
+                        )}
+                      >
+                        <EuiBadge color="default">
+                          {i18n.translate('xpack.streams.streamsTable.pendingDataStream.label', {
+                            defaultMessage: 'Pending',
+                          })}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    )}
                 </EuiFlexGroup>
               </EuiFlexGroup>
             );
@@ -543,6 +566,7 @@ export function StreamsTreeTable({
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
               lifecycle={item.effective_lifecycle!}
+              streamName={item.stream.name}
               aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },

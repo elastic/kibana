@@ -54,10 +54,12 @@ export function Wrapper({
   tabs,
   streamId,
   tab,
+  topContent,
 }: {
   tabs: ManagementTabs;
   streamId: string;
   tab: string;
+  topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
@@ -264,6 +266,7 @@ export function Wrapper({
         })}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {topContent}
         {Streams.ingest.all.GetResponse.is(definition) && definition.replicated && (
           <>
             <EuiCallOut

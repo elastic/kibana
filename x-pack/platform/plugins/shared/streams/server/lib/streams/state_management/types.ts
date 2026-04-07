@@ -39,4 +39,5 @@ export interface StateDependencies {
   isSecurityEnabled: boolean;
   isWiredStreamViewsEnabled: boolean;
   isDev: boolean;
+  deferRootDataStreamMaterialization?: boolean;
 }
