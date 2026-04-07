@@ -41,6 +41,11 @@ paths:
                   description: The CSV file to upload.
               required:
                 - file
+            examples:
+              csvUpload:
+                summary: CSV file with user entities
+                value:
+                  file: "type,user.name\nuser,john.doe\nuser,jane.smith\n"
       responses:
         "200":
           description: Upload successful
