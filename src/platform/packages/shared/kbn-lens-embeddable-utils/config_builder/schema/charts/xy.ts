@@ -212,22 +212,41 @@ const sharedLegendSchema = {
 /**
  * Layout Schemas
  */
-const legendTruncateMaxPixelsSchema = schema.number({
-  defaultValue: 250,
-  min: 10,
-  max: 1000,
-  meta: {
-    description: 'Maximum pixels before truncating legend items in list layout',
-    id: 'legendTruncateMaxPixels',
-  },
-});
+const legendTruncateMaxPixelsSchema = schema.maybe(
+  schema.number({
+    defaultValue: 250,
+    min: 10,
+    max: 1000,
+    meta: {
+      description: 'Maximum pixels before truncating legend items in list layout',
+      id: 'legendTruncateMaxPixels',
+    },
+  })
+);
+const legendTruncateEnabledSchema = schema.maybe(
+  schema.boolean({
+    meta: {
+      description: 'Enable truncation of legend items',
+    },
+  })
+);
 const gridLayout = schema.object({
   type: schema.literal('grid'),
-  truncate: schema.maybe(schema.object({ max_lines: legendTruncateAfterLinesSchema })),
+  truncate: schema.maybe(
+    schema.object({
+      max_lines: legendTruncateAfterLinesSchema,
+      enabled: legendTruncateEnabledSchema,
+    })
+  ),
 });
 const listLayout = schema.object({
   type: schema.literal('list'),
-  truncate: schema.maybe(schema.object({ max_pixels: legendTruncateMaxPixelsSchema })),
+  truncate: schema.maybe(
+    schema.object({
+      max_pixels: legendTruncateMaxPixelsSchema,
+      enabled: legendTruncateEnabledSchema,
+    })
+  ),
 });
 
 const XY_API_LINE_INTERPOLATION = {

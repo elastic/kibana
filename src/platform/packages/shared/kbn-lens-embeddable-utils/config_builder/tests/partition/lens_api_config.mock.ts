@@ -35,8 +35,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -87,8 +87,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -140,8 +140,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -186,8 +186,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -234,8 +234,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -281,8 +281,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -299,8 +299,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -346,8 +346,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -364,8 +364,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -412,8 +412,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -430,8 +430,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -471,8 +471,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -491,8 +491,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -545,8 +545,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -563,8 +563,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -622,8 +622,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -640,8 +640,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -699,8 +699,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -746,8 +746,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         collapse_by: 'sum',
@@ -760,8 +760,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -806,8 +806,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -824,8 +824,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -837,8 +837,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -883,8 +883,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -934,8 +934,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -947,8 +947,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -993,8 +993,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1006,8 +1006,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1019,8 +1019,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1065,8 +1065,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1116,8 +1116,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1129,8 +1129,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1176,8 +1176,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1227,8 +1227,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1268,8 +1268,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1321,8 +1321,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1364,8 +1364,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1542,8 +1542,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         collapse_by: 'sum',
@@ -1556,8 +1556,8 @@ export const esqlCharts: Array<PartitionConfig> = [
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {

@@ -64,7 +64,6 @@ export const complexMetricAPIAttributes = {
         },
       },
       position: 'top',
-      title_weight: 'normal',
     },
     {
       type: 'secondary',
@@ -169,8 +168,8 @@ export const metricAPIWithTermsRankedBySecondary = {
     fields: ['extension.keyword'],
     limit: 5,
     rank_by: {
-      type: 'column',
-      metric: 1,
+      type: 'metric',
+      metric_index: 1,
       direction: 'desc',
     },
   },

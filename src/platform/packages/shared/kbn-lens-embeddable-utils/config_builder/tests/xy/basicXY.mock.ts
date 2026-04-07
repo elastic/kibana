@@ -18,6 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 
 export const minimalAttributesXY: LensAttributes = {
@@ -1069,7 +1070,7 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
@@ -1146,8 +1147,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1239,8 +1240,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1327,8 +1328,8 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,

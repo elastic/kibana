@@ -36,8 +36,8 @@ export const basicRegionMapWithAdHocDataView = {
       include_documents_without_field: false,
     },
     rank_by: {
-      type: 'column',
-      metric: 0,
+      type: 'metric',
+      metric_index: 0,
       direction: 'desc',
     },
   },
@@ -68,8 +68,8 @@ export const basicRegionMapWithDataView = {
       include_documents_without_field: false,
     },
     rank_by: {
-      type: 'column',
-      metric: 0,
+      type: 'metric',
+      metric_index: 0,
       direction: 'desc',
     },
     ems: {
