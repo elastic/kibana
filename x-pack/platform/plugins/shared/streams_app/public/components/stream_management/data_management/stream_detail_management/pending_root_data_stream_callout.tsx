@@ -23,6 +23,7 @@ export function PendingRootDataStreamCallout({
   const {
     core: {
       notifications: { toasts },
+      docLinks: { links: docLinks },
     },
     dependencies: {
       start: {
@@ -64,7 +65,7 @@ export function PendingRootDataStreamCallout({
             'Start sending data to get started. The data stream will be created automatically when data is first ingested. Or create it now to start configuring.',
         })}{' '}
         <EuiLink
-          href="https://www.elastic.co/docs/solutions/observability/streams/wired-streams#streams-wired-streams-ship"
+          href={`${docLinks.observability.wiredStreams}#streams-wired-streams-ship`}
           target="_blank"
           external
         >
