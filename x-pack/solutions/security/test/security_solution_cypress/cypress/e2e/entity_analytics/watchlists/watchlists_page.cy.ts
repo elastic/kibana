@@ -131,13 +131,14 @@ describe(
 
     it('shows loading indicator while watchlists request is pending', () => {
       cy.intercept('GET', WATCHLISTS_LIST_URL, {
-        delayMs: 1000,
+        delay: 1000,
         statusCode: 200,
         body: [],
       }).as('watchlistsList');
 
       visitWatchlistsPage();
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('exist');
+      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('not.exist');
     });
 
