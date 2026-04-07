@@ -15,10 +15,12 @@ jest.mock('./components/footer_ai_actions', () => ({
     <div data-test-subj="footerAiActions" data-hit-id={hit.id} />
   ),
 }));
+const mockTakeAction = jest.fn();
 jest.mock('./components/take_action', () => ({
-  TakeAction: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="takeAction" data-hit-id={hit.id} />
-  ),
+  TakeAction: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => {
+    mockTakeAction({ hit, onAlertUpdated });
+    return <div data-test-subj="takeAction" data-hit-id={hit.id} />;
+  },
 }));
 
 const createMockHit = (): DataTableRecord =>
@@ -28,11 +30,20 @@ const createMockHit = (): DataTableRecord =>
     flattened: {},
   } as DataTableRecord);
 
+const mockOnAlertUpdated = jest.fn();
+const mockOnShowNotes = jest.fn();
+
 describe('<Footer />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders FooterAiActions with the provided hit', () => {
     const hit = createMockHit();
 
-    const { getByTestId } = render(<Footer hit={hit} />);
+    const { getByTestId } = render(
+      <Footer hit={hit} onAlertUpdated={mockOnAlertUpdated} onShowNotes={mockOnShowNotes} />
+    );
 
     const aiActions = getByTestId('footerAiActions');
     expect(aiActions).toBeInTheDocument();
@@ -42,10 +53,21 @@ describe('<Footer />', () => {
   it('renders TakeAction with the provided hit', () => {
     const hit = createMockHit();
 
-    const { getByTestId } = render(<Footer hit={hit} />);
+    const { getByTestId } = render(
+      <Footer hit={hit} onAlertUpdated={mockOnAlertUpdated} onShowNotes={mockOnShowNotes} />
+    );
 
     const aiActions = getByTestId('takeAction');
     expect(aiActions).toBeInTheDocument();
     expect(aiActions).toHaveAttribute('data-hit-id', 'test-id');
+  });
+
+  it('passes onAlertUpdated to TakeAction', () => {
+    const hit = createMockHit();
+    const onAlertUpdated = jest.fn();
+
+    render(<Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={mockOnShowNotes} />);
+
+    expect(mockTakeAction).toHaveBeenCalledWith(expect.objectContaining({ onAlertUpdated }));
   });
 });
