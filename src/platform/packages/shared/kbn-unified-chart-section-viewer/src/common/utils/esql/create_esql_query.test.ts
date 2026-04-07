@@ -538,10 +538,9 @@ TS metrics-*
       const query = createESQLQuery({
         metricItem: mockMetricWithConflictingHistogram,
       });
-      // Incompatible types produce an empty aggregation, resulting in
-      // a STATS clause with no metric (graceful no-op)
-      expect(query).toContain('STATS');
-      expect(query).not.toContain('PERCENTILE');
+      // Incompatible types produce an empty aggregation, so the query
+      // short-circuits to an empty string (graceful no-op)
+      expect(query).toBe('');
     });
   });
 });

@@ -51,13 +51,18 @@ export function createESQLQuery({
     return '';
   }
 
-  const query = esql.ts(index);
   const metricAggregation = createMetricAggregation({
     type: fieldTypes,
     instrument,
     metricName,
     placeholderName: 'metricName',
   });
+
+  if (!metricAggregation) {
+    return '';
+  }
+
+  const query = esql.ts(index);
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0
