@@ -13,7 +13,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { QueryLink } from '../../../common/queries';
+import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
@@ -26,6 +26,7 @@ export async function readSignificantEventsFromAlertsIndices(
     bucketSize: string;
     query?: string;
     filters?: QueryLinkFilters;
+    searchMode?: SearchMode;
   },
   dependencies: {
     queryClient: QueryClient;
@@ -33,10 +34,10 @@ export async function readSignificantEventsFromAlertsIndices(
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query, filters } = params;
+  const { streamNames = [], from, to, bucketSize, query, filters, searchMode } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(streamNames, query, filters)
+    ? await queryClient.findQueries(streamNames, query, filters, searchMode)
     : await queryClient.getQueryLinks(streamNames, filters);
 
   if (isEmpty(queryLinks)) {

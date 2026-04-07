@@ -8,6 +8,9 @@
 // Import and re-export RuleKind and RecoveryPolicyType from schema
 import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
 
+/** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
+export type StateTransitionDelayMode = 'immediate' | 'breaches' | 'duration';
+
 /**
  * Rule metadata containing identification and categorization info.
  */
@@ -16,7 +19,7 @@ export interface RuleMetadata {
   enabled: boolean;
   description?: string;
   owner?: string;
-  labels?: string[];
+  tags?: string[];
 }
 
 export interface RuleSchedule {
@@ -26,7 +29,6 @@ export interface RuleSchedule {
 export interface RuleEvaluation {
   query: {
     base: string;
-    condition?: string;
   };
 }
 
@@ -37,8 +39,7 @@ export interface RuleGrouping {
 export interface RecoveryPolicy {
   type: RecoveryPolicyType;
   query?: {
-    base?: string;
-    condition?: string;
+    base?: string | null;
   };
 }
 
@@ -52,10 +53,10 @@ export interface RuleArtifact {
  * State transition configuration for alert-type rules.
  */
 export interface StateTransition {
-  pendingCount?: number;
-  pendingTimeframe?: string;
-  recoveringCount?: number;
-  recoveringTimeframe?: string;
+  pendingCount?: number | null;
+  pendingTimeframe?: string | null;
+  recoveringCount?: number | null;
+  recoveringTimeframe?: string | null;
 }
 
 /**
@@ -72,5 +73,7 @@ export interface FormValues {
   grouping?: RuleGrouping;
   recoveryPolicy?: RecoveryPolicy;
   stateTransition?: StateTransition;
+  stateTransitionAlertDelayMode: StateTransitionDelayMode;
+  stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
 }

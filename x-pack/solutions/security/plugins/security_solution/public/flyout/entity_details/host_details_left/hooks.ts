@@ -11,11 +11,13 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
+  getResolutionGroupTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
 } from '../shared/components/left_panel/left_panel_header';
+import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
@@ -54,6 +56,7 @@ export const useTabs = ({
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
+  entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   return useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && hostName;
@@ -75,7 +78,15 @@ export const useTabs = ({
           ]
         : [];
 
-    return [...riskScoreTab, ...insightsTab];
+    const graphViewTab = entityStoreEntityId
+      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
+      : [];
+
+    const resolutionTab = entityStoreEntityId
+      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.host })]
+      : [];
+
+    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
     hostName,
@@ -84,5 +95,6 @@ export const useTabs = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    entityStoreEntityId,
   ]);
 };

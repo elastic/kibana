@@ -2905,6 +2905,14 @@ paths:
             items:
               $ref: '#/components/schemas/GapFillStatus'
             type: array
+        - description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          in: query
+          name: gap_auto_fill_scheduler_id
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -4083,6 +4091,7 @@ components:
         - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
         - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
         - RULE_FILL_GAPS_DISABLED_RULE
+        - USER_INSUFFICIENT_RULE_PRIVILEGES
       type: string
     BulkActionSkipResult:
       type: object
@@ -4104,6 +4113,11 @@ components:
         action:
           enum:
             - delete
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -4139,6 +4153,11 @@ components:
         action:
           enum:
             - disable
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -4188,6 +4207,11 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -4303,6 +4327,11 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -4343,6 +4372,11 @@ components:
           enum:
             - enable
           type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -4379,6 +4413,11 @@ components:
         action:
           enum:
             - export
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -4434,6 +4473,11 @@ components:
           required:
             - start_date
             - end_date
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
         gap_fill_statuses:
           description: >-
             Gap fill statuses to filter rules with gaps by status (used together
@@ -4469,6 +4513,11 @@ components:
         action:
           enum:
             - run
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: >-
+            Gap auto fill scheduler ID used to determine gap fill status for
+            rules
           type: string
         gap_fill_statuses:
           description: >-
@@ -5737,6 +5786,7 @@ components:
         - unfilled
         - in_progress
         - filled
+        - error
       type: string
     HistoryWindowStart:
       description: >-

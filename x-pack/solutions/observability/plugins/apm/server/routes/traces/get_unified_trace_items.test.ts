@@ -150,6 +150,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -171,7 +172,12 @@ describe('getUnifiedTraceItems', () => {
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
             serviceName: 'test-service',
+            serviceEnvironment: undefined,
             type: undefined,
+            sync: undefined,
+            agentName: undefined,
+            coldstart: undefined,
+            composite: undefined,
             spanLinksCount: {
               incoming: 0,
               outgoing: 0,
@@ -181,7 +187,7 @@ describe('getUnifiedTraceItems', () => {
         ],
         agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
-        traceDocsTotal: 0,
+        traceDocsTotal: 1,
       });
     });
     it('should return trace items and unified trace with agent marks', async () => {
@@ -209,6 +215,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -230,7 +237,12 @@ describe('getUnifiedTraceItems', () => {
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
             serviceName: 'test-service',
+            serviceEnvironment: undefined,
             type: undefined,
+            sync: undefined,
+            agentName: undefined,
+            coldstart: undefined,
+            composite: undefined,
             spanLinksCount: {
               incoming: 0,
               outgoing: 0,
@@ -244,7 +256,7 @@ describe('getUnifiedTraceItems', () => {
           domComplete: 118,
         },
         unifiedTraceErrors: mockUnifiedTraceErrors,
-        traceDocsTotal: 0,
+        traceDocsTotal: 1,
       });
     });
     it('should return trace items and unified trace errors', async () => {
@@ -260,6 +272,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -270,6 +283,7 @@ describe('getUnifiedTraceItems', () => {
       expect(result).toEqual({
         traceItems: [
           {
+            icon: undefined,
             id: 'span-1',
             name: 'Test Span',
             timestampUs: 1672531200000000,
@@ -280,7 +294,12 @@ describe('getUnifiedTraceItems', () => {
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
             serviceName: 'test-service',
+            serviceEnvironment: undefined,
             type: undefined,
+            sync: undefined,
+            agentName: undefined,
+            coldstart: undefined,
+            composite: undefined,
             spanLinksCount: {
               incoming: 0,
               outgoing: 0,
@@ -290,7 +309,7 @@ describe('getUnifiedTraceItems', () => {
         ],
         agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
-        traceDocsTotal: 0,
+        traceDocsTotal: 1,
       });
     });
 
@@ -1238,17 +1257,29 @@ describe('getUnifiedTraceItems', () => {
   });
 
   describe('traceDocsTotal and maxTraceItems', () => {
-    it('returns traceDocsTotal from hits.total.value when total is an object', async () => {
+    it('returns traceDocsTotal as raw ES total', async () => {
       (mockApmEventClient.search as jest.Mock).mockResolvedValue({
-        hits: { hits: [], total: { value: 42, relation: 'eq' } },
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+          total: { value: 5000, relation: 'eq' },
+        },
       });
 
       const result = await getUnifiedTraceItems(defaultParams);
 
-      expect(result.traceDocsTotal).toBe(42);
+      expect(result.traceDocsTotal).toBe(5000);
     });
 
-    it('defaults traceDocsTotal to 0 when hits.total is undefined', async () => {
+    it('returns traceDocsTotal as 0 when hits.total is undefined', async () => {
       (mockApmEventClient.search as jest.Mock).mockResolvedValue({
         hits: { hits: [] },
       });

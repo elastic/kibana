@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYPersistedState } from '@kbn/lens-common';
+import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
-import { capitalize } from 'lodash';
 import type { XYState } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
@@ -25,15 +24,12 @@ import {
   buildAPIReferenceLinesLayer,
 } from './api_layers';
 import { stripUndefined } from '../utils';
-import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
-
-function convertFittingToStateFormat(fitting: XYState['fitting']) {
-  return {
-    ...(fitting?.type ? { fittingFunction: capitalize(fitting.type) } : {}),
-    ...(fitting?.dotted ? { emphasizeFitting: fitting.dotted } : {}),
-    ...(fitting?.end_value ? { endValue: capitalize(fitting.end_value) } : {}),
-  };
-}
+import { axisLabelOrientationCompat } from '../common';
+import {
+  convertStylingToAPIFormat,
+  convertStylingToStateFormat,
+  type LayerPresence,
+} from './appearances';
 
 type AxisType = Required<NonNullable<XYState['axis']>>;
 type XAxisType = AxisType extends { x?: infer T } ? T : undefined;
@@ -61,12 +57,6 @@ function convertAPIExtentToStateFormat(extent: ExtentsType): AxisExtentConfig | 
       return;
   }
 }
-
-const orientationDictionary = {
-  horizontal: 0,
-  vertical: -90,
-  angled: -45,
-} as const;
 
 function convertAxisSettingsToStateFormat(
   axis: XYState['axis']
@@ -124,9 +114,13 @@ function convertAxisSettingsToStateFormat(
     axis?.right?.labels?.orientation == null
       ? undefined
       : {
-          x: orientationDictionary[axis?.x?.labels?.orientation ?? 'horizontal'],
-          yLeft: orientationDictionary[axis?.left?.labels?.orientation ?? 'horizontal'],
-          yRight: orientationDictionary[axis?.right?.labels?.orientation ?? 'horizontal'],
+          x: axisLabelOrientationCompat.toState(axis?.x?.labels?.orientation ?? 'horizontal'),
+          yLeft: axisLabelOrientationCompat.toState(
+            axis?.left?.labels?.orientation ?? 'horizontal'
+          ),
+          yRight: axisLabelOrientationCompat.toState(
+            axis?.right?.labels?.orientation ?? 'horizontal'
+          ),
         };
   const xTitle = axis?.x?.title?.text;
   const yTitle = axis?.left?.title?.text;
@@ -149,6 +143,15 @@ function convertAxisSettingsToStateFormat(
   });
 }
 
+function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
+  const seriesTypes = new Set(dataLayers.map((layer) => layer.seriesType));
+  return {
+    hasBars: [...seriesTypes].some((t) => t.startsWith('bar')),
+    hasLines: seriesTypes.has('line'),
+    hasAreas: [...seriesTypes].some((t) => t.startsWith('area')),
+  };
+}
+
 type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
@@ -169,9 +172,8 @@ export function buildVisualizationState(
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
-    ...convertFittingToStateFormat(config.fitting),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.decorations ? convertAppearanceToStateFormat(config.decorations) : {}),
+    ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
     layers,
   };
 }
@@ -192,29 +194,15 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
-  const decorations = convertAppearanceToAPIFormat(config);
+  const layerPresence = getLayerPresence(dataLayers);
+
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
-    ...convertFittingToAPIFormat(config),
     ...convertAxisSettingsToAPIFormat(config, layers),
-    ...(decorations ? { decorations } : {}),
+    styling: convertStylingToAPIFormat(config, layerPresence),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
-}
-
-function convertFittingToAPIFormat(config: XYPersistedState): Pick<XYState, 'fitting'> | {} {
-  const fittingOptions = {
-    ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
-    ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
-    ...(config.endValue ? { end_value: config.endValue.toLowerCase() } : {}),
-  };
-
-  if (Object.keys(fittingOptions).length === 0) {
-    return {};
-  }
-
-  return { fitting: fittingOptions };
 }
 
 function convertExtendsToAPIFormat(extent: AxisExtentConfig | undefined): { extent?: ExtentsType } {
@@ -260,27 +248,11 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
   return {};
 }
 
-/**
- * Returns the first map key whose value strictly equals the provided value.
- */
-function findKeyByValue<T extends Record<string, unknown>>(
-  map: T,
-  value: unknown
-): Extract<keyof T, string> | undefined {
-  return Object.keys(map).find((key): key is Extract<keyof T, string> => map[key] === value);
-}
-
 function convertAxisSettingsToAPIFormat(
   config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>
 ): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
-
-  const { labelsOrientation } = config;
-  const xLabelsOrientation = findKeyByValue(orientationDictionary, labelsOrientation?.x);
-  const yLeftLabelsOrientation = findKeyByValue(orientationDictionary, labelsOrientation?.yLeft);
-  const yRightLabelsOrientation = findKeyByValue(orientationDictionary, labelsOrientation?.yRight);
-
   let xAxisScale: XAxisType['scale'];
   const firstLayer = config.layers[0];
   const dataSourceLayer = layers[firstLayer.layerId];
@@ -300,7 +272,6 @@ function convertAxisSettingsToAPIFormat(
                 : undefined,
           })
         : undefined,
-
     ticks:
       config.tickLabelsVisibilitySettings?.x != null
         ? { visible: config.tickLabelsVisibilitySettings.x }
@@ -310,7 +281,13 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.x }
         : undefined,
     ...convertXExtent(config.xExtent),
-    labels: xLabelsOrientation ? { orientation: xLabelsOrientation } : undefined,
+    ...(config.labelsOrientation?.x != null
+      ? {
+          labels: {
+            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.x),
+          },
+        }
+      : {}),
     scale: xAxisScale,
   } satisfies XAxisType);
   if (Object.keys(xAxis).length) {
@@ -338,8 +315,14 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.yLeft }
         : undefined,
     ...convertExtendsToAPIFormat(config.yLeftExtent),
-    labels: yLeftLabelsOrientation ? { orientation: yLeftLabelsOrientation } : undefined,
-  } satisfies YAxisType);
+    ...(config.labelsOrientation?.yLeft != null
+      ? {
+          labels: {
+            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.yLeft),
+          },
+        }
+      : {}),
+  });
   if (Object.keys(leftAxis).length) {
     axis.left = leftAxis;
   }
@@ -365,7 +348,13 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.yRight }
         : undefined,
     ...convertExtendsToAPIFormat(config.yRightExtent),
-    labels: yRightLabelsOrientation ? { orientation: yRightLabelsOrientation } : undefined,
+    ...(config.labelsOrientation?.yRight != null
+      ? {
+          labels: {
+            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.yRight),
+          },
+        }
+      : {}),
   });
 
   if (Object.keys(rightAxis).length) {
