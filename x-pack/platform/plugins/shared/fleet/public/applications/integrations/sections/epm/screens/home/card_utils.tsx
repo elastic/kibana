@@ -120,10 +120,16 @@ export const mapToCard = ({
     }
 
     // Extract deprecation information
+    // officially deprecated items have a `deprecated` field
     if ('deprecated' in item && item.deprecated) {
       isDeprecated = true;
       deprecationInfo = item.deprecated;
-    } else if (item.title && /\(deprecated\)/i.test(item.title)) {
+    } else if (
+      // bwc: unofficially deprecated items are marked as such in their title, description or name
+      (item.title && /deprecated/i.test(item.title)) ||
+      (item.description && /deprecated/i.test(item.description)) ||
+      ('name' in item && item.name && /deprecated/i.test(item.name))
+    ) {
       isDeprecated = true;
     }
 

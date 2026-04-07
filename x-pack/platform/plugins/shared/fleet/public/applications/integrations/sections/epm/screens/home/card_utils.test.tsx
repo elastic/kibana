@@ -210,7 +210,7 @@ describe('Card utils', () => {
       });
     });
 
-    it('should set isDeprecated to true when item title contains "(Deprecated)"', () => {
+    it('should set isDeprecated to true when item title contains "deprecated"', () => {
       const cardItem = mapToCard({
         item: {
           id: 'old-package',
@@ -226,12 +226,29 @@ describe('Card utils', () => {
       expect(cardItem).toMatchObject({ isDeprecated: true });
     });
 
-    it('should set isDeprecated to true when item title contains "(deprecated)" (lowercase)', () => {
+    it('should set isDeprecated to true when item description contains "deprecated"', () => {
       const cardItem = mapToCard({
         item: {
           id: 'old-package',
           name: 'old-package',
-          title: 'Old Package (deprecated)',
+          title: 'Old Package',
+          description: 'This integration is deprecated, use new-package instead',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({ isDeprecated: true });
+    });
+
+    it('should set isDeprecated to true when item name contains "deprecated"', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'deprecated-package',
+          name: 'deprecated-package',
+          title: 'Old Package',
           version: '1.0.0',
           type: 'integration',
         },
