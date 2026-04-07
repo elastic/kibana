@@ -72,7 +72,8 @@ export class FeatureSettingsPage {
   // --- Add Model Popover ---
 
   public get firstAddModelButton(): Locator {
-    return this.content.locator('[data-test-subj="add-model-button"]').locator('nth=0');
+    // eslint-disable-next-line playwright/no-nth-methods
+    return this.content.locator('[data-test-subj="add-model-button"]').first();
   }
 
   public get addModelSearch(): Locator {
@@ -82,7 +83,8 @@ export class FeatureSettingsPage {
   // --- Copy To Modal ---
 
   public get firstCopyToButton(): Locator {
-    return this.content.locator('[data-test-subj^="copy-to-"]').locator('nth=0');
+    // eslint-disable-next-line playwright/no-nth-methods
+    return this.content.locator('[data-test-subj^="copy-to-"]').first();
   }
 
   public get copyToModalApply(): Locator {
@@ -96,7 +98,8 @@ export class FeatureSettingsPage {
   // --- Reset Defaults Modal ---
 
   public get firstResetLink(): Locator {
-    return this.content.locator('[data-test-subj^="reset-"]').locator('nth=0');
+    // eslint-disable-next-line playwright/no-nth-methods
+    return this.content.locator('[data-test-subj^="reset-"]').first();
   }
 
   public get resetDefaultsModal(): Locator {
