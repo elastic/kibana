@@ -8,7 +8,7 @@
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
+>>>>>>> d41dadb078c (feat(onboarding): add onboarding options)
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,14 +18,12 @@ import {
   EuiSwitch,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { InferenceConnector } from '@kbn/inference-common';
 import { useBoolean } from '@kbn/react-hooks';
 import { OnboardingStep } from '@kbn/streams-schema';
-import React, { useCallback, useMemo } from 'react';
-import { buildConnectorSelectOptions, getEffectiveConnectorId } from './connector_select_options';
+import React, { useCallback } from 'react';
+import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
+import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
 import {
-  CONNECTOR_LOAD_ERROR,
   FEATURES_STEP_LABEL,
   ONBOARDING_CONFIG_POPOVER_ARIA_LABEL,
   ONBOARDING_CONFIG_POPOVER_TITLE,
@@ -41,23 +39,13 @@ export interface OnboardingConfig {
   };
 }
 
-const STEP_CONNECTOR_KEY: Record<OnboardingStep, keyof OnboardingConfig['connectors']> = {
-  [OnboardingStep.FeaturesIdentification]: 'features',
-  [OnboardingStep.QueriesGeneration]: 'queries',
-};
-
-const STEPS: ReadonlyArray<{ step: OnboardingStep; label: string }> = [
-  { step: OnboardingStep.FeaturesIdentification, label: FEATURES_STEP_LABEL },
-  { step: OnboardingStep.QueriesGeneration, label: QUERIES_STEP_LABEL },
-];
-
+>>>>>>> d41dadb078c (feat(onboarding): add onboarding options)
 interface StepRowProps {
   step: OnboardingStep;
   label: string;
   enabled: boolean;
-  displayConnectorId: string | undefined;
-  connectorList: InferenceConnector[];
-  connectorError: Error | undefined;
+  connectorId: string | undefined;
+  connectors: UseInferenceFeatureConnectorsResult;
   onToggle: (step: OnboardingStep, enabled: boolean) => void;
   onConnectorChange: (step: OnboardingStep, connectorId: string) => void;
 }
@@ -66,22 +54,24 @@ const StepRow = ({
   step,
   label,
   enabled,
-  displayConnectorId,
-  connectorList,
-  connectorError,
+  connectorId,
+  connectors,
   onToggle,
   onConnectorChange,
 }: StepRowProps) => {
   const selectId = useGeneratedHtmlId({ prefix: `onboardingStep_${step}` });
 
-  const connectorOptions = useMemo(
-    () => buildConnectorSelectOptions(connectorList),
-    [connectorList]
-  );
-  const effectiveConnectorId = useMemo(
-    () => getEffectiveConnectorId(displayConnectorId, connectorOptions),
-    [displayConnectorId, connectorOptions]
-  );
+  const connectorOptions = connectors.allConnectors.map((connector) => ({
+    value: connector.connectorId,
+    inputDisplay: (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <ConnectorIcon connectorName={connector.name} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{connector.name}</EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  }));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -93,51 +83,40 @@ const StepRow = ({
           compressed
         />
       </EuiFlexItem>
-      {connectorError ? (
+      {connectorOptions.length >= 1 && (
         <EuiFlexItem>
-          <EuiCallOut announceOnMount color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
+          <EuiFormRow display="rowCompressed" aria-label={label}>
+            <EuiSuperSelect
+              id={selectId}
+              options={connectorOptions}
+              valueOfSelected={connectorId ?? ''}
+              onChange={(value) => onConnectorChange(step, value)}
+              disabled={!enabled}
+              compressed
+              fullWidth
+            />
+          </EuiFormRow>
         </EuiFlexItem>
-      ) : (
-        effectiveConnectorId &&
-        connectorOptions.length > 0 && (
-          <EuiFlexItem>
-            <EuiFormRow display="rowCompressed" aria-label={label}>
-              <EuiSuperSelect
-                id={selectId}
-                options={connectorOptions}
-                valueOfSelected={effectiveConnectorId}
-                onChange={(value) => onConnectorChange(step, value)}
-                disabled={!enabled}
-                compressed
-                fullWidth
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )
       )}
     </EuiFlexGroup>
   );
 };
 
+const STEP_ORDER = [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration];
+
 interface OnboardingConfigPopoverProps {
   config: OnboardingConfig;
-  displayConnectors: OnboardingConfig['connectors'];
-  connectorList: InferenceConnector[];
-  connectorError: Error | undefined;
+  featuresConnectors: UseInferenceFeatureConnectorsResult;
+  queriesConnectors: UseInferenceFeatureConnectorsResult;
   onConfigChange: (config: OnboardingConfig) => void;
   onRun: () => void;
   isRunDisabled: boolean;
 }
 
-const popoverContentStyle = css`
-  min-width: 280px;
-`;
-
 export const OnboardingConfigPopover = ({
   config,
-  displayConnectors,
-  connectorList,
-  connectorError,
+  featuresConnectors,
+  queriesConnectors,
   onConfigChange,
   onRun,
   isRunDisabled,
@@ -148,15 +127,14 @@ export const OnboardingConfigPopover = ({
   const handleToggle = useCallback(
     (step: OnboardingStep, enabled: boolean) => {
       const toggled = enabled ? [...config.steps, step] : config.steps.filter((s) => s !== step);
-      const ordered = STEPS.map((s) => s.step).filter((s) => toggled.includes(s));
-      onConfigChange({ ...config, steps: ordered });
+      onConfigChange({ ...config, steps: STEP_ORDER.filter((s) => toggled.includes(s)) });
     },
     [config, onConfigChange]
   );
 
   const handleConnectorChange = useCallback(
     (step: OnboardingStep, newConnectorId: string) => {
-      const key = STEP_CONNECTOR_KEY[step];
+      const key = step === OnboardingStep.FeaturesIdentification ? 'features' : 'queries';
       onConfigChange({ ...config, connectors: { ...config.connectors, [key]: newConnectorId } });
     },
     [config, onConfigChange]
@@ -186,21 +164,29 @@ export const OnboardingConfigPopover = ({
       panelPaddingSize="m"
     >
       <EuiPopoverTitle paddingSize="s">{ONBOARDING_CONFIG_POPOVER_TITLE}</EuiPopoverTitle>
-      <EuiFlexGroup direction="column" gutterSize="m" css={popoverContentStyle}>
-        {STEPS.map(({ step, label }) => (
-          <EuiFlexItem key={step}>
-            <StepRow
-              step={step}
-              label={label}
-              enabled={config.steps.includes(step)}
-              displayConnectorId={displayConnectors[STEP_CONNECTOR_KEY[step]]}
-              connectorList={connectorList}
-              connectorError={connectorError}
-              onToggle={handleToggle}
-              onConnectorChange={handleConnectorChange}
-            />
-          </EuiFlexItem>
-        ))}
+      <EuiFlexGroup direction="column" gutterSize="m" css={{ minWidth: 280 }}>
+        <EuiFlexItem>
+          <StepRow
+            step={OnboardingStep.FeaturesIdentification}
+            label={FEATURES_STEP_LABEL}
+            enabled={config.steps.includes(OnboardingStep.FeaturesIdentification)}
+            connectorId={config.connectors.features}
+            connectors={featuresConnectors}
+            onToggle={handleToggle}
+            onConnectorChange={handleConnectorChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <StepRow
+            step={OnboardingStep.QueriesGeneration}
+            label={QUERIES_STEP_LABEL}
+            enabled={config.steps.includes(OnboardingStep.QueriesGeneration)}
+            connectorId={config.connectors.queries}
+            connectors={queriesConnectors}
+            onToggle={handleToggle}
+            onConnectorChange={handleConnectorChange}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
             size="s"
