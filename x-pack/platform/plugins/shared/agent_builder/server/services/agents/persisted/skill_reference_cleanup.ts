@@ -61,7 +61,18 @@ export async function runSkillRefCleanup({
     size: SEARCH_SIZE,
     query: {
       bool: {
-        filter: [createSpaceDslFilter(spaceId), { terms: { 'config.skill_ids': skillIds } }],
+        filter: [
+          createSpaceDslFilter(spaceId),
+          {
+            bool: {
+              should: [
+                { terms: { 'config.skill_ids': skillIds } },
+                { terms: { 'configuration.skill_ids': skillIds } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
       },
     },
   });

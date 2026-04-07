@@ -11,6 +11,11 @@ import type {
   RunAgentReturn,
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
+
+/** Plugin-local extension of AgentHandlerContext with fields not yet in the package interface. */
+export interface AgentHandlerContextExtended extends AgentHandlerContext {
+  availableConnectors: Array<{ id: string; name: string; type: string }>;
+}
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { withAgentSpan } from '../../tracing';
 import { createAgentHandler } from '../agents/modes/create_handler';
@@ -24,13 +29,13 @@ import {
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
 
-export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
+export const createAgentHandlerContext = async ({
   agentExecutionParams,
   manager,
 }: {
   agentExecutionParams: ScopedRunnerRunAgentParams;
   manager: RunnerManager;
-}): Promise<AgentHandlerContext> => {
+}): Promise<AgentHandlerContextExtended> => {
   const { onEvent } = agentExecutionParams;
   const {
     request,
@@ -113,11 +118,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
     experimentalFeatures,
-    // Plugin-only extension: not part of the package AgentHandlerContext interface.
-    // run_chat_agent.ts reads this via (context as Record<string, unknown>).availableConnectors
-    // to inject connector info into the system prompt without requiring a discovery call.
     availableConnectors,
-  } as AgentHandlerContext;
+  };
 };
 
 export const runAgent = async ({

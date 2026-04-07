@@ -55,7 +55,12 @@ function normalizeWorkflowOutput(output: unknown): unknown {
 }
 
 function isBeforeAgentWorkflowOutput(value: unknown): value is BeforeAgentWorkflowOutput {
-  return typeof value === 'object' && value !== null;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    ('new_prompt' in value || 'abort' in value || 'abort_message' in value)
+  );
 }
 
 /**

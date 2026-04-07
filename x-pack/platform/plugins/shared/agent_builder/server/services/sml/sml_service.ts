@@ -201,7 +201,7 @@ const filterResultsByPermissions = async ({
     return hit.permissions.every((p) => authorizedPerms.has(p));
   });
 
-  return { results: filteredResults, total: filteredResults.length };
+  return { results: filteredResults, total: searchResult.total };
 };
 
 /**

@@ -15,11 +15,12 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
+import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
+import type { AgentHandlerContextExtended } from '../../../runner/run_agent';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import { createResultTransformer } from '../utils/create_result_transformer';
 import {
@@ -53,7 +54,7 @@ export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
 
 export type RunChatAgentFn = (
   params: RunChatAgentParams,
-  context: AgentHandlerContext
+  context: AgentHandlerContextExtended
 ) => Promise<RunAgentResponse>;
 
 /*
@@ -80,7 +81,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     configurationOverrides,
     action,
   },
-  context
+  context: AgentHandlerContextExtended
 ) => {
   const {
     logger,
@@ -226,9 +227,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
-    availableConnectors: (context as Record<string, unknown>).availableConnectors as
-      | import('./prompts/types').AvailableConnector[]
-      | undefined,
+    availableConnectors: context.availableConnectors,
   });
 
   const agentGraph = createAgentGraph({

@@ -56,6 +56,9 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
   // Stable ref so the EventsService subscription always calls the latest spawnTab
   const spawnTabRef = useRef(spawnTab);
   spawnTabRef.current = spawnTab;
+  // Stable ref to avoid stale closure in the title-fetch effect below
+  const tabsRef = useRef(tabs);
+  tabsRef.current = tabs;
 
   const ConversationComponent = useMemo(
     () =>
@@ -68,10 +71,11 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
     [services]
   );
 
-  // Fetch titles for restored tabs (those that already have a conversation)
+  // Fetch titles for restored tabs (those that already have a conversation).
+  // Runs only when services first become available; uses tabsRef to avoid a stale closure.
   useEffect(() => {
     if (!services) return;
-    tabs.forEach((tab) => {
+    tabsRef.current.forEach((tab) => {
       if (tab.isNew) return; // new tab has no persisted conversation yet
       if (tab.title !== 'New Chat') return; // already have a real title
       const conversationId = localStorage.getItem(getLastConversationKey(getSessionTag(tab.id)));
@@ -87,9 +91,7 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
           // ignore — tab keeps its default title
         });
     });
-    // Run only when services first become available
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [services]);
+  }, [services, updateTabTitle]);
 
   // Listen for spawn_conversation tool results and open new background tabs.
   useEffect(() => {

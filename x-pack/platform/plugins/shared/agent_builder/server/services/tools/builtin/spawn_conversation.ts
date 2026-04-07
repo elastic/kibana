@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformCoreTools, ToolType, agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, getAgentFromRunContext } from '@kbn/agent-builder-server';
@@ -92,7 +92,7 @@ export const createSpawnConversationTool = ({
         newConversationId = forked.id;
       } else {
         // Fresh: create an empty conversation; the frontend auto-sends initial_message
-        const agentId = agentFromContext?.agentId ?? 'elastic-ai-agent';
+        const agentId = agentFromContext?.agentId ?? agentBuilderDefaultAgentId;
         const fresh = await client.create({
           agent_id: agentId,
           title: title ?? 'New Conversation',

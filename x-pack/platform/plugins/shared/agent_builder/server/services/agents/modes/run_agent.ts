@@ -17,6 +17,7 @@ import type {
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { runDefaultAgentMode } from './default';
+import type { AgentHandlerContextExtended } from '../../runner/run_agent';
 
 export interface RunAgentParams {
   /**
@@ -75,9 +76,14 @@ export interface RunAgentResponse {
   round: ConversationRound;
 }
 
+/**
+ * The public signature uses AgentHandlerContext (the package type) for compatibility with
+ * AgentHandlerFn. At runtime the context is always AgentHandlerContextExtended, which is
+ * cast here — the single place where that assumption is made explicit.
+ */
 export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
-  return runDefaultAgentMode(params, context);
+  return runDefaultAgentMode(params, context as AgentHandlerContextExtended);
 };
