@@ -198,6 +198,7 @@ export const bucketTermsOperationSchema = schema.object(
           type: schema.literal('metric'),
           metric_index: schema.number({
             defaultValue: 0,
+            min: 0,
             meta: {
               description:
                 "0-based index into the metrics array (layer's metrics array if XY chart) identifying which metric to rank by. Defaults to 0 (first metric).",
