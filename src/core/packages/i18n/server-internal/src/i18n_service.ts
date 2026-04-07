@@ -50,8 +50,7 @@ export class I18nService {
   }
 
   public async preboot({ pluginPaths, http }: PrebootDeps): Promise<InternalI18nServicePreboot> {
-    const { locale, translationHash, translationHashes } =
-      await this.initTranslations(pluginPaths);
+    const { locale, translationHash, translationHashes } = await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
       registerRoutes({
