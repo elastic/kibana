@@ -197,10 +197,6 @@ export class StreamsPlugin
         isSecurityEnabled,
       });
 
-      const modelSettingsClient = modelSettingsConfigService.getClient({
-        soClient,
-      });
-
       const streamsSettingsStorageClient = createStreamsSettingsStorageClient(
         coreStart.elasticsearch.client.asInternalUser,
         this.logger
@@ -221,7 +217,6 @@ export class StreamsPlugin
         uiSettingsClient,
         globalUiSettingsClient,
         taskClient,
-        modelSettingsClient,
         streamsSettingsStorageClient,
         isSecurityEnabled,
       };
