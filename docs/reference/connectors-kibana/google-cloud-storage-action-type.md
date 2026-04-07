@@ -17,10 +17,20 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-cloud-storage-connector-configuration]
 
-Google Cloud Storage connectors have the following configuration property:
+Google Cloud Storage connectors support **Bearer Token** or **OAuth 2.0 authorization code** authentication.
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. Refer to [Get API credentials](#google-cloud-storage-api-credentials) for instructions.
+:   A Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. See **Get API credentials**.
+
+OAuth 2.0 authorization code
+:   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you typically provide:
+
+    - **Authorization URL** (default): `https://accounts.google.com/o/oauth2/v2/auth`
+    - **Token URL** (default): `https://oauth2.googleapis.com/token`
+    - **Client ID** and **Client Secret**: from that OAuth client
+    - **Scope** (defaults): `https://www.googleapis.com/auth/devstorage.read_only` and
+      `https://www.googleapis.com/auth/cloudplatformprojects.readonly`
+    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
 
 ## Test connectors [google-cloud-storage-action-configuration]
 
@@ -65,7 +75,39 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [google-cloud-storage-api-credentials]
 
-To use the Google Cloud Storage connector, you need a Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. You can obtain one using the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/):
+### OAuth 2.0 authorization code (recommended for ongoing use)
+
+Use when you select **OAuth 2.0 authorization code** in {{kib}}. Create a **Web application** OAuth client with
+**Authorized JavaScript origins** ({{kib}} base URL) and **Authorized redirect URIs** ({{kib}} callback below).
+
+Start in **[Google Cloud Console](https://console.cloud.google.com/)**. 
+
+1. Select or create a project. Enable **Cloud Storage API** and **Cloud Resource Manager API** (**APIs & Services** >
+   **Library**).
+2. Open **APIs & Services** > **OAuth consent screen**.
+- Create OAuth Client
+- Select Web Application,
+- The **Name** can be something like 'Elastic' or 'Kibana'
+- Under **Authorized JavaScript origins**, add the base origin of your {{kib}} deployment (scheme, host, and port only—for
+  example `https://my-kibana.example.com`).
+- Under **Authorized redirect URIs**, add {{kib}}’s connector OAuth callback for your host. Copy the pattern below and
+  substitute your public {{kib}} hostname:
+  ```text
+  https://<your-kibana-host>/api/actions/connector/_oauth_callback
+  ```
+
+3. Open **APIs & Services** > **Data Access** and choose scopes your integration needs (at minimum the readonly scopes
+   the connector uses by default:
+   `https://www.googleapis.com/auth/devstorage.read_only` and
+   `https://www.googleapis.com/auth/cloudplatformprojects.readonly`, or broader scopes if your policy allows).
+
+4. Copy **Client ID** and **Client secret** into the connector. Use default **Authorization URL** and **Token URL** unless
+   your environment specifies otherwise.
+
+### Bearer token (manual, short-lived)
+
+Obtain a Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes—for example using Google’s
+OAuth 2.0 Playground.
 
 1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 2. In the list of APIs, select **Cloud Storage JSON API v1** and select the `https://www.googleapis.com/auth/devstorage.read_only` scope. Then also select **Cloud Resource Manager API v1** and select the `https://www.googleapis.com/auth/cloudplatformprojects.readonly` scope.

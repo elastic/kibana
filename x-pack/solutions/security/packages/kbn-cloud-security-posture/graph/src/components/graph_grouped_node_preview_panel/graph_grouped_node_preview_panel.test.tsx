@@ -70,11 +70,12 @@ describe('GraphGroupedNodePreviewPanel', () => {
     entityIdCounter += 1;
     return {
       id: `entity-${entityIdCounter}`,
-      type: 'host',
+      itemType: 'entity',
       icon: 'storage',
       label: 'Test Host',
+      entity: { type: 'host' },
       ...overrides,
-    } as EntityItem;
+    };
   };
 
   beforeEach(() => {
@@ -177,7 +178,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should render icon, title, and grouped type in ContentBody', () => {
-        const entityItems = [createEntityItem({ icon: 'test-icon', type: 'host' })];
+        const entityItems = [createEntityItem({ icon: 'test-icon', entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toBeInTheDocument();
@@ -199,7 +200,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display correct groupedItemsType label', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
@@ -448,8 +449,8 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
       it('should derive groupedItemsType from first entity type - this should never happened', () => {
         const entityItems = [
-          createEntityItem({ type: 'host' }),
-          createEntityItem({ type: 'user' }),
+          createEntityItem({ entity: { type: 'host' } }),
+          createEntityItem({ entity: { type: 'user' } }),
         ];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
@@ -457,30 +458,28 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display "Hosts" label for host type', () => {
-        const entityItems = [createEntityItem({ type: 'host' })];
+        const entityItems = [createEntityItem({ entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
       });
 
       it('should display "Users" label for user type', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
       });
 
       it('should display "Entities" label for unknown type', () => {
-        const entityItems = [
-          createEntityItem({ type: 'unknown' as unknown as EntityItem['type'] }),
-        ];
+        const entityItems = [createEntityItem({ entity: { type: 'unknown' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
       });
 
       it('should display "Entities" label when type is undefined', () => {
-        const entityItems = [createEntityItem({ type: undefined })];
+        const entityItems = [createEntityItem({ entity: { type: undefined } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');

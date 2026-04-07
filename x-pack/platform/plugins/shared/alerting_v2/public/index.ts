@@ -12,8 +12,11 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { mountAlertingV2App } from './main';
-import { ALERTING_V2_APP_ID } from './constants';
+import {
+  ALERTING_V2_SECTION_ID,
+  ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_NOTIFICATION_POLICIES_APP_ID,
+} from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
@@ -47,14 +50,35 @@ export const module = new ContainerModule(({ bind }) => {
     });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
-    management.sections.section.insightsAndAlerting.registerApp({
-      id: ALERTING_V2_APP_ID,
-      title: 'Rules V2',
+    const alertingV2Section = management.sections.register({
+      id: ALERTING_V2_SECTION_ID,
+      title: 'V2 Alerting Preview',
+      tip: 'Start exploring our latest alerts experience',
+      order: 1,
+    });
 
+    alertingV2Section.registerApp({
+      id: ALERTING_V2_RULES_APP_ID,
+      title: 'Rules',
       order: 1,
       async mount(params) {
         const [coreStart] = await getStartServices();
+        const { mountAlertingV2App } = await import('./application/mount');
         return mountAlertingV2App({ params, container: coreStart.injection.getContainer() });
+      },
+    });
+
+    alertingV2Section.registerApp({
+      id: ALERTING_V2_NOTIFICATION_POLICIES_APP_ID,
+      title: 'Notification Policies',
+      order: 2,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountNotificationPoliciesApp } = await import('./application/mount');
+        return mountNotificationPoliciesApp({
+          params,
+          container: coreStart.injection.getContainer(),
+        });
       },
     });
   });

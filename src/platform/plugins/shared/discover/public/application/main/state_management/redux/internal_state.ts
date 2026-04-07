@@ -31,6 +31,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
@@ -103,6 +104,17 @@ const withTab = <TPayload extends TabActionPayload>(
   if (tab) {
     fn(tab);
   }
+};
+
+const normalizeVisiblePanelsState = (appState: TabState['appState']) => {
+  if (appState.hideChart && appState.hideTable) {
+    return {
+      ...appState,
+      hideTable: false,
+    };
+  }
+
+  return appState;
 };
 
 const setProfileStateSnapshotField = <TField extends DefaultProfileStateField>(
@@ -296,7 +308,7 @@ export const internalStateSlice = createSlice({
      */
     setAppState: (state, action: TabAction<RawAppStatePayload & { profileId: string }>) =>
       withTab(state, action.payload, (tab) => {
-        let appState = action.payload.appState;
+        let appState = normalizeVisiblePanelsState(action.payload.appState);
 
         // When updating to an ES|QL query, sync the data source
         if (isOfAggregateQueryType(appState.query)) {
@@ -486,6 +498,27 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.docViewer = action.payload.docViewerUiState;
+      }),
+
+    setDataCascadeUiState: (
+      state,
+      action: TabAction<{ dataCascadeUiState: TabState['uiState']['dataCascade'] }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.dataCascade = action.payload.dataCascadeUiState;
+      }),
+
+    setCascadedDocumentsDataGridUiState: (
+      state,
+      action: TabAction<{
+        nodeId: string;
+        dataGridUiState: Partial<UnifiedDataTableRestorableState>;
+      }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.cascadedDocumentsDataGridMap ??= {};
+        tab.uiState.cascadedDocumentsDataGridMap[action.payload.nodeId] =
+          action.payload.dataGridUiState;
       }),
   },
   extraReducers: (builder) => {

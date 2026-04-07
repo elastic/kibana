@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/usage-collection-plugin'
   - '@kbn/tracing-utils'
+  - '@kbn/apm-utils'
 tags:
   - plugin
   - prod

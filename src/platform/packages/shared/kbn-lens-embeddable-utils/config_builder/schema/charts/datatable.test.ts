@@ -494,7 +494,6 @@ describe('Datatable Schema', () => {
         metrics: [],
         rows: [
           {
-            operation: 'value',
             column: 'location',
           },
         ],
@@ -512,7 +511,6 @@ describe('Datatable Schema', () => {
         },
         metrics: [
           {
-            operation: 'value',
             column: 'bytes',
           },
         ],
@@ -767,7 +765,6 @@ describe('Datatable Schema', () => {
         },
         metrics: [
           {
-            operation: 'value',
             column: 'avg_bytes',
             alignment: 'left',
             apply_color_to: 'badge',
@@ -785,7 +782,6 @@ describe('Datatable Schema', () => {
             },
           },
           {
-            operation: 'value',
             column: 'median_bytes',
             alignment: 'center',
             apply_color_to: 'value',
@@ -805,7 +801,6 @@ describe('Datatable Schema', () => {
         ],
         rows: [
           {
-            operation: 'value',
             column: 'location',
             alignment: 'right',
             apply_color_to: 'value',
@@ -829,7 +824,6 @@ describe('Datatable Schema', () => {
         ],
         split_metrics_by: [
           {
-            operation: 'value',
             column: 'api',
           },
         ],
@@ -850,7 +844,6 @@ describe('Datatable Schema', () => {
         },
         rows: [
           {
-            operation: 'value',
             column: 'location',
             alignment: 'right',
             apply_color_to: 'value',

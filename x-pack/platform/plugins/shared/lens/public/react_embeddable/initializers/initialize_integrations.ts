@@ -31,7 +31,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedAPIConfig> &
+    Pick<HasSerializableState<LensSerializedAPIConfig>, 'serializeState'> &
     LegacyLensStateApi;
 } {
   return {
