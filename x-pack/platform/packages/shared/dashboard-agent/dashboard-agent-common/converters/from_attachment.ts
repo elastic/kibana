@@ -100,6 +100,7 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
 export const attachmentDataToDashboardState = ({
   panels = [],
   filters,
+  query,
   pinned_panels,
   access_control,
   options,
