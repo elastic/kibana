@@ -17188,6 +17188,127 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/detection_engine/rules/_history:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/_history</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a paginated list of historical rule revisions. By default, the first page is returned, with 20 results per page.
+      operationId: RuleHistory
+      parameters:
+        - description: The rule's `id` value.
+          in: query
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Rules per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                example1:
+                  value:
+                    items:
+                      - changedFields:
+                          - alert.name
+                          - alert.tags
+                        message: Rule installed
+                        revision: 256
+                        timestamp: '2025-07-02T10:05:19.613Z'
+                        username: bobpurton
+                    page: 1
+                    perPage: 5
+                    total: 4
+              schema:
+                type: object
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/Security_Detections_API_RuleHistoryResult'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - items
+          description: |
+            Successful response
+            > info
+      summary: List historical revisions for a detection rule
+      tags:
+        - Security Detections API
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X GET "localhost:5601/api/detection_engine/rules/_history?id=6399a03a-9ec2-4c42-8e2a-9e622683cfcd&per_page=5" -H 'kbn-xsrf: true'
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    patch:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/_history</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Restores a historical revision of a detection rule.
+      operationId: RestoreRule
+      parameters:
+        - description: The rule's `id` value.
+          in: query
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
+        - description: The historical change event Id
+          in: query
+          name: changeId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |
+            Successful response
+            > info
+      summary: Restores a historical revisions of a detection rule
+      tags:
+        - Security Detections API
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X PATCH "localhost:5601/api/detection_engine/rules/_history?id=6399a03a-9ec2-4c42-8e2a-9e622683cfcd&changeId=MmZVCRRrcU8IXhpdBBau" -H 'kbn-xsrf: true'
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/detection_engine/rules/_import:
     post:
       description: |
@@ -80124,6 +80245,37 @@ components:
         > This field is not supported for ES|QL rules.
       items: {}
       type: array
+    Security_Detections_API_RuleHistoryResult:
+      type: object
+      properties:
+        action:
+          type: string
+        changes:
+          items:
+            type: string
+          type: array
+        id:
+          type: string
+        metadata: {}
+        oldvalues: {}
+        previousRevision:
+          type: integer
+        revision:
+          type: integer
+        rule: {}
+        snapshot: {}
+        timestamp:
+          type: string
+        username:
+          type: string
+        version:
+          type: integer
+      required:
+        - timestamp
+        - id
+        - ruleId
+        - username
+        - rule
     Security_Detections_API_RuleInterval:
       description: Frequency of rule execution, using a date math range. For example, "1h" means the rule runs every hour. Defaults to 5m (5 minutes).
       type: string
