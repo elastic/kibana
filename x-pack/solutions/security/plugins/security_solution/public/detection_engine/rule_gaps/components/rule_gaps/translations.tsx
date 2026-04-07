@@ -153,12 +153,23 @@ export const GAP_STATUS_FILTER_TITLE = i18n.translate(
   }
 );
 
+export const GAP_REASON_FILTER_TITLE = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapReasonFilterTitle',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
 export const GAPS_TABLE_REASON_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.reasonLabel',
   {
     defaultMessage: 'Reason',
   }
 );
+
+export const GAPS_TABLE_CAPTION = i18n.translate('xpack.securitySolution.gapsTable.caption', {
+  defaultMessage: 'Rule gaps',
+});
 
 export const GAPS_TABLE_REASON_LABEL_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapsTable.reasonLabelTooltip',

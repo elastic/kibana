@@ -26,6 +26,7 @@ import { links as managementLinks, getManagementFilteredLinks } from '../../mana
 import { exploreLinks } from '../../explore/links';
 import { onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
 import { entityAnalyticsLinks } from '../../entity_analytics/links';
@@ -53,9 +54,14 @@ export const appLinks: AppLinkItems = Object.freeze([
 
 export const getFilteredLinks = async (
   core: CoreStart,
-  plugins: StartPlugins
+  plugins: StartPlugins,
+  experimentalFeatures: ExperimentalFeatures
 ): Promise<AppLinkItems> => {
-  const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
+  const managementFilteredLinks = await getManagementFilteredLinks(
+    core,
+    plugins,
+    experimentalFeatures
+  );
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,

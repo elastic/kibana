@@ -12,6 +12,7 @@ import {
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
+import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   name: string,
@@ -27,9 +28,13 @@ export const useTabs = (
       }),
     ];
 
-    const resolutionTab = entityStoreEntityId
-      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'service' })]
+    const graphTab = entityStoreEntityId
+      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
       : [];
 
-    return [...riskTab, ...resolutionTab];
+    const resolutionTab = entityStoreEntityId
+      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.service })]
+      : [];
+
+    return [...riskTab, ...graphTab, ...resolutionTab];
   }, [name, scopeId, entityStoreEntityId]);

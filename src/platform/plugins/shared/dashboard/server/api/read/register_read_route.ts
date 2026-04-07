@@ -9,15 +9,18 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { telemetryHandler } from '../telemetry_handler';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
@@ -61,32 +64,34 @@ export function registerReadRoute(
         },
       }),
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await read(
-          ctx,
-          getCachedDashboardStateSchema(),
-          req.params.id,
-          isDashboardAppRequest
-        );
-        return res.ok({
-          body: result,
-        });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with ID [${req.params.id}] was not found.`,
-            },
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const { body, resolveHeaders } = await read(
+            ctx,
+            getCachedDashboardStateSchema(),
+            req.params.id,
+            isDashboardAppRequest
+          );
+          return res.ok({
+            body,
+            ...(isDashboardAppRequest && { headers: resolveHeaders }),
           });
-        }
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 404) {
+            return res.notFound({
+              body: {
+                message: `A dashboard with ID [${req.params.id}] was not found.`,
+              },
+            });
+          }
 
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
-        }
+          if (e.isBoom && e.output.statusCode === 403) {
+            return res.forbidden({ body: { message: e.message } });
+          }
 
-        return res.badRequest({ body: { message: e.message } });
-      }
-    }
+          return res.badRequest({ body: { message: e.message } });
+        }
+      })
   );
 }
