@@ -7,7 +7,6 @@
 
 /* eslint-disable playwright/no-nth-methods */
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 export class FeatureSettingsPage {
   constructor(private readonly page: ScoutPage) {}
@@ -119,12 +118,13 @@ export class FeatureSettingsPage {
    */
   public async removeEndpointsUntilOneRemains(): Promise<number> {
     const firstCard = this.allSubFeatureCards.first();
-    const removeButtons = firstCard.locator('[data-test-subj^="remove-endpoint-"]');
-    const initialCount = await removeButtons.count();
+    const endpointRows = firstCard.locator('[data-test-subj^="endpoint-row-"]');
+    const initialCount = await endpointRows.count();
 
     for (let remaining = initialCount; remaining > 1; remaining--) {
-      await removeButtons.last().click();
-      await expect(removeButtons).toHaveCount(remaining - 1);
+      const lastRemoveBtn = firstCard.locator('[data-test-subj^="remove-endpoint-"]').last();
+      await lastRemoveBtn.click();
+      await lastRemoveBtn.waitFor({ state: 'detached' });
     }
 
     return initialCount;
