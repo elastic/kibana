@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('Perform CCS Search in Console', () => {
       before(async () => {
-        await browser.setScreenshotSize(1800, 2937); //add the full response in getVisibleText
+        await browser.setScreenshotSize(1800, 2937); // add the full response in getVisibleText
         await PageObjects.console.clearEditorText();
       });
       it('it should be able to access remote data', async () => {
