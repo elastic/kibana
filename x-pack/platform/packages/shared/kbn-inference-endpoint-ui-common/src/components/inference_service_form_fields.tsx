@@ -41,10 +41,9 @@ import {
   solutionKeys,
   type ProviderSolution,
 } from './providers/render_service_provider/service_provider';
-import type { ServiceProviderKeys } from '../constants';
+import { ServiceProviderKeys } from '../constants';
 import {
   DEFAULT_TASK_TYPE,
-  internalProviderKeys,
   INTERNAL_OVERRIDE_FIELDS,
   serviceProviderLinkComponents,
   SERVICE_SETTINGS,
@@ -466,7 +465,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           : providers;
 
         filteredProviders = filteredProviders.filter(
-          (provider) => !internalProviderKeys.includes(provider.service)
+          (provider) => provider.service !== ServiceProviderKeys.elasticsearch
         );
 
         if (allowedTaskTypes) {
