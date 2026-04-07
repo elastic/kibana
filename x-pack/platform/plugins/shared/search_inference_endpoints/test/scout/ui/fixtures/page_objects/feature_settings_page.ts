@@ -53,9 +53,53 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator('disallowOtherModelsCheckbox');
   }
 
-  // --- Dynamic Section Locators ---
+  // --- Feature Sections ---
 
   public getFeatureSection(parentName: string): Locator {
     return this.page.testSubj.locator(`featureSection-${parentName}`);
+  }
+
+  public get allFeatureSections(): Locator {
+    return this.content.locator('[data-test-subj^="featureSection-"]');
+  }
+
+  public getResetLink(parentName: string): Locator {
+    return this.page.testSubj.locator(`reset-${parentName}`);
+  }
+
+  // --- Sub-Feature Cards ---
+
+  public getSubFeatureCard(featureId: string): Locator {
+    return this.page.testSubj.locator(`subFeatureCard-${featureId}`);
+  }
+
+  public get allSubFeatureCards(): Locator {
+    return this.content.locator('[data-test-subj^="subFeatureCard-"]');
+  }
+
+  public get allEndpointRows(): Locator {
+    return this.content.locator('[data-test-subj^="endpoint-row-"]');
+  }
+
+  public getEndpointRow(endpointId: string): Locator {
+    return this.page.testSubj.locator(`endpoint-row-${endpointId}`);
+  }
+
+  public getRemoveEndpointButton(endpointId: string): Locator {
+    return this.page.testSubj.locator(`remove-endpoint-${endpointId}`);
+  }
+
+  public get disabledRemoveButtons(): Locator {
+    return this.content.locator('[data-test-subj^="remove-endpoint-"]:disabled');
+  }
+
+  // --- Add Model Popover ---
+
+  public get firstAddModelButton(): Locator {
+    return this.content.locator('[data-test-subj="add-model-button"]').locator('nth=0');
+  }
+
+  public get addModelSearch(): Locator {
+    return this.page.testSubj.locator('add-model-search');
   }
 }

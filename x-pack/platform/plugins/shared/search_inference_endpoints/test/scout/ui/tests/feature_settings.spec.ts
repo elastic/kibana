@@ -51,9 +51,7 @@ test.describe('Feature Settings', { tag: tags.deploymentAgnostic }, () => {
     });
 
     await test.step('feature sections are hidden', async () => {
-      await expect(
-        featureSettings.content.locator('[data-test-subj^="featureSection-"]')
-      ).toHaveCount(0);
+      await expect(featureSettings.allFeatureSections).toHaveCount(0);
     });
 
     await test.step('disable disallow other models', async () => {
@@ -61,9 +59,41 @@ test.describe('Feature Settings', { tag: tags.deploymentAgnostic }, () => {
     });
 
     await test.step('feature sections reappear', async () => {
-      await expect(
-        featureSettings.content.locator('[data-test-subj^="featureSection-"]')
-      ).not.toHaveCount(0);
+      await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
+    });
+  });
+
+  test('feature sections render with sub-feature cards', async ({ pageObjects }) => {
+    const { featureSettings } = pageObjects;
+
+    await test.step('at least one feature section is visible', async () => {
+      await expect(featureSettings.allFeatureSections).not.toHaveCount(0);
+    });
+
+    await test.step('sub-feature cards are present with endpoint rows', async () => {
+      await expect(featureSettings.allSubFeatureCards).not.toHaveCount(0);
+      await expect(featureSettings.allEndpointRows).not.toHaveCount(0);
+    });
+
+    await test.step('endpoint rows contain a default badge', async () => {
+      await expect(featureSettings.content).toContainText('Default');
+    });
+  });
+
+  test('add model popover opens with search', async ({ pageObjects }) => {
+    const { featureSettings } = pageObjects;
+
+    await test.step('open add model popover on a sub-feature', async () => {
+      await featureSettings.firstAddModelButton.click();
+      await expect(featureSettings.addModelSearch).toBeVisible();
+    });
+  });
+
+  test('remove button is disabled when only one endpoint remains', async ({ pageObjects }) => {
+    const { featureSettings } = pageObjects;
+
+    await test.step('single-endpoint card has disabled remove button', async () => {
+      await expect(featureSettings.disabledRemoveButtons).not.toHaveCount(0);
     });
   });
 });
