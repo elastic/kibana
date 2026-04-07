@@ -20,7 +20,6 @@ export type {
   DataCascadeImplRef,
   DataCascadeRowProps,
   DataCascadeRowCellProps,
-  CascadeGroupNodeUIInteraction,
   DataCascadeUISnapshot,
   DataCascadeRestorableState,
 } from './src/components';

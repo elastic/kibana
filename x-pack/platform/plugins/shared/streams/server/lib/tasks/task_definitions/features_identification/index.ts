@@ -15,6 +15,7 @@ import {
 } from '@kbn/inference-common';
 import {
   type IdentifyFeaturesResult,
+  type IterationResult,
   type BaseFeature,
   type Feature,
   isComputedFeature,
@@ -34,10 +35,11 @@ import {
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
+import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { parseError } from '../../../streams/errors/parse_error';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
+import { resolveConnectorForFeature } from '../../../../routes/utils/resolve_connector_for_feature';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
 import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
@@ -45,18 +47,23 @@ import { cancellableTask } from '../../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
 
+const toFeatureSummary = ({ id, title }: Feature) => ({ id, title: title ?? id });
+
 const DEFAULT_MAX_ITERATIONS = 5;
 const DOCUMENTS_BATCH_SIZE = 20;
+const EMPTY_TOKENS: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0, cached: 0 };
 const MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
 
 class FeatureAccumulator {
   private readonly byUuid = new Map<string, Feature>();
   private readonly byLowerId = new Map<string, Feature>();
+  private readonly fromStorage = new Set<string>();
 
   constructor(initialFeatures: Feature[] = []) {
     for (const f of initialFeatures) {
       this.add(f);
+      this.fromStorage.add(f.uuid);
     }
   }
 
@@ -80,13 +87,30 @@ class FeatureAccumulator {
     );
   }
 
+  isStoredFeature(feature: Feature): boolean {
+    return this.fromStorage.has(feature.uuid);
+  }
+
+  promoteFromStorage(featureUuid: string) {
+    this.fromStorage.delete(featureUuid);
+  }
+
   getAll(): Feature[] {
     return Array.from(this.byUuid.values());
   }
 
-  getTopByConfidence(limit: number): Feature[] {
+  getDiscovered(): Feature[] {
+    return this.getAll().filter((f) => !this.fromStorage.has(f.uuid));
+  }
+
+  getTopRanked(limit: number): Feature[] {
     return this.getAll()
-      .sort((a, b) => b.confidence - a.confidence)
+      .sort((a, b) => {
+        const aEntity = a.type === 'entity' ? 0 : 1;
+        const bEntity = b.type === 'entity' ? 0 : 1;
+        if (aEntity !== bEntity) return aEntity - bEntity;
+        return b.confidence - a.confidence;
+      })
       .slice(0, limit);
   }
 
@@ -123,7 +147,7 @@ export interface IdentifyStreamFeaturesOptions {
   maxIterations?: number;
   onIterationComplete?: (
     telemetry: IterationTelemetry,
-    changedFeatures: Feature[]
+    changes: { newFeatures: Feature[]; updatedFeatures: Feature[] }
   ) => Promise<void>;
   excludedFeatures: Feature[];
 }
@@ -156,15 +180,12 @@ export async function identifyStreamFeatures({
       properties,
     }));
 
-  const known = new FeatureAccumulator();
-  const existing = new FeatureAccumulator(existingFeatures);
+  const known = new FeatureAccumulator(existingFeatures);
 
-  let totalTokensUsed: ChatCompletionTokenCount = {
-    prompt: 0,
-    completion: 0,
-    total: 0,
-    cached: 0,
-  };
+  let totalTokensUsed: ChatCompletionTokenCount = { ...EMPTY_TOKENS };
+
+  let successCount = 0;
+  let failureCount = 0;
 
   for (let i = 0; i < maxIterations; i++) {
     if (signal.aborted) {
@@ -177,7 +198,7 @@ export async function identifyStreamFeatures({
       index: streamName,
       start,
       end,
-      features: known.getAll().filter(isFeatureWithFilter),
+      features: known.getDiscovered().filter(isFeatureWithFilter),
       logger,
       size: DOCUMENTS_BATCH_SIZE,
     });
@@ -187,7 +208,7 @@ export async function identifyStreamFeatures({
       break;
     }
 
-    const previousFeatures = known.getTopByConfidence(MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
+    const previousFeatures = known.getTopRanked(MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
 
     logger.debug(
       () =>
@@ -197,77 +218,80 @@ export async function identifyStreamFeatures({
     );
 
     const iterationStart = Date.now();
-    let rawFeatures: BaseFeature[];
-    let tokensUsed: ChatCompletionTokenCount;
-    let ignoredFeatures: IgnoredFeature[];
 
-    try {
-      ({
-        features: rawFeatures,
-        tokensUsed,
-        ignoredFeatures,
-      } = await identifyFeatures({
-        streamName,
-        sampleDocuments: batchResult.documents,
-        excludedFeatures: excludedSummaries,
-        inferenceClient,
-        systemPrompt,
-        logger,
-        signal,
-        previouslyIdentifiedFeatures: previousFeatures.map((f) => ({
-          id: f.id,
-          type: f.type,
-          subtype: f.subtype,
-          title: f.title,
-          description: f.description,
-          properties: f.properties,
-        })),
-      }));
-    } catch (error) {
-      const emptyTokens: ChatCompletionTokenCount = {
-        prompt: 0,
-        completion: 0,
-        total: 0,
-        cached: 0,
-      };
-      await onIterationComplete?.(
+    const identifyFeaturesArgs = {
+      streamName,
+      sampleDocuments: batchResult.documents,
+      excludedFeatures: excludedSummaries,
+      inferenceClient,
+      systemPrompt,
+      logger,
+      signal,
+      previouslyIdentifiedFeatures: previousFeatures.map((f) => ({
+        id: f.id,
+        type: f.type,
+        subtype: f.subtype,
+        title: f.title,
+        description: f.description,
+        properties: f.properties,
+      })),
+    };
+
+    const emitFailedIteration = (sinceMs: number) =>
+      onIterationComplete?.(
         {
           iteration: i + 1,
           state: 'failure',
           docsCount: batchResult.documents.length,
           featuresNew: 0,
           featuresUpdated: 0,
-          durationMs: Date.now() - iterationStart,
-          tokensUsed: emptyTokens,
+          durationMs: Date.now() - sinceMs,
+          tokensUsed: EMPTY_TOKENS,
           ignoredFeaturesCount: 0,
           codeIgnoredCount: 0,
           totalFilters: batchResult.totalFilters,
           filtersCapped: batchResult.filtersCapped,
           hasFilteredDocuments: batchResult.hasFilteredDocuments,
         },
-        []
+        { newFeatures: [], updatedFeatures: [] }
       );
-      throw error;
+
+    let result: Awaited<ReturnType<typeof identifyFeatures>>;
+    try {
+      result = await identifyFeatures(identifyFeaturesArgs);
+    } catch (error) {
+      if (signal.aborted) {
+        throw error;
+      }
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      logger.warn(`Iteration ${i + 1} failed (${errorMsg}), continuing`);
+      failureCount++;
+      await emitFailedIteration(iterationStart);
+      continue;
     }
+
+    successCount++;
+
+    const { features: rawFeatures, tokensUsed, ignoredFeatures } = result;
 
     totalTokensUsed = sumTokens(totalTokensUsed, tokensUsed);
 
     const { newFeatures, updatedFeatures, codeIgnoredCount } = reconcileFeatures({
       rawFeatures,
       known,
-      existing,
       ignoredFeatures,
       logger,
       excludedFeatures,
     });
-
-    const changedFeatures = [...newFeatures, ...updatedFeatures];
 
     for (const feature of newFeatures) {
       known.add(feature);
     }
     for (const feature of updatedFeatures) {
       known.update(feature);
+      if (known.isStoredFeature(feature)) {
+        known.promoteFromStorage(feature.uuid);
+      }
     }
 
     const iterationEntry: IterationTelemetry = {
@@ -284,7 +308,8 @@ export async function identifyStreamFeatures({
       filtersCapped: batchResult.filtersCapped,
       hasFilteredDocuments: batchResult.hasFilteredDocuments,
     };
-    await onIterationComplete?.(iterationEntry, changedFeatures);
+
+    await onIterationComplete?.(iterationEntry, { newFeatures, updatedFeatures });
 
     logger.debug(
       () =>
@@ -296,8 +321,12 @@ export async function identifyStreamFeatures({
     );
   }
 
+  if (failureCount > 0 && successCount === 0) {
+    throw new Error(`All iterations failed for stream ${streamName}`);
+  }
+
   return {
-    features: known.getAll(),
+    features: known.getDiscovered(),
     tokensUsed: totalTokensUsed,
   };
 }
@@ -324,6 +353,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
               const { start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
@@ -360,22 +390,21 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 streamsClient,
                 inferenceClient,
                 soClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
-                uiSettingsClient,
-                logger: taskLogger,
+              const connectorId = await resolveConnectorForFeature({
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                featureName: 'knowledge indicator extraction',
+                request: fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               let hasTrackedIteration = false;
+              const iterationResults: IterationResult[] = [];
               try {
                 const [
                   stream,
@@ -398,7 +427,10 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
 
-                const [{ features: inferredFeatures }, computedFeatures] = await Promise.all([
+                const [
+                  { features: inferredFeatures, tokensUsed: totalTokensUsed },
+                  computedFeatures,
+                ] = await Promise.all([
                   identifyStreamFeatures({
                     streamName: stream.name,
                     esClient,
@@ -410,13 +442,22 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     logger: taskLogger,
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
-                    onIterationComplete: async (it, changedFeatures) => {
-                      if (changedFeatures.length > 0) {
+                    onIterationComplete: async (it, changes) => {
+                      const allChanged = [...changes.newFeatures, ...changes.updatedFeatures];
+                      if (allChanged.length > 0) {
                         await featureClient.bulk(
                           stream.name,
-                          changedFeatures.map((feature) => ({ index: { feature } }))
+                          allChanged.map((feature) => ({ index: { feature } }))
                         );
                       }
+                      iterationResults.push({
+                        iteration: it.iteration,
+                        durationMs: it.durationMs,
+                        state: it.state,
+                        tokensUsed: it.tokensUsed,
+                        newFeatures: changes.newFeatures.map(toFeatureSummary),
+                        updatedFeatures: changes.updatedFeatures.map(toFeatureSummary),
+                      });
                       taskContext.telemetry.trackFeaturesIdentified({
                         run_id: runId,
                         iteration: it.iteration,
@@ -450,6 +491,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   }),
                 ]);
 
+                const durationMs = Date.now() - new Date(_task.created_at).getTime();
+
                 const reconciledComputedFeatures = reconcileComputedFeatures({
                   computedFeatures,
                   streamName,
@@ -467,9 +510,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
                   { start, end, streamName },
-                  { features: allFeatures }
+                  {
+                    features: allFeatures,
+                    durationMs,
+                    iterations: iterationResults,
+                    totalTokensUsed,
+                  }
                 );
               } catch (error) {
+                const failDurationMs = Date.now() - new Date(_task.created_at).getTime();
+
                 if (isDefinitionNotFoundError(error)) {
                   taskLogger.debug(
                     () =>
@@ -478,12 +528,21 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   return getDeleteTaskRunResult();
                 }
 
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
+                let connector;
+                try {
+                  connector = await inferenceClient.getConnectorById(connectorId);
+                } catch (connectorErr) {
+                  taskLogger.warn(
+                    `Failed to fetch connector ${connectorId} for error enrichment: ${
+                      connectorErr instanceof Error ? connectorErr.message : String(connectorErr)
+                    }`
+                  );
+                }
 
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : parseError(error).message;
+                const errorMessage =
+                  isInferenceProviderError(error) && connector
+                    ? formatInferenceProviderError(error, connector)
+                    : parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -500,10 +559,21 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   error,
                 } as LogMeta);
 
-                await taskClient.fail<FeaturesIdentificationTaskParams>(
+                const partialTokensUsed = iterationResults.reduce(
+                  (acc, iter) => sumTokens(acc, iter.tokensUsed),
+                  { ...EMPTY_TOKENS }
+                );
+
+                await taskClient.fail<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
                   { start, end, streamName },
-                  errorMessage
+                  errorMessage,
+                  {
+                    features: [],
+                    durationMs: failDurationMs,
+                    iterations: iterationResults,
+                    totalTokensUsed: partialTokensUsed,
+                  }
                 );
 
                 if (!hasTrackedIteration) {
@@ -538,14 +608,12 @@ const hasChanged = (updated: BaseFeature, current: Feature): boolean =>
 function reconcileFeatures({
   rawFeatures,
   known,
-  existing,
   ignoredFeatures,
   excludedFeatures,
   logger,
 }: {
   rawFeatures: BaseFeature[];
   known: FeatureAccumulator;
-  existing: FeatureAccumulator;
   ignoredFeatures: IgnoredFeature[];
   excludedFeatures: Feature[];
   logger: Logger;
@@ -579,23 +647,21 @@ function reconcileFeatures({
   });
 
   for (const raw of nonExcludedInferredFeatures) {
-    const thisRunMatch = known.findDuplicate(raw);
+    const match = known.findDuplicate(raw);
 
-    if (thisRunMatch) {
-      // Intra-run: merge evidence/tags accumulated across iterations of this run
-      const merged = mergeFeature(thisRunMatch, raw);
-      if (hasChanged(merged, thisRunMatch)) {
-        updatedFeatures.push({ ...merged, ...metadata, uuid: thisRunMatch.uuid });
+    if (match) {
+      if (known.isStoredFeature(match)) {
+        // Stored-origin: always update to refresh last_seen / expires_at
+        updatedFeatures.push({ ...raw, ...metadata, uuid: match.uuid });
+      } else {
+        // Intra-run: merge properties accumulated across iterations of this run
+        const merged = mergeFeature(match, raw);
+        if (hasChanged(merged, match)) {
+          updatedFeatures.push({ ...merged, ...metadata, uuid: match.uuid });
+        }
       }
     } else {
-      // Cross-run: reuse UUID for UI continuity but don't merge — prior data may be stale
-      const existingMatch = existing.findDuplicate(raw);
-
-      if (existingMatch) {
-        newFeatures.push({ ...raw, ...metadata, uuid: existingMatch.uuid });
-      } else {
-        newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
-      }
+      newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
     }
   }
 

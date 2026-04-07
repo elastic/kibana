@@ -12,6 +12,7 @@ import { useUpdateWatchlist } from './use_update_watchlist';
 export interface UseWatchlistMutationsParams {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
+  entitySourceId?: string;
   spaceId?: string;
   isEditMode: boolean;
   onSuccess: () => void;
@@ -20,6 +21,7 @@ export interface UseWatchlistMutationsParams {
 export const useWatchlistMutations = ({
   watchlist,
   watchlistId,
+  entitySourceId,
   spaceId,
   isEditMode,
   onSuccess,
@@ -31,6 +33,7 @@ export const useWatchlistMutations = ({
   });
   const updateMutation = useUpdateWatchlist({
     watchlistId,
+    entitySourceId,
     watchlist,
     spaceId,
     onSuccess,

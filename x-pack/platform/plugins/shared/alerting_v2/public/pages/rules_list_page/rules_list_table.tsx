@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,17 +19,36 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  type Criteria,
   type EuiBasicTableColumn,
-  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
+
+const labelsContainerStyle = css`
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow: hidden;
+`;
+
+const labelBadgeStyle = css`
+  min-width: 0;
+  flex-shrink: 1;
+`;
+
+const overflowTooltipStyle = css`
+  flex-shrink: 0;
+  line-height: 0;
+`;
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -46,6 +66,8 @@ interface RuleActionsMenuProps {
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
 }
+
+export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
 
 const RuleActionsMenu = ({
   rule,
@@ -143,6 +165,9 @@ export interface RulesListTableProps {
   page: number;
   perPage: number;
   search: string;
+  hasActiveFilters: boolean;
+  sortField?: RulesListTableSortField;
+  sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
 
   /** Bulk selection state */
@@ -161,13 +186,14 @@ export interface RulesListTableProps {
   onBulkDelete: () => void;
 
   /** Row action callbacks */
+  onNavigateToDetails: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
 
   /** Pagination callback */
-  onTableChange: (criteria: CriteriaWithPagination<RuleApiResponse>) => void;
+  onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
 }
 
 export const RulesListTable: React.FC<RulesListTableProps> = ({
@@ -176,6 +202,9 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   page,
   perPage,
   search,
+  hasActiveFilters,
+  sortField,
+  sortDirection,
   isLoading,
   selectedCount,
   isAllSelected,
@@ -188,6 +217,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onNavigateToDetails,
   onEdit,
   onClone,
   onDelete,
@@ -252,9 +282,15 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
         ),
         truncateText: true,
+        sortable: true,
         render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
           <div>
-            {metadata?.name ?? rule.id}
+            <EuiLink
+              onClick={() => onNavigateToDetails(rule)}
+              data-test-subj={`ruleNameLink-${rule.id}`}
+            >
+              {metadata?.name ?? rule.id}
+            </EuiLink>
             {metadata?.description && (
               <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
                 {metadata.description}
@@ -282,24 +318,45 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'metadata',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
         ),
-        width: '12%',
+        width: '20%',
         render: (_metadata: RuleApiResponse['metadata']) => {
-          const labels = _metadata?.labels;
-          if (!labels || labels.length === 0) {
+          const tags = _metadata?.tags;
+          if (!tags || tags.length === 0) {
             return (
               <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
             );
           }
+          const overflowCount = tags.length - 1;
           return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {labels.map((label) => (
-                <EuiFlexItem key={label} grow={false}>
-                  <EuiBadge color="hollow">{label}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <EuiBadgeGroup
+              gutterSize="xs"
+              css={labelsContainerStyle}
+              data-test-subj="tagsContainer"
+            >
+              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
+                {tags[0]}
+              </EuiBadge>
+              {overflowCount > 0 && (
+                <span css={overflowTooltipStyle}>
+                  <EuiToolTip content={tags.slice(1).join(', ')}>
+                    <EuiBadge
+                      tabIndex={0}
+                      color="hollow"
+                      data-test-subj="overflowTagsBadge"
+                      iconType="tag"
+                      title=""
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
+                        defaultMessage: '+{count}',
+                        values: { count: overflowCount },
+                      })}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </span>
+              )}
+            </EuiBadgeGroup>
           );
         },
       },
@@ -308,7 +365,8 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
         ),
-        width: '12%',
+        width: '10%',
+        sortable: true,
         render: (kind: string) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -335,7 +393,8 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
         ),
-        width: '10%',
+        width: '8%',
+        sortable: true,
         render: (enabled: boolean) =>
           enabled ? (
             <EuiBadge color="success" data-test-subj="ruleStatusEnabled">
@@ -376,6 +435,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       isRowSelected,
       onSelectPage,
       onSelectRow,
+      onNavigateToDetails,
       onEdit,
       onClone,
       onDelete,
@@ -383,13 +443,14 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     ]
   );
 
-  const noItemsMessage = search
-    ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
-        defaultMessage: 'No rules match your search.',
-      })
-    : i18n.translate('xpack.alertingV2.rulesList.noRules', {
-        defaultMessage: 'No rules found.',
-      });
+  const noItemsMessage =
+    search || hasActiveFilters
+      ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
+          defaultMessage: 'No rules match your search or filters.',
+        })
+      : i18n.translate('xpack.alertingV2.rulesList.noRules', {
+          defaultMessage: 'No rules found.',
+        });
 
   return (
     <>
@@ -524,6 +585,11 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         columns={columns}
         loading={isLoading}
         pagination={pagination}
+        sorting={
+          sortField && sortDirection
+            ? { sort: { field: sortField, direction: sortDirection } }
+            : undefined
+        }
         noItemsMessage={noItemsMessage}
         onChange={onTableChange}
         responsiveBreakpoint={false}

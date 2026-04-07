@@ -31,7 +31,7 @@ function getOrderByValue(
     return { type: 'custom' };
   }
 
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   if (!refId) {
     return { type: 'alphabetical', fallback: true };
   }
@@ -45,7 +45,7 @@ function getOrderDirection(
   if (rankBy && 'direction' in rankBy && rankBy.direction) {
     return rankBy.direction;
   }
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   return refId ? 'desc' : 'asc';
 }
 
@@ -53,7 +53,7 @@ export function fromTermsLensApiToLensState(
   options: LensApiTermsOperation,
   getMetricColumnIdByIndex: (index: number) => string | undefined
 ): TermsIndexPatternColumn {
-  const { fields, size, increase_accuracy, includes, excludes, other_bucket, rank_by } = options;
+  const { fields, limit, increase_accuracy, includes, excludes, other_bucket, rank_by } = options;
 
   const [field, ...secondaryFields] = fields;
   const orderByConfig = getOrderByValue(rank_by, getMetricColumnIdByIndex);
@@ -67,7 +67,7 @@ export function fromTermsLensApiToLensState(
     ...getLensStateBucketSharedProps({ ...options, field }),
     params: {
       ...(secondaryFields.length ? { secondaryFields } : {}),
-      size, // it cannot be 0 (zero)
+      size: limit, // it cannot be 0 (zero)
       ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
       ...(includes?.values
         ? { include: includes?.values, includeIsRegex: includes?.as_regex ?? false }
@@ -135,8 +135,8 @@ function getRankByConfig(
       );
     if (index > -1) {
       return {
-        type: 'column',
-        metric: index,
+        type: 'metric',
+        metric_index: index,
         direction: params.orderDirection,
       };
     }
@@ -153,7 +153,7 @@ export function fromTermsLensStateToAPI(
     operation: 'terms',
     fields: [column.sourceField].concat(column.params.secondaryFields ?? []),
     ...(label ? { label } : {}),
-    size: column.params.size,
+    limit: column.params.size,
     ...(column.params.accuracyMode != null
       ? { increase_accuracy: column.params.accuracyMode }
       : {}),

@@ -6,10 +6,20 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import { useShowRelatedAttacks } from './hooks/use_show_related_attacks';
 import { useShowRelatedAlertsByAncestry } from './hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from './hooks/use_show_related_alerts_by_same_source_event';
@@ -47,6 +57,10 @@ export interface CorrelationsDetailsProps {
   hidePreviewLink?: boolean;
 }
 
+const TITLE = i18n.translate('xpack.securitySolution.flyout.correlations.title', {
+  defaultMessage: 'Correlations',
+});
+
 /**
  * Displays the full correlations details for a given alert/event document.
  * This component is meant to be used in a tools flyout, with the new EUI flyout system.
@@ -59,6 +73,7 @@ export const CorrelationsDetails = memo(
     onShowAlert,
     hidePreviewLink = true,
   }: CorrelationsDetailsProps) => {
+    const { euiTheme } = useEuiTheme();
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
       () => ({
@@ -92,68 +107,80 @@ export const CorrelationsDetails = memo(
       showSuppressedAlerts;
 
     return (
-      <EuiPanel color="transparent">
-        {canShowAtLeastOneInsight ? (
-          <EuiFlexGroup gutterSize="l" direction="column">
-            {showSuppressedAlerts && (
-              <EuiFlexItem>
-                <SuppressedAlerts
-                  alertSuppressionCount={alertSuppressionCount}
-                  ecsData={ecsData}
-                  showInvestigateInTimeline={!isRulePreview}
-                />
-              </EuiFlexItem>
+      <>
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            padding-block-end: ${euiTheme.size.m} !important;
+          `}
+        >
+          <ToolsFlyoutHeader hit={hit} title={TITLE} />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiPanel color="transparent">
+            {canShowAtLeastOneInsight ? (
+              <EuiFlexGroup gutterSize="l" direction="column">
+                {showSuppressedAlerts && (
+                  <EuiFlexItem>
+                    <SuppressedAlerts
+                      alertSuppressionCount={alertSuppressionCount}
+                      ecsData={ecsData}
+                      showInvestigateInTimeline={!isRulePreview}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showCases && (
+                  <EuiFlexItem>
+                    <RelatedCases eventId={eventId} />
+                  </EuiFlexItem>
+                )}
+                {showSameSourceAlerts && (
+                  <EuiFlexItem>
+                    <RelatedAlertsBySameSourceEvent
+                      originalEventId={originalEventId}
+                      scopeId={scopeId}
+                      eventId={eventId}
+                      onShowAlert={onShowAlert}
+                      hidePreviewLink={hidePreviewLink}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showAlertsBySession && entityId && (
+                  <EuiFlexItem>
+                    <RelatedAlertsBySession
+                      entityId={entityId}
+                      scopeId={scopeId}
+                      eventId={eventId}
+                      onShowAlert={onShowAlert}
+                      hidePreviewLink={hidePreviewLink}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showAlertsByAncestry && (
+                  <EuiFlexItem>
+                    <RelatedAlertsByAncestry
+                      scopeId={scopeId}
+                      documentId={ancestryDocumentId}
+                      onShowAlert={onShowAlert}
+                      hidePreviewLink={hidePreviewLink}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showRelatedAttacks && (
+                  <EuiFlexItem>
+                    <RelatedAttacks attackIds={attackIds} scopeId={scopeId} eventId={eventId} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.correlations.noDataDescription"
+                defaultMessage="No correlations data available."
+              />
             )}
-            {showCases && (
-              <EuiFlexItem>
-                <RelatedCases eventId={eventId} />
-              </EuiFlexItem>
-            )}
-            {showSameSourceAlerts && (
-              <EuiFlexItem>
-                <RelatedAlertsBySameSourceEvent
-                  originalEventId={originalEventId}
-                  scopeId={scopeId}
-                  eventId={eventId}
-                  onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
-                />
-              </EuiFlexItem>
-            )}
-            {showAlertsBySession && entityId && (
-              <EuiFlexItem>
-                <RelatedAlertsBySession
-                  entityId={entityId}
-                  scopeId={scopeId}
-                  eventId={eventId}
-                  onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
-                />
-              </EuiFlexItem>
-            )}
-            {showAlertsByAncestry && (
-              <EuiFlexItem>
-                <RelatedAlertsByAncestry
-                  scopeId={scopeId}
-                  documentId={ancestryDocumentId}
-                  onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
-                />
-              </EuiFlexItem>
-            )}
-            {showRelatedAttacks && (
-              <EuiFlexItem>
-                <RelatedAttacks attackIds={attackIds} scopeId={scopeId} eventId={eventId} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ) : (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.correlations.noDataDescription"
-            defaultMessage="No correlations data available."
-          />
-        )}
-      </EuiPanel>
+          </EuiPanel>
+        </EuiFlyoutBody>
+      </>
     );
   }
 );

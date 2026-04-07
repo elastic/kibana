@@ -13,6 +13,7 @@ import type {
   ScanDashboardsResult,
   DashboardReadResponseBody,
 } from '@kbn/dashboard-plugin/server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -75,7 +76,7 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let references = this.isLensVizAttributes(panel.config)
+      let references = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.references
         : undefined;
       if (!references && panel.uid) {
@@ -94,7 +95,7 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let state: unknown = this.isLensVizAttributes(panel.config)
+      let state: unknown = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.state
         : undefined;
       if (!state && panel.uid) {
@@ -300,17 +301,15 @@ export class RelatedDashboardsClient {
     return fields ?? new Set<string>();
   }
 
-  private isLensVizAttributes(config: object): config is { attributes: LensAttributes } {
+  private isLensVizAttributes(
+    type: string,
+    config: object
+  ): config is { attributes: LensAttributes } {
     const { attributes } = (config ?? {}) as Record<string, unknown>;
-    if (!attributes) {
+    if (!attributes || type !== LENS_EMBEDDABLE_TYPE) {
       return false;
     }
-    return (
-      Boolean(attributes) &&
-      typeof attributes === 'object' &&
-      'type' in attributes &&
-      attributes.type === 'lens'
-    );
+    return typeof attributes === 'object';
   }
 
   private getRuleQueryIndex(): string | null {

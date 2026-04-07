@@ -72,7 +72,7 @@ describe('XY', () => {
               ignore_global_filters: false,
               sampling: 1,
               y: [{ operation: 'count', empty_as_null: false }],
-              breakdown_by: { operation: 'terms', fields: ['product'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product'], limit: 5 },
             },
           ],
         } satisfies XYState)
@@ -100,7 +100,7 @@ describe('XY', () => {
                   include_empty_rows: false,
                 },
                 y: [{ operation: 'count', empty_as_null: false }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
           } satisfies XYState)
@@ -123,9 +123,9 @@ describe('XY', () => {
               type,
               ignore_global_filters: false,
               sampling: 1,
-              x: { operation: 'value', column: 'order_date' },
-              y: [{ operation: 'value', column: 'count' }],
-              breakdown_by: { operation: 'value', column: 'product' },
+              x: { column: 'order_date' },
+              y: [{ column: 'count' }],
+              breakdown_by: { column: 'product' },
             },
           ],
         } satisfies XYState)
@@ -154,7 +154,7 @@ describe('XY', () => {
               breakdown_by: {
                 operation: 'terms',
                 fields: ['product', 'category'],
-                size: 5,
+                limit: 5,
               },
             },
             {
@@ -196,7 +196,7 @@ describe('XY', () => {
                 include_empty_rows: false,
               },
               y: [{ operation: 'count', empty_as_null: false }],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
             {
               type: 'annotations',
@@ -252,7 +252,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
@@ -270,7 +270,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
           } satisfies XYState)
@@ -302,7 +302,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
@@ -320,7 +320,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'myDataView' },
@@ -388,7 +388,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: { visible: true },
                     color: {
@@ -432,11 +432,11 @@ describe('XY', () => {
                 breakdown_by: {
                   operation: 'terms',
                   fields: ['product', 'category'],
-                  size: 5,
+                  limit: 5,
                   rank_by: {
                     direction: 'desc',
-                    metric: 0,
-                    type: 'column',
+                    metric_index: 0,
+                    type: 'metric',
                   },
                 },
               },
@@ -445,12 +445,9 @@ describe('XY', () => {
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: 'order_date' },
-                y: [
-                  { operation: 'value', column: 'value' },
-                  { operation: 'value', column: 'price' },
-                ],
-                breakdown_by: { operation: 'value', column: 'product' },
+                x: { column: 'order_date' },
+                y: [{ column: 'value' }, { column: 'price' }],
+                breakdown_by: { column: 'product' },
               },
               {
                 dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
@@ -520,7 +517,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: {
                       visible: true,
@@ -574,7 +571,7 @@ describe('XY', () => {
                 { operation: 'count', empty_as_null: false },
                 { operation: 'average', field: 'price' },
               ],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
           ],
         } satisfies XYState)

@@ -36,6 +36,10 @@ const mockProps = {
   serviceName: 'testService',
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
+  contextID: 'testContextId',
+  identityFields: { 'service.name': 'testService' },
+  isPreviewMode: false,
+  entityId: 'testEntityId',
 };
 
 const tab = EntityDetailsLeftPanelTab.RISK_INPUTS;
@@ -64,6 +68,8 @@ describe('useNavigateToServiceDetails', () => {
         serviceName: mockProps.serviceName,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
+        identityFields: mockProps.identityFields,
+        entityId: mockProps.entityId,
         path: { tab, subTab },
       },
     });

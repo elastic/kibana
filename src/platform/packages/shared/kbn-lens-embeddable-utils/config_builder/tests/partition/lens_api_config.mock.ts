@@ -30,13 +30,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -63,15 +63,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'basic donut',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -82,13 +82,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -110,14 +110,14 @@ export const esqlCharts: Array<PartitionConfig> = [
       visible: true,
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -135,13 +135,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -164,8 +164,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -181,13 +181,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -210,8 +210,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -229,13 +229,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -257,8 +257,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -276,13 +276,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -294,13 +294,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -322,15 +322,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'donut with multiple groups',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -341,13 +341,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -359,13 +359,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -382,14 +382,14 @@ export const esqlCharts: Array<PartitionConfig> = [
       visible: true,
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -407,13 +407,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -425,13 +425,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -449,8 +449,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -466,13 +466,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -486,13 +486,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -509,8 +509,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -540,13 +540,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -558,13 +558,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -586,15 +586,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'donut with multiple metrics',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -617,13 +617,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -635,13 +635,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -657,14 +657,14 @@ export const esqlCharts: Array<PartitionConfig> = [
     values: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -694,13 +694,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -722,8 +722,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -741,13 +741,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         collapse_by: 'sum',
@@ -755,13 +755,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -782,8 +782,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -801,13 +801,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -819,26 +819,26 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -859,8 +859,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -878,13 +878,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -929,26 +929,26 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -969,8 +969,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -988,39 +988,39 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1041,15 +1041,15 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
     title: 'donut with color mapping',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -1060,13 +1060,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1111,26 +1111,26 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1146,14 +1146,14 @@ export const esqlCharts: Array<PartitionConfig> = [
     values: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1171,13 +1171,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1222,13 +1222,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1246,8 +1246,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1263,13 +1263,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1316,13 +1316,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
       },
@@ -1340,8 +1340,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1359,13 +1359,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1420,8 +1420,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1431,13 +1431,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'pie',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1469,13 +1467,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'treemap',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1502,12 +1498,10 @@ export const esqlCharts: Array<PartitionConfig> = [
     ignore_global_filters: false,
     type: 'mosaic',
     metric: {
-      operation: 'value',
       column: 'count',
     },
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1543,13 +1537,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         collapse_by: 'sum',
@@ -1557,13 +1551,13 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         color: {
@@ -1584,8 +1578,8 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      expression: 'test: true',
+      language: 'kql',
     },
   },
   {
@@ -1595,13 +1589,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'waffle',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',

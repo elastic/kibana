@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiFlexGroup,
   EuiHorizontalRule,
@@ -16,9 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { hasAgentWriteAccess } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { useMutation, useQueryClient } from '@kbn/react-query';
+import { hasAgentWriteAccess, canChangeAgentVisibility } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
@@ -26,68 +23,58 @@ import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_servic
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useToasts } from '../../../hooks/use_toasts';
-import { queryKeys } from '../../../query_keys';
 import { appPaths } from '../../../utils/app_paths';
-import { labels } from '../../../utils/i18n';
-import { storageKeys } from '../../../storage_keys';
+import { isPreExecutionWorkflowEnabled } from '../../../utils/is_pre_execution_workflow_enabled';
 import { AgentHeader } from './agent_header';
 import { CapabilitiesSection } from './capabilities_section';
 import { EditDetailsFlyout } from './edit_details_flyout';
 import { SettingsSection } from './settings_section';
-import { TurnOffCapabilitiesModal } from './turn_off_capabilities_modal';
-
-const { agentOverview: overviewLabels } = labels;
+import { PageWrapper } from '../common/page_wrapper';
 
 export const AgentOverview: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const { euiTheme } = useEuiTheme();
-  const { agentService, docLinksService } = useAgentBuilderServices();
-  const { addSuccessToast, addErrorToast } = useToasts();
-  const queryClient = useQueryClient();
-  const { navigateToAgentBuilderUrl } = useNavigation();
+  const { docLinksService } = useAgentBuilderServices();
+  const { navigateToAgentBuilderUrl, createAgentBuilderUrl } = useNavigation();
 
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const {
     services: { uiSettings },
   } = useKibana();
-  const isConnectorsEnabled = uiSettings.get<boolean>(
-    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
-    false
-  );
 
   const { manageAgents, isAdmin } = useUiPrivileges();
-  const hasConnectorsPrivileges = useHasConnectorsAllPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser();
 
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills } = useSkillsService();
   const { plugins: allPlugins } = usePluginsService();
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [instructions, setInstructions] = useState<string | undefined>(undefined);
-
-  const [warningDismissed, setWarningDismissed] = useLocalStorage(
-    storageKeys.autoIncludeWarningDismissed,
-    false
-  );
 
   const canEditAgent = useMemo(() => {
     if (!manageAgents || !agent) return false;
-    if (!isExperimentalFeaturesEnabled) return true;
     return hasAgentWriteAccess({
       visibility: agent.visibility,
       owner: agent.created_by,
       currentUser: currentUser ?? undefined,
       isAdmin,
     });
-  }, [manageAgents, agent, isExperimentalFeaturesEnabled, currentUser, isAdmin]);
+  }, [manageAgents, agent, currentUser, isAdmin]);
 
-  const currentInstructions = instructions ?? agent?.configuration?.instructions ?? '';
+  const canChangeVisibility = useMemo(() => {
+    if (!isExperimentalFeaturesEnabled || !agent) return false;
+    return canChangeAgentVisibility({
+      agentId: agent.id,
+      owner: agent.created_by,
+      currentUser: currentUser ?? undefined,
+      isAdmin,
+    });
+  }, [isExperimentalFeaturesEnabled, agent, currentUser, isAdmin]);
+
+  const showWorkflowSection = isPreExecutionWorkflowEnabled(uiSettings);
+
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
   const agentSkillIdSet = useMemo(
@@ -122,75 +109,6 @@ export const AgentOverview: React.FC = () => {
     builtinPlugins,
     agentPluginIdSet,
   ]);
-  const connectorsCount = 0;
-
-  const updateAgentMutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) => agentService.update(agentId!, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
-    },
-  });
-
-  const handleToggleAutoInclude = useCallback(
-    (checked: boolean) => {
-      if (!checked && !warningDismissed) {
-        setIsModalVisible(true);
-        return;
-      }
-      updateAgentMutation.mutate(
-        { configuration: { enable_elastic_capabilities: checked } },
-        {
-          onSuccess: () => {
-            addSuccessToast({
-              title: checked
-                ? overviewLabels.autoIncludeEnabledToast
-                : overviewLabels.autoIncludeDisabledToast,
-            });
-          },
-          onError: () => {
-            addErrorToast({ title: overviewLabels.autoIncludeErrorToast });
-          },
-        }
-      );
-    },
-    [warningDismissed, updateAgentMutation, addSuccessToast, addErrorToast]
-  );
-
-  const handleConfirmTurnOff = useCallback(
-    (dontShowAgain: boolean) => {
-      if (dontShowAgain) {
-        setWarningDismissed(true);
-      }
-      setIsModalVisible(false);
-      updateAgentMutation.mutate(
-        { configuration: { enable_elastic_capabilities: false } },
-        {
-          onSuccess: () => {
-            addSuccessToast({ title: overviewLabels.autoIncludeDisabledToast });
-          },
-          onError: () => {
-            addErrorToast({ title: overviewLabels.autoIncludeErrorToast });
-          },
-        }
-      );
-    },
-    [updateAgentMutation, setWarningDismissed, addSuccessToast, addErrorToast]
-  );
-
-  const handleSaveInstructions = useCallback(() => {
-    updateAgentMutation.mutate(
-      { configuration: { instructions: currentInstructions } },
-      {
-        onSuccess: () => {
-          addSuccessToast({ title: overviewLabels.instructionsSavedToast });
-        },
-        onError: () => {
-          addErrorToast({ title: overviewLabels.instructionsErrorToast });
-        },
-      }
-    );
-  }, [updateAgentMutation, currentInstructions, addSuccessToast, addErrorToast]);
-
   if (isLoading || !agent) {
     return (
       <EuiFlexGroup
@@ -213,61 +131,54 @@ export const AgentOverview: React.FC = () => {
   `;
 
   return (
-    <div css={containerStyles} data-test-subj="agentOverviewPage">
-      <AgentHeader
-        agent={agent}
-        docsUrl={docLinksService.agentBuilderAgents}
-        canEditAgent={canEditAgent}
-        onEditDetails={() => setIsEditFlyoutOpen(true)}
-      />
-
-      <EuiSpacer size="xl" />
-      <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="xl" />
-
-      <CapabilitiesSection
-        skillsCount={skillsCount}
-        pluginsCount={pluginsCount}
-        connectorsCount={connectorsCount}
-        enableElasticCapabilities={enableElasticCapabilities}
-        isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
-        isConnectorsEnabled={isConnectorsEnabled}
-        hasConnectorsPrivileges={hasConnectorsPrivileges}
-        onNavigateToSkills={() =>
-          navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))
-        }
-        onNavigateToPlugins={() =>
-          navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))
-        }
-        onNavigateToConnectors={() =>
-          navigateToAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))
-        }
-      />
-
-      <EuiSpacer size="xl" />
-      <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="xl" />
-
-      <SettingsSection
-        enableElasticCapabilities={enableElasticCapabilities}
-        currentInstructions={currentInstructions}
-        canEditAgent={canEditAgent}
-        isLoading={updateAgentMutation.isLoading}
-        onToggleAutoInclude={handleToggleAutoInclude}
-        onInstructionsChange={setInstructions}
-        onSaveInstructions={handleSaveInstructions}
-      />
-
-      {isEditFlyoutOpen && agent && (
-        <EditDetailsFlyout agent={agent} onClose={() => setIsEditFlyoutOpen(false)} />
-      )}
-
-      {isModalVisible && (
-        <TurnOffCapabilitiesModal
-          onConfirm={handleConfirmTurnOff}
-          onCancel={() => setIsModalVisible(false)}
+    <PageWrapper>
+      <div css={containerStyles} data-test-subj="agentOverviewPage">
+        <AgentHeader
+          agent={agent}
+          docsUrl={docLinksService.agentBuilderAgents}
+          canEditAgent={canEditAgent}
+          onEditDetails={() => setIsEditFlyoutOpen(true)}
         />
-      )}
-    </div>
+
+        <EuiSpacer size="xl" />
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="xl" />
+
+        <CapabilitiesSection
+          skillsCount={skillsCount}
+          pluginsCount={pluginsCount}
+          enableElasticCapabilities={enableElasticCapabilities}
+          isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
+          skillsHref={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+          pluginsHref={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+          onNavigateToSkills={() =>
+            navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))
+          }
+          onNavigateToPlugins={() =>
+            navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))
+          }
+        />
+
+        <EuiSpacer size="xl" />
+
+        <SettingsSection
+          enableElasticCapabilities={enableElasticCapabilities}
+          currentInstructions={agent.configuration?.instructions ?? ''}
+          showWorkflowSection={showWorkflowSection}
+          workflowIds={agent.configuration?.workflow_ids ?? []}
+          onOpenEditFlyout={() => setIsEditFlyoutOpen(true)}
+        />
+
+        {isEditFlyoutOpen && agent && (
+          <EditDetailsFlyout
+            agent={agent}
+            onClose={() => setIsEditFlyoutOpen(false)}
+            isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
+            canChangeVisibility={canChangeVisibility}
+            showWorkflowSection={showWorkflowSection}
+          />
+        )}
+      </div>
+    </PageWrapper>
   );
 };
