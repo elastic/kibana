@@ -12,8 +12,10 @@ import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
+const PROXY_PATH = `api/console/proxy?method=GET&path=${encodeURIComponent('/.kibana/_settings')}`;
+
 apiTest.describe(
-  'GET /api/console/api_server',
+  'POST /api/console/proxy',
   {
     tag: [
       ...tags.stateful.classic,
@@ -23,28 +25,22 @@ apiTest.describe(
     ],
   },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let credentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('viewer');
+      credentials = await requestAuth.getApiKey('admin');
     });
 
-    apiTest('returns autocomplete definitions', async ({ apiClient }) => {
-      const { body, statusCode } = await apiClient.get('api/console/api_server', {
+    apiTest('does not forward x-elastic-product-origin', async ({ apiClient }) => {
+      const response = await apiClient.post(PROXY_PATH, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          'x-elastic-product-origin': 'kibana',
+          ...credentials.apiKeyHeader,
         },
-        responseType: 'json',
       });
-      expect(statusCode).toBe(200);
-      expect(body.es).toBeDefined();
-      const {
-        es: { name, globals, endpoints },
-      } = body;
-      expect(name).toBe('es');
-      expect(Object.keys(globals).length).toBeGreaterThan(0);
-      expect(Object.keys(endpoints).length).toBeGreaterThan(0);
+
+      expect(response.headers.warning).toBeDefined();
     });
   }
 );
