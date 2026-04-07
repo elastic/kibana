@@ -57,7 +57,7 @@ const unmappedFields = {
   preview: true,
   snapshotOnly: false,
   description:
-    'Defines how unmapped fields are treated. Possible values are:\n\n- `DEFAULT` (default) - standard ESQL queries fail when referencing unmapped fields, while other query types (e.g. PromQL) may treat them differently;\n- `NULLIFY` - treats unmapped fields as null values.\n- `LOAD` - attempts to load the fields from the source. {applies_to}`stack: preview 9.4`\n',
+    'Defines how unmapped fields are treated. Possible values are:\n\n- `DEFAULT` (default) - standard ESQL queries fail when referencing unmapped fields, while other query types (e.g. PromQL) may treat them differently;\n- `NULLIFY` - treats unmapped fields as null values.\n- `LOAD` - attempts to load the fields from the source. \n',
   ignoreAsSuggestion: false,
 };
 
