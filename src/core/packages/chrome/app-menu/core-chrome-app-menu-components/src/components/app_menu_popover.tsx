@@ -89,7 +89,7 @@ export const AppMenuPopover = ({
       panelPaddingSize="none"
       hasArrow={false}
       anchorPosition="downLeft"
-      aria-label={i18n.translate('core.ui.chrome.appMenu.appMenuAriaLabel', {
+      aria-label={i18n.translate('core.chrome.appMenu.popoverAriaLabel', {
         defaultMessage: 'App menu',
       })}
     >
