@@ -617,21 +617,23 @@ const extractNumber = (observations: Observation[], key: string): number => {
 const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 const buildDescription = (group: ScoredEntity[], observations: Observation[]): string => {
-  const lines: string[] = [];
+  const seen = new Set<string>();
+  const bullets: string[] = [];
 
   for (const scored of group) {
     const { entity } = scored;
     const entityObs = observations.filter((o) => o.entityId === entityToKey(entity));
-    lines.push(
-      `${entity.type} ${entity.name} (priority: ${scored.priority}/10, observations: ${entityObs.length}):`
-    );
     for (const obs of entityObs) {
-      lines.push(`${obs.description}`);
+      const normalized = obs.description.trim().toLowerCase();
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        const desc = obs.description.trim();
+        bullets.push(desc.charAt(0).toUpperCase() + desc.slice(1));
+      }
     }
-    lines.push('');
   }
 
-  return lines.join(' ').trim();
+  return bullets.join('\n');
 };
 
 /**

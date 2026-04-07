@@ -41,6 +41,23 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/notification_policies/suggestions/values\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
         "type": "string",
         "tags": [],
@@ -87,23 +104,6 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
         "lineNumber": 12,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-v2-constants",
-        "id": "def-common.INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH",
-        "description": [],
-        "signature": [
-          "\"/internal/notification_policies/suggestions/values\""
-        ],
-        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

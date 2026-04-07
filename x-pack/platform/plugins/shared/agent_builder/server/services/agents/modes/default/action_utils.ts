@@ -12,7 +12,6 @@ import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
-import type { Logger } from '@kbn/logging';
 import type {
   ToolCallAction,
   HandoverAction,
@@ -56,17 +55,12 @@ export const processResearchResponse = (
 /**
  * Create execute tool action(s) based on the tool node result.
  *
- * When parallel tool calls are used and one tool triggers a HITL interrupt:
+ * When parallel tool calls are used and tools trigger HITL interrupts:
  * - Completed tools are returned as an `ExecuteToolAction`
- * - The first interrupted tool is returned as a `ToolPromptAction`
- *
- * NOTE: If multiple tools trigger HITL in the same batch, only the first
- * interrupt is handled. The others are discarded. This is an accepted
- * limitation for the first iteration of parallel tool call support.
+ * - All interrupted tools are returned as a single `ToolPromptAction` containing all prompts
  */
 export const processToolNodeResponse = (
-  toolNodeResult: BaseMessage[],
-  { logger }: { logger?: Logger } = {}
+  toolNodeResult: BaseMessage[]
 ): (ExecuteToolAction | ToolPromptAction)[] => {
   const toolMessages = toolNodeResult.filter(isToolMessage);
 
@@ -97,12 +91,14 @@ export const processToolNodeResponse = (
   }
 
   if (interruptMessages.length > 0) {
-    const firstInterrupt = interruptMessages[0];
-    const toolResult: ToolHandlerPromptReturn = firstInterrupt.artifact;
-    actions.push(toolPromptAction(firstInterrupt.tool_call_id, toolResult.prompt));
-    if (interruptMessages.length > 1) {
-      logger?.warn(`[agent] Tool execution: Found multiple tool interrupts in the same batch.`);
-    }
+    actions.push(
+      toolPromptAction(
+        interruptMessages.map((msg) => ({
+          tool_call_id: msg.tool_call_id,
+          prompt: (msg.artifact as ToolHandlerPromptReturn).prompt,
+        }))
+      )
+    );
   }
 
   return actions;
