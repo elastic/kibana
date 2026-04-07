@@ -12,8 +12,9 @@
 export const elasticsearchOnboardingAgent = {
   id: 'elasticsearch-onboarding',
   name: 'Elasticsearch Onboarding',
-  description: 'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
-  labels: ["search","onboarding","getting started"],
+  description:
+    'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
+  labels: ['search', 'onboarding', 'getting started'],
   avatar_icon: 'logoElasticsearch',
   configuration: {
     instructions: `# Elastic Developer Guide

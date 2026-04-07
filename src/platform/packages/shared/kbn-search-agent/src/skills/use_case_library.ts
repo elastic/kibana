@@ -12,7 +12,8 @@
 export const useCaseLibrarySkill = {
   id: 'use-case-library',
   name: 'use-case-library',
-  description: 'Elasticsearch use case library — the full map of what you can build, with industry examples and technologies. Use when a developer asks "what can Elastic do?", "what can I build?", "what use cases does Elasticsearch support?", or needs help choosing what to build.',
+  description:
+    'Elasticsearch use case library — the full map of what you can build, with industry examples and technologies. Use when a developer asks "what can Elastic do?", "what can I build?", "what use cases does Elasticsearch support?", or needs help choosing what to build.',
   content: `# Elasticsearch Use Case Library
 
 Present this library when a user asks what they can build with Elasticsearch, wants to explore use cases, or needs help figuring out which category their project falls into. Walk through the relevant use cases conversationally — don't dump the entire list. Ask what resonates, then continue the conversation.
