@@ -127,7 +127,11 @@ async function createPackagePolicy(
           throw error;
         }
       },
-      maxRetryTime: 30_000,
+      minTimeout: 100,
+      factor: 2,
+      maxTimeout: 2_000,
+      retries: 100,
+      maxRetryTime: 60_000,
     }
   );
 }
