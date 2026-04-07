@@ -7,6 +7,7 @@ value:
       "comments": [],
       "totalComment": 0,
       "totalAlerts": 0,
+      "totalEvents": 0,
       "title": "Case title 1",
       "tags": [ "tag-1" ],
       "settings": {

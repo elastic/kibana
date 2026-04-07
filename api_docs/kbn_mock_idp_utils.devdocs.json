@@ -209,16 +209,169 @@
       },
       {
         "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.createUiamOAuthAccessToken",
+        "type": "Function",
+        "tags": [],
+        "label": "createUiamOAuthAccessToken",
+        "description": [
+          "\nCreates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.\n\nUnlike {@link createUiamSessionTokens}, this creates a token with `typ: 'oauth-access-token'`\nthat includes OAuth-specific claims (audience, scope, client_id, connection_id)."
+        ],
+        "signature": [
+          "({\n  username,\n  organizationId,\n  projectType,\n  roles,\n  audience,\n  fullName,\n  email,\n  accessTokenLifetimeSec = 3600,\n}: { username: string; organizationId: string; projectType: string; roles: string[]; audience: string; fullName?: string | undefined; email?: string | undefined; accessTokenLifetimeSec?: number | undefined; }) => Promise<string>"
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+        "lineNumber": 427,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.createUiamOAuthAccessToken.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  username,\n  organizationId,\n  projectType,\n  roles,\n  audience,\n  fullName,\n  email,\n  accessTokenLifetimeSec = 3600,\n}",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 442,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.username",
+                "type": "string",
+                "tags": [],
+                "label": "username",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 443,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.organizationId",
+                "type": "string",
+                "tags": [],
+                "label": "organizationId",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 444,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.projectType",
+                "type": "string",
+                "tags": [],
+                "label": "projectType",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 445,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.roles",
+                "type": "Array",
+                "tags": [],
+                "label": "roles",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 446,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.audience",
+                "type": "string",
+                "tags": [],
+                "label": "audience",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 447,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.fullName",
+                "type": "string",
+                "tags": [],
+                "label": "fullName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 448,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.email",
+                "type": "string",
+                "tags": [],
+                "label": "email",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 449,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createUiamOAuthAccessToken.$1.accessTokenLifetimeSec",
+                "type": "number",
+                "tags": [],
+                "label": "accessTokenLifetimeSec",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 450,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
         "id": "def-common.createUiamSessionTokens",
         "type": "Function",
         "tags": [],
         "label": "createUiamSessionTokens",
         "description": [],
         "signature": [
-          "({\n  username,\n  organizationId,\n  projectType,\n  roles,\n  fullName,\n  email,\n  // 1H\n  accessTokenLifetimeSec = 3600,\n  // 3D\n  refreshTokenLifetimeSec = 3 * 24 * 3600,\n}: { username: string; organizationId: string; projectType: string; roles: string[]; fullName?: string | undefined; email?: string | undefined; accessTokenLifetimeSec?: number | undefined; refreshTokenLifetimeSec?: number | undefined; }) => Promise<{ accessToken: string; accessTokenExpiresAt: number; refreshToken: string; refreshTokenExpiresAt: number; }>"
+          "({\n  username,\n  organizationId,\n  projectType: rawProjectType,\n  roles,\n  fullName,\n  email,\n  // 1H\n  accessTokenLifetimeSec = 3600,\n  // 3D\n  refreshTokenLifetimeSec = 3 * 24 * 3600,\n}: { username: string; organizationId: string; projectType: string; roles: string[]; fullName?: string | undefined; email?: string | undefined; accessTokenLifetimeSec?: number | undefined; refreshTokenLifetimeSec?: number | undefined; }) => Promise<{ accessToken: string; accessTokenExpiresAt: number; refreshToken: string; refreshTokenExpiresAt: number; }>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-        "lineNumber": 295,
+        "lineNumber": 314,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -228,10 +381,10 @@
             "id": "def-common.createUiamSessionTokens.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  username,\n  organizationId,\n  projectType,\n  roles,\n  fullName,\n  email,\n  // 1H\n  accessTokenLifetimeSec = 3600,\n  // 3D\n  refreshTokenLifetimeSec = 3 * 24 * 3600,\n}",
+            "label": "{\n  username,\n  organizationId,\n  projectType: rawProjectType,\n  roles,\n  fullName,\n  email,\n  // 1H\n  accessTokenLifetimeSec = 3600,\n  // 3D\n  refreshTokenLifetimeSec = 3 * 24 * 3600,\n}",
             "description": [],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-            "lineNumber": 306,
+            "lineNumber": 325,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -244,7 +397,7 @@
                 "label": "username",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 307,
+                "lineNumber": 326,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -257,7 +410,7 @@
                 "label": "organizationId",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 308,
+                "lineNumber": 327,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -270,7 +423,7 @@
                 "label": "projectType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 309,
+                "lineNumber": 328,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -286,7 +439,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 310,
+                "lineNumber": 329,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -302,7 +455,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 311,
+                "lineNumber": 330,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -318,7 +471,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 312,
+                "lineNumber": 331,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -334,7 +487,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 313,
+                "lineNumber": 332,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -350,7 +503,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-                "lineNumber": 314,
+                "lineNumber": 333,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -484,7 +637,7 @@
           "(requestUrl: string) => Promise<string | undefined>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-        "lineNumber": 426,
+        "lineNumber": 537,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -500,7 +653,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
-            "lineNumber": 426,
+            "lineNumber": 537,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -996,6 +1149,24 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.projectTypeToAlias",
+        "type": "Object",
+        "tags": [],
+        "label": "projectTypeToAlias",
+        "description": [],
+        "signature": [
+          "Map<string, string>"
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+        "lineNumber": 296,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

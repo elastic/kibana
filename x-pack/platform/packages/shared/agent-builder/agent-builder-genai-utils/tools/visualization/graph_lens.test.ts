@@ -62,9 +62,13 @@ describe('createVisualizationGraph', () => {
   });
 
   it('uses the provided esql query without generating a new one', async () => {
-    const graph = createVisualizationGraph(createMockModel() as never, logger, events, esClient, {
-      includeTimeRange: false,
-    });
+    const graph = createVisualizationGraph(
+      createMockModel() as never,
+      logger,
+      events,
+      esClient,
+      false
+    );
     const esqlQuery = 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)';
 
     const finalState = await graph.invoke({
@@ -90,9 +94,13 @@ describe('createVisualizationGraph', () => {
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
     } as Awaited<ReturnType<typeof generateEsql>>);
 
-    const graph = createVisualizationGraph(createMockModel() as never, logger, events, esClient, {
-      includeTimeRange: false,
-    });
+    const graph = createVisualizationGraph(
+      createMockModel() as never,
+      logger,
+      events,
+      esClient,
+      false
+    );
     const parsedExistingConfig = {
       type: 'metric',
       dataset: {

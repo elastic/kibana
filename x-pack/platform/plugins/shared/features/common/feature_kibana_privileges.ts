@@ -280,6 +280,16 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     assign?: readonly string[];
+    /**
+     * List of case owners whose users should have template management access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    manageTemplates: ['securitySolution']
+     *  }
+     * ```
+     */
+    manageTemplates?: readonly string[];
   };
 
   /**

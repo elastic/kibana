@@ -55,6 +55,9 @@ import {
   type IdentityFields,
 } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
+import { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID } from './constants';
+
+export { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID };
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -76,7 +79,7 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
-export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
+
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -129,7 +132,11 @@ export const UserPanel = ({
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const observedUser = useObservedUser(userName, scopeId, entityIdProp);
+  const observedUser = useObservedUser(
+    userName,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
 
   const panelDisplayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityIdProp),
@@ -194,6 +201,10 @@ export const UserPanel = ({
       ? !!getRiskFromEntityRecord(observedUser.entityRecord)
       : !!userRiskData?.user?.risk;
 
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? observedUser.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
     entityId: panelDisplayEntityId,
@@ -204,6 +215,7 @@ export const UserPanel = ({
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     isPreviewMode,
+    entityStoreEntityId,
   });
 
   const riskScoreStateFromStore =
@@ -231,14 +243,17 @@ export const UserPanel = ({
     [http, queryClient, calculateEntityRiskScore]
   );
 
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (hasMisconfigurationFindings || hasNonClosedAlerts)
+      return EntityDetailsLeftPanelTab.CSP_INSIGHTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [isRiskScoreExist, hasMisconfigurationFindings, hasNonClosedAlerts, entityStoreEntityId]);
+
   const openDefaultPanel = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      }),
-    [isRiskScoreExist, openDetailsPanel]
+    () => openDetailsPanel({ tab: defaultTab }),
+    [openDetailsPanel, defaultTab]
   );
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
@@ -263,7 +278,12 @@ export const UserPanel = ({
   return (
     <>
       <FlyoutNavigation
-        flyoutIsExpandable={hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts}
+        flyoutIsExpandable={
+          hasUserDetailsData ||
+          hasMisconfigurationFindings ||
+          hasNonClosedAlerts ||
+          !!entityStoreEntityId
+        }
         expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
@@ -272,7 +292,8 @@ export const UserPanel = ({
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
         userName={userName}
-        entityId={entityStoreV2Enabled ? panelDisplayEntityId : undefined}
+        entityId={panelDisplayEntityId}
+        identityFields={documentEntityIdentifiers}
       />
       {noEntityInStore && (
         <EuiCallOut
@@ -305,6 +326,7 @@ export const UserPanel = ({
             : undefined
         }
         skipRiskAndCriticality={noEntityInStore}
+        entityStoreEntityId={entityStoreEntityId}
       />
       {!isPreviewMode && assetInventoryEnabled && (
         <UserPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />

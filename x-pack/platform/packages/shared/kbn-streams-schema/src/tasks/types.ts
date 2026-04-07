@@ -30,5 +30,6 @@ export type TaskResult<TPayload> =
         | TaskStatus.Canceled;
       created_at?: string;
     }
-  | { status: TaskStatus.Failed; error: string; created_at?: string }
-  | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged; created_at?: string } & TPayload);
+  | ({ status: TaskStatus.Failed; error: string; created_at?: string } & Partial<TPayload>)
+  | ({ status: TaskStatus.Completed; created_at?: string } & TPayload)
+  | ({ status: TaskStatus.Acknowledged; created_at?: string } & TPayload);

@@ -1644,7 +1644,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | \"wait_for\" | undefined"
+              "\"true\" | \"false\" | \"wait_for\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 74,
@@ -1719,7 +1719,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | undefined"
+              "\"true\" | \"false\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 62,
@@ -2254,7 +2254,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | \"wait_for\" | undefined"
+              "\"true\" | \"false\" | \"wait_for\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 52,
@@ -2303,7 +2303,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"false\" | \"true\" | undefined"
+              "\"true\" | \"false\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "lineNumber": 67,

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   getInsightsInputTab,
+  getResolutionGroupTab,
   getRiskInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
@@ -25,6 +26,7 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
+import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -34,10 +36,12 @@ export const useTabs = (
   hasMisconfigurationFindings?: boolean,
   hasNonClosedAlerts?: boolean,
   identityFields?: IdentityFields,
-  entityId?: string
+  entityId?: string,
+  entityStoreEntityId?: string
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
+
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
@@ -71,6 +75,13 @@ export const useTabs = (
       );
     }
 
+    if (entityStoreEntityId) {
+      tabs.push(getGraphViewTab({ entityId: entityStoreEntityId, scopeId }));
+      tabs.push(
+        getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.user })
+      );
+    }
+
     return tabs;
   }, [
     entityId,
@@ -81,6 +92,7 @@ export const useTabs = (
     managedUser,
     name,
     scopeId,
+    entityStoreEntityId,
   ]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({

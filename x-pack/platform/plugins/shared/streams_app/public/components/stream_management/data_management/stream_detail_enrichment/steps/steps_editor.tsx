@@ -6,7 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAccordion, EuiCallOut, EuiCode, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -32,11 +44,23 @@ import { hasValidMessageFieldsForSuggestion } from '../utils';
 import { RootSteps } from './root_steps';
 import { SuggestionLoadingPrompt } from '../../shared/suggestion_loading_prompt';
 
-interface ErrorPanelsProps {
+const clampTwoLines = css`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const calloutTitleWeight = css`
+  font-weight: 450;
+`;
+
+interface ErrorPanelProps {
   showBottomBar: boolean;
 }
 
-const ErrorPanels = React.memo<ErrorPanelsProps>(({ showBottomBar }) => {
+const ErrorPanel = React.memo<ErrorPanelProps>(({ showBottomBar }) => {
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
   const validationErrors = useStreamEnrichmentSelector((state) =>
@@ -85,146 +109,161 @@ const ErrorPanels = React.memo<ErrorPanelsProps>(({ showBottomBar }) => {
     return null;
   }
 
+  const errorCount =
+    allValidationErrors.length +
+    (errors.definition_error ? 1 : 0) +
+    (errors.ignoredFields.length > 0 ? 1 : 0) +
+    (errors.mappingFailures.length > 0 ? 1 : 0);
+
   return (
     <div
       css={css`
         ${showBottomBar ? 'margin-bottom: 30px;' : ''}
       `}
     >
-      {hasValidationErrors && (
-        <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
-          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-            <EuiAccordion
-              id="validation-errors-accordion"
-              initialIsOpen
-              buttonContent={
+      <EuiPanel paddingSize="m" grow={false} hasBorder={true}>
+        <EuiAccordion
+          id="error-panel-accordion"
+          buttonContent={
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem>
+                <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiTextColor color="danger">
                 <strong>
                   {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.count',
+                    'xpack.streams.streamDetailView.managementTab.enrichment.errorPanel.title',
                     {
                       defaultMessage:
-                        '{count, plural, one {# validation error} other {# validation errors}}',
-                      values: { count: allValidationErrors.length },
+                        '{count, plural, one {# Validation error or issue} other {# Validation errors or issues}}',
+                      values: { count: errorCount },
                     }
                   )}
                 </strong>
-              }
-            >
-              <EuiText size="s">
-                <ul>
-                  {allValidationErrors.map((error, idx) => {
-                    const errorTypeLabel = validationErrorTypeLabels[error.type];
-                    return (
-                      <li key={idx}>
-                        <strong>{errorTypeLabel}:</strong> {error.message}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </EuiText>
-            </EuiAccordion>
-          </EuiPanel>
-        </EuiPanel>
-      )}
-      {hasSimulationErrors && (
-        <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
-          {errors.definition_error && (
-            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.streams.streamDetailView.managementTab.enrichment.definitionError"
-                    defaultMessage="Please fix this error before saving: {error}"
-                    values={{ error: errors.definition_error.message }}
-                  />
-                </p>
-              </EuiText>
-            </EuiPanel>
-          )}
-          {!isEmpty(errors.ignoredFields) && (
-            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-              <EuiAccordion
-                id="ignored-fields-failures-accordion"
-                initialIsOpen
-                buttonContent={
-                  <strong>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                      { defaultMessage: 'Malformed fields detected.' }
-                    )}
-                  </strong>
-                }
-              >
-                <EuiText component="p" size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="Some fields are malformed and won't be stored correctly: {fields}"
-                      values={{
-                        fields: errors.ignoredFields.map((field) => (
-                          <>
-                            <EuiCode key={field}>{field}</EuiCode>{' '}
-                          </>
-                        )),
-                      }}
-                    />
-                  </p>
-                  <p>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
-                      {
-                        defaultMessage:
-                          'This can happen due to type mismatches or fields exceeding configured limits.',
-                      }
-                    )}
-                  </p>
-                  <p>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.suggestionsLabel',
-                      {
-                        defaultMessage:
-                          'Check your field mappings, add processors to normalize values, or remove the conflicting fields.',
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiAccordion>
-            </EuiPanel>
-          )}
-          {!isEmpty(errors.mappingFailures) && (
-            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-              <EuiAccordion
-                id="mapping-failures-accordion"
-                initialIsOpen
-                buttonContent={i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
-                  {
-                    defaultMessage: 'Field conflicts during simulation',
-                  }
+              </EuiTextColor>
+            </EuiFlexGroup>
+          }
+        >
+          <EuiFlexGroup gutterSize="s" direction="column">
+            <EuiSpacer size="s" />
+            {allValidationErrors.map((error, idx) => {
+              const errorTypeLabel = validationErrorTypeLabels[error.type];
+              return (
+                <EuiCallOut key={idx} color="danger" size="s" title={errorTypeLabel}>
+                  {error.message}
+                </EuiCallOut>
+              );
+            })}
+            {errors.definition_error && (
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                size="s"
+                title={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.definitionError',
+                  { defaultMessage: 'Please fix this error before saving' }
                 )}
               >
-                <EuiText size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
-                      defaultMessage="These are some mapping failures that occurred during the simulation:"
-                    />
-                  </p>
-                  <ul>
-                    {errors.mappingFailures.map((failureMessage, id) => (
-                      <li key={id}>
-                        <EuiText css={clampTwoLines} size="s">
-                          {failureMessage}
-                        </EuiText>
-                      </li>
-                    ))}
-                  </ul>
-                </EuiText>
-              </EuiAccordion>
-            </EuiPanel>
-          )}
-        </EuiPanel>
-      )}
+                {errors.definition_error.message}
+              </EuiCallOut>
+            )}
+            {!isEmpty(errors.ignoredFields) && (
+              <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+                <EuiAccordion
+                  id="ignored-fields-failures-accordion"
+                  buttonContent={
+                    <EuiTitle size="xxs" css={calloutTitleWeight}>
+                      <h4>
+                        <EuiTextColor color="danger">
+                          {i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
+                            { defaultMessage: 'Malformed fields detected.' }
+                          )}
+                        </EuiTextColor>
+                      </h4>
+                    </EuiTitle>
+                  }
+                >
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                        defaultMessage="Some fields are malformed and won't be stored correctly: {fields}"
+                        values={{
+                          fields: errors.ignoredFields.map((field) => (
+                            <>
+                              <EuiCode key={field}>{field}</EuiCode>{' '}
+                            </>
+                          )),
+                        }}
+                      />
+                    </p>
+                    <p>
+                      {i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
+                        {
+                          defaultMessage:
+                            'This can happen due to type mismatches or fields exceeding configured limits.',
+                        }
+                      )}
+                    </p>
+                    <p>
+                      {i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.suggestionsLabel',
+                        {
+                          defaultMessage:
+                            'Check your field mappings, add processors to normalize values, or remove the conflicting fields.',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                </EuiAccordion>
+              </EuiPanel>
+            )}
+            {!isEmpty(errors.mappingFailures) && (
+              <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+                <EuiAccordion
+                  id="mapping-failures-accordion"
+                  buttonContent={
+                    <EuiTitle size="xxs" css={calloutTitleWeight}>
+                      <h4>
+                        <EuiTextColor color="danger">
+                          {i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+                            {
+                              defaultMessage: 'Field conflicts during simulation',
+                            }
+                          )}
+                        </EuiTextColor>
+                      </h4>
+                    </EuiTitle>
+                  }
+                >
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
+                        defaultMessage="These are some mapping failures that occurred during the simulation:"
+                      />
+                    </p>
+                    <ul>
+                      {errors.mappingFailures.map((failureMessage, id) => (
+                        <li key={id}>
+                          <EuiText css={clampTwoLines} size="xs">
+                            {failureMessage}
+                          </EuiText>
+                        </li>
+                      ))}
+                    </ul>
+                  </EuiText>
+                </EuiAccordion>
+              </EuiPanel>
+            )}
+          </EuiFlexGroup>
+        </EuiAccordion>
+      </EuiPanel>
     </div>
   );
 });
@@ -349,7 +388,8 @@ export const StepsEditor = React.memo(() => {
           )}
         </NoStepsEmptyPrompt>
       )}
-      <ErrorPanels showBottomBar={hasChanges} />
+      <EuiSpacer size="m" />
+      <ErrorPanel showBottomBar={hasChanges} />
       {isNoSuggestionsFound && (
         <NoSuggestionsPanel showBottomBar={hasChanges} onDismiss={clearSuggestedSteps} />
       )}
@@ -447,11 +487,3 @@ const SuggestionFailedPanel = React.memo<SuggestionFailedPanelProps>(
     );
   }
 );
-
-const clampTwoLines = css`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;

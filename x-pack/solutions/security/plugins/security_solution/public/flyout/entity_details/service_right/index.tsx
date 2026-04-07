@@ -36,6 +36,7 @@ export interface ServicePanelProps extends Record<string, unknown> {
   scopeId: string;
   entityId: string;
   serviceName: string;
+  isPreviewMode?: boolean;
 }
 
 export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -49,10 +50,22 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: ServicePanelProps) => {
+export const ServicePanel = ({
+  contextID,
+  scopeId,
+  entityId,
+  serviceName,
+  isPreviewMode = false,
+}: ServicePanelProps) => {
+  const safeContextID = contextID ?? scopeId ?? 'service-panel';
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const serviceStoreIdentityFields = useMemo(
+    () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
+    [entityId, serviceName]
+  );
   const entityFromStoreResult = useEntityFromStore({
     entityId,
+    identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: !entityStoreV2Enabled,
   });
@@ -107,19 +120,33 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
     setQuery,
   });
 
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? entityFromStoreResult.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToServiceDetails({
     serviceName,
     entityId,
     scopeId,
+    contextID: safeContextID,
     isRiskScoreExist,
+    identityFields: documentEntityIdentifiers,
+    isPreviewMode,
+    entityStoreEntityId,
   });
+
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [isRiskScoreExist, entityStoreEntityId]);
 
   const openPanelFirstTab = useCallback(
     () =>
       openDetailsPanel({
-        tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+        tab: defaultTab,
       }),
-    [openDetailsPanel]
+    [openDetailsPanel, defaultTab]
   );
 
   if (observedService.isLoading) {
@@ -129,8 +156,9 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
   return (
     <>
       <FlyoutNavigation
-        flyoutIsExpandable={isRiskScoreExist}
+        flyoutIsExpandable={isRiskScoreExist || !!entityStoreEntityId}
         expandDetails={openPanelFirstTab}
+        isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
       <ServicePanelHeader serviceName={serviceName} observedService={observedService} />
@@ -141,9 +169,11 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
-        contextID={contextID}
+        contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
+        isPreviewMode={isPreviewMode}
+        entityStoreEntityId={entityStoreEntityId}
       />
     </>
   );
