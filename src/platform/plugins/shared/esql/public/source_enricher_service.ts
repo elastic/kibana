@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/logging';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 
 type SourceEnricher = (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
@@ -17,6 +18,8 @@ type SourceEnricher = (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[
  */
 export class SourceEnricherService {
   private readonly enrichers: SourceEnricher[] = [];
+
+  constructor(private readonly logger: Logger) {}
 
   register(enricher: SourceEnricher): void {
     this.enrichers.push(enricher);
@@ -32,9 +35,7 @@ export class SourceEnricherService {
         try {
           enriched = await enricher(enriched);
         } catch (error) {
-          // TODO: improve error handling
-          // eslint-disable-next-line no-console
-          console.error('ES|QL source enricher failed:', error);
+          this.logger.error(error);
         }
       }
       return enriched;

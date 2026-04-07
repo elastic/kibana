@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SourceEnricherService } from './source_enricher_service';
 
@@ -15,9 +17,11 @@ const makeSources = (...names: string[]): ESQLSourceResult[] =>
 
 describe('SourceEnricherService', () => {
   let service: SourceEnricherService;
+  let logger: MockedLogger;
 
   beforeEach(() => {
-    service = new SourceEnricherService();
+    logger = loggerMock.create();
+    service = new SourceEnricherService(logger);
   });
 
   describe('getComposedEnricher', () => {
@@ -73,10 +77,9 @@ describe('SourceEnricherService', () => {
 
   describe('error handling', () => {
     it('skips a failing enricher and continues with the next one', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
+      const failure = new Error('enricher failure');
       service.register(async () => {
-        throw new Error('enricher failure');
+        throw failure;
       });
       service.register(async (sources) => [...sources, ...makeSources('from-enricher-2')]);
 
@@ -84,14 +87,10 @@ describe('SourceEnricherService', () => {
       const result = await enricher(makeSources('base'));
 
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-2']);
-      expect(consoleSpy).toHaveBeenCalledWith('ES|QL source enricher failed:', expect.any(Error));
-
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(failure);
     });
 
     it('uses the last successful output when a middle enricher fails', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
       service.register(async (sources) => [...sources, ...makeSources('from-enricher-1')]);
       service.register(async () => {
         throw new Error('middle failure');
@@ -102,8 +101,7 @@ describe('SourceEnricherService', () => {
       const result = await enricher(makeSources('base'));
 
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-1', 'from-enricher-3']);
-
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
   });
 });

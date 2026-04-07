@@ -66,9 +66,13 @@ export interface EsqlPluginStart {
 }
 
 export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
-  private readonly sourceEnricherService = new SourceEnricherService();
+  private readonly sourceEnricherService: SourceEnricherService;
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.sourceEnricherService = new SourceEnricherService(
+      initContext.logger.get('sourceEnricher')
+    );
+  }
 
   public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
     registerESQLEditorAnalyticsEvents(core.analytics);
