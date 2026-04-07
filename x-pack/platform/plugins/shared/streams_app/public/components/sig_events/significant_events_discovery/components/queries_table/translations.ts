@@ -204,7 +204,7 @@ export const CHART_SERIES_NAME = i18n.translate(
 
 export const getEventsCount = (count: number) =>
   i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.eventsCount', {
-    defaultMessage: '{count} {count, plural, one {Rule} other {Rules}}',
+    defaultMessage: '{count} {count, plural, one {Query} other {Queries}}',
     values: { count },
   });
 

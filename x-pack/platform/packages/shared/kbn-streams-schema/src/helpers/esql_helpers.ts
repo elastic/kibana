@@ -160,9 +160,10 @@ export function replaceFromSources(esql: string, newSources: string[]): string {
  * indicating an aggregation-based (symptom) query rather than a
  * row-level (cause / match) query.
  *
- * Defaults to `false` on parse failure — treating unparseable queries
- * as 'match' is safe because ensureMetadata also gracefully handles
- * parse errors (returns the query unchanged).
+ * When parsing succeeds the AST is inspected for a `stats` command.
+ * On parse failure a regex fallback (`STATS_REGEX`) is used so that
+ * unparseable queries containing `| STATS` are still classified
+ * correctly rather than silently defaulting to `match`.
  */
 export function hasStatsCommand(esql: string): boolean {
   const { root, parsed } = tryParseEsql(esql);
@@ -191,7 +192,7 @@ const NEEDS_SAMPLE_FLOOR_PATTERN = new RegExp(
   'i'
 );
 
-const COMPARISON_PATTERN = /\b\w+\s*>=?\s*\d+(?:\.\d+)?/gi;
+const COMPARISON_PATTERN = /\b\w+\s*[<>]=?\s*\d+(?:\.\d+)?/gi;
 
 function checkSampleSizeFloor(esql: string, hints: string[]): void {
   if (!NEEDS_SAMPLE_FLOOR_PATTERN.test(esql)) return;

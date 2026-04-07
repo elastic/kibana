@@ -233,12 +233,14 @@ function fromStorage(link: StoredQueryLink, logger?: Logger): QueryLink {
     );
   }
 
+  const ruleBacked = type === QUERY_TYPE_STATS ? false : link[RULE_BACKED];
+
   return {
     [ASSET_UUID]: link[ASSET_UUID],
     [ASSET_ID]: link[ASSET_ID],
     [ASSET_TYPE]: link[ASSET_TYPE],
     stream_name: link[STREAM_NAME],
-    rule_backed: link[RULE_BACKED],
+    rule_backed: ruleBacked,
     rule_id: link[RULE_ID],
     query: {
       id: link[ASSET_ID],
@@ -734,16 +736,13 @@ export class QueryClient {
 
     for (const query of queries) {
       const currentLink = currentLinkByQueryId.get(query.id);
+      const isStats = deriveQueryType(query.esql.query) === QUERY_TYPE_STATS;
       if (!currentLink) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
-      } else if (!currentLink.rule_backed || query.type === QUERY_TYPE_STATS) {
-        // Non-rule-backed queries (STATS or pre-promotion match queries): keep
-        // them in storage with updated content but skip rule create/update.
-        // STATS queries always land here regardless of stored rule_backed to
-        // prevent a stale rule_backed=true from sending them to installQueries.
-        if (currentLink.rule_backed && query.type === QUERY_TYPE_STATS) {
+      } else if (!currentLink.rule_backed || isStats) {
+        if (currentLink.rule_backed && isStats) {
           demotedToStats.push(currentLink);
         }
         allNextQueryLinks.push({ ...currentLink, query, rule_backed: false });
@@ -928,20 +927,32 @@ export class QueryClient {
 
     await this.installQueries(toPromote, [], definition);
 
-    await this.bulkStorage(
-      definition,
-      toPromote.map((link) => ({
-        index: {
-          asset: {
-            [ASSET_ID]: link[ASSET_ID],
-            [ASSET_TYPE]: link[ASSET_TYPE],
-            query: link.query,
-            rule_backed: true,
-            rule_id: link.rule_id,
+    try {
+      await this.bulkStorage(
+        definition,
+        toPromote.map((link) => ({
+          index: {
+            asset: {
+              [ASSET_ID]: link[ASSET_ID],
+              [ASSET_TYPE]: link[ASSET_TYPE],
+              query: link.query,
+              rule_backed: true,
+              rule_id: link.rule_id,
+            },
           },
-        },
-      }))
-    );
+        }))
+      );
+    } catch (storageError) {
+      this.dependencies.logger.error(
+        `Storage update failed after installing rules for stream "${streamName}". Attempting to uninstall orphaned rules.`
+      );
+      await this.uninstallQueries(toPromote).catch((uninstallError) => {
+        this.dependencies.logger.error(
+          `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${uninstallError instanceof Error ? uninstallError.message : String(uninstallError)}`
+        );
+      });
+      throw storageError;
+    }
 
     return { promoted: toPromote.length, skipped_stats: skippedStats.length };
   }

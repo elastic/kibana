@@ -43,11 +43,7 @@ import { InfoPanel } from '../../../../info_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { SeveritySelector } from '../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import {
-  OCCURRENCES_COLUMN,
-  OCCURRENCES_TOOLTIP_NAME,
-  THRESHOLD_BREACHES_TOOLTIP_NAME,
-} from './translations';
+import { OCCURRENCES_COLUMN, THRESHOLD_BREACHES_TOOLTIP_NAME } from './translations';
 import { AssetImage } from '../../../../asset_image';
 import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 
@@ -271,7 +267,7 @@ export function QueryDetailsFlyout({
                       name={
                         queryType === QUERY_TYPE_STATS
                           ? THRESHOLD_BREACHES_TOOLTIP_NAME
-                          : OCCURRENCES_TOOLTIP_NAME
+                          : OCCURRENCES_COLUMN
                       }
                       type="bar"
                       timeseries={item.occurrences}

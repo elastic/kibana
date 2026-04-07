@@ -14,7 +14,12 @@ import type {
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { ensureMetadata, deriveQueryType, QUERY_TYPE_STATS } from '@kbn/streams-schema';
+import {
+  ensureMetadata,
+  deriveQueryType,
+  QUERY_TYPE_MATCH,
+  QUERY_TYPE_STATS,
+} from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
@@ -112,7 +117,7 @@ export class QueryService {
           // match (safe default) and force rule_backed=false so no alerting
           // rule is created for a broken query.
           const isCorruptEsql = !esqlQuery || !esqlQuery.trim();
-          const derivedType = isCorruptEsql ? 'match' : deriveQueryType(esqlQuery);
+          const derivedType = isCorruptEsql ? QUERY_TYPE_MATCH : deriveQueryType(esqlQuery);
 
           migrated = { ...migrated, [QUERY_TYPE]: derivedType };
 

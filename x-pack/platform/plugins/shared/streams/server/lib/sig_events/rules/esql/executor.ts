@@ -94,7 +94,9 @@ export async function getRuleExecutor(
   );
 
   if (!isEmpty(errors)) {
-    logger.debug(() => `Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    logger.warn(
+      `alertWithPersistence completed with ${errors.length} error(s) (${createdAlerts.length} alerts created): ${JSON.stringify(errors)}`
+    );
   }
 
   const originalDocumentIds: string[] = [];
