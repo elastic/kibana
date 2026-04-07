@@ -139,7 +139,7 @@ describe('searchEmbeddableTransforms', () => {
       expect(density).toBe(DataGridDensity.COMPACT);
       expect(dataSource).toEqual({
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'data-view-1',
+        ref_id: 'data-view-1',
       });
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
@@ -261,7 +261,7 @@ describe('searchEmbeddableTransforms', () => {
               filters: [],
               rows_per_page: 100,
               sample_size: 1000,
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
             },
           ],
         };
@@ -299,7 +299,7 @@ describe('searchEmbeddableTransforms', () => {
               row_height: 3,
               query: { language: 'kuery', query: '' },
               filters: [],
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-id-123' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-id-123' },
             },
           ],
         };
