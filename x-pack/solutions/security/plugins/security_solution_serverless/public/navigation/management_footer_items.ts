@@ -141,6 +141,17 @@ export const createManagementFooterItemsTree = (
           ],
         },
         {
+          title: i18nStrings.projectPerformance.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              link: 'management:queryActivity',
+              breadcrumbStatus: 'hidden',
+              badgeType: 'new',
+            },
+          ],
+        },
+        {
           title: i18nStrings.ml.title,
           children: [
             { link: 'management:overview' },
