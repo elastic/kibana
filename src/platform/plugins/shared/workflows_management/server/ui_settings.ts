@@ -10,10 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  WORKFLOWS_AI_AGENT_SETTING_ID,
-  WORKFLOWS_UI_SETTING_ID,
-} from '@kbn/workflows/common/constants';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
 
@@ -45,28 +42,6 @@ export const registerUISettings = (
       }),
       name: i18n.translate('workflowsManagement.uiSettings.ui.name', {
         defaultMessage: 'Elastic Workflows',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      readonly: false,
-      technicalPreview: true,
-      requiresPageReload: true,
-      category: ['general'],
-    },
-    [WORKFLOWS_AI_AGENT_SETTING_ID]: {
-      description: i18n.translate('workflowsManagement.uiSettings.aiAgent.description', {
-        defaultMessage:
-          'Enables AI-powered workflow authoring experiences. {licenseText} {learnMoreLink}',
-        values: {
-          learnMoreLink: `<a href="${WORKFLOWS_DOCUMENTATION_URL}" target="_blank" rel="noreferrer noopener">${i18n.translate(
-            'workflowsManagement.uiSettings.aiAgent.learnMore',
-            { defaultMessage: 'Learn more' }
-          )}</a>.`,
-          licenseText,
-        },
-      }),
-      name: i18n.translate('workflowsManagement.uiSettings.aiAgent.name', {
-        defaultMessage: 'Elastic Workflows: AI agent authoring',
       }),
       schema: schema.boolean(),
       value: false,

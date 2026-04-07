@@ -147,6 +147,7 @@ export function QueriesTable() {
 
   const promoteAllMutation = useMutation<{ promoted: number }, Error>({
     mutationFn: promoteAll,
+    mutationKey: ['promoteAll'],
     onSuccess: async ({ promoted }) => {
       toasts.addSuccess(getPromoteAllSuccessToast(promoted));
       await invalidateQueriesData();

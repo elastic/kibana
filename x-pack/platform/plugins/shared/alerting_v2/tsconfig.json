@@ -78,7 +78,8 @@
     "@kbn/object-utils",
     "@kbn/alerting-v2-constants",
     "@kbn/utility-types",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }

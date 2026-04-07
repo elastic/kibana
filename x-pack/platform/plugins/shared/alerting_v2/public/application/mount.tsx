@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Container } from 'inversify';
 import type { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
-import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { Context } from '@kbn/core-di-browser';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,26 +27,30 @@ interface AlertingV2MountParams {
 export const mountAlertingV2App = ({
   params,
   container,
+  coreStart,
 }: {
   params: AlertingV2MountParams;
   container: Container;
+  coreStart: CoreStart;
 }): AppUnmount => {
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    <Context.Provider value={container}>
-      <QueryClientProvider client={queryClient}>
-        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>
-            <Router history={history}>
-              <RulesApp />
-            </Router>
-          </I18nProvider>
-        </BreadcrumbProvider>
-      </QueryClientProvider>
-    </Context.Provider>,
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+            <I18nProvider>
+              <Router history={history}>
+                <RulesApp />
+              </Router>
+            </I18nProvider>
+          </BreadcrumbProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
     element
   );
 
@@ -56,26 +60,30 @@ export const mountAlertingV2App = ({
 export const mountNotificationPoliciesApp = ({
   params,
   container,
+  coreStart,
 }: {
   params: AlertingV2MountParams;
   container: Container;
+  coreStart: CoreStart;
 }): AppUnmount => {
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    <Context.Provider value={container}>
-      <QueryClientProvider client={queryClient}>
-        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>
-            <Router history={history}>
-              <NotificationPoliciesApp />
-            </Router>
-          </I18nProvider>
-        </BreadcrumbProvider>
-      </QueryClientProvider>
-    </Context.Provider>,
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+            <I18nProvider>
+              <Router history={history}>
+                <NotificationPoliciesApp />
+              </Router>
+            </I18nProvider>
+          </BreadcrumbProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
     element
   );
 

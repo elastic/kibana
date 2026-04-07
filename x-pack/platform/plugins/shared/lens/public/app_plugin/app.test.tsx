@@ -247,12 +247,17 @@ describe('Lens App', () => {
       services.getOriginatingAppName = jest.fn(() => undefined);
       const { lensStore } = await renderApp();
 
+      const dashboardsBreadcrumb = {
+        text: 'Dashboards',
+        href: services.application.getUrlForApp('dashboards', { path: '#/list' }),
+      };
+      const visualizationsBreadcrumb = {
+        text: 'Visualizations',
+        href: services.application.getUrlForApp('dashboards', { path: '#/list/visualizations' }),
+      };
       const expectedCreateBreadcrumbs = [
-        {
-          text: 'Dashboards',
-          href: '/testbasepath/app/dashboards#/',
-          onClick: expect.anything(),
-        },
+        dashboardsBreadcrumb,
+        visualizationsBreadcrumb,
         { text: 'Create' },
       ];
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
@@ -268,11 +273,8 @@ describe('Lens App', () => {
       });
 
       const expectedSavedBreadcrumbs = [
-        {
-          text: 'Dashboards',
-          href: '/testbasepath/app/dashboards#/',
-          onClick: expect.anything(),
-        },
+        dashboardsBreadcrumb,
+        visualizationsBreadcrumb,
         { text: 'Daaaaaaadaumching!' },
       ];
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
@@ -338,6 +340,116 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
       expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Daaaaaaadaumching!' });
+    });
+
+    it('prepends incomingBreadcrumbs from incomingState when provided', async () => {
+      const incomingBreadcrumbs = [
+        { text: 'My Dashboard', href: '/app/dashboards#/view/123' },
+        { text: 'Visualizations', href: '/app/dashboards#/list/visualizations' },
+      ];
+      props.incomingState = {
+        originatingApp: 'dashboards',
+        breadcrumbs: incomingBreadcrumbs,
+      };
+      services.getOriginatingAppName = jest.fn(() => 'My Dashboard');
+      const { lensStore } = await renderApp();
+
+      const expectedCreateBreadcrumbs = [...incomingBreadcrumbs, { text: 'Create' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
+        project: { value: expectedCreateBreadcrumbs, absolute: true },
+      });
+
+      await act(async () => {
+        lensStore.dispatch(setState({ persistedDoc: breadcrumbDoc }));
+      });
+
+      const expectedSavedBreadcrumbs = [...incomingBreadcrumbs, { text: 'Daaaaaaadaumching!' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
+        project: { value: expectedSavedBreadcrumbs, absolute: true },
+      });
+    });
+
+    it('falls back to incomingBreadcrumbs from initialContext when incomingState has no breadcrumbs', async () => {
+      const contextBreadcrumbs = [
+        { text: 'Dashboards', href: '/app/dashboards#/list' },
+        { text: 'Visualizations', href: '/app/dashboards#/list/visualizations' },
+      ];
+      props.incomingState = undefined;
+      props.initialContext = {
+        isVisualizeAction: true,
+        breadcrumbs: contextBreadcrumbs,
+      } as VisualizeEditorContext;
+      services.getOriginatingAppName = jest.fn(() => undefined);
+      const { lensStore } = await renderApp();
+
+      const expectedCreateBreadcrumbs = [...contextBreadcrumbs, { text: 'Create' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
+        project: { value: expectedCreateBreadcrumbs, absolute: true },
+      });
+
+      await act(async () => {
+        lensStore.dispatch(setState({ persistedDoc: breadcrumbDoc }));
+      });
+
+      const expectedSavedBreadcrumbs = [...contextBreadcrumbs, { text: 'Daaaaaaadaumching!' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
+        project: { value: expectedSavedBreadcrumbs, absolute: true },
+      });
+    });
+
+    it('incomingState breadcrumbs take precedence over initialContext breadcrumbs when both are present', async () => {
+      const stateBreadcrumbs = [{ text: 'From State', href: '/app/dashboards#/view/state' }];
+      const contextBreadcrumbs = [{ text: 'From Context', href: '/app/dashboards#/list' }];
+      props.incomingState = {
+        originatingApp: 'dashboards',
+        breadcrumbs: stateBreadcrumbs,
+      };
+      props.initialContext = {
+        isVisualizeAction: true,
+        breadcrumbs: contextBreadcrumbs,
+      } as VisualizeEditorContext;
+      services.getOriginatingAppName = jest.fn(() => 'From State');
+      await renderApp();
+
+      const expectedBreadcrumbs = [...stateBreadcrumbs, { text: 'Create' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedBreadcrumbs, {
+        project: { value: expectedBreadcrumbs, absolute: true },
+      });
+      // Context breadcrumbs must NOT appear
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ text: 'From Context' })]),
+        expect.anything()
+      );
+    });
+
+    it('shows "Edit visualization" title in by-value mode (linked to origin, no savedObjectId)', async () => {
+      props.incomingState = { originatingApp: 'dashboards', originatingPath: '/view/123' };
+      services.getOriginatingAppName = jest.fn(() => 'My Dashboard');
+      const { lensStore } = await renderApp({
+        preloadedState: { isLinkedToOriginatingApp: true },
+      });
+
+      // Dispatch a persisted doc — by-value means isLinkedToOriginatingApp && !savedObjectId
+      // so initialInput has no ref_id, therefore savedObjectId is undefined
+      await act(async () => {
+        lensStore.dispatch(setState({ persistedDoc: breadcrumbDoc }));
+      });
+
+      const expectedByValueBreadcrumbs = [
+        { text: 'My Dashboard', onClick: expect.anything() },
+        { text: 'Edit visualization' },
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedByValueBreadcrumbs, {
+        project: { value: expectedByValueBreadcrumbs, absolute: true },
+      });
+    });
+
+    it('does not update breadcrumbs when savedObjectId is set but persistedDoc has not loaded yet', async () => {
+      services.getOriginatingAppName = jest.fn(() => undefined);
+      props.initialInput = { ref_id: breadcrumbDocSavedObjectId };
+      await renderApp({ preloadedState: { persistedDoc: undefined } });
+
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
     });
   });
 
