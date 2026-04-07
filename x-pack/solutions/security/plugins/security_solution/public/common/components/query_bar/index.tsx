@@ -92,6 +92,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
   }) => {
     const { data } = useKibana().services;
     const [dataView, setDataView] = useState<DataView>();
+    const [isCreatingDataView, setIsCreatingDataView] = useState(false);
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -155,8 +156,16 @@ export const QueryBar = memo<QueryBarComponentProps>(
         setDataView(indexPattern);
       } else if (!isEsql && !isEmpty(indexPattern.title)) {
         const createDataView = async () => {
-          dv = await data.dataViews.create({ id: indexPattern.title, title: indexPattern.title });
-          setDataView(dv);
+          setIsCreatingDataView(true);
+          try {
+            dv = await data.dataViews.create({
+              id: indexPattern.title,
+              title: indexPattern.title,
+            });
+            setDataView(dv);
+          } finally {
+            setIsCreatingDataView(false);
+          }
         };
         createDataView();
       }
@@ -186,7 +195,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           dateRangeTo={dateRangeTo}
           filters={searchBarFilters}
           indexPatterns={arrDataView}
-          isLoading={isLoading}
+          isLoading={isLoading || isCreatingDataView}
           isRefreshPaused={isRefreshPaused}
           query={query}
           onClearSavedQuery={onClearSavedQuery}
@@ -205,7 +214,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           dataTestSubj={dataTestSubj}
           savedQuery={savedQuery}
           displayStyle={isEsql ? 'withBorders' : displayStyle}
-          isDisabled={isDisabled}
+          isDisabled={isDisabled || isCreatingDataView}
           bubbleSubmitEvent={bubbleSubmitEvent}
         />
       </CustomStylesWrapper>
