@@ -586,7 +586,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             <EuiButtonEmpty
               size="s"
               className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-              iconType="checkInCircleFilled"
+              iconType="checkCircleFill"
               onClick={() => dispatchLens(applyChanges())}
               data-test-subj="lnsApplyChanges__workspace"
             >

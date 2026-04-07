@@ -19,6 +19,7 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useKibana } from '../../common/lib/kibana';
 import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { flyoutProviders } from '../shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
@@ -62,6 +63,7 @@ export const SessionView: FC<SessionViewProps> = memo(
     const { overlays, sessionView } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -91,15 +93,17 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-            type: 'overlay',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         ),
-      [history, onAlertUpdated, overlays, renderCellActions, services, store]
+      [
+        defaultFlyoutProperties,
+        history,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const handleJumpToEvent = useCallback(
@@ -154,16 +158,11 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-            type: 'overlay',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         );
       },
       [
+        defaultFlyoutProperties,
         handleJumpToEvent,
         history,
         onAlertUpdated,

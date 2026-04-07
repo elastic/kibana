@@ -29,6 +29,10 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../shared/hooks/use_default_flyout_properties';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -61,6 +65,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
 
   const expanded = useExpandSection({
@@ -94,12 +99,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         history,
         children: <ThreatIntelligenceDetails hit={hit} />,
       }),
-      {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      }
+      { ...defaultToolsFlyoutProperties }
     );
   }, [history, hit, overlays, services, store]);
   const onShowAlert = useCallback(
@@ -118,9 +118,9 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             />
           ),
         }),
-        { ownFocus: false, resizable: true, session: 'inherit', size: 's' }
+        { ...defaultFlyoutProperties, session: 'inherit' }
       ),
-    [history, onAlertUpdated, services, store]
+    [defaultFlyoutProperties, history, onAlertUpdated, services, store]
   );
   const onShowCorrelationsDetails = useCallback(() => {
     overlays.openSystemFlyout(
@@ -137,12 +137,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
           />
         ),
       }),
-      {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      }
+      { ...defaultToolsFlyoutProperties }
     );
   }, [history, hit, onShowAlert, overlays, services, store]);
   const onShowPrevalenceDetails = useCallback(() => {
@@ -160,12 +155,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
           />
         ),
       }),
-      {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      }
+      { ...defaultToolsFlyoutProperties }
     );
   }, [history, hit, investigationFields, isInSecurityApp, overlays, services, store]);
 

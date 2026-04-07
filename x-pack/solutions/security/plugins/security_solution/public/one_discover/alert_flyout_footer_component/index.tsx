@@ -6,10 +6,12 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Footer } from '../../flyout_v2/document/footer';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
+import { NotesDetails } from '../../flyout_v2/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
 export interface AlertFlyoutFooterProps {
@@ -37,8 +39,29 @@ export const AlertFlyoutFooter = ({
   storePromise,
   onAlertUpdated,
 }: AlertFlyoutFooterProps) => {
+  const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const openNotesFlyout = useCallback(() => {
+    if (!services || !store) {
+      return;
+    }
+
+    services.overlays?.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <NotesDetails hit={hit} />,
+      }),
+      {
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      }
+    );
+  }, [history, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -71,6 +94,6 @@ export const AlertFlyoutFooter = ({
   return flyoutProviders({
     services,
     store,
-    children: <Footer hit={hit} onAlertUpdated={onAlertUpdated} />,
+    children: <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={openNotesFlyout} />,
   });
 };
