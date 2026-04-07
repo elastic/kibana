@@ -14,22 +14,26 @@ export interface PrivilegedRouteProps {
   path: string;
   component: ComponentType<{}>;
   hasPrivilege: boolean;
+  /** When true, the path must match the URL exactly (no extra trailing segments). */
+  exact?: boolean;
 }
 
-export const PrivilegedRoute = memo(({ component, hasPrivilege, path }: PrivilegedRouteProps) => {
-  const docLinkSelector = useCallback((docLinks: DocLinks) => {
-    return docLinks.securitySolution.privileges;
-  }, []);
+export const PrivilegedRoute = memo(
+  ({ component, hasPrivilege, path, exact }: PrivilegedRouteProps) => {
+    const docLinkSelector = useCallback((docLinks: DocLinks) => {
+      return docLinks.securitySolution.privileges;
+    }, []);
 
-  const componentToRender = useMemo(() => {
-    if (!hasPrivilege) {
-      // eslint-disable-next-line react/display-name
-      return () => <NoPrivilegesPage docLinkSelector={docLinkSelector} />;
-    }
+    const componentToRender = useMemo(() => {
+      if (!hasPrivilege) {
+        // eslint-disable-next-line react/display-name
+        return () => <NoPrivilegesPage docLinkSelector={docLinkSelector} />;
+      }
 
-    return component;
-  }, [component, docLinkSelector, hasPrivilege]);
+      return component;
+    }, [component, docLinkSelector, hasPrivilege]);
 
-  return <Route path={path} component={componentToRender} />;
-});
+    return <Route path={path} exact={exact} component={componentToRender} />;
+  }
+);
 PrivilegedRoute.displayName = 'PrivilegedRoute';

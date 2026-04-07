@@ -7,38 +7,57 @@
 
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
-import { basicCase } from './mock';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as api from './api';
-import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
 import { casesQueriesKeys } from './constants';
 import { useReplaceCustomField } from './use_replace_custom_field';
-import { TestProviders, createTestQueryClient } from '../common/mock';
+import { basicCaseFixture } from './test_fixtures';
+import { CustomFieldTypes } from '../../common/types/domain';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+jest.mock('./api', () => ({
+  getCase: jest.fn(),
+  replaceCustomField: jest.fn(),
+}));
+jest.mock('../common/use_cases_toast', () => ({
+  useCasesToast: jest.fn(),
+}));
 
 describe('useReplaceCustomField', () => {
   const sampleData = {
-    caseId: basicCase.id,
+    caseId: basicCaseFixture.id,
     customFieldId: 'test_key_1',
     customFieldValue: 'this is an updated custom field',
-    caseVersion: basicCase.version,
+    caseVersion: basicCaseFixture.version,
+    caseData: basicCaseFixture,
   };
 
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  const showErrorToast = jest.fn();
+  (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  const createQueryClient = () =>
+    new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+
+  const getWrapper = (queryClient: QueryClient) =>
+    function Wrapper({ children }: React.PropsWithChildren<{}>) {
+      return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    };
+
   it('replace a customField and refresh the case page', async () => {
-    const queryClient = createTestQueryClient();
+    const queryClient = createQueryClient();
     const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useReplaceCustomField(), {
-      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
+      wrapper: getWrapper(queryClient),
     });
 
     act(() => {
@@ -54,8 +73,9 @@ describe('useReplaceCustomField', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const queryClient = createQueryClient();
     const { result } = renderHook(() => useReplaceCustomField(), {
-      wrapper: TestProviders,
+      wrapper: getWrapper(queryClient),
     });
 
     act(() => {
@@ -76,14 +96,16 @@ describe('useReplaceCustomField', () => {
 
   it('calls the api when invoked with the correct parameters of toggle field', async () => {
     const newData = {
-      caseId: basicCase.id,
+      caseId: basicCaseFixture.id,
       customFieldId: 'test_key_2',
       customFieldValue: false,
-      caseVersion: basicCase.version,
+      caseVersion: basicCaseFixture.version,
+      caseData: basicCaseFixture,
     };
     const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const queryClient = createQueryClient();
     const { result } = renderHook(() => useReplaceCustomField(), {
-      wrapper: TestProviders,
+      wrapper: getWrapper(queryClient),
     });
 
     act(() => {
@@ -104,14 +126,16 @@ describe('useReplaceCustomField', () => {
 
   it('calls the api when invoked with the correct parameters with null value', async () => {
     const newData = {
-      caseId: basicCase.id,
+      caseId: basicCaseFixture.id,
       customFieldId: 'test_key_3',
       customFieldValue: null,
-      caseVersion: basicCase.version,
+      caseVersion: basicCaseFixture.version,
+      caseData: basicCaseFixture,
     };
     const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const queryClient = createQueryClient();
     const { result } = renderHook(() => useReplaceCustomField(), {
-      wrapper: TestProviders,
+      wrapper: getWrapper(queryClient),
     });
 
     act(() => {
@@ -130,19 +154,63 @@ describe('useReplaceCustomField', () => {
     );
   });
 
-  it('shows a toast error when the api return an error', async () => {
-    jest
+  it('retries once with the latest version when only system-managed fields changed', async () => {
+    const latestCase = {
+      ...basicCaseFixture,
+      incrementalId: 42,
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      version: 'WzQ4LDFd',
+    };
+    const conflictError = Object.assign(new Error('Conflict'), {
+      body: { statusCode: 409 },
+    });
+
+    const replaceCustomFieldSpy = jest
       .spyOn(api, 'replaceCustomField')
-      .mockRejectedValue(new Error('useUpdateComment: Test error'));
+      .mockRejectedValueOnce(conflictError)
+      .mockResolvedValueOnce({
+        key: sampleData.customFieldId,
+        type: CustomFieldTypes.TEXT,
+        value: sampleData.customFieldValue,
+      });
+    const getCaseSpy = jest.spyOn(api, 'getCase').mockResolvedValue(latestCase);
+    const queryClient = createQueryClient();
 
     const { result } = renderHook(() => useReplaceCustomField(), {
-      wrapper: TestProviders,
+      wrapper: getWrapper(queryClient),
     });
 
     act(() => {
       result.current.mutate(sampleData);
     });
 
-    await waitFor(() => expect(addError).toHaveBeenCalled());
+    await waitFor(() => expect(replaceCustomFieldSpy).toHaveBeenCalledTimes(2));
+
+    expect(getCaseSpy).toHaveBeenCalledWith({ caseId: basicCaseFixture.id });
+    expect(replaceCustomFieldSpy).toHaveBeenNthCalledWith(2, {
+      caseId: sampleData.caseId,
+      customFieldId: sampleData.customFieldId,
+      request: {
+        value: sampleData.customFieldValue,
+        caseVersion: latestCase.version,
+      },
+    });
+  });
+
+  it('shows a toast error when the api return an error', async () => {
+    jest
+      .spyOn(api, 'replaceCustomField')
+      .mockRejectedValue(new Error('useUpdateComment: Test error'));
+    const queryClient = createQueryClient();
+
+    const { result } = renderHook(() => useReplaceCustomField(), {
+      wrapper: getWrapper(queryClient),
+    });
+
+    act(() => {
+      result.current.mutate(sampleData);
+    });
+
+    await waitFor(() => expect(showErrorToast).toHaveBeenCalled());
   });
 });

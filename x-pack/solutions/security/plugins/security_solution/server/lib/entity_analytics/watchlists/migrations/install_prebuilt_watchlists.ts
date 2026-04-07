@@ -9,7 +9,10 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
-import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analytics/watchlists/constants';
+import {
+  PRIVILEGED_USER_WATCHLIST_ID,
+  PRIVILEGED_USER_WATCHLIST_NAME,
+} from '../../../../../common/entity_analytics/watchlists/constants';
 import { getMatchersFor } from '../../privilege_monitoring/data_sources/matchers';
 import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
@@ -22,7 +25,7 @@ export const PREBUILT_WATCHLISTS_VERSION = 1;
 const PREBUILT_WATCHLISTS = [
   {
     id: PRIVILEGED_USER_WATCHLIST_ID,
-    name: PRIVILEGED_USER_WATCHLIST_ID,
+    name: PRIVILEGED_USER_WATCHLIST_NAME,
     description: 'System-managed watchlist for tracking privileged users',
     managed: true,
     riskModifier: PRIVILEGED_USER_MODIFIER,

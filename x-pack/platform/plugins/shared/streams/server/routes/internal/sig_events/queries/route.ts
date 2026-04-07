@@ -128,6 +128,74 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
   },
 });
 
+export const demoteBackedQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_demote',
+  options: {
+    access: 'internal',
+    summary: 'Demote backed queries',
+    description:
+      'Removes Kibana rules for the provided stored significant-events queries and marks them as unbacked.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      queryIds: z.array(z.string()).min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ demoted: number }> => {
+    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const toDemote = await queryClient.getQueryLinks([], {
+      ruleUnbacked: 'exclude',
+      queryIds: params.body.queryIds,
+    });
+
+    const byStream = toDemote.reduce<Record<string, string[]>>((acc, link) => {
+      const stream = link.stream_name;
+
+      if (!acc[stream]) {
+        acc[stream] = [];
+      }
+
+      acc[stream].push(link.query.id);
+      return acc;
+    }, {});
+
+    const streamDefinitions = await streamsClient.listStreams();
+    const streamDefinitionsByName = new Map(
+      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    );
+
+    let demoted = 0;
+
+    for (const [streamName, queryIds] of Object.entries(byStream)) {
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping demotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await queryClient.demoteQueries(definition, queryIds);
+      demoted += result.demoted;
+    }
+
+    return { demoted };
+  },
+});
+
 const getDiscoveryQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
   params: z.object({
@@ -258,6 +326,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
+  ...demoteBackedQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
 };
