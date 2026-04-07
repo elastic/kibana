@@ -167,23 +167,23 @@ export const TakeActionButton = memo(
       () => [
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
-        ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
+        ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
         ...(isAlert ? alertAssigneesItems : []),
         ...(isAlert ? alertTagsItems : []),
-        ...(isAlert ? runWorkflowMenuItem : []),
         ...(isAlert ? [] : noteItems),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
       ],
       [
         addToCaseActionItems,
-        alertTagsItems,
-        investigateInTimelineActionItems,
         isAlert,
-        isInSecurityApp,
-        noteItems,
-        runWorkflowMenuItem,
         statusActionItems,
+        runWorkflowMenuItem,
+        documentWorkflowMenuItem,
         alertAssigneesItems,
+        alertTagsItems,
+        noteItems,
+        isInSecurityApp,
+        investigateInTimelineActionItems,
       ]
     );
 
@@ -196,12 +196,13 @@ export const TakeActionButton = memo(
         ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
       ],
       [
+        items,
+        isAlert,
+        statusActionPanels,
         alertAssigneesPanels,
         alertTagsPanels,
-        isAlert,
-        items,
-        statusActionPanels,
         runAlertWorkflowPanel,
+        runDocumentWorkflowPanel,
       ]
     );
 
