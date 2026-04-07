@@ -171,6 +171,8 @@ export function SliChartPanel({
                     href={apmLink}
                     disabled={!isApmLinkEnabled}
                     data-test-subj="slidHistoryChartViewInApmLink"
+                    data-action="openInApm"
+                    data-source={slo.indicator.type}
                   >
                     {inApmLabel}
                   </EuiContextMenuItem>
@@ -178,6 +180,8 @@ export function SliChartPanel({
                     href={discoverLink}
                     disabled={!isDiscoverLinkEnabled}
                     data-test-subj="slidHistoryChartOpenInDiscoverLink"
+                    data-action="openTracesInDiscover"
+                    data-source={slo.indicator.type}
                   >
                     {tracesInDiscoverLabel}
                   </EuiContextMenuItem>
