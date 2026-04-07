@@ -77,7 +77,17 @@ export type EsqlFieldType = (typeof esqlFieldTypes)[number];
  *  Partial fields metadata client, used to avoid circular dependency with @kbn/monaco
  **/
 export interface PartialFieldsMetadataClient {
-  find: ({ fieldNames, attributes }: { fieldNames?: string[]; attributes: string[] }) => Promise<{
+  find: ({
+    fieldNames,
+    attributes,
+    streamName,
+    source,
+  }: {
+    fieldNames?: string[];
+    attributes: string[];
+    streamName?: string;
+    source?: string[];
+  }) => Promise<{
     fields: Record<
       string,
       {

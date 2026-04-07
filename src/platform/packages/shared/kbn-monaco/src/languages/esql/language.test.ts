@@ -136,6 +136,238 @@ describe('ESQLLang', () => {
         expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
       });
 
+      describe('stream descriptions', () => {
+        const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
+
+        beforeEach(() => {
+          mockSuggest.mockResolvedValue([]);
+        });
+
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        const makeFieldItem = (label: string): monaco.languages.CompletionItem => ({
+          label,
+          kind: 4, // Variable
+          insertText: label,
+          range: new monaco.Range(0, 0, 0, 0),
+        });
+
+        const createModel = (query: string) =>
+          ({
+            getValue: jest.fn().mockReturnValue(query),
+          } as unknown as monaco.editor.ITextModel);
+
+        it('should show stream description for a field when the query sources a stream', async () => {
+          const mockFind = jest.fn().mockImplementation(({ streamName, source }) => {
+            if (streamName === 'logs-kibana.otel-default' && source?.includes('streams')) {
+              return Promise.resolve({
+                fields: {
+                  'body.text': { type: 'keyword', description: 'Kibana body.text description' },
+                },
+              });
+            }
+            return Promise.resolve({ fields: {} });
+          });
+
+          const suggestionProvider = ESQLLang.getSuggestionProvider({
+            getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          });
+
+          const model = createModel('FROM logs-kibana.otel-default | WHERE body.text');
+          await suggestionProvider.provideCompletionItems(
+            model,
+            new monaco.Position(1, 1),
+            {} as any,
+            {} as any
+          );
+
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+            makeFieldItem('body.text'),
+            {} as any
+          );
+
+          expect(resolvedItem).toEqual({
+            ...makeFieldItem('body.text'),
+            documentation: {
+              value:
+                'Described in **logs-kibana.otel-default** stream:\n\n> Kibana body.text description',
+            },
+          });
+        });
+
+        it('should combine ECS description and stream description separated by a divider', async () => {
+          const mockFind = jest.fn().mockImplementation(({ streamName, source }) => {
+            if (streamName === 'logs-kibana.otel-default' && source?.includes('streams')) {
+              return Promise.resolve({
+                fields: {
+                  'body.text': { type: 'keyword', description: 'Stream description' },
+                },
+              });
+            }
+            return Promise.resolve({
+              fields: {
+                'body.text': { type: 'keyword', description: 'ECS description' },
+              },
+            });
+          });
+
+          const suggestionProvider = ESQLLang.getSuggestionProvider({
+            getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          });
+
+          const model = createModel('FROM logs-kibana.otel-default | WHERE body.text');
+          await suggestionProvider.provideCompletionItems(
+            model,
+            new monaco.Position(1, 1),
+            {} as any,
+            {} as any
+          );
+
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+            makeFieldItem('body.text'),
+            {} as any
+          );
+
+          expect(resolvedItem).toEqual({
+            ...makeFieldItem('body.text'),
+            documentation: {
+              value:
+                'ECS description\n\n---\n\nDescribed in **logs-kibana.otel-default** stream:\n\n> Stream description',
+            },
+          });
+        });
+
+        it('should show descriptions for multiple streams separated by a blank line', async () => {
+          const mockFind = jest.fn().mockImplementation(({ streamName, source }) => {
+            if (source?.includes('streams')) {
+              if (streamName === 'stream-a') {
+                return Promise.resolve({
+                  fields: {
+                    'my.field': { type: 'keyword', description: 'Description from stream-a' },
+                  },
+                });
+              }
+              if (streamName === 'stream-b') {
+                return Promise.resolve({
+                  fields: {
+                    'my.field': { type: 'keyword', description: 'Description from stream-b' },
+                  },
+                });
+              }
+            }
+            return Promise.resolve({ fields: {} });
+          });
+
+          const suggestionProvider = ESQLLang.getSuggestionProvider({
+            getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          });
+
+          const model = createModel('FROM stream-a, stream-b | WHERE my.field');
+          await suggestionProvider.provideCompletionItems(
+            model,
+            new monaco.Position(1, 1),
+            {} as any,
+            {} as any
+          );
+
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+            makeFieldItem('my.field'),
+            {} as any
+          );
+
+          expect(resolvedItem).toEqual({
+            ...makeFieldItem('my.field'),
+            documentation: {
+              value:
+                'Described in **stream-a** stream:\n\n> Description from stream-a\n\nDescribed in **stream-b** stream:\n\n> Description from stream-b',
+            },
+          });
+        });
+
+        it('should not fetch stream descriptions when no stream is in the FROM clause', async () => {
+          const mockFind = jest.fn().mockResolvedValue({ fields: {} });
+
+          const suggestionProvider = ESQLLang.getSuggestionProvider({
+            getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          });
+
+          // provideCompletionItems not called — lastStreamNames stays empty
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+            makeFieldItem('body.text'),
+            {} as any
+          );
+
+          expect(resolvedItem).toEqual(makeFieldItem('body.text'));
+          // Only the upfront ECS list check, no stream fetch
+          expect(mockFind).toBeCalledTimes(1);
+        });
+
+        it('should strip .keyword suffix when looking up stream description', async () => {
+          const mockFind = jest.fn().mockImplementation(({ fieldNames, streamName, source }) => {
+            if (
+              streamName === 'logs-kibana.otel-default' &&
+              source?.includes('streams') &&
+              fieldNames?.includes('body.text')
+            ) {
+              return Promise.resolve({
+                fields: {
+                  'body.text': { type: 'keyword', description: 'Kibana body.text description' },
+                },
+              });
+            }
+            return Promise.resolve({ fields: {} });
+          });
+
+          const suggestionProvider = ESQLLang.getSuggestionProvider({
+            getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          });
+
+          const model = createModel('FROM logs-kibana.otel-default | WHERE body.text.keyword');
+          await suggestionProvider.provideCompletionItems(
+            model,
+            new monaco.Position(1, 1),
+            {} as any,
+            {} as any
+          );
+
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
+            makeFieldItem('body.text.keyword'),
+            {} as any
+          );
+
+          expect(resolvedItem).toEqual({
+            ...makeFieldItem('body.text.keyword'),
+            documentation: {
+              value:
+                'Described in **logs-kibana.otel-default** stream:\n\n> Kibana body.text description',
+            },
+          });
+        });
+
+        it('should not fetch stream descriptions for wildcard sources', async () => {
+          const mockFind = jest.fn().mockResolvedValue({ fields: {} });
+
+          const suggestionProvider = ESQLLang.getSuggestionProvider({
+            getFieldsMetadata: Promise.resolve({ find: mockFind }),
+          });
+
+          const model = createModel('FROM logs-* | WHERE body.text');
+          await suggestionProvider.provideCompletionItems(
+            model,
+            new monaco.Position(1, 1),
+            {} as any,
+            {} as any
+          );
+
+          await suggestionProvider.resolveCompletionItem!(makeFieldItem('body.text'), {} as any);
+
+          // Wildcard source excluded — only the ECS list check, no stream fetch
+          expect(mockFind).toBeCalledTimes(1);
+        });
+      });
+
       it('should call onSuggestionsWithCustomCommandShown when suggestions contain custom commands', async () => {
         const mockOnSuggestionsWithCustomCommandShown = jest.fn();
 

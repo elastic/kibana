@@ -9,6 +9,7 @@
 
 import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
+import { Parser, Walker } from '@elastic/esql';
 import {
   getSignatureHelp,
   getHoverItem,
@@ -34,6 +35,19 @@ import { buildEsqlTheme } from './lib/theme';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
+};
+
+const getStreamNamesFromQuery = (query: string): string[] => {
+  try {
+    const { root } = Parser.parse(query);
+    const fromCmd = Walker.match(root, { type: 'command', name: 'from' });
+    if (!fromCmd) return [];
+    return Walker.matchAll(fromCmd, { type: 'source', sourceType: 'index' })
+      .map((node) => node.name)
+      .filter((name) => name.length > 0 && !name.includes('*'));
+  } catch {
+    return [];
+  }
 };
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
@@ -165,12 +179,16 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     return provider;
   },
   getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
+    let lastStreamNames: string[] = [];
+    let lastModel: monaco.editor.ITextModel | undefined;
+
     return {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
+        lastModel = model;
         const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
         const resolvedDeps = resolvedCallbacks
           ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
@@ -198,43 +216,75 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           model.getLineCount()
         );
 
+        lastStreamNames = getStreamNamesFromQuery(fullText);
+
         return result;
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
-        if (!deps?.getFieldsMetadata) return item;
-        const fieldsMetadataClient = await deps?.getFieldsMetadata;
+        const resolvedDeps = lastModel
+          ? { ...deps, ...(deps?.getModelDependencies?.(lastModel) ?? {}) }
+          : deps;
+        if (!resolvedDeps?.getFieldsMetadata) return item;
 
-        const fullEcsMetadataList = await fieldsMetadataClient?.find({
-          attributes: ['type'],
-        });
-        if (!fullEcsMetadataList || !fieldsMetadataClient || typeof item.label !== 'string')
-          return item;
+        const fieldsMetadataClient = await resolvedDeps.getFieldsMetadata;
+        if (!fieldsMetadataClient) return item;
+
+        // Fetch the full ECS field list upfront as a single lightweight check.
+        // The client caches this result, so subsequent calls are free.
+        const fullEcsMetadataList = await fieldsMetadataClient.find({ attributes: ['type'] });
+
+        if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
+        if (typeof item.label !== 'string') return item;
 
         const strippedFieldName = removeKeywordSuffix(item.label);
-        if (
-          // If item is not a field, no need to fetch metadata
-          item.kind === monaco.languages.CompletionItemKind.Variable &&
-          // If not ECS, no need to fetch description
-          Object.hasOwn(fullEcsMetadataList?.fields, strippedFieldName)
-        ) {
+        const streamNames = lastStreamNames;
+        const documentationParts: string[] = [];
+
+        // 1. ECS description
+        if (fullEcsMetadataList && Object.hasOwn(fullEcsMetadataList.fields, strippedFieldName)) {
           const ecsMetadata = await fieldsMetadataClient.find({
             fieldNames: [strippedFieldName],
             attributes: ['description'],
           });
-
-          const fieldMetadata = ecsMetadata.fields[strippedFieldName];
-          if (fieldMetadata && fieldMetadata.description) {
-            const completionItem: monaco.languages.CompletionItem = {
-              ...item,
-              documentation: {
-                value: fieldMetadata.description,
-              },
-            };
-            return completionItem;
+          const ecsDescription = ecsMetadata.fields[strippedFieldName]?.description;
+          if (ecsDescription) {
+            documentationParts.push(ecsDescription);
           }
         }
 
-        return item;
+        // 2. Stream descriptions
+        if (streamNames?.length) {
+          const streamParts: string[] = [];
+          for (const streamName of streamNames) {
+            const streamMetadata = await fieldsMetadataClient.find({
+              fieldNames: [strippedFieldName],
+              attributes: ['description'],
+              streamName,
+              source: ['streams'],
+            });
+            const streamDescription = streamMetadata.fields[strippedFieldName]?.description;
+            if (streamDescription) {
+              streamParts.push(`Described in **${streamName}** stream:\n\n> ${streamDescription}`);
+            }
+          }
+          if (streamParts.length > 0) {
+            if (documentationParts.length > 0) {
+              documentationParts.push('---');
+            }
+            documentationParts.push(streamParts.join('\n\n'));
+          }
+        }
+
+        if (documentationParts.length === 0) {
+          return item;
+        }
+
+        return {
+          ...item,
+          documentation: {
+            value: documentationParts.join('\n\n'),
+          },
+        };
       },
     };
   },
