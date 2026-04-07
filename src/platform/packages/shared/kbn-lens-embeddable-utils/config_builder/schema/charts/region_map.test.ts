@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { RegionMapState } from './region_map';
 import { regionMapStateSchema } from './region_map';
@@ -23,7 +24,7 @@ describe('Region Map Schema', () => {
   const baseRegionMapConfig: Omit<RegionMapWithoutDefaultsConfig, 'metric' | 'region'> = {
     type: 'region_map',
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: 'test-data-view',
     },
   };

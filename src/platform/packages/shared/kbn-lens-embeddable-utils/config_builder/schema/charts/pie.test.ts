@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { PieStateESQL, PieStateNoESQL } from './pie';
 import { pieStateSchema } from './pie';
 
@@ -16,7 +17,7 @@ describe('Pie Schema', () => {
       const basePieConfig = {
         type: 'pie',
         data_source: {
-          type: 'data_view_reference',
+          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
           id: 'test-data-view',
         },
         ignore_global_filters: false,

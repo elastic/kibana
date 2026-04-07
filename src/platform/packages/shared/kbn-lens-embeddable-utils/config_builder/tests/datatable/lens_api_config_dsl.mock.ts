@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import type { DatatableState, DatatableStateNoESQL } from '../../schema';
 
 /**
@@ -16,7 +20,7 @@ export const singleMetricDatatableWithAdhocDataView: DatatableState = {
   title: 'Single metric',
   type: 'data_table',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
@@ -37,7 +41,7 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with ad hoc dataView',
   type: 'data_table',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
@@ -113,7 +117,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
@@ -278,7 +282,7 @@ export const fullConfigDatatableWithDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'my-custom-data-view-id',
   },
   sampling: 1,
@@ -441,7 +445,7 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
   title: 'Sorted by a pivoted metric column',
   type: 'data_table',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,
@@ -610,7 +614,7 @@ export const sortedByRowDatatable: DatatableState = {
   title: 'Sorted by row column',
   type: 'data_table',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,

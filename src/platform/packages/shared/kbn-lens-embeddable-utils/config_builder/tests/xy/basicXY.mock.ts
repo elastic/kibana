@@ -18,6 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 
 export const minimalAttributesXY: LensAttributes = {
   visualizationType: 'lnsXY',
@@ -1121,7 +1122,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     {
       type: 'bar_stacked',
       data_source: {
-        type: 'data_view_reference',
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
@@ -1217,7 +1218,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
     {
       type: 'bar_stacked',
       data_source: {
-        type: 'data_view_reference',
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
@@ -1308,7 +1309,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     {
       type: 'bar_stacked',
       data_source: {
-        type: 'data_view_reference',
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,

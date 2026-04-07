@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { DatatableState } from './datatable';
 import { datatableStateSchema } from './datatable';
@@ -17,7 +18,7 @@ describe('Datatable Schema', () => {
   const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
     type: 'data_table',
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: 'test-data-view',
     },
   };

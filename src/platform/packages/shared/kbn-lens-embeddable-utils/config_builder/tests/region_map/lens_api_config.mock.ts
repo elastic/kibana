@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import type { RegionMapState } from '../../schema';
 
 /**
@@ -16,7 +20,7 @@ export const basicRegionMapWithAdHocDataView = {
   title: 'Test Region Map',
   type: 'region_map',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
@@ -48,7 +52,7 @@ export const basicRegionMapWithDataView = {
   title: 'Test Region Map',
   type: 'region_map',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'test-id',
   },
   metric: {
@@ -108,7 +112,7 @@ export const comprehensiveRegionMapWithAdHocDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
@@ -143,7 +147,7 @@ export const comprehensiveRegionMapWithDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'my-custom-data-view-id',
   },
   metric: {

@@ -10,13 +10,17 @@
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './data_source';
 import { dataSourceSchema, dataSourceEsqlTableTypeSchema } from './data_source';
-import { dataViewSchema } from '@kbn/as-code-data-views-schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+  dataViewSchema,
+} from '@kbn/as-code-data-views-schema';
 
 describe('DataSource Schema', () => {
   describe('DataViewReference type', () => {
     it('validates a valid dataView configuration', () => {
       const input = {
-        type: 'data_view_reference',
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         id: 'my-data-view',
       } satisfies DataSourceTypeNoESQL;
 
@@ -26,7 +30,7 @@ describe('DataSource Schema', () => {
 
     it('throws on missing name', () => {
       const input = {
-        type: 'data_view_reference',
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         // @ts-expect-error
       } satisfies DataSourceTypeNoESQL;
 
@@ -39,7 +43,7 @@ describe('DataSource Schema', () => {
   describe('index type', () => {
     it('validates a valid index configuration', () => {
       const input = {
-        type: 'data_view_spec',
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
       } satisfies DataSourceTypeNoESQL;
@@ -50,7 +54,7 @@ describe('DataSource Schema', () => {
 
     it('validates index configuration with runtime fields', () => {
       const input = {
-        type: 'data_view_spec',
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
         runtime_fields: [
@@ -72,7 +76,7 @@ describe('DataSource Schema', () => {
 
     it('throws on missing required fields', () => {
       const input = {
-        type: 'data_view_spec',
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         time_field: '@timestamp',
         // @ts-expect-error
       } satisfies DataSourceTypeNoESQL;
@@ -137,7 +141,7 @@ describe('DataSource Schema', () => {
   describe('DataSource schema wrapper', () => {
     it('validates datasource property with valid configuration', () => {
       const input = {
-        type: 'data_view_reference',
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         id: 'my-data-view',
       } satisfies DataSourceTypeNoESQL;
 
@@ -158,7 +162,7 @@ describe('DataSource Schema', () => {
   describe('edge cases', () => {
     it('validates index configuration with empty runtime fields array', () => {
       const input = {
-        type: 'data_view_spec',
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
         runtime_fields: [],
@@ -170,7 +174,7 @@ describe('DataSource Schema', () => {
 
     it('validates runtime fields with various format configurations', () => {
       const input = {
-        type: 'data_view_spec',
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
         runtime_fields: [

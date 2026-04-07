@@ -27,6 +27,11 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
+import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -220,7 +225,7 @@ export function buildDataSourceStateNoESQL(
     const dataViewSpec = adHocDataViews[adhocReference.id];
     if (isDataViewSpec(dataViewSpec) && dataViewSpec.title) {
       return {
-        type: 'data_view_spec',
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: dataViewSpec.title,
         time_field: dataViewSpec.timeFieldName,
       };
@@ -230,13 +235,13 @@ export function buildDataSourceStateNoESQL(
   const reference = references?.find(referenceCriteria);
   if (reference) {
     return {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: reference.id,
     };
   }
 
   return {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
   };
 }
@@ -287,7 +292,7 @@ export function isSingleLayer(
 export function getDataSourceIndex(dataSource: DataSourceType) {
   const timeFieldName: string = LENS_DEFAULT_TIME_FIELD;
   switch (dataSource.type) {
-    case 'data_view_spec':
+    case AS_CODE_DATA_VIEW_SPEC_TYPE:
       return {
         index: dataSource.index_pattern,
         timeFieldName: dataSource.time_field ?? timeFieldName,
@@ -298,7 +303,7 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
         timeFieldName: getTimeFieldFromESQLQuery(dataSource.query),
         esqlQuery: dataSource.query,
       };
-    case 'data_view_reference':
+    case AS_CODE_DATA_VIEW_REFERENCE_TYPE:
       return {
         index: dataSource.id,
         timeFieldName,
@@ -459,8 +464,8 @@ export const buildDatasourceStates = (
           : Object.keys(layerConfig);
       for (const id of newLayerIds) {
         usedDataviews[id] =
-          dataSource.type === 'data_view_reference'
-            ? { type: 'dataView', id: dataSource.id }
+          dataSource.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE
+            ? { type: 'dataView', id: (dataSource as AsCodeDataViewReference).id }
             : {
                 type: 'adHocDataView',
                 ...dataSourceIndex,

@@ -26,6 +26,8 @@ import {
   isPersistedByReferenceAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
 } from '@kbn/lens-common';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -430,15 +432,18 @@ export function buildAPIAnnotationsLayer(
   const dataSource = (
     isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
       ? {
-          type: 'data_view_spec',
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
           index_pattern: indexPatternId,
           time_field: adHocDataView.timeFieldName,
         }
       : {
-          type: 'data_view_reference',
+          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
           id: referencedDataView ?? indexPatternId,
         }
-  ) satisfies Extract<DataSourceType, { type: 'data_view_reference' | 'data_view_spec' }>;
+  ) satisfies Extract<
+    DataSourceType,
+    { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
+  >;
   return {
     type: 'annotations',
     data_source: dataSource,

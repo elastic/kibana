@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import type { LegacyMetricState } from '../../schema/charts/legacy_metric';
 
 /**
@@ -16,7 +20,7 @@ export const basicLegacyMetricWithAdHocDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Test Metric',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
@@ -37,7 +41,7 @@ export const basicLegacyMetricWithDataView: LegacyMetricState = {
   title: 'Test Metric',
   description: 'A test metric chart',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'test-id',
   },
   metric: {
@@ -75,7 +79,7 @@ export const comprehensiveLegacyMetricWithAdHocDataView: LegacyMetricState = {
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'comprehensive-index',
     time_field: '@timestamp',
   },
@@ -109,7 +113,7 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'my-custom-data-view-id',
   },
   metric: {
@@ -173,7 +177,7 @@ export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricState = {
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'my-custom-data-view-id',
   },
   metric: {
@@ -197,7 +201,7 @@ export const legacyMetricWithColorWithoutApplyColorTo: LegacyMetricState = {
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'my-custom-data-view-id',
   },
   metric: {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import { tagcloudStateSchema } from './tagcloud';
 
@@ -14,7 +15,7 @@ describe('Tagcloud Schema', () => {
   const baseTagcloudConfig = {
     type: 'tag_cloud',
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: 'test-data-view',
     },
   };

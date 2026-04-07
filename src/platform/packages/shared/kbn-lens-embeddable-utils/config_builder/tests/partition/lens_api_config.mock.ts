@@ -11,7 +11,7 @@ import type { MosaicState } from '../../schema/charts/mosaic';
 import type { PieState } from '../../schema/charts/pie';
 import type { TreemapState } from '../../schema/charts/treemap';
 import type { WaffleState } from '../../schema/charts/waffle';
-
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 type PartitionConfig = PieState | MosaicState | TreemapState | WaffleState;
 
 export const esqlCharts: Array<PartitionConfig> = [
@@ -47,7 +47,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -99,7 +99,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -152,7 +152,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -198,7 +198,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -246,7 +246,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -306,7 +306,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -371,7 +371,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -437,7 +437,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -498,7 +498,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -570,7 +570,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -647,7 +647,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -711,7 +711,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -772,7 +772,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -844,7 +844,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -954,7 +954,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1026,7 +1026,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1136,7 +1136,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1234,7 +1234,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1328,7 +1328,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1409,7 +1409,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1568,7 +1568,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       },
     ],
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {

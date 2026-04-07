@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { ColorByValueType } from '../color';
 import type { GaugeState } from './gauge';
@@ -16,7 +17,7 @@ describe('Gauge Schema', () => {
   const baseGaugeConfig = {
     type: 'gauge',
     data_source: {
-      type: 'data_view_reference',
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       id: 'test-data-view',
     },
   } satisfies Partial<GaugeState>;

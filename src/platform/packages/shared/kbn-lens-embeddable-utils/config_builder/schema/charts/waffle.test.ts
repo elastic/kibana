@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { WaffleStateNoESQL, WaffleStateESQL } from './waffle';
 import { waffleStateSchema } from './waffle';
 
@@ -17,7 +18,7 @@ describe('Waffle Schema', () => {
       ignore_global_filters: false,
       sampling: 1,
       data_source: {
-        type: 'data_view_reference',
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         id: 'test-data-view',
       },
     } satisfies Partial<WaffleStateNoESQL>;

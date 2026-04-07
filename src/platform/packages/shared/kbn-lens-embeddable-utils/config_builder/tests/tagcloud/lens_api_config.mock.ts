@@ -8,6 +8,10 @@
  */
 
 import type { TagcloudState } from '../../schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 
 /**
  * Basic tagcloud chart with ad hoc dataView
@@ -16,7 +20,7 @@ export const basicTagcloudWithAdHocDataView = {
   title: 'Test Tagcloud',
   type: 'tag_cloud',
   data_source: {
-    type: 'data_view_spec',
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
@@ -42,7 +46,7 @@ export const basicTagcloudWithDataView = {
   title: 'Test Tagcloud',
   type: 'tag_cloud',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'test-id',
   },
   metric: {
@@ -87,7 +91,7 @@ export const comprehensiveTagcloudWithAdHocDataView = {
   title: 'Comprehensive Test Tagcloud',
   type: 'tag_cloud',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'my-custom-data-view-id',
   },
   orientation: 'angled',
@@ -150,7 +154,7 @@ export const comprehensiveTagcloudWithDataView = {
   title: 'Comprehensive Test Tagcloud',
   type: 'tag_cloud',
   data_source: {
-    type: 'data_view_reference',
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     id: 'my-custom-data-view-id',
   },
   orientation: 'angled',

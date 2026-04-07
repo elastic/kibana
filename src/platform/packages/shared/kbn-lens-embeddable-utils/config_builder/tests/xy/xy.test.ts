@@ -30,6 +30,10 @@ import {
   esqlChartWithBreakdownColorMapping,
   esqlXYWithCollapseByBreakdown,
 } from './esqlXY.mock';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
@@ -281,7 +285,7 @@ describe('XY', () => {
             {
               ignore_global_filters: false,
               sampling: 1,
-              data_source: { type: 'data_view_reference', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
               type,
               y: [{ operation: 'count', empty_as_null: false }],
             },
@@ -391,7 +395,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                data_source: { type: 'data_view_reference', id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -429,7 +433,7 @@ describe('XY', () => {
               },
               {
                 data_source: {
-                  type: 'data_view_spec',
+                  type: AS_CODE_DATA_VIEW_SPEC_TYPE,
                   index_pattern: 'companyIndex',
                   time_field: '@timestamp',
                 },
@@ -459,7 +463,7 @@ describe('XY', () => {
                 type: 'annotations',
                 ignore_global_filters: false,
                 data_source: {
-                  type: 'data_view_reference',
+                  type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
                   id: 'metrics-*',
                 },
                 events: [
@@ -538,7 +542,7 @@ describe('XY', () => {
           title: 'Chart with by-ref annotation',
           layers: [
             {
-              data_source: { type: 'data_view_reference', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'myDataView' },
               type: 'line',
               ignore_global_filters: false,
               sampling: 1,

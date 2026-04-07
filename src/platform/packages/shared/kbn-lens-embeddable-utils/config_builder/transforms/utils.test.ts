@@ -27,6 +27,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
@@ -57,7 +58,7 @@ test('build references correctly builds references', () => {
 describe('getDatasetIndex', () => {
   test('returns index if provided', () => {
     const result = getDataSourceIndex({
-      type: 'data_view_spec',
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'test',
       time_field: '@timestamp',
     });
