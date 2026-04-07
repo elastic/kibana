@@ -17,7 +17,7 @@ export const AskExpert: React.FC<{ askExpertLink: string }> = ({ askExpertLink }
         <EuiTitle size="xxxs">
           <p>
             {i18n.translate('xpack.search.gettingStarted.topNav.needHelpTitleLabel', {
-              defaultMessage: 'Need help ?',
+              defaultMessage: 'Need help?',
             })}
           </p>
         </EuiTitle>
@@ -31,7 +31,7 @@ export const AskExpert: React.FC<{ askExpertLink: string }> = ({ askExpertLink }
         aria-label={i18n.translate(
           'xpack.search.gettingStarted.topNav.ariaLabel.askAnExpertLinkLabel',
           {
-            defaultMessage: 'Need help? ask an expert',
+            defaultMessage: 'Need help? Ask an expert',
           }
         )}
       >

@@ -42,7 +42,7 @@ export const SearchGettingStartedSectionTopNavigation = () => {
     {
       id: 'elasticCloud',
       buttonLabel: i18n.translate('xpack.search.gettingStarted.topNav.buttonLabel.cloudHome', {
-        defaultMessage: 'Elastic cloud',
+        defaultMessage: 'Elastic Cloud',
       }),
       buttonHref: cloudLinks.cloudHome,
       dataTestSubj: 'gettingStartedCloudHome',
