@@ -121,8 +121,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       }
 
       if (confirmStatus === ConfirmationStatus.unprompted) {
+        const definition = tool.confirmation.getConfirmation
+          ? await tool.confirmation.getConfirmation({ toolParams })
+          : undefined;
         return {
-          prompt: createToolConfirmationPrompt({ confirmationId, tool }),
+          prompt: createToolConfirmationPrompt({ confirmationId, tool, definition }),
         };
       }
     }

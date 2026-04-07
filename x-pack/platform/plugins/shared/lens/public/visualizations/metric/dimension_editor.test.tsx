@@ -57,40 +57,40 @@ describe('dimension editor', () => {
     },
   };
 
-  const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign'>> =
-    {
-      layerId: 'first',
-      layerType: 'data',
-      metricAccessor: 'metric-col-id',
-      secondaryMetricAccessor: 'secondary-metric-col-id',
-      maxAccessor: 'max-metric-col-id',
-      breakdownByAccessor: 'breakdown-col-id',
-      collapseFn: 'sum',
-      subtitle: faker.lorem.word(5),
-      secondaryLabel: faker.lorem.word(3),
-      secondaryTrend: { type: 'none' },
-      progressDirection: 'vertical',
-      maxCols: 5,
-      color: faker.color.rgb(),
-      palette,
-      icon: 'tag',
-      showBar: true,
-      titlesTextAlign: 'left',
-      primaryAlign: 'right',
-      secondaryAlign: 'right',
-      primaryPosition: 'bottom',
-      titleWeight: 'bold',
-      iconAlign: 'left',
-      valueFontMode: 'default',
-      trendlineLayerId: 'second',
-      trendlineLayerType: 'metricTrendline',
-      trendlineMetricAccessor: 'trendline-metric-col-id',
-      trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
-      trendlineTimeAccessor: 'trendline-time-col-id',
-      trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-      secondaryLabelPosition: 'before',
-      applyColorTo: 'background',
-    };
+  const fullState: Required<
+    Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+  > = {
+    layerId: 'first',
+    layerType: 'data',
+    metricAccessor: 'metric-col-id',
+    secondaryMetricAccessor: 'secondary-metric-col-id',
+    maxAccessor: 'max-metric-col-id',
+    breakdownByAccessor: 'breakdown-col-id',
+    collapseFn: 'sum',
+    subtitle: faker.lorem.word(5),
+    secondaryLabel: faker.lorem.word(3),
+    secondaryTrend: { type: 'none' },
+    progressDirection: 'vertical',
+    maxCols: 5,
+    color: faker.color.rgb(),
+    palette,
+    icon: 'tag',
+    showBar: true,
+    titlesTextAlign: 'left',
+    primaryAlign: 'right',
+    secondaryAlign: 'right',
+    primaryPosition: 'bottom',
+    iconAlign: 'left',
+    valueFontMode: 'default',
+    trendlineLayerId: 'second',
+    trendlineLayerType: 'metricTrendline',
+    trendlineMetricAccessor: 'trendline-metric-col-id',
+    trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
+    trendlineTimeAccessor: 'trendline-time-col-id',
+    trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
+    secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
+  };
 
   let props: Props;
 
@@ -236,7 +236,7 @@ describe('dimension editor', () => {
     });
 
     describe('icon select', () => {
-      it('sets icon with deafult iconAlign', async () => {
+      it('sets icon with default iconAlign', async () => {
         const setState = jest.fn();
         const { setIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: undefined, iconAlign: undefined },

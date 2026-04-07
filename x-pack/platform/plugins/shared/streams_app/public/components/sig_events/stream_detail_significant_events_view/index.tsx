@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -113,6 +115,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       void Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['features', definition.stream.name] }),
+        queryClient.invalidateQueries({
+          queryKey: ['onboardingTaskStatus', definition.stream.name],
+        }),
       ]);
     },
     [definition.stream.name, queryClient, toasts]
@@ -227,8 +232,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   fullWidth
                   value={tableSearchValue}
                   onChange={(event) => setTableSearchValue(event.target.value)}
-                  placeholder={SIGNIFICANT_EVENTS_SEARCH_PLACEHOLDER}
-                  aria-label={SIGNIFICANT_EVENTS_SEARCH_ARIA_LABEL}
+                  placeholder={
+                    isRulesSelected
+                      ? RULES_SEARCH_PLACEHOLDER
+                      : KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER
+                  }
+                  aria-label={
+                    isRulesSelected
+                      ? RULES_SEARCH_ARIA_LABEL
+                      : KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL
+                  }
                 />
               </EuiFlexItem>
               {!isRulesSelected ? (
@@ -321,16 +334,35 @@ function KnowledgeIndicatorsGenerationControls({
   onGenerateSuggestionsClick: () => void;
   onCancelGenerationClick: () => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {isGenerating ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
-            iconType="stop"
-            onClick={onCancelGenerationClick}
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={CANCEL_GENERATION_BUTTON_TOOLTIP}>
+              <EuiButtonIcon
+                size="m"
+                aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                iconType="stop"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.currentTarget.blur();
+                  onCancelGenerationClick();
+                }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              width: 1px;
+              align-self: stretch;
+              background-color: currentColor;
+              opacity: 0.15;
+              margin: 0 ${euiTheme.size.s};
+            `}
           />
-        </EuiFlexItem>
+        </>
       ) : null}
       <EuiFlexItem grow={false}>
         <EuiButton
@@ -364,17 +396,31 @@ const RULES_FILTER_LABEL = i18n.translate(
   }
 );
 
-const SIGNIFICANT_EVENTS_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.streams.significantEventsTable.searchPlaceholder',
+const KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchPlaceholder',
   {
-    defaultMessage: 'Search significant events',
+    defaultMessage: 'Search knowledge indicators',
   }
 );
 
-const SIGNIFICANT_EVENTS_SEARCH_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.searchAriaLabel',
+const KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchAriaLabel',
   {
-    defaultMessage: 'Search significant events',
+    defaultMessage: 'Search knowledge indicators',
+  }
+);
+
+const RULES_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchPlaceholder',
+  {
+    defaultMessage: 'Search rules',
+  }
+);
+
+const RULES_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchAriaLabel',
+  {
+    defaultMessage: 'Search rules',
   }
 );
 
@@ -403,6 +449,13 @@ const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.significantEventsTable.cancelGenerationButtonAriaLabel',
   {
     defaultMessage: 'Cancel generation',
+  }
+);
+
+const CANCEL_GENERATION_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelGenerationButtonTooltip',
+  {
+    defaultMessage: 'Stop this process',
   }
 );
 
