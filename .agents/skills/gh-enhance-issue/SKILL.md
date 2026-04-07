@@ -1,7 +1,7 @@
 ---
 name: gh-enhance-issue
 description: Fetch a GitHub issue by number or URL and reformat it according to the Kibana bug report or feature request template. Classifies the issue type automatically, then rewrites the body and updates it via the GitHub CLI.
-user-invocable: true
+disable-model-invocation: true
 ---
 
 # Enhance GitHub Issue

@@ -1,7 +1,7 @@
 ---
 name: gh-create-issue
 description: Create a new GitHub issue (feature request or bug report) by gathering an unstructured description from the user, classifying it, filling out the appropriate Kibana template, interviewing the user to improve any weak sections, and filing the issue via the GitHub CLI.
-user-invocable: true
+disable-model-invocation: true
 ---
 
 # Create GitHub Issue
