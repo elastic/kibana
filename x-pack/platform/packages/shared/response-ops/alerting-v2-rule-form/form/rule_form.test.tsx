@@ -142,6 +142,18 @@ describe('RuleForm', () => {
       expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeInTheDocument();
     });
 
+    it('shows Rule configuration heading when includeYaml is true', () => {
+      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByText('Rule configuration')).toBeInTheDocument();
+    });
+
+    it('does not show Rule configuration heading when includeYaml is false', () => {
+      render(<RuleForm {...defaultProps} includeYaml={false} />, { wrapper: createFormWrapper() });
+
+      expect(screen.queryByText('Rule configuration')).not.toBeInTheDocument();
+    });
+
     it('starts in form mode by default', () => {
       render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
 

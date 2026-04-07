@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useRef, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
 import { SubmissionButtons } from './components/submission_buttons';
@@ -134,11 +135,30 @@ const RuleFormContent = ({
     <>
       <ErrorCallOut />
       {includeYaml && (
-        <EditModeToggle
-          editMode={editMode}
-          onChange={handleModeChange}
-          disabled={isDisabled || isSubmitting}
-        />
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          gutterSize="m"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleForm.ruleConfigurationHeading"
+                  defaultMessage="Rule configuration"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EditModeToggle
+              editMode={editMode}
+              onChange={handleModeChange}
+              disabled={isDisabled || isSubmitting}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
       <EuiSpacer size="m" />
 
