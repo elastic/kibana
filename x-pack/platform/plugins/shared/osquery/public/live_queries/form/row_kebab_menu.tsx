@@ -6,13 +6,15 @@
  */
 
 import React, { useCallback, useContext, useState, useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseContextProvider } from '../../cases/add_to_cases';
 import { AddToCaseButton } from '../../cases/add_to_cases_button';
 import { CasesAttachmentWrapperContext } from '../../shared_components/attachments/pack_queries_attachment_wrapper';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { useExportResults } from '../../results/use_export_results';
 import type { AddToTimelineHandler } from '../../types';
 
 interface RowKebabMenuProps {
@@ -27,16 +29,51 @@ interface RowKebabMenuProps {
 const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
   ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount }) => {
     const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
+    const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
     const [isOpen, setIsOpen] = useState(false);
-    const close = useCallback(() => setIsOpen(false), []);
+    const [showExportPanel, setShowExportPanel] = useState(false);
+    const close = useCallback(() => {
+      setIsOpen(false);
+      setShowExportPanel(false);
+    }, []);
     const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+
+    const { exportResults } = useExportResults({
+      actionId: row.action_id ?? '',
+      isLive: !scheduleId,
+      scheduleId,
+      executionCount,
+    });
+
+    const openExportPanel = useCallback(() => {
+      setShowExportPanel(true);
+    }, []);
+
+    const backToMainPanel = useCallback(() => {
+      setShowExportPanel(false);
+    }, []);
+
+    const handleExportNdjson = useCallback(() => {
+      close();
+      exportResults('ndjson');
+    }, [close, exportResults]);
+
+    const handleExportJson = useCallback(() => {
+      close();
+      exportResults('json');
+    }, [close, exportResults]);
+
+    const handleExportCsv = useCallback(() => {
+      close();
+      exportResults('csv');
+    }, [close, exportResults]);
 
     const kebabLabel = i18n.translate(
       'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
       { defaultMessage: 'More actions' }
     );
 
-    const menuItems = useMemo(
+    const mainMenuItems = useMemo(
       () => [
         ...(row.action_id
           ? [
@@ -66,9 +103,24 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
               />,
             ]
           : []),
+        ...(isExportEnabled && row.action_id
+          ? [
+              <EuiContextMenuItem
+                key="export"
+                icon="exportAction"
+                onClick={openExportPanel}
+                data-test-subj="osqueryExportResultsMenuItem"
+              >
+                {i18n.translate('xpack.osquery.kebab.exportResults', {
+                  defaultMessage: 'Export results',
+                })}
+              </EuiContextMenuItem>,
+            ]
+          : []),
       ],
       [
         isCasesAttachment,
+        isExportEnabled,
         row.action_id,
         actionId,
         agentIds,
@@ -76,10 +128,38 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
         scheduleId,
         executionCount,
         close,
+        openExportPanel,
       ]
     );
 
-    if (menuItems.length === 0) return null;
+    const exportMenuItems = useMemo(
+      () => [
+        <EuiContextMenuItem
+          key="export-ndjson"
+          onClick={handleExportNdjson}
+          data-test-subj="osqueryExportFormat-ndjson"
+        >
+          NDJSON
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          key="export-json"
+          onClick={handleExportJson}
+          data-test-subj="osqueryExportFormat-json"
+        >
+          JSON
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          key="export-csv"
+          onClick={handleExportCsv}
+          data-test-subj="osqueryExportFormat-csv"
+        >
+          CSV
+        </EuiContextMenuItem>,
+      ],
+      [handleExportNdjson, handleExportJson, handleExportCsv]
+    );
+
+    if (mainMenuItems.length === 0) return null;
 
     return (
       <EuiPopover
@@ -96,7 +176,18 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        {showExportPanel ? (
+          <EuiContextMenuPanel
+            size="s"
+            title={i18n.translate('xpack.osquery.kebab.exportResults', {
+              defaultMessage: 'Export results',
+            })}
+            items={exportMenuItems}
+            onClose={backToMainPanel}
+          />
+        ) : (
+          <EuiContextMenuPanel size="s" items={mainMenuItems} />
+        )}
       </EuiPopover>
     );
   }
