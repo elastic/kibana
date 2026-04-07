@@ -45,11 +45,7 @@ export const formatResearcherActionHistory = ({
         continue;
       }
 
-      const toolCallsWithReasoningArgs = action.tool_calls.map((tc) => ({
-        ...tc,
-        args: tc.reasoning ? { ...tc.args, _reasoning: tc.reasoning } : tc.args,
-      }));
-      formatted.push(createToolCallMessage(toolCallsWithReasoningArgs, action.message));
+      formatted.push(createToolCallMessage(action.tool_calls, action.message));
     }
     if (isExecuteToolAction(action)) {
       formatted.push(

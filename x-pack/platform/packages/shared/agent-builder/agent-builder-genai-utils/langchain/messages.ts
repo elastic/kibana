@@ -134,16 +134,20 @@ export const createToolResultMessage = ({
 };
 
 export const createToolCallMessage = (
-  toolCallOrCalls: ToolCall | ToolCall[],
+  toolCallOrCalls: ToolCallWithReasoning | ToolCallWithReasoning[],
   message?: string
 ): AIMessage => {
   const toolCalls = isArray(toolCallOrCalls) ? toolCallOrCalls : [toolCallOrCalls];
   return new AIMessage({
     content: message ?? '',
-    tool_calls: toolCalls.map((toolCall) => ({
-      id: toolCall.toolCallId,
-      name: toolCall.toolName,
-      args: toolCall.args,
-    })),
+    tool_calls: toolCalls.map((toolCall) => {
+      return {
+        id: toolCall.toolCallId,
+        name: toolCall.toolName,
+        args: toolCall.reasoning
+          ? { _reasoning: toolCall.reasoning, ...toolCall.args }
+          : toolCall.args,
+      };
+    }),
   });
 };
