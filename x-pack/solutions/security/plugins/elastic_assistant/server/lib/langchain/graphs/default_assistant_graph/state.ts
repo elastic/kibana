@@ -8,7 +8,7 @@
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { BaseMessage } from '@langchain/core/messages';
 import { Annotation } from '@langchain/langgraph';
-import { AgentStep, AgentAction, AgentFinish } from 'langchain/agents';
+import type { AgentStep, AgentAction, AgentFinish } from '@langchain/core/agents';
 
 export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: () => string }) => {
   const graphAnnotation = Annotation.Root({

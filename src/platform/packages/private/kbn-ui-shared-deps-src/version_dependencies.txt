@@ -1,4 +1,4 @@
-@babel/helper-plugin-utils@7.27.1
+@babel/helper-plugin-utils@7.28.6
 @babel/plugin-syntax-numeric-separator@7.10.4
 @babel/plugin-transform-numeric-separator@7.24.7
 @babel/runtime@7.27.6
@@ -6,7 +6,7 @@
 @jridgewell/resolve-uri@3.1.2
 @jridgewell/set-array@1.2.1
 @jridgewell/source-map@0.3.5
-@jridgewell/sourcemap-codec@1.4.15
+@jridgewell/sourcemap-codec@1.5.5
 @jridgewell/trace-mapping@0.3.25
 @types/eslint-scope@3.7.7
 @types/eslint@8.44.2
@@ -57,7 +57,7 @@ cssesc@3.0.0
 csstype@3.1.2
 dompurify@3.3.2
 electron-to-chromium@1.5.250
-enhanced-resolve@5.18.3
+enhanced-resolve@5.20.0
 error-stack-parser@2.0.6
 es-module-lexer@1.5.4
 escalade@3.2.0
@@ -114,7 +114,7 @@ postcss-modules-scope@3.2.0
 postcss-modules-values@4.0.0
 postcss-selector-parser@6.1.2
 postcss-value-parser@4.2.0
-postcss@8.5.6
+postcss@8.5.8
 prettier@2.8.8
 punycode@2.3.1
 react-universal-interface@0.6.2
@@ -137,7 +137,7 @@ stacktrace-gps@3.1.2
 stacktrace-js@2.0.2
 stylis@4.3.6
 supports-color@8.1.1
-tapable@2.2.1
+tapable@2.3.0
 terser-webpack-plugin@5.3.17
 terser@5.40.0
 throttle-debounce@3.0.1

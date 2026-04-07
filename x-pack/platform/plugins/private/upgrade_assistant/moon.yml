@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-deprecations-common'
   - '@kbn/core-deprecations-server'
   - '@kbn/upgrade-assistant'
+  - '@kbn/core-doc-links-browser-mocks'
 tags:
   - plugin
   - prod
