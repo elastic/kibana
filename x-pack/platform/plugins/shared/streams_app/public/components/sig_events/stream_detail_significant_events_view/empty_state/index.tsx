@@ -17,12 +17,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import noSigEventsImage from './no_sig_events.svg';
 
-const ML_MODEL_SETTINGS_PATH = '/ml/model_settings';
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export function EmptyState({
@@ -38,14 +38,25 @@ export function EmptyState({
   onCancelGenerationClick: () => void;
   onGenerateSuggestionsClick: () => void;
 }) {
-  const { core } = useKibana();
+  const {
+    dependencies: {
+      start: { share },
+    },
+    core,
+  } = useKibana();
   const defaultConnector = core.uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
 
   const isDefaultAiConnectorMissing =
     !defaultConnector || defaultConnector === NO_DEFAULT_CONNECTOR;
-  const genAiSettingsUrl = core.application.getUrlForApp('management', {
-    path: ML_MODEL_SETTINGS_PATH,
-  });
+  const genAiSettingsUrl = useMemo(() => {
+    const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
+    return (
+      managementLocator?.getRedirectUrl({
+        sectionId: 'modelManagement',
+        appId: 'model_settings',
+      }) ?? ''
+    );
+  }, [share.url.locators]);
 
   return (
     <EuiEmptyPrompt
