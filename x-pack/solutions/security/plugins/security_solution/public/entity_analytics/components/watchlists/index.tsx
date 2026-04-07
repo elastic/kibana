@@ -51,7 +51,7 @@ export const Watchlists = () => {
             title={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.watchlists.missingPrivileges.title"
-                defaultMessage="Insufficient privileges to view the watchlists management table"
+                defaultMessage="Insufficient privileges to view Watchlists Management"
               />
             }
           />

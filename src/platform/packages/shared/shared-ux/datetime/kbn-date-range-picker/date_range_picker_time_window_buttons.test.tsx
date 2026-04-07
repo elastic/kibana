@@ -24,6 +24,8 @@ function renderPicker(overrides: Partial<DateRangePickerProps> = {}) {
     defaultValue: '-15m to now',
     onChange,
     showTimeWindowButtons: true,
+    settings: { roundRelativeTime: false },
+    onSettingsChange: () => {},
     ...overrides,
   };
   const result = renderWithEuiTheme(<DateRangePicker {...props} />);
@@ -81,6 +83,18 @@ describe('TimeWindowButtons', () => {
       showTimeWindowButtons: { showShiftArrows: false, showZoomOut: false, showZoomIn: false },
     });
     expect(screen.queryByTestId('dateRangePickerTimeWindowButtons')).not.toBeInTheDocument();
+  });
+
+  describe('disabled prop', () => {
+    it('disables all time window buttons when disabled is true', () => {
+      renderPicker({ disabled: true });
+
+      const group = screen.getByTestId('dateRangePickerTimeWindowButtons');
+      const buttons = group.querySelectorAll('button');
+      buttons.forEach((button) => {
+        expect(button).toBeDisabled();
+      });
+    });
   });
 
   describe('time shift', () => {

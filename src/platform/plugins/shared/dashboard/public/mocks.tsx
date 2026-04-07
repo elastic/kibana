@@ -12,6 +12,7 @@ import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 import type { DashboardReadResponseBody } from '../server';
+import { DEFAULT_DASHBOARD_STATE } from './dashboard_api/default_dashboard_state';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -93,28 +94,18 @@ export function buildMockDashboardApi({
 
 export function getSampleDashboardState(overrides?: Partial<DashboardState>): DashboardState {
   return {
-    // options
-    options: {
-      use_margins: true,
-      sync_colors: false,
-      sync_cursor: true,
-      sync_tooltips: false,
-      hide_panel_titles: false,
-      hide_panel_borders: false,
-    },
-
+    ...DEFAULT_DASHBOARD_STATE,
     tags: [],
     filters: [],
     title: 'My Dashboard',
     query: {
-      language: 'kuery',
-      query: 'hi',
+      language: 'kql',
+      expression: 'hi',
     },
     time_range: {
       to: 'now',
       from: 'now-15m',
     },
-    panels: [],
     ...overrides,
   };
 }

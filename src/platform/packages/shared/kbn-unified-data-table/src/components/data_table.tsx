@@ -132,6 +132,18 @@ export enum DataLoadingState {
   loaded = 'loaded',
 }
 
+export type RenderDocumentViewCallback = (
+  hit: DataTableRecord,
+  displayedRows: DataTableRecord[],
+  displayedColumns: string[],
+  columnsMeta?: DataTableColumnsMeta
+) => JSX.Element | undefined;
+
+export interface RenderDocumentViewMeta {
+  displayedRows: DataTableRecord[];
+  displayedColumns: string[];
+}
+
 /**
  * Unified Data Table props
  */
@@ -325,15 +337,17 @@ interface InternalUnifiedDataTableProps {
     data: DataPublicPluginStart;
   };
   /**
-   * Callback to render DocumentView when the document is expanded
+   * Accepts one of two types:
+   * - Callback to render the document view when a document is expanded
+   * - 'external' const to indicate the consumer will handle rendering
+   *   the doc view themselves when a document is expanded
    */
-  renderDocumentView?: (
-    hit: DataTableRecord,
-    displayedRows: DataTableRecord[],
-    displayedColumns: string[],
-    expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
-    columnsMeta?: DataTableColumnsMeta
-  ) => JSX.Element | undefined;
+  renderDocumentView?: RenderDocumentViewCallback | 'external';
+  /**
+   * Callback to set associated metadata when rendering the document view,
+   * only used when {@link renderDocumentView} is set to `external`
+   */
+  setRenderDocumentViewMeta?: (meta: RenderDocumentViewMeta | undefined) => void;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
@@ -546,6 +560,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       totalHits,
       onFetchMoreRecords,
       renderDocumentView,
+      setRenderDocumentViewMeta,
       setExpandedDoc,
       expandedDoc,
       configRowHeight,
@@ -737,6 +752,40 @@ const InternalUnifiedDataTable = React.forwardRef<
       currentPageSize,
       currentPageIndex,
       changeCurrentPageIndex,
+    ]);
+
+    // When the document view is rendered externally, we need to provide some metadata
+    // to the consumer to allow them to properly render the doc viewer component
+    const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();
+
+    useEffect(() => {
+      if (renderDocumentView !== 'external' || !setRenderDocumentViewMeta) {
+        prevRenderDocumentViewMeta.current = undefined;
+        return;
+      }
+
+      if (!expandedDoc) {
+        prevRenderDocumentViewMeta.current = undefined;
+        setRenderDocumentViewMeta(undefined);
+        return;
+      }
+
+      const prevMeta = prevRenderDocumentViewMeta.current;
+      const metaChanged =
+        prevMeta?.displayedColumns !== displayedColumns ||
+        prevMeta?.displayedRows !== displayedRows;
+
+      if (metaChanged) {
+        const nextMeta: RenderDocumentViewMeta = { displayedColumns, displayedRows };
+        setRenderDocumentViewMeta(nextMeta);
+        prevRenderDocumentViewMeta.current = nextMeta;
+      }
+    }, [
+      displayedColumns,
+      displayedRows,
+      expandedDoc,
+      renderDocumentView,
+      setRenderDocumentViewMeta,
     ]);
 
     const unifiedDataTableContextValue = useMemo<DataTableContext>(
@@ -1316,7 +1365,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           css={styles.loadingAndEmpty}
           data-test-subj="unifiedDataTableLoading"
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" textAlign="center">
             <EuiLoadingSpinner />
             <EuiSpacer size="s" />
             <FormattedMessage
@@ -1340,7 +1389,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           data-document-number={0}
         >
           <EuiText size="xs" color="subdued" textAlign="center">
-            <EuiIcon type="discoverApp" size="m" color="subdued" />
+            <EuiIcon type="discoverApp" size="m" color="subdued" aria-hidden="true" />
             <EuiSpacer size="s" />
             <FormattedMessage
               id="unifiedDataTable.noResultsFound"
@@ -1455,13 +1504,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
           {canSetExpandedDoc &&
             expandedDoc &&
-            renderDocumentView!(
-              expandedDoc,
-              displayedRows,
-              displayedColumns,
-              setExpandedDoc!,
-              columnsMeta
-            )}
+            typeof renderDocumentView === 'function' &&
+            renderDocumentView(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
         </span>
       </UnifiedDataTableContext.Provider>
     );
@@ -1572,6 +1616,9 @@ const componentStyles = {
         {
           whiteSpace: 'pre-wrap',
         },
+      '.euiDataGrid__pagination': {
+        paddingTop: 0,
+      },
     }),
   dataTable: css({
     flexGrow: 1,

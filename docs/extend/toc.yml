@@ -70,6 +70,7 @@ toc:
           - file: scout/global-setup-hook.md
           - file: scout/deployment-tags.md
           - file: scout/skip-tests.md
+          - file: scout/feature-flags.md
       - file: scout/ui-testing.md
         children:
           - file: scout/write-ui-tests.md

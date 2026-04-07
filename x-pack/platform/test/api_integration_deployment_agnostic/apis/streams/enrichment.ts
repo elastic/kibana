@@ -52,6 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },

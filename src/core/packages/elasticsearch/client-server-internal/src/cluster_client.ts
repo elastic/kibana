@@ -24,9 +24,6 @@ import type {
   IScopedClusterClient,
   ElasticsearchClientConfig,
   AsScopedOptions,
-  OriginOnlyRouting,
-  SpaceNPRERouting,
-  AllProjectsRouting,
 } from '@kbn/core-elasticsearch-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
@@ -45,15 +42,31 @@ import {
 import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 
+export type { OnRequestHandler };
+
 const noop = () => undefined;
 
+interface CommonFactoryRoutingOpts {
+  logger: Logger;
+  request?: ScopeableUrlRequest;
+}
+
+interface ScopedFactoryRoutingOpts extends CommonFactoryRoutingOpts {
+  projectRouting: 'space';
+  request: ScopeableUrlRequest;
+}
+
+/**
+ * Union of routing options passed to {@link OnRequestHandlerFactory}.
+ * The scoped variant carries the request so the factory can extract the space NPRE.
+ * @internal
+ */
+export type FactoryRoutingOpts = CommonFactoryRoutingOpts | ScopedFactoryRoutingOpts;
 /**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
  */
-export type OnRequestHandlerFactory = (opts: {
-  projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
-}) => OnRequestHandler;
+export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts) => OnRequestHandler;
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
@@ -62,6 +75,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly security?: InternalSecurityServiceSetup;
   private readonly rootScopedClient: Client;
   private readonly kibanaVersion: string;
+  private readonly logger: Logger;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private readonly onRequestHandlerFactory: OnRequestHandlerFactory;
@@ -96,11 +110,12 @@ export class ClusterClient implements ICustomClusterClient {
     this.authHeaders = authHeaders;
     this.security = security;
     this.kibanaVersion = kibanaVersion;
+    this.logger = logger;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
     this.onRequestHandlerFactory = onRequestHandlerFactory;
 
-    const internalUserOnRequest = onRequestHandlerFactory({ projectRouting: 'origin-only' });
+    const internalUserOnRequest = onRequestHandlerFactory({ logger });
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -121,25 +136,20 @@ export class ClusterClient implements ICustomClusterClient {
     });
   }
 
-  asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
-  asScoped(
-    request: ScopeableRequest,
-    opts?: OriginOnlyRouting | AllProjectsRouting
-  ): IScopedClusterClient;
-  asScoped(request: ScopeableRequest, opts: AsScopedOptions = { projectRouting: 'origin-only' }) {
+  asScoped(request: ScopeableRequest): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts?: AsScopedOptions): IScopedClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
-      const { projectRouting } = opts;
-
+      const factoryOpts: FactoryRoutingOpts = opts
+        ? { ...opts, logger: this.logger, request }
+        : { logger: this.logger, request };
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory(
-          projectRouting === 'space'
-            ? { projectRouting: request as ScopeableUrlRequest }
-            : { projectRouting }
-        ),
+        onRequest: this.onRequestHandlerFactory(factoryOpts),
+        logger: this.logger,
       });
 
       // TODO: callers who pass { Transport: CustomTransport } to child() bypass our

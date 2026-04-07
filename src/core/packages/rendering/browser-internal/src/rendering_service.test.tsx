@@ -49,6 +49,22 @@ jest.mock('@kbn/core-chrome-browser-components', () => ({
   ChromelessHeader: () => <div>Chromeless!</div>,
   AppMenuBar: () => <div>App menu!</div>,
   Sidebar: () => <div>Sidebar!</div>,
+  useHasAppMenu: () => false,
+}));
+
+const mockChromeVisible$ = new BehaviorSubject(false);
+jest.mock('@kbn/core-chrome-browser-hooks', () => {
+  const { useObservable } = jest.requireActual('@kbn/use-observable');
+  return {
+    useChromeStyle: () => 'classic',
+    useIsChromeVisible: () => useObservable(mockChromeVisible$, mockChromeVisible$.getValue()),
+    useSidebarWidth: () => 0,
+    useSideNavWidth: () => 0,
+  };
+});
+jest.mock('@kbn/core-chrome-browser-hooks/internal', () => ({
+  useGlobalFooter: () => null,
+  useHasHeaderBanner: () => false,
 }));
 jest.mock('@elastic/eui', () => {
   const actualEui = jest.requireActual('@elastic/eui');
@@ -67,6 +83,9 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { RenderingService } from './rendering_service';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 
@@ -83,6 +102,16 @@ describe('RenderingService', () => {
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
   let coreEnv: ReturnType<typeof coreContextMock.create>['env'];
+
+  const getRenderCoreDeps = () => ({
+    chrome,
+    application,
+    overlays,
+    featureFlags,
+    http: httpServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
+    customBranding: customBrandingServiceMock.createStartContract(),
+  });
 
   beforeEach(() => {
     analytics = analyticsServiceMock.createAnalyticsServiceStart();
@@ -112,6 +141,7 @@ describe('RenderingService', () => {
     });
     mockRoots.length = 0;
     mockLegacyRender.mockClear();
+    mockChromeVisible$.next(false);
   });
 
   describe('renderCore', () => {
@@ -137,7 +167,7 @@ describe('RenderingService', () => {
     it('renders application service into provided DOM element', async () => {
       const service = startService();
       await act(async () => {
-        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
       });
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
         <div
@@ -155,20 +185,19 @@ describe('RenderingService', () => {
     });
 
     it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', async () => {
-      const isVisible$ = new BehaviorSubject(true);
-      chrome.getIsVisible$.mockReturnValue(isVisible$);
+      mockChromeVisible$.next(true);
       const service = startService();
       await act(async () => {
-        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
       });
 
       const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
       expect(appWrapper.className).toEqual('kbnAppWrapper');
 
-      act(() => isVisible$.next(false));
+      act(() => mockChromeVisible$.next(false));
       expect(appWrapper.className).toEqual('kbnAppWrapper kbnAppWrapper--hiddenChrome');
 
-      act(() => isVisible$.next(true));
+      act(() => mockChromeVisible$.next(true));
       expect(appWrapper.className).toEqual('kbnAppWrapper');
     });
 
@@ -180,7 +209,7 @@ describe('RenderingService', () => {
     it('renders the banner UI', async () => {
       const service = startService();
       await act(async () => {
-        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
       });
       expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
                 <div
@@ -204,7 +233,7 @@ describe('RenderingService', () => {
 
       const service = startService({ isCoreRenderingInReactConcurrentMode: true });
       await act(async () => {
-        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
       });
 
       expect(createRoot).toHaveBeenCalledWith(targetDomElement);
@@ -217,7 +246,7 @@ describe('RenderingService', () => {
 
       const service = startService({ isCoreRenderingInReactConcurrentMode: false });
       await act(async () => {
-        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
       });
 
       expect(mockLegacyRender).toHaveBeenCalledWith(expect.anything(), targetDomElement);

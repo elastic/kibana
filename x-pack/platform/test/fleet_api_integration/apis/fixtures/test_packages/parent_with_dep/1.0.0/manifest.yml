@@ -1,0 +1,27 @@
+format_version: 1.0.0
+name: parent_with_dep
+title: Parent package with dependency for integration tests
+description: Package that declares dep_package as a dependency to test resolve-dependencies install flow
+version: 1.0.0
+categories: []
+release: ga
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+requires:
+  content:
+    - package: dep_package
+      version: "1.0.0"
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

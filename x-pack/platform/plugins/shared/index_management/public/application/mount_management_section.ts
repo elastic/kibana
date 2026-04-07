@@ -91,6 +91,7 @@ export function getIndexManagementDependencies({
       isFleetEnabled,
       share: startDependencies.share,
       cloud,
+      cloudConnect: startDependencies.cloudConnect,
       console: startDependencies.console,
       ml: startDependencies.ml,
       streams: startDependencies.streams,

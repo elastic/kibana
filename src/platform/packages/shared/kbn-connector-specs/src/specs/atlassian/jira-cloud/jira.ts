@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../../..';
-
 const buildBaseUrl = (ctx: ActionContext) =>
   `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
 
@@ -19,10 +18,11 @@ export const JiraConnector: ConnectorSpec = {
     id: '.jira-cloud',
     displayName: 'Jira Cloud',
     description: i18n.translate('core.kibanaConnectorSpecs.jira.metadata.description', {
-      defaultMessage: 'Connect to Jira to pull data from your project.',
+      defaultMessage: 'Search issues, browse projects, and look up users in Jira Cloud',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: [

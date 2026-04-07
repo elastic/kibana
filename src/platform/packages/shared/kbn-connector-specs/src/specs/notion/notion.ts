@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Notion from './types';
-
 export const NotionConnector: ConnectorSpec = {
   metadata: {
     id: '.notion',
@@ -19,11 +18,26 @@ export const NotionConnector: ConnectorSpec = {
       defaultMessage: 'Explore content and databases in Notion',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
+          tokenUrl: 'https://api.notion.com/v1/oauth/token',
+        },
+      },
+    ],
     headers: {
       'Notion-Version': '2025-09-03',
     },

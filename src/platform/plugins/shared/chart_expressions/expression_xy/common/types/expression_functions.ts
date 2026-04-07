@@ -216,6 +216,11 @@ export interface LegendConfig {
   maxLines?: number;
 
   /**
+   * Maximum label width in pixels for "list" layout truncation
+   */
+  maxPixels?: number;
+
+  /**
    * Flag whether the legend items are truncated or not
    */
   shouldTruncate?: boolean;

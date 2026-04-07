@@ -22,10 +22,12 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_EXCLUDED_AT,
   FEATURE_ID,
   FEATURE_PROPERTIES,
   FEATURE_SUBTYPE,
   FEATURE_FILTER,
+  FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 
 export const storedFeatureSchema = z.object({
@@ -44,8 +46,10 @@ export const storedFeatureSchema = z.object({
   [FEATURE_TAGS]: z.array(z.string()).optional(),
   [FEATURE_META]: z.record(z.string(), z.any()).optional(),
   [FEATURE_EXPIRES_AT]: z.string().optional(),
+  [FEATURE_EXCLUDED_AT]: z.string().optional(),
   [FEATURE_TITLE]: z.string().optional(),
   [FEATURE_FILTER]: conditionSchema.optional(),
+  [FEATURE_SEARCH_EMBEDDING]: z.string().optional(),
 });
 
 export type StoredFeature = z.infer<typeof storedFeatureSchema>;

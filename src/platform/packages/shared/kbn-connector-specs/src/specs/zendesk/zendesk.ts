@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-
 const buildBaseUrl = (ctx: ActionContext): string =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
 
@@ -19,11 +18,11 @@ export const ZendeskConnector: ConnectorSpec = {
     id: '.zendesk',
     displayName: 'Zendesk',
     description: i18n.translate('core.kibanaConnectorSpecs.zendesk.metadata.description', {
-      defaultMessage:
-        'Connect to Zendesk to search and retrieve tickets, users, and Help Center content.',
+      defaultMessage: 'Search and retrieve tickets, users, and Help Center content in Zendesk',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

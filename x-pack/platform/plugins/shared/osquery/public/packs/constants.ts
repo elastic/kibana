@@ -6,3 +6,4 @@
  */
 
 export const PACKS_ID = 'packList';
+export const PACK_USERS_ID = 'packUsers';

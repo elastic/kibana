@@ -30,7 +30,6 @@ Array [
       fallback={<EuiLoadingSpinner />}
     >
       <UNDEFINED
-        attachmentId="basic-comment-id"
         caseData={
           Object {
             "id": "basic-case-id",
@@ -38,9 +37,11 @@ Array [
           }
         }
         foo="bar"
+        savedObjectId="basic-comment-id"
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event
@@ -126,7 +127,6 @@ Array [
       fallback={<EuiLoadingSpinner />}
     >
       <UNDEFINED
-        attachmentId="basic-comment-id"
         caseData={
           Object {
             "id": "basic-case-id",
@@ -134,9 +134,11 @@ Array [
           }
         }
         foo="bar"
+        savedObjectId="basic-comment-id"
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event
@@ -209,7 +211,6 @@ Array [
       fallback={<EuiLoadingSpinner />}
     >
       <UNDEFINED
-        attachmentId="basic-comment-id"
         caseData={
           Object {
             "id": "basic-case-id",
@@ -217,9 +218,11 @@ Array [
           }
         }
         foo="bar"
+        savedObjectId="basic-comment-id"
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event

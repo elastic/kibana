@@ -20,6 +20,7 @@ export const enableStreamsRoute = createServerRoute({
     summary: 'Enable streams',
     description: 'Enables wired streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -54,6 +55,7 @@ export const disableStreamsRoute = createServerRoute({
     description:
       'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },

@@ -535,7 +535,7 @@ describe('FeatureRegistry', () => {
         .toThrowErrorMatchingInlineSnapshot(`
         "[privileges]: types that failed validation:
         - [privileges.0]: expected value to equal [null]
-        - [privileges.1.foo]: definition for this key is missing"
+        - [privileges.1.foo]: Additional properties are not allowed ('foo' was unexpected)"
       `);
     });
 
@@ -887,7 +887,6 @@ describe('FeatureRegistry', () => {
                     { ruleTypeId: 'foo', consumers: ['test-feature'] },
                     { ruleTypeId: 'bar', consumers: ['test-feature'] },
                   ],
-                  read: [{ ruleTypeId: 'baz', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {
@@ -987,7 +986,7 @@ describe('FeatureRegistry', () => {
             all: {
               alerting: {
                 rule: {
-                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                  manual_run: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {
@@ -1000,7 +999,7 @@ describe('FeatureRegistry', () => {
             read: {
               alerting: {
                 rule: {
-                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                  read: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {

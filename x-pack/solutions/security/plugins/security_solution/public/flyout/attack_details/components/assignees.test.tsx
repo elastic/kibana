@@ -76,6 +76,17 @@ const mockRefetch = jest.fn();
 const mockInvalidateFindAttackDiscoveries = jest.fn();
 
 const defaultContext = {
+  attack: {
+    id: 'attack-123',
+    alertIds: [],
+    connectorId: 'connector-1',
+    connectorName: 'Test Connector',
+    detailsMarkdown: 'Details',
+    generationUuid: 'gen-uuid-123',
+    summaryMarkdown: 'Summary',
+    timestamp: '2024-01-01T00:00:00Z',
+    title: 'Test Attack',
+  },
   attackId: 'attack-123',
   refetch: mockRefetch,
   indexName: 'test-index',
@@ -84,6 +95,7 @@ const defaultContext = {
   getFieldsData: jest.fn(),
   dataFormattedForFieldBrowser: [],
   scopeId: 'test-scope-id',
+  isPreviewMode: false,
 } as ReturnType<typeof useAttackDetailsContext>;
 
 const defaultHeaderData = {
@@ -133,6 +145,7 @@ describe('Assignees', () => {
             assignees: ['uid-1'],
           },
         ],
+        telemetrySource: 'attacks_page_flyout_header',
       })
     );
     const call = mockUseAttackAssigneesContextMenuItems.mock.calls[0][0];

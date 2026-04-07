@@ -19,6 +19,8 @@ interface ViewResultsInDiscoverActionProps {
   endDate?: string;
   startDate?: string;
   mode?: string;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
@@ -26,6 +28,8 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
+  scheduleId,
+  executionCount,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
@@ -38,23 +42,62 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     const getDiscoverUrl = async () => {
       if (!locator || !logsDataView) return;
 
+      const isScheduled = !!scheduleId && executionCount != null;
+
+      const filters = isScheduled
+        ? [
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'schedule_id',
+                params: { query: scheduleId },
+              },
+              query: { match_phrase: { schedule_id: scheduleId } },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'osquery_meta.schedule_execution_count',
+                params: { query: executionCount },
+              },
+              query: {
+                match_phrase: {
+                  'osquery_meta.schedule_execution_count': executionCount,
+                },
+              },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+          ]
+        : [
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'action_id',
+                params: { query: actionId },
+              },
+              query: { match_phrase: { action_id: actionId } },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+          ];
+
+      const defaultFrom = isScheduled ? 'now-7d' : 'now-1d';
+
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,
-        filters: [
-          {
-            meta: {
-              index: logsDataView.id,
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'action_id',
-              params: { query: actionId },
-            },
-            query: { match_phrase: { action_id: actionId } },
-            $state: { store: FilterStateStore.APP_STATE },
-          },
-        ],
+        filters,
         refreshInterval: {
           pause: true,
           value: 0,
@@ -68,7 +111,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
               }
             : {
                 to: 'now',
-                from: 'now-1d',
+                from: defaultFrom,
                 mode: 'relative',
               },
       });
@@ -76,7 +119,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, endDate, startDate, locator, logsDataView]);
+  }, [actionId, endDate, executionCount, scheduleId, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;

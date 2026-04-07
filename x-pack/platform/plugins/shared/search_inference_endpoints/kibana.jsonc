@@ -15,13 +15,14 @@
     "requiredPlugins": [
       "actions",
       "features",
+      "inference",
       "licensing",
       "management",
-      "ml",
       "share",
     ],
     "optionalPlugins": [
       "cloud",
+      "cloudConnect",
       "console",
       "serverless",
     ],

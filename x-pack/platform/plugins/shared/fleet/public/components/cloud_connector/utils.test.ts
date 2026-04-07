@@ -15,6 +15,7 @@ import {
   isCloudConnectorReusableEnabled,
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
+  isGcpCloudConnectorVars,
   getCloudConnectorRemoteRoleTemplate,
   getKibanaComponentId,
   getDeploymentIdFromUrl,
@@ -24,7 +25,7 @@ import {
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
-import { AWS_PROVIDER, AZURE_PROVIDER } from './constants';
+import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
 describe('updateInputVarsWithCredentials - AWS support', () => {
   let mockInputVars: PackagePolicyConfigRecord;
@@ -112,7 +113,6 @@ describe('updateInputVarsWithCredentials - AWS support', () => {
   it('should handle partial inputVars (missing some fields)', () => {
     const partialInputVars: PackagePolicyConfigRecord = {
       role_arn: { value: 'arn:aws:iam::123456789012:role/OriginalRole' },
-      // Missing other fields
     };
 
     const credentials: CloudConnectorCredentials = {
@@ -123,7 +123,6 @@ describe('updateInputVarsWithCredentials - AWS support', () => {
     const result = updateInputVarsWithCredentials(partialInputVars, credentials);
 
     expect(result?.role_arn?.value).toBe('arn:aws:iam::123456789012:role/UpdatedRole');
-    // Should not crash when fields are missing
     expect(result).toEqual(
       expect.objectContaining({
         role_arn: { value: 'arn:aws:iam::123456789012:role/UpdatedRole' },
@@ -134,7 +133,6 @@ describe('updateInputVarsWithCredentials - AWS support', () => {
   it('should handle undefined credentials', () => {
     const result = updateInputVarsWithCredentials(mockInputVars, undefined);
 
-    // Should clear all credential fields when credentials is undefined
     expect(result?.role_arn).toEqual({ value: undefined });
     expect(result?.external_id).toEqual({ value: undefined });
     expect(result?.['aws.role_arn']).toEqual({ value: undefined });
@@ -368,8 +366,41 @@ describe('isCloudConnectorReusableEnabled - Azure provider', () => {
   });
 
   it('should return false for unknown providers', () => {
-    expect(isCloudConnectorReusableEnabled('gcp', '9.9.9', 'cspm')).toBe(false);
     expect(isCloudConnectorReusableEnabled('unknown', '1.0.0', 'asset_inventory')).toBe(false);
+  });
+});
+
+describe('isCloudConnectorReusableEnabled - GCP provider', () => {
+  it('should return true for GCP CSPM when version meets requirement', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.3.0-preview06', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.4.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'cspm')).toBe(true);
+  });
+
+  it('should return false for GCP CSPM when version below requirement', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.3.0-preview05', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.2.0', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '2.0.0', 'cspm')).toBe(false);
+  });
+
+  it('should return true for GCP asset_inventory when version meets requirement', () => {
+    expect(
+      isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.5.0-preview04', 'asset_inventory')
+    ).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.6.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '2.0.0', 'asset_inventory')).toBe(true);
+  });
+
+  it('should return false for GCP asset_inventory when version below requirement', () => {
+    expect(
+      isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.5.0-preview03', 'asset_inventory')
+    ).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.4.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.0.0', 'asset_inventory')).toBe(false);
+  });
+
+  it('should return false for GCP with unknown template names', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'unknown_template')).toBe(false);
   });
 });
 
@@ -439,14 +470,94 @@ describe('Cloud Connector Type Guards', () => {
       expect(isAzureCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
     });
   });
+
+  describe('isGcpCloudConnectorVars', () => {
+    it('should return true for GCP cloud connector vars with gcp provider', () => {
+      const gcpVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(gcpVars, GCP_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for GCP cloud connector vars with non-gcp provider', () => {
+      const gcpVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(gcpVars, AWS_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for AWS cloud connector vars', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isGcpCloudConnectorVars(awsVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for Azure cloud connector vars', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
+        client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
+        azure_credentials_cloud_connector_id: {
+          value: 'connector-id',
+          type: 'text',
+        },
+      };
+
+      expect(isGcpCloudConnectorVars(azureVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false when missing service_account', () => {
+      const incompleteVars = {
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(incompleteVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false when missing audience', () => {
+      const incompleteVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(incompleteVars, GCP_PROVIDER)).toBe(false);
+    });
+  });
 });
 
 describe('getCloudConnectorRemoteRoleTemplate', () => {
-  // Cloud setup for testing - ESS deployment
   const mockCloudSetup = {
     isCloudEnabled: true,
-    // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-    // Decodes to: 'endpoint$deployment$kibana-component-id'
     cloudId: 'cluster:ZW5kcG9pbnQkZGVwbG95bWVudCRraWJhbmEtY29tcG9uZW50LWlk',
     baseUrl: 'https://elastic.co',
     deploymentUrl: 'https://cloud.elastic.co/deployments/deployment-123/kibana',
@@ -456,7 +567,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
     isServerlessEnabled: false,
   } as CloudSetup;
 
-  // Serverless cloud setup
   const mockServerlessCloudSetup = {
     isCloudEnabled: false,
     isServerlessEnabled: true,
@@ -544,7 +654,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
     it('should handle complex cloud ID with base64 encoding', () => {
       const complexCloudSetup = {
         ...mockCloudSetup,
-        // Decodes to: 'eu-west-1.aws.found.io$deployment-complex$complex-kibana-id'
         cloudId:
           'production:ZXUtd2VzdC0xLmF3cy5mb3VuZC5pbyRkZXBsb3ltZW50LWNvbXBsZXgkY29tcGxleC1raWJhbmEtaWQ=',
       } as CloudSetup;
@@ -634,7 +743,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
     it('should return undefined when cloud ID has missing kibana component', () => {
       const invalidCloudIdSetup = {
         ...mockCloudSetup,
-        // Decodes to: 'endpoint$deployment' (no third part)
         cloudId: 'cluster:ZW5kcG9pbnQkZGVwbG95bWVudA==',
       } as CloudSetup;
 
@@ -666,7 +774,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
 describe('getKibanaComponentId', () => {
   it('should extract kibana component ID from valid cloudId', () => {
-    // cloudId format: name:base64(host$kibana-component-id$es-component-id)
     const cloudId = 'test:dGVzdC1ob3N0JGtpYmFuYS1jb21wb25lbnQtaWQkZXMtY29tcG9uZW50LWlk';
     const result = getKibanaComponentId(cloudId);
     expect(result).toBe('es-component-id');
@@ -696,7 +803,6 @@ describe('getKibanaComponentId', () => {
   });
 
   it('should return undefined when decoded value does not have expected format', () => {
-    // Base64 encode a string without $ separators
     const encodedValue = btoa('no-dollar-signs');
     const cloudId = `test:${encodedValue}`;
     const result = getKibanaComponentId(cloudId);
@@ -704,7 +810,6 @@ describe('getKibanaComponentId', () => {
   });
 
   it('should handle cloudId with only one $ separator', () => {
-    // Base64 encode a string with only one $ separator
     const encodedValue = btoa('host$component');
     const cloudId = `test:${encodedValue}`;
     const result = getKibanaComponentId(cloudId);

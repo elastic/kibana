@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import type { DefendInsightsCombinedPrompts } from '.';
@@ -25,7 +23,6 @@ jest.mock('./policy_response_failure', () => ({
 
 describe('getDefendInsightsPrompt', () => {
   const mockArgs = {
-    actionsClient: {} as unknown as PublicMethodsOf<ActionsClient>,
     connector: undefined,
     connectorId: 'mock-connector-id',
     model: 'mock-model',

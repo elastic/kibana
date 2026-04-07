@@ -93,11 +93,11 @@ export const Zoom: ConnectorSpec = {
     id: '.zoom',
     displayName: 'Zoom',
     description: i18n.translate('core.kibanaConnectorSpecs.zoom.metadata.description', {
-      defaultMessage:
-        'Kibana Stack Connector for Zoom — access meetings, recordings, transcripts, and participants.',
+      defaultMessage: 'Access meetings, recordings, transcripts, and participants in Zoom',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -118,6 +118,15 @@ export const Zoom: ConnectorSpec = {
               }),
             },
           },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://zoom.us/oauth/authorize',
+          tokenUrl: 'https://zoom.us/oauth/token',
+          scope:
+            'user:read:user meeting:read:meeting meeting:read:list_meetings meeting:read:past_meeting meeting:read:list_past_participants meeting:read:list_registrants cloud_recording:read:list_recording_files cloud_recording:read:list_user_recordings',
         },
       },
     ],

@@ -17,7 +17,7 @@
  *    - DB span with `span.destination.service.resource` (dependency link)
  *      → 1 APM error + 1 correlated error log
  *    - Internal span with span links
- *      → 3 correlated info logs (non-error)
+ *      → 1 APM error + 3 correlated info logs
  *
  * 2. Minimal trace ("GET /health") — transaction + DB span only
  *    - No errors, no logs, no span links
@@ -37,10 +37,10 @@ import type {
   SynthtraceGenerator,
 } from '@kbn/synthtrace-client';
 import { apm, log, timerange } from '@kbn/synthtrace-client';
-import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from '../constants';
+import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from '../constants';
 
 const FRONTEND_SERVICE = RICH_TRACE.SERVICE_NAME;
-const BACKEND_SERVICE = 'synth-traces-backend';
+const BACKEND_SERVICE = PRODUCER_TRACE.SERVICE_NAME;
 const ENVIRONMENT = 'production';
 
 interface TraceCorrelationIds {
@@ -78,7 +78,7 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
           .children(
             backend
               .span({
-                spanName: 'Publish to kafka/orders',
+                spanName: PRODUCER_TRACE.KAFKA_SPAN_NAME,
                 spanType: 'messaging',
                 spanSubtype: 'kafka',
               })
@@ -176,25 +176,26 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
     return error.timestamp(timestamp).serialize()[0];
   };
 
-  // 2 errors on "Process order item" span (which also has span links), 1 error on DB span
+  // 2 errors on transaction, 1 error on DB span, 1 error on process-order span
   const errorEvents: ApmFields[] = [
-    createError(
-      RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR,
-      'DatabaseError',
-      correlationIds.processOrderSpanId,
-      from + 320
-    ),
+    createError(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR, 'DatabaseError', transactionId, from + 100),
     createError(
       RICH_TRACE.ERRORS.TRANSACTION_VALIDATION_ERROR,
       'ValidationError',
-      correlationIds.processOrderSpanId,
-      from + 330
+      transactionId,
+      from + 200
     ),
     createError(
       RICH_TRACE.ERRORS.DB_SPAN_TIMEOUT,
       'QueryTimeoutError',
       correlationIds.dbSpanId,
       from + 310
+    ),
+    createError(
+      RICH_TRACE.ERRORS.PROCESS_ORDER_FAILURE,
+      'InventoryError',
+      correlationIds.processOrderSpanId,
+      from + 320
     ),
   ];
 
@@ -342,4 +343,61 @@ export function traceCorrelatedLogs({
         .defaults({ 'trace.id': traceId, 'span.id': processOrderSpanId })
         .timestamp(timestamp + 900),
     ]);
+}
+
+/**
+ * Generates a trace with enough spans to push the scroll target below the
+ * visible fold in the full-screen waterfall flyout, so the scroll-to-highlighted
+ * behaviour can be validated end-to-end.
+ *
+ * Structure: root transaction + 19 filler spans + 1 named scroll target (all siblings).
+ */
+export function deepTrace({
+  from,
+  to,
+}: {
+  from: number;
+  to: number;
+}): SynthtraceGenerator<ApmFields> {
+  const frontend = apm
+    .service({ name: FRONTEND_SERVICE, environment: 'production', agentName: 'nodejs' })
+    .instance('frontend-1');
+
+  const events = Array.from(
+    timerange(from, to)
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) => {
+        const fillerSpans = Array.from({ length: 19 }, (_, i) =>
+          frontend
+            .span({ spanName: `step-${i + 1}`, spanType: 'app', spanSubtype: 'internal' })
+            .timestamp(timestamp + 10 + i * 20)
+            .duration(10)
+            .success()
+        );
+
+        const scrollTarget = frontend
+          .span({
+            spanName: DEEP_TRACE.SCROLL_TARGET_SPAN_NAME,
+            spanType: 'app',
+            spanSubtype: 'internal',
+          })
+          .timestamp(timestamp + 400)
+          .duration(10)
+          .success();
+
+        return frontend
+          .transaction({ transactionName: DEEP_TRACE.TRANSACTION_NAME })
+          .timestamp(timestamp)
+          .duration(500)
+          .success()
+          .children(...fillerSpans, scrollTarget);
+      })
+  );
+
+  function* generator(): SynthtraceGenerator<ApmFields> {
+    yield* events;
+  }
+
+  return generator();
 }

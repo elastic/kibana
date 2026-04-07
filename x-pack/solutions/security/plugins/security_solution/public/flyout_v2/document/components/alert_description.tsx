@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { EventKind } from '../constants/event_kinds';
 import { LineClamp } from '../../../common/components/line_clamp';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
@@ -42,7 +43,10 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
   onShowRuleSummary,
   ruleSummaryDisabled,
 }) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
 
   const ruleDescription = useMemo(
     () => getFieldValue(hit, 'kibana.alert.rule.description') as string,

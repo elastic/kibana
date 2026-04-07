@@ -138,6 +138,93 @@ describe('getTemplateLocalContext', () => {
     });
   });
 
+  describe('same-line use-before-declaration edge cases', () => {
+    it('excludes assign when variable is used before assign on the same line', () => {
+      const template = '{{ x }}{% assign x = 1 %}';
+      const varOffset = 0;
+      const ctx = getTemplateLocalContext(template, varOffset);
+      expect(ctx.assignVars.map((a) => a.name)).not.toContain('x');
+    });
+
+    it('includes assign when variable is used after assign on the same line', () => {
+      const template = '{% assign x = 1 %}{{ x }}';
+      const varOffset = template.indexOf('{{ x }}');
+      const ctx = getTemplateLocalContext(template, varOffset);
+      expect(ctx.assignVars.map((a) => a.name)).toContain('x');
+    });
+
+    it('handles mixed: first variable invalid, second valid on same line', () => {
+      const template = '{{ y }}{% assign y = 2 %}{{ y }}';
+
+      const firstVarOffset = 0;
+      const ctx1 = getTemplateLocalContext(template, firstVarOffset);
+      expect(ctx1.assignVars.map((a) => a.name)).not.toContain('y');
+
+      const secondVarOffset = template.lastIndexOf('{{ y }}');
+      const ctx2 = getTemplateLocalContext(template, secondVarOffset);
+      expect(ctx2.assignVars.map((a) => a.name)).toContain('y');
+    });
+
+    it('handles multiple assigns and variables interleaved on one line', () => {
+      const template = '{% assign a = 1 %}{{ a }}{{ b }}{% assign b = 2 %}{{ a }}{{ b }}';
+
+      const aAfterAssign = template.indexOf('{{ a }}');
+      const ctx1 = getTemplateLocalContext(template, aAfterAssign);
+      expect(ctx1.assignVars.map((v) => v.name)).toContain('a');
+      expect(ctx1.assignVars.map((v) => v.name)).not.toContain('b');
+
+      const bBeforeAssign = template.indexOf('{{ b }}');
+      const ctx2 = getTemplateLocalContext(template, bBeforeAssign);
+      expect(ctx2.assignVars.map((v) => v.name)).toContain('a');
+      expect(ctx2.assignVars.map((v) => v.name)).not.toContain('b');
+
+      const bAfterAssign = template.lastIndexOf('{{ b }}');
+      const ctx3 = getTemplateLocalContext(template, bAfterAssign);
+      expect(ctx3.assignVars.map((v) => v.name)).toContain('a');
+      expect(ctx3.assignVars.map((v) => v.name)).toContain('b');
+    });
+
+    it('excludes capture that closes after the variable offset', () => {
+      const template = '{{ cap }}{% capture cap %}body{% endcapture %}{{ cap }}';
+      const earlyOffset = 0;
+      const ctx1 = getTemplateLocalContext(template, earlyOffset);
+      expect(ctx1.captureNames).not.toContain('cap');
+
+      const lateOffset = template.lastIndexOf('{{ cap }}');
+      const ctx2 = getTemplateLocalContext(template, lateOffset);
+      expect(ctx2.captureNames).toContain('cap');
+    });
+
+    it('excludes capture when variable is on a preceding line', () => {
+      const template = '{{ cap }}\n{% capture cap %}body{% endcapture %}';
+      const ctx = getTemplateLocalContext(template, 3);
+      expect(ctx.captureNames).not.toContain('cap');
+    });
+
+    it('includes capture when variable follows the capture on a later line', () => {
+      const template = '{% capture cap %}body{% endcapture %}\n{{ cap }}';
+      const varOffset = template.indexOf('{{ cap }}');
+      const ctx = getTemplateLocalContext(template, varOffset);
+      expect(ctx.captureNames).toContain('cap');
+    });
+  });
+
+  describe('liquid block tag scoping', () => {
+    it('includes assign from liquid block when variable is after the block', () => {
+      const template = '{%- liquid\n  assign x = 1\n-%}{{ x }}';
+      const varOffset = template.indexOf('{{ x }}');
+      const ctx = getTemplateLocalContext(template, varOffset);
+      expect(ctx.assignVars.map((a) => a.name)).toContain('x');
+    });
+
+    it('excludes assign from liquid block when variable is before the block', () => {
+      const template = '{{ x }}{%- liquid\n  assign x = 1\n-%}';
+      const varOffset = 0;
+      const ctx = getTemplateLocalContext(template, varOffset);
+      expect(ctx.assignVars.map((a) => a.name)).not.toContain('x');
+    });
+  });
+
   describe('templates without tags', () => {
     it('returns empty context for plain output templates', () => {
       const template = '{{ workflow.id }}';

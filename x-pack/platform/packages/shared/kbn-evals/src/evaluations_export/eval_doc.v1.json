@@ -1,0 +1,76 @@
+{
+  "@timestamp": "1970-01-01T00:00:00.000Z",
+  "run_id": "kbn-evals-preflight",
+  "experiment_id": "preflight",
+  "example": {
+    "id": "preflight",
+    "index": 0,
+    "input": {
+      "kind": "preflight",
+      "nested": {
+        "a": 1,
+        "b": "two",
+        "c": true
+      },
+      "items": [
+        "x",
+        "y"
+      ]
+    },
+    "dataset": {
+      "id": "preflight",
+      "name": "preflight"
+    }
+  },
+  "task": {
+    "trace_id": null,
+    "repetition_index": 0,
+    "output": {
+      "kind": "preflight",
+      "summary": "ok",
+      "metrics": {
+        "latency_ms": 1
+      },
+      "tags": [
+        "a",
+        "b"
+      ]
+    },
+    "model": {
+      "id": "kbn-evals-preflight",
+      "family": "GPT",
+      "provider": "OpenAI"
+    }
+  },
+  "evaluator": {
+    "name": "preflight",
+    "score": 0,
+    "label": "ok",
+    "explanation": null,
+    "metadata": {
+      "preflight": true,
+      "details": {
+        "reason": "preflight"
+      },
+      "counts": {
+        "a": 1,
+        "b": 2
+      }
+    },
+    "trace_id": null,
+    "model": {
+      "id": "kbn-evals-preflight",
+      "family": "GPT",
+      "provider": "OpenAI"
+    }
+  },
+  "run_metadata": {
+    "git_branch": null,
+    "git_commit_sha": null,
+    "total_repetitions": 1
+  },
+  "environment": {
+    "hostname": "sample"
+  }
+}
+

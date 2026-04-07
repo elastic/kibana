@@ -53,7 +53,6 @@ export { FailedToLoadResponse } from './components/message_panel/failed_to_load_
 export { MessageText } from './components/message_panel/message_text';
 
 export { ElasticLlmTourCallout } from './components/tour_callout/elastic_llm_tour_callout';
-export { AIAgentTourCallout } from './components/tour_callout/ai_agent_tour_callout';
 export { EisKnowledgeBaseCallout } from './components/tour_callout/eis_knowledge_base_callout';
 
 export {
@@ -113,11 +112,6 @@ export {
   aiAssistantSearchConnectorIndexPattern,
 } from '../common/ui_settings/settings_keys';
 
-export {
-  getElasticManagedLlmConnector,
-  INFERENCE_CONNECTOR_ACTION_TYPE_ID,
-} from './utils/get_elastic_managed_llm_connector';
-
 export const elasticAiAssistantImage = elasticAiAssistantImg;
 
 export const plugin: PluginInitializer<
@@ -156,4 +150,7 @@ export {
   type UseAgentBuilderOptInParams,
   type UseAgentBuilderOptInResult,
 } from './hooks/use_agent_builder_opt_in';
-export { useAIAgentTourDismissed, AIAgentTourKey } from './hooks/use_ai_agent_tour_dismissed';
+export {
+  useDefaultExperienceCalloutDismissed,
+  DefaultExperienceCalloutKey,
+} from './hooks/use_default_experience_callout_dismissed';

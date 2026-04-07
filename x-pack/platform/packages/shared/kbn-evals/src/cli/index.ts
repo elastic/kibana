@@ -13,10 +13,13 @@ import { envCmd } from './commands/env';
 import { ciMapCmd } from './commands/ci_map';
 import { compareCmd } from './commands/compare';
 import { initCmd } from './commands/init';
+import { labelsCmd } from './commands/labels';
 import { startCmd } from './commands/start';
 import { stopCmd } from './commands/stop';
 import { logsCmd } from './commands/logs';
 import { scoutCmd } from './commands/scout';
+import { clearIndexCmd } from './commands/clear_index';
+import { dataplexCmd } from './commands/dataplex';
 
 export async function run() {
   await new RunWithCommands(
@@ -29,8 +32,11 @@ export async function run() {
       stopCmd,
       logsCmd,
       scoutCmd,
+      clearIndexCmd,
+      dataplexCmd,
       runSuiteCmd,
       listSuitesCmd,
+      labelsCmd,
       doctorCmd,
       envCmd,
       ciMapCmd,

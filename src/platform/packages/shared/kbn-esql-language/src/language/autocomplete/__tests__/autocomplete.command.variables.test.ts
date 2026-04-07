@@ -30,28 +30,32 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: 'Create control',
-        text: '',
-        kind: 'Issue',
-        detail: 'Click to create',
-        command: {
-          arguments: [{ triggerSource: 'question_mark' }],
-          id: 'esql.control.values.create',
-          title: 'Click to create',
-        },
-        category: SuggestionCategory.CUSTOM_ACTION,
-        sortText: '0000',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: {
+            arguments: [{ triggerSource: 'question_mark' }],
+            id: 'esql.control.values.create',
+            title: 'Click to create',
+          },
+          category: SuggestionCategory.CUSTOM_ACTION,
+          sortText: '0000',
+        })
+      );
 
-      expect(suggestions).toContainEqual({
-        label: 'value',
-        text: 'value',
-        kind: 'Constant',
-        detail: 'Named parameter',
-        category: 'user_defined_column',
-        sortText: '0001',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: 'value',
+          text: 'value',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          category: 'user_defined_column',
+          sortText: '0001',
+        })
+      );
     });
 
     test('suggests `Create control` option for aggregations', async () => {
@@ -66,19 +70,21 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: 'Create control',
-        text: '',
-        kind: 'Issue',
-        detail: 'Click to create',
-        command: {
-          arguments: [{ triggerSource: 'smart_suggestion' }],
-          id: 'esql.control.functions.create',
-          title: 'Click to create',
-        },
-        category: SuggestionCategory.CUSTOM_ACTION,
-        sortText: '0000',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: {
+            arguments: [{ triggerSource: 'smart_suggestion' }],
+            id: 'esql.control.functions.create',
+            title: 'Click to create',
+          },
+          category: SuggestionCategory.CUSTOM_ACTION,
+          sortText: '0000',
+        })
+      );
     });
 
     test('suggests `??function` option', async () => {
@@ -99,14 +105,16 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: '??function',
-        text: '??function',
-        kind: 'Constant',
-        detail: 'Named parameter',
-        category: 'user_defined_column',
-        sortText: '0001',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: '??function',
+          text: '??function',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          category: 'user_defined_column',
+          sortText: '0001',
+        })
+      );
     });
 
     test('suggests `Create control` option for grouping', async () => {
@@ -121,19 +129,21 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: 'Create control',
-        text: '',
-        kind: 'Issue',
-        detail: 'Click to create',
-        command: {
-          arguments: [{ triggerSource: 'smart_suggestion' }],
-          id: 'esql.control.fields.create',
-          title: 'Click to create',
-        },
-        category: SuggestionCategory.CUSTOM_ACTION,
-        sortText: '0002',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: {
+            arguments: [{ triggerSource: 'smart_suggestion' }],
+            id: 'esql.control.fields.create',
+            title: 'Click to create',
+          },
+          category: SuggestionCategory.CUSTOM_ACTION,
+          sortText: '0002',
+        })
+      );
     });
 
     test('suggests `??field` option', async () => {
@@ -154,14 +164,16 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: '??field',
-        text: '??field',
-        kind: 'Constant',
-        detail: 'Named parameter',
-        category: 'user_defined_column',
-        sortText: '0000',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: '??field',
+          text: '??field',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          category: 'user_defined_column',
+          sortText: '0000',
+        })
+      );
     });
 
     test('suggests `?interval` option', async () => {
@@ -182,14 +194,16 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: '?interval',
-        text: '?interval',
-        kind: 'Constant',
-        detail: 'Named parameter',
-        category: 'user_defined_column',
-        sortText: '0000',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: '?interval',
+          text: '?interval',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          category: 'user_defined_column',
+          sortText: '0000',
+        })
+      );
     });
 
     test('suggests `?multiValue` option', async () => {
@@ -215,14 +229,16 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: '?multiValue',
-        text: '?multiValue',
-        kind: 'Constant',
-        detail: 'Named parameter',
-        category: 'user_defined_column',
-        sortText: '0004',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: '?multiValue',
+          text: '?multiValue',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          category: 'user_defined_column',
+          sortText: '0004',
+        })
+      );
     });
 
     test('suggests `Create control` option when ? is being typed', async () => {
@@ -237,19 +253,21 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: 'Create control',
-        text: '',
-        kind: 'Issue',
-        detail: 'Click to create',
-        command: {
-          arguments: [{ triggerSource: 'question_mark' }],
-          id: 'esql.control.values.create',
-          title: 'Click to create',
-        },
-        category: SuggestionCategory.CUSTOM_ACTION,
-        sortText: '0000',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: {
+            arguments: [{ triggerSource: 'question_mark' }],
+            id: 'esql.control.values.create',
+            title: 'Click to create',
+          },
+          category: SuggestionCategory.CUSTOM_ACTION,
+          sortText: '0000',
+        })
+      );
     });
 
     test('suggests `Create control` option', async () => {
@@ -264,19 +282,21 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: 'Create control',
-        text: '',
-        kind: 'Issue',
-        detail: 'Click to create',
-        command: {
-          arguments: [{ triggerSource: 'smart_suggestion' }],
-          id: 'esql.control.values.create',
-          title: 'Click to create',
-        },
-        category: SuggestionCategory.CUSTOM_ACTION,
-        sortText: '0000',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: {
+            arguments: [{ triggerSource: 'smart_suggestion' }],
+            id: 'esql.control.values.create',
+            title: 'Click to create',
+          },
+          category: SuggestionCategory.CUSTOM_ACTION,
+          sortText: '0000',
+        })
+      );
     });
 
     test('suggests `?value` option', async () => {
@@ -297,14 +317,16 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: '?value',
-        text: '?value',
-        kind: 'Constant',
-        detail: 'Named parameter',
-        category: 'user_defined_column',
-        sortText: '0001',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: '?value',
+          text: '?value',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          category: 'user_defined_column',
+          sortText: '0001',
+        })
+      );
     });
 
     test('suggests `Create control` option when a questionmark is typed', async () => {
@@ -319,19 +341,21 @@ describe('autocomplete.suggest', () => {
         },
       });
 
-      expect(suggestions).toContainEqual({
-        label: 'Create control',
-        text: '',
-        kind: 'Issue',
-        detail: 'Click to create',
-        command: {
-          arguments: [{ triggerSource: 'question_mark' }],
-          id: 'esql.control.values.create',
-          title: 'Click to create',
-        },
-        category: SuggestionCategory.CUSTOM_ACTION,
-        sortText: '0000',
-      });
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: {
+            arguments: [{ triggerSource: 'question_mark' }],
+            id: 'esql.control.values.create',
+            title: 'Click to create',
+          },
+          category: SuggestionCategory.CUSTOM_ACTION,
+          sortText: '0000',
+        })
+      );
     });
   });
 });

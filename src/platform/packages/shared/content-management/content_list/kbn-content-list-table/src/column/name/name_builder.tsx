@@ -54,6 +54,13 @@ export interface NameColumnProps {
    */
   showTags?: boolean;
   /**
+   * Whether to show a star button inline after the title.
+   * Requires `services.favorites` to be configured on the `ContentListProvider`.
+   *
+   * @default false
+   */
+  showStarred?: boolean;
+  /**
    * Optional click handler for tag badges.
    * Called with the tag and a boolean indicating whether a modifier key
    * (Cmd on Mac, Ctrl on Windows/Linux) was held during the click.
@@ -81,6 +88,7 @@ export const buildNameColumn = (
     sortable: sortableProp,
     showDescription = true,
     showTags = false,
+    showStarred = false,
     onTagClick,
     render: customRender,
   } = attributes;
@@ -101,7 +109,7 @@ export const buildNameColumn = (
         return customRender(item);
       }
 
-      return <NameCell {...{ item, showDescription, showTags, onTagClick }} />;
+      return <NameCell {...{ item, showDescription, showTags, showStarred, onTagClick }} />;
     },
   };
 };

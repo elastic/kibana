@@ -9,10 +9,12 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod/v4';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerFn } from './handler';
 
 /**
@@ -70,11 +72,19 @@ export interface ToolAvailabilityConfig {
 
 export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
 
+export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
+
 export interface ToolConfirmationPolicy {
   /**
    * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
    */
   askUser?: ToolConfirmationPolicyMode;
+  /**
+   * If set, will be used to get the confirmation
+   */
+  getConfirmation?: (opts: {
+    toolParams: Record<string, unknown>;
+  }) => MaybePromise<ToolPolicyConfirmationDefinition>;
 }
 
 export interface BuiltInToolSpecificConfig {
@@ -114,8 +124,10 @@ export type ToolReturnSummarizerFn = (
 /**
  * Built-in tool, as registered as static tool.
  */
-export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
-  extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
+export interface BuiltinToolDefinition<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
     BuiltInToolSpecificConfig {
   /**
    * built-in tool types
@@ -128,7 +140,7 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
   /**
    * Handler to call to execute the tool.
    */
-  handler: ToolHandlerFn<z.infer<RunInput>>;
+  handler: ToolHandlerFn<z.infer<RunInput>, TResult>;
   /**
    * Optional dynamic availability configuration.
    * Refer to {@link ToolAvailabilityConfig}
@@ -143,8 +155,11 @@ export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;
 export type StaticIndexSearchTool = StaticToolRegistrationMixin<IndexSearchToolDefinition>;
 export type StaticWorkflowTool = StaticToolRegistrationMixin<WorkflowToolDefinition>;
 
-export type StaticToolRegistration<RunInput extends ZodObject<any> = ZodObject<any>> =
-  | BuiltinToolDefinition<RunInput>
+export type StaticToolRegistration<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> =
+  | BuiltinToolDefinition<RunInput, TResult>
   | StaticEsqlTool
   | StaticIndexSearchTool
   | StaticWorkflowTool;

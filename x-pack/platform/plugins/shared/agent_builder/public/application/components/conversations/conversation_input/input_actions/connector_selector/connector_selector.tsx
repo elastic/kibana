@@ -15,7 +15,7 @@ import {
   EuiPopoverFooter,
   EuiSelectable,
 } from '@elastic/eui';
-import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -160,8 +160,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const { data: aiConnectors, isLoading } = useLoadConnectors({
     http,
+    featureId: 'agent_builder',
     settings,
-    inferenceEnabled: true,
   });
 
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);

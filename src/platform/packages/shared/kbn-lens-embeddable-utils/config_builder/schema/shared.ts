@@ -9,13 +9,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   LENS_SAMPLING_MIN_VALUE,
   LENS_SAMPLING_MAX_VALUE,
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
-import { filterSchema, unifiedSearchFilterSchema } from './filter';
+import { filterSchema } from './filter';
 
 export const labelSharedProp = {
   /**
@@ -60,7 +61,15 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema, { maxSize: 100 })),
+  filters: schema.maybe(
+    schema.arrayOf(asCodeFilterSchema, {
+      maxSize: 100,
+      meta: {
+        id: 'lensPanelFilters',
+        description: 'Filters applied to the panel',
+      },
+    })
+  ),
 };
 
 export const dslOnlyPanelInfoSchema = {
@@ -144,10 +153,8 @@ const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;
 
 export const axisTitleSchemaProps = {
-  value: schema.maybe(
-    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
-  ),
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
+  text: schema.maybe(schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Show the title' } })),
 };
 
 export const legendTruncateAfterLinesSchema = schema.maybe(

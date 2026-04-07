@@ -313,150 +313,115 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     steps: [{ name: 'step1', type: 'console' }],
   };
 
-  it('should only include spaceId in event schema when workflow has only manual trigger', () => {
-    const workflow: WorkflowYaml = {
-      ...baseWorkflow,
+  function getEventKeys(workflow: WorkflowYaml | WorkflowDefinitionForContext): string[] {
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+    return Object.keys(getShape(eventResult.schema!));
+  }
+
+  it.each<{
+    label: string;
+    triggers: WorkflowYaml['triggers'] | undefined | [];
+    expectedKeys: string[];
+    unexpectedKeys: string[];
+  }>([
+    {
+      label: 'manual trigger',
       triggers: [{ type: 'manual' }],
-    };
-
-    const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
-
-    const eventShape = getShape(eventResult.schema!);
-    const eventKeys = Object.keys(eventShape);
-    expect(eventKeys).toEqual(['spaceId']);
-    expect(eventKeys).not.toContain('alerts');
-    expect(eventKeys).not.toContain('rule');
-    expect(eventKeys).not.toContain('params');
-  });
-
-  it('should only include spaceId in event schema when workflow has only scheduled trigger', () => {
-    const workflow: WorkflowYaml = {
-      ...baseWorkflow,
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+    },
+    {
+      label: 'scheduled trigger',
       triggers: [{ type: 'scheduled', with: { every: '5m' } }],
-    };
-
-    const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
-
-    const eventShape = getShape(eventResult.schema!);
-    const eventKeys = Object.keys(eventShape);
-    expect(eventKeys).toEqual(['spaceId']);
-    expect(eventKeys).not.toContain('alerts');
-    expect(eventKeys).not.toContain('rule');
-    expect(eventKeys).not.toContain('params');
-  });
-
-  it('should include alerts, rule, params, and spaceId in event schema when workflow has alert trigger', () => {
-    const workflow: WorkflowYaml = {
-      ...baseWorkflow,
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+    },
+    {
+      label: 'alert trigger',
       triggers: [{ type: 'alert' }],
-    };
-
-    const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
-
-    const eventShape = getShape(eventResult.schema!);
-    const eventKeys = Object.keys(eventShape);
-    expect(eventKeys).toContain('spaceId');
-    expect(eventKeys).toContain('alerts');
-    expect(eventKeys).toContain('rule');
-    expect(eventKeys).toContain('params');
-  });
-
-  it('should include alert event properties when alert trigger is among multiple triggers', () => {
-    const workflow: WorkflowYaml = {
-      ...baseWorkflow,
+      expectedKeys: ['spaceId', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp'],
+    },
+    {
+      label: 'manual + alert triggers',
       triggers: [{ type: 'manual' }, { type: 'alert' }],
-    };
-
-    const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
-
-    const eventShape = getShape(eventResult.schema!);
-    const eventKeys = Object.keys(eventShape);
-    expect(eventKeys).toContain('spaceId');
-    expect(eventKeys).toContain('alerts');
-    expect(eventKeys).toContain('rule');
-    expect(eventKeys).toContain('params');
-  });
-
-  it('should not include alert properties with manual + scheduled triggers', () => {
-    const workflow: WorkflowYaml = {
-      ...baseWorkflow,
+      expectedKeys: ['spaceId', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp'],
+    },
+    {
+      label: 'manual + scheduled triggers',
       triggers: [{ type: 'manual' }, { type: 'scheduled', with: { every: '1h' } }],
-    };
-
-    const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
-
-    const eventShape = getShape(eventResult.schema!);
-    const eventKeys = Object.keys(eventShape);
-    expect(eventKeys).toEqual(['spaceId']);
-  });
-
-  it('should handle workflow with empty triggers array gracefully', () => {
-    const workflow: WorkflowDefinitionForContext = {
-      ...baseWorkflow,
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+    },
+    {
+      label: 'empty triggers array',
       triggers: [] as any,
-    };
-
-    const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
-
-    const eventShape = getShape(eventResult.schema!);
-    const eventKeys = Object.keys(eventShape);
-    expect(eventKeys).toEqual(['spaceId']);
-  });
-
-  it('should handle workflow with undefined triggers gracefully', () => {
-    const workflow: WorkflowDefinitionForContext = {
-      ...baseWorkflow,
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp'],
+    },
+    {
+      label: 'undefined triggers',
       triggers: undefined as any,
-    };
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp'],
+    },
+  ])(
+    'should produce correct event keys for $label',
+    ({ triggers, expectedKeys, unexpectedKeys }) => {
+      const workflow = {
+        ...baseWorkflow,
+        triggers,
+      } as WorkflowYaml | WorkflowDefinitionForContext;
+      const eventKeys = getEventKeys(workflow);
 
+      for (const key of expectedKeys) {
+        expect(eventKeys).toContain(key);
+      }
+      for (const key of unexpectedKeys) {
+        expect(eventKeys).not.toContain(key);
+      }
+      expect(eventKeys).toHaveLength(expectedKeys.length);
+    }
+  );
+
+  it('should allow accessing event.rule and event.spaceId when alert trigger is present', () => {
+    const workflow: WorkflowYaml = { ...baseWorkflow, triggers: [{ type: 'alert' }] };
     const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
 
-    const eventShape = getShape(eventResult.schema!);
-    const eventKeys = Object.keys(eventShape);
-    expect(eventKeys).toEqual(['spaceId']);
+    expect(getSchemaAtPath(contextSchema, 'event.rule.id').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'event.rule.name').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'event.spaceId').schema).toBeDefined();
   });
 
-  it('should allow accessing event.alerts sub-properties when alert trigger is present', () => {
-    const workflow: WorkflowYaml = {
+  it('should not include timestamp when workflow has custom trigger type but no registered definition', () => {
+    const workflow = {
       ...baseWorkflow,
-      triggers: [{ type: 'alert' }],
-    };
+      triggers: [{ type: 'some.unknown_trigger' }],
+    } as unknown as WorkflowYaml;
 
-    const contextSchema = getWorkflowContextSchema(workflow);
+    const getTriggerDefinitionSpy = jest
+      .spyOn(triggerSchemas, 'getTriggerDefinition')
+      .mockReturnValue(undefined);
 
-    // event.rule.id should be accessible
-    const ruleIdResult = getSchemaAtPath(contextSchema, 'event.rule.id');
-    expect(ruleIdResult.schema).toBeDefined();
+    try {
+      const eventKeys = getEventKeys(workflow);
 
-    // event.rule.name should be accessible
-    const ruleNameResult = getSchemaAtPath(contextSchema, 'event.rule.name');
-    expect(ruleNameResult.schema).toBeDefined();
-
-    // event.spaceId should always be accessible
-    const spaceIdResult = getSchemaAtPath(contextSchema, 'event.spaceId');
-    expect(spaceIdResult.schema).toBeDefined();
+      expect(eventKeys).toContain('spaceId');
+      expect(eventKeys).not.toContain('timestamp');
+      expect(eventKeys).toHaveLength(1);
+    } finally {
+      getTriggerDefinitionSpy.mockRestore();
+    }
   });
 
-  it('should include custom trigger eventSchema properties when triggerSchemas.getTriggerDefinition returns a definition', () => {
+  it('should include timestamp and custom trigger eventSchema when workflow has a custom trigger', () => {
     const customEventSchema = z.object({
       severity: z.string(),
       message: z.string(),
     });
-    // WorkflowYaml's trigger type union is built-in only; custom trigger types are supported at runtime
     const workflow = {
       ...baseWorkflow,
       triggers: [{ type: 'example.custom_trigger' }],
@@ -467,6 +432,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       description: 'Test trigger for event schema merge',
       eventSchema: customEventSchema,
     };
+
     const getTriggerDefinitionSpy = jest
       .spyOn(triggerSchemas, 'getTriggerDefinition')
       .mockImplementation((triggerType: string) =>
@@ -474,20 +440,16 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       );
 
     try {
-      const contextSchema = getWorkflowContextSchema(workflow);
-      const eventResult = getSchemaAtPath(contextSchema, 'event');
-      expect(eventResult.schema).toBeDefined();
+      const eventKeys = getEventKeys(workflow);
 
-      const eventShape = getShape(eventResult.schema!);
-      const eventKeys = Object.keys(eventShape);
       expect(eventKeys).toContain('spaceId');
+      expect(eventKeys).toContain('timestamp');
       expect(eventKeys).toContain('severity');
       expect(eventKeys).toContain('message');
 
-      const severityResult = getSchemaAtPath(contextSchema, 'event.severity');
-      expect(severityResult.schema).toBeDefined();
-      const messageResult = getSchemaAtPath(contextSchema, 'event.message');
-      expect(messageResult.schema).toBeDefined();
+      const contextSchema = getWorkflowContextSchema(workflow);
+      expect(getSchemaAtPath(contextSchema, 'event.severity').schema).toBeDefined();
+      expect(getSchemaAtPath(contextSchema, 'event.message').schema).toBeDefined();
     } finally {
       getTriggerDefinitionSpy.mockRestore();
     }

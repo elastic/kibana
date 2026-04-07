@@ -35,6 +35,14 @@ export interface ContentListFeatures {
    * - `false`: Explicitly disables tags even if `services.tags` is present.
    */
   tags?: boolean;
+
+  /**
+   * Starred feature configuration.
+   *
+   * - `true` or `undefined`: Auto-enabled when `services.favorites` is provided.
+   * - `false`: Explicitly disables starring even if `services.favorites` is present.
+   */
+  starred?: boolean;
 }
 
 /**
@@ -95,4 +103,6 @@ export interface ContentListSupports {
   selection: boolean;
   /** Whether tags filtering and display is supported. */
   tags: boolean;
+  /** Whether starring items is supported. */
+  starred: boolean;
 }

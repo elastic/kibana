@@ -7,7 +7,11 @@
 
 import type { StructuredDatasourceStates } from '@kbn/lens-common';
 import type { LensPartitionVisualizationState } from '@kbn/lens-common';
-import type { DatatableVisualizationState, TagcloudState, XYState } from '../../../../../public';
+import type {
+  DatatableVisualizationState,
+  TagcloudState,
+  XYVisualizationState,
+} from '../../../../../public';
 import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import { convertXYToRawColorMappings, type DeprecatedColorMappingsXYState } from './xy';
 import type { DeprecatedColorMappingLensPartitionVisualizationState } from './partition';
@@ -58,7 +62,7 @@ export function getUpdatedVisualizationState(
   const datasourceStates = state.datasourceStates as StructuredDatasourceStates | undefined;
 
   if (visualizationType === 'lnsXY') {
-    const visState = state.visualization as XYState | DeprecatedColorMappingsXYState;
+    const visState = state.visualization as XYVisualizationState | DeprecatedColorMappingsXYState;
     return convertXYToRawColorMappings(visState, datasourceStates);
   }
 

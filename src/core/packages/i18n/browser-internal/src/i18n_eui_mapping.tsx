@@ -213,6 +213,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
     }),
+    'euiColorPicker.ariaLabel': i18n.translate('core.euiColorPicker.ariaLabel', {
+      defaultMessage: 'Select a color',
+      description: 'ARIA label for the color picker button',
+    }),
     'euiColorPicker.colorLabel': i18n.translate('core.euiColorPicker.colorLabel', {
       defaultMessage: 'Color value',
     }),
@@ -776,10 +780,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage:
         'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
     }),
-    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
-      'core.euiFlyout.screenReaderNonModalDialog',
+    'euiFlyout.screenReaderNoOverlayMaskDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNoOverlayMaskDialog',
       {
-        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+        defaultMessage: 'You are in a modal dialog. To close the dialog, press Escape.',
       }
     ),
     'euiFlyout.screenReaderFocusTrapShards': i18n.translate(

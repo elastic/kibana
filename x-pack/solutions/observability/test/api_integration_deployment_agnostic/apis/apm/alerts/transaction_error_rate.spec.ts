@@ -211,6 +211,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
         expect(alerts[0]).property('transaction.name', 'tx-java');
+        expect(alerts[0])
+          .property('kibana.alert.grouping')
+          .eql({
+            service: {
+              name: 'opbeans-java',
+              environment: 'production',
+            },
+            transaction: {
+              type: 'request',
+              name: 'tx-java',
+            },
+          });
       });
 
       it('produces an alert for opbeans-java with the correct reason', async () => {
@@ -312,6 +324,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
         expect(alerts[0]).property('transaction.name', 'tx-node');
+        expect(alerts[0])
+          .property('kibana.alert.grouping')
+          .eql({
+            service: {
+              name: 'opbeans-node',
+              environment: 'production',
+            },
+            transaction: {
+              type: 'request',
+              name: 'tx-node',
+            },
+          });
       });
 
       it('produces an alert for opbeans-node with the correct reason', async () => {

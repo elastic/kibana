@@ -27,7 +27,7 @@ import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 
-const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
+const DRAG_ICON = <EuiIcon type="drag" size="m" />;
 
 /**
  * Props of FieldItemButton component
@@ -189,7 +189,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
             className={classnames(fieldActionClassName, buttonAddFieldToWorkspaceProps?.className)}
             css={fieldActionCss}
             color="text"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
               event.preventDefault();
               event.stopPropagation();

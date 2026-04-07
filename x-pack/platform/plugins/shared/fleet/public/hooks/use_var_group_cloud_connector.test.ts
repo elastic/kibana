@@ -14,6 +14,13 @@ import { useVarGroupCloudConnector, type VarGroupSelection } from './use_var_gro
 describe('useVarGroupCloudConnector hook', () => {
   const mockUpdatePackagePolicy = jest.fn();
 
+  const createMockPackagePolicy = (overrides?: Partial<{ inputs: any[] }>) => ({
+    name: 'test-policy',
+    enabled: true,
+    policy_ids: [],
+    inputs: overrides?.inputs ?? [],
+  });
+
   const createMockVarGroups = (): RegistryVarGroup[] => [
     {
       name: 'auth_method',
@@ -23,7 +30,7 @@ describe('useVarGroupCloudConnector hook', () => {
         {
           name: 'cloud_connector',
           title: 'Cloud Connector',
-          vars: ['role_arn', 'external_id'],
+          vars: ['role_arn', 'external_id', 'aws.account_type'],
           provider: 'aws',
           iac_template_url: 'https://example.com/cloudformation.yaml',
         },
@@ -47,12 +54,14 @@ describe('useVarGroupCloudConnector hook', () => {
       useVarGroupCloudConnector({
         varGroups: undefined,
         varGroupSelections: selections,
+        packagePolicy: createMockPackagePolicy() as any,
         updatePackagePolicy: mockUpdatePackagePolicy,
       })
     );
 
     expect(result.current.isSelected).toBe(false);
     expect(result.current.cloudProvider).toBeUndefined();
+    expect(result.current.accountType).toBe('single-account');
     expect(result.current.iacTemplateUrl).toBeUndefined();
     expect(result.current.cloudConnectorVars.size).toBe(0);
   });
@@ -65,6 +74,7 @@ describe('useVarGroupCloudConnector hook', () => {
       useVarGroupCloudConnector({
         varGroups,
         varGroupSelections: selections,
+        packagePolicy: createMockPackagePolicy() as any,
         updatePackagePolicy: mockUpdatePackagePolicy,
       })
     );
@@ -82,6 +92,7 @@ describe('useVarGroupCloudConnector hook', () => {
       useVarGroupCloudConnector({
         varGroups,
         varGroupSelections: selections,
+        packagePolicy: createMockPackagePolicy() as any,
         updatePackagePolicy: mockUpdatePackagePolicy,
       })
     );
@@ -91,7 +102,7 @@ describe('useVarGroupCloudConnector hook', () => {
     expect(result.current.cloudConnectorVars.size).toBe(0);
   });
 
-  it('should return cloud connector info when cloud connector option is selected', () => {
+  it('should return cloud connector info with default accountType when cloud connector option is selected', () => {
     const varGroups = createMockVarGroups();
     const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
@@ -99,14 +110,111 @@ describe('useVarGroupCloudConnector hook', () => {
       useVarGroupCloudConnector({
         varGroups,
         varGroupSelections: selections,
+        packagePolicy: createMockPackagePolicy() as any,
         updatePackagePolicy: mockUpdatePackagePolicy,
       })
     );
 
     expect(result.current.isSelected).toBe(true);
     expect(result.current.cloudProvider).toBe('aws');
+    expect(result.current.accountType).toBe('single-account');
     expect(result.current.iacTemplateUrl).toBe('https://example.com/cloudformation.yaml');
-    expect(result.current.cloudConnectorVars).toEqual(new Set(['role_arn', 'external_id']));
+    expect(result.current.cloudConnectorVars).toEqual(
+      new Set(['role_arn', 'external_id', 'aws.account_type'])
+    );
+  });
+
+  it('should return accountType from enabled input vars', () => {
+    const varGroups = createMockVarGroups();
+    const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+    const packagePolicy = createMockPackagePolicy({
+      inputs: [
+        {
+          enabled: true,
+          type: 'aws-test',
+          vars: { 'aws.account_type': { value: 'organization-account' } },
+        },
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useVarGroupCloudConnector({
+        varGroups,
+        varGroupSelections: selections,
+        packagePolicy: packagePolicy as any,
+        updatePackagePolicy: mockUpdatePackagePolicy,
+      })
+    );
+
+    expect(result.current.accountType).toBe('organization-account');
+  });
+
+  it('should default accountType to single-account when input var is undefined', () => {
+    const varGroups = createMockVarGroups();
+    const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+    const packagePolicy = createMockPackagePolicy({
+      inputs: [
+        {
+          enabled: true,
+          type: 'aws-test',
+          vars: { 'aws.account_type': { value: undefined } },
+        },
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useVarGroupCloudConnector({
+        varGroups,
+        varGroupSelections: selections,
+        packagePolicy: packagePolicy as any,
+        updatePackagePolicy: mockUpdatePackagePolicy,
+      })
+    );
+
+    expect(result.current.accountType).toBe('single-account');
+  });
+
+  it('should read accountType from inputs when varGroups is undefined (legacy fallback)', () => {
+    const selections: VarGroupSelection = {};
+    const packagePolicy = createMockPackagePolicy({
+      inputs: [
+        {
+          enabled: true,
+          type: 'aws-test',
+          vars: { 'aws.account_type': { value: 'organization-account' } },
+        },
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useVarGroupCloudConnector({
+        varGroups: undefined,
+        varGroupSelections: selections,
+        packagePolicy: packagePolicy as any,
+        updatePackagePolicy: mockUpdatePackagePolicy,
+      })
+    );
+
+    expect(result.current.accountType).toBe('single-account');
+  });
+
+  it('should default accountType when var_group scopes account_type but input has no value', () => {
+    const varGroups = createMockVarGroups();
+    const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+    const packagePolicy = createMockPackagePolicy({
+      inputs: [{ enabled: true, type: 'aws-test', vars: {} }],
+    });
+
+    const { result } = renderHook(() =>
+      useVarGroupCloudConnector({
+        varGroups,
+        varGroupSelections: selections,
+        packagePolicy: packagePolicy as any,
+        updatePackagePolicy: mockUpdatePackagePolicy,
+      })
+    );
+
+    expect(result.current.accountType).toBe('single-account');
   });
 
   it('should provide handleCloudConnectorUpdate callback that calls updatePackagePolicy', () => {
@@ -117,6 +225,7 @@ describe('useVarGroupCloudConnector hook', () => {
       useVarGroupCloudConnector({
         varGroups,
         varGroupSelections: selections,
+        packagePolicy: createMockPackagePolicy() as any,
         updatePackagePolicy: mockUpdatePackagePolicy,
       })
     );
@@ -137,6 +246,7 @@ describe('useVarGroupCloudConnector hook', () => {
       useVarGroupCloudConnector({
         varGroups,
         varGroupSelections: selections,
+        packagePolicy: createMockPackagePolicy() as any,
         updatePackagePolicy: mockUpdatePackagePolicy,
       })
     );
@@ -159,6 +269,7 @@ describe('useVarGroupCloudConnector hook', () => {
       useVarGroupCloudConnector({
         varGroups,
         varGroupSelections: selections,
+        packagePolicy: createMockPackagePolicy() as any,
         updatePackagePolicy: mockUpdatePackagePolicy,
       })
     );

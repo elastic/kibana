@@ -10,6 +10,7 @@ import { isRootStreamDefinition } from './is_root_stream_definition';
 describe('isRootStreamDefinition', () => {
   it('returns true for a valid root wired stream definition (logs)', () => {
     const validWired = {
+      type: 'wired' as const,
       name: 'logs',
       description: '',
       updated_at: new Date().toISOString(),
@@ -26,6 +27,7 @@ describe('isRootStreamDefinition', () => {
 
   it('returns true for logs.otel root stream', () => {
     const validLogsOtel = {
+      type: 'wired' as const,
       name: 'logs.otel',
       description: '',
       updated_at: new Date().toISOString(),
@@ -42,6 +44,7 @@ describe('isRootStreamDefinition', () => {
 
   it('returns true for logs.ecs root stream', () => {
     const validLogsEcs = {
+      type: 'wired' as const,
       name: 'logs.ecs',
       description: '',
       updated_at: new Date().toISOString(),
@@ -58,6 +61,7 @@ describe('isRootStreamDefinition', () => {
 
   it('returns false for a wired stream definition with a non-root name', () => {
     const nonRootWired = {
+      type: 'wired' as const,
       name: 'logs.bar',
       description: '',
       updated_at: new Date().toISOString(),
@@ -74,6 +78,7 @@ describe('isRootStreamDefinition', () => {
 
   it('returns false for a classic stream definition even with a root name', () => {
     const classic = {
+      type: 'classic' as const,
       name: 'logs-test-default',
       description: '',
       updated_at: new Date().toISOString(),

@@ -14,6 +14,7 @@ import type {
   CloudConnectorSecretReference,
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
@@ -29,6 +30,9 @@ import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
 } from '../../common/constants/cloud_connector';
 
 import {
@@ -40,6 +44,7 @@ import {
 } from '../errors';
 
 import { appContextService } from './app_context';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
 
@@ -222,10 +227,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       // Validate and normalize the name, checking for duplicates
       const name = await this.validateAndNormalizeName(soClient, cloudConnector.name);
 
-      // Check if space awareness is enabled for namespace handling
-      const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
-      const useSpaceAwareness = await isSpaceAwarenessEnabled();
-      const namespace = useSpaceAwareness ? '*' : undefined;
+      const namespace = cloudConnector.namespace ?? '*';
+
+      if (namespace) {
+        await validatePolicyNamespaceForSpace({
+          namespace,
+          spaceId: soClient.getCurrentNamespace(),
+        });
+      }
 
       const cloudConnectorAttributes: CloudConnectorSOAttributes = {
         name,
@@ -235,6 +244,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         vars,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        verification_status: 'pending',
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -577,6 +587,34 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
         throw new CloudConnectorInvalidVarsError(
           `${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
+        );
+      }
+    } else if (cloudConnector.cloudProvider === 'gcp') {
+      const gcpVars = vars as GcpCloudConnectorVars;
+      // service_account and audience are non-secret text fields;
+      // only gcp_credentials_cloud_connector_id is a secret reference
+      const serviceAccount = gcpVars.service_account;
+      const audience = gcpVars.audience;
+      const gcpCredentials = gcpVars.gcp_credentials_cloud_connector_id;
+
+      if (!serviceAccount?.value) {
+        logger.error(`Package policy must contain valid ${SERVICE_ACCOUNT_VAR_NAME} value`);
+        throw new CloudConnectorInvalidVarsError(
+          `${SERVICE_ACCOUNT_VAR_NAME} must be a valid string`
+        );
+      }
+
+      if (!audience?.value) {
+        logger.error(`Package policy must contain valid ${AUDIENCE_VAR_NAME} value`);
+        throw new CloudConnectorInvalidVarsError(`${AUDIENCE_VAR_NAME} must be a valid string`);
+      }
+
+      if (!gcpCredentials?.value) {
+        logger.error(
+          `Package policy must contain valid ${GCP_CREDENTIALS_CLOUD_CONNECTOR_ID} value`
+        );
+        throw new CloudConnectorInvalidVarsError(
+          `${GCP_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
         );
       }
     } else {

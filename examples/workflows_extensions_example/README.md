@@ -2,6 +2,16 @@
 
 This example plugin demonstrates how to register a custom workflow step using the workflows extensions API.
 
+## How to run
+
+Example plugins are only loaded when Kibana is started with the `--run-examples` flag. Start Kibana with:
+
+```bash
+yarn start --run-examples
+```
+
+Then open **Developer examples** in the sidebar and click **Workflows Extensions Example**.
+
 ## Overview
 
 The plugin registers a `setvar` step that allows you to set variables in the workflow context. These variables can then be referenced in subsequent steps using template syntax.
@@ -51,6 +61,37 @@ steps:
     with:
       message: "{{ steps.set_vars.output.variables.myVar }}"
 ```
+
+## Event-driven trigger and emitEvent
+
+The plugin registers an event-driven trigger `example.customTrigger` and exposes a route to emit events for it. Workflows that subscribe to this trigger in the same space will run when an event is emitted.
+
+You can emit events in two ways: **via the request-scoped client** (from a route, recommended) or **directly** via the start contract when you have a request and space id. This example uses the request-scoped client. For the full guide (both options, naming, approval), see the [Workflows Extensions README — Contributing Event-Driven Triggers](../../src/platform/plugins/shared/workflows_extensions/README.md#contributing-event-driven-triggers).
+
+### Emit an event (request context)
+
+From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type the route context with `workflows: WorkflowsRouteHandlerContext`):
+
+```ts
+const client = context.workflows.getWorkflowsClient();
+await client.emitEvent(CUSTOM_TRIGGER_ID, {
+  message: 'Hello',
+  source: 'example',
+  labels: ['demo', 'alerts'],
+});
+```
+
+To try it via HTTP (example only; authz disabled for demo):
+
+```bash
+curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
+  'http://localhost:5601/api/workflows_extensions_example/emit' \
+  -d '{"message":"Hello from example","source":"curl","labels":["demo","curl"]}'
+```
+
+The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required; `source`, `category`, and `labels` optional).
+
+For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
 
 ## Key Points
 

@@ -21,7 +21,7 @@ export enum LogLevel {
 
 export function extendToolingLog(log: ToolingLog, logLevel: LogLevel = LogLevel.verbose): Logger {
   const logger = log as Logger;
-  logger.perf = (name: string, callback: () => any) => {
+  logger.perf = <T>(name: string, callback: () => T) => {
     return logPerf(log, LogLevel.verbose, name, callback);
   };
 

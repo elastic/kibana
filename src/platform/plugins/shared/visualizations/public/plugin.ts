@@ -67,7 +67,11 @@ import type {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  VisualizeConstants,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VISUALIZE_SAVED_OBJECT_TYPE,
+} from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
@@ -497,7 +501,7 @@ export class VisualizationsPlugin
           }
         );
       },
-      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_SAVED_OBJECT_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),

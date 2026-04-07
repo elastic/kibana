@@ -40,7 +40,11 @@ describe('buildTemplateFromWizardData', () => {
           lifecycle: { enabled: true, value: 1, unit: 'd' },
         },
         settings: undefined,
-        mappings: undefined,
+        mappings: {
+          properties: {
+            field_1: { type: 'text' },
+          },
+        },
         aliases: undefined,
         components: [],
       },
@@ -49,6 +53,11 @@ describe('buildTemplateFromWizardData', () => {
     expect(result.dataStream).toEqual({
       hidden: true,
       anyUnknownKey: 'should_be_kept',
+    });
+    expect(result.template?.mappings).toEqual({
+      properties: {
+        field_1: { type: 'text' },
+      },
     });
     expect(result.version).toBe(1);
     expect(Object.prototype.hasOwnProperty.call(result, 'lifecycle')).toBe(false);
@@ -286,5 +295,127 @@ describe('buildTemplateFromWizardData', () => {
     expect(result._kbnMeta).toEqual(initialTemplate._kbnMeta);
     expect(result.deprecated).toBe(true);
     expect(result.ignoreMissingComponentTemplates).toEqual(['initial_missing_component']);
+  });
+
+  test('builds clone payload shape when wizard keeps template sections', () => {
+    const initialTemplate: TemplateDeserialized = {
+      name: 'my_template-copy',
+      indexPatterns: ['index-1'],
+      priority: 3,
+      version: 1,
+      allowAutoCreate: 'NO_OVERWRITE',
+      indexMode: 'standard',
+      dataStream: {},
+      template: {
+        settings: { index: { number_of_shards: 1 } },
+        mappings: { properties: { field_1: { type: 'keyword' } } },
+        aliases: { my_alias: { is_write_index: true } },
+      },
+      ignoreMissingComponentTemplates: [],
+      composedOf: ['component_1'],
+      _kbnMeta: {
+        type: 'default',
+        hasDatastream: false,
+        isLegacy: false,
+      },
+    };
+
+    const { _kbnMeta: _ignoredKbnMeta, template: _ignoredTemplate, ...logistics } = initialTemplate;
+
+    const result = buildTemplateFromWizardData({
+      initialTemplate,
+      wizardData: {
+        logistics,
+        settings: initialTemplate.template?.settings,
+        mappings: initialTemplate.template?.mappings,
+        aliases: initialTemplate.template?.aliases,
+        components: initialTemplate.composedOf,
+      },
+    });
+
+    expect(result).toEqual({
+      ...logistics,
+      _kbnMeta: initialTemplate._kbnMeta,
+      deprecated: initialTemplate.deprecated,
+      composedOf: initialTemplate.composedOf,
+      template: initialTemplate.template,
+      ignoreMissingComponentTemplates: [],
+    });
+  });
+
+  test('includes composedOf + ignoreMissingComponentTemplates for missing component templates', () => {
+    const missing = 'component_template@custom';
+    const initialTemplate: TemplateDeserialized = {
+      name: 'template_with_missing_component',
+      indexPatterns: ['indexPattern1'],
+      dataStream: {},
+      indexMode: 'standard',
+      template: {},
+      allowAutoCreate: 'NO_OVERWRITE',
+      ignoreMissingComponentTemplates: [missing],
+      composedOf: [],
+      _kbnMeta: {
+        type: 'default',
+        hasDatastream: false,
+        isLegacy: false,
+      },
+    };
+
+    const { _kbnMeta: _ignoredKbnMeta, template: _ignoredTemplate, ...logistics } = initialTemplate;
+
+    const result = buildTemplateFromWizardData({
+      initialTemplate,
+      wizardData: {
+        logistics,
+        settings: undefined,
+        mappings: undefined,
+        aliases: undefined,
+        components: [missing],
+      },
+    });
+
+    expect(result.composedOf).toEqual([missing]);
+    expect(result.ignoreMissingComponentTemplates).toEqual([missing]);
+  });
+
+  test('preserves legacy mappings types in mappings payload', () => {
+    const initialTemplate: TemplateDeserialized = {
+      name: 'legacy_template',
+      indexPatterns: ['indexPattern1'],
+      dataStream: {},
+      indexMode: 'standard',
+      template: {},
+      allowAutoCreate: 'NO_OVERWRITE',
+      ignoreMissingComponentTemplates: [],
+      composedOf: [],
+      _kbnMeta: {
+        type: 'default',
+        hasDatastream: false,
+        isLegacy: true,
+      },
+    };
+
+    const { _kbnMeta: _ignoredKbnMeta, template: _ignoredTemplate, ...logistics } = initialTemplate;
+
+    const legacyMappings = {
+      my_mapping_type: {
+        properties: {
+          field_1: { type: 'keyword' },
+        },
+      },
+    };
+
+    const result = buildTemplateFromWizardData({
+      initialTemplate,
+      wizardData: {
+        logistics,
+        settings: undefined,
+        mappings: legacyMappings,
+        aliases: undefined,
+        components: [],
+      },
+    });
+
+    expect(result.template?.mappings).toEqual(legacyMappings);
   });
 });

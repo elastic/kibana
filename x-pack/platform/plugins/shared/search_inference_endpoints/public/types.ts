@@ -12,10 +12,10 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
@@ -31,9 +31,9 @@ export interface AppPluginStartDependencies {
   share: SharePluginStart;
   console?: ConsolePluginStart;
   licensing: LicensingPluginStart;
-  ml: MlPluginStart;
   serverless?: ServerlessPluginStart;
   cloud?: CloudStart;
+  cloudConnect?: CloudConnectedPluginStart;
 }
 
 export interface AppPluginSetupDependencies {
@@ -43,7 +43,6 @@ export interface AppPluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
-  ml: MlPluginSetup;
   share: SharePluginSetup;
   serverless?: ServerlessPluginSetup;
 }

@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  savedSearchMock,
-  savedSearchMockWithTimeField,
-} from '../../../../../__mocks__/saved_search';
 import type {
   DiscoverSessionSaveModalOnSaveCallback,
   DiscoverSessionSaveModalProps,
 } from './save_modal';
 import type { OnSaveDiscoverSessionParams } from './on_save_discover_session';
 import { onSaveDiscoverSession } from './on_save_discover_session';
-import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ReactElement } from 'react';
 import type { DiscoverServices } from '../../../../../build_services';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
@@ -27,10 +23,15 @@ import {
   fromTabStateToSavedObjectTab,
   internalStateActions,
 } from '../../../state_management/redux';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { getTabStateMock } from '../../../state_management/redux/__mocks__/internal_state.mocks';
+import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import {
+  getPersistedTabMock,
+  getTabStateMock,
+} from '../../../state_management/redux/__mocks__/internal_state.mocks';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 
 const mockShowSaveModal = jest.mocked(showSaveModal);
 
@@ -52,8 +53,26 @@ const getOnSaveProps = (props?: Partial<OnSaveProps>): OnSaveProps => ({
   ...props,
 });
 
+const defaultServices = createDiscoverServicesMock();
+
+const defaultPersistedDiscoverSession = createDiscoverSessionMock({
+  id: 'the-saved-search-id',
+  title: 'A saved search',
+  description: 'description',
+  managed: false,
+  tags: [],
+  tabs: [
+    getPersistedTabMock({
+      tabId: 'the-saved-search-id',
+      dataView: dataViewMock,
+      services: defaultServices,
+    }),
+  ],
+});
+
 const setup = async ({
-  savedSearch = savedSearchMock,
+  persistedDiscoverSession = defaultPersistedDiscoverSession,
+  initialTabDataView,
   additionalPersistedTabs,
   dataViewsList,
   services = createDiscoverServicesMock(),
@@ -67,7 +86,8 @@ const setup = async ({
   onSaveCb,
   onClose,
 }: {
-  savedSearch?: SavedSearch | false;
+  persistedDiscoverSession?: DiscoverSession | false;
+  initialTabDataView?: DataView;
   additionalPersistedTabs?: DiscoverSessionTab[];
   dataViewsList?: DataView[];
   services?: DiscoverServices;
@@ -75,33 +95,75 @@ const setup = async ({
   onSaveCb?: OnSaveDiscoverSessionParams['onSaveCb'];
   onClose?: OnSaveDiscoverSessionParams['onClose'];
 } = {}) => {
+  const finalPersistedSession =
+    persistedDiscoverSession === false
+      ? undefined
+      : additionalPersistedTabs
+      ? {
+          ...persistedDiscoverSession,
+          tabs: [...persistedDiscoverSession.tabs, ...additionalPersistedTabs],
+        }
+      : persistedDiscoverSession;
+
+  const allDataViews = [
+    ...(initialTabDataView ? [initialTabDataView] : []),
+    ...(dataViewsList ?? []),
+    dataViewMock,
+    dataViewMockWithTimeField,
+    dataViewWithTimefieldMock,
+  ];
+  const uniqueDataViews = allDataViews.filter(
+    (dv, index, self) => self.findIndex((d) => d.id === dv.id) === index
+  );
+
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: uniqueDataViews,
+  });
+
+  // Apply mock after creating toolkit since toolkit also mocks saveDiscoverSession
   jest
     .spyOn(services.savedSearch, 'saveDiscoverSession')
     .mockImplementation(mockSaveDiscoverSession);
-  const stateContainer = getDiscoverStateMock({
-    savedSearch,
-    additionalPersistedTabs,
-    services,
-  });
+
+  await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
+
+  // Initialize the current tab's runtime state to set up currentDataView$
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  // Ensure the current tab's data view is set for tests that depend on isTimeBased
+  if (initialTabDataView) {
+    toolkit.internalState.dispatch(
+      internalStateActions.setDataView({
+        tabId: toolkit.getCurrentTab().id,
+        dataView: initialTabDataView,
+      })
+    );
+  }
+
   if (dataViewsList) {
-    stateContainer.internalState.dispatch(
+    toolkit.internalState.dispatch(
       internalStateActions.loadDataViewList.fulfilled(
         dataViewsList as DataViewListItem[],
         'requestId'
       )
     );
   }
+
   let saveModal: ReactElement<DiscoverSessionSaveModalProps> | undefined;
   mockShowSaveModal.mockImplementation((modal) => {
     saveModal = modal as ReactElement<DiscoverSessionSaveModalProps>;
   });
+
   await onSaveDiscoverSession({
     services,
-    state: stateContainer,
+    dispatch: toolkit.internalState.dispatch,
+    getState: toolkit.internalState.getState,
+    runtimeStateManager: toolkit.runtimeStateManager,
     onSaveCb,
     onClose,
   });
-  return { stateContainer, saveModal };
+  return { toolkit, saveModal };
 };
 
 describe('onSaveDiscoverSession', () => {
@@ -113,16 +175,19 @@ describe('onSaveDiscoverSession', () => {
     it('should skip the modal and immediately save and return the serialisable state', async () => {
       const services = createDiscoverServicesMock();
       jest.spyOn(services.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
-      jest
-        .spyOn(services.embeddableEditor, 'getByValueInput')
-        .mockReturnValue({ id: 'mock-session' } as DiscoverSessionTab);
+      const byValueTab = getPersistedTabMock({
+        tabId: 'mock-session',
+        dataView: dataViewMock,
+        services,
+      });
+      jest.spyOn(services.embeddableEditor, 'getByValueInput').mockReturnValue(byValueTab);
       jest.spyOn(services.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
 
       const onSaveCb = jest.fn();
 
       const { saveModal } = await setup({
-        savedSearch: {
-          ...savedSearchMock,
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
           managed: true,
         },
         onSaveCb,
@@ -139,8 +204,8 @@ describe('onSaveDiscoverSession', () => {
     it('should call showSaveModal and set expected props', async () => {
       const services = createDiscoverServicesMock();
       const { saveModal } = await setup({
-        savedSearch: {
-          ...savedSearchMock,
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
           managed: true,
         },
         services,
@@ -219,7 +284,7 @@ describe('onSaveDiscoverSession', () => {
         [
           'initialized tab',
           {
-            savedSearch: savedSearchMockWithTimeField,
+            initialTabDataView: dataViewWithTimefieldMock,
             additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
             dataViewsList: [dataViewMock],
           },
@@ -273,7 +338,7 @@ describe('onSaveDiscoverSession', () => {
 
     it('should set showCopyOnSave to true if a persisted Discover session exists', async () => {
       const services = createDiscoverServicesMock();
-      let { saveModal } = await setup({ services, savedSearch: false });
+      let { saveModal } = await setup({ services, persistedDiscoverSession: false });
       expect(saveModal?.props.showCopyOnSave).toBe(false);
       ({ saveModal } = await setup({ services }));
       expect(saveModal?.props.showCopyOnSave).toBe(true);
@@ -281,8 +346,8 @@ describe('onSaveDiscoverSession', () => {
 
     it('should pass tags to the save modal', async () => {
       const { saveModal } = await setup({
-        savedSearch: {
-          ...savedSearchMock,
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
           tags: ['tag1', 'tag2'],
         },
       });
@@ -290,46 +355,46 @@ describe('onSaveDiscoverSession', () => {
     });
 
     it('should update tags if savedObjectsTagging is defined', async () => {
-      const savedSearch: SavedSearch = {
-        ...savedSearchMock,
-        tags: ['tag1', 'tag2'],
-      };
-      const { stateContainer, saveModal } = await setup({ savedSearch });
+      const { toolkit, saveModal } = await setup({
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
+          tags: ['tag1', 'tag2'],
+        },
+      });
       await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-      expect(stateContainer.internalState.getState().persistedDiscoverSession?.tags).toEqual([
+      expect(toolkit.internalState.getState().persistedDiscoverSession?.tags).toEqual([
         'tag3',
         'tag4',
       ]);
     });
 
     it('should not update tags if savedObjectsTagging is undefined', async () => {
-      const savedSearch: SavedSearch = {
-        ...savedSearchMock,
-        tags: ['tag1', 'tag2'],
-      };
-      const { stateContainer, saveModal } = await setup({
-        savedSearch,
+      const { toolkit, saveModal } = await setup({
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
+          tags: ['tag1', 'tag2'],
+        },
         services: { ...createDiscoverServicesMock(), savedObjectsTagging: undefined },
       });
       await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-      expect(stateContainer.internalState.getState().persistedDiscoverSession?.tags).toEqual([
+      expect(toolkit.internalState.getState().persistedDiscoverSession?.tags).toEqual([
         'tag1',
         'tag2',
       ]);
     });
 
     it('should return the Discover session ID on save', async () => {
-      const { saveModal } = await setup({ savedSearch: savedSearchMock });
+      const { saveModal } = await setup();
       const result = await saveModal?.props.onSave(getOnSaveProps());
-      expect(result).toEqual({ id: savedSearchMock.id });
+      expect(result).toEqual({ id: defaultPersistedDiscoverSession.id });
     });
 
     it('should call onSaveCb on save if provided', async () => {
       const onSaveCb = jest.fn();
-      let { saveModal } = await setup({ savedSearch: savedSearchMock, onSaveCb });
+      let { saveModal } = await setup({ onSaveCb });
       await saveModal?.props.onSave(getOnSaveProps());
       expect(onSaveCb).toHaveBeenCalledTimes(1);
-      ({ saveModal } = await setup({ savedSearch: false, onSaveCb }));
+      ({ saveModal } = await setup({ persistedDiscoverSession: false, onSaveCb }));
       await saveModal?.props.onSave(getOnSaveProps());
       expect(onSaveCb).toHaveBeenCalledTimes(2);
     });
@@ -337,20 +402,21 @@ describe('onSaveDiscoverSession', () => {
     it('should navigate to new Discover session on save if onSaveCb is not provided', async () => {
       const services = createDiscoverServicesMock();
       const navigateSpy = jest.spyOn(services.locator, 'navigate');
-      let { saveModal } = await setup({ services });
+      const { saveModal } = await setup({ services });
       await saveModal?.props.onSave(getOnSaveProps());
       expect(navigateSpy).not.toHaveBeenCalled();
-      ({ saveModal } = await setup({
-        savedSearch: false,
+      const { saveModal: newSaveModal, toolkit: newToolkit } = await setup({
+        persistedDiscoverSession: false,
         services,
-      }));
-      await saveModal?.props.onSave(getOnSaveProps());
+      });
+      await newSaveModal?.props.onSave(getOnSaveProps());
       expect(navigateSpy).toHaveBeenCalledWith({
         savedSearchId: 'new-session',
         tab: {
-          id: 'stable-test-initial-tab-id',
+          id: newToolkit.getCurrentTab().id,
         },
       });
+      expect(newToolkit.internalState.getState().persistedDiscoverSession?.id).toBe('new-session');
     });
 
     it('should show a success toast on save', async () => {

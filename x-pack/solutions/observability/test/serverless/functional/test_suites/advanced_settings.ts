@@ -12,6 +12,8 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -46,7 +48,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         if (
           settingId === OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS ||
           settingId === OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY ||
-          settingId === OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS
+          settingId === OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS ||
+          settingId === OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS ||
+          settingId === OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE
         ) {
           continue;
         }

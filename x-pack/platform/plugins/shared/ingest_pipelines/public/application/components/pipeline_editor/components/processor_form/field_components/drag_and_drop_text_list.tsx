@@ -160,7 +160,7 @@ function DragAndDropTextListComponent({
                         <EuiFlexGroup css={styles.item} justifyContent="center" gutterSize="none">
                           <EuiFlexItem grow={false}>
                             <div {...provided.dragHandleProps} css={styles.grabIcon}>
-                              <EuiIcon type="grab" />
+                              <EuiIcon type="dragVertical" />
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem>
@@ -199,7 +199,7 @@ function DragAndDropTextListComponent({
                               <EuiButtonIcon
                                 aria-label={i18nTexts.removeItemButtonAriaLabel}
                                 css={styles.removeButton}
-                                iconType="minusInCircle"
+                                iconType="minusCircle"
                                 color="danger"
                                 onClick={() => onRemove(item.id)}
                                 size="s"
@@ -217,7 +217,7 @@ function DragAndDropTextListComponent({
               })}
             </EuiDroppable>
           </EuiDragDropContext>
-          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd} data-test-subj="addButton">
+          <EuiButtonEmpty iconType="plusCircle" onClick={onAdd} data-test-subj="addButton">
             {addLabel}
           </EuiButtonEmpty>
         </div>

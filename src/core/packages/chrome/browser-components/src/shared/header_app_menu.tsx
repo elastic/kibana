@@ -8,8 +8,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { useChromeComponentsDeps } from '../context';
+import { useAppMenu } from './chrome_hooks';
 
 const AppMenu = lazy(async () => {
   const { AppMenuComponent } = await import('@kbn/core-chrome-app-menu-components');
@@ -17,14 +16,15 @@ const AppMenu = lazy(async () => {
 });
 
 export const HeaderAppMenu = () => {
-  const { appMenu$ } = useChromeComponentsDeps();
-  const menuConfig = useObservable(appMenu$, undefined);
+  const menuConfig = useAppMenu();
 
-  if (menuConfig) {
-    return (
-      <Suspense>
-        <AppMenu config={menuConfig} />
-      </Suspense>
-    );
+  if (!menuConfig) {
+    return null;
   }
+
+  return (
+    <Suspense>
+      <AppMenu config={menuConfig} />
+    </Suspense>
+  );
 };

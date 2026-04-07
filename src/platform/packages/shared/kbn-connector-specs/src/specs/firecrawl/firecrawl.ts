@@ -18,7 +18,6 @@ import {
   CrawlAndWaitInputSchema,
   GetCrawlStatusInputSchema,
 } from './types';
-
 const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
 
 /** Max characters of markdown to include per page in crawlAndWait output. */
@@ -83,10 +82,11 @@ export const FirecrawlConnector: ConnectorSpec = {
     id: '.firecrawl',
     displayName: 'Firecrawl',
     description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.metadata.description', {
-      defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API.',
+      defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

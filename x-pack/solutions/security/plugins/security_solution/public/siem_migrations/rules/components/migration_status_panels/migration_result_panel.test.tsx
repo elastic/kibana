@@ -124,6 +124,18 @@ describe('RuleMigrationResultPanel', () => {
     await waitFor(() => expect(screen.getByTestId('translatedResultsTable')).toBeInTheDocument());
   });
 
+  it('renders correct translation status counts', async () => {
+    renderTestComponent();
+    await waitFor(() => expect(screen.getByTestId('translatedResultsTable')).toBeInTheDocument());
+
+    expect(screen.getByTestId('translationStatusCount-Translated')).toHaveTextContent('1');
+    expect(screen.getByTestId('translationStatusCount-Partially translated')).toHaveTextContent(
+      '2'
+    );
+    expect(screen.getByTestId('translationStatusCount-Not translated')).toHaveTextContent('3');
+    expect(screen.getByTestId('translationStatusCount-Failed')).toHaveTextContent('4');
+  });
+
   it('renders upload missing panel', () => {
     mockGetMissingResources.mockReturnValue([{}]);
     renderTestComponent();

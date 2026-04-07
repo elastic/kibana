@@ -42,7 +42,7 @@ const AssigneesButton: FC<{
         { defaultMessage: 'Update assignees' }
       )}
       data-test-subj={HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={onClick}
       isDisabled={isDisabled}
     />
@@ -81,6 +81,7 @@ export const Assignees = memo(() => {
     attacksWithAssignees,
     closePopover,
     onSuccess,
+    telemetrySource: 'attacks_page_flyout_header',
   });
 
   const uids = useMemo(() => new Set(assignees), [assignees]);

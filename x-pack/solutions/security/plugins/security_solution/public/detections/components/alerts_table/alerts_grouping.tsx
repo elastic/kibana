@@ -20,6 +20,7 @@ import {
 } from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { estypes } from '@elastic/elasticsearch';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type {
   GetAdditionalActionButtons,
@@ -124,6 +125,11 @@ export interface AlertsTableComponentProps {
    * Sort order for the grouping results.
    */
   sort?: GroupingSort;
+
+  /**
+   * Filter specifically for the unitsCount aggregation
+   */
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -429,6 +435,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
           onAggregationsChange={props.onAggregationsChange}
           additionalToolbarControls={props.additionalToolbarControls}
+          unitsCountFilter={props.unitsCountFilter}
         />
       );
     },

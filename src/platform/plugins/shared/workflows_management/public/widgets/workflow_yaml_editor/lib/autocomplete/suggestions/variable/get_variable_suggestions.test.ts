@@ -65,6 +65,8 @@ describe('getVariableSuggestions', () => {
       totalWorkflows: 0,
     },
     isInLiquidBlock: false,
+    isInTriggerConditionField: false,
+    triggerConditionDefinition: undefined,
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: false,
     isInTriggersContext: false,
