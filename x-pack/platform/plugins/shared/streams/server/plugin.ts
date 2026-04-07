@@ -356,65 +356,64 @@ export class StreamsPlugin
 
           if (streamsSettings?.wired_streams_disabled_by_user) {
             this.logger.info('Wired streams are disabled by user, skipping preconfiguration');
-            return;
-          }
+          } else {
+            // Since the RulesClient cannot be unscoped, we provide a stub client that
+            // will throw an error if rules or queries exist in the stream definition.
+            // This is a limitation of the config-based streams for now.
+            const rulesClient = {
+              bulkGetRules() {
+                throw new Error('Not implemented');
+              },
+              create() {
+                throw new Error('Not implemented');
+              },
+              update() {
+                throw new Error('Not implemented');
+              },
+            } as unknown as RulesClient;
 
-          // Since the RulesClient cannot be unscoped, we provide a stub client that
-          // will throw an error if rules or queries exist in the stream definition.
-          // This is a limitation of the config-based streams for now.
-          const rulesClient = {
-            bulkGetRules() {
-              throw new Error('Not implemented');
-            },
-            create() {
-              throw new Error('Not implemented');
-            },
-            update() {
-              throw new Error('Not implemented');
-            },
-          } as unknown as RulesClient;
+            const [attachmentClient, featureClient, queryClient] = await Promise.all([
+              attachmentService.getClient({ soClient, rulesClient }),
+              featureService.getClient(),
+              queryService.getClient({ esClient, soClient, rulesClient }),
+            ]);
 
-          const [attachmentClient, featureClient, queryClient] = await Promise.all([
-            attachmentService.getClient({ soClient, rulesClient }),
-            featureService.getClient(),
-            queryService.getClient({ esClient, soClient, rulesClient }),
-          ]);
+            const streamsClient = await streamsService.getClient({
+              attachmentClient,
+              queryClient,
+              featureClient,
+              esClient,
+              esClientAsInternalUser: esClient,
+              uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+              isSecurityEnabled: false,
+            });
 
-          const streamsClient = await streamsService.getClient({
-            attachmentClient,
-            queryClient,
-            featureClient,
-            esClient,
-            esClientAsInternalUser: esClient,
-            uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
-            isSecurityEnabled: false,
-          });
+            await streamsClient.enableStreams();
 
-          await streamsClient.enableStreams();
-
-          await streamsClient.bulkUpsert(
-            this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
-              name,
-              request: Streams.all.UpsertRequest.parse(
-                ROOT_STREAM_NAMES.includes(name)
-                  ? {
-                      ...definition,
-                      stream: {
-                        ...definition.stream,
-                        ingest: {
-                          ...definition.stream.ingest,
-                          wired: {
-                            ...definition.stream.ingest.wired,
-                            fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+            await streamsClient.bulkUpsert(
+              this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
+                name,
+                request: Streams.all.UpsertRequest.parse(
+                  ROOT_STREAM_NAMES.includes(name)
+                    ? {
+                        ...definition,
+                        stream: {
+                          ...definition.stream,
+                          ingest: {
+                            ...definition.stream.ingest,
+                            wired: {
+                              ...definition.stream.ingest.wired,
+                              fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+                            },
                           },
                         },
-                      },
-                    }
-                  : definition
-              ),
-            }))
-          );
-          this.logger.info('Streams preconfigured successfully');
+                      }
+                    : definition
+                ),
+              }))
+            );
+            this.logger.info('Streams preconfigured successfully');
+          }
         }
 
         startupUiSettingsClient
