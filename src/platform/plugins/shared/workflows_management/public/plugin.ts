@@ -8,7 +8,7 @@
  */
 
 import { Subject, type Subscription } from 'rxjs';
-import { filter, map, pairwise, startWith } from 'rxjs';
+import { filter } from 'rxjs';
 import {
   type AppDeepLinkLocations,
   type AppMountParameters,
@@ -52,7 +52,6 @@ export class WorkflowsPlugin
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
   private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
-  private isWorkflowsUiEnabled = false;
   private settingsSubscription?: Subscription;
 
   constructor() {
@@ -68,13 +67,12 @@ export class WorkflowsPlugin
     this.telemetryService.setup({ analytics: core.analytics });
 
     // Check if workflows UI is enabled
-    this.isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
-
+    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, true);
     /* **************************************************************************************************************************** */
     /* WARNING: DO NOT ADD ANYTHING ABOVE THIS LINE, which can expose workflows UI to users who don't have the feature flag enabled */
     /* **************************************************************************************************************************** */
     // Return early if workflows UI is not enabled, do not register the connector type and UI
-    if (!this.isWorkflowsUiEnabled) {
+    if (!isWorkflowsUiEnabled) {
       return {};
     }
 
@@ -143,11 +141,9 @@ export class WorkflowsPlugin
     this.settingsSubscription = core.settings.client
       .getUpdate$()
       .pipe(
-        filter(({ key }) => key === WORKFLOWS_UI_SETTING_ID),
-        map(({ newValue }) => newValue as boolean),
-        startWith(this.isWorkflowsUiEnabled),
-        pairwise(),
-        filter(([prev, curr]) => prev === true && curr === false)
+        filter(({ key, oldValue, newValue }) => {
+          return key === WORKFLOWS_UI_SETTING_ID && oldValue === true && newValue === false;
+        })
       )
       .subscribe(() => {
         core.http

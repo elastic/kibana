@@ -7,19 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsRouter } from '../../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management_api';
+import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerDisableAllWorkflowsRoute({
-  router,
-  api,
-}: {
-  router: WorkflowsRouter;
-  api: WorkflowsManagementApi;
-}) {
+export function registerDisableAllWorkflowsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .post({
       path: '/internal/workflows/disable_all_workflows',
