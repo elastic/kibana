@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EVALS_RUNS_URL,
@@ -290,6 +291,12 @@ export const useEvaluationRun = (runId: string) => {
       return services.http!.get<GetEvaluationRunResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
+    },
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
     },
   });
 };
