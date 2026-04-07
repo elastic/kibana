@@ -16,7 +16,7 @@ import type {
   DashboardUpdateOut,
 } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { getDashboardBackupService } from '../../dashboard_backup_service';
+import { getDashboardBackupService } from '../../dashboard_api_services';
 import { contentManagementService, coreServices } from '../../kibana_services';
 import type { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
