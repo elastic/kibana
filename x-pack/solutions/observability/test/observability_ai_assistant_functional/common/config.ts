@@ -107,6 +107,8 @@ async function getTestConfig({
       ...testConfig.get('kbnTestServer'),
       serverArgs: [
         ...testConfig.get('kbnTestServer.serverArgs'),
+        // Suppress Agent Builder announcement modal so it does not overlay test UI.
+        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
         ...(kibanaConfig
           ? Object.entries(kibanaConfig).map(([key, value]) =>
               Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
