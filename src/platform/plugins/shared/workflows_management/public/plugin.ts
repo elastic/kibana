@@ -136,14 +136,7 @@ export class WorkflowsPlugin
   private setupAiIntegration(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
   ): void {
-    let registered = false;
-
     const register = async () => {
-      if (registered) {
-        return;
-      }
-      registered = true;
-
       const aiIntegrationModule = import('./features/ai_integration');
 
       this.agentBuilderPromise = core.plugins
