@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/core-http-browser'
-  - '@kbn/lens-common'
 tags:
   - plugin
   - prod
