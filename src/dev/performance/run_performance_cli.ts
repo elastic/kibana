@@ -138,6 +138,7 @@ const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?
   if (journeyPath && fs.statSync(journeyPath).isFile()) {
     return [{ name: path.parse(journeyPath).name, path: journeyPath }];
   } else {
+    // default dir is x-pack/performance/journeys_e2e
     const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
     return getAllJourneys(dir);
   }
