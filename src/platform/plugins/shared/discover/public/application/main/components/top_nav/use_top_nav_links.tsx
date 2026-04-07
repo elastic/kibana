@@ -398,7 +398,6 @@ export const useTopNavLinks = ({
     getState,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
-    showCreateRuleV2,
     transferBackToEditor,
     persistedDiscoverSession,
     onOpenSaveModal,

@@ -10,39 +10,66 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useTopNavLinks } from './use_top_nav_links';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import { internalStateActions } from '../../state_management/redux';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { DiscoverServices } from '../../../../build_services';
 
 jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
-  useGetRuleTypesPermissions: jest.fn().mockReturnValue({ authorizedRuleTypes: [] }),
+  useGetRuleTypesPermissions: jest.fn(() => ({
+    authorizedRuleTypes: [
+      {
+        id: '.es-query',
+        authorizedConsumers: {
+          discover: { all: true, read: true },
+        },
+      },
+    ],
+  })),
 }));
 
-describe('useTopNavLinks', () => {
-  const getServices = () => {
-    const services = createDiscoverServicesMock();
-    const uiSettingsGetMock = services.uiSettings.get;
+const createTestServices = (overrides: Partial<DiscoverServices> = {}): DiscoverServices => {
+  const services = createDiscoverServicesMock();
+  const uiSettingsGetMock = services.uiSettings.get;
 
-    services.share = sharePluginMock.createStartContract();
-    services.application.currentAppId$ = new BehaviorSubject('discover');
-    services.capabilities.discover_v2 = {
-      save: true,
-      storeSearchSession: true,
-    };
-    services.uiSettings.get = <T,>(key: string) => {
-      return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
-    };
-
-    return services;
+  services.share = sharePluginMock.createStartContract();
+  services.application.currentAppId$ = new BehaviorSubject('discover');
+  services.capabilities.discover_v2 = {
+    save: true,
+    storeSearchSession: true,
+  };
+  services.capabilities.management = {
+    ...services.capabilities.management,
+    insightsAndAlerting: {
+      triggersActions: true,
+    },
+  };
+  services.uiSettings.get = <T,>(key: string) => {
+    return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
   };
 
+  // Apply overrides
+  return {
+    ...services,
+    ...overrides,
+    capabilities: {
+      ...services.capabilities,
+      ...overrides.capabilities,
+    },
+  } as DiscoverServices;
+};
+
+describe('useTopNavLinks', () => {
   const setup = async (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
-    const services = hookAttrs.services ?? getServices();
+    const services = hookAttrs.services ?? createTestServices();
     const toolkit = getDiscoverInternalStateMock({ services });
 
     await toolkit.initializeTabs();
@@ -115,7 +142,7 @@ describe('useTopNavLinks', () => {
 
   describe('when share service included', () => {
     it('should include the share menu item', async () => {
-      const services = getServices();
+      const services = createTestServices();
 
       jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
 
@@ -130,7 +157,7 @@ describe('useTopNavLinks', () => {
     });
 
     it('should include the export menu item', async () => {
-      const services = getServices();
+      const services = createTestServices();
 
       jest
         .spyOn(services.share!, 'availableIntegrations')
@@ -164,7 +191,7 @@ describe('useTopNavLinks', () => {
 
   describe('when background search is enabled', () => {
     it('should return the background search menu item', async () => {
-      const services = getServices();
+      const services = createTestServices();
       services.data.search.isBackgroundSearchEnabled = true;
       const appMenuConfig = await setup({ services });
 
@@ -200,6 +227,35 @@ describe('useTopNavLinks', () => {
 
       const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
       expect(inspectItem).toBeUndefined();
+    });
+  });
+
+  describe('save as button', () => {
+    it('should disable save as button when session is not persisted', async () => {
+      const appMenuConfig = await setup({ persistedDiscoverSession: undefined });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+
+      expect(saveAsItem?.disableButton).toBe(true);
+    });
+
+    it('should enable save as button when session is persisted', async () => {
+      const persistedSession = {
+        id: 'test-session-id',
+        title: 'Test Session',
+        description: 'Test Description',
+        tags: [],
+        managed: false,
+        tabs: [],
+        timeRestore: false,
+      };
+      const appMenuConfig = await setup({ persistedDiscoverSession: persistedSession });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+
+      expect(saveAsItem?.disableButton).toBe(false);
     });
   });
 
@@ -282,34 +338,6 @@ describe('useTopNavLinks', () => {
     });
   });
 
-  describe('save as button', () => {
-    it('should disable save as button when session is not persisted', async () => {
-      const appMenuConfig = await setup({ persistedDiscoverSession: undefined });
-
-      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
-      const saveAsItem = items?.find((item) => item.id === 'saveAs');
-
-      expect(saveAsItem?.disableButton).toBe(true);
-    });
-
-    it('should enable save as button when session is persisted', async () => {
-      const persistedSession = {
-        id: 'test-session-id',
-        title: 'Test Session',
-        description: 'Test Description',
-        tags: [],
-        managed: false,
-        tabs: [],
-        timeRestore: false,
-      };
-      const appMenuConfig = await setup({ persistedDiscoverSession: persistedSession });
-
-      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
-      const saveAsItem = items?.find((item) => item.id === 'saveAs');
-
-      expect(saveAsItem?.disableButton).toBe(false);
-    });
-  });
   describe('alerting v2 rules menu', () => {
     const setupWithAlertingV2 = async (
       hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {},
@@ -357,6 +385,8 @@ describe('useTopNavLinks', () => {
             hasShareIntegration: false,
             persistedDiscoverSession: undefined,
             ...hookAttrs,
+            onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
+            onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
           }),
         {
           wrapper: ({ children }) => (
