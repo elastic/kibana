@@ -123,6 +123,8 @@ export const mapToCard = ({
     if ('deprecated' in item && item.deprecated) {
       isDeprecated = true;
       deprecationInfo = item.deprecated;
+    } else if (item.title && /\(deprecated\)/i.test(item.title)) {
+      isDeprecated = true;
     }
 
     const url = getHref('integration_details_overview', {

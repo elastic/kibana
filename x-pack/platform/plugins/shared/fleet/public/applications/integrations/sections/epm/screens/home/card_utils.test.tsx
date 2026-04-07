@@ -209,6 +209,38 @@ describe('Card utils', () => {
         },
       });
     });
+
+    it('should set isDeprecated to true when item title contains "(Deprecated)"', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'old-package',
+          name: 'old-package',
+          title: 'Old Package (Deprecated)',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({ isDeprecated: true });
+    });
+
+    it('should set isDeprecated to true when item title contains "(deprecated)" (lowercase)', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'old-package',
+          name: 'old-package',
+          title: 'Old Package (deprecated)',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({ isDeprecated: true });
+    });
   });
   describe('getIntegrationLabels', () => {
     it('should return an empty list for an integration without errors', () => {
