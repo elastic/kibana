@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.14>>
 * <<release-notes-8.19.13>>
 * <<release-notes-8.19.12>>
 * <<release-notes-8.19.11>>
@@ -119,6 +120,30 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.14]]
+== {kib} 8.19.14
+
+The 8.19.14 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.14]]
+=== Fixes
+Dashboards and Visualizations::
+*  Fixes Lens panels appearing to revert after inline edits until you refresh the page, even though changes are saved ({kibana-pull}256984[#256984]).
+Data ingestion and Fleet::
+* Fixes Fleet bulk agent actions (unenroll, upgrade, reassign to policy) not respecting the current space when selection uses a kuery filter ({kibana-pull}258582[#258582]).
+Data management::
+* Restores keyboard focus to the **Create a transform** button on the **Transforms** page ({kibana-pull}258095[#258095]).
+Elastic Observability solution::
+* Fixes alert tags on inventory threshold, metric threshold, and custom threshold rules when tags are provided as a string instead of an array ({kibana-pull}259729[#259729]).
+Elastic Security solution::
+For the Elastic Security 8.19.14 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Elasticsearch solution::
+* Fixes the query rules UI rejecting case variants as duplicate values ({kibana-pull}259506[#259506]).
+* Fixes only passing filtered rules to the API and deleting rules not matching the filter in the Query Rule Set editor ({kibana-pull}259503[#259503]).
+Machine Learning::
+* Fixes the anomaly swim lane dashboard panel not refreshing ({kibana-pull}259962[#259962]). 
 
 [[release-notes-8.19.13]]
 == {kib} 8.19.13

@@ -16,7 +16,7 @@ type SavedObjectTypeMigrationHash = string;
 export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigrationHash => {
   const migInfo = extractMigrationInfo(soType);
 
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
 
   const hashParts = [
     migInfo.name,
