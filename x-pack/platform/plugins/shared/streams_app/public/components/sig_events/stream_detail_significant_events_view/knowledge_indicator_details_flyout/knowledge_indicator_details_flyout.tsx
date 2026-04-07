@@ -46,8 +46,8 @@ export function KnowledgeIndicatorDetailsFlyout({
 
   const title =
     knowledgeIndicator.kind === 'feature'
-      ? (knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id)
-      : (knowledgeIndicator.query.title ?? knowledgeIndicator.query.id);
+      ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
+      : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
 
   const streamName =
     knowledgeIndicator.kind === 'feature'
@@ -103,9 +103,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               <>
                 <EuiFlexItem>
                   <KiMetadataCard title={CONFIDENCE_LABEL}>
-                    <EuiHealth
-                      color={getConfidenceColor(knowledgeIndicator.feature.confidence)}
-                    >
+                    <EuiHealth color={getConfidenceColor(knowledgeIndicator.feature.confidence)}>
                       {knowledgeIndicator.feature.confidence}
                     </EuiHealth>
                   </KiMetadataCard>
@@ -201,4 +199,3 @@ const QUERY_TYPE_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicatorDetailsFlyout.queryTypeLabel',
   { defaultMessage: 'Query' }
 );
-
