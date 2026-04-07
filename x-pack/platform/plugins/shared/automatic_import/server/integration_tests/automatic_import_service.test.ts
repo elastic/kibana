@@ -19,6 +19,7 @@ import type {
 import type { AutomaticImportPluginStartDependencies } from '..';
 import { AutomaticImportService } from '../services/automatic_import_service';
 import type { AutomaticImportSavedObjectService } from '../services/saved_objects/saved_objects_service';
+import type { IntegrationAttributes } from '../services/saved_objects/schemas/types';
 import { TASK_STATUSES } from '../services/saved_objects/constants';
 import {
   mockAuthenticatedUser,
@@ -162,5 +163,110 @@ describe('AutomaticImportService Integration Tests', () => {
     await expect(
       automaticImportService.getDataStreamResults('itest-integration-failed', 'itest-ds-failed')
     ).rejects.toThrow('failed and has no results');
+  });
+
+  describe('resetApprovedStatus on data stream deletion', () => {
+    it('should reset approved integration to completed when a data stream is deleted', async () => {
+      const savedObjectService = (
+        automaticImportService as unknown as {
+          savedObjectService: AutomaticImportSavedObjectService;
+        }
+      ).savedObjectService;
+
+      const integrationId = 'itest-reset-approved';
+
+      // Create integration with two data streams
+      await savedObjectService.insertIntegration(
+        { ...mockIntegrationParams, integrationId },
+        mockAuthenticatedUser
+      );
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId: 'itest-reset-ds-1',
+          jobInfo: {
+            jobId: 'job-r1',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.completed,
+          },
+        },
+        mockAuthenticatedUser
+      );
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId: 'itest-reset-ds-2',
+          jobInfo: {
+            jobId: 'job-r2',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.completed,
+          },
+        },
+        mockAuthenticatedUser
+      );
+
+      // Manually set the integration to approved status
+      const integration = await savedObjectService.getIntegration(integrationId);
+      const approvedData: IntegrationAttributes = {
+        ...integration,
+        status: TASK_STATUSES.approved,
+      };
+      await savedObjectService.updateIntegration(approvedData, '1.0.0');
+
+      // Verify it's approved
+      const beforeDelete = await savedObjectService.getIntegration(integrationId);
+      expect(beforeDelete.status).toBe(TASK_STATUSES.approved);
+
+      // Delete one data stream
+      await automaticImportService.deleteDataStream(integrationId, 'itest-reset-ds-1');
+
+      // Integration should now be completed, not approved
+      const afterDelete = await savedObjectService.getIntegration(integrationId);
+      expect(afterDelete.status).toBe(TASK_STATUSES.completed);
+    });
+
+    it('should not change status of a non-approved integration on data stream deletion', async () => {
+      const savedObjectService = (
+        automaticImportService as unknown as {
+          savedObjectService: AutomaticImportSavedObjectService;
+        }
+      ).savedObjectService;
+
+      const integrationId = 'itest-no-reset';
+
+      // Create integration with a completed data stream (status remains completed, not approved)
+      await savedObjectService.insertIntegration(
+        { ...mockIntegrationParams, integrationId },
+        mockAuthenticatedUser
+      );
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId: 'itest-no-reset-ds-1',
+          jobInfo: {
+            jobId: 'job-nr1',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.completed,
+          },
+        },
+        mockAuthenticatedUser
+      );
+
+      // Verify it's not approved
+      const beforeDelete = await savedObjectService.getIntegration(integrationId);
+      expect(beforeDelete.status).not.toBe(TASK_STATUSES.approved);
+
+      const statusBeforeDelete = beforeDelete.status;
+
+      // Delete the data stream
+      await automaticImportService.deleteDataStream(integrationId, 'itest-no-reset-ds-1');
+
+      // Status should remain unchanged
+      const afterDelete = await savedObjectService.getIntegration(integrationId);
+      expect(afterDelete.status).toBe(statusBeforeDelete);
+    });
   });
 });

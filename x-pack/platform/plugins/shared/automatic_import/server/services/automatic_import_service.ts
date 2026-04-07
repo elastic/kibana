@@ -404,8 +404,6 @@ export class AutomaticImportService {
       },
       authenticatedUser
     );
-
-    await this.resetApprovedStatus(dataStreamParams.integrationId);
   }
 
   public async getDataStream(
