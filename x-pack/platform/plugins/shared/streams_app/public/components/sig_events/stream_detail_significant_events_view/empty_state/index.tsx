@@ -137,7 +137,7 @@ const NO_SIGNIFICANT_EVENTS_IMAGE_ALT = i18n.translate(
 const ONBOARD_STREAM_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEvents.emptyState.onboardStreamButtonLabel',
   {
-    defaultMessage: 'Onboard stream',
+    defaultMessage: 'Generate knowledge indicators',
   }
 );
 
