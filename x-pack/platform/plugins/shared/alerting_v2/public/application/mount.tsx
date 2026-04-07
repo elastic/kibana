@@ -8,9 +8,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Container } from 'inversify';
-import { CoreSetup as DiCoreSetup } from '@kbn/core-di-browser';
 import type { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
-import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Context } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
@@ -42,16 +41,15 @@ interface AlertingV2MountParams {
 export const mountAlertingV2App = async ({
   params,
   container,
+  coreStart,
 }: {
   params: AlertingV2MountParams;
   container: Container;
+  coreStart: CoreStart;
 }): Promise<AppUnmount> => {
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
-
-  const getStartServices = container.get(DiCoreSetup('getStartServices'));
-  const [coreStart] = await getStartServices();
 
   ReactDOM.render(
     coreStart.rendering.addContext(
@@ -74,18 +72,17 @@ export const mountAlertingV2App = async ({
 export const mountEpisodesApp = async ({
   params,
   container,
+  coreStart,
 }: {
   params: ManagementAppMountParams;
   container: Container;
+  coreStart: CoreStart;
 }): Promise<AppUnmount> => {
   const { element, history, setBreadcrumbs } = params;
 
   element.classList.add(APP_WRAPPER_CLASS);
 
   const queryClient = new QueryClient();
-
-  const getStartServices = container.get(DiCoreSetup('getStartServices'));
-  const [coreStart] = await getStartServices();
 
   const data = container.get(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart;
@@ -135,16 +132,15 @@ export const mountEpisodesApp = async ({
 export const mountNotificationPoliciesApp = async ({
   params,
   container,
+  coreStart,
 }: {
   params: AlertingV2MountParams;
   container: Container;
+  coreStart: CoreStart;
 }): Promise<AppUnmount> => {
   const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
-
-  const getStartServices = container.get(DiCoreSetup('getStartServices'));
-  const [coreStart] = await getStartServices();
 
   ReactDOM.render(
     coreStart.rendering.addContext(

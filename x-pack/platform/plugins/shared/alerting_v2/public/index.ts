@@ -71,7 +71,11 @@ export const module = new ContainerModule(({ bind }) => {
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountAlertingV2App } = await import('./application/mount');
-        return mountAlertingV2App({ params, container: coreStart.injection.getContainer() });
+        return mountAlertingV2App({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
       },
     });
 
@@ -86,6 +90,7 @@ export const module = new ContainerModule(({ bind }) => {
         return mountEpisodesApp({
           params,
           container: coreStart.injection.getContainer(),
+          coreStart,
         });
       },
     });
@@ -100,6 +105,7 @@ export const module = new ContainerModule(({ bind }) => {
         return mountNotificationPoliciesApp({
           params,
           container: coreStart.injection.getContainer(),
+          coreStart,
         });
       },
     });
