@@ -195,20 +195,13 @@ describe('dimension editor', () => {
       };
       const clearIcon = async () => {
         const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
-        // Type 'None' to filter the options list to the "None" option
-        fireEvent.input(iconInput, { target: { value: 'None' } });
-        // Wait for the options list popover to appear
+        await userEvent.click(iconInput);
         const optionsList = await screen.findByTestId(
           'comboBoxOptionsList lns-icon-select-optionsList'
         );
-        // Find the "None" option in the options list
-        const noneOption = within(optionsList).getByText('None', { exact: true });
-        // Click the "None" option to clear the icon selection
-        if (noneOption) {
-          await userEvent.click(noneOption);
-        } else {
-          throw new Error(`none option not found`);
-        }
+        fireEvent.change(iconInput, { target: { value: 'None' } });
+        const noneOption = await within(optionsList).findByRole('option', { name: 'None' });
+        await userEvent.click(noneOption);
       };
 
       return {
