@@ -10,8 +10,10 @@ import { normalizeRelativePathSegments } from '@kbn/agent-builder-common';
 export { normalizeRelativePathSegments };
 
 /**
- * Builds the display path: `{skillFolder}/{normalizedRelativePath}/{fileName}.md`,
- * collapsing duplicate slashes between segments.
+ * Builds a human-friendly display path: `{skillFolder}/{subPath}/{fileName}.md`.
+ * Uses {@link normalizeRelativePathSegments} for validation-style normalization, then strips
+ * a leading `./` from the folder segment **only for this preview** (root becomes no extra segment).
+ * Collapses duplicate slashes between parts.
  */
 export const buildReferencedContentFullPathPreview = (
   skillFolderSegment: string,
@@ -19,9 +21,10 @@ export const buildReferencedContentFullPathPreview = (
   fileNameWithoutExtension: string
 ): string => {
   const normPath = normalizeRelativePathSegments(relativePath);
+  const previewSubPath = normPath === './' ? '' : normPath.replace(/^\.\//, '');
   const base = skillFolderSegment.trim();
   const name = fileNameWithoutExtension.trim();
   const file = name.length > 0 ? `${name}.md` : '.md';
-  const joined = [base, normPath, file].filter((segment) => segment.length > 0).join('/');
+  const joined = [base, previewSubPath, file].filter((segment) => segment.length > 0).join('/');
   return joined.replace(/\/{2,}/g, '/');
 };

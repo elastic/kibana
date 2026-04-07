@@ -23,14 +23,19 @@ describe('referenced_content_path_utils', () => {
   });
 
   describe('buildReferencedContentFullPathPreview', () => {
-    it('builds a preview with normalized slashes between segments', () => {
+    it('builds a preview without leading ./ in the folder segment', () => {
       expect(
         buildReferencedContentFullPathPreview('Email helper', './templates//notes', 'readme')
-      ).toBe('Email helper/./templates/notes/readme.md');
+      ).toBe('Email helper/templates/notes/readme.md');
+    });
+
+    it('omits a subfolder segment for skill root (./)', () => {
+      expect(buildReferencedContentFullPathPreview('foo', './', 'hello')).toBe('foo/hello.md');
+      expect(buildReferencedContentFullPathPreview('foo', '.', 'hello')).toBe('foo/hello.md');
     });
 
     it('collapses duplicate slashes produced when joining segments', () => {
-      expect(buildReferencedContentFullPathPreview('S', './a', 'f')).toBe('S/./a/f.md');
+      expect(buildReferencedContentFullPathPreview('S', './a', 'f')).toBe('S/a/f.md');
     });
   });
 });

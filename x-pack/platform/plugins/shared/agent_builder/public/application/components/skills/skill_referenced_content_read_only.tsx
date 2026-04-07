@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React from 'react';
 import {
   EuiAccordion,
@@ -59,7 +60,12 @@ export const SkillReferencedContentReadOnly: React.FC<SkillReferencedContentRead
             <EuiAccordion
               id={`agentBuilderSkillReferencedContentReadOnly-${index}`}
               buttonContent={
-                <EuiText size="s">
+                <EuiText
+                  size="s"
+                  css={css`
+                    padding-left: 5px;
+                  `}
+                >
                   <strong>{fullPath}</strong>
                 </EuiText>
               }
