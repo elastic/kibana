@@ -138,10 +138,9 @@ describe('useBootstrapPromotionRulesMutation', () => {
       bootstrapPromotionRulesMock.mockResolvedValue(response);
       const onSuccess = jest.fn();
 
-      const { result } = renderHook(
-        () => useBootstrapPromotionRulesMutation({ onSuccess }),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useBootstrapPromotionRulesMutation({ onSuccess }), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await result.current.mutateAsync();

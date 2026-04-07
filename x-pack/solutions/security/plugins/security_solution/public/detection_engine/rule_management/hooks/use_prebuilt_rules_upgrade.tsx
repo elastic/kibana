@@ -72,8 +72,11 @@ export function usePrebuiltRulesUpgrade({
   onUpgrade,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]);
-  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
+  const initState = useSecuritySolutionInitialization([
+    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  ]);
+  const isUpgradingSecurityPackages =
+    initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;

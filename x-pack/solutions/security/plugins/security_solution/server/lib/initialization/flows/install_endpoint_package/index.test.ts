@@ -29,18 +29,16 @@ const createMockSecurityContext = ({ isExternalDetectionsEnabled = false } = {})
       isEnabled: (key: string) =>
         key === ProductFeatureRulesKey.externalDetections && isExternalDetectionsEnabled,
     }),
-  }) as unknown;
+  } as unknown);
 
 const createMockInitializationFlowContext = ({
   isExternalDetectionsEnabled = false,
 } = {}): InitializationFlowContext =>
   ({
     requestHandlerContext: {
-      securitySolution: Promise.resolve(
-        createMockSecurityContext({ isExternalDetectionsEnabled })
-      ),
+      securitySolution: Promise.resolve(createMockSecurityContext({ isExternalDetectionsEnabled })),
     },
-  }) as unknown as InitializationFlowContext;
+  } as unknown as InitializationFlowContext);
 
 describe('installEndpointPackageFlow', () => {
   beforeEach(() => {
@@ -85,7 +83,9 @@ describe('installEndpointPackageFlow', () => {
 
       const result = await installEndpointPackageFlow.provision(
         {
-          securityContext: createMockSecurityContext({ isExternalDetectionsEnabled: true }) as never,
+          securityContext: createMockSecurityContext({
+            isExternalDetectionsEnabled: true,
+          }) as never,
           isExternalDetectionsEnabled: true,
         },
         logger
@@ -166,9 +166,7 @@ describe('installEndpointPackageFlow', () => {
         logger
       );
 
-      expect(logger.info).toHaveBeenCalledWith(
-        'Endpoint package initialized: "endpoint" v8.15.0'
-      );
+      expect(logger.info).toHaveBeenCalledWith('Endpoint package initialized: "endpoint" v8.15.0');
     });
 
     it('propagates errors from installEndpointPackage', async () => {

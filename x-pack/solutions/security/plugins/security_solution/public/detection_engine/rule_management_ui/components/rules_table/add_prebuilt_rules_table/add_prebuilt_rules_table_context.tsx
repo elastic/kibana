@@ -161,8 +161,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
-  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]);
-  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
+  const initState = useSecuritySolutionInitialization([
+    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  ]);
+  const isUpgradingSecurityPackages =
+    initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
   const isInstallingAllRules =
     useIsMutating({
       mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,

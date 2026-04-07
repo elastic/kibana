@@ -68,11 +68,14 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../../common/components/initialization/use_security_solution_initialization', () => ({
-  useSecuritySolutionInitialization: jest.fn().mockReturnValue({
-    'install-prebuilt-rules-package': { loading: false, result: { status: 'ready' } },
-  }),
-}));
+jest.mock(
+  '../../../../../common/components/initialization/use_security_solution_initialization',
+  () => ({
+    useSecuritySolutionInitialization: jest.fn().mockReturnValue({
+      'install-prebuilt-rules-package': { loading: false, result: { status: 'ready' } },
+    }),
+  })
+);
 
 jest.mock(
   '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review',

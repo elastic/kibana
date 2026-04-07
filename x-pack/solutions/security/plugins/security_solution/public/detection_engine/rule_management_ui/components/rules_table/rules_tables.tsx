@@ -78,8 +78,11 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const {
     rules: { read: canReadRules },
   } = useUserPrivileges().rulesPrivileges;
-  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]);
-  const isUpgradingSecurityPackages = initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
+  const initState = useSecuritySolutionInitialization([
+    INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
+  ]);
+  const isUpgradingSecurityPackages =
+    initState[INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE].loading;
 
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();

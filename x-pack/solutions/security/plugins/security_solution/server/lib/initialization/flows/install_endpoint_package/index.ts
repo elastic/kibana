@@ -30,9 +30,7 @@ export const installEndpointPackageFlow: InitializationFlowDefinition<InstallEnd
     },
     provision: async ({ securityContext, isExternalDetectionsEnabled }, logger: Logger) => {
       if (isExternalDetectionsEnabled) {
-        logger.debug(
-          'Endpoint package installation skipped: external detections is enabled'
-        );
+        logger.debug('Endpoint package installation skipped: external detections is enabled');
         return {
           status: INITIALIZATION_FLOW_STATUS_READY,
           payload: {

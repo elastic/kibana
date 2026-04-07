@@ -17,21 +17,22 @@ import { installSecurityAiPromptsPackage } from '../../../detection_engine/prebu
 
 jest.mock('../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts');
 
-const installSecurityAiPromptsPackageMock =
-  installSecurityAiPromptsPackage as jest.MockedFunction<typeof installSecurityAiPromptsPackage>;
+const installSecurityAiPromptsPackageMock = installSecurityAiPromptsPackage as jest.MockedFunction<
+  typeof installSecurityAiPromptsPackage
+>;
 
 const createMockSecurityContext = () =>
   ({
     getInternalFleetServices: jest.fn(),
     getAppClient: jest.fn(),
-  }) as unknown;
+  } as unknown);
 
 const createMockInitializationFlowContext = (): InitializationFlowContext =>
   ({
     requestHandlerContext: {
       securitySolution: Promise.resolve(createMockSecurityContext()),
     },
-  }) as unknown as InitializationFlowContext;
+  } as unknown as InitializationFlowContext);
 
 describe('installAiPromptsPackageFlow', () => {
   beforeEach(() => {
@@ -51,8 +52,10 @@ describe('installAiPromptsPackageFlow', () => {
       const logger = loggerMock.create();
       const context = createMockInitializationFlowContext();
 
-      const provisionContext =
-        await installAiPromptsPackageFlow.resolveProvisionContext(context, logger);
+      const provisionContext = await installAiPromptsPackageFlow.resolveProvisionContext(
+        context,
+        logger
+      );
 
       expect(provisionContext.securityContext).toBeDefined();
     });

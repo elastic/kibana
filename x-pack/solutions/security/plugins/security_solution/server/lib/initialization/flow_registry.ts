@@ -48,7 +48,10 @@ const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
 
 export class FlowInitializationError extends Error {}
 
-type FlowRunResult = { id: InitializationFlowId; result: FlowResult };
+interface FlowRunResult {
+  id: InitializationFlowId;
+  result: FlowResult;
+}
 
 // Deduplicates concurrent server-side executions of the same flow within the
 // same space. The key is `flowId:spaceId` so flows running in different spaces
@@ -106,9 +109,7 @@ const executeSingleFlow = async (
   } catch (err) {
     logger.error(`Initialization flow '${flowId}' failed: ${err.message}`);
     const errMessage =
-      err instanceof FlowInitializationError
-        ? err.message
-        : 'internal initialization flow error';
+      err instanceof FlowInitializationError ? err.message : 'internal initialization flow error';
     return {
       id: flowId,
       result: {

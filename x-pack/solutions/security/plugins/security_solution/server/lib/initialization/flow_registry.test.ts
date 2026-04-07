@@ -9,7 +9,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { InitializationFlowId } from '../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
-  INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
   INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
@@ -216,7 +215,9 @@ describe('runInitializationFlows', () => {
         './flows/install_prebuilt_rules_package'
       );
       const { installEndpointPackageFlow } = jest.requireMock('./flows/install_endpoint_package');
-      const { installAiPromptsPackageFlow } = jest.requireMock('./flows/install_ai_prompts_package');
+      const { installAiPromptsPackageFlow } = jest.requireMock(
+        './flows/install_ai_prompts_package'
+      );
 
       installPrebuiltRulesPackageFlow.provision.mockImplementation(async () => {
         executionOrder.push('prebuilt-rules');
@@ -294,7 +295,9 @@ describe('runInitializationFlows', () => {
       const aiPromptsStarted = jest.fn();
 
       const { installEndpointPackageFlow } = jest.requireMock('./flows/install_endpoint_package');
-      const { installAiPromptsPackageFlow } = jest.requireMock('./flows/install_ai_prompts_package');
+      const { installAiPromptsPackageFlow } = jest.requireMock(
+        './flows/install_ai_prompts_package'
+      );
 
       installEndpointPackageFlow.provision.mockImplementation(
         () =>
@@ -313,7 +316,10 @@ describe('runInitializationFlows', () => {
 
       const context = createMockContext();
       const promise = runInitializationFlows(
-        [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE, INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE],
+        [
+          INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
+          INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+        ],
         context,
         logger
       );
@@ -359,8 +365,14 @@ describe('runInitializationFlows', () => {
       const [response1, response2] = await Promise.all([promise1, promise2]);
 
       // Both get the same result
-      expect(response1.flows[flowA]).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY, payload: null });
-      expect(response2.flows[flowA]).toEqual({ status: INITIALIZATION_FLOW_STATUS_READY, payload: null });
+      expect(response1.flows[flowA]).toEqual({
+        status: INITIALIZATION_FLOW_STATUS_READY,
+        payload: null,
+      });
+      expect(response2.flows[flowA]).toEqual({
+        status: INITIALIZATION_FLOW_STATUS_READY,
+        payload: null,
+      });
 
       // provision was called only once
       expect(createListIndicesInitializationFlow.provision).toHaveBeenCalledTimes(1);

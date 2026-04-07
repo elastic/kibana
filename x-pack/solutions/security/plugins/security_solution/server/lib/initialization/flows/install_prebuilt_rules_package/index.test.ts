@@ -27,14 +27,14 @@ const createMockSecurityContext = () =>
     getInternalFleetServices: jest.fn(),
     getConfig: jest.fn(),
     getAppClient: jest.fn(),
-  }) as unknown;
+  } as unknown);
 
 const createMockInitializationFlowContext = (): InitializationFlowContext =>
   ({
     requestHandlerContext: {
       securitySolution: Promise.resolve(createMockSecurityContext()),
     },
-  }) as unknown as InitializationFlowContext;
+  } as unknown as InitializationFlowContext);
 
 describe('installPrebuiltRulesPackageFlow', () => {
   beforeEach(() => {
@@ -56,8 +56,10 @@ describe('installPrebuiltRulesPackageFlow', () => {
       const logger = loggerMock.create();
       const context = createMockInitializationFlowContext();
 
-      const provisionContext =
-        await installPrebuiltRulesPackageFlow.resolveProvisionContext(context, logger);
+      const provisionContext = await installPrebuiltRulesPackageFlow.resolveProvisionContext(
+        context,
+        logger
+      );
 
       expect(provisionContext.securityContext).toBeDefined();
     });
