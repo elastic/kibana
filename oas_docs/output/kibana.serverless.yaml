@@ -4024,6 +4024,15 @@ paths:
                   description: Example response showing that the deletion operation was successful
                   value:
                     success: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    description: Whether the record was successfully deleted.
+                    type: boolean
+                required:
+                  - success
           description: Indicates a successful response
       summary: Delete an SML record
       tags:
@@ -4085,6 +4094,63 @@ paths:
                     type: index
                     updated_at: '2026-04-01T00:00:00.000Z'
                     user_defined: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  content:
+                    description: The searchable content.
+                    type: string
+                  created_at:
+                    description: ISO 8601 creation timestamp.
+                    type: string
+                  id:
+                    description: The unique identifier of the SML record.
+                    type: string
+                  origin_id:
+                    description: The origin identifier.
+                    type: string
+                  params:
+                    additionalProperties: {}
+                    description: Type-specific parameters.
+                    type: object
+                  permissions:
+                    description: Kibana privileges required to access this record.
+                    items:
+                      type: string
+                    type: array
+                  spaces:
+                    description: Space IDs this record belongs to.
+                    items:
+                      type: string
+                    type: array
+                  tags:
+                    description: Optional tags for categorization and filtering.
+                    items:
+                      type: string
+                    type: array
+                  title:
+                    description: Display title for the record.
+                    type: string
+                  type:
+                    description: The SML record type.
+                    type: string
+                  updated_at:
+                    description: ISO 8601 last update timestamp.
+                    type: string
+                  user_defined:
+                    description: Whether this record was created via the public API.
+                    type: boolean
+                required:
+                  - id
+                  - type
+                  - title
+                  - origin_id
+                  - content
+                  - created_at
+                  - updated_at
+                  - spaces
+                  - permissions
           description: Indicates a successful response
       summary: Get an SML record by ID
       tags:
@@ -4238,6 +4304,63 @@ paths:
                     type: index
                     updated_at: '2026-04-01T00:00:00.000Z'
                     user_defined: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  content:
+                    description: The searchable content.
+                    type: string
+                  created_at:
+                    description: ISO 8601 creation timestamp.
+                    type: string
+                  id:
+                    description: The unique identifier of the SML record.
+                    type: string
+                  origin_id:
+                    description: The origin identifier.
+                    type: string
+                  params:
+                    additionalProperties: {}
+                    description: Type-specific parameters.
+                    type: object
+                  permissions:
+                    description: Kibana privileges required to access this record.
+                    items:
+                      type: string
+                    type: array
+                  spaces:
+                    description: Space IDs this record belongs to.
+                    items:
+                      type: string
+                    type: array
+                  tags:
+                    description: Optional tags for categorization and filtering.
+                    items:
+                      type: string
+                    type: array
+                  title:
+                    description: Display title for the record.
+                    type: string
+                  type:
+                    description: The SML record type.
+                    type: string
+                  updated_at:
+                    description: ISO 8601 last update timestamp.
+                    type: string
+                  user_defined:
+                    description: Whether this record was created via the public API.
+                    type: boolean
+                required:
+                  - id
+                  - type
+                  - title
+                  - origin_id
+                  - content
+                  - created_at
+                  - updated_at
+                  - spaces
+                  - permissions
           description: Indicates a successful response
       summary: Create or update an SML record
       tags:
