@@ -65,12 +65,12 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 
 #### Tags when the FTR suite was "deployment agnostic"
 
-FTR **deployment-agnostic** configs often load the same files under both stateful and serverless. In Scout, **do not assume** `tags.deploymentAgnostic` is the right default for every migrated spec—it selects **many** targets (including stateful/search/security and serverless/search/security, etc.).
+For available tag helpers and their meaning, see [Deployment tags](docs/extend/scout/deployment-tags.md).
 
-- **Tests colocated under a solution plugin or package** (`x-pack/solutions/observability|security|search/...`, using `@kbn/scout-oblt`, `@kbn/scout-security`, or `@kbn/scout-search`): Prefer **explicit solution targets** instead of `tags.deploymentAgnostic`, so CI only runs where that solution is present and supported. Typical pattern (adjust domain to your solution):
-  - Observability: `{ tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }` (and add `tags.serverless.observability.logs_essentials` only if the feature is meant to run on that project type).
-  - Security / Search: use the corresponding `tags.serverless.*` and `tags.stateful.*` entries from the same Scout package—**match sibling specs** in that module.
-- **Tests colocated under platform** (`src/platform/**`, `x-pack/platform/**`, `@kbn/scout` only): If the original intent was "run everywhere the deployment-agnostic FTR job runs", **`tags.deploymentAgnostic`** is still appropriate.
+FTR **deployment-agnostic** configs often load the same files under both stateful and serverless. In Scout, **do not assume** `tags.deploymentAgnostic` is the right default for every migrated spec. Instead:
+
+- **Solution modules** (`x-pack/solutions/observability|security|search/...`): use explicit solution targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`) so CI only runs where that solution is present. Match sibling specs in the same module.
+- **Platform modules** (`src/platform/**`, `x-pack/platform/**`): `tags.deploymentAgnostic` is appropriate when the original intent was "run everywhere."
 
 API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
 
