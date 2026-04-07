@@ -29,8 +29,8 @@ const statusRequestQuery = {
 } as const satisfies StatusRequestQuery;
 
 const getStatusRequest: HttpFetchOptionsWithPath = {
-  path: ENTITY_STORE_ROUTES.STATUS,
-  query: { apiVersion: '2', ...statusRequestQuery },
+  path: ENTITY_STORE_ROUTES.public.STATUS,
+  query: statusRequestQuery,
 };
 
 const getStatusV1Request: HttpFetchOptionsWithPath = {
@@ -38,13 +38,12 @@ const getStatusV1Request: HttpFetchOptionsWithPath = {
 };
 
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
-  path: ENTITY_STORE_ROUTES.INSTALL,
+  path: ENTITY_STORE_ROUTES.public.INSTALL,
   body: JSON.stringify({}),
-  query: { apiVersion: '2' },
 };
 
 const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
-  path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+  path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
   body: JSON.stringify({}),
   query: { apiVersion: '2' },
 };

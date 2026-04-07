@@ -47,7 +47,7 @@ export async function getGapsSummaryByRuleIds(
       throw error;
     }
 
-    const { start, end, ruleIds, schedulerId } = params;
+    const { start, end, ruleIds, schedulerId, excludedReasons } = params;
 
     const schedulerContext = schedulerId
       ? await getSchedulerContextInternal(context.unsecuredSavedObjectsClient, schedulerId)
@@ -109,6 +109,7 @@ export async function getGapsSummaryByRuleIds(
     const filter = buildGapsFilter({
       start,
       end,
+      excludedReasons,
     });
 
     const exhaustedRetryAgg = schedulerContext?.enabled
