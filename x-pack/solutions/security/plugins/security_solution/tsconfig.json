@@ -50,6 +50,7 @@
     "@kbn/spaces-plugin",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
+    "@kbn/as-code-shared-transforms",
     "@kbn/utility-types",
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-io-ts-list-types",
@@ -293,5 +294,6 @@
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
     "@kbn/shared-ux-column-presets",
+    "@kbn/core-overlays-browser",
   ]
 }
