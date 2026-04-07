@@ -55,6 +55,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'many_fields_transform',
     'many_fields_discover_esql',
     'data_stress_test_lens',
+    'flight_dashboard',
   ],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
   dashboard: [
