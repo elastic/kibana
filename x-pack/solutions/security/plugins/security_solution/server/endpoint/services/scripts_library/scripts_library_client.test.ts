@@ -775,16 +775,14 @@ describe('scripts library client', () => {
       });
     });
 
-    it('should error if no rules client was provided when ScriptsLibraryClient was initialized', async () => {
+    it('should complete successfuly even if no rules client was provided when ScriptsLibraryClient was initialized', async () => {
       scriptsClient = new ScriptsLibraryClient({
         spaceId: 'spaceA',
         username: 'elastic',
         endpointService: endpointAppServicesMock,
       });
 
-      await expect(scriptsClient.delete('1-2-3')).rejects.toThrow(
-        'Unable to query for rules - no Rules client available!'
-      );
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
     });
 
     it('should error if script id is being used by rules', async () => {
@@ -806,6 +804,13 @@ describe('scripts library client', () => {
       await expect(scriptsClient.delete('non-existent')).rejects.toThrow(
         'Script with id [non-existent] not found'
       );
+    });
+
+    it('should complete successfully even if rules check fails', async () => {
+      rulesClient.find.mockRejectedValue(
+        new Error('Unauthorized to find rules for any rule types')
+      );
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
     });
 
     it('should complete successfully even if file deletion fails', async () => {
