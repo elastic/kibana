@@ -83,6 +83,7 @@ dependsOn:
   - '@kbn/object-utils'
   - '@kbn/alerting-v2-constants'
   - '@kbn/utility-types'
+  - '@kbn/usage-collection-plugin'
 tags:
   - plugin
   - prod

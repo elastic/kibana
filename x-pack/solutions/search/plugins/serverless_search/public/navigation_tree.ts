@@ -51,6 +51,13 @@ const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.
   defaultMessage: 'AI',
 });
 
+const PROJECT_PERFORMANCE_TITLE = i18n.translate(
+  'xpack.serverlessSearch.nav.adminAndSettings.projectPerformance.title',
+  {
+    defaultMessage: 'Project performance',
+  }
+);
+
 export function createNavigationTree({
   isAppRegistered,
   showAiAssistant = true,
@@ -265,6 +272,18 @@ export function createNavigationTree({
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+            ],
+          },
+          {
+            id: 'settings_project_performance',
+            title: PROJECT_PERFORMANCE_TITLE,
+            breadcrumbStatus: 'hidden',
+            children: [
+              {
+                link: 'management:queryActivity',
+                breadcrumbStatus: 'hidden',
+                badgeType: 'new',
+              },
             ],
           },
           {
