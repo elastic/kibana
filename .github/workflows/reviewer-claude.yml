@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Mint LiteLLM token
         id: mint
-        uses: elastic/github-actions/litellm-token@v3 # TODO: update to SHA after release
+        uses: elastic/github-actions/litellm-token@cd6ed0cb2ac3e8c6d84a5ffed58eda02f4165faa # v3.0.0
         with:
           base-url: ${{ secrets.LITELLM_BASE_URL }}
           master-key: ${{ secrets.LITELLM_API_KEY }}
@@ -94,7 +94,7 @@ jobs:
     steps:
       - name: Revoke LiteLLM token
         id: revoke
-        uses: elastic/github-actions/litellm-token@v3 # TODO: update to SHA after release
+        uses: elastic/github-actions/litellm-token@cd6ed0cb2ac3e8c6d84a5ffed58eda02f4165faa # v3.0.0
         with:
           base-url: ${{ secrets.LITELLM_BASE_URL }}
           master-key: ${{ secrets.LITELLM_API_KEY }}
