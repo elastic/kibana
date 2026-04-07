@@ -97,9 +97,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'dateFormat:tz': 'UTC',
         'observability:enableLegacyUptimeApp': true,
-      },
-      globalDefaults: {
-        hideAnnouncements: true,
+        'agentBuilder:announcementModalSeen': true,
       },
     },
     testFiles: [resolve(__dirname, './apps/observability')],
