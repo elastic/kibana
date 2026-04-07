@@ -166,7 +166,7 @@ spaceTest.describe.skip(
 
         const firstHandlerExecution = handlerExecutions[0];
         expect(firstHandlerExecution).toBeDefined();
-        const handlerExecutionId = (firstHandlerExecution as typeof handlerExecutions[number]).id;
+        const handlerExecutionId = (firstHandlerExecution as (typeof handlerExecutions)[number]).id;
         const handlerExecution = await waitForExecution(workflowsApi, handlerExecutionId);
 
         expect(handlerExecution?.triggeredBy).toBe('workflows.failed');
@@ -245,7 +245,7 @@ spaceTest.describe.skip(
 
         const firstHandlerExecution = handlerExecutions[0];
         expect(firstHandlerExecution).toBeDefined();
-        const handlerExecutionId = (firstHandlerExecution as typeof handlerExecutions[number]).id;
+        const handlerExecutionId = (firstHandlerExecution as (typeof handlerExecutions)[number]).id;
         const handlerExecution = await waitForExecution(workflowsApi, handlerExecutionId);
         expect(handlerExecution?.triggeredBy).toBe('workflows.failed');
         expect(handlerExecution?.status).toBe(ExecutionStatus.COMPLETED);
