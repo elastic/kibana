@@ -13,7 +13,8 @@ import { access } from 'fs/promises';
 import { resolve, dirname } from 'path';
 import { asyncForEach } from '@kbn/std';
 import { Jsonc } from '@kbn/repo-packages';
-import { getKibanaTranslationFiles, supportedLocale } from '@kbn/core-i18n-server-internal';
+import { getKibanaTranslationFiles } from '@kbn/core-i18n-server-internal';
+import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
@@ -39,7 +40,7 @@ export const CreateCdnAssets: Task = {
 
     // translation files
     const pluginPaths = plugins.map((plugin) => resolve(dirname(plugin)));
-    for (const locale of supportedLocale) {
+    for (const locale of SUPPORTED_LOCALE_IDS) {
       const translationFileContent = await generateTranslationFile(locale, pluginPaths);
       await write(
         resolve(assets, buildSha, `translations`, `${locale}.json`),
