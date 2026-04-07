@@ -391,7 +391,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
       it('should not call eviction when there are no loop steps', async () => {
         (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
           { stepId: 'action1', stepType: 'slack', status: ExecutionStatus.COMPLETED },
-          { stepId: 'action2', stepType: 'elasticsearch.search', status: ExecutionStatus.COMPLETED },
+          {
+            stepId: 'action2',
+            stepType: 'elasticsearch.search',
+            status: ExecutionStatus.COMPLETED,
+          },
         ] as EsWorkflowStepExecution[]);
 
         await underTest.resume();
