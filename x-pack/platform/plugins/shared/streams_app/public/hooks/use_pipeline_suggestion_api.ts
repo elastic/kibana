@@ -7,7 +7,11 @@
 
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { useAbortController } from '@kbn/react-hooks';
-import { isHttpFetchError } from '@kbn/server-route-repository-client';
+import {
+  getPipelineSuggestionTaskStatus,
+  postPipelineSuggestionTaskByAction,
+  postSchedulePipelineSuggestionTaskWithConflictRetry,
+} from '../lib/pipeline_suggestion_repository';
 import { useKibana } from './use_kibana';
 
 export function usePipelineSuggestionApi(streamName: string) {
@@ -28,76 +32,37 @@ export function usePipelineSuggestionApi(streamName: string) {
       fieldName: string;
       sampleMessages: string[];
     }) => {
-      const maxRetries = 5;
-      const retryIntervalMs = 1000;
-
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          return await streamsRepositoryClient.fetch(
-            'POST /internal/streams/{name}/_pipeline_suggestion/_task',
-            {
-              signal,
-              params: {
-                path: { name: streamName },
-                body: {
-                  action: 'schedule' as const,
-                  connectorId: params.connectorId,
-                  documents: params.documents,
-                  fieldName: params.fieldName,
-                  sampleMessages: params.sampleMessages,
-                },
-              },
-            }
-          );
-        } catch (error) {
-          const isCancellationInProgress =
-            isHttpFetchError(error) && error.response?.status === 409;
-          if (isCancellationInProgress && attempt < maxRetries) {
-            await new Promise((resolve) => setTimeout(resolve, retryIntervalMs));
-            continue;
-          }
-          throw error;
-        }
-      }
+      return postSchedulePipelineSuggestionTaskWithConflictRetry(streamsRepositoryClient, {
+        streamName,
+        signal,
+        body: {
+          action: 'schedule',
+          connectorId: params.connectorId,
+          documents: params.documents,
+          fieldName: params.fieldName,
+          sampleMessages: params.sampleMessages,
+        },
+      });
     },
     getPipelineSuggestionTaskStatus: async () => {
-      return streamsRepositoryClient.fetch(
-        'GET /internal/streams/{name}/_pipeline_suggestion/_status',
-        {
-          signal,
-          params: {
-            path: { name: streamName },
-          },
-        }
-      );
+      return getPipelineSuggestionTaskStatus(streamsRepositoryClient, {
+        streamName,
+        signal,
+      });
     },
     cancelPipelineSuggestionTask: async () => {
-      return streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/_pipeline_suggestion/_task',
-        {
-          signal,
-          params: {
-            path: { name: streamName },
-            body: {
-              action: 'cancel' as const,
-            },
-          },
-        }
-      );
+      return postPipelineSuggestionTaskByAction(streamsRepositoryClient, {
+        streamName,
+        signal,
+        action: 'cancel',
+      });
     },
     acknowledgePipelineSuggestionTask: async () => {
-      return streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/_pipeline_suggestion/_task',
-        {
-          signal,
-          params: {
-            path: { name: streamName },
-            body: {
-              action: 'acknowledge' as const,
-            },
-          },
-        }
-      );
+      return postPipelineSuggestionTaskByAction(streamsRepositoryClient, {
+        streamName,
+        signal,
+        action: 'acknowledge',
+      });
     },
   };
 }

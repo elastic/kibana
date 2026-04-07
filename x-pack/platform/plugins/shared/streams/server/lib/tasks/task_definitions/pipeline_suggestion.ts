@@ -23,7 +23,11 @@ import { handleProcessingGrokSuggestions } from '../../../routes/internal/stream
 import { handleProcessingDissectSuggestions } from '../../../routes/internal/streams/processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../../../routes/internal/streams/processing/no_llm_suggestions_error';
 import type { StreamsClient } from '../../streams/client';
+import { TaskNotFoundError } from '../../streams/errors/task_not_found_error';
+import { isStreamEligibleForPipelineSuggestion } from '../../streams/pipeline_suggestion_eligibility';
 import type { IPatternExtractionService } from '../../pattern_extraction/pattern_extraction_service';
+import type { PersistedTask } from '../types';
+import type { TaskClient } from '../task_client';
 
 export interface PipelineSuggestionTaskParams {
   connectorId: string;
@@ -38,6 +42,46 @@ export interface PipelineSuggestionTaskPayload {
 }
 
 export const STREAMS_PIPELINE_SUGGESTION_TASK_TYPE = 'streams_pipeline_suggestion';
+
+async function discardPipelineSuggestionTaskIfStreamNoLongerEligible({
+  streamsClient,
+  taskClient,
+  logger,
+  streamName,
+  _task,
+}: {
+  streamsClient: StreamsClient;
+  taskClient: TaskClient<string>;
+  logger: Logger;
+  streamName: string;
+  _task: PersistedTask;
+}): Promise<boolean> {
+  try {
+    const latestStream = await streamsClient.getStream(streamName);
+    if (isStreamEligibleForPipelineSuggestion(latestStream)) {
+      return false;
+    }
+    logger.debug(
+      `Discarding pipeline suggestion task for ${streamName}: stream no longer eligible (not ingest or already has processing steps)`
+    );
+  } catch (error) {
+    logger.debug(
+      `Discarding pipeline suggestion task for ${streamName}: could not re-fetch stream (${String(
+        error
+      )})`
+    );
+  }
+
+  try {
+    await taskClient.deleteTask(_task.id);
+  } catch (error) {
+    if (error instanceof TaskNotFoundError) {
+      return true;
+    }
+    throw error;
+  }
+  return true;
+}
 
 export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
   return {
@@ -177,6 +221,17 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                     }),
                 });
 
+                const discarded = await discardPipelineSuggestionTaskIfStreamNoLongerEligible({
+                  streamsClient,
+                  taskClient,
+                  logger,
+                  streamName,
+                  _task,
+                });
+                if (discarded) {
+                  return;
+                }
+
                 await taskClient.complete<
                   PipelineSuggestionTaskParams,
                   PipelineSuggestionTaskPayload
@@ -189,6 +244,16 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                 // Handle NoLLMSuggestionsError gracefully - complete with null pipeline
                 if (isNoLLMSuggestionsError(error)) {
                   logger.debug('No LLM suggestions available for pipeline generation');
+                  const discarded = await discardPipelineSuggestionTaskIfStreamNoLongerEligible({
+                    streamsClient,
+                    taskClient,
+                    logger,
+                    streamName,
+                    _task,
+                  });
+                  if (discarded) {
+                    return;
+                  }
                   await taskClient.complete<
                     PipelineSuggestionTaskParams,
                     PipelineSuggestionTaskPayload

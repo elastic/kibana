@@ -31,6 +31,7 @@ import {
   type ActorRefFrom,
   type SnapshotFrom,
 } from 'xstate';
+import { postPipelineSuggestionTaskByAction } from '../../../../../../lib/pipeline_suggestion_repository';
 import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { stepMachine } from '../steps_state_machine';
@@ -1040,56 +1041,40 @@ export const createInteractiveModeMachineImplementations = ({
   actions: {
     notifySuggestionFailure: createNotifySuggestionFailureNotifier({ toasts }),
     cancelSuggestionTask: (_, params: { streamName: string }) => {
-      // Fire-and-forget cancel request - we don't need to wait for it
-      // TypeScript has trouble with discriminated unions in route types,
-      // so we use a type assertion here
-      streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
-          params: {
-            path: { name: params.streamName },
-            body: { action: 'cancel' },
-          },
-        } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
-        .catch((error: unknown) => {
-          if (isBenignPipelineSuggestionTaskWriteError(error)) {
-            return;
-          }
-          notifyPipelineSuggestionTaskWriteFailed(toasts, 'cancel', error);
-        });
+      postPipelineSuggestionTaskByAction(streamsRepositoryClient, {
+        streamName: params.streamName,
+        signal: null,
+        action: 'cancel',
+      }).catch((error: unknown) => {
+        if (isBenignPipelineSuggestionTaskWriteError(error)) {
+          return;
+        }
+        notifyPipelineSuggestionTaskWriteFailed(toasts, 'cancel', error);
+      });
     },
     acknowledgeSuggestionTask: (_, params: { streamName: string }) => {
-      // Fire-and-forget acknowledge request - clears the suggestion from the server
-      // so it doesn't appear in the badge count on the listing page
-      // TypeScript has trouble with discriminated unions in route types,
-      // so we use a type assertion here
-      streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
-          params: {
-            path: { name: params.streamName },
-            body: { action: 'acknowledge' },
-          },
-        } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
-        .catch((error: unknown) => {
-          if (isBenignPipelineSuggestionTaskWriteError(error)) {
-            return;
-          }
-          notifyPipelineSuggestionTaskWriteFailed(toasts, 'acknowledge', error);
-        });
+      postPipelineSuggestionTaskByAction(streamsRepositoryClient, {
+        streamName: params.streamName,
+        signal: null,
+        action: 'acknowledge',
+      }).catch((error: unknown) => {
+        if (isBenignPipelineSuggestionTaskWriteError(error)) {
+          return;
+        }
+        notifyPipelineSuggestionTaskWriteFailed(toasts, 'acknowledge', error);
+      });
     },
     deleteSuggestionTask: (_, params: { streamName: string }) => {
-      streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
-          params: {
-            path: { name: params.streamName },
-            body: { action: 'delete' },
-          },
-        } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
-        .catch((error: unknown) => {
-          if (isBenignPipelineSuggestionTaskWriteError(error)) {
-            return;
-          }
-          notifyPipelineSuggestionTaskWriteFailed(toasts, 'delete', error);
-        });
+      postPipelineSuggestionTaskByAction(streamsRepositoryClient, {
+        streamName: params.streamName,
+        signal: null,
+        action: 'delete',
+      }).catch((error: unknown) => {
+        if (isBenignPipelineSuggestionTaskWriteError(error)) {
+          return;
+        }
+        notifyPipelineSuggestionTaskWriteFailed(toasts, 'delete', error);
+      });
     },
   },
 });

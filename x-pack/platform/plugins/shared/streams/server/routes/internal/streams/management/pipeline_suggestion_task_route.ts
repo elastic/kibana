@@ -20,6 +20,7 @@ import {
 import { SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE } from '../../../../lib/sig_events/tasks/significant_events_queries_generation';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { SuggestionBulkStatusItem } from '../../../../../common';
+import { isStreamEligibleForPipelineSuggestion } from '../../../../lib/streams/pipeline_suggestion_eligibility';
 import { createServerRoute } from '../../../create_server_route';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
@@ -212,11 +213,28 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
       .optional(),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestionBulkStatusItem[]> => {
-    const { taskClient } = await getScopedClients({
+    const { taskClient, streamsClient } = await getScopedClients({
       request,
     });
 
     const streamName = params?.query?.stream;
+
+    const pipelineSuggestionApplicableByStream = new Map<string, boolean>();
+    const isPipelineSuggestionApplicableForBulkCount = async (name: string): Promise<boolean> => {
+      const cached = pipelineSuggestionApplicableByStream.get(name);
+      if (cached !== undefined) {
+        return cached;
+      }
+      try {
+        const definition = await streamsClient.getStream(name);
+        const applicable = isStreamEligibleForPipelineSuggestion(definition);
+        pipelineSuggestionApplicableByStream.set(name, applicable);
+        return applicable;
+      } catch {
+        pipelineSuggestionApplicableByStream.set(name, false);
+        return false;
+      }
+    };
 
     // Build a map of stream name -> per-type suggestion counts
     interface StreamCounts {
@@ -271,12 +289,25 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
             payload != null &&
             'pipeline' in payload &&
             payload.pipeline == null;
-          if (status === TaskStatus.Completed && !hasEmptyPipeline) {
-            counts.pipelineCount += 1;
-          } else if (
+          const pipelineStatusNeedsStreamEligibility =
+            (status === TaskStatus.Completed && !hasEmptyPipeline) ||
             status === TaskStatus.InProgress ||
             status === TaskStatus.Stale ||
-            status === TaskStatus.BeingCanceled
+            status === TaskStatus.BeingCanceled;
+          const streamEligibleForPipelineSuggestion = pipelineStatusNeedsStreamEligibility
+            ? await isPipelineSuggestionApplicableForBulkCount(extractedStreamName)
+            : false;
+          if (
+            status === TaskStatus.Completed &&
+            !hasEmptyPipeline &&
+            streamEligibleForPipelineSuggestion
+          ) {
+            counts.pipelineCount += 1;
+          } else if (
+            (status === TaskStatus.InProgress ||
+              status === TaskStatus.Stale ||
+              status === TaskStatus.BeingCanceled) &&
+            streamEligibleForPipelineSuggestion
           ) {
             counts.pipelineInProgressCount += 1;
           } else if (status === TaskStatus.Failed || hasEmptyPipeline) {

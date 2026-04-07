@@ -10,17 +10,24 @@ import type { IToasts, NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { TaskStatus, type TaskResult } from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 
 import { i18n } from '@kbn/i18n';
-import { isRequestAbortedError, isHttpFetchError } from '@kbn/server-route-repository-client';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { getFormattedError } from '../../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
 import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
+import {
+  getPipelineSuggestionTaskStatus,
+  postSchedulePipelineSuggestionTaskWithConflictRetry,
+  type PipelineSuggestionTaskStatusResult,
+} from '../../../../../../lib/pipeline_suggestion_repository';
+
+export type { PipelineSuggestionTaskStatusResult };
 
 export interface SuggestPipelineInput {
   streamName: string;
@@ -46,38 +53,17 @@ export async function schedulePipelineSuggestionTaskLogic(
   const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
   const messages = extractMessagesFromField(documents, fieldName);
 
-  // Schedule background task for server-side processing (extraction + review + assembly)
-  const maxRetries = 10;
-  const retryIntervalMs = 1000;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/_pipeline_suggestion/_task',
-        {
-          signal,
-          params: {
-            path: { name: streamName },
-            body: {
-              action: 'schedule' as const,
-              connectorId,
-              documents,
-              fieldName,
-              sampleMessages: messages,
-            },
-          },
-        }
-      );
-      return;
-    } catch (error) {
-      const isCancellationInProgress = isHttpFetchError(error) && error.response?.status === 409;
-      if (isCancellationInProgress && attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, retryIntervalMs));
-        continue;
-      }
-      throw error;
-    }
-  }
+  await postSchedulePipelineSuggestionTaskWithConflictRetry(streamsRepositoryClient, {
+    streamName,
+    signal,
+    body: {
+      action: 'schedule',
+      connectorId,
+      documents,
+      fieldName,
+      sampleMessages: messages,
+    },
+  });
 }
 
 // --- Schedule Suggestion Task Actor ---
@@ -110,11 +96,6 @@ export const createSchedulePipelineSuggestionTaskActor = ({
 
 // --- Get Suggestion Status Actor ---
 
-interface PipelineSuggestionStatusPayload {
-  pipeline: unknown | null;
-}
-export type PipelineSuggestionTaskStatusResult = TaskResult<PipelineSuggestionStatusPayload>;
-
 export interface GetPipelineSuggestionStatusInputMinimal {
   streamName: string;
 }
@@ -128,15 +109,10 @@ export async function getPipelineSuggestionStatusLogic({
   signal: AbortSignal;
   streamsRepositoryClient: StreamsRepositoryClient;
 }): Promise<PipelineSuggestionTaskStatusResult> {
-  return await streamsRepositoryClient.fetch(
-    'GET /internal/streams/{name}/_pipeline_suggestion/_status',
-    {
-      signal,
-      params: {
-        path: { name: streamName },
-      },
-    }
-  );
+  return getPipelineSuggestionTaskStatus(streamsRepositoryClient, {
+    streamName,
+    signal,
+  });
 }
 
 export const createGetPipelineSuggestionStatusActor = ({
@@ -215,21 +191,12 @@ export async function loadExistingSuggestionLogic(
 ): Promise<LoadExistingSuggestionResult> {
   const { streamName, signal, streamsRepositoryClient } = input;
 
-  const getStatus = async () => {
-    return streamsRepositoryClient.fetch(
-      'GET /internal/streams/{name}/_pipeline_suggestion/_status',
-      {
-        signal,
-        params: {
-          path: { name: streamName },
-        },
-      }
-    );
-  };
-
   let taskResult;
   try {
-    taskResult = await getStatus();
+    taskResult = await getPipelineSuggestionTaskStatus(streamsRepositoryClient, {
+      streamName,
+      signal,
+    });
   } catch (error) {
     // If aborted during initial fetch, return 'none' gracefully
     if (isRequestAbortedError(error)) {
