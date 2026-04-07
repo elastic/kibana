@@ -4,4 +4,4 @@ steps:
     trigger: kibana-artifacts-staging
     async: false
     build:
-      branch: '$BRANCH'
+      branch: 'main'
