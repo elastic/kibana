@@ -34,9 +34,7 @@ describe('collectReferencedContentRefineIssues', () => {
   });
 
   it('flags reserved skill name at root', () => {
-    const issues = collectReferencedContentRefineIssues([
-      { name: 'Skill', relativePath: './' },
-    ]);
+    const issues = collectReferencedContentRefineIssues([{ name: 'Skill', relativePath: './' }]);
     expect(issues).toContainEqual({
       code: REFERENCED_CONTENT_REFINE_ISSUE_CODE.RESERVED_SKILL_NAME,
       itemIndex: 0,
@@ -46,8 +44,8 @@ describe('collectReferencedContentRefineIssues', () => {
 
   it('flags duplicate normalized paths', () => {
     const issues = collectReferencedContentRefineIssues([
-      { name: 'dup', relativePath: './templates', },
-      { name: 'dup', relativePath: './templates/', },
+      { name: 'dup', relativePath: './templates' },
+      { name: 'dup', relativePath: './templates/' },
     ]);
     const dupes = issues.filter(
       (i) => i.code === REFERENCED_CONTENT_REFINE_ISSUE_CODE.DUPLICATE_PATH
@@ -58,9 +56,7 @@ describe('collectReferencedContentRefineIssues', () => {
 
   it('returns no issues for valid items', () => {
     expect(
-      collectReferencedContentRefineIssues([
-        { name: 'readme', relativePath: './docs', },
-      ])
+      collectReferencedContentRefineIssues([{ name: 'readme', relativePath: './docs' }])
     ).toEqual([]);
   });
 });
