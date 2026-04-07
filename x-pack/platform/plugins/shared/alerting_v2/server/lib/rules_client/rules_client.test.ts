@@ -1103,7 +1103,7 @@ describe('RulesClient', () => {
       mockSavedObjectsClient.find.mockImplementation((opts: { page?: number }) => {
         const p = opts.page ?? 1;
         const pageSize = 100;
-        const saved_objects = Array.from({ length: pageSize }, (_, i) => ({
+        const savedObjects = Array.from({ length: pageSize }, (_, i) => ({
           id: `cap-rule-${(p - 1) * pageSize + i}`,
           type: RULE_SAVED_OBJECT_TYPE,
           attributes: baseSoAttrs,
@@ -1111,7 +1111,7 @@ describe('RulesClient', () => {
           score: 0,
         }));
         return Promise.resolve({
-          saved_objects,
+          saved_objects: savedObjects,
           total: excessTotal,
           page: p,
           per_page: pageSize,
