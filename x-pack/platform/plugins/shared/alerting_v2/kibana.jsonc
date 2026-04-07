@@ -20,7 +20,8 @@
       "lens",
       "security",
       "encryptedSavedObjects",
-      "workflowsManagement"
+      "workflowsManagement",
+      "share"
     ],
     "optionalPlugins": ["management"],
     "requiredBundles": ["alerting"],

@@ -19,6 +19,7 @@ import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_moda
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
 import { RuleSidebar } from './sidebar/rule_sidebar';
 import { paths } from '../../constants';
+import { useNavigateToRuleEventsInDiscover } from '../../hooks/use_rule_events_in_discover';
 
 export interface RuleDetailPageProps {
   rule: RuleApiResponse;
@@ -31,6 +32,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
   const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
+  const navigateToRuleEventsInDiscover = useNavigateToRuleEventsInDiscover(rule.id);
 
   const showDeleteConfirmationModal = () => {
     setShowDeleteConfirmation(true);
@@ -57,7 +59,28 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
             rule={rule}
             showDeleteConfirmation={showDeleteConfirmationModal}
           />,
+          ...(navigateToRuleEventsInDiscover
+            ? [
+                <EuiButtonEmpty
+                  key="viewInDiscover"
+                  aria-label={i18n.translate(
+                    'xpack.alertingV2.sections.ruleDetails.viewRuleEventsInDiscoverButtonLabel',
+                    { defaultMessage: 'View rule events in Discover' }
+                  )}
+                  data-test-subj="viewRuleEventsInDiscoverButton"
+                  color="text"
+                  iconType="discoverApp"
+                  onClick={navigateToRuleEventsInDiscover}
+                >
+                  <FormattedMessage
+                    id="xpack.alertingV2.sections.ruleDetails.viewRuleEventsInDiscoverButtonLabel"
+                    defaultMessage="View rule events in Discover"
+                  />
+                </EuiButtonEmpty>,
+              ]
+            : []),
           <EuiButtonEmpty
+            key="edit"
             aria-label={i18n.translate(
               'xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel',
               { defaultMessage: 'Edit Rule' }

@@ -11,6 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 import { RuleDetailPage } from './rule_detail_page';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { useNavigateToRuleEventsInDiscover } from '../../hooks/use_rule_events_in_discover';
+
+jest.mock('../../hooks/use_rule_events_in_discover');
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -80,6 +83,10 @@ const baseRule: RuleApiResponse = {
   updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
+const mockUseNavigateToRuleEventsInDiscover = useNavigateToRuleEventsInDiscover as jest.MockedFunction<
+  typeof useNavigateToRuleEventsInDiscover
+>;
+
 const renderPage = (rule: RuleApiResponse) =>
   render(
     <MemoryRouter>
@@ -92,6 +99,7 @@ const renderPage = (rule: RuleApiResponse) =>
 describe('RuleDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseNavigateToRuleEventsInDiscover.mockReturnValue(jest.fn());
   });
 
   it('wires breadcrumbs with the rule name', () => {
@@ -147,5 +155,27 @@ describe('RuleDetailPage', () => {
     fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
     fireEvent.click(screen.getByText('Cancel'));
     expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
+  });
+
+  describe('view rule events in Discover button', () => {
+    it('renders the button when the Discover locator is available', () => {
+      mockUseNavigateToRuleEventsInDiscover.mockReturnValue(jest.fn());
+      renderPage(baseRule);
+      expect(screen.getByTestId('viewRuleEventsInDiscoverButton')).toBeInTheDocument();
+    });
+
+    it('hides the button when the Discover locator is unavailable', () => {
+      mockUseNavigateToRuleEventsInDiscover.mockReturnValue(undefined);
+      renderPage(baseRule);
+      expect(screen.queryByTestId('viewRuleEventsInDiscoverButton')).not.toBeInTheDocument();
+    });
+
+    it('calls the navigate callback when clicked', () => {
+      const mockNavigate = jest.fn();
+      mockUseNavigateToRuleEventsInDiscover.mockReturnValue(mockNavigate);
+      renderPage(baseRule);
+      fireEvent.click(screen.getByTestId('viewRuleEventsInDiscoverButton'));
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
+    });
   });
 });
