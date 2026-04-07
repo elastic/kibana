@@ -78,7 +78,9 @@ test.describe(
       });
 
       await test.step('Click on error link to go to detail page', async () => {
-        await page.getByTestId('apmErrorDetailsLink').click();
+        const errorLink = page.getByTestId('apmErrorDetailsLink');
+        await errorLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await errorLink.click();
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
@@ -149,7 +151,9 @@ test.describe(
       });
 
       await test.step('Click on error link to go to detail page', async () => {
-        await page.getByRole('link', { name: 'ResponseError', exact: true }).click();
+        const errorLink = page.getByRole('link', { name: 'ResponseError', exact: true });
+        await errorLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await errorLink.click();
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
