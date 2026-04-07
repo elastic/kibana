@@ -90,6 +90,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/share-plugin",
     "@kbn/core-security-server",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

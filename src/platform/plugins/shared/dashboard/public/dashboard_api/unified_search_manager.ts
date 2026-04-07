@@ -13,6 +13,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { toStoredFilters, fromStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
@@ -56,11 +57,15 @@ export function initializeUnifiedSearchManager(
   } = dataService.query;
 
   const reload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
+  const query$ = new BehaviorSubject<Query | undefined>(
+    initialState.query ? toStoredQuery(initialState.query) : undefined
+  );
+  const asCodeQuery$ = new BehaviorSubject<DashboardState['query']>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
-  function setQuery(query: Query) {
+  function setQuery(query: Query | undefined) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
+      asCodeQuery$.next(query ? toAsCodeQuery(query) : undefined);
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
@@ -258,6 +263,7 @@ export function initializeUnifiedSearchManager(
     'filters' | 'query' | 'refresh_interval' | 'time_range'
   > => {
     const serializableFilters = asCodeFilters$.value;
+    const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
 
     const timeRange =
       timeRestore$.value && timeRange$.value
@@ -276,7 +282,7 @@ export function initializeUnifiedSearchManager(
         : undefined;
 
     return {
-      query: query$.value,
+      ...(asCodeQuery && { query: asCodeQuery }),
       ...(serializableFilters?.length && { filters: serializableFilters }),
       ...(refreshInterval && { refresh_interval: refreshInterval }),
       ...(timeRange && { time_range: timeRange }),
@@ -302,19 +308,21 @@ export function initializeUnifiedSearchManager(
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           asCodeFilters$,
-          query$,
+          asCodeQuery$,
           refreshInterval$,
           timeRange$,
           timeRestore$,
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
 
-          map(([filters, query, refresh_interval, time_range]) => ({
-            filters,
-            query,
-            refresh_interval,
-            time_range,
-          })),
+          map(([filters, query, refresh_interval, time_range]) => {
+            return {
+              filters,
+              query,
+              refresh_interval,
+              time_range,
+            };
+          }),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
             diffComparators(comparators, lastSavedState, latestState)
@@ -326,9 +334,8 @@ export function initializeUnifiedSearchManager(
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
           ...(toStoredFilters(lastSavedState.filters, logger) ?? []),
         ]);
-        if (lastSavedState.query) {
-          setQuery(lastSavedState.query);
-        }
+        const storedQuery = lastSavedState.query ? toStoredQuery(lastSavedState.query) : undefined;
+        setQuery(storedQuery);
         if (lastSavedState.time_range) {
           setAndSyncTimeRange(lastSavedState.time_range);
         }

@@ -99,7 +99,7 @@ export const toAttachmentWidget = (
  * Converts a DashboardState to DashboardAttachmentData.
  * Preserves all dashboard state fields for full round-trip support.
  */
-export const dashboardStateToAttachment = (state: DashboardState): DashboardAttachmentData => {
+export const dashboardStateToAttachmentData = (state: DashboardState): DashboardAttachmentData => {
   return {
     ...state,
     panels: state.panels

@@ -14356,14 +14356,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_notification_policy.ts"
               },
               {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
-              },
-              {
                 "plugin": "maintenanceWindows",
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_find_maintenance_windows.ts"
               },
@@ -14633,10 +14625,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
               },
               {
@@ -14650,6 +14638,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -84,6 +84,7 @@ export const createAssetsNavigationTree = (_core: CoreStart): NodeDefinition => 
           {
             id: SecurityPageName.scriptLibrary,
             link: securityLink(SecurityPageName.scriptLibrary),
+            badgeType: 'new',
           },
         ],
       },
