@@ -98,7 +98,13 @@ export function buildLogsExtractionEsqlQuery({
 
   // FROM and WHERE
   parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      recoveryId,
+    })
   );
 
   // Special evaluations for entity id

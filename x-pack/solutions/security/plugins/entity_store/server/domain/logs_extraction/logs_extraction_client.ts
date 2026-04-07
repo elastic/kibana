@@ -44,9 +44,13 @@ import {
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { parseDurationToMs } from '../../infra/time';
-import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
+import type {
+  CcsExtractToUpdatesResult,
+  CcsLogsExtractionClient,
+} from './ccs_logs_extraction_client';
 import { EntityStoreNotRunningError } from '../errors';
 import type { LogExtractionUpdateParams } from '../../routes/constants';
+import { resolveCappedTimeWindow } from './logs_cap_probe';
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -61,6 +65,8 @@ interface ExtractedLogsSummarySuccess {
   count: number;
   pages: number;
   scannedIndices: string[];
+  /** Effective upper bound of the log time window searched (matches persisted lastExecutionTimestamp when not using specificWindow). */
+  lastSearchTimestamp: string;
 }
 
 interface ExtractedLogsSummaryError {
@@ -143,6 +149,7 @@ export class LogsExtractionClient {
         count,
         pages,
         scannedIndices: indexPatterns,
+        lastSearchTimestamp,
       };
 
       if (opts?.specificWindow) {
@@ -232,16 +239,34 @@ export class LogsExtractionClient {
     lastSearchTimestamp: string;
     ccsError?: Error;
   }> {
-    const { docsLimit } = config;
+    const { docsLimit, maxLogsPerCycle } = config;
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
-    const { fromDateISO, toDateISO } =
+    const { fromDateISO, toDateISO: originalToDateISO } =
       opts?.specificWindow || this.getExtractionWindow(config, engineState, delayMs);
 
-    this.validateExtractionWindow(fromDateISO, toDateISO);
+    this.validateExtractionWindow(fromDateISO, originalToDateISO);
+
+    const recoveryId = engineState.paginationId;
+    const cappedToDateISO = await resolveCappedTimeWindow({
+      esClient: this.esClient,
+      abortController: opts?.abortController,
+      indexPatterns: localIndexPatterns,
+      type,
+      fromDateISO,
+      toDateISO: originalToDateISO,
+      recoveryId,
+      maxLogsPerCycle,
+    });
+
+    if (cappedToDateISO !== originalToDateISO) {
+      this.logger.warn(`Hit max logs per cycle limit (${maxLogsPerCycle}) for main extraction`);
+    }
+
+    this.validateExtractionWindow(fromDateISO, cappedToDateISO);
 
     const mainPromise = this.runMainExtractionLoop({
       type,
@@ -250,7 +275,7 @@ export class LogsExtractionClient {
       indexPatterns: localIndexPatterns,
       latestIndex,
       fromDateISO,
-      toDateISO,
+      toDateISO: cappedToDateISO,
       docsLimit,
       entityDefinition,
     });
@@ -260,22 +285,53 @@ export class LogsExtractionClient {
         type,
         remoteIndexPatterns,
         fromDateISO,
-        toDateISO,
+        toDateISO: originalToDateISO,
         docsLimit,
+        maxLogsPerCycle,
         entityDefinition,
         abortController: opts?.abortController,
+        recoveryId,
       });
 
       const [mainResult, ccsResult] = await Promise.all([mainPromise, ccsPromise]);
 
+      const lastSearchTimestamp = this.resolveLastSearchTimestamp(
+        mainResult.lastSearchTimestamp,
+        ccsResult
+      );
+
       return {
         ...mainResult,
+        lastSearchTimestamp,
         indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],
         ccsError: ccsResult.error,
       };
     }
 
     return await mainPromise;
+  }
+
+  /**
+   * Picks the timestamp to persist as the extraction waterline when local (main) and remote (CCS)
+   * extractions both ran in the same cycle.
+   *
+   * Main and CCS can end at different effective upper bounds (for example when `maxLogsPerCycle`
+   * caps one side before the other). We take the **earlier** instant so the next run resumes from
+   * the side that did not advance as far and does not leave a gap.
+   *
+   * When CCS fails or provides no usable timestamp, we keep the main extraction value only.
+   */
+  private resolveLastSearchTimestamp(
+    mainLastSearchTimestamp: string,
+    ccsResult: Pick<CcsExtractToUpdatesResult, 'error' | 'lastSearchTimestamp'>
+  ): string {
+    if (ccsResult.error || !ccsResult.lastSearchTimestamp) {
+      return mainLastSearchTimestamp;
+    }
+
+    return moment
+      .min(moment(mainLastSearchTimestamp), moment(ccsResult.lastSearchTimestamp))
+      .toISOString();
   }
 
   private async runMainExtractionLoop({

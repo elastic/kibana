@@ -27,6 +27,7 @@ import {
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
+import { resolveCappedTimeWindow } from './logs_cap_probe';
 
 interface CcsExtractToUpdatesParams {
   type: EntityType;
@@ -34,13 +35,17 @@ interface CcsExtractToUpdatesParams {
   fromDateISO: string;
   toDateISO: string;
   docsLimit: number;
+  maxLogsPerCycle: number;
   entityDefinition: ManagedEntityDefinition;
   abortController?: AbortController;
+  recoveryId?: string;
 }
 
 export interface CcsExtractToUpdatesResult {
   count: number;
   pages: number;
+  /** Effective upper bound of the window actually queried (for checkpoint merge with main extraction). */
+  lastSearchTimestamp: string;
   error?: Error;
 }
 
@@ -58,10 +63,12 @@ export class CcsLogsExtractionClient {
       return await this.doExtractToUpdates(params);
     } catch (error) {
       const wrappedError = new Error(
-        `Failed to extract to updates from CCS indices: ${error.message}`
+        `Failed to extract to updates from CCS indices: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       this.logger.error(wrappedError);
-      return { count: 0, pages: 0, error: wrappedError };
+      return { count: 0, pages: 0, lastSearchTimestamp: params.toDateISO, error: wrappedError };
     }
   }
 
@@ -69,11 +76,24 @@ export class CcsLogsExtractionClient {
     type,
     remoteIndexPatterns,
     fromDateISO,
-    toDateISO,
+    toDateISO: originalToDateISO,
     docsLimit,
+    maxLogsPerCycle,
     entityDefinition,
     abortController,
+    recoveryId,
   }: CcsExtractToUpdatesParams): Promise<CcsExtractToUpdatesResult> {
+    const toDateISO = await resolveCappedTimeWindow({
+      esClient: this.esClient,
+      abortController,
+      indexPatterns: remoteIndexPatterns,
+      type,
+      fromDateISO,
+      toDateISO: originalToDateISO,
+      recoveryId,
+      maxLogsPerCycle,
+    });
+
     let totalCount = 0;
     let pages = 0;
     let pagination: PaginationParams | undefined;
@@ -90,7 +110,6 @@ export class CcsLogsExtractionClient {
         docsLimit,
         pagination,
       });
-
       this.logger.info(
         `Running CCS extraction from ${fromDateISO} to ${toDateISO} ${
           pagination
@@ -135,7 +154,7 @@ export class CcsLogsExtractionClient {
 
     abortController?.signal.removeEventListener('abort', onAbort);
 
-    return { count: totalCount, pages };
+    return { count: totalCount, pages, lastSearchTimestamp: toDateISO };
   }
 
   private transformDocForCcsUpsert(

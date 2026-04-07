@@ -43,8 +43,6 @@ export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
 
-const METADATA_FIELDS = ['_index'];
-
 export interface PaginationParams {
   timestampCursor: string;
   idCursor: string;
@@ -68,8 +66,7 @@ export function buildExtractionSourceClause(params: {
 }): string {
   const { indexPatterns, type, fromDateISO, toDateISO, recoveryId } = params;
   return (
-    `FROM ${indexPatterns.join(', ')}
-    METADATA ${METADATA_FIELDS.join(', ')}` +
+    `FROM ${indexPatterns.join(', ')}` +
     `
   | WHERE 
       ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")

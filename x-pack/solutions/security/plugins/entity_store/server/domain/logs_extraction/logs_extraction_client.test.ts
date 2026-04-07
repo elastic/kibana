@@ -18,6 +18,7 @@ import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
 import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from './query_builder_commons';
 import {
   LogExtractionConfig,
+  LOG_EXTRACTION_MAX_LOGS_PER_CYCLE_DEFAULT,
   type EngineDescriptorClient,
   type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
@@ -29,7 +30,9 @@ function createMockCcsLogsExtractionClient(): jest.Mocked<
   Pick<CcsLogsExtractionClient, 'extractToUpdates'>
 > {
   return {
-    extractToUpdates: jest.fn().mockResolvedValue({ count: 0, pages: 0 }),
+    extractToUpdates: jest
+      .fn()
+      .mockResolvedValue({ count: 0, pages: 0, lastSearchTimestamp: '2099-01-01T00:00:00.000Z' }),
   };
 }
 
@@ -38,6 +41,17 @@ jest.mock('../../infra/elasticsearch/ingest');
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
+
+/** Probe result where the cap does not tighten the window (row_count lower than maxLogsPerCycle). */
+function esqlLogsCapProbeSkippedResponse(): ESQLSearchResponse {
+  return {
+    columns: [
+      { name: 'row_count', type: 'long' },
+      { name: 'cap_ts', type: 'date' },
+    ],
+    values: [[100, '2024-01-01T00:00:00.000Z']],
+  };
+}
 
 function createMockEngineDescriptor(
   type: EntityType = 'user',
@@ -138,7 +152,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -155,7 +171,7 @@ describe('LogsExtractionClient', () => {
       );
 
       expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('user');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
         query: expect.any(String),
@@ -182,6 +198,14 @@ describe('LogsExtractionClient', () => {
           }),
         })
       );
+      if (result.success) {
+        const persisted = mockEngineDescriptorClient.update.mock.calls[0][1] as {
+          logExtractionState: { lastExecutionTimestamp?: string };
+        };
+        expect(result.lastSearchTimestamp).toBe(
+          persisted.logExtractionState.lastExecutionTimestamp
+        );
+      }
     });
 
     it('should handle empty results from ESQL query', async () => {
@@ -204,7 +228,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -212,7 +238,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success).toBe(true);
       expect(result.success && result.count).toBe(0);
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
         'user',
@@ -224,6 +250,14 @@ describe('LogsExtractionClient', () => {
           }),
         })
       );
+      if (result.success) {
+        const persisted = mockEngineDescriptorClient.update.mock.calls[0][1] as {
+          logExtractionState: { lastExecutionTimestamp?: string };
+        };
+        expect(result.lastSearchTimestamp).toBe(
+          persisted.logExtractionState.lastExecutionTimestamp
+        );
+      }
     });
 
     it('should compute extraction window from lookbackPeriod and delay when no custom range', async () => {
@@ -253,7 +287,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       await client.extractLogs('user');
@@ -298,7 +334,9 @@ describe('LogsExtractionClient', () => {
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       await client.extractLogs('user');
@@ -401,7 +439,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const fromDate = '2024-01-01T00:00:00.000Z';
@@ -444,7 +484,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user', {
@@ -456,7 +498,8 @@ describe('LogsExtractionClient', () => {
 
       expect(result.success).toBe(true);
       expect(result.success && result.count).toBe(2);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(result.success && result.lastSearchTimestamp).toBe('2024-01-02T00:00:00.000Z');
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
     });
@@ -473,7 +516,9 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       const testError = new Error('ESQL query failed');
-      mockExecuteEsqlQuery.mockRejectedValue(testError);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockRejectedValue(testError);
 
       const result = await client.extractLogs('user');
 
@@ -504,7 +549,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       const testError = new Error('Ingestion failed');
       mockIngestEntities.mockRejectedValue(testError);
 
@@ -539,7 +586,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -550,15 +599,25 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.scannedIndices).toContain('metrics-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
-      // Main query runs once; injected CCS client is invoked for remote patterns
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      // Local cap probe + main extract; injected CCS client is invoked for remote patterns
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
       expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'user',
           remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
+          maxLogsPerCycle: LOG_EXTRACTION_MAX_LOGS_PER_CYCLE_DEFAULT,
+          recoveryId: undefined,
         })
       );
+      if (result.success) {
+        const persisted = mockEngineDescriptorClient.update.mock.calls[0][1] as {
+          logExtractionState: { lastExecutionTimestamp?: string };
+        };
+        expect(result.lastSearchTimestamp).toBe(
+          persisted.logExtractionState.lastExecutionTimestamp
+        );
+      }
     });
 
     it('should store CCS errors in the saved object while main execution remains unchanged', async () => {
@@ -582,11 +641,14 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
       mockCcsLogsExtractionClient.extractToUpdates.mockResolvedValue({
         count: 0,
         pages: 0,
+        lastSearchTimestamp: '2024-01-01T00:00:00.000Z',
         error: ccsError,
       });
 
@@ -597,7 +659,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.count).toBe(1);
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
 
       // CCS error is stored in the saved object
@@ -612,6 +674,14 @@ describe('LogsExtractionClient', () => {
           error: { message: ccsError.message, action: 'extractLogs' },
         })
       );
+      if (result.success) {
+        const persisted = mockEngineDescriptorClient.update.mock.calls[0][1] as {
+          logExtractionState: { lastExecutionTimestamp?: string };
+        };
+        expect(result.lastSearchTimestamp).toBe(
+          persisted.logExtractionState.lastExecutionTimestamp
+        );
+      }
     });
 
     it('should fallback to logs-* when data view is not found', async () => {
@@ -630,7 +700,9 @@ describe('LogsExtractionClient', () => {
       );
       const error = new Error('Data view not found');
       mockDataViewsService.get.mockRejectedValue(error);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -638,6 +710,14 @@ describe('LogsExtractionClient', () => {
       expect(result.success).toBe(true);
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(!result.success && result.error).toBeFalsy();
+      if (result.success) {
+        const persisted = mockEngineDescriptorClient.update.mock.calls[0][1] as {
+          logExtractionState: { lastExecutionTimestamp?: string };
+        };
+        expect(result.lastSearchTimestamp).toBe(
+          persisted.logExtractionState.lastExecutionTimestamp
+        );
+      }
     });
 
     it('should work with different entity types', async () => {
@@ -660,13 +740,15 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(esqlLogsCapProbeSkippedResponse())
+        .mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       await client.extractLogs('host');
 
       expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('host');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       expect(mockIngestEntities).toHaveBeenCalledWith(
         expect.objectContaining({
           targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),

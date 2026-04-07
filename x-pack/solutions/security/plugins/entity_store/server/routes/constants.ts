@@ -24,6 +24,7 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   frequency: true,
   delay: true,
   docsLimit: true,
+  maxLogsPerCycle: true,
 }).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
@@ -45,6 +46,7 @@ export const LogExtractionUpdateParams = z.object({
     .regex(/[smdh]$/)
     .optional(),
   docsLimit: z.number().int().positive().optional(),
+  maxLogsPerCycle: z.number().int().optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;

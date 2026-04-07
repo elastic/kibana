@@ -14,6 +14,7 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { LOG_EXTRACTION_MAX_LOGS_PER_CYCLE_DEFAULT } from '../../domain/saved_objects';
 
 const DEFAULT_DOCS_LIMIT = 10000;
 
@@ -26,6 +27,7 @@ const bodySchema = z.object({
   fromDateISO: z.string().datetime(),
   toDateISO: z.string().datetime(),
   docsLimit: z.number().int().positive().optional(),
+  maxLogsPerCycle: z.number().int().optional(),
 });
 
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
@@ -52,7 +54,7 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
         const entityStoreCtx = await ctx.entityStore;
         const { logger: baseLogger, ccsLogsExtractionClient, namespace } = entityStoreCtx;
         const { entityType } = req.params;
-        const { indexPatterns, fromDateISO, toDateISO, docsLimit } = req.body;
+        const { indexPatterns, fromDateISO, toDateISO, docsLimit, maxLogsPerCycle } = req.body;
 
         const logger = baseLogger.get('forceCcsExtractToUpdates').get(entityType);
         logger.debug(
@@ -68,6 +70,7 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
           fromDateISO,
           toDateISO,
           docsLimit: docsLimit ?? DEFAULT_DOCS_LIMIT,
+          maxLogsPerCycle: maxLogsPerCycle ?? LOG_EXTRACTION_MAX_LOGS_PER_CYCLE_DEFAULT,
           entityDefinition,
         });
 
