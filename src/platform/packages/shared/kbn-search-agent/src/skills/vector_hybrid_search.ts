@@ -12,8 +12,7 @@
 export const vectorHybridSearchSkill = {
   id: 'vector-hybrid-search',
   name: 'vector-hybrid-search',
-  description:
-    'Guide for building vector search, hybrid search, and using Elasticsearch as a vector database. Covers semantic_text, dense_vector, embedding strategies, hybrid BM25+kNN via RRF, reranking, and production optimization. Use when a developer wants semantic search, hybrid search, kNN, embeddings, or Elasticsearch as a vector store.',
+  description: 'Guide for building vector search, hybrid search, and using Elasticsearch as a vector database. Covers semantic_text, dense_vector, embedding strategies, hybrid BM25+kNN via RRF, reranking, and production optimization. Use when a developer wants semantic search, hybrid search, kNN, embeddings, or Elasticsearch as a vector store.',
   content: `# Vector & Hybrid Search Guide
 
 Covers the full lifecycle of vector or hybrid search with Elasticsearch — planning, data modeling, search implementation, and optimization. All API examples use SENSE syntax for Kibana Dev Tools.
@@ -25,11 +24,11 @@ Ask these routing questions first:
 1. "Are you already generating embeddings?" → Yes → \`dense_vector\` path. Briefly offer \`semantic_text\` as a simpler alternative.
 2. "What version of Elasticsearch?" → Below 8.15 → \`semantic_text\` unavailable, use \`dense_vector\`.
 
-| Option                           | When to Use                                                      |
-| -------------------------------- | ---------------------------------------------------------------- |
-| **Built-in via EIS**             | Default for Cloud (Serverless or ECH) on 8.15+. No ML node cost. |
-| **Third-party (OpenAI, Cohere)** | Existing model contract or specific model requirement.           |
-| **Self-hosted**                  | Custom fine-tuned models deployed on ML nodes.                   |
+| Option                           | When to Use                                                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Built-in via EIS**             | Default for Cloud (Serverless or ECH) on 8.15+. No ML node cost. Jina v3 is the current default dense model for \`semantic_text\`. |
+| **Third-party (OpenAI, Cohere)** | Existing model contract or specific model requirement.                                                                           |
+| **Self-hosted**                  | Custom fine-tuned models deployed on ML nodes.                                                                                   |
 
 ## Decision: Vector Field Type
 
@@ -40,7 +39,7 @@ Ask these routing questions first:
 
 ### \`semantic_text\` Mapping (Default)
 
-Minimal — works out of the box on Serverless:
+Minimal — works out of the box on Serverless (uses the platform default model, currently Jina):
 
 \`\`\`json
 PUT /my-index
@@ -91,7 +90,9 @@ PUT /my-index
 }
 \`\`\`
 
-Set \`dims\` to match the embedding model output (OpenAI text-embedding-3-small = 1536, E5-small = 384).
+Set \`dims\` to match the embedding model output (OpenAI text-embedding-3-small = 1536, Jina v3 = 1024, E5-small = 384).
+
+> **Before generating inference endpoint config, check [EIS docs](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for current model IDs.** Jina v3 is the current default dense model for \`semantic_text\`; Jina v5-small is available for cost-sensitive workloads. Model IDs change regularly.
 
 ## Decision: Search Type
 
@@ -190,7 +191,7 @@ POST /my-index/_search
 }
 \`\`\`
 
-Check [reranker docs](https://www.elastic.co/docs/solutions/search/ranking/semantic-reranking) for current inference endpoint setup.
+EIS provides managed rerankers (currently Jina Reranker v2 and v3). Check [reranker docs](https://www.elastic.co/docs/solutions/search/ranking/semantic-reranking) for current setup.
 
 ## Production Optimization
 

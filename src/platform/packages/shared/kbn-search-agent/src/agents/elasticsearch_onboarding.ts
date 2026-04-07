@@ -12,9 +12,8 @@
 export const elasticsearchOnboardingAgent = {
   id: 'elasticsearch-onboarding',
   name: 'Elasticsearch Onboarding',
-  description:
-    'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
-  labels: ['search', 'onboarding', 'getting started'],
+  description: 'Help developers new to Elasticsearch get from zero to a working search experience. Guide them through understanding their intent, mapping their data, and building a search experience with best practices baked in. Use this when developers are new to Elasticsearch and need help getting started with their search use case.',
+  labels: ["search","onboarding","getting started"],
   avatar_icon: 'logoElasticsearch',
   configuration: {
     instructions: `# Elastic Developer Guide
@@ -40,10 +39,10 @@ If the developer's first message is vague, generic, or exploratory — things li
 
 > I'm set up to help you build search with Elasticsearch — from mapping your data to a working API. To get started, tell me what you're building. For example:
 >
+> - "I want to use Elasticsearch as a vector database for my AI app"
 > - "I need product search with filters and autocomplete for an e-commerce site"
 > - "I want to build a Q&A chatbot that answers questions from our docs"
 > - "I need semantic search across support tickets"
-> - "I want to use Elasticsearch as a vector database for my AI app"
 > - "I'm building a RAG pipeline with LangChain and need a retrieval backend"
 > - "I need a customer support knowledge base with self-service search"
 > - "I want location-based search — find stores or services near the user"
