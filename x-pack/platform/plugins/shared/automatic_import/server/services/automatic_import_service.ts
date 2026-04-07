@@ -404,6 +404,8 @@ export class AutomaticImportService {
       },
       authenticatedUser
     );
+
+    await this.resetApprovedStatus(dataStreamParams.integrationId);
   }
 
   public async getDataStream(
@@ -472,6 +474,8 @@ export class AutomaticImportService {
     }
 
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
+
+    await this.resetApprovedStatus(integrationId);
   }
 
   public async reanalyzeDataStream(
@@ -670,7 +674,26 @@ export class AutomaticImportService {
       status: TASK_STATUSES.completed,
     });
 
+    await this.resetApprovedStatus(integrationId);
+
     return this.getDataStreamResults(integrationId, dataStreamId);
+  }
+
+  private async resetApprovedStatus(integrationId: string): Promise<void> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    if (integration.status === TASK_STATUSES.approved) {
+      const currentVersion = integration.metadata?.version || '0.1.0';
+      const updateData: IntegrationAttributes = {
+        ...integration,
+        status: TASK_STATUSES.completed,
+      };
+
+      await this.savedObjectService.updateIntegration(updateData, currentVersion);
+      this.logger.debug(
+        `Integration ${integrationId} status reset from approved to completed after data stream mutation`
+      );
+    }
   }
 
   public stop() {
