@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
-import { useAbortController } from '@kbn/react-hooks';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 export function PendingRootDataStreamCallout({
@@ -32,25 +32,30 @@ export function PendingRootDataStreamCallout({
     },
   } = useKibana();
 
-  const abortController = useAbortController();
-
-  const createDataStream = useCallback(async () => {
-    await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_restore_data_stream', {
-      params: {
-        path: {
-          name: streamName,
+  const [{ loading }, createDataStream] = useAsyncFn(async () => {
+    try {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_restore_data_stream', {
+        params: {
+          path: {
+            name: streamName,
+          },
         },
-      },
-      signal: abortController.signal,
-    });
+      });
 
-    toasts.addSuccess(
-      i18n.translate('xpack.streams.pendingRootDataStream.create.successToast', {
-        defaultMessage: 'Data stream created',
-      })
-    );
-    refreshDefinition();
-  }, [abortController.signal, refreshDefinition, streamName, streamsRepositoryClient, toasts]);
+      toasts.addSuccess(
+        i18n.translate('xpack.streams.pendingRootDataStream.create.successToast', {
+          defaultMessage: 'Data stream created',
+        })
+      );
+      refreshDefinition();
+    } catch (err) {
+      toasts.addError(err as Error, {
+        title: i18n.translate('xpack.streams.pendingRootDataStream.create.errorToast', {
+          defaultMessage: 'Failed to create data stream',
+        }),
+      });
+    }
+  }, [refreshDefinition, streamName, streamsRepositoryClient, toasts]);
 
   return (
     <EuiCallOut
@@ -74,7 +79,7 @@ export function PendingRootDataStreamCallout({
           })}
         </EuiLink>
       </p>
-      <EuiButton onClick={createDataStream} isDisabled={!canManage}>
+      <EuiButton onClick={createDataStream} isLoading={loading} isDisabled={!canManage || loading}>
         {i18n.translate('xpack.streams.pendingRootDataStream.createButton', {
           defaultMessage: 'Create data stream without data and start configuring',
         })}
