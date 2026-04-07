@@ -143,6 +143,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
             defaultMessage="Change default"
           />
         }
+        maxWidth={440}
         data-test-subj="confirmDefaultRepositoryModal"
       >
         <p>

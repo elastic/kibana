@@ -213,6 +213,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
             defaultMessage="Change default"
           />
         }
+        maxWidth={440}
         data-test-subj="confirmDefaultRepositoryModal"
       >
         <p>

@@ -440,6 +440,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             defaultMessage="Change default"
           />
         }
+        maxWidth={440}
         data-test-subj="confirmDefaultRepositoryModal"
       >
         <p>
