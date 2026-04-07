@@ -7986,6 +7986,28 @@
                       }
                     }
                   }
+                },
+                "ai_created_rules": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of rules created via AI rule creation"
+                      }
+                    },
+                    "enabled": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of AI-created rules that are enabled"
+                      }
+                    },
+                    "disabled": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of AI-created rules that are disabled"
+                      }
+                    }
+                  }
                 }
               }
             },
