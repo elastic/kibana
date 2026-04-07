@@ -36,7 +36,9 @@ import {
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
   const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
   if (!useMemory) {
-    throw new Error('Memory is disabled. Enable useMemory in settings to use this feature.');
+    throw new Error(
+      'Memory is disabled. Enable the Streams memory advanced setting (observability:streamsEnableMemory).'
+    );
   }
 };
 

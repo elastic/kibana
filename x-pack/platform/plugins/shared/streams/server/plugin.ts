@@ -418,29 +418,6 @@ export class StreamsPlugin
         });
     }
 
-    if (this.config.significantEvents.useMemory !== undefined) {
-      core
-        .getStartServices()
-        .then(async ([coreStart]) => {
-          const soClient = coreStart.savedObjects.getUnsafeInternalClient();
-          const startupUiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-          await startupUiSettings.set(
-            OBSERVABILITY_STREAMS_ENABLE_MEMORY,
-            this.config.significantEvents.useMemory
-          );
-          if (this.config.significantEvents.useMemory) {
-            this.server?.ensureMemorySkillRegistered?.();
-            await this.server?.ensureMemoryTasksScheduled?.();
-          }
-          this.logger.info(
-            `Preconfigured significantEvents.useMemory: ${this.config.significantEvents.useMemory}`
-          );
-        })
-        .catch((error) => {
-          this.logger.error(`Error preconfiguring significant events settings: ${error}`);
-        });
-    }
-
     return {};
   }
 
