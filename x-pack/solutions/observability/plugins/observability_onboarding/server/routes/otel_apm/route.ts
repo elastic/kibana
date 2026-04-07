@@ -17,6 +17,7 @@ import {
   isNoShardsAvailableError,
   throwHasDataSearchError,
 } from '../../lib/handle_has_data_search_error';
+import { checkPreExistingData } from '../../lib/check_pre_existing_data';
 
 const createOtelApmOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/otel_apm/flow',
@@ -68,9 +69,19 @@ const hasOtelApmDataRoute = createObservabilityOnboardingServerRoute({
       reason: 'Authorization is checked by Elasticsearch',
     },
   },
-  async handler(resources): Promise<{ hasData: boolean }> {
+  async handler(resources): Promise<{ hasData: boolean; hasPreExistingData?: boolean }> {
     const { start, serviceName } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
+
+    const apmIndices = [
+      'traces-apm*',
+      'traces-*.otel-*',
+      'logs-apm*',
+      'logs-*.otel-*',
+      'metrics-apm*',
+      'metrics-*.otel-*',
+      'apm-*',
+    ];
 
     try {
       const filters: estypes.QueryDslQueryContainer[] = [
@@ -83,25 +94,20 @@ const hasOtelApmDataRoute = createObservabilityOnboardingServerRoute({
         bool: { filter: filters },
       };
 
-      const result = await elasticsearch.client.asCurrentUser.search({
-        index: [
-          'traces-apm*',
-          'traces-*.otel-*',
-          'logs-apm*',
-          'logs-*.otel-*',
-          'metrics-apm*',
-          'metrics-*.otel-*',
-          'apm-*',
-        ],
-        ignore_unavailable: true,
-        allow_partial_search_results: true,
-        size: 0,
-        terminate_after: 1,
-        query,
-      });
+      const [preExisting, result] = await Promise.all([
+        checkPreExistingData(elasticsearch.client.asCurrentUser, apmIndices, start),
+        elasticsearch.client.asCurrentUser.search({
+          index: apmIndices,
+          ignore_unavailable: true,
+          allow_partial_search_results: true,
+          size: 0,
+          terminate_after: 1,
+          query,
+        }),
+      ]);
 
       const hasData = (result.hits.total as estypes.SearchTotalHits).value > 0;
-      return { hasData };
+      return { hasData, hasPreExistingData: preExisting || undefined };
     } catch (error) {
       if (isNoShardsAvailableError(error)) {
         return { hasData: false };

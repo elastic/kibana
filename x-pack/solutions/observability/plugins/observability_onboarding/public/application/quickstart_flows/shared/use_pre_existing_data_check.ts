@@ -11,6 +11,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 const FLOW_ENDPOINTS = {
   kubernetes: '/internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
   otel_host: '/internal/observability_onboarding/otel_host/has-data',
+  otel_apm: '/internal/observability_onboarding/otel_apm/has-data',
 } as const;
 
 type PreExistingDataFlow = keyof typeof FLOW_ENDPOINTS;

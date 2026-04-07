@@ -33,6 +33,7 @@ import type { ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
+import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -67,15 +68,20 @@ export function OtelApmQuickstartFlow() {
     }
   }, [data, onPageReady]);
 
-  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+  const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_apm' });
+
+  const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'otel_apm',
     onboardingId: data?.onboardingId,
   });
 
-  // Set sessionStartTime when monitoring begins (first blur) rather than on
-  // mount, to narrow the time-window and reduce false positives from other
-  // APM services already ingesting data on the same cluster.
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
+
+  // Set sessionStartTime when monitoring begins (first blur or early
+  // pre-existing data detection) rather than on mount, to narrow the
+  // time-window and reduce false positives from other APM services
+  // already ingesting data on the same cluster.
   const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
   useEffect(() => {
     if (isMonitoringStepActive && sessionStartTime === null) {
@@ -84,7 +90,7 @@ export function OtelApmQuickstartFlow() {
   }, [isMonitoringStepActive, sessionStartTime]);
 
   const trimmedServiceName = serviceName.trim();
-  const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+  const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
     isMonitoringActive: isMonitoringStepActive && sessionStartTime !== null,
     sessionStartTime: sessionStartTime ?? '',
     fetchInterval: FETCH_INTERVAL,
@@ -94,6 +100,8 @@ export function OtelApmQuickstartFlow() {
     endpoint: '/internal/observability_onboarding/otel_apm/has-data',
     extraQueryParams: trimmedServiceName ? { serviceName: trimmedServiceName } : undefined,
   });
+
+  const hasPreExistingDataFinal = hasPreExistingData || hasPreExistingDataEarly;
 
   if (error !== undefined) {
     return <EmptyPrompt onboardingFlowType="otel_apm" error={error} onRetryClick={refetch} />;
@@ -147,30 +155,32 @@ export function OtelApmQuickstartFlow() {
             title: i18n.translate('xpack.observability_onboarding.otelApm.monitorStepTitle', {
               defaultMessage: 'Visualize your data',
             }),
-            status: (hasData
+            status: (hasData || hasPreExistingDataFinal
               ? 'complete'
               : isMonitoringStepActive
               ? 'current'
               : 'incomplete') as EuiStepStatus,
             children: isMonitoringStepActive ? (
               <>
-                <ProgressIndicator
-                  title={
-                    hasData
-                      ? i18n.translate('xpack.observability_onboarding.otelApm.monitoringApp', {
-                          defaultMessage: 'We are receiving your application data',
-                        })
-                      : i18n.translate('xpack.observability_onboarding.otelApm.waitingForData', {
-                          defaultMessage: 'Waiting for data to be shipped',
-                        })
-                  }
-                  iconType="checkInCircleFilled"
-                  isLoading={!hasData}
-                  css={css`
-                    max-width: 40%;
-                  `}
-                  data-test-subj="observabilityOnboardingOtelApmDataProgressIndicator"
-                />
+                {!hasPreExistingDataFinal && (
+                  <ProgressIndicator
+                    title={
+                      hasData
+                        ? i18n.translate('xpack.observability_onboarding.otelApm.monitoringApp', {
+                            defaultMessage: 'We are receiving your application data',
+                          })
+                        : i18n.translate('xpack.observability_onboarding.otelApm.waitingForData', {
+                            defaultMessage: 'Waiting for data to be shipped',
+                          })
+                    }
+                    iconType="checkInCircleFilled"
+                    isLoading={!hasData}
+                    css={css`
+                      max-width: 40%;
+                    `}
+                    data-test-subj="observabilityOnboardingOtelApmDataProgressIndicator"
+                  />
+                )}
 
                 {isTroubleshootingVisible && (
                   <>
@@ -199,7 +209,7 @@ export function OtelApmQuickstartFlow() {
                   </>
                 )}
 
-                {hasData === true && (
+                {(hasData === true || hasPreExistingDataFinal) && (
                   <>
                     <EuiSpacer />
                     <GetStartedPanel
