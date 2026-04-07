@@ -90,6 +90,7 @@ jobs:
     if: ${{ always() }}
     needs: [mint-token, claude-review, claude-review-comment]
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Revoke LiteLLM token
         id: revoke
