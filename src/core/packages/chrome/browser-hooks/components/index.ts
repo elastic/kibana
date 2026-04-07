@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppMenu } from './app_menu';
+export { RegisterAppMenu } from './app_menu';

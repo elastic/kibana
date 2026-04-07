@@ -15,7 +15,7 @@ interface AppMenuProps {
   config?: AppMenuConfig;
 }
 
-export const AppMenu = ({ config }: AppMenuProps) => {
+export const RegisterAppMenu = ({ config }: AppMenuProps) => {
   const chrome = useChromeService();
 
   useEffect(() => {

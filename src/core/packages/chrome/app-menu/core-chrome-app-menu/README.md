@@ -16,7 +16,7 @@ The context is available automatically when:
 
 ```tsx
 import React from 'react';
-import { AppMenu } from '@kbn/core-chrome-browser-hooks';
+import { RegisterAppMenu } from '@kbn/core-chrome-browser-hooks';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 
@@ -26,7 +26,7 @@ interface Props {
 
 
 const Example = ({ config }: Props) => {
-  return <AppMenu config={config} />;
+  return <RegisterAppMenu config={config} />;
 };
 ```
 
