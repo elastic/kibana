@@ -310,4 +310,113 @@ describe('useTopNavLinks', () => {
       expect(saveAsItem?.disableButton).toBe(false);
     });
   });
+  describe('alerting v2 rules menu', () => {
+    const setupWithAlertingV2 = async (
+      hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {},
+      alertingV2Enabled = true
+    ) => {
+      const baseMock = createDiscoverServicesMock();
+      const v2Services = createTestServices({
+        capabilities: {
+          ...baseMock.capabilities,
+          discover_v2: {
+            save: true,
+            storeSearchSession: true,
+          },
+          ...(alertingV2Enabled ? { alertingVTwo: {} } : {}),
+          management: {
+            ...baseMock.capabilities.management,
+            insightsAndAlerting: {
+              triggersActions: true,
+            },
+          },
+        },
+        triggersActionsUi: triggersActionsUiMock.createStart(),
+      });
+
+      const toolkit = getDiscoverInternalStateMock({ services: v2Services });
+      await toolkit.initializeTabs();
+      await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+      });
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.assignNextDataView)({
+          dataView: dataViewMock,
+        })
+      );
+
+      return renderHook(
+        () =>
+          useTopNavLinks({
+            dataView: dataViewMock,
+            onOpenInspector: jest.fn(),
+            services: v2Services,
+            hasUnsavedChanges: false,
+            isEsqlMode: true,
+            adHocDataViews: [],
+            hasShareIntegration: false,
+            persistedDiscoverSession: undefined,
+            ...hookAttrs,
+          }),
+        {
+          wrapper: ({ children }) => (
+            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+          ),
+        }
+      ).result.current;
+    };
+
+    it('should include the alerts menu when in ES|QL mode and alerting v2 is enabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
+      expect(alertsItem?.label).toBe('Alerts');
+
+      const createRuleTopLevel = appMenuConfig.items?.find(
+        (item) => item.id === AppMenuActionId.createRule
+      );
+      expect(createRuleTopLevel).toBeUndefined();
+    });
+
+    it('should prepend the v2 ES|QL rule row inside the alerts popover when v2 is enabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem?.items).toBeDefined();
+
+      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeDefined();
+      expect(v2Row?.order).toBe(0);
+      expect(v2Row?.labelBadgeText).toBe('New');
+    });
+
+    it('should NOT include the v2 row when not in ES|QL mode', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
+
+      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
+    });
+
+    it('should NOT include the v2 row when alerting v2 is disabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, false);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
+
+      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
+    });
+
+    it('should include alerts menu in both ES|QL and classic modes', async () => {
+      const esqlConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
+      const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
+
+      expect(esqlConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
+      expect(classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
+    });
+  });
 });

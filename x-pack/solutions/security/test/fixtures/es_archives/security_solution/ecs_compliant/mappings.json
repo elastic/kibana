@@ -113,6 +113,18 @@
             },
             "created": {
               "type": "keyword"
+            },
+            "kind": {
+              "type": "keyword"
+            },
+            "category": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "outcome": {
+              "type": "keyword"
             }
           }
         },

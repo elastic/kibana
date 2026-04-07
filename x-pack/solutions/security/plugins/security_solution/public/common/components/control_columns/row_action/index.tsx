@@ -27,11 +27,12 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -90,6 +91,7 @@ const RowActionComponent = ({
 
   const { openFlyout } = useExpandableFlyoutApi();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const columnValues = useMemo(
     () =>
@@ -132,12 +134,7 @@ const RowActionComponent = ({
             />
           ),
         }),
-        {
-          ownFocus: false,
-          resizable: true,
-          size: 's',
-          type: 'overlay',
-        }
+        { ...defaultFlyoutProperties }
       );
     } else {
       openFlyout({
@@ -156,18 +153,19 @@ const RowActionComponent = ({
       });
     }
   }, [
-    eventId,
-    hit,
-    indexName,
+    defaultFlyoutProperties,
     newFlyoutSystemEnabled,
-    openFlyout,
+    hit,
     overlays,
-    history,
     services,
     store,
+    history,
+    eventId,
+    indexName,
+    handleAlertUpdated,
+    openFlyout,
     tableId,
     telemetry,
-    handleAlertUpdated,
   ]);
 
   const toggleShowNotes = useCallback(() => {

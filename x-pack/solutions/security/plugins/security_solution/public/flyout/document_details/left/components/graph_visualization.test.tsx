@@ -14,6 +14,16 @@ import { GraphVisualization } from './graph_visualization';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 
+/**
+ * Unit tests for the document_details GraphVisualization wrapper.
+ *
+ * This wrapper reads event context from useDocumentDetailsContext + useGraphPreview
+ * and passes the resolved values to the shared GraphVisualization component in 'event' mode.
+ *
+ * The full callback behaviour (onInvestigateInTimeline, onOpenEventPreview, etc.) is tested in:
+ * flyout/shared/components/graph_visualization.test.tsx
+ */
+
 const mockToasts = {
   addDanger: jest.fn(),
   addError: jest.fn(),
@@ -23,10 +33,6 @@ const mockToasts = {
   remove: jest.fn(),
 };
 
-const mockInvestigateInTimeline = {
-  investigateInTimeline: jest.fn(),
-};
-
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
 jest.mock('@kbn/expandable-flyout', () => ({
@@ -34,7 +40,6 @@ jest.mock('@kbn/expandable-flyout', () => ({
 }));
 
 jest.mock('@kbn/cloud-security-posture-graph', () => {
-  // Import actual utility functions directly from the source
   const { isEntityNode, getNodeDocumentMode, hasNodeDocumentsData, getSingleDocumentData } =
     jest.requireActual('@kbn/cloud-security-posture-graph/src/components/utils');
   const { GraphGroupedNodePreviewPanelKey, GROUP_PREVIEW_BANNER } = jest.requireActual(
@@ -45,35 +50,30 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
   );
 
   return {
-    // Mocked GraphInvestigation component
     GraphInvestigation: jest.fn(),
-    // Use actual utility functions
     isEntityNode,
     isEntityItem,
     getNodeDocumentMode,
     hasNodeDocumentsData,
     getSingleDocumentData,
-    // Use actual constants
     GraphGroupedNodePreviewPanelKey,
     GROUP_PREVIEW_BANNER,
   };
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  return {
-    useToasts: () => mockToasts,
-    KibanaServices: {
-      get: () => ({
-        uiSettings: {
-          get: jest.fn().mockReturnValue(true),
-        },
-      }),
-    },
-  };
-});
+jest.mock('../../../../common/lib/kibana', () => ({
+  useToasts: () => mockToasts,
+  KibanaServices: {
+    get: () => ({
+      uiSettings: {
+        get: jest.fn().mockReturnValue(true),
+      },
+    }),
+  },
+}));
 
 jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: () => mockInvestigateInTimeline,
+  useInvestigateInTimeline: () => ({ investigateInTimeline: jest.fn() }),
 }));
 
 jest.mock('../../../../sourcerer/components/use_get_sourcerer_data_view', () => ({
@@ -107,15 +107,18 @@ jest.mock('../../shared/context', () => ({
   }),
 }));
 
+const MOCK_EVENT_IDS = ['event-1', 'event-2'];
+const MOCK_TIMESTAMP = new Date().toISOString();
+
 jest.mock('../../shared/hooks/use_graph_preview', () => ({
   useGraphPreview: () => ({
-    eventIds: ['event-1', 'event-2'],
-    timestamp: new Date().toISOString(),
+    eventIds: MOCK_EVENT_IDS,
+    timestamp: MOCK_TIMESTAMP,
     isAlert: false,
   }),
 }));
 
-describe('GraphVisualization', () => {
+describe('GraphVisualization (document_details wrapper)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
@@ -128,80 +131,31 @@ describe('GraphVisualization', () => {
     jest.resetAllMocks();
   });
 
-  describe('rendering', () => {
-    it('renders GraphInvestigation component', async () => {
-      const { getByTestId } = render(<GraphVisualization />);
-      expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
+  it('renders the graph visualization wrapper', async () => {
+    const { getByTestId } = render(<GraphVisualization />);
+    expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
-      // Wait for lazy-loaded GraphInvestigation to appear
-      await waitFor(() => {
-        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
-      });
-    });
-
-    it('GraphInvestigation receives onOpenEventPreview callback', async () => {
-      const { getByTestId } = render(<GraphVisualization />);
-
-      await waitFor(() => {
-        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
-      });
-
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      // Verify onOpenEventPreview IS passed as a callback
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      expect(typeof jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview).toBe(
-        'function'
-      );
+    await waitFor(() => {
+      expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
     });
   });
 
-  describe('onInvestigateInTimeline', () => {
-    it('shows danger toast when cannot investigate in timeline - missing time range', async () => {
-      const { getByTestId } = render(<GraphVisualization />);
-      expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
+  it('passes event context from useDocumentDetailsContext and useGraphPreview as originEventIds', async () => {
+    render(<GraphVisualization />);
 
-      // Wait for lazy-loaded GraphInvestigation to appear
-      await waitFor(() => {
-        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
-      });
-
+    await waitFor(() => {
       expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty(
-        'onInvestigateInTimeline'
-      );
-      const onInvestigateInTimeline =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onInvestigateInTimeline;
-
-      // Act
-      onInvestigateInTimeline?.(undefined, [], { from: '', to: '' });
-
-      // Assert
-      expect(mockInvestigateInTimeline.investigateInTimeline).not.toHaveBeenCalled();
-      expect(mockToasts.addDanger).toHaveBeenCalled();
     });
 
-    it('calls investigate in time', async () => {
-      const { getByTestId } = render(<GraphVisualization />);
-      expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
-
-      // Wait for lazy-loaded GraphInvestigation to appear
-      await waitFor(() => {
-        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
-      });
-
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty(
-        'onInvestigateInTimeline'
-      );
-      const onInvestigateInTimeline =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onInvestigateInTimeline;
-
-      // Act
-      onInvestigateInTimeline?.(undefined, [], { from: 'now-15m', to: 'now' });
-
-      // Assert
-      expect(mockInvestigateInTimeline.investigateInTimeline).toHaveBeenCalled();
-      expect(mockToasts.addDanger).not.toHaveBeenCalled();
+    const { initialState, scopeId } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+    expect(scopeId).toBe('test-scope');
+    expect(initialState.originEventIds).toEqual([
+      { id: 'event-1', isAlert: false },
+      { id: 'event-2', isAlert: false },
+    ]);
+    expect(initialState.timeRange).toEqual({
+      from: `${MOCK_TIMESTAMP}||-30m`,
+      to: `${MOCK_TIMESTAMP}||+30m`,
     });
   });
 });
