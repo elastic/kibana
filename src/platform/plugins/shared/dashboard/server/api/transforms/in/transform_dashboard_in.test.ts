@@ -94,7 +94,6 @@ describe('transformDashboardIn', () => {
           "timeTo": "now",
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
@@ -118,7 +117,6 @@ describe('transformDashboardIn', () => {
           "timeRestore": false,
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
@@ -131,7 +129,6 @@ describe('transformDashboardIn', () => {
     };
 
     const output = transformDashboardIn(dashboardState);
-    expect(output.error).toBeNull();
     expect(output.attributes?.projectRouting).toBe('_alias:_origin');
   });
 
@@ -141,7 +138,6 @@ describe('transformDashboardIn', () => {
     };
 
     const output = transformDashboardIn(dashboardState);
-    expect(output.error).toBeNull();
     expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 });
