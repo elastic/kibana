@@ -19,6 +19,8 @@ const mockReportCancelButtonClicked = jest.fn();
 const mockReportDoneButtonClicked = jest.fn();
 const mockUseGetIntegrationById = jest.fn();
 const mockDeleteIntegrationMutateAsync = jest.fn().mockResolvedValue(undefined);
+const mockCreateUpdateIntegrationMutateAsync = jest.fn().mockResolvedValue(undefined);
+const mockSubmit = jest.fn();
 
 const mockEnterpriseLicense = {
   isAvailable: true,
@@ -58,6 +60,12 @@ jest.mock('../../common', () => ({
       isLoading: false,
     },
   }),
+  useCreateUpdateIntegration: () => ({
+    createUpdateIntegrationMutation: {
+      mutateAsync: mockCreateUpdateIntegrationMutateAsync,
+      isLoading: false,
+    },
+  }),
   useKibana: () => ({
     services: {
       application: {
@@ -89,7 +97,7 @@ jest.mock('../../common/components/connector_selector', () => ({
 
 jest.mock('./forms/integration_form', () => ({
   IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useIntegrationForm: () => ({ formData: {}, form: {} }),
+  useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit }),
 }));
 
 jest.mock('../../common/components/button_footer', () => ({
@@ -175,7 +183,7 @@ describe('IntegrationManagement telemetry', () => {
     expect(mockReportDoneButtonClicked).toHaveBeenCalledTimes(1);
   });
 
-  it('navigates away after done is clicked', () => {
+  it('calls submit when done is clicked', () => {
     mockUseGetIntegrationById.mockReturnValue({
       integration: {
         integrationId: 'int-1',
@@ -200,7 +208,7 @@ describe('IntegrationManagement telemetry', () => {
 
     fireEvent.click(screen.getByTestId('doneButton'));
 
-    expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', expect.any(Object));
+    expect(mockSubmit).toHaveBeenCalledTimes(1);
   });
 
   it('opens delete integration modal when cancel is clicked and integration has no data streams', async () => {

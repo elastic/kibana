@@ -115,9 +115,6 @@ export class TaskManagerService {
             }
           },
           cancel: async () => {
-            if (!abortController.signal.aborted) {
-              abortController.abort();
-            }
             return this.cancelTask(taskInstance);
           },
         }),
@@ -148,41 +145,19 @@ export class TaskManagerService {
       dataStreamId: params.dataStreamId,
     });
 
-    try {
-      const taskInstance = await this.taskManager.schedule(
-        {
-          id: taskId,
-          taskType: DATA_STREAM_CREATION_TASK_TYPE,
-          params,
-          state: { task_status: TASK_STATUSES.pending },
-          scope: ['automaticImport'],
-        },
-        { request }
-      );
+    const taskInstance = await this.taskManager.ensureScheduled(
+      {
+        id: taskId,
+        taskType: DATA_STREAM_CREATION_TASK_TYPE,
+        params,
+        state: { task_status: TASK_STATUSES.pending },
+        scope: ['automaticImport'],
+      },
+      { request }
+    );
 
-      this.logger.debug(`Task scheduled: ${taskInstance.id}`);
-      return { taskId: taskInstance.id };
-    } catch (error: unknown) {
-      const statusCode =
-        typeof error === 'object' && error !== null && 'statusCode' in error
-          ? (error as { statusCode?: number }).statusCode
-          : undefined;
-      const message = error instanceof Error ? error.message : '';
-      // If task already exists (version conflict), return the existing task ID
-      if (statusCode === 409 || message.includes('version conflict')) {
-        this.logger.debug(`Task ${taskId} already exists, returning existing task ID`);
-        try {
-          const existingTask = await this.taskManager.get(taskId);
-          return { taskId: existingTask.id };
-        } catch (getError) {
-          // If we can't get the task, re-throw the original error
-          this.logger.error(`Failed to get existing task ${taskId}:`, getError);
-          throw error;
-        }
-      }
-      // Re-throw other errors
-      throw error;
-    }
+    this.logger.debug(`Task scheduled: ${taskInstance.id}`);
+    return { taskId: taskInstance.id };
   }
 
   public async removeDataStreamCreationTask(dataStreamParams: DataStreamParams): Promise<void> {
@@ -437,7 +412,6 @@ export class TaskManagerService {
   }
 
   private async cancelTask(taskInstance: ConcreteTaskInstance) {
-    // Cancel the AI task here
     this.logger.debug(`Cancelling task ${taskInstance.id}`);
     return { state: { task_status: TASK_STATUSES.cancelled } };
   }
