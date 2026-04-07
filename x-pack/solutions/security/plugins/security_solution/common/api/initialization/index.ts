@@ -10,9 +10,10 @@ export {
   InitializeSecuritySolutionRequestBody,
   InitializeSecuritySolutionResponse,
   InitializationFlowsResult,
-  InitializationFlowReadyResult,
   InitializationFlowErrorResult,
   CreateListIndicesReadyResult,
+  DataViewPayload,
+  SecurityDataViewsReadyResult,
 } from './initialization.gen';
 
 export type { InitializationFlowsResult as InitializationFlowsResultType } from './initialization.gen';

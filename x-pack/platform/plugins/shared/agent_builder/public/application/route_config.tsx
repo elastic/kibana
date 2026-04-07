@@ -9,7 +9,6 @@ import React from 'react';
 import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { RouteDisplay } from './components/common/route_display';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
@@ -33,7 +32,6 @@ export type SidebarView = 'conversation' | 'manage';
 
 export interface FeatureFlags {
   experimental: boolean;
-  connectors: boolean;
 }
 
 export interface RouteDefinition {
@@ -41,7 +39,6 @@ export interface RouteDefinition {
   element: React.ReactNode;
   sidebarView: SidebarView;
   isExperimental?: boolean;
-  isConnectors?: boolean;
   navLabel?: string;
   navIcon?: string;
 }
@@ -83,7 +80,6 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/skills',
     sidebarView: 'conversation',
-    isExperimental: true,
     navLabel: navLabels.skills,
     element: <AgentBuilderAgentSkillsPage />,
   },
@@ -93,13 +89,6 @@ export const agentRoutes: RouteDefinition[] = [
     isExperimental: true,
     navLabel: navLabels.plugins,
     element: <AgentBuilderAgentPluginsPage />,
-  },
-  {
-    path: '/agents/:agentId/connectors',
-    sidebarView: 'conversation',
-    navLabel: navLabels.connectors,
-    isConnectors: true,
-    element: <RouteDisplay />,
   },
   {
     path: '/agents/:agentId/tools',
@@ -136,19 +125,16 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/skills',
     sidebarView: 'manage',
     navLabel: navLabels.skills,
-    isExperimental: true,
     element: <AgentBuilderSkillsPage />,
   },
   {
     path: '/manage/skills/new',
     sidebarView: 'manage',
-    isExperimental: true,
     element: <AgentBuilderSkillCreatePage />,
   },
   {
     path: '/manage/skills/:skillId',
     sidebarView: 'manage',
-    isExperimental: true,
     element: <AgentBuilderSkillDetailsPage />,
   },
   {
@@ -168,7 +154,7 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/connectors',
     sidebarView: 'manage',
     navLabel: navLabels.connectors,
-    isConnectors: true,
+    isExperimental: true,
     element: <AgentBuilderConnectorsPage />,
   },
   {
@@ -223,7 +209,6 @@ export interface SidebarNavItem {
 
 const isRouteEnabled = (route: RouteDefinition, flags: FeatureFlags): boolean => {
   if (route.isExperimental && !flags.experimental) return false;
-  if (route.isConnectors && !flags.connectors) return false;
   return true;
 };
 

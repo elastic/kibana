@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { hasAgentWriteAccess, canChangeAgentVisibility } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
@@ -24,7 +23,6 @@ import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_servic
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
@@ -45,14 +43,9 @@ export const AgentOverview: React.FC = () => {
   const {
     services: { uiSettings },
   } = useKibana();
-  const isConnectorsEnabled = uiSettings.get<boolean>(
-    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
-    false
-  );
 
   const { manageAgents, isAdmin } = useUiPrivileges();
-  const hasConnectorsPrivileges = useHasConnectorsAllPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser();
 
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills } = useSkillsService();
@@ -62,14 +55,13 @@ export const AgentOverview: React.FC = () => {
 
   const canEditAgent = useMemo(() => {
     if (!manageAgents || !agent) return false;
-    if (!isExperimentalFeaturesEnabled) return true;
     return hasAgentWriteAccess({
       visibility: agent.visibility,
       owner: agent.created_by,
       currentUser: currentUser ?? undefined,
       isAdmin,
     });
-  }, [manageAgents, agent, isExperimentalFeaturesEnabled, currentUser, isAdmin]);
+  }, [manageAgents, agent, currentUser, isAdmin]);
 
   const canChangeVisibility = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
@@ -117,8 +109,6 @@ export const AgentOverview: React.FC = () => {
     builtinPlugins,
     agentPluginIdSet,
   ]);
-  const connectorsCount = 0;
-
   if (isLoading || !agent) {
     return (
       <EuiFlexGroup
@@ -157,22 +147,15 @@ export const AgentOverview: React.FC = () => {
         <CapabilitiesSection
           skillsCount={skillsCount}
           pluginsCount={pluginsCount}
-          connectorsCount={connectorsCount}
           enableElasticCapabilities={enableElasticCapabilities}
           isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
-          isConnectorsEnabled={isConnectorsEnabled}
-          hasConnectorsPrivileges={hasConnectorsPrivileges}
           skillsHref={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
           pluginsHref={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
-          connectorsHref={createAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))}
           onNavigateToSkills={() =>
             navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))
           }
           onNavigateToPlugins={() =>
             navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))
-          }
-          onNavigateToConnectors={() =>
-            navigateToAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))
           }
         />
 

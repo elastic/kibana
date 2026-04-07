@@ -34,7 +34,7 @@ describe('yaml_form_utils', () => {
           enabled: true,
           description: 'A test rule',
           owner: 'test-owner',
-          labels: ['label1', 'label2'],
+          tags: ['label1', 'label2'],
         },
         timeField: '@timestamp',
         schedule: {
@@ -50,6 +50,8 @@ describe('yaml_form_utils', () => {
           fields: ['host.name', 'service.name'],
         },
         artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       };
 
       const result = formValuesToYamlObject(formValues);
@@ -61,7 +63,7 @@ describe('yaml_form_utils', () => {
           enabled: true,
           description: 'A test rule',
           owner: 'test-owner',
-          labels: ['label1', 'label2'],
+          tags: ['label1', 'label2'],
         },
         time_field: '@timestamp',
         schedule: {
@@ -97,6 +99,8 @@ describe('yaml_form_utils', () => {
             base: 'FROM logs-*',
           },
         },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       };
 
       const result = formValuesToYamlObject(formValues);
@@ -174,7 +178,7 @@ describe('yaml_form_utils', () => {
           enabled: true,
           description: 'A description',
           owner: undefined,
-          labels: undefined,
+          tags: undefined,
         },
         timeField: '@timestamp',
         schedule: {
@@ -193,6 +197,8 @@ describe('yaml_form_utils', () => {
           { id: 'artifact-1', type: 'host', value: 'host-a' },
           { id: 'artifact-2', type: 'service', value: 'service-a' },
         ],
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       });
     });
 
@@ -345,6 +351,77 @@ describe('yaml_form_utils', () => {
 
       expect(result.values?.metadata.name).toBe('Test Rule');
     });
+
+    it('derives breaches alert delay mode from state_transition with pending_count', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with breaches' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        state_transition: { pending_count: 3 },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.stateTransition).toEqual({
+        pendingCount: 3,
+        pendingTimeframe: null,
+        recoveringCount: null,
+        recoveringTimeframe: null,
+      });
+      expect(result.values?.stateTransitionAlertDelayMode).toBe('breaches');
+      expect(result.values?.stateTransitionRecoveryDelayMode).toBe('immediate');
+    });
+
+    it('derives duration alert delay mode from state_transition with pending_timeframe', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with duration' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        state_transition: { pending_timeframe: '10m' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.stateTransitionAlertDelayMode).toBe('duration');
+      expect(result.values?.stateTransitionRecoveryDelayMode).toBe('immediate');
+    });
+
+    it('derives both delay modes from state_transition with pending and recovering fields', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with both' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        state_transition: {
+          pending_count: 2,
+          recovering_timeframe: '15m',
+        },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.stateTransition).toEqual({
+        pendingCount: 2,
+        pendingTimeframe: null,
+        recoveringCount: null,
+        recoveringTimeframe: '15m',
+      });
+      expect(result.values?.stateTransitionAlertDelayMode).toBe('breaches');
+      expect(result.values?.stateTransitionRecoveryDelayMode).toBe('duration');
+    });
+
+    it('defaults both modes to immediate when no state_transition is present', () => {
+      const yaml = dump({
+        metadata: { name: 'No delay' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.stateTransition).toBeUndefined();
+      expect(result.values?.stateTransitionAlertDelayMode).toBe('immediate');
+      expect(result.values?.stateTransitionRecoveryDelayMode).toBe('immediate');
+    });
   });
 
   describe('serializeFormToYaml', () => {
@@ -358,6 +435,8 @@ describe('yaml_form_utils', () => {
         timeField: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
         evaluation: { query: { base: 'FROM logs-*' } },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
       };
 
       const yaml = serializeFormToYaml(formValues);

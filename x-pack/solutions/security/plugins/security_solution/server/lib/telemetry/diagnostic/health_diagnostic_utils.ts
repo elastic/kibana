@@ -6,11 +6,10 @@
  */
 
 import { randomUUID } from 'crypto';
-import * as YAML from 'yaml';
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import {
   Action,
-  type HealthDiagnosticQuery,
+  type HealthDiagnosticQueryBase,
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
@@ -20,12 +19,6 @@ import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
   return nextDate !== undefined && nextDate < endDate;
-}
-
-export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] {
-  return YAML.parseAllDocuments(input as string).map((doc) => {
-    return doc.toJSON() as HealthDiagnosticQuery;
-  });
 }
 
 export function fieldNames<T>(documents: T): string[] {
@@ -52,23 +45,27 @@ export function fieldNames<T>(documents: T): string[] {
   return Array.from(result);
 }
 
-export function emptyStat(name: string, now: Date): HealthDiagnosticQueryStats {
-  return {
-    name,
-    started: now.toISOString(),
-    traceId: randomUUID(),
-    finished: new Date().toISOString(),
-    numDocs: 0,
-    passed: false,
-    fieldNames: [],
-  };
-}
+export const emptyStat = (
+  name: string,
+  now: Date,
+  descriptorVersion: number
+): HealthDiagnosticQueryStats => ({
+  name,
+  started: now.toISOString(),
+  traceId: randomUUID(),
+  finished: new Date().toISOString(),
+  numDocs: 0,
+  passed: false,
+  fieldNames: [],
+  descriptorVersion,
+  status: 'failed',
+});
 
 export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
   salt: string,
-  query?: Pick<HealthDiagnosticQuery, 'encryptionKeyId'>,
+  query?: Pick<HealthDiagnosticQueryBase, 'encryptionKeyId'>,
   encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
