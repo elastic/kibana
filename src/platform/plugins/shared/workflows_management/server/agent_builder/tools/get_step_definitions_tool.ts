@@ -8,6 +8,7 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { BaseStepDefinition, ConnectorContractUnion, StepParamSummary } from '@kbn/workflows';
 import {
   buildBuiltInStepSchema,
@@ -18,7 +19,6 @@ import {
   StepCategories,
   StepCategory,
 } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
 import {
@@ -180,7 +180,9 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
     tags: ['workflows', 'yaml', 'steps'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
