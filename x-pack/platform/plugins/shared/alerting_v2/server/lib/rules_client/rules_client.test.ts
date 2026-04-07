@@ -1100,8 +1100,8 @@ describe('RulesClient', () => {
       const client = createClient();
       const excessTotal = BULK_FILTER_MAX_RULES + 42;
 
-      mockSavedObjectsClient.find.mockImplementation((opts: { page: number }) => {
-        const p = opts.page;
+      mockSavedObjectsClient.find.mockImplementation((opts: { page?: number }) => {
+        const p = opts.page ?? 1;
         const pageSize = 100;
         const saved_objects = Array.from({ length: pageSize }, (_, i) => ({
           id: `cap-rule-${(p - 1) * pageSize + i}`,
