@@ -423,6 +423,34 @@ describe('XY', () => {
                 },
               },
               {
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
+                type: type2,
+                ignore_global_filters: false,
+                sampling: 1,
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  include_empty_rows: false,
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  drop_partial_intervals: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: {
+                  operation: 'terms',
+                  fields: ['product', 'category'],
+                  limit: 5,
+                  rank_by: {
+                    direction: 'desc',
+                    metric_index: 0,
+                    type: 'metric',
+                  },
+                },
+              },
+              {
                 data_source: {
                   type: AS_CODE_DATA_VIEW_SPEC_TYPE,
                   index_pattern: 'companyIndex',
