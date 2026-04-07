@@ -35,7 +35,6 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
       adminCredentials = await requestAuth.getApiKey('admin');
-      await kbnClient.savedObjects.cleanStandardList();
       await kbnClient.importExport.load(KBN_ARCHIVES.RELATIONSHIPS);
     });
 

@@ -19,7 +19,6 @@ apiTest.describe('find - sortField and sortOrder', { tag: tags.deploymentAgnosti
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.REFERENCES);
   });
@@ -27,6 +26,7 @@ apiTest.describe('find - sortField and sortOrder', { tag: tags.deploymentAgnosti
   apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.importExport.unload(KBN_ARCHIVES.REFERENCES);
     await kbnClient.importExport.unload(KBN_ARCHIVES.BASIC);
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   apiTest('sort objects by "type" in "asc" order', async ({ apiClient }) => {

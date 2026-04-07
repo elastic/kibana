@@ -19,12 +19,12 @@ apiTest.describe('find - basic', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.importExport.unload(KBN_ARCHIVES.BASIC);
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   apiTest('should return 200 with individual responses', async ({ apiClient }) => {

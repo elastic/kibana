@@ -22,7 +22,6 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
       adminCredentials = await requestAuth.getApiKey('admin');
-      await kbnClient.savedObjects.cleanStandardList();
       await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
       await kbnClient.importExport.load(KBN_ARCHIVES.REFERENCES);
     });
@@ -30,6 +29,7 @@ apiTest.describe(
     apiTest.afterAll(async ({ kbnClient }) => {
       await kbnClient.importExport.unload(KBN_ARCHIVES.REFERENCES);
       await kbnClient.importExport.unload(KBN_ARCHIVES.BASIC);
+      await kbnClient.savedObjects.cleanStandardList();
     });
 
     apiTest('search for a reference', async ({ apiClient }) => {
