@@ -16,7 +16,7 @@ import type { AgentPolicy, PackagePolicy } from '../types';
 import { agentPolicyService, packagePolicyService, appContextService } from '.';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { bulkInstallPackages } from './epm/packages';
-import { incrementPackageName, isPackagePolicyNameCollisionLoser } from './package_policies';
+import { incrementPackageName } from './package_policies';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
@@ -24,10 +24,6 @@ const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof pa
 const mockIncrementPackageName = incrementPackageName as jest.MockedFunction<
   typeof incrementPackageName
 >;
-const mockIsPackagePolicyNameCollisionLoser =
-  isPackagePolicyNameCollisionLoser as jest.MockedFunction<
-    typeof isPackagePolicyNameCollisionLoser
-  >;
 
 const mockEnsureDefaultEnrollmentAPIKeyForAgentPolicy =
   ensureDefaultEnrollmentAPIKeyForAgentPolicy as jest.MockedFunction<
@@ -97,38 +93,13 @@ describe('createAgentPolicyWithPackages', () => {
           id: 'mock-package-policy-id',
         } as PackagePolicy)
       );
-    mockIsPackagePolicyNameCollisionLoser.mockResolvedValue(false);
   });
 
   afterEach(() => {
     appContextService.stop();
   });
 
-  it('should fall back to a suffixed name after exhausting all retries via post-creation collision check', async () => {
-    mockIsPackagePolicyNameCollisionLoser.mockResolvedValue(true);
-    mockedPackagePolicyService.delete = jest.fn().mockResolvedValue([]);
-
-    await createAgentPolicyWithPackages({
-      esClient: esClientMock,
-      soClient: soClientMock,
-      agentPolicyService: mockedAgentPolicyService,
-      newPolicy: { name: 'Agent policy 1', namespace: 'default' },
-      withSysMonitoring: true,
-      spaceId: 'default',
-    });
-
-    // All 5 retry attempts should have been deleted
-    expect(mockedPackagePolicyService.delete).toHaveBeenCalledTimes(5);
-
-    // Final create call should use the last attempted numeric name suffixed with the
-    // first 8 chars of the agent policy ID (mocked as 'new_id')
-    const lastCreateCall = jest.mocked(mockedPackagePolicyService.create).mock.calls.at(-1)!;
-    const finalName = (lastCreateCall[2] as { name: string }).name;
-    expect(finalName).toBe('system-1-new_id');
-  });
-
-  it('should retry without deleting when create throws PackagePolicyNameExistsError', async () => {
-    mockedPackagePolicyService.delete = jest.fn().mockResolvedValue([]);
+  it('should retry via the lock when create throws PackagePolicyNameExistsError', async () => {
     jest
       .mocked(mockedPackagePolicyService.create)
       .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
@@ -145,8 +116,6 @@ describe('createAgentPolicyWithPackages', () => {
     });
 
     expect(mockedPackagePolicyService.create).toHaveBeenCalledTimes(3);
-    // No delete should be called — create-throws path skips the post-creation check
-    expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
   });
 
   it('should roll back agent policy if package policy creation failed', async () => {

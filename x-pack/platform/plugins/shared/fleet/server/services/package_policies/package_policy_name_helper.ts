@@ -49,39 +49,6 @@ export async function incrementPackageName(
   return getMaxPackageName(packageName, packagePolicies);
 }
 
-export async function isPackagePolicyNameCollisionLoser(
-  soClient: SavedObjectsClientContract,
-  createdPolicyId: string,
-  candidateName: string,
-  spaceIds: string[]
-): Promise<boolean> {
-  const isMultiSpace = spaceIds.length > 1;
-  const baseSearchParams = {
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${candidateName}"`,
-  };
-
-  let result;
-  if (isMultiSpace) {
-    result = await packagePolicyService.list(
-      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-      { ...baseSearchParams, spaceId: '*' }
-    );
-  } else {
-    result = await packagePolicyService.list(soClient, baseSearchParams);
-  }
-
-  const matches = isMultiSpace
-    ? result.items.filter((p) => p.spaceIds?.some((s) => spaceIds.includes(s)))
-    : result.items;
-
-  if (matches.length <= 1) return false;
-
-  // Deterministic tie-breaker: smallest ID wins, all others are losers
-  const sortedIds = matches.map((p) => p.id).sort();
-  return sortedIds[0] !== createdPolicyId;
-}
-
 export async function incrementPackagePolicyCopyName(
   soClient: SavedObjectsClientContract,
   packagePolicyName: string

@@ -12,6 +12,10 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
+import pRetry from 'p-retry';
+
+import { LockAcquisitionError } from '@kbn/lock-manager';
+
 import { getDefaultFleetServerpolicyId } from '../../common/services/agent_policies_helpers';
 
 import {
@@ -24,7 +28,7 @@ import type { AgentPolicy, NewAgentPolicy } from '../types';
 import { PackagePolicyNameExistsError } from '../errors';
 
 import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
-import { incrementPackageName, isPackagePolicyNameCollisionLoser } from './package_policies';
+import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
@@ -94,65 +98,38 @@ async function createPackagePolicy(
   }
 
   const spaceIds = agentPolicy.space_ids ?? [options.spaceId];
-  const MAX_RETRIES = 5;
-  let succeeded = false;
+  const lockKey = `fleet-package-policy-name-${packageToInstall}-${[...spaceIds].sort().join(':')}`;
 
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
-
-    let created;
-    try {
-      created = await packagePolicyService.create(
-        soClient,
-        esClient,
-        newPackagePolicy,
-        {
-          spaceId: options.spaceId,
-          user: options.user,
-          bumpRevision: false,
-          force: options.force,
-        },
-        undefined,
-        options.request
-      );
-    } catch (err) {
-      if (err instanceof PackagePolicyNameExistsError) {
-        // Name was taken by a concurrent create — retry with next incremented name
-        continue;
-      }
-      throw err;
+  await pRetry(
+    () =>
+      appContextService.getLockManagerService()!.withLock(lockKey, async () => {
+        newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
+        await packagePolicyService.create(
+          soClient,
+          esClient,
+          newPackagePolicy,
+          {
+            spaceId: options.spaceId,
+            user: options.user,
+            bumpRevision: false,
+            force: options.force,
+          },
+          undefined,
+          options.request
+        );
+      }),
+    {
+      onFailedAttempt: (error) => {
+        if (
+          !(error instanceof LockAcquisitionError) &&
+          !(error instanceof PackagePolicyNameExistsError)
+        ) {
+          throw error;
+        }
+      },
+      maxRetryTime: 30_000,
     }
-
-    const isLoser = await isPackagePolicyNameCollisionLoser(
-      soClient,
-      created.id,
-      newPackagePolicy.name,
-      spaceIds
-    );
-
-    if (!isLoser) {
-      succeeded = true;
-      break;
-    }
-
-    // Lost the name collision race — delete and retry with next incremented name
-    await packagePolicyService.delete(soClient, esClient, [created.id], { user: options.user });
-  }
-
-  if (!succeeded) {
-    // Best-effort numeric name exhausted retries — append agent policy ID suffix to guarantee
-    // unique completion without discarding the numeric context.
-    // agentPolicy.id is a UUID unique per creation, so this suffix cannot collide.
-    newPackagePolicy.name = `${newPackagePolicy.name}-${agentPolicy.id.slice(0, 8)}`;
-    await packagePolicyService.create(
-      soClient,
-      esClient,
-      newPackagePolicy,
-      { spaceId: options.spaceId, user: options.user, bumpRevision: false, force: options.force },
-      undefined,
-      options.request
-    );
-  }
+  );
 }
 
 interface CreateAgentPolicyParams {

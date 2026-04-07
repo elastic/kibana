@@ -9,11 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { packagePolicyService } from '../package_policy';
 
-import {
-  incrementPackageName,
-  incrementPackagePolicyCopyName,
-  isPackagePolicyNameCollisionLoser,
-} from './package_policy_name_helper';
+import { incrementPackageName, incrementPackagePolicyCopyName } from './package_policy_name_helper';
 
 jest.mock('..', () => ({
   appContextService: {
@@ -103,70 +99,6 @@ describe('Package policy name helper', () => {
         'packagePolicyName'
       );
       expect(newName).toEqual('packagePolicyName (copy 3)');
-    });
-  });
-
-  describe('isPackagePolicyNameCollisionLoser', () => {
-    it('should return false when no collision (only one policy with that name)', async () => {
-      packagePolicyService.list = jest.fn().mockResolvedValue({
-        items: [{ id: 'policy-aaa', name: 'system-2', spaceIds: ['default'] }],
-      });
-      const result = await isPackagePolicyNameCollisionLoser(
-        savedObjectsClientMock.create(),
-        'policy-aaa',
-        'system-2',
-        ['default']
-      );
-      expect(result).toBe(false);
-    });
-
-    it('should return false when collision but caller has the winning (smallest) id', async () => {
-      packagePolicyService.list = jest.fn().mockResolvedValue({
-        items: [
-          { id: 'policy-aaa', name: 'system-2', spaceIds: ['default'] },
-          { id: 'policy-zzz', name: 'system-2', spaceIds: ['default'] },
-        ],
-      });
-      const result = await isPackagePolicyNameCollisionLoser(
-        savedObjectsClientMock.create(),
-        'policy-aaa',
-        'system-2',
-        ['default']
-      );
-      expect(result).toBe(false);
-    });
-
-    it('should return true when collision and caller has a losing (larger) id', async () => {
-      packagePolicyService.list = jest.fn().mockResolvedValue({
-        items: [
-          { id: 'policy-aaa', name: 'system-2', spaceIds: ['default'] },
-          { id: 'policy-zzz', name: 'system-2', spaceIds: ['default'] },
-        ],
-      });
-      const result = await isPackagePolicyNameCollisionLoser(
-        savedObjectsClientMock.create(),
-        'policy-zzz',
-        'system-2',
-        ['default']
-      );
-      expect(result).toBe(true);
-    });
-
-    it('should only count policies in the matching spaces', async () => {
-      packagePolicyService.list = jest.fn().mockResolvedValue({
-        items: [
-          { id: 'policy-aaa', name: 'system-2', spaceIds: ['default'] },
-          { id: 'policy-zzz', name: 'system-2', spaceIds: ['other-space'] },
-        ],
-      });
-      // Only 'default' space is relevant — so only policy-aaa matches, no collision
-      const result = await isPackagePolicyNameCollisionLoser(
-        savedObjectsClientMock.create(),
-        'policy-aaa',
-        'system-2',
-        ['default']
-      );
-      expect(result).toBe(false);
     });
   });
 });
