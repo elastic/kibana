@@ -171,7 +171,7 @@ describe('search embeddable transform utils', () => {
 
       expect('tabs' in result && result.tabs).toBeDefined();
       expect('tabs' in result && result.tabs?.[0]).toMatchObject({
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: dataViewId },
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
       });
     });
   });
@@ -213,7 +213,7 @@ describe('search embeddable transform utils', () => {
             row_height: 'auto',
             query: { language: 'kuery', query: '' },
             filters: [],
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
           },
         ],
       };
@@ -298,7 +298,7 @@ describe('search embeddable transform utils', () => {
             header_row_height: 3,
             data_source: {
               type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-              id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
+              ref_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
             },
           },
         ],
@@ -474,7 +474,7 @@ describe('search embeddable transform utils', () => {
             filters: [],
             rows_per_page: 100,
             sample_size: 1000,
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
           },
         ],
       };
@@ -1000,7 +1000,7 @@ describe('search embeddable transform utils', () => {
       expect(result.density).toBe(DataGridDensity.COMPACT);
       expect('data_source' in result && result.data_source).toEqual({
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'data-view-1',
+        ref_id: 'data-view-1',
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
     });
@@ -1020,7 +1020,7 @@ describe('search embeddable transform utils', () => {
         filters: [],
         rows_per_page: 100,
         sample_size: 500,
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
       };
       const { state, references } = toStoredTab(apiTab);
       expect(references).toContainEqual({
