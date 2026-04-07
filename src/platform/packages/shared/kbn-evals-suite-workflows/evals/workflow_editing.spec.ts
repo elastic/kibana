@@ -118,7 +118,7 @@ const evaluate = base.extend<
             skip(createEfficiencyEvaluator()),
             skip(createToolTrajectoryEvaluator()),
             skip(createLatencyEvaluator()),
-            skip(createCriteriaEvaluator({ evaluators })),
+            skipInfraErrors(createCriteriaEvaluator({ evaluators })),
           ])
         );
       });
@@ -206,7 +206,6 @@ evaluate.describe(
                 expectedStepCount: 3,
                 preservedStepNames: ['log_start', 'log_end'],
                 expectedMaxToolCalls: 3,
-                expectedToolSequence: [],
               },
               metadata: { category: 'modify-step' },
             },
@@ -371,7 +370,6 @@ evaluate.describe(
                 expectedStepCount: 4,
                 preservedStepNames: ['create_index', 'index_document', 'log_results'],
                 expectedMaxToolCalls: 3,
-                expectedToolSequence: [],
               },
               metadata: { category: 'modify-es-step' },
             },
@@ -435,7 +433,6 @@ evaluate.describe(
                 ],
                 expectedStepCount: { min: 4, max: 7 },
                 expectedMaxToolCalls: 6,
-                expectedToolSequence: [],
               },
               metadata: { category: 'multi-step-es' },
             },
@@ -490,7 +487,6 @@ evaluate.describe(
                 expectedStepCount: 2,
                 preservedStepNames: ['log_case_id'],
                 expectedMaxToolCalls: 3,
-                expectedToolSequence: [],
               },
               metadata: { category: 'modify-cases-step' },
             },
@@ -620,7 +616,6 @@ evaluate.describe(
                 expectedStepCount: 3,
                 preservedStepNames: ['fetch_alerts', 'log_done'],
                 expectedMaxToolCalls: 3,
-                expectedToolSequence: [],
               },
               metadata: { category: 'modify-connector-step' },
             },

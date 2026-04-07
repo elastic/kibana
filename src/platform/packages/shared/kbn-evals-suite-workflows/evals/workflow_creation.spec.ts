@@ -81,7 +81,7 @@ const evaluate = base.extend<
             skip(createEfficiencyEvaluator()),
             skip(createToolTrajectoryEvaluator()),
             skip(createLatencyEvaluator()),
-            skip(createCriteriaEvaluator({ evaluators })),
+            skipInfraErrors(createCriteriaEvaluator({ evaluators })),
             skipInfraErrors(createRejectionEvaluator()),
           ])
         );

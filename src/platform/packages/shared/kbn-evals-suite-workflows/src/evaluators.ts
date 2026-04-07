@@ -622,7 +622,7 @@ export function createEfficiencyEvaluator() {
 }
 
 export function createToolTrajectoryEvaluator() {
-  return createTrajectoryEvaluator({
+  const inner = createTrajectoryEvaluator({
     extractToolCalls: (output) => {
       const steps = (output as WorkflowTaskOutput).steps ?? [];
       return steps.filter((s) => s.type === 'tool_call' && s.tool_id).map((s) => s.tool_id!);
@@ -634,6 +634,21 @@ export function createToolTrajectoryEvaluator() {
     orderWeight: 0.6,
     coverageWeight: 0.4,
   });
+
+  return {
+    ...inner,
+    evaluate: async (args: Parameters<typeof inner.evaluate>[0]) => {
+      const exp = args.expected as EfficiencyExpectations;
+      if (!exp.expectedToolSequence) {
+        return {
+          score: null as null,
+          label: 'N/A' as const,
+          explanation: 'No expected tool sequence defined — skipping trajectory evaluation.',
+        };
+      }
+      return inner.evaluate(args);
+    },
+  };
 }
 
 /**
@@ -673,6 +688,7 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       input,
       output,
       expected,
+      metadata,
     }: {
       input: WorkflowEditExample['input'] | WorkflowCreateExample['input'];
       output: WorkflowTaskOutput;
@@ -691,12 +707,30 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
         cleanInput.initialYaml = input.initialYaml;
       }
 
-      const cleanOutput = output.resultYaml ? { resultYaml: output.resultYaml } : output;
+      const isNegativeCase = metadata?.category === 'negative';
+
+      if (isNegativeCase) {
+        const responseText = output.messages?.map((m) => m.message).join('\n') ?? '';
+        return evaluators.criteria(criteria).evaluate({
+          input: cleanInput,
+          expected,
+          output: { response: responseText },
+          metadata: undefined,
+        });
+      }
+
+      if (!output.resultYaml) {
+        return {
+          score: 0,
+          label: 'FAIL' as const,
+          explanation: 'No result YAML produced — cannot evaluate criteria.',
+        };
+      }
 
       return evaluators.criteria(criteria).evaluate({
         input: cleanInput,
         expected,
-        output: cleanOutput,
+        output: { resultYaml: output.resultYaml },
         metadata: undefined,
       });
     },
