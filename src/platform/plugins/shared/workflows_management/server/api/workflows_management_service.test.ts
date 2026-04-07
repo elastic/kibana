@@ -383,7 +383,6 @@ describe('WorkflowsService', () => {
             valid: true,
             createdAt: '2023-01-01T00:00:00.000Z',
             lastUpdatedAt: '2023-01-01T00:00:00.000Z',
-            history: [],
           },
         ],
       });
@@ -619,6 +618,28 @@ describe('WorkflowsService', () => {
         },
       };
 
+      it('should not include execution history when includeExecutionHistory is false', async () => {
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+        // First call for workflows, second call for execution history
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockResolvedValueOnce(mockExecutionResponse as any);
+
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: false,
+        });
+
+        expect(result.results[0].history).toEqual(undefined);
+
+        // First call for workflows, second call for execution history
+        expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      });
+
       it('should include execution history when workflows have executions', async () => {
         const mockSearchResponse = {
           hits: {
@@ -632,10 +653,12 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockExecutionResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toHaveLength(1);
-        expect(result.results[0].history[0]).toEqual({
+        expect(result.results[0].history?.[0]).toEqual({
           id: 'execution-1',
           workflowId: 'test-workflow-id',
           workflowName: 'Test Workflow',
@@ -705,7 +728,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockEmptyExecutionResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
       });
@@ -750,9 +775,11 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockExecutionResponseWithoutFinishedAt as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
-        expect(result.results[0].history[0]).toEqual({
+        expect(result.results[0].history?.[0]).toEqual({
           id: 'execution-1',
           workflowId: 'test-workflow-id',
           workflowName: 'Test Workflow',
@@ -812,7 +839,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockMixedExecutionResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results).toHaveLength(2);
         expect(result.results[0].history).toHaveLength(1);
@@ -831,7 +860,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(new Error('Execution search failed'));
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -865,7 +896,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(indexNotFoundError);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).not.toHaveBeenCalled();
@@ -897,7 +930,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(otherError);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -915,7 +950,9 @@ describe('WorkflowsService', () => {
 
         mockEsClient.search.mockResolvedValueOnce(mockSearchResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results).toEqual([]);
         expect(mockEsClient.search).toHaveBeenCalledTimes(1); // Only workflows search, no execution search
@@ -2255,7 +2292,8 @@ steps:
   });
 
   describe('getWorkflowStats', () => {
-    it('should return workflow statistics', async () => {
+    beforeEach(() => {
+      mockEsClient.search.mockClear();
       const mockWorkflowStatsResponse = {
         hits: {
           hits: [],
@@ -2281,8 +2319,20 @@ steps:
       mockEsClient.search
         .mockResolvedValueOnce(mockWorkflowStatsResponse as any)
         .mockResolvedValueOnce(mockExecutionStatsResponse as any);
+    });
 
-      const result = await service.getWorkflowStats('default');
+    it('should not include execution stats when includeExecutionStats is false', async () => {
+      const result = await service.getWorkflowStats('default', { includeExecutionStats: false });
+      expect(result.executions).toBeUndefined();
+    });
+
+    it('should include execution stats when includeExecutionStats is true', async () => {
+      const result = await service.getWorkflowStats('default', { includeExecutionStats: true });
+      expect(result.executions).toEqual([]);
+    });
+
+    it('should return workflow statistics', async () => {
+      const result = await service.getWorkflowStats('default', { includeExecutionStats: true });
 
       expect(result).toEqual({
         workflows: {
