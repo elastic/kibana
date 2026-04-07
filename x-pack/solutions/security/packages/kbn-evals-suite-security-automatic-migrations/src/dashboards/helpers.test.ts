@@ -226,9 +226,7 @@ describe('extractIndexPatterns', () => {
       },
     ]);
     const patterns = extractIndexPatterns(result);
-    expect(patterns).toEqual([
-      { panelTitle: 'Panel 1', indexPattern: 'logs-endpoint.events.*' },
-    ]);
+    expect(patterns).toEqual([{ panelTitle: 'Panel 1', indexPattern: 'logs-endpoint.events.*' }]);
   });
 });
 

@@ -153,7 +153,9 @@ export class DashboardMigrationClient {
       // Log progress every 6th attempt (every 30s) at info level so it's visible
       if (attempt % 6 === 1 || attempt <= 3) {
         this.log.info(
-          `[DashboardMigrationClient] Polling migration ${migrationId} (attempt ${attempt}/${MAX_POLL_ATTEMPTS}): ${JSON.stringify(stats)}`
+          `[DashboardMigrationClient] Polling migration ${migrationId} (attempt ${attempt}/${MAX_POLL_ATTEMPTS}): ${JSON.stringify(
+            stats
+          )}`
         );
       }
 

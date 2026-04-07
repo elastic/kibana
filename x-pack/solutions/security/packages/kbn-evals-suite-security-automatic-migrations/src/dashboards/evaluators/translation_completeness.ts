@@ -44,9 +44,7 @@ export const createTranslationCompletenessEvaluator = (): Evaluator<
       }
     }
 
-    const fullyTranslated = output.dashboards.filter(
-      (d) => d.translation_result === 'full'
-    ).length;
+    const fullyTranslated = output.dashboards.filter((d) => d.translation_result === 'full').length;
     const partiallyTranslated = output.dashboards.filter(
       (d) => d.translation_result === 'partial'
     ).length;

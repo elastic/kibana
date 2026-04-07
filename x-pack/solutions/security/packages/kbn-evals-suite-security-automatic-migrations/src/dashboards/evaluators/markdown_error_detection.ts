@@ -43,7 +43,7 @@ export const createMarkdownErrorDetectionEvaluator = (): Evaluator<
         if (isMarkdown) {
           const vizState = attrs?.state?.visualization;
           // Markdown content is stored in visualization.shape for lnsMarkdown
-          const content = vizState?.['shape'] ?? vizState?.['content'];
+          const content = vizState?.shape ?? vizState?.content;
           if (typeof content === 'string') {
             hasError = markdownHasError(content);
           }
