@@ -23,6 +23,11 @@ export function mockHandlerArguments(
     actionsClient?: ActionsClientMock;
     listTypes?: ConnectorType[];
     getCurrentUser?: jest.Mock;
+    getSkippedPreconfiguredConnectorIds = () => new Set<string>(),
+  }: {
+    actionsClient?: ActionsClientMock;
+    listTypes?: ConnectorType[];
+    getSkippedPreconfiguredConnectorIds?: () => Set<string>;
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -45,6 +50,7 @@ export function mockHandlerArguments(
             }
           );
         },
+        getSkippedPreconfiguredConnectorIds,
       },
       core: Promise.resolve({
         security: {

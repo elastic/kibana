@@ -53,7 +53,9 @@
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
     "@kbn/streams-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/ingest-hub-plugin",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }

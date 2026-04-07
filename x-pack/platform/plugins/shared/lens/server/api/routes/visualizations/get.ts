@@ -82,11 +82,6 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 
       try {
         const { result } = await client.get(req.params.id);
-
-        if (result.item.error) {
-          throw result.item.error;
-        }
-
         const responseItem = getLensResponseItem(builder, result.item);
 
         return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
