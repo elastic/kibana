@@ -16,6 +16,8 @@ export interface EpisodesFilterState {
   ruleId?: string | null;
   /** Query string for full-text search */
   queryString?: string | null;
+  /** Group hashes that are currently deactivated (resolved by the user). */
+  deactivatedGroupHashes?: string[];
 }
 
 export interface EpisodesSortState {
@@ -71,7 +73,17 @@ export const buildEpisodesQuery = (
   let query = buildEpisodesBaseQuery(filterState?.queryString?.trim());
 
   if (filterState?.status) {
-    query = query.where`episode.status == ${filterState.status}`;
+    const deactivatedHashes = filterState.deactivatedGroupHashes ?? [];
+    if (deactivatedHashes.length > 0) {
+      const hashLiterals = deactivatedHashes.map((h) => esql.str(h));
+      if (filterState.status === 'inactive') {
+        query = query.where`episode.status == "inactive" OR group_hash IN (${hashLiterals})`;
+      } else {
+        query = query.where`episode.status == ${filterState.status} AND NOT group_hash IN (${hashLiterals})`;
+      }
+    } else {
+      query = query.where`episode.status == ${filterState.status}`;
+    }
   }
 
   if (filterState?.ruleId) {

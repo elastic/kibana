@@ -98,6 +98,87 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('WHERE episode.status == "active"');
   });
 
+  describe('with deactivatedGroupHashes', () => {
+    it('should exclude deactivated group hashes when filtering by active', () => {
+      const query = buildEpisodesQuery(
+        { sortField: '@timestamp', sortDirection: 'desc' },
+        { status: 'active', deactivatedGroupHashes: ['hash-1', 'hash-2'] }
+      );
+      const queryString = query.print('basic');
+
+      expect(queryString).toContain('episode.status == "active"');
+      expect(queryString).toContain('NOT (group_hash IN ("hash-1", "hash-2"))');
+    });
+
+    it('should exclude deactivated group hashes when filtering by pending', () => {
+      const query = buildEpisodesQuery(
+        { sortField: '@timestamp', sortDirection: 'desc' },
+        { status: 'pending', deactivatedGroupHashes: ['hash-1'] }
+      );
+      const queryString = query.print('basic');
+
+      expect(queryString).toContain('episode.status == "pending"');
+      expect(queryString).toContain('NOT (group_hash IN ("hash-1"))');
+    });
+
+    it('should exclude deactivated group hashes when filtering by recovering', () => {
+      const query = buildEpisodesQuery(
+        { sortField: '@timestamp', sortDirection: 'desc' },
+        { status: 'recovering', deactivatedGroupHashes: ['hash-1'] }
+      );
+      const queryString = query.print('basic');
+
+      expect(queryString).toContain('episode.status == "recovering"');
+      expect(queryString).toContain('NOT (group_hash IN ("hash-1"))');
+    });
+
+    it('should include deactivated group hashes when filtering by inactive', () => {
+      const query = buildEpisodesQuery(
+        { sortField: '@timestamp', sortDirection: 'desc' },
+        { status: 'inactive', deactivatedGroupHashes: ['hash-1', 'hash-2'] }
+      );
+      const queryString = query.print('basic');
+
+      expect(queryString).toContain('episode.status == "inactive"');
+      expect(queryString).toContain('group_hash IN ("hash-1", "hash-2")');
+      expect(queryString).toContain('OR');
+    });
+
+    it('should fall back to simple status filter when deactivatedGroupHashes is empty', () => {
+      const query = buildEpisodesQuery(
+        { sortField: '@timestamp', sortDirection: 'desc' },
+        { status: 'active', deactivatedGroupHashes: [] }
+      );
+      const queryString = query.print('basic');
+
+      expect(queryString).toContain('WHERE episode.status == "active"');
+      expect(queryString).not.toContain('group_hash IN');
+    });
+
+    it('should not affect query when no status filter is set', () => {
+      const query = buildEpisodesQuery(
+        { sortField: '@timestamp', sortDirection: 'desc' },
+        { deactivatedGroupHashes: ['hash-1'] }
+      );
+      const queryString = query.print('basic');
+
+      expect(queryString).not.toContain('group_hash IN');
+      expect(queryString).not.toContain('episode.status ==');
+    });
+
+    it('should work with combined status and rule filters', () => {
+      const query = buildEpisodesQuery(
+        { sortField: '@timestamp', sortDirection: 'desc' },
+        { status: 'active', ruleId: 'rule-123', deactivatedGroupHashes: ['hash-1'] }
+      );
+      const queryString = query.print('basic');
+
+      expect(queryString).toContain('episode.status == "active"');
+      expect(queryString).toContain('NOT (group_hash IN ("hash-1"))');
+      expect(queryString).toContain('WHERE rule.id == "rule-123"');
+    });
+  });
+
   it('should apply ruleId filter', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { queryKeys } from '../query_keys';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
+import { useFetchDeactivatedGroupHashes } from './use_fetch_deactivated_group_hashes';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import {
   type EpisodesFilterState,
@@ -32,6 +34,9 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 /**
  * Hook to fetch alerting episodes data with filters and sort.
  * Returns an ad-hoc data view too, constructed from the query columns.
+ *
+ * When a status filter is active, pre-fetches deactivated (resolved) group hashes
+ * so the status filter accounts for user-driven deactivation.
  */
 export const useFetchAlertingEpisodesQuery = ({
   pageSize,
@@ -42,9 +47,30 @@ export const useFetchAlertingEpisodesQuery = ({
 }: UseFetchAlertingEpisodesQueryOptions) => {
   const dataView = useAlertingEpisodesDataView({ services });
 
-  const queryKey = queryKeys.list(pageSize, filterState, sortState, timeRange ?? undefined);
+  const isStatusFilterActive = !!filterState?.status;
+
+  const { data: deactivatedGroupHashes, isSuccess: isDeactivatedReady } =
+    useFetchDeactivatedGroupHashes({
+      enabled: isStatusFilterActive,
+      services,
+    });
+
+  const enrichedFilterState: EpisodesFilterState | undefined = useMemo(() => {
+    if (!filterState) return undefined;
+    if (!isStatusFilterActive) return filterState;
+    return { ...filterState, deactivatedGroupHashes: deactivatedGroupHashes ?? [] };
+  }, [filterState, isStatusFilterActive, deactivatedGroupHashes]);
+
+  const queryKey = queryKeys.list(
+    pageSize,
+    enrichedFilterState,
+    sortState,
+    timeRange ?? undefined,
+    deactivatedGroupHashes
+  );
+
   const query = useQuery({
-    enabled: dataView != null,
+    enabled: dataView != null && (!isStatusFilterActive || isDeactivatedReady),
     queryKey,
     queryFn: async ({ signal: abortSignal }) => {
       if (!dataView) {
@@ -54,7 +80,7 @@ export const useFetchAlertingEpisodesQuery = ({
         abortSignal,
         pageSize,
         services,
-        filterState,
+        filterState: enrichedFilterState,
         sortState,
         timeRange,
       });

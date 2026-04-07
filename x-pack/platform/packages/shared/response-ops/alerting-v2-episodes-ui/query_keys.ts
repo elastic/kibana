@@ -14,10 +14,22 @@ export const queryKeys = {
   groupActionsAll: () => [...queryKeys.all, 'group-actions'] as const,
   groupActions: (groupHashes: string[]) =>
     [...queryKeys.groupActionsAll(), ...groupHashes] as const,
+  deactivatedGroupHashesAll: () => [...queryKeys.all, 'deactivated-group-hashes'] as const,
+  deactivatedGroupHashes: () => [...queryKeys.deactivatedGroupHashesAll()] as const,
   list: (
     pageSize: number,
     filterState?: EpisodesFilterState,
     sortState?: EpisodesSortState,
-    timeRange?: { from: string; to: string } | null
-  ) => [...queryKeys.all, 'list', pageSize, filterState, sortState, timeRange] as const,
+    timeRange?: { from: string; to: string } | null,
+    deactivatedGroupHashes?: string[]
+  ) =>
+    [
+      ...queryKeys.all,
+      'list',
+      pageSize,
+      filterState,
+      sortState,
+      timeRange,
+      deactivatedGroupHashes,
+    ] as const,
 };
