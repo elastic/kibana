@@ -51,11 +51,9 @@ export function createESQLQuery({
     return '';
   }
 
-  // Pass the full fieldTypes array to handle conflicting types
-  const types = fieldTypes.length > 1 ? fieldTypes : [type];
   const query = esql.ts(index);
   const metricAggregation = createMetricAggregation({
-    type: types,
+    type: fieldTypes,
     instrument,
     metricName,
     placeholderName: 'metricName',
