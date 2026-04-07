@@ -59,6 +59,12 @@ export class OtelTelemetryCollectionPlugin
     this.logger.debug('Setting up OTel telemetry collection plugin');
 
     registerOtelEbtEvents(core.analytics);
+
+    if (!this.pluginConfig.enabled) {
+      this.logger.info('OTel telemetry collection plugin is disabled via config');
+      return;
+    }
+
     this.otelTelemetryService.setup(plugins.taskManager);
   }
 
@@ -70,7 +76,6 @@ export class OtelTelemetryCollectionPlugin
     }
 
     if (!this.pluginConfig.enabled) {
-      this.logger.info('OTel telemetry collection plugin is disabled via config');
       return;
     }
 

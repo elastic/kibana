@@ -120,7 +120,7 @@ export class ArtifactService {
     }
 
     const manifest = JSON.parse(manifestFile.getData().toString());
-    const artifact = manifest.artifacts[name];
+    const artifact = manifest?.artifacts?.[name];
     if (artifact) {
       const url = `${this.cdnConfig?.url}${artifact.relative_url}`;
       const artifactResponse = await axios.get(url, { timeout: this.cdnConfig?.requestTimeout });

@@ -17,7 +17,7 @@ export class OtelTelemetrySender {
   }
 
   public report(results: OtelPerServiceResult[], maxElementsPerEvent: number): void {
-    if (results.length === 0) {
+    if (results.length === 0 || maxElementsPerEvent <= 0) {
       return;
     }
 

@@ -104,6 +104,22 @@ describe('OtelTelemetrySender', () => {
     expect(analytics.reportEvent).not.toHaveBeenCalled();
   });
 
+  it('should not report when maxElementsPerEvent is 0', () => {
+    const results = [makeResult('svc-1')];
+
+    sender.report(results, 0);
+
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('should not report when maxElementsPerEvent is negative', () => {
+    const results = [makeResult('svc-1')];
+
+    sender.report(results, -1);
+
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+  });
+
   it('should log total result count and batch count', () => {
     const results = Array.from({ length: 5 }, (_, i) => makeResult(`svc-${i}`));
 
