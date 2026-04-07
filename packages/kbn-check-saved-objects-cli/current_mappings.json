@@ -3957,7 +3957,7 @@
         "type": "keyword"
       },
       "name": {
-        "type": "text"
+        "type": "keyword"
       },
       "path_to_executable": {
         "type": "keyword"
