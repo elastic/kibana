@@ -735,6 +735,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const settings = getInheritedSettings(ancestors);
     const failureStore = this.getInheritedFailureStoreFromAncestors(ancestors);
 
+    const shouldDeferDataStream =
+      !existsAsManagedDataStream &&
+      this.dependencies.deferRootDataStreamMaterialization === true &&
+      isRootStreamDefinition(this._definition);
+
     const actions: ElasticsearchAction[] = [
       {
         type: 'upsert_component_template',
@@ -766,7 +771,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           this._definition.name,
           lifecycle,
           failureStore,
-          this.dependencies.isServerless
+          this.dependencies.isServerless,
+          shouldDeferDataStream
+            ? formatSettings(settings, this.dependencies.isServerless)
+            : undefined
         ),
       },
       {
@@ -774,11 +782,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         request: this._definition,
       },
     ];
-
-    const shouldDeferDataStream =
-      !existsAsManagedDataStream &&
-      this.dependencies.deferRootDataStreamMaterialization === true &&
-      isRootStreamDefinition(this._definition);
 
     if (!shouldDeferDataStream) {
       actions.push(

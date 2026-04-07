@@ -10,6 +10,10 @@ import { getAncestorsAndSelf, isDslLifecycle } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { failureStoreToIndexTemplateDataStreamOptions } from '../data_streams/manage_data_streams';
+import {
+  type FormattedIngestSettings,
+  formattedIngestSettingsToTemplateIndexSettings,
+} from '../state_management/streams/helpers';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
@@ -23,7 +27,9 @@ export function generateIndexTemplate(
   name: string,
   lifecycle?: IngestStreamLifecycle,
   failureStore?: FailureStore,
-  isServerless?: boolean
+  isServerless?: boolean,
+  /** When the backing data stream is deferred, ingest settings must live on the template. */
+  deferredFormattedIngestSettings?: FormattedIngestSettings
 ) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
     return [...acc, `${ancestorName}@stream.layer`];
@@ -33,6 +39,10 @@ export function generateIndexTemplate(
     failureStore !== undefined && isServerless !== undefined
       ? failureStoreToIndexTemplateDataStreamOptions(failureStore, isServerless)
       : undefined;
+
+  const deferredIndexSettings = deferredFormattedIngestSettings
+    ? formattedIngestSettingsToTemplateIndexSettings(deferredFormattedIngestSettings)
+    : {};
 
   return {
     name: getIndexTemplateName(name),
@@ -53,6 +63,7 @@ export function generateIndexTemplate(
       settings: {
         index: {
           default_pipeline: getProcessingPipelineName(name),
+          ...deferredIndexSettings,
         },
       },
       mappings: {
