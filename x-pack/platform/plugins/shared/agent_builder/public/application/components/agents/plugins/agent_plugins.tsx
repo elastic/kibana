@@ -25,6 +25,8 @@ import {
 } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useQueryState } from '../../../hooks/use_query_state';
+import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -54,7 +56,7 @@ export const AgentPlugins: React.FC = () => {
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPluginId, setSelectedPluginId] = useState<string | null>(null);
+  const [selectedPluginId, setSelectedPluginId] = useQueryState<string>(searchParamNames.pluginId);
   const pendingSelectPluginIdRef = useRef<string | null>(null);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [mutatingPluginId, setMutatingPluginId] = useState<string | null>(null);
@@ -109,6 +111,8 @@ export const AgentPlugins: React.FC = () => {
   }, [allPlugins, agentPluginIdSet, enableElasticCapabilities, builtinPlugins]);
 
   useEffect(() => {
+    if (agentLoading || pluginsLoading) return;
+
     if (pendingSelectPluginIdRef.current) {
       const pendingInActive = activePlugins.some((p) => p.id === pendingSelectPluginIdRef.current);
       if (pendingInActive) {
@@ -128,7 +132,7 @@ export const AgentPlugins: React.FC = () => {
         setSelectedPluginId(activePlugins[0]?.id ?? null);
       }
     }
-  }, [activePlugins, selectedPluginId]);
+  }, [activePlugins, selectedPluginId, setSelectedPluginId, agentLoading, pluginsLoading]);
 
   const filteredActivePlugins = useMemo(() => {
     if (!searchQuery.trim()) return activePlugins;
@@ -185,7 +189,7 @@ export const AgentPlugins: React.FC = () => {
         onSettled: () => setMutatingPluginId(null),
       });
     },
-    [agentPluginIds, updatePluginsMutation, addSuccessToast]
+    [agentPluginIds, updatePluginsMutation, addSuccessToast, setSelectedPluginId]
   );
 
   const handleTogglePlugin = useCallback(

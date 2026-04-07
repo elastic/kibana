@@ -498,12 +498,12 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
+    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
+      (connector) => connector.id === id
+    );
+
     try {
       await this.context.authorization.ensureAuthorized({ operation: 'delete' });
-
-      const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-        (connector) => connector.id === id
-      );
 
       if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
@@ -513,18 +513,6 @@ export class ActionsClient {
               id,
             },
           })
-        );
-      }
-
-      if (foundInMemoryConnector?.isPreconfigured) {
-        throw new PreconfiguredActionDisabledModificationError(
-          i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
-            defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
-            values: {
-              id,
-            },
-          }),
-          'delete'
         );
       }
     } catch (error) {
@@ -546,7 +534,23 @@ export class ActionsClient {
       })
     );
 
-    const rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    let rawAction;
+    try {
+      rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    } catch (e) {
+      if (foundInMemoryConnector?.isPreconfigured) {
+        throw new PreconfiguredActionDisabledModificationError(
+          i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
+            defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
+            values: {
+              id,
+            },
+          }),
+          'delete'
+        );
+      }
+      throw e;
+    }
     const {
       attributes: { actionTypeId, config, authMode },
     } = rawAction;

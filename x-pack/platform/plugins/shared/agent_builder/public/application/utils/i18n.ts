@@ -623,6 +623,36 @@ export const labels = {
         defaultMessage: 'This action will permanently remove the skill. This cannot be undone.',
       }
     ),
+    deleteSkillUsedByAgentsTitle: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillUsedByAgentsTitle', {
+        defaultMessage: 'Skill "{skillId}" is used by agents',
+        values: { skillId },
+      }),
+    deleteSkillUsedByAgentsDescription: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsDescription',
+      {
+        defaultMessage: 'Remove this skill from all agents that use it and delete the skill?',
+      }
+    ),
+    deleteSkillUsedByAgentsAgentListLabel: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsAgentListLabel',
+      {
+        defaultMessage: 'Agents using this skill',
+      }
+    ),
+    deleteSkillUsedByAgentsAgentList: (agentNames: string[]) => agentNames.join(', '),
+    deleteSkillUsedByAgentsConfirmButton: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsConfirmButton',
+      {
+        defaultMessage: 'Yes, remove and delete',
+      }
+    ),
+    deleteSkillUsedByAgentsCancelButton: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
     toolIdsLabel: i18n.translate('xpack.agentBuilder.skills.toolIdsLabel', {
       defaultMessage: 'Associated tools',
     }),
@@ -1458,6 +1488,251 @@ export const labels = {
       i18n.translate('xpack.agentBuilder.plugins.loadPluginErrorToast', {
         defaultMessage: 'Unable to load "{pluginId}"',
         values: { pluginId },
+      }),
+  },
+  connectors: {
+    title: i18n.translate('xpack.agentBuilder.connectors.title', {
+      defaultMessage: 'Connectors',
+    }),
+    pageDescription: i18n.translate('xpack.agentBuilder.connectors.pageDescription', {
+      defaultMessage:
+        'Manage connectors for your agents. Connectors with workflow definitions will automatically create tools when configured.',
+    }),
+    createButton: i18n.translate('xpack.agentBuilder.connectors.createButton', {
+      defaultMessage: 'Create connector',
+    }),
+
+    // Table columns
+    nameColumn: i18n.translate('xpack.agentBuilder.connectors.column.name', {
+      defaultMessage: 'Name',
+    }),
+    typeColumn: i18n.translate('xpack.agentBuilder.connectors.column.type', {
+      defaultMessage: 'Type',
+    }),
+    statusColumn: i18n.translate('xpack.agentBuilder.connectors.column.status', {
+      defaultMessage: 'Status',
+    }),
+    statusAuthorized: i18n.translate('xpack.agentBuilder.connectors.status.authorized', {
+      defaultMessage: 'Authorized',
+    }),
+    statusNotAuthorized: i18n.translate('xpack.agentBuilder.connectors.status.notAuthorized', {
+      defaultMessage: 'Not authorized',
+    }),
+    statusNotAuthorizedTooltip: i18n.translate(
+      'xpack.agentBuilder.connectors.status.notAuthorizedTooltip',
+      {
+        defaultMessage: 'Click to authorize via OAuth',
+      }
+    ),
+    statusFilter: i18n.translate('xpack.agentBuilder.connectors.statusFilter', {
+      defaultMessage: 'Status',
+    }),
+    connectorsLabel: i18n.translate('xpack.agentBuilder.connectors.connectorsLabel', {
+      defaultMessage: 'Connectors',
+    }),
+
+    // Table
+    tableCaption: (count: number) =>
+      i18n.translate('xpack.agentBuilder.connectors.tableCaption', {
+        defaultMessage: 'Available connectors: {count} connectors',
+        values: { count },
+      }),
+    noConnectorsMessage: i18n.translate('xpack.agentBuilder.connectors.noConnectorsMessage', {
+      defaultMessage: "It looks like you don't have any connectors configured yet.",
+    }),
+    noConnectorsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.connectors.noConnectorsMatchMessage',
+      {
+        defaultMessage: 'No connectors match your search.',
+      }
+    ),
+    listConnectorsErrorMessage: i18n.translate(
+      'xpack.agentBuilder.connectors.listConnectorsErrorMessage',
+      {
+        defaultMessage: 'Failed to fetch connectors',
+      }
+    ),
+
+    // Search
+    searchConnectorsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.connectors.searchConnectorsPlaceholder',
+      {
+        defaultMessage: 'Search',
+      }
+    ),
+    typeFilter: i18n.translate('xpack.agentBuilder.connectors.typeFilter', {
+      defaultMessage: 'Type',
+    }),
+
+    // Actions
+    editConnectorButtonLabel: i18n.translate(
+      'xpack.agentBuilder.connectors.editConnectorButtonLabel',
+      {
+        defaultMessage: 'Edit',
+      }
+    ),
+    deleteConnectorButtonLabel: i18n.translate(
+      'xpack.agentBuilder.connectors.deleteConnectorButtonLabel',
+      {
+        defaultMessage: 'Delete',
+      }
+    ),
+    connectorContextMenuButtonLabel: i18n.translate(
+      'xpack.agentBuilder.connectors.connectorContextMenuButtonLabel',
+      {
+        defaultMessage: 'Connector context menu',
+      }
+    ),
+
+    // OAuth
+    authorizeButtonLabel: i18n.translate('xpack.agentBuilder.connectors.authorizeButtonLabel', {
+      defaultMessage: 'Authorize',
+    }),
+    cancelAuthorizationButtonLabel: i18n.translate(
+      'xpack.agentBuilder.connectors.cancelAuthorizationButtonLabel',
+      {
+        defaultMessage: 'Cancel authorization',
+      }
+    ),
+    disconnectButtonLabel: i18n.translate('xpack.agentBuilder.connectors.disconnectButtonLabel', {
+      defaultMessage: 'Disconnect',
+    }),
+    disconnectConfirmTitle: (name: string) =>
+      i18n.translate('xpack.agentBuilder.connectors.disconnectConfirmTitle', {
+        defaultMessage: 'Disconnect {name}?',
+        values: { name },
+      }),
+    disconnectConfirmMessage: i18n.translate(
+      'xpack.agentBuilder.connectors.disconnectConfirmMessage',
+      {
+        defaultMessage: 'You will need to re-authorize to use this connector again.',
+      }
+    ),
+    disconnectConfirmButton: i18n.translate(
+      'xpack.agentBuilder.connectors.disconnectConfirmButton',
+      {
+        defaultMessage: 'Disconnect',
+      }
+    ),
+    disconnectCancelButton: i18n.translate('xpack.agentBuilder.connectors.disconnectCancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    oauthConnectSuccessTitle: i18n.translate(
+      'xpack.agentBuilder.connectors.oauthConnectSuccessTitle',
+      {
+        defaultMessage: 'Authorization successful',
+      }
+    ),
+    oauthConnectSuccessMessage: i18n.translate(
+      'xpack.agentBuilder.connectors.oauthConnectSuccessMessage',
+      {
+        defaultMessage: 'Your connector has been authorized successfully.',
+      }
+    ),
+    oauthConnectErrorTitle: i18n.translate('xpack.agentBuilder.connectors.oauthConnectErrorTitle', {
+      defaultMessage: 'Authorization failed',
+    }),
+    oauthDisconnectSuccessTitle: i18n.translate(
+      'xpack.agentBuilder.connectors.oauthDisconnectSuccessTitle',
+      {
+        defaultMessage: 'Disconnected',
+      }
+    ),
+    oauthDisconnectSuccessMessage: i18n.translate(
+      'xpack.agentBuilder.connectors.oauthDisconnectSuccessMessage',
+      {
+        defaultMessage: 'Your connector has been disconnected from OAuth.',
+      }
+    ),
+    oauthDisconnectErrorTitle: i18n.translate(
+      'xpack.agentBuilder.connectors.oauthDisconnectErrorTitle',
+      {
+        defaultMessage: 'Disconnect failed',
+      }
+    ),
+
+    // Bulk actions
+    deleteSelectedConnectorsButtonLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.connectors.deleteSelectedConnectorsButtonLabel', {
+        defaultMessage: 'Delete {count, plural, one {# Connector} other {# Connectors}}',
+        values: { count },
+      }),
+    selectAllConnectorsButtonLabel: i18n.translate(
+      'xpack.agentBuilder.connectors.selectAllConnectorsButtonLabel',
+      {
+        defaultMessage: 'Select all',
+      }
+    ),
+    clearSelectionButtonLabel: i18n.translate(
+      'xpack.agentBuilder.connectors.clearSelectionButtonLabel',
+      {
+        defaultMessage: 'Clear selection',
+      }
+    ),
+
+    // Delete modal
+    deleteConnectorTitle: (name: string) =>
+      i18n.translate('xpack.agentBuilder.connectors.deleteConnectorTitle', {
+        defaultMessage: 'Delete {name}?',
+        values: { name },
+      }),
+    deleteConnectorCancelButton: i18n.translate(
+      'xpack.agentBuilder.connectors.deleteConnectorCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    deleteConnectorConfirmButton: i18n.translate(
+      'xpack.agentBuilder.connectors.deleteConnectorConfirmButton',
+      {
+        defaultMessage: 'Delete connector',
+      }
+    ),
+    deleteConnectorConfirmationText: i18n.translate(
+      'xpack.agentBuilder.connectors.deleteConnectorConfirmationText',
+      {
+        defaultMessage: 'This action will permanently remove the connector. This cannot be undone.',
+      }
+    ),
+
+    // Bulk delete modal
+    bulkDeleteConnectorsTitle: (count: number) =>
+      i18n.translate('xpack.agentBuilder.connectors.bulkDeleteConnectorsTitle', {
+        defaultMessage: 'Delete {count, plural, one {# connector} other {# connectors}}?',
+        values: { count },
+      }),
+    bulkDeleteConnectorsConfirmButton: (count: number) =>
+      i18n.translate('xpack.agentBuilder.connectors.bulkDeleteConnectorsConfirmButton', {
+        defaultMessage: 'Delete {count, plural, one {# connector} other {# connectors}}',
+        values: { count },
+      }),
+    bulkDeleteConnectorsConfirmationText: i18n.translate(
+      'xpack.agentBuilder.connectors.bulkDeleteConnectorsConfirmationText',
+      {
+        defaultMessage: "You can't recover deleted connectors.",
+      }
+    ),
+
+    // Toasts
+    deleteConnectorSuccessToast: (name: string) =>
+      i18n.translate('xpack.agentBuilder.connectors.deleteConnectorSuccessToast', {
+        defaultMessage: 'Connector "{name}" deleted',
+        values: { name },
+      }),
+    deleteConnectorErrorToast: (name: string) =>
+      i18n.translate('xpack.agentBuilder.connectors.deleteConnectorErrorToast', {
+        defaultMessage: 'Unable to delete connector "{name}"',
+        values: { name },
+      }),
+    bulkDeleteConnectorsSuccessToast: (count: number) =>
+      i18n.translate('xpack.agentBuilder.connectors.bulkDeleteConnectorsSuccessToast', {
+        defaultMessage: 'Deleted {count, plural, one {# connector} other {# connectors}}',
+        values: { count },
+      }),
+    bulkDeleteConnectorsErrorToast: (count: number) =>
+      i18n.translate('xpack.agentBuilder.connectors.bulkDeleteConnectorsErrorToast', {
+        defaultMessage: 'Unable to delete {count, plural, one {# connector} other {# connectors}}',
+        values: { count },
       }),
   },
   agents: {

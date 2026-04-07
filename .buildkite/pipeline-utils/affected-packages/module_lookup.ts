@@ -12,8 +12,7 @@ import * as fs from 'fs';
 import { execSync } from 'child_process';
 import * as JSON5 from 'json5';
 import { getKibanaDir } from '../utils';
-
-export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
+import { UNCATEGORIZED_MODULE_ID } from './const';
 
 export interface ModuleLookup {
   /**
