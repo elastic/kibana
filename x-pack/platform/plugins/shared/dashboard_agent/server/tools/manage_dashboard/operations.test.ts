@@ -44,20 +44,20 @@ const getPanelsOnly = (panels: DashboardAttachmentData['panels']): AttachmentPan
 
 describe('executeDashboardOperations', () => {
   const logger = createMockLogger();
-  const createLensPanel = (uid: string, gridY = 0): AttachmentPanel => ({
+  const createLensPanel = (id: string, gridY = 0): AttachmentPanel => ({
     type: 'lens',
-    uid,
+    id,
     config: { type: 'metric' },
     grid: { x: 0, y: gridY, w: 24, h: 9 },
   });
 
   const createSection = (
-    uid: string,
+    id: string,
     title: string,
     gridY: number,
     panels: AttachmentPanel[] = []
   ): DashboardSection => ({
-    uid,
+    id,
     title,
     collapsed: false,
     grid: { y: gridY },
@@ -116,7 +116,7 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.title).toBe('Updated title');
     expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({
-        uid: 'from-attachment-panel',
+        id: 'from-attachment-panel',
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
       expect.objectContaining({
@@ -166,7 +166,7 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ uid: 'from-attachment' }),
+      expect.objectContaining({ id: 'from-attachment' }),
     ]);
     expect(result.failures).toEqual([
       expect.objectContaining({
@@ -207,7 +207,7 @@ describe('executeDashboardOperations', () => {
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toEqual([
       {
-        uid: 'section-1',
+        id: 'section-1',
         title: 'Section 1',
         collapsed: false,
         grid: { y: 10 },
@@ -241,7 +241,7 @@ describe('executeDashboardOperations', () => {
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(1);
     expect(sections[0]).toEqual({
-      uid: expect.any(String),
+      id: expect.any(String),
       title: 'Overview',
       collapsed: false,
       grid: { y: 12 },
@@ -293,7 +293,7 @@ describe('executeDashboardOperations', () => {
     expect(panelsOnly).toEqual([]);
     expect(sections).toHaveLength(1);
     expect(sections[0]).toEqual({
-      uid: expect.any(String),
+      id: expect.any(String),
       title: 'Overview',
       collapsed: false,
       grid: { y: 12 },
@@ -632,7 +632,7 @@ describe('executeDashboardOperations', () => {
     expect(panelsOnly).toEqual([]);
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
-        uid: 'section-routed-panel',
+        id: 'section-routed-panel',
         grid: { x: 12, y: 0, w: 12, h: 5 },
       }),
     ]);
@@ -651,16 +651,16 @@ describe('executeDashboardOperations', () => {
           ]),
         ],
       },
-      operations: [{ operation: 'remove_section', uid: 'section-a', panelAction: 'promote' }],
+      operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'promote' }],
       logger,
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(0);
     expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ uid: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
-      expect.objectContaining({ uid: 'section-a-1', grid: { x: 0, y: 9, w: 24, h: 9 } }),
-      expect.objectContaining({ uid: 'section-a-2', grid: { x: 0, y: 18, w: 24, h: 9 } }),
+      expect.objectContaining({ id: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
+      expect.objectContaining({ id: 'section-a-1', grid: { x: 0, y: 9, w: 24, h: 9 } }),
+      expect.objectContaining({ id: 'section-a-2', grid: { x: 0, y: 18, w: 24, h: 9 } }),
     ]);
   });
 
@@ -674,14 +674,14 @@ describe('executeDashboardOperations', () => {
           createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
         ],
       },
-      operations: [{ operation: 'remove_section', uid: 'section-a', panelAction: 'delete' }],
+      operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'delete' }],
       logger,
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
 
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(0);
-    expect(result.dashboardData.panels).toEqual([expect.objectContaining({ uid: 'top-1' })]);
+    expect(result.dashboardData.panels).toEqual([expect.objectContaining({ id: 'top-1' })]);
   });
 
   it('removes matching panelIds from top-level and section panels', async () => {
@@ -707,11 +707,11 @@ describe('executeDashboardOperations', () => {
     expect(panelsOnly).toEqual([]);
     expect(sections).toEqual([
       {
-        uid: 'section-a',
+        id: 'section-a',
         title: 'Section A',
         collapsed: false,
         grid: { y: 8 },
-        panels: [expect.objectContaining({ uid: 'section-a-2' })],
+        panels: [expect.objectContaining({ id: 'section-a-2' })],
       },
     ]);
   });
@@ -775,7 +775,7 @@ describe('executeDashboardOperations', () => {
       const sections = getSections(result.dashboardData.panels);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
-          uid: 'section-panel-1',
+          id: 'section-panel-1',
           grid: { x: 12, y: 4, w: 12, h: 6 },
           config: { type: 'metric' },
         }),
@@ -811,7 +811,7 @@ describe('executeDashboardOperations', () => {
       expect(panelsOnly).toEqual([]);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
-          uid: 'top-1',
+          id: 'top-1',
           grid: { x: 24, y: 0, w: 24, h: 9 },
           config: { type: 'metric' },
         }),
@@ -849,7 +849,7 @@ describe('executeDashboardOperations', () => {
       expect(sections[0].panels).toEqual([]);
       expect(panelsOnly).toEqual([
         expect.objectContaining({
-          uid: 'section-panel-1',
+          id: 'section-panel-1',
           grid: { x: 0, y: 20, w: 24, h: 9 },
           config: { type: 'metric' },
         }),
@@ -940,7 +940,7 @@ describe('executeDashboardOperations', () => {
       ]);
     });
 
-    it('edits inline visualization panels while preserving uid and grid', async () => {
+    it('edits inline visualization panels while preserving id and grid', async () => {
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test',
@@ -975,14 +975,14 @@ describe('executeDashboardOperations', () => {
 
       expect(topLevelPanels[0]).toEqual(
         expect.objectContaining({
-          uid: 'panel-1',
+          id: 'panel-1',
           grid: { x: 0, y: 5, w: 24, h: 9 },
           config: { attributes: { type: 'bar' } },
         })
       );
       expect(sections[0].panels[0]).toEqual(
         expect.objectContaining({
-          uid: 'section-panel-1',
+          id: 'section-panel-1',
           grid: { x: 0, y: 0, w: 24, h: 9 },
           config: { attributes: { type: 'line' } },
         })
@@ -1038,7 +1038,7 @@ describe('executeDashboardOperations', () => {
       expect(seenConfigSteps).toEqual(['initial', 'after-first-edit']);
       expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
         expect.objectContaining({
-          uid: 'panel-1',
+          id: 'panel-1',
           config: { attributes: { type: 'metric', testStep: 'after-second-edit' } },
           grid: { x: 0, y: 5, w: 24, h: 9 },
         })
@@ -1138,7 +1138,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               type: 'aiOpsLogRateAnalysis',
-              uid: 'panel-1',
+              id: 'panel-1',
               config: { seriesType: 'log_rate' },
               grid: { x: 0, y: 5, w: 24, h: 9 },
             },
@@ -1167,7 +1167,7 @@ describe('executeDashboardOperations', () => {
 
       expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
         expect.objectContaining({
-          uid: 'panel-1',
+          id: 'panel-1',
           type: 'aiOpsLogRateAnalysis',
           config: { seriesType: 'log_rate' },
           grid: { x: 0, y: 5, w: 24, h: 9 },

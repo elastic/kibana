@@ -9,18 +9,19 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import { css } from '@emotion/react';
-import { INTEGRATION_APP_ID } from '../../../../common/lib/integrations/constants';
-import { useIntegrationLinkState } from '../../../../common/hooks/integrations/use_integration_link_state';
-import { addPathParamToUrl } from '../../../../common/utils/integrations';
-import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../../common/constants';
-import { useNavigation } from '../../../../common/lib/kibana';
-import { useEntityAnalyticsIntegrations } from '../hooks/use_integrations';
+import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../common/constants';
+import { INTEGRATION_APP_ID } from '../../../common/lib/integrations/constants';
+import { useIntegrationLinkState } from '../../../common/hooks/integrations/use_integration_link_state';
+import { addPathParamToUrl } from '../../../common/utils/integrations';
+import { useNavigation } from '../../../common/lib/kibana';
+import { useEntityAnalyticsIntegrations } from './hooks/use_entity_analytics_integrations';
 
 export interface IntegrationCardsProps {
   maxCardWidth?: number;
   showInstallationStatus?: boolean;
   onIntegrationInstalled?: (count: number) => void;
   titleSize?: 'xs' | 's';
+  isClickable?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export const IntegrationCards = ({
   maxCardWidth,
   showInstallationStatus = false,
   titleSize = 's',
+  isClickable = true,
 }: IntegrationCardsProps) => {
   const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
   const { navigateTo } = useNavigation();
@@ -74,8 +76,15 @@ export const IntegrationCards = ({
             grow={maxCardWidth ? 0 : 1}
             key={name}
             data-test-subj="entity_analytics-integration-card"
+            aria-disabled={!isClickable || undefined}
+            tabIndex={!isClickable ? -1 : undefined}
             css={css`
-              max-width: ${maxCardWidth}px;
+              ${maxCardWidth != null && `max-width: ${maxCardWidth}px;`}
+              ${!isClickable &&
+              `
+                pointer-events: none;
+                cursor: default;
+              `}
             `}
           >
             <LazyPackageCard
@@ -89,9 +98,17 @@ export const IntegrationCards = ({
               title={title}
               titleSize={titleSize}
               version={version}
-              onCardClick={() => {
-                navigateToIntegration(name, version);
-              }}
+              onCardClick={
+                isClickable
+                  ? () => {
+                      navigateToIntegration(name, version);
+                    }
+                  : // If we pass undefined, PackageCard's onClick defaults to its internal `onCardClick` navigation function:
+                    // `onClick={onClickProp ?? onCardClick}`
+                    // So we MUST pass a no-op function to prevent navigation, and then rely on
+                    // `pointer-events: none` on the wrapper to kill the pointer/hover UI entirely.
+                    () => {}
+              }
               // Required values that don't make sense for this scenario
               categories={[]}
               integration={''}

@@ -28,8 +28,8 @@ import type { HeatmapState } from '../../../schema';
 import { fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
 import {
-  buildDatasetStateESQL,
-  buildDatasetStateNoESQL,
+  buildDataSourceStateESQL,
+  buildDataSourceStateNoESQL,
   generateApiLayer,
   isTextBasedLayer,
   operationFromColumn,
@@ -121,11 +121,11 @@ function reverseBuildVisualizationState(
       throw new Error('xAccessor is missing in the visualization state');
     }
 
-    const dataset = buildDatasetStateESQL(layer);
+    const dataSource = buildDataSourceStateESQL(layer);
 
     return {
       ...sharedProps,
-      dataset,
+      data_source: dataSource,
       metric: {
         ...getValueApiColumn(valueAccessor, layer),
         ...paletteProps,
@@ -135,7 +135,7 @@ function reverseBuildVisualizationState(
     } satisfies HeatmapStateESQL;
   }
 
-  const dataset = buildDatasetStateNoESQL(
+  const dataSource = buildDataSourceStateNoESQL(
     layer,
     layerId,
     adHocDataViews,
@@ -145,7 +145,7 @@ function reverseBuildVisualizationState(
 
   return {
     ...sharedProps,
-    dataset,
+    data_source: dataSource,
     metric: {
       ...operationFromColumn(valueAccessor, layer),
       ...paletteProps,

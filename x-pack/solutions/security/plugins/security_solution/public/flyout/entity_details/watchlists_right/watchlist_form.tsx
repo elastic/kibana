@@ -6,16 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiRange,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { canUpdateWatchlistField } from '../../../../common/api/entity_analytics/watchlists/management';
@@ -26,6 +17,7 @@ import {
   WATCHLIST_RISK_SCORE_WEIGHTING_LABEL,
 } from './translations';
 import { RuleBasedSourceInput } from './rule_based_source_input';
+import { ManagedWatchlistSourceInput } from './managed_watchlist_source_input';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
@@ -103,35 +95,14 @@ export const WatchlistForm = ({
           onChange={(e) => onFieldChange('riskModifier', Number(e.currentTarget.value))}
         />
       </EuiFormRow>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.ruleBasedDataSourcesTitle"
-                defaultMessage="Rule Based Data Sources"
-              />
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.ruleBasedDataSourcesDescription"
-                defaultMessage="Create Watchlist by filtering on existing entities in the store or filtering on entities from an indexPattern"
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {watchlist.managed && <ManagedWatchlistSourceInput watchlist={watchlist} />}
       <RuleBasedSourceInput
         watchlistName={watchlist.name}
         isEditMode={isEditMode}
+        isManaged={watchlist.managed}
         onFieldChange={onFieldChange}
-        initialEntitySource={watchlist.entitySources?.[0]}
+        initialEntitySources={watchlist.entitySources}
       />
     </EuiForm>
   );
