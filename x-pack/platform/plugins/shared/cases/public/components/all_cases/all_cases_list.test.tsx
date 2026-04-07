@@ -48,6 +48,7 @@ import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import * as i18n from './translations';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
@@ -758,12 +759,24 @@ describe('AllCasesListGeneric', () => {
 
           await userEvent.click(await screen.findByTestId(`cases-bulk-action-status-${status}`));
 
+          if (status === CaseStatuses.closed) {
+            await waitFor(() => {
+              expect(
+                screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+              ).toBeInTheDocument();
+            });
+
+            await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_REASON_DUPLICATE));
+            await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
+          }
+
           await waitFor(() => {
             expect(updateCasesSpy).toBeCalledWith({
               cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
                 status,
+                ...(status === CaseStatuses.closed ? { closeReason: 'duplicate' } : {}),
               })),
             });
           });

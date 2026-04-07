@@ -11256,7 +11256,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; traceId?: string | undefined; entryTransactionId?: string | undefined; startedAt: string; workflowId?: string | undefined; isTestRun: boolean; executedBy?: string | undefined; triggeredBy?: string | undefined; stepId?: string | undefined; finishedAt: string; workflowName?: string | undefined; }"
+          "; traceId?: string | undefined; entryTransactionId?: string | undefined; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; isTestRun: boolean; executedBy?: string | undefined; triggeredBy?: string | undefined; finishedAt: string; workflowName?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "lineNumber": 216,
@@ -11574,7 +11574,7 @@
             "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
-          " | undefined; startedAt: string; workflowId: string; isTestRun?: boolean | undefined; stepId: string; stepType?: string | undefined; scopeStack: ",
+          " | undefined; startedAt: string; stepId: string; workflowId: string; isTestRun?: boolean | undefined; stepType?: string | undefined; scopeStack: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
