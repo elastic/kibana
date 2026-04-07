@@ -300,13 +300,10 @@ export const useEntityGrouping = ({
   );
 
   const targetEntityIds = useMemo(() => {
-    if (!isResolutionGrouping) return [];
-    if (!('groupByFields' in groupData)) return [];
+    if (!isResolutionGrouping || !('groupByFields' in groupData)) return [];
     const buckets = groupData.groupByFields?.buckets;
     if (!buckets) return [];
-    return buckets.map((bucket: { key_as_string?: string; key: string | string[] }) =>
-      String(bucket.key_as_string ?? bucket.key)
-    );
+    return buckets.map((bucket) => bucket.key_as_string).filter((id): id is string => !!id);
   }, [groupData, isResolutionGrouping]);
 
   const targetMetadata = useFetchTargetMetadata(targetEntityIds);
