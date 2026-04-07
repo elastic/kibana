@@ -12,14 +12,28 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
+import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
+import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions'
+);
+jest.mock('../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions');
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
+);
+jest.mock('../../../common/hooks/is_in_security_app');
 
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
+const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
+const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
 
 const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord =>
   ({
@@ -28,11 +42,11 @@ const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord
     flattened,
     isAnchor: false,
   } as DataTableRecord);
-
+const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
+const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
 const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
-
 const mockOnAlertUpdated = jest.fn();
 
 const defaultProps = {
@@ -50,6 +64,13 @@ describe('<TakeActionButton />', () => {
     jest.clearAllMocks();
     mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [] });
     mockUseAlertsActions.mockReturnValue({ actionItems: [], panels: [] });
+    mockUseAlertAssigneesActions.mockReturnValue({
+      alertAssigneesItems: [],
+      alertAssigneesPanels: [],
+    });
+    mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [], alertTagsPanels: [] });
+    mockUseInvestigateInTimeline.mockReturnValue({ investigateInTimelineActionItems: [] });
+    mockUseIsInSecurityApp.mockReturnValue(true);
   });
 
   it('should render the take action button', () => {
@@ -85,17 +106,40 @@ describe('<TakeActionButton />', () => {
     );
   });
 
-  it('should render action items in the popover', () => {
-    const mockItems = [
-      { name: 'Add to new case', onClick: jest.fn() },
-      { name: 'Add to existing case', onClick: jest.fn() },
-    ];
-    mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: mockItems });
+  it('should call useInvestigateInTimeline with the correct arguments', () => {
+    renderTakeActionButton();
 
-    const { getByTestId } = renderTakeActionButton();
-    fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+    expect(mockUseInvestigateInTimeline).toHaveBeenCalledWith(
+      expect.objectContaining({ ecsRowData: mockEcsData })
+    );
+  });
 
-    expect(getByTestId('takeActionPanelMenu')).toBeInTheDocument();
+  it('should include investigateInTimelineActionItems when in Security app', () => {
+    mockUseIsInSecurityApp.mockReturnValue(true);
+    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimelineActionItems: [timelineItem],
+    });
+
+    renderTakeActionButton();
+
+    expect(mockUseInvestigateInTimeline).toHaveBeenCalledWith(
+      expect.objectContaining({ ecsRowData: mockEcsData })
+    );
+  });
+
+  it('should not include investigateInTimelineActionItems when not in Security app (e.g. Discover)', () => {
+    mockUseIsInSecurityApp.mockReturnValue(false);
+    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimelineActionItems: [timelineItem],
+    });
+
+    const { queryByText } = renderTakeActionButton();
+
+    fireEvent.click(queryByText('Take action')!.closest('button')!);
+
+    expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
   });
 
   it('should pass onAlertUpdated as refetch to useAlertsActions', () => {
@@ -133,5 +177,87 @@ describe('<TakeActionButton />', () => {
         alertStatus: undefined,
       })
     );
+  });
+
+  it('should call useAlertAssigneesActions with ecsData and closePopover', () => {
+    renderTakeActionButton();
+
+    expect(mockUseAlertAssigneesActions).toHaveBeenCalledWith(
+      expect.objectContaining({ ecsRowData: mockEcsData })
+    );
+  });
+
+  it('should call onAlertUpdated and refetchFlyoutData when assignees are updated', () => {
+    renderTakeActionButton();
+
+    const assigneesCallArgs = mockUseAlertAssigneesActions.mock.calls[0][0];
+    assigneesCallArgs.refetch();
+
+    expect(mockOnAlertUpdated).toHaveBeenCalled();
+    expect(mockRefetchFlyoutData).toHaveBeenCalled();
+  });
+
+  it('should call useAlertTagsActions with ecsData and onAlertUpdated as refetch', () => {
+    renderTakeActionButton();
+
+    expect(mockUseAlertTagsActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ecsRowData: mockEcsData,
+        refetch: mockOnAlertUpdated,
+      })
+    );
+  });
+
+  describe('alert vs non-alert document', () => {
+    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
+    const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
+    const tagsItem = { name: 'Apply alert tags', onClick: jest.fn() };
+
+    beforeEach(() => {
+      mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
+      mockUseAlertAssigneesActions.mockReturnValue({
+        alertAssigneesItems: [assigneeItem],
+        alertAssigneesPanels: [],
+      });
+      mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [tagsItem], alertTagsPanels: [] });
+    });
+
+    it('should include status and assignees items for alert documents (event.kind === signal)', () => {
+      const alertHit = createMockHit({ 'event.kind': 'signal' });
+      const { getByTestId, getByText } = renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Mark as acknowledged')).toBeInTheDocument();
+      expect(getByText('Assign alert')).toBeInTheDocument();
+      expect(getByText('Apply alert tags')).toBeInTheDocument();
+    });
+
+    it('should exclude status and assignees items for non-alert documents', () => {
+      const eventHit = createMockHit({ 'event.kind': 'event' });
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+    });
+
+    it('should exclude status and assignees items when event.kind is not set', () => {
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit(),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+    });
   });
 });
