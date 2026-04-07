@@ -322,7 +322,7 @@ describe('RelatedDashboardsClient', () => {
           {
             id: 'dashboard1',
             title: 'Dashboard 1',
-            panels: [{ config: {}, uid: PANEL_UID, type: PANEL_TYPE }],
+            panels: [{ config: {}, id: PANEL_UID, type: PANEL_TYPE }],
             references: [{ name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID }],
           },
         ],
@@ -357,8 +357,8 @@ describe('RelatedDashboardsClient', () => {
             id: 'dashboard1',
             title: 'Dashboard 1',
             panels: [
-              { config: {}, uid: PANEL_UID, type: PANEL_TYPE },
-              { config: {}, uid: OTHER_PANEL_UID, type: PANEL_TYPE },
+              { config: {}, id: PANEL_UID, type: PANEL_TYPE },
+              { config: {}, id: OTHER_PANEL_UID, type: PANEL_TYPE },
             ],
             references: [
               { name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
@@ -452,7 +452,7 @@ describe('RelatedDashboardsClient', () => {
         panels: [
           {
             type: LENS_EMBEDDABLE_TYPE,
-            uid: PANEL_UID,
+            id: PANEL_UID,
             config: {},
           },
         ],
@@ -505,7 +505,7 @@ describe('RelatedDashboardsClient', () => {
         panels: [
           {
             type: LENS_EMBEDDABLE_TYPE,
-            uid: PANEL_UID,
+            id: PANEL_UID,
             config: {},
           },
         ],

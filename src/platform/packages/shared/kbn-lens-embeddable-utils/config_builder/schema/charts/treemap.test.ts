@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { TreemapStateESQL, TreemapStateNoESQL } from './treemap';
 import { treemapStateSchema } from './treemap';
 
@@ -14,9 +15,9 @@ describe('Treemap Schema', () => {
   describe('Non-ES|QL Schema', () => {
     const baseTreemapConfig = {
       type: 'treemap',
-      dataset: {
-        type: 'dataView',
-        id: 'test-data-view',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'test-data-view',
       },
       ignore_global_filters: false,
       sampling: 1,
@@ -535,7 +536,7 @@ describe('Treemap Schema', () => {
   describe('ES|QL Schema', () => {
     const baseESQLTreemapConfig = {
       type: 'treemap',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | STATS ...',
       },
@@ -554,7 +555,7 @@ describe('Treemap Schema', () => {
       };
 
       const validated = treemapStateSchema.validate(input);
-      expect(validated.dataset.type).toBe('esql');
+      expect(validated.data_source.type).toBe('esql');
       expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
 

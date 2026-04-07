@@ -24,7 +24,7 @@ import { isSection } from '../types';
  * Converts an AttachmentPanel to a DashboardPanel.
  * For Lens panels with API format attributes, converts to internal format.
  */
-const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): DashboardPanel => {
+const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
   let configObject = config;
   if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
     const lensAttributes = new LensConfigBuilder().fromAPIFormat(config.attributes);
@@ -35,7 +35,7 @@ const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): Das
   }
   return {
     type,
-    uid,
+    id,
     grid,
     config: configObject,
   };
@@ -48,7 +48,7 @@ type DashboardWidget = DashboardPanel | DashboardSection;
  * Converts an AgentDashboardSection to a DashboardSection.
  */
 const normalizeSection = (section: AgentDashboardSection): DashboardSection => ({
-  uid: section.uid,
+  id: section.id,
   title: section.title,
   collapsed: section.collapsed,
   grid: { y: section.grid.y },
