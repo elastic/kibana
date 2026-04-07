@@ -9,6 +9,7 @@ import {
   evaluate as base,
   createQuantitativeCorrectnessEvaluators,
   createSpanLatencyEvaluator,
+  createTrajectoryEvaluator,
   getCurrentTraceId,
   type EvaluationDataset,
   type Example,
@@ -27,6 +28,7 @@ interface ObservabilityAgentExample extends Example {
   output: {
     criteria?: string[];
     expected?: string;
+    expectedTools?: string[];
   };
 }
 
@@ -57,6 +59,10 @@ export const evaluate = base.extend<
       use(async ({ dataset: { name, description, examples } }) => {
         const includeQuantitativeCorrectness = examples.some((example) =>
           Boolean(example.output.expected)
+        );
+
+        const includeToolCoverage = examples.some((example) =>
+          Boolean(example.output.expectedTools?.length)
         );
 
         await executorClient.runExperiment(
@@ -96,6 +102,32 @@ export const evaluate = base.extend<
           [
             createCriteriaEvaluator({ evaluators }),
             ...(includeQuantitativeCorrectness ? createQuantitativeCorrectnessEvaluators() : []),
+            ...(includeToolCoverage
+              ? [
+                  createTrajectoryEvaluator({
+                    extractToolCalls: (output: unknown) => {
+                      const steps = (output as any)?.steps ?? [];
+                      return steps
+                        .filter((s: any) => s.type === 'tool_call')
+                        .map((s: any) => s.tool_id as string);
+                    },
+                    goldenPathExtractor: (expected: unknown) => {
+                      return (expected as any)?.expectedTools ?? [];
+                    },
+                    orderWeight: 0,
+                    coverageWeight: 1,
+                  }),
+                ]
+              : []),
+            {
+              name: 'Tool Calls',
+              kind: 'CODE' as const,
+              evaluate: async ({ output: taskOutput }: any) => {
+                const steps = taskOutput?.steps ?? [];
+                const toolCalls = steps.filter((s: any) => s.type === 'tool_call');
+                return { score: toolCalls.length };
+              },
+            },
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,
