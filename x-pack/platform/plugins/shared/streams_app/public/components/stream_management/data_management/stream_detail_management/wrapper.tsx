@@ -31,7 +31,6 @@ import {
 } from '../../../../hooks/use_streams_doc_counts_fetch';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../../util/calculate_data_quality';
-import { FeedbackButton } from '../../../feedback_button';
 import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
@@ -226,9 +225,6 @@ export function Wrapper({
                       spellOut
                     />
                   )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <FeedbackButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
