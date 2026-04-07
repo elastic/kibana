@@ -17,20 +17,19 @@ import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface ToolItemProps
   extends Omit<EuiButtonIconProps, 'href' | 'iconType' | 'onClick' | 'onKeyDown'>,
-    Omit<ToolItemData, 'sections'> {
+    Omit<ToolItemData, 'sections' | 'renderPopover'> {
   hasContent?: boolean;
+  isCollapsed?: boolean;
   isHighlighted: boolean;
   isNew: boolean;
   onClick?: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
 }
 
-export const ToolItem = forwardRef<HTMLButtonElement, ToolItemProps>(
-  ({ id, ...props }, ref) => (
-    <IconButton
-      ref={ref as Ref<HTMLElement>}
-      data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-toolItem-${id}`}
-      {...props}
-    />
-  )
-);
+export const ToolItem = forwardRef<HTMLButtonElement, ToolItemProps>(({ id, ...props }, ref) => (
+  <IconButton
+    ref={ref as Ref<HTMLElement>}
+    data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-toolItem-${id}`}
+    {...props}
+  />
+));

@@ -76,11 +76,16 @@ export interface MenuItem {
 
 /**
  * A chrome tool control (search, help, etc.) — not a primary navigation destination.
+ *
+ * At least one of `iconType` or `renderContent` must be provided.
+ * When `renderPopover` is present, it takes precedence over `sections`.
  */
 export interface ToolItem {
   id: string;
   label: string;
-  iconType: string;
+  iconType?: string;
+  renderContent?: (state: { isCollapsed: boolean }) => ReactNode;
+  renderPopover?: (closePopover: () => void) => ReactNode;
   onClick?: () => void;
   sections?: SecondaryMenuSection[];
   badgeType?: BadgeType;

@@ -189,9 +189,11 @@ export const Navigation = ({
           {hasHeaderTools && (
             <SideNav.HeaderToolbar>
               {renderToolItems({
+                anchorPosition: 'rightDown',
                 items: headerTools,
                 itemComponent: SideNav.HeaderToolbar.Item,
                 isAnyPopoverLocked,
+                isCollapsed,
                 popoverItemPrefix: popoverHeaderToolPrefix,
               })}
             </SideNav.HeaderToolbar>
@@ -247,7 +249,7 @@ export const Navigation = ({
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
                                 const subItemAriaDescribedBy = isFirstSubItem
-                                  ? ids?.popoverNavigationInstructionsId
+                                  ? ids.popoverNavigationInstructionsId
                                   : undefined;
                                 return (
                                   <SideNav.SecondaryMenu.Item
@@ -426,9 +428,11 @@ export const Navigation = ({
           <SideNav.FooterToolbar isCollapsed={isCollapsed}>
             {hasFooterTools &&
               renderToolItems({
+                anchorPosition: 'rightUp',
                 items: footerTools,
                 itemComponent: SideNav.FooterToolbar.Item,
                 isAnyPopoverLocked,
+                isCollapsed,
                 popoverItemPrefix: popoverFooterToolPrefix,
               })}
             {collapseToggle && (
@@ -558,7 +562,7 @@ const renderFooterNavItems = ({
                     const isFirstSubItem =
                       sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
                     const subItemAriaDescribedBy = isFirstSubItem
-                      ? ids?.popoverNavigationInstructionsId
+                      ? ids.popoverNavigationInstructionsId
                       : undefined;
 
                     return (
@@ -591,25 +595,31 @@ const renderFooterNavItems = ({
   });
 
 interface RenderToolItemsArgs {
+  anchorPosition?: 'rightUp' | 'rightDown';
   isAnyPopoverLocked: boolean;
+  isCollapsed: boolean;
   itemComponent: ForwardRefExoticComponent<ToolItemProps & RefAttributes<HTMLButtonElement>>;
   items: ToolItem[];
   popoverItemPrefix: string;
 }
 
 const renderToolItems = ({
+  anchorPosition,
   isAnyPopoverLocked,
+  isCollapsed,
   itemComponent: ItemComponent,
   items,
   popoverItemPrefix,
 }: RenderToolItemsArgs) =>
   items.map((item) => {
-    const { onClick: itemOnClick, sections, ...itemProps } = item;
-
+    const { onClick: itemOnClick, sections, renderContent, renderPopover, ...itemProps } = item;
+    const hasPopoverContent = getHasSubmenu(item);
     return (
       <SideNav.Popover
         key={item.id}
-        hasContent={getHasSubmenu(item)}
+        anchorPosition={anchorPosition}
+        customContent={!!renderPopover}
+        hasContent={hasPopoverContent}
         isSidePanelOpen={false}
         isAnyPopoverLocked={isAnyPopoverLocked}
         label={item.label}
@@ -618,7 +628,9 @@ const renderToolItems = ({
           <ItemComponent
             isHighlighted={false}
             isNew={false}
-            hasContent={getHasSubmenu(item)}
+            isCollapsed={isCollapsed}
+            hasContent={hasPopoverContent}
+            renderContent={renderContent}
             onClick={() => {
               itemOnClick?.();
             }}
@@ -627,6 +639,10 @@ const renderToolItems = ({
         }
       >
         {(closePopover, ids) => {
+          if (renderPopover) {
+            return renderPopover(closePopover);
+          }
+
           const firstNonEmptySectionIndex = sections?.findIndex(
             (section) => section.items.length > 0
           );
@@ -638,7 +654,7 @@ const renderToolItems = ({
                     const isFirstSubItem =
                       sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
                     const subItemAriaDescribedBy = isFirstSubItem
-                      ? ids?.popoverNavigationInstructionsId
+                      ? ids.popoverNavigationInstructionsId
                       : undefined;
 
                     return (

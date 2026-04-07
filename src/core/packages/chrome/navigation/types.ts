@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 
 export type BadgeType = 'beta' | 'techPreview' | 'new';
@@ -99,15 +100,20 @@ export interface MenuItem {
 /**
  * A chrome tool control (search, help, profile, etc.) — not a navigation destination.
  * Tool items can perform an action via `onClick` or expose submenu content via `sections`.
+ *
+ * At least one of `iconType` or `renderContent` must be provided.
+ * When both are present, `renderContent` takes precedence for the trigger visual.
+ *
+ * When `renderPopover` is present, it takes precedence over `sections` for the
+ * popover body content. They are not combined.
  */
 export interface ToolItem {
   id: string;
   label: string;
-  iconType: IconType;
+  iconType?: IconType;
+  renderContent?: (state: { isCollapsed: boolean }) => ReactNode;
+  renderPopover?: (closePopover: () => void) => ReactNode;
   onClick?: () => void;
-  /**
-   * Optional submenu content shown for the tool control.
-   */
   sections?: SecondaryMenuSection[];
   badgeType?: BadgeType;
   'data-test-subj'?: string;

@@ -13,6 +13,9 @@
  * @param item - the menu item to check.
  * @returns `true` if the menu item has a submenu, `false` otherwise.
  */
-export const getHasSubmenu = (item: { sections?: ReadonlyArray<unknown> }): boolean => {
-  return !!item.sections && item.sections.length > 0;
+export const getHasSubmenu = (item: {
+  sections?: ReadonlyArray<unknown>;
+  renderPopover?: unknown;
+}): boolean => {
+  return (!!item.sections && item.sections.length > 0) || !!item.renderPopover;
 };
