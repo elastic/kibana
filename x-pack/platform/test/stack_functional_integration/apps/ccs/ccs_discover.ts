@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default ({ getService, getPageObjects }) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   describe('Cross cluster search test in discover', () => {
     const PageObjects = getPageObjects([
       'common',
@@ -130,7 +131,7 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('create index pattern for data from both clusters', async () => {
-      await PageObjects.settings.createIndexPattern('*:makelogs工程-*', '@timestamp', true, false);
+      await PageObjects.settings.createIndexPattern('*:makelogs工程-*', '@timestamp', true);
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('*:makelogs工程-*');
     });
@@ -186,7 +187,7 @@ export default ({ getService, getPageObjects }) => {
       await queryBar.submitQuery();
       await retry.try(async () => {
         const hitCountNumber = await PageObjects.discover.getHitCount();
-        const hitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
+        const hitCount = parseInt(hitCountNumber.replace(/\,/g, ''), 10);
         log.debug('### hit count = ' + hitCount);
         expect(hitCount).to.be.greaterThan(25000);
         expect(hitCount).to.be.lessThan(28000);
@@ -198,12 +199,12 @@ export default ({ getService, getPageObjects }) => {
         'ftr-remote:makelogs工程-*,local:makelogs工程-*'
       );
       const hitCountNumber = await PageObjects.discover.getHitCount();
-      const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
+      const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''), 10);
       await filterBar.addFilter({ field: 'extension.keyword', operation: 'is', value: 'jpg' });
       expect(await filterBar.hasFilter('extension.keyword', 'jpg')).to.be(true);
       await retry.try(async () => {
-        const hitCountNumber = await PageObjects.discover.getHitCount();
-        const hitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
+        const filteredHitCountNumber = await PageObjects.discover.getHitCount();
+        const hitCount = parseInt(filteredHitCountNumber.replace(/\,/g, ''), 10);
         log.debug('### hit count = ' + hitCount);
         expect(hitCount).to.be.greaterThan(15000);
         expect(hitCount).to.be.lessThan(originalHitCount);
