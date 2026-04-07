@@ -74,6 +74,7 @@ export interface InjectedMetadata {
   i18n: {
     translationsUrl: string;
     browserLocale?: string;
+    userLocale?: string;
   };
   theme: InjectedMetadataTheme;
   csp: {

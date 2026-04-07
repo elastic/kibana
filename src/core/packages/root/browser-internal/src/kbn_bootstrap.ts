@@ -26,20 +26,11 @@ export async function __kbnBootstrap__() {
   );
 
   // Resolve the user's preferred locale using the priority chain:
-  // 1. localStorage (explicit user selection)
+  // 1. User profile setting (injected as injectedMetadata.i18n.userLocale)
   // 2. kibana.yml config (already embedded in injectedMetadata.i18n.translationsUrl)
   // 3. browser Accept-Language (injected as injectedMetadata.i18n.browserLocale)
-  const LOCALE_STORAGE_KEY = 'kibana.i18n.locale';
   let translationsUrl = injectedMetadata.i18n.translationsUrl;
-  let resolvedLocale: string | null = null;
-  try {
-    resolvedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
-  } catch (e) {
-    // localStorage may be unavailable
-  }
-  if (!resolvedLocale && injectedMetadata.i18n.browserLocale) {
-    resolvedLocale = injectedMetadata.i18n.browserLocale;
-  }
+  const resolvedLocale = injectedMetadata.i18n.userLocale ?? injectedMetadata.i18n.browserLocale;
   if (resolvedLocale) {
     translationsUrl = translationsUrl.replace(/\/[^/]+\.json$/, `/${resolvedLocale}.json`);
   }

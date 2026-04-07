@@ -237,6 +237,7 @@ export class RenderingService {
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
+      userSettingLocale,
     ] = await Promise.all([
       // All sites
       withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
@@ -247,10 +248,13 @@ export class RenderingService {
             uiSettings.globalClient?.getUserProvided(),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
+            // locale
+            userSettings?.getUserSettingLocale(request),
           ] as [
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<DarkModeValue> | undefined
+            Promise<DarkModeValue> | undefined,
+            Promise<string> | undefined
           ])
         : []),
     ]);
@@ -364,6 +368,7 @@ export class RenderingService {
         i18n: {
           translationsUrl,
           ...(browserLocale ? { browserLocale } : {}),
+          ...(userSettingLocale ? { userLocale: userSettingLocale } : {}),
         },
         theme: {
           darkMode,
