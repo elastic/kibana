@@ -19,6 +19,7 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useKibana } from '../../common/lib/kibana';
 import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { flyoutProviders } from '../shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
@@ -47,17 +48,22 @@ export interface SessionViewProps {
    * Renderer used by Session View panels for field cell actions.
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const SessionView: FC<SessionViewProps> = memo(
-  ({ hit, jumpToEntityId, jumpToCursor, renderCellActions }) => {
+  ({ hit, jumpToEntityId, jumpToCursor, renderCellActions, onAlertUpdated }) => {
     const { services } = useKibana();
     const { overlays, sessionView } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -83,18 +89,21 @@ export const SessionView: FC<SessionViewProps> = memo(
                 documentId={alertId}
                 indexName={alertIndex}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-            type: 'overlay',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         ),
-      [history, overlays, renderCellActions, services, store]
+      [
+        defaultFlyoutProperties,
+        history,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const handleJumpToEvent = useCallback(
@@ -145,21 +154,18 @@ export const SessionView: FC<SessionViewProps> = memo(
                 investigatedAlertId={sessionViewConfig.investigatedAlertId}
                 renderCellActions={renderCellActions}
                 onJumpToEvent={handleJumpToEvent}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-            type: 'overlay',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         );
       },
       [
+        defaultFlyoutProperties,
         handleJumpToEvent,
         history,
+        onAlertUpdated,
         overlays,
         renderCellActions,
         services,

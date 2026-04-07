@@ -8,8 +8,15 @@
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { fetchEvents } from './fetch_events_graph';
-import { fetchEntityRelationships } from './fetch_entity_relationships_graph';
-import type { EsQuery, EntityId, OriginEventId, EventEdge, RelationshipEdge } from './types';
+import { fetchEntities, fetchEntityRelationships } from './fetch_entity_relationships_graph';
+import type {
+  EsQuery,
+  EntityId,
+  OriginEventId,
+  EventEdge,
+  RelationshipEdge,
+  EntityRecord,
+} from './types';
 
 export interface FetchGraphParams {
   esClient: IScopedClusterClient;
@@ -28,10 +35,12 @@ export interface FetchGraphParams {
 export interface FetchGraphResult {
   events: EventEdge[];
   relationships: RelationshipEdge[];
+  entities: EntityRecord[];
 }
 
 const emptyEventsResult: EsqlToRecords<EventEdge> = { columns: [], records: [] };
 const emptyRelationshipsResult: EsqlToRecords<RelationshipEdge> = { columns: [], records: [] };
+const emptyEntitiesResult: EsqlToRecords<EntityRecord> = { columns: [], records: [] };
 
 /**
  * Fetches graph data including both events and entity relationships.
@@ -92,10 +101,25 @@ export const fetchGraph = async ({
       })
     : Promise.resolve(emptyRelationshipsResult);
 
-  // Wait for both in parallel
-  const [eventsResult, relationshipsResult] = await Promise.all([
+  // We fetch the entities just in case they don't have any relationships. We would still like to see them in the graph.
+  // These entities suppose to be pinned anyway. So there's no worry that they might be part of a group.
+  const entitiesPromise = hasEntityIds
+    ? fetchEntities({
+        esClient,
+        logger,
+        entityIds,
+        spaceId,
+      }).catch((error) => {
+        logger.error(`Failed to fetch entities: ${error.message}`);
+        throw error;
+      })
+    : Promise.resolve(emptyEntitiesResult);
+
+  // Wait for all in parallel
+  const [eventsResult, relationshipsResult, entitiesResult] = await Promise.all([
     eventsPromise,
     relationshipsPromise,
+    entitiesPromise,
   ]);
 
   logger.trace(
@@ -105,5 +129,6 @@ export const fetchGraph = async ({
   return {
     events: eventsResult.records,
     relationships: relationshipsResult.records,
+    entities: entitiesResult.records,
   };
 };

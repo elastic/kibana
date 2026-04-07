@@ -25,7 +25,7 @@ export function ErrorBudgetActions({ setDashboardAttachmentReady }: Props) {
   const ContextMenuButton = (
     <EuiButtonIcon
       data-test-subj="o11yErrorBudgetActionsButton"
-      iconType={'boxesHorizontal'}
+      iconType={'boxesVertical'}
       onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
       aria-label={i18n.translate('xpack.slo.item.actions.openMenuAriaLabel', {
         defaultMessage: 'Error budget actions context menu',

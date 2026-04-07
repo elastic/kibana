@@ -59,7 +59,7 @@ export function useStreamsPrivileges() {
 
   const wiredStreamViewsEnabled = uiSettings.get(
     OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-    false
+    true
   );
 
   const overviewPageEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE, false);
