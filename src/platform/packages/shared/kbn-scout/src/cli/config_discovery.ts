@@ -260,22 +260,16 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
     );
   }
 
-  if (selectiveTesting && process.env.GITHUB_PR_DRAFT !== 'true') {
-    throw createFailError(
-      '--selective-testing is only valid for draft pull requests (GITHUB_PR_DRAFT=true from the PR build trigger).'
-    );
-  }
-
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
 
-  // --affected-modules only: keep every Scout module that passes target/CI filters; set isAffected
+  // --affected-modules: keep every Scout module that passes target/CI filters; set isAffected
   // per module so CI step labels can use an "affected " prefix where the PR touched that @kbn/ ID.
   const modulesAfterAffectedMark = affectedModulesPath
     ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
     : modulesWithTests;
 
-  // Draft PRs only (validated above): narrow to affected module groups; steps keep the "affected " prefix.
+  // --selective-testing: narrow to affected module groups only.
   const limitDiscoveryToAffectedModules = selectiveTesting;
 
   const modulesForTargetTags = limitDiscoveryToAffectedModules
@@ -325,8 +319,8 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  *
  * Affected modules:
  * - With --affected-modules, all modules are still considered; isAffected flags drive the
- *   "affected " Buildkite step prefix. With --selective-testing (draft PRs only: GITHUB_PR_DRAFT=true),
- *   only affected module groups are emitted; those steps keep the same prefix.
+ *   "affected " Buildkite step prefix. With --selective-testing, only affected module groups
+ *   are emitted; those steps keep the same prefix.
  */
 export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
@@ -349,7 +343,7 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               isAffected so CI can prefix steps with "affected " when the PR
                               touches that module. Combine with --selective-testing to emit only
                               affected module groups.
-    --selective-testing       Draft PRs only (GITHUB_PR_DRAFT=true). Requires --affected-modules.
+    --selective-testing       Requires --affected-modules.
                               Limits output / Scout CI steps to affected modules; labels unchanged.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
@@ -388,8 +382,8 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     # Affected-module labels on every Scout group (full CI matrix)
     node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --save
 
-    # Only affected module groups (draft PR; requires GITHUB_PR_DRAFT=true, e.g. CI)
-    GITHUB_PR_DRAFT=true node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --selective-testing --save
+    # Only affected module groups (selective testing for PRs)
+    node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --selective-testing --save
   `,
   flags: {
     string: ['target', 'affected-modules'],

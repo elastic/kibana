@@ -146,8 +146,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.arrayOfStrings.mockReturnValue([]);
     flagsReader.string.mockImplementation(() => '');
 
-    delete process.env.GITHUB_PR_DRAFT;
-
     (findPackageForPath as jest.Mock).mockReset();
 
     (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
@@ -332,22 +330,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     );
   });
 
-  it('fails when --selective-testing is used on a non-draft PR (GITHUB_PR_DRAFT unset)', () => {
-    delete process.env.GITHUB_PR_DRAFT;
-    flagsReader.enum.mockReturnValue('mki');
-    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
-    flagsReader.string.mockImplementation((name: string) =>
-      name === 'affected-modules' ? '/mock/affected_modules.json' : ''
-    );
-
-    expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
-      '--selective-testing is only valid for draft pull requests'
-    );
-  });
-
-  it('with --selective-testing and --affected-modules on a draft PR, limits discovery to affected modules only', () => {
-    process.env.GITHUB_PR_DRAFT = 'true';
-
+  it('with --selective-testing and --affected-modules, limits discovery to affected modules only', () => {
     flagsReader.enum.mockReturnValue('mki');
     flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
     flagsReader.string.mockImplementation((name: string) =>
