@@ -16,6 +16,7 @@ import { useAlertAssigneesActions } from '../../../detections/components/alerts_
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -29,11 +30,15 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
+);
 
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
+
 const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord =>
   ({
     id: 'test-id',
@@ -41,7 +46,6 @@ const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord
     flattened,
     isAnchor: false,
   } as DataTableRecord);
-
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
@@ -49,6 +53,7 @@ const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['tes
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
+const mockUseRunAlertWorkflowPanel = useRunAlertWorkflowPanel as jest.Mock;
 
 const defaultProps = {
   hit: createMockHit(),
@@ -73,6 +78,10 @@ describe('<TakeActionButton />', () => {
     mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [], alertTagsPanels: [] });
     mockUseInvestigateInTimeline.mockReturnValue({ investigateInTimelineActionItems: [] });
     mockUseIsInSecurityApp.mockReturnValue(true);
+    mockUseRunAlertWorkflowPanel.mockReturnValue({
+      runWorkflowMenuItem: [],
+      runAlertWorkflowPanel: [],
+    });
   });
 
   it('should render the take action button', () => {
@@ -210,10 +219,31 @@ describe('<TakeActionButton />', () => {
     );
   });
 
+  it('should call useRunAlertWorkflowPanel with ecsData and closePopover', () => {
+    renderTakeActionButton();
+
+    expect(mockUseRunAlertWorkflowPanel).toHaveBeenCalledWith(
+      expect.objectContaining({ ecsRowData: mockEcsData })
+    );
+  });
+
+  it('should not include run workflow menu item when hook returns empty (no permissions)', () => {
+    mockUseRunAlertWorkflowPanel.mockReturnValue({
+      runWorkflowMenuItem: [],
+      runAlertWorkflowPanel: [],
+    });
+
+    const { getByTestId, queryByText } = renderTakeActionButton();
+    fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+    expect(queryByText('Run workflow')).not.toBeInTheDocument();
+  });
+
   describe('alert vs non-alert document', () => {
     const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
     const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
     const tagsItem = { name: 'Apply alert tags', onClick: jest.fn() };
+    const workflowItem = { name: 'Run workflow', onClick: jest.fn() };
 
     beforeEach(() => {
       mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
@@ -222,9 +252,13 @@ describe('<TakeActionButton />', () => {
         alertAssigneesPanels: [],
       });
       mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [tagsItem], alertTagsPanels: [] });
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [workflowItem],
+        runAlertWorkflowPanel: [],
+      });
     });
 
-    it('should include status, assignees and tags items for alert documents (event.kind === signal)', () => {
+    it('should include all items for alert documents (event.kind === signal)', () => {
       const alertHit = createMockHit({ 'event.kind': 'signal' });
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
         ...defaultProps,
@@ -237,9 +271,10 @@ describe('<TakeActionButton />', () => {
       expect(getByText('Assign alert')).toBeInTheDocument();
       expect(getByText('Apply alert tags')).toBeInTheDocument();
       expect(queryByText('Add note')).not.toBeInTheDocument();
+      expect(getByText('Run workflow')).toBeInTheDocument();
     });
 
-    it('should exclude status, assignees and tags items but have note item for non-alert documents', () => {
+    it('should exclude some items for non-alert documents', () => {
       const eventHit = createMockHit({ 'event.kind': 'event' });
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
         ...defaultProps,
@@ -252,9 +287,10 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Assign alert')).not.toBeInTheDocument();
       expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
       expect(getByText('Add note')).toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
 
-    it('should exclude status, assignees and tags items but have note item when event.kind is not set', () => {
+    it('should exclude some items when event.kind is not set', () => {
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
         ...defaultProps,
         hit: createMockHit(),
@@ -266,6 +302,7 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Assign alert')).not.toBeInTheDocument();
       expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
       expect(getByText('Add note')).toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
   });
 
