@@ -7,12 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 
+import { maxReferencedContentItems } from './referenced_content_shared';
 import {
-  canComputeReferencedContentUniquenessKey,
-  isRootRelativePath,
-  maxReferencedContentItems,
-  normalizeRelativePathSegments,
-} from './referenced_content_shared';
+  collectReferencedContentRefineIssues,
+  REFERENCED_CONTENT_REFINE_ISSUE_CODE,
+  type ReferencedContentRefineIssueCode,
+} from './referenced_content_refine';
 
 export { maxReferencedContentItems } from './referenced_content_shared';
 
@@ -57,67 +57,25 @@ const referencedContentItemSchema = z.object({
   content: z.string(),
 });
 
-const referencedContentErrors = {
-  pathProtocol: 'Folder path must start with ./.',
-  pathTraversal: 'Folder path must not contain "../".',
-  duplicatePath: 'This file path is already used by another additional file.',
-  reservedSkillName: 'This name is reserved for the main instructions file.',
-} as const;
+const referencedContentSuperRefineMessages: Record<ReferencedContentRefineIssueCode, string> = {
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_PROTOCOL]: 'Folder path must start with ./.',
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_TRAVERSAL]: 'Folder path must not contain "../".',
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.DUPLICATE_PATH]:
+    'This file path is already used by another additional file.',
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.RESERVED_SKILL_NAME]:
+    'This name is reserved for the main instructions file.',
+};
 
 const superRefineReferencedContent = (
   items: Array<{ name: string; relativePath: string; content: string }>,
   ctx: z.RefinementCtx
 ): void => {
-  items.forEach((item, index) => {
-    const trimmedPath = item.relativePath.trim();
-
-    if (!trimmedPath.startsWith('./')) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: referencedContentErrors.pathProtocol,
-        path: ['referenced_content', index, 'relativePath'],
-      });
-    }
-
-    if (trimmedPath.includes('../')) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: referencedContentErrors.pathTraversal,
-        path: ['referenced_content', index, 'relativePath'],
-      });
-    }
-
-    if (item.name.trim().toLowerCase() === 'skill' && isRootRelativePath(item.relativePath)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: referencedContentErrors.reservedSkillName,
-        path: ['referenced_content', index, 'name'],
-      });
-    }
-  });
-
-  const keyToIndices = new Map<string, number[]>();
-  items.forEach((item, index) => {
-    if (!canComputeReferencedContentUniquenessKey(item.relativePath)) {
-      return;
-    }
-    const key = `${normalizeRelativePathSegments(item.relativePath)}/${item.name.trim()}`;
-    const indices = keyToIndices.get(key) ?? [];
-    indices.push(index);
-    keyToIndices.set(key, indices);
-  });
-
-  for (const indices of keyToIndices.values()) {
-    if (indices.length < 2) {
-      continue;
-    }
-    for (const index of indices) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: referencedContentErrors.duplicatePath,
-        path: ['referenced_content', index, 'name'],
-      });
-    }
+  for (const issue of collectReferencedContentRefineIssues(items)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: referencedContentSuperRefineMessages[issue.code],
+      path: ['referenced_content', issue.itemIndex, issue.field],
+    });
   }
 };
 

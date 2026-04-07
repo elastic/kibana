@@ -28,3 +28,9 @@ export {
   isRootRelativePath,
   canComputeReferencedContentUniquenessKey,
 } from './referenced_content_shared';
+export {
+  REFERENCED_CONTENT_REFINE_ISSUE_CODE,
+  type ReferencedContentRefineIssueCode,
+  type ReferencedContentRefineIssue,
+  collectReferencedContentRefineIssues,
+} from './referenced_content_refine';

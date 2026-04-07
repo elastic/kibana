@@ -14,9 +14,9 @@ import {
   skillNameRegexp,
   maxToolsPerSkill,
   maxReferencedContentItems,
-  normalizeRelativePathSegments,
-  isRootRelativePath,
-  canComputeReferencedContentUniquenessKey,
+  collectReferencedContentRefineIssues,
+  REFERENCED_CONTENT_REFINE_ISSUE_CODE,
+  type ReferencedContentRefineIssueCode,
 } from '@kbn/agent-builder-common';
 
 const validationMessages = {
@@ -98,6 +98,17 @@ const validationMessages = {
   },
 };
 
+const referencedContentSuperRefineMessages: Record<ReferencedContentRefineIssueCode, string> = {
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_PROTOCOL]:
+    validationMessages.referencedContent.pathProtocol,
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_TRAVERSAL]:
+    validationMessages.referencedContent.pathTraversal,
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.DUPLICATE_PATH]:
+    validationMessages.referencedContent.duplicatePath,
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.RESERVED_SKILL_NAME]:
+    validationMessages.referencedContent.reservedSkillName,
+};
+
 /**
  * One additional markdown file attached to a skill (same shape as API `referenced_content` items).
  */
@@ -141,57 +152,12 @@ const skillFormObjectSchema = z.object({
 });
 
 export const skillFormValidationSchema = skillFormObjectSchema.superRefine((data, ctx) => {
-  data.referenced_content.forEach((item, index) => {
-    const trimmedPath = item.relativePath.trim();
-
-    const hasValidPathPrefix = trimmedPath.startsWith('./');
-    if (!hasValidPathPrefix) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: validationMessages.referencedContent.pathProtocol,
-        path: ['referenced_content', index, 'relativePath'],
-      });
-    }
-
-    if (trimmedPath.includes('../')) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: validationMessages.referencedContent.pathTraversal,
-        path: ['referenced_content', index, 'relativePath'],
-      });
-    }
-
-    if (item.name.trim().toLowerCase() === 'skill' && isRootRelativePath(item.relativePath)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: validationMessages.referencedContent.reservedSkillName,
-        path: ['referenced_content', index, 'name'],
-      });
-    }
-  });
-
-  const keyToIndices = new Map<string, number[]>();
-  data.referenced_content.forEach((item, index) => {
-    if (!canComputeReferencedContentUniquenessKey(item.relativePath)) {
-      return;
-    }
-    const key = `${normalizeRelativePathSegments(item.relativePath)}/${item.name.trim()}`;
-    const indices = keyToIndices.get(key) ?? [];
-    indices.push(index);
-    keyToIndices.set(key, indices);
-  });
-
-  for (const indices of keyToIndices.values()) {
-    if (indices.length < 2) {
-      continue;
-    }
-    for (const index of indices) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: validationMessages.referencedContent.duplicatePath,
-        path: ['referenced_content', index, 'name'],
-      });
-    }
+  for (const issue of collectReferencedContentRefineIssues(data.referenced_content)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: referencedContentSuperRefineMessages[issue.code],
+      path: ['referenced_content', issue.itemIndex, issue.field],
+    });
   }
 });
 
