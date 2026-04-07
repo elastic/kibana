@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo, useRef } from 'react';
 import * as uuid from 'uuid';
 import {
   type GroupOption,
@@ -33,9 +33,11 @@ import {
 import {
   type EntitiesGroupingAggregation,
   type EntitiesGroupingQuery,
+  type TargetMetadataMap,
   useFetchGroupedData,
+  useFetchTargetMetadata,
 } from './use_fetch_grouped_data';
-import { groupPanelRenderer, groupStatsRenderer } from './entity_group_renderer';
+import { createGroupPanelRenderer, groupStatsRenderer } from './entity_group_renderer';
 
 const MAX_GROUPING_LEVELS = 3;
 
@@ -139,26 +141,6 @@ export const buildResolutionGroupingQuery = ({
         resolutionRiskScore: {
           max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
         },
-        resolutionEntityName: {
-          filter: {
-            bool: {
-              must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
-            },
-          },
-          aggs: {
-            name: { terms: { field: ENTITY_FIELDS.ENTITY_NAME, size: 1 } },
-          },
-        },
-        resolutionEntityType: {
-          filter: {
-            bool: {
-              must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
-            },
-          },
-          aggs: {
-            type: { terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 } },
-          },
-        },
         bucket_truncate: {
           bucket_sort: {
             from: pageIndex * pageSize,
@@ -190,6 +172,14 @@ export const useEntityGrouping = ({
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
   const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
+
+  const targetMetadataRef = useRef<TargetMetadataMap>(new Map());
+
+  const groupPanelRenderer = useCallback(
+    (...args: Parameters<ReturnType<typeof createGroupPanelRenderer>>) =>
+      createGroupPanelRenderer(targetMetadataRef.current)(...args),
+    []
+  );
 
   const grouping = useGrouping({
     componentProps: {
@@ -308,6 +298,19 @@ export const useEntityGrouping = ({
       ),
     [data, currentSelectedGroup, uniqueValue]
   );
+
+  const targetEntityIds = useMemo(() => {
+    if (!isResolutionGrouping) return [];
+    if (!('groupByFields' in groupData)) return [];
+    const buckets = groupData.groupByFields?.buckets;
+    if (!buckets) return [];
+    return buckets.map((bucket: { key_as_string?: string; key: string | string[] }) =>
+      String(bucket.key_as_string ?? bucket.key)
+    );
+  }, [groupData, isResolutionGrouping]);
+
+  const targetMetadata = useFetchTargetMetadata(targetEntityIds);
+  targetMetadataRef.current = targetMetadata;
 
   const isEmptyResults =
     !isFetching && 'unitsCount' in groupData && groupData.unitsCount?.value === 0;
