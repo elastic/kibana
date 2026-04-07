@@ -20,7 +20,7 @@ export const getExampleLensBody = (
   description,
   ignore_global_filters: false,
   sampling: 1,
-  data_source: { type: 'data_view_reference', id: SAMPLE_DATA_VIEW_ID },
+  data_source: { type: 'data_view_reference', ref_id: SAMPLE_DATA_VIEW_ID },
   metrics: [
     {
       type: 'primary',
