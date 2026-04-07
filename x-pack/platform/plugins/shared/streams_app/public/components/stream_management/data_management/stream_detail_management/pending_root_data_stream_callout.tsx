@@ -40,6 +40,7 @@ export function PendingRootDataStreamCallout({
             name: streamName,
           },
         },
+        signal: null,
       });
 
       toasts.addSuccess(
