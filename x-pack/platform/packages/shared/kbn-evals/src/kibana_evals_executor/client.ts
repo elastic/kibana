@@ -117,17 +117,26 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
               const runKey = `${exampleIndex}-${rep}-${randomUUID()}`;
 
               this.options.log.info(
-                `🔧 Running task "task" on dataset "${datasetId}" (exampleIndex=${exampleIndex}, repetition=${rep})`
+                `🔧 Running task "${resolvedDataset.name}" on dataset "${datasetId}" (exampleIndex=${exampleIndex}, repetition=${rep})`
               );
 
-              const { taskOutput, traceId } = await withTaskSpan('task', {}, async () => {
-                const _traceId = getCurrentTraceId();
-                const _taskOutput = await task(example);
-                return {
-                  taskOutput: _taskOutput,
-                  traceId: _traceId,
-                };
-              });
+              const { taskOutput, traceId } = await withTaskSpan(
+                resolvedDataset.name,
+                {
+                  attributes: {
+                    'dataset.name': resolvedDataset.name,
+                    'dataset.id': datasetId,
+                  },
+                },
+                async () => {
+                  const _traceId = getCurrentTraceId();
+                  const _taskOutput = await task(example);
+                  return {
+                    taskOutput: _taskOutput,
+                    traceId: _traceId,
+                  };
+                }
+              );
 
               runs[runKey] = {
                 exampleIndex,

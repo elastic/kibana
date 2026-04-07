@@ -53,6 +53,7 @@ describe('FetchPoliciesStep', () => {
     expect(policy?.apiKey).toBe('decrypted-key');
     expect(policy?.matcher).toBeUndefined();
     expect(policy?.groupBy).toEqual([]);
+    expect(policy?.tags).toEqual([]);
     expect(policy?.throttle).toBeUndefined();
     expect(policy?.snoozedUntil).toBeNull();
 
