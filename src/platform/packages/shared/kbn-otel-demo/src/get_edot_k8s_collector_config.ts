@@ -294,12 +294,13 @@ export function getEdotK8sCollectorConfig({
   // -- Pipelines -----------------------------------------------------------
   const pipelines = base.service.pipelines;
 
-  // OTLP logs: feed to elasticapm for APM error detection; route to logs.otel
-  // via elasticsearch.index so span events don't land in logs-generic.otel-default
+  // OTLP logs: feed to elasticapm for APM error detection.
+  // The elasticapm connector internally routes processed events to ES
+  // (landing in logs-generic.otel-default); we can't control that routing.
+  // Container logs go to logs.otel via the logs/k8s pipeline instead.
   delete pipelines.logs;
   pipelines['logs/otlp'] = {
     receivers: ['otlp'],
-    processors: ['resource/wired_streams'],
     exporters: ['elasticapm', 'debug'],
   };
 
