@@ -41,10 +41,10 @@ import {
   solutionKeys,
   type ProviderSolution,
 } from './providers/render_service_provider/service_provider';
-import { ServiceProviderKeys } from '../constants';
 import {
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
+  ServiceProviderKeys,
   serviceProviderLinkComponents,
   SERVICE_SETTINGS,
   TASK_SETTINGS,
