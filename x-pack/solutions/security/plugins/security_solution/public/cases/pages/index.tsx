@@ -190,7 +190,7 @@ const CaseContainerComponent: React.FC = () => {
               });
             },
           },
-          ...(canReadRules
+          ...(canReadRules && !EASE
             ? {
                 ruleDetailsNavigation: {
                   onClick: onRuleDetailsClick,
