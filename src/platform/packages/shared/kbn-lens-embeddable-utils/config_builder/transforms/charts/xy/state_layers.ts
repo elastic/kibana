@@ -35,6 +35,7 @@ import {
   getAccessorNameForXY,
   isAPIDataLayer,
 } from './helpers';
+import { xyIconCompat } from './helpers';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import { fromColorMappingAPIToLensState } from '../../coloring';
@@ -143,7 +144,7 @@ function buildByValueAnnotationLayer(
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
           ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
-          ...(annotation.icon ? { icon: annotation.icon } : {}),
+          ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
           ...(annotation.line?.stroke_width != null
             ? { lineWidth: annotation.line.stroke_width }
             : {}),
@@ -165,7 +166,7 @@ function buildByValueAnnotationLayer(
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
         ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
         ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
-        ...(annotation.icon ? { icon: annotation.icon } : {}),
+        ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
         ...(annotation.line?.stroke_width != null
           ? { lineWidth: annotation.line.stroke_width }
           : {}),
@@ -183,7 +184,7 @@ function buildReferenceLineLayer(
   i: number
 ): XYReferenceLineLayerConfig {
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => ({
-    icon: threshold.icon,
+    icon: xyIconCompat.toState(threshold.icon),
     iconPosition: threshold.position,
     lineWidth: threshold.stroke_width,
     lineStyle: threshold.stroke_dash,
