@@ -79,6 +79,9 @@ Follow existing patterns in the target area first; below are common defaults.
 - Avoid inline styles unless consistent with the file’s conventions.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
+## GitHub
+- Use the `gh` CLI for all GitHub interactions: issues, pull requests, checks, releases, and comments. If `gh` is not installed, prompt the user to follow the instructions at https://github.com/cli/cli#installation.
+
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Fix root cause (not band-aid).
