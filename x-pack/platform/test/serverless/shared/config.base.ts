@@ -198,13 +198,6 @@ export default async () => {
       ],
     },
 
-    uiSettings: {
-      globalDefaults: {
-        // Suppress announcement popups that can block UI interactions in tests.
-        hideAnnouncements: true,
-      },
-    },
-
     security: { disableTestUser: true },
 
     // Used by FTR to recognize serverless project and change its behavior accordingly
