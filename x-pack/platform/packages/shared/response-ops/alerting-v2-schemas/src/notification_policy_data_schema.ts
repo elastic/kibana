@@ -152,6 +152,7 @@ export const createNotificationPolicyDataSchema = z
       .min(1, 'At least one destination must be provided'),
     matcher: z.string().optional(),
     groupBy: z.array(z.string()).optional(),
+    tags: z.array(z.string().min(1).max(128)).max(20).optional(),
     groupingMode: groupingModeSchema.optional(),
     throttle: throttleSchema.optional(),
   })
@@ -169,6 +170,7 @@ export const updateNotificationPolicyDataSchema = z
       .optional(),
     matcher: z.string().optional().nullable(),
     groupBy: z.array(z.string()).optional().nullable(),
+    tags: z.array(z.string().min(1).max(128)).max(20).optional().nullable(),
     groupingMode: groupingModeSchema.optional().nullable(),
     throttle: throttleSchema.optional().nullable(),
   })
