@@ -29,12 +29,18 @@ export const hasConnectedRemoteClusters = async (
     return ccsCache.value;
   }
 
-  const response = await esClient.cluster.remoteInfo();
-  const connected = Object.values(response).some((r) => r.connected);
+  try {
+    const response = await esClient.cluster.remoteInfo();
+    const connected = Object.values(response).some((r) => r.connected);
 
-  ccsCache = { value: connected, timestamp: now };
+    ccsCache = { value: connected, timestamp: now };
 
-  return connected;
+    return connected;
+  } catch {
+    ccsCache = { value: false, timestamp: now };
+
+    return false;
+  }
 };
 
 export const prefixIndexPatternsWithCcs = (indexPattern: string, ccsEnabled: boolean): string => {

@@ -46,6 +46,15 @@ describe('hasConnectedRemoteClusters', () => {
     await hasConnectedRemoteClusters(esClient);
     expect(esClient.cluster.remoteInfo).toHaveBeenCalledTimes(1);
   });
+
+  it('returns false and caches the result when remoteInfo throws', async () => {
+    const esClient = {
+      cluster: { remoteInfo: jest.fn().mockRejectedValue(new Error('permission denied')) },
+    } as unknown as ElasticsearchClient;
+    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
+    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
+    expect(esClient.cluster.remoteInfo).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('prefixIndexPatternsWithCcs', () => {
