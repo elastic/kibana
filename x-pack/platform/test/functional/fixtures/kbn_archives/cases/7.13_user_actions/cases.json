@@ -139,67 +139,6 @@
 }
 
 {
-  "id": "dd0438d0-005e-11ec-91f1-6daf2ab59fb5",
-  "type": "cases-configure",
-  "attributes": {
-    "closure_type": "close-by-user",
-    "connector": {
-      "fields": [],
-      "id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
-      "name": "a jira connector",
-      "type": ".jira"
-    },
-    "created_at": "2021-08-18T19:59:55.586Z",
-    "created_by": {
-      "email": null,
-      "full_name": "j@elastic.co",
-      "username": "1234"
-    },
-    "updated_at": null,
-    "updated_by": null
-  },
-  "references": [],
-  "migrationVersion": {
-    "cases-configure": "7.10.0"
-  },
-  "coreMigrationVersion": "7.13.4",
-  "updated_at": "2021-08-18T19:59:57.675Z"
-}
-
-{
-  "id": "dc9e4b10-005e-11ec-91f1-6daf2ab59fb5",
-  "type": "cases-connector-mappings",
-  "attributes": {
-    "mappings": [
-      {
-        "action_type": "overwrite",
-        "source": "title",
-        "target": "summary"
-      },
-      {
-        "action_type": "overwrite",
-        "source": "description",
-        "target": "description"
-      },
-      {
-        "action_type": "append",
-        "source": "comments",
-        "target": "comments"
-      }
-    ]
-  },
-  "references": [
-    {
-      "id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
-      "name": "associated-action",
-      "type": "action"
-    }
-  ],
-  "coreMigrationVersion": "7.13.4",
-  "updated_at": "2021-08-18T19:59:57.016Z"
-}
-
-{
   "id": "e9471b80-005e-11ec-91f1-6daf2ab59fb5",
   "type": "cases-user-actions",
   "attributes": {
@@ -398,39 +337,6 @@
   },
   "coreMigrationVersion": "7.13.4",
   "updated_at": "2021-08-18T20:02:06.475Z"
-}
-
-{
-  "id": "1d427330-005f-11ec-91f1-6daf2ab59fb5",
-  "type": "cases-connector-mappings",
-  "attributes": {
-    "mappings": [
-      {
-        "action_type": "overwrite",
-        "source": "title",
-        "target": "summary"
-      },
-      {
-        "action_type": "overwrite",
-        "source": "description",
-        "target": "description"
-      },
-      {
-        "action_type": "append",
-        "source": "comments",
-        "target": "comments"
-      }
-    ]
-  },
-  "references": [
-    {
-      "id": "0a572860-005f-11ec-91f1-6daf2ab59fb5",
-      "name": "associated-action",
-      "type": "action"
-    }
-  ],
-  "coreMigrationVersion": "7.13.4",
-  "updated_at": "2021-08-18T20:01:45.466Z"
 }
 
 {

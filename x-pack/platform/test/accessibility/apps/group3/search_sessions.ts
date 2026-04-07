@@ -107,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expires: '2021-02-24T00:00:00.000Z',
             idMapping: {},
             sessionId: id,
+            version: '8.8.0',
           },
         });
       }

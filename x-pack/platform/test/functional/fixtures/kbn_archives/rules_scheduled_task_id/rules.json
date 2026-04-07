@@ -10,6 +10,12 @@
     "createdAt": "2020-06-17T15:35:38.497Z",
     "createdBy": "elastic",
     "enabled": true,
+    "executionStatus": {
+      "status": "pending",
+      "lastExecutionDate": "2020-06-17T15:35:38.497Z",
+      "error": null,
+      "warning": null
+    },
     "muteAll": false,
     "mutedInstanceIds": [],
     "name": "always-firing-alert",
@@ -42,6 +48,12 @@
     "createdAt": "2020-06-17T15:35:38.497Z",
     "createdBy": "elastic",
     "enabled": false,
+    "executionStatus": {
+      "status": "pending",
+      "lastExecutionDate": "2020-06-17T15:35:38.497Z",
+      "error": null,
+      "warning": null
+    },
     "muteAll": false,
     "mutedInstanceIds": [],
     "name": "always-firing-alert",
@@ -74,6 +86,12 @@
     "createdAt": "2020-06-17T15:35:38.497Z",
     "createdBy": "elastic",
     "enabled": true,
+    "executionStatus": {
+      "status": "pending",
+      "lastExecutionDate": "2020-06-17T15:35:38.497Z",
+      "error": null,
+      "warning": null
+    },
     "muteAll": false,
     "mutedInstanceIds": [],
     "name": "always-firing-alert-stuck-running",
