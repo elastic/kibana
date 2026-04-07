@@ -277,6 +277,7 @@ export class TaskManagerService {
       this.logger.debug(
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
+      this.logger.info(`Agent field mappings: ${JSON.stringify(result.field_mappings)}`);
 
       const agentFieldMappings = (result.field_mappings as FieldMapping[] | undefined) ?? undefined;
       const fieldMapping = await generateFieldMappings(
@@ -310,6 +311,8 @@ export class TaskManagerService {
           ingestPipeline: pipelineObject,
           pipelineDocs: pipelineGenerationResultsObjects,
           fieldMapping,
+          agentFieldMappings:
+            agentFieldMappings && agentFieldMappings.length > 0 ? agentFieldMappings : undefined,
           status: TASK_STATUSES.completed,
         },
         abortSignal

@@ -81,6 +81,15 @@ export const dataStreamSchemaV1 = schema.object({
       pipeline_docs: schema.maybe(
         schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
       ),
+      agent_field_mappings: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            name: schema.string(),
+            type: schema.string(),
+          }),
+          { maxSize: 10000 }
+        )
+      ),
     })
   ),
 });

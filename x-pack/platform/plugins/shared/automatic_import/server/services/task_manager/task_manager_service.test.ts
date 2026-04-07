@@ -194,6 +194,23 @@ describe('runTask abort handling', () => {
     ]);
   });
 
+  it('stores agent field_mappings on the saved object', async () => {
+    const abortController = new AbortController();
+    const runner = createRunner(abortController);
+
+    await runner.run();
+
+    expect(mockSavedObjectService.updateDataStreamSavedObjectAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentFieldMappings: [
+          { name: 'my_app.created_at', type: 'date' },
+          { name: 'my_app.status', type: 'keyword' },
+        ],
+      }),
+      abortController.signal
+    );
+  });
+
   it('marks data stream as cancelled when aborted before agent invocation returns', async () => {
     const abortController = new AbortController();
 
