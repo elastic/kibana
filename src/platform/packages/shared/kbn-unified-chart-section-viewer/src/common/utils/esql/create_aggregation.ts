@@ -26,6 +26,11 @@ import { isLegacyHistogram } from '../legacy_histogram';
  * @param fieldTypes - Array of field types (may contain duplicates or compatible types)
  * @returns The selected field type, or undefined if types are incompatible or non-numeric
  */
+// Numeric type families for auto-casting precedence
+const FLOAT_FAMILY = ['float', 'half_float', 'scaled_float'];
+const INT_FAMILY = ['integer', 'short', 'byte'];
+const ALL_NUMERIC = ['double', ...FLOAT_FAMILY, 'long', ...INT_FAMILY];
+
 export function resolveConflictingFieldTypes(
   fieldTypes: ES_FIELD_TYPES[]
 ): ES_FIELD_TYPES | undefined {
@@ -39,10 +44,6 @@ export function resolveConflictingFieldTypes(
     return undefined;
   }
 
-  // Numeric type precedence for auto-casting
-  const FLOAT_FAMILY = ['float', 'half_float', 'scaled_float'];
-  const INT_FAMILY = ['integer', 'short', 'byte'];
-
   // Check if all types are in the float family (double is the widest)
   if (uniqueTypes.every((type) => type === 'double' || FLOAT_FAMILY.includes(type as string))) {
     return ES_FIELD_TYPES.DOUBLE;
@@ -54,7 +55,6 @@ export function resolveConflictingFieldTypes(
   }
 
   // Mixed numeric: if all types are numeric, prefer double
-  const ALL_NUMERIC = ['double', ...FLOAT_FAMILY, 'long', ...INT_FAMILY];
   if (uniqueTypes.every((type) => ALL_NUMERIC.includes(type as string))) {
     return ES_FIELD_TYPES.DOUBLE;
   }
