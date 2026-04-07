@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 function prettyPrint(value: string): string {
   try {
@@ -56,7 +56,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   onClose,
   onStopQuery,
 }) => {
-  const { url, capabilities } = useQueryActivityAppContext();
+  const { url, capabilities, dataViews } = useQueryActivityAppContext();
   const canCancelTasks = capabilities.canCancelTasks;
   const source = query.source?.trim();
 
@@ -73,8 +73,17 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
     defaultMessage: 'Query details',
   });
 
+  const [dataViewExists, setDataViewExists] = useState(false);
+  useEffect(() => {
+    if (!query.traceId) return;
+    dataViews
+      .get('discover-observability-solution-all-logs')
+      .then(() => setDataViewExists(true))
+      .catch(() => setDataViewExists(false));
+  }, [query.traceId, dataViews]);
+
   const inspectInDiscoverLinkProps = useMemo(() => {
-    if (!query.traceId) {
+    if (!query.traceId || !dataViewExists) {
       return undefined;
     }
     const discoverParams: DiscoverAppLocatorParams = {
@@ -97,7 +106,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
           rel: 'noopener noreferrer',
         }
       : undefined;
-  }, [discoverLocator, query.traceId, rangeFrom, rangeTo]);
+  }, [dataViewExists, discoverLocator, query.traceId, rangeFrom, rangeTo]);
 
   return (
     <EuiFlyout aria-label={flyoutAriaLabel} onClose={onClose} size="m" maxWidth={691}>
