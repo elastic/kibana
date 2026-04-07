@@ -67,7 +67,7 @@ export function UrlTemplateList({
         <EuiButton
           size="s"
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="graphAddNewTemplate"
           onClick={() => {
             setUncommittedForms([...uncommittedForms, generateId()]);
