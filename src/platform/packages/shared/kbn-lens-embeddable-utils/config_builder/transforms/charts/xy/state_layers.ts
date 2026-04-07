@@ -191,7 +191,7 @@ function buildReferenceLineLayer(
 ): XYReferenceLineLayerConfig {
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => {
     const axisMode =
-      threshold.axis === 'secondary_y' ? 'right' : threshold.axis === 'y' ? 'left' : threshold.axis;
+      threshold.axis_id === 'secondary_y' ? 'right' : threshold.axis_id === 'x' ? 'bottom' : 'left';
     return {
       icon: threshold.icon,
       iconPosition: threshold.position,

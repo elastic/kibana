@@ -259,11 +259,11 @@ function convertReferenceLinesDecorationsToAPIFormat(
   resolveAxisId: ResolveAxisId
 ): Pick<
   ReferenceLineDef,
-  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
+  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis_id' | 'text'
 > {
-  const resolveAxis = (): ReferenceLineDef['axis'] | undefined => {
+  const resolvedAxisId = (): ReferenceLineDef['axis_id'] | undefined => {
     if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
-    if (yConfig.axisMode === 'bottom') return 'bottom';
+    if (yConfig.axisMode === 'bottom') return 'x';
     return resolveAxisId(yConfig.axisMode);
   };
   return stripUndefined({
@@ -273,7 +273,7 @@ function convertReferenceLinesDecorationsToAPIFormat(
     icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
     position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
-    axis: resolveAxis(),
+    axis_id: resolvedAxisId(),
     text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
   });
 }

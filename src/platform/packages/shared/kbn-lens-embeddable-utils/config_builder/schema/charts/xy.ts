@@ -736,10 +736,13 @@ const referenceLineLayerShared = {
       meta: { description: 'Position of the icon and label relative to the reference line' },
     })
   ),
-  axis: schema.maybe(
-    schema.oneOf([schema.literal('bottom'), schema.literal('y'), schema.literal('secondary_y')], {
+  axis_id: schema.maybe(
+    schema.oneOf([schema.literal('x'), schema.literal('y'), schema.literal('secondary_y')], {
       defaultValue: 'y',
-      meta: { description: 'Which axis the reference line applies to' },
+      meta: {
+        description:
+          'ID of the axis this reference line applies to. If omitted, the reference line is bound to the primary Y axis.',
+      },
     })
   ),
 };

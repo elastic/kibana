@@ -439,7 +439,7 @@ describe('XY', () => {
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
                     text: { visible: true },
-                    axis: 'y',
+                    axis_id: 'y',
                   },
                   {
                     operation: 'average',
@@ -447,7 +447,7 @@ describe('XY', () => {
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
                     text: { visible: false },
-                    axis: 'y',
+                    axis_id: 'y',
                   },
                 ],
               },
