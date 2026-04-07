@@ -159,6 +159,7 @@ function convertDataLayerToAPI(
     return {
       ...getValueApiColumn(accessor, layer),
       ...(color ? { color: fromStaticColorLensStateToAPI(color) } : {}),
+      axis_id: yAccessorToAxisPositionMap.get(accessor),
     };
   });
 
