@@ -37,7 +37,7 @@ export function registerSearchRoute(
         },
         authc: {
           enabled: 'minimal',
-          reason: `This route is optimized for performant retrieval of data from Elasticsearch.`,
+          reason: 'This route is optimized for performant retrieval of data from Elasticsearch.',
         },
       },
     })

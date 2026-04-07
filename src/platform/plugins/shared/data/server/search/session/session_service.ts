@@ -164,7 +164,7 @@ export class SearchSessionService implements ISearchSessionService {
     { savedObjectsClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string,
-    skipUserCheck: boolean = false
+    skipRealmCheck: boolean = false
   ) => {
     this.logger.debug(`get | ${sessionId}`);
     const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
@@ -172,16 +172,7 @@ export class SearchSessionService implements ISearchSessionService {
       sessionId
     );
 
-    // Skip user-sameness check for requests from minimal auth routes (search route).
-    // The search route uses minimal auth for performance, which doesn't include realm information.
-    // Session management routes use full auth and will enforce the complete realm check.
-    if (!skipUserCheck) {
-      this.throwOnUserConflict(user, session);
-    } else {
-      this.logger.debug(
-        `Skipping user-sameness check for session ${session.attributes.sessionId} (minimal auth request)`
-      );
-    }
+    this.throwOnUserConflict(user, session, skipRealmCheck);
 
     return session;
   };
@@ -238,11 +229,11 @@ export class SearchSessionService implements ISearchSessionService {
     user: AuthenticatedUser | null,
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>,
-    skipUserCheck: boolean = false
+    skipRealmCheck: boolean = false
   ) => {
     this.logger.debug(`SearchSessionService: update | ${sessionId}`);
     if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
-    await this.get(deps, user, sessionId, skipUserCheck); // Verify correct user
+    await this.get(deps, user, sessionId, skipRealmCheck); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId,
@@ -305,7 +296,8 @@ export class SearchSessionService implements ISearchSessionService {
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     searchId: string,
-    options: ISearchOptions
+    options: ISearchOptions,
+    skipRealmCheck: boolean = false
   ) => {
     const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY, requestHash } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
@@ -345,7 +337,7 @@ export class SearchSessionService implements ISearchSessionService {
               queue[0].user,
               sessionId,
               { idMapping: batchedIdMapping },
-              true // Skip user check for trackId - called from minimal auth search route
+              skipRealmCheck
             )
               .then(() => {
                 queue.forEach((q) => q.resolve());
@@ -468,7 +460,8 @@ export class SearchSessionService implements ISearchSessionService {
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
-    { sessionId, isStored, isRestore, requestHash }: ISearchOptions
+    { sessionId, isStored, isRestore, requestHash }: ISearchOptions,
+    skipRealmCheck: boolean = false
   ) => {
     if (!this.sessionConfig.enabled) {
       throw new Error('Background search is disabled');
@@ -482,8 +475,7 @@ export class SearchSessionService implements ISearchSessionService {
       throw new Error('Request hash is required to get search ID from session');
     }
 
-    // Skip user check for getId - called from minimal auth search route
-    const session = await this.get(deps, user, sessionId, true);
+    const session = await this.get(deps, user, sessionId, skipRealmCheck);
     if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
       this.logger.debug(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.error(
@@ -531,14 +523,32 @@ export class SearchSessionService implements ISearchSessionService {
 
   private throwOnUserConflict = (
     user: AuthenticatedUser | null,
-    session?: SavedObject<SearchSessionSavedObjectAttributes>
+    session?: SavedObject<SearchSessionSavedObjectAttributes>,
+    skipRealmCheck: boolean = false
   ) => {
     if (user === null || !session) return;
+
+    if (skipRealmCheck) {
+      this.logger.debug(
+        `Skipping realm check for user ${user.username} when accessing search session ${session.attributes.sessionId}.`
+      );
+    }
+
+    let matchesUser = true;
+
+    if (user.username !== session.attributes.username) {
+      matchesUser = false;
+    }
+
     if (
-      user.authentication_realm.type !== session.attributes.realmType ||
-      user.authentication_realm.name !== session.attributes.realmName ||
-      user.username !== session.attributes.username
+      !skipRealmCheck &&
+      (user.authentication_realm.type !== session.attributes.realmType ||
+        user.authentication_realm.name !== session.attributes.realmName)
     ) {
+      matchesUser = false;
+    }
+
+    if (!matchesUser) {
       this.logger.debug(
         `User ${user.username} has no access to search session ${session.attributes.sessionId}`
       );
