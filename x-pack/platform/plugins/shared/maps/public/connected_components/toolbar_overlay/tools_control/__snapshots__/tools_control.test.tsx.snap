@@ -7,6 +7,7 @@ exports[`Should render cancel button when drawing 1`] = `
   <EuiFlexItem>
     <EuiPopover
       anchorPosition="leftUp"
+      aria-label="Tools"
       button={
         <EuiPanel
           className="mapToolbarOverlay__button"
@@ -109,6 +110,7 @@ exports[`Should render cancel button when drawing 1`] = `
 exports[`renders 1`] = `
 <EuiPopover
   anchorPosition="leftUp"
+  aria-label="Tools"
   button={
     <EuiPanel
       className="mapToolbarOverlay__button"

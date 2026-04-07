@@ -47,7 +47,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
@@ -62,7 +62,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status', 'region'],
-        size: 3,
+        limit: 3,
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
@@ -73,7 +73,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 10,
+        limit: 10,
         label: 'Custom Label',
       };
 
@@ -86,7 +86,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
         includes: { as_regex: true, values: ['active', 'pending'] },
         excludes: { as_regex: false, values: ['inactive'] },
       };
@@ -102,8 +102,8 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
-        rank_by: { type: 'column', metric: 0, direction: 'desc' },
+        limit: 5,
+        rank_by: { type: 'metric', metric_index: 0, direction: 'desc' },
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
@@ -111,12 +111,25 @@ describe('Top Values Transforms', () => {
       expect(result.params.orderDirection).toBe('desc');
     });
 
+    it('should resolve a non-zero metric_index to the correct metric column', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: { type: 'metric', metric_index: 1, direction: 'asc' },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'column', columnId: 'metricCol2' });
+      expect(result.params.orderDirection).toBe('asc');
+    });
+
     it('should fallback to alphabetical order if metric column id is missing', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
-        rank_by: { type: 'column', metric: 3, direction: 'desc' },
+        limit: 5,
+        rank_by: { type: 'metric', metric_index: 3, direction: 'desc' },
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
@@ -153,7 +166,7 @@ describe('Top Values Transforms', () => {
       const result = fromTermsLensStateToAPI(input, columns);
       expect(result.operation).toBe('terms');
       expect(result.fields).toEqual(['status']);
-      expect(result.size).toBe(5);
+      expect(result.limit).toBe(5);
       expect(result.other_bucket).toBeUndefined();
     });
 
@@ -245,7 +258,7 @@ describe('Top Values Transforms', () => {
       };
 
       const result = fromTermsLensStateToAPI(input, columns);
-      expect(result.rank_by).toEqual({ type: 'column', metric: 1, direction: 'desc' });
+      expect(result.rank_by).toEqual({ type: 'metric', metric_index: 1, direction: 'desc' });
     });
 
     it('should handle custom label', () => {

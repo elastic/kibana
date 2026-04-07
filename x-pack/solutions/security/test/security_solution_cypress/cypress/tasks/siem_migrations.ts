@@ -42,7 +42,6 @@ export const selectAutomaticMigrationTopic = () => {
 };
 
 export const selectMigrationConnector = () => {
-  selectAutomaticMigrationTopic();
   toggleSiemMigrationsCard();
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.SELECT_CONNECTORS).click();
   cy.get(SELECTORS.FAKE_BEDROCK_SELECTOR).click();

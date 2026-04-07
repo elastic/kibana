@@ -54,6 +54,14 @@ import {
 import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
+const executionsTabReadExecutionDisabledTooltip = i18n.translate(
+  'workflows.workflowDetailHeader.executionsTabReadExecutionDisabledTooltip',
+  {
+    defaultMessage:
+      'You need the Workflows "Read Workflow Execution" privilege to view workflow executions.',
+  }
+);
+
 const Translations = {
   runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
     defaultMessage: 'Run workflow',
@@ -100,7 +108,23 @@ export const WorkflowDetailHeader = React.memo(
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
-    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow } = useWorkflowsCapabilities();
+    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
+      useWorkflowsCapabilities();
+
+    const workflowDetailTabButtonOptions = useMemo(
+      () =>
+        ButtonGroupOptions.map((option) =>
+          option.id === 'executions' && !canReadWorkflowExecution
+            ? {
+                ...option,
+                isDisabled: true,
+                title: '',
+                toolTipContent: executionsTabReadExecutionDisabledTooltip,
+              }
+            : option
+        ),
+      [canReadWorkflowExecution]
+    );
 
     const { activeTab, setActiveTab } = useWorkflowUrlState();
 
@@ -247,10 +271,11 @@ export const WorkflowDetailHeader = React.memo(
                     <EuiButtonGroup
                       buttonSize="compressed"
                       color="primary"
-                      options={ButtonGroupOptions}
+                      options={workflowDetailTabButtonOptions}
                       idSelected={activeTab}
                       legend="Switch between workflow and executions"
                       type="single"
+                      hasAriaDisabled={!canReadWorkflowExecution}
                       onChange={(id) => setActiveTab(id as WorkflowUrlStateTabType)}
                     />
                   </EuiFlexItem>

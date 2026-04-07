@@ -20,6 +20,7 @@ import type {
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-server/tools';
+import type { ToolPolicyConfirmationDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { i18nBundles } from '../i18n';
 
 export const createPromptManager = ({
@@ -128,16 +129,26 @@ export const toolConfirmationId = ({
 export const createToolConfirmationPrompt = ({
   confirmationId,
   tool,
+  definition,
 }: {
   confirmationId: string;
   tool: InternalToolDefinition;
+  definition?: ToolPolicyConfirmationDefinition;
 }): ConfirmationPrompt => {
-  return {
-    type: AgentPromptType.confirmation,
-    id: confirmationId,
-    title: i18nBundles.toolConfirmation.title,
-    message: i18nBundles.toolConfirmation.message(tool.id),
-    confirm_text: i18nBundles.toolConfirmation.confirmText,
-    cancel_text: i18nBundles.toolConfirmation.cancelText,
-  };
+  if (definition) {
+    return {
+      type: AgentPromptType.confirmation,
+      id: confirmationId,
+      ...definition,
+    };
+  } else {
+    return {
+      type: AgentPromptType.confirmation,
+      id: confirmationId,
+      title: i18nBundles.toolConfirmation.title,
+      message: i18nBundles.toolConfirmation.message(tool.id),
+      confirm_text: i18nBundles.toolConfirmation.confirmText,
+      cancel_text: i18nBundles.toolConfirmation.cancelText,
+    };
+  }
 };

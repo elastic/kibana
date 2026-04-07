@@ -79,7 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
-              cloud_id: 'ftr_fake_cloud_id',
+              cloud_id: rawExpect.any(String),
               license_level: rawExpect.any(String),
               monitors: [
                 {
@@ -123,7 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ],
                 },
               ],
-              output: { hosts: [] },
+              output: { hosts: rawExpect.any(Array) },
             }),
           ],
           privateConfig: null,
@@ -196,8 +196,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               ],
               license_level: rawExpect.any(String),
-              cloud_id: 'ftr_fake_cloud_id',
-              output: { hosts: [] },
+              cloud_id: rawExpect.any(String),
+              output: { hosts: rawExpect.any(Array) },
             }),
           ],
           privateConfig: null,

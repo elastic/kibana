@@ -66,7 +66,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     spaceId: 'default',
     name: 'Test rule',
     description: '',
-    labels: [],
+    tags: [],
     enabled: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
@@ -84,6 +84,7 @@ export function createNotificationPolicy(
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
+    tags: [],
     ...overrides,
   };
 }
@@ -102,7 +103,6 @@ export function createNotificationGroup(
   return {
     id: 'group-1',
     spaceId: 'default',
-    ruleId: 'rule-1',
     policyId: 'policy-1',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},

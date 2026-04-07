@@ -18,6 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const minimalAttributesXY: LensAttributes = {
   visualizationType: 'lnsXY',
@@ -1068,7 +1069,7 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
@@ -1078,9 +1079,6 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     visibility: 'visible',
     placement: 'inside',
     position: 'top_right',
-  },
-  fitting: {
-    type: 'linear',
   },
   axis: {
     x: {
@@ -1114,8 +1112,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
     },
   },
-  decorations: {
-    values: { visible: false },
+  styling: {
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {
@@ -1143,13 +1141,13 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1157,8 +1155,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     },
   ],
   query: {
-    query: '',
-    language: 'kuery',
+    expression: 'test: true',
+    language: 'kql',
   },
 };
 
@@ -1175,9 +1173,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
   },
-  fitting: {
-    type: 'linear',
-  },
   axis: {
     x: {
       title: {
@@ -1210,8 +1205,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
   },
-  decorations: {
-    values: { visible: false },
+  styling: {
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {
@@ -1239,13 +1234,13 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1253,8 +1248,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
     },
   ],
   query: {
-    query: '',
-    language: 'kuery',
+    expression: 'test: true',
+    language: 'kql',
   },
 };
 
@@ -1266,9 +1261,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     placement: 'outside',
     position: 'bottom',
   },
-  fitting: {
-    type: 'linear',
-  },
   axis: {
     x: {
       title: {
@@ -1301,8 +1293,8 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
     },
   },
-  decorations: {
-    values: { visible: false },
+  styling: {
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {
@@ -1330,13 +1322,13 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1344,7 +1336,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     },
   ],
   query: {
-    query: '',
-    language: 'kuery',
+    expression: 'test: true',
+    language: 'kql',
   },
 };

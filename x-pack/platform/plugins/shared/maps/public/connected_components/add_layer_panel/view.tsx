@@ -190,7 +190,7 @@ export class AddLayerPanel extends Component<Props, State> {
           disabled={isDisabled || this.state.isStepLoading}
           isLoading={this.state.isStepLoading}
           iconSide="right"
-          iconType={'arrowRight'}
+          iconType={'chevronSingleRight'}
           onClick={this._onNext}
           fill
         >

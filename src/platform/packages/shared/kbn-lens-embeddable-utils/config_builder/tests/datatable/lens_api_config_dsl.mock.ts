@@ -57,13 +57,13 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -80,26 +80,26 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -200,13 +200,13 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -231,26 +231,26 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -364,13 +364,13 @@ export const fullConfigDatatableWithDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -395,26 +395,26 @@ export const fullConfigDatatableWithDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -527,13 +527,13 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -558,26 +558,26 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -696,13 +696,13 @@ export const sortedByRowDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -727,26 +727,26 @@ export const sortedByRowDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
