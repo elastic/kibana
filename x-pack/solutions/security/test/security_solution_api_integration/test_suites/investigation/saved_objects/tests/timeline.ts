@@ -379,12 +379,12 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         expect(responseToTest.status).to.be(200);
       });
 
-      it('rejects an empty delete request body', async () => {
+      it('accepts an empty delete request body', async () => {
         const responseToTest = await supertest.delete(TIMELINE_URL).set('kbn-xsrf', 'true').send({
           savedObjectIds: [],
         });
 
-        expect(responseToTest.status).to.be(400);
+        expect(responseToTest.status).to.be(200);
       });
 
       it('rejects delete requests above the max bulk size', async () => {

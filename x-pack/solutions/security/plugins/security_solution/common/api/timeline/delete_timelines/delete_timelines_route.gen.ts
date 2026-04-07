@@ -21,7 +21,7 @@ export const DeleteTimelinesRequestBody = z.object({
   /**
    * The list of IDs of the Timelines or Timeline templates to delete
    */
-  savedObjectIds: z.array(z.string()).min(1).max(100),
+  savedObjectIds: z.array(z.string()).max(100),
   /**
    * Saved search IDs that should be deleted alongside the timelines
    */
