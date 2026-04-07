@@ -613,7 +613,9 @@ export const SharepointOnline: ConnectorSpec = {
           .min(1)
           .max(500)
           .default(25)
-          .describe('Number of results to return per page. Must be between 1 and 500. Defaults to 25.'),
+          .describe(
+            'Number of results to return per page. Must be between 1 and 500. Defaults to 25.'
+          ),
       }),
       output: z.any(),
       handler: async (ctx, input) => {
