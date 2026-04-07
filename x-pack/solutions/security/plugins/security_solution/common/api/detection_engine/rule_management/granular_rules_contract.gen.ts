@@ -22,17 +22,7 @@ Only `legacy` is supported; additional modes may be added later.
 
   */
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
-export const GranularRulesSearchMode = z.literal('legacy').default('legacy');
-
-/**
-  * Free-text search combined with the KQL `filter` (e.g. `search[term]` / `search[mode]` query keys).
-
-  */
-export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
-export const GranularRulesSearch = z.object({
-  term: z.string().max(1000).optional(),
-  mode: GranularRulesSearchMode.optional(),
-});
+export const GranularRulesSearchMode = z.enum(['legacy']).default('legacy');
 
 /**
   * Facet dimension to include in `counts` when requested via `include_counts`.

@@ -19,8 +19,8 @@ import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import {
   GranularRulesFacetCategory,
-  GranularRulesSearch,
   FacetCounts,
+  GranularRulesSearchMode,
 } from '../granular_rules_contract.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
@@ -42,7 +42,8 @@ saved-object / alerting fields before execution.
    * Facet categories for which to compute counts over the filtered + searched set.
    */
   include_counts: ArrayFromString(GranularRulesFacetCategory).optional(),
-  search: GranularRulesSearch.optional(),
+  searchTerm: z.string().optional(),
+  searchMode: GranularRulesSearchMode.optional(),
   /**
    * Sort criteria as `field:order` tokens (e.g. `name:asc`). Comma-separated or repeated.
    */

@@ -51,11 +51,16 @@ paths:
             type: array
             items:
               $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFacetCategory'
-        - name: search
+        - name: searchTerm
           in: query
           required: false
           schema:
-            $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+            type: string
+        - name: searchMode
+          in: query
+          required: false
+          schema:
+            $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearchMode'
         - name: sort
           in: query
           required: false

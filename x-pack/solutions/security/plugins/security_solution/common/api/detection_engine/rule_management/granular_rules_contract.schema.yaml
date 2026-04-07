@@ -15,17 +15,6 @@ components:
         - legacy
       default: legacy
 
-    GranularRulesSearch:
-      type: object
-      description: |
-        Free-text search combined with the KQL `filter` (e.g. `search[term]` / `search[mode]` query keys).
-      properties:
-        term:
-          type: string
-          maxLength: 1000
-        mode:
-          $ref: '#/components/schemas/GranularRulesSearchMode'
-
     GranularRulesFacetCategory:
       type: string
       description: |

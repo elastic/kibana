@@ -73,7 +73,12 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
 
           const combinedKql = buildGranularRulesKql({
             filter: query.filter,
-            search: query.search,
+            search: query.searchTerm
+              ? {
+                  term: query.searchTerm,
+                  mode: query.searchMode,
+                }
+              : undefined,
           });
 
           const parsedSort = parseGranularSort(query.sort);

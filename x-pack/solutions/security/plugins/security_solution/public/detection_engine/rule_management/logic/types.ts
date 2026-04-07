@@ -27,7 +27,7 @@ import type {
   CoverageOverviewFilter,
   FindRulesWithFacetsResponse,
   GranularRulesFacetCategory,
-  GranularRulesSearch,
+  GranularRulesSearchMode,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
@@ -128,7 +128,7 @@ export interface FetchRulesResponse {
 export interface FetchRulesWithFacetsProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filter?: string;
-  search?: GranularRulesSearch;
+  search?: { term: string; mode: GranularRulesSearchMode | undefined };
   sort?: string;
   includeCountsCategories?: GranularRulesFacetCategory[];
   cursor?: string;

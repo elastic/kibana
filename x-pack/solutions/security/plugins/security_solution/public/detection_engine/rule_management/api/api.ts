@@ -252,8 +252,6 @@ export const fetchRulesWithFacets = async ({
 }: FetchRulesWithFacetsProps): Promise<FetchRulesWithFacetsResponse> => {
   const shouldApplyDefaultGapsRange = Boolean(gapFillStatuses?.length);
   const defaultGapsRange = shouldApplyDefaultGapsRange ? getGapRange(defaultRangeValue) : undefined;
-  const trimmedSearchTerm = search?.term?.trim() ?? '';
-  const searchMode = search?.mode ?? 'legacy';
 
   const query = {
     page: pagination.page,
@@ -264,12 +262,8 @@ export const fetchRulesWithFacets = async ({
       ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
       : {}),
     ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
-    ...(trimmedSearchTerm !== ''
-      ? {
-          'search[term]': trimmedSearchTerm,
-          'search[mode]': searchMode,
-        }
-      : {}),
+    searchTerm: search?.term,
+    searchMode: search?.mode,
     ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
     ...(includeCountsCategories.length > 0 ? { include_counts: includeCountsCategories } : {}),
     ...(cursor ? { cursor } : {}),
