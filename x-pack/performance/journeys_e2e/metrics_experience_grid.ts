@@ -9,7 +9,6 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import {
   setupMetricsExperienceData,
-  cleanupMetricsExperienceData,
   METRICS_EXPERIENCE_CONFIG,
 } from '../utils/metrics_experience_setup';
 
