@@ -63,7 +63,7 @@ export const App = (props: {
     ],
     styling: {
       primary: {
-        value: { alignment: 'left', fit: false },
+        value: { alignment: 'left', sizing: 'auto' },
         labels: { alignment: 'left' },
       },
     },

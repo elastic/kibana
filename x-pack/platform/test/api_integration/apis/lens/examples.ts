@@ -32,7 +32,7 @@ export const getExampleLensBody = (
   styling: {
     primary: {
       labels: { alignment: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign },
-      value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, fit: false },
+      value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, sizing: 'auto' },
     },
   },
 });
