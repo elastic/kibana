@@ -26,9 +26,9 @@ To use workflows, you need an **active Enterprise license**. Workflows are not a
 
 ---
 
-## Enable the Feature Flag
+## The Feature Flag
 
-The workflows feature can be disabled via UI settings. To disable it via Kibana config use:
+The workflows feature UI setting is enabled by default, it can be disabled via Kibana config with:
 
 ```yml
 uiSettings.overrides:
