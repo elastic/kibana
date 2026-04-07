@@ -44,6 +44,7 @@ import {
 import type { ServiceProviderKeys } from '../constants';
 import {
   DEFAULT_TASK_TYPE,
+  internalProviderKeys,
   INTERNAL_OVERRIDE_FIELDS,
   serviceProviderLinkComponents,
   SERVICE_SETTINGS,
@@ -116,8 +117,6 @@ interface InferenceServicesProps {
     enableEisPromoTour?: boolean;
     /** When set, only these task types will be available for selection in the form. */
     allowedTaskTypes?: InferenceTaskType[];
-    /** When set, providers matching these keys will be hidden from the selectable list. */
-    excludeProviders?: ServiceProviderKeys[];
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -136,7 +135,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     reenterSecretsOnEdit,
     enableEisPromoTour,
     allowedTaskTypes,
-    excludeProviders,
   },
 }) => {
   const {
@@ -467,11 +465,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           ? providers.filter(isProviderForSolutions.bind(this, filterBySolution))
           : providers;
 
-        if (excludeProviders?.length) {
-          filteredProviders = filteredProviders.filter(
-            (provider) => !excludeProviders.includes(provider.service as ServiceProviderKeys)
-          );
-        }
+        filteredProviders = filteredProviders.filter(
+          (provider) => !internalProviderKeys.includes(provider.service)
+        );
 
         if (allowedTaskTypes) {
           filteredProviders = filteredProviders.filter((provider) =>
@@ -495,7 +491,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         }
       }
     },
-    [providers, allowedTaskTypes, excludeProviders]
+    [providers, allowedTaskTypes]
   );
 
   useEffect(() => {

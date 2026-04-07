@@ -18,7 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mockProviders } from '../utils/mock_providers';
 import type { InferenceProvider } from '../types/types';
-import { INTERNAL_OVERRIDE_FIELDS, ServiceProviderKeys } from '../constants';
+import { INTERNAL_OVERRIDE_FIELDS } from '../constants';
 
 // Create a stable cloned copy for each test suite to prevent mutations from affecting other tests
 // Note: Variable must be prefixed with 'mock' to be allowed in jest.mock()
@@ -45,18 +45,17 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 
 interface RenderFormOptions {
   enforceAdaptiveAllocations?: boolean;
-  excludeProviders?: ServiceProviderKeys[];
 }
 
 const renderForm = (options: RenderFormOptions = {}) => {
-  const { enforceAdaptiveAllocations, excludeProviders } = options;
+  const { enforceAdaptiveAllocations } = options;
 
   return render(
     <MockFormProvider>
       <InferenceServiceFormFields
         http={httpMock}
         toasts={notificationsMock.toasts}
-        config={{ enforceAdaptiveAllocations, excludeProviders }}
+        config={{ enforceAdaptiveAllocations }}
       />
     </MockFormProvider>
   );
@@ -153,24 +152,13 @@ describe.skip('Inference Services', () => {
     });
   });
 
-  describe('excludeProviders', () => {
-    it('hides excluded providers from the selectable list', async () => {
-      renderForm({ excludeProviders: [ServiceProviderKeys.elasticsearch] });
+  it('does not show Elasticsearch in the provider list', async () => {
+    renderForm();
 
-      await userEvent.click(screen.getByTestId('provider-select'));
-      const listItems = screen.getAllByTestId('provider');
-      const providerTexts = listItems.map((item) => item.textContent);
-      expect(providerTexts).not.toContain('Elasticsearch');
-    });
-
-    it('shows all providers when excludeProviders is not set', async () => {
-      renderForm();
-
-      await userEvent.click(screen.getByTestId('provider-select'));
-      const listItems = screen.getAllByTestId('provider');
-      const providerTexts = listItems.map((item) => item.textContent);
-      expect(providerTexts).toContain('Elasticsearch');
-    });
+    await userEvent.click(screen.getByTestId('provider-select'));
+    const listItems = screen.getAllByTestId('provider');
+    const providerTexts = listItems.map((item) => item.textContent);
+    expect(providerTexts).not.toContain('Elasticsearch');
   });
 
   describe('Serverless adaptive allocations', () => {
