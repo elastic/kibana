@@ -13,7 +13,7 @@ import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
 import {
   MemoryServiceImpl,
   formatExistingPages,
@@ -66,12 +66,14 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                 return;
               }
 
-              const connectorId = await resolveConnectorId({
-                uiSettingsClient,
-                logger: taskLogger,
+              const connectorId = await resolveConnectorForSignificantEventsDiscovery({
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                request: runContext.fakeRequest,
               });
 
-              taskLogger.info(`Using connector ${connectorId} for memory consolidation`);
+              taskLogger.info(
+                `Using connector ${connectorId} for memory consolidation (discovery model)`
+              );
 
               const memory = new MemoryServiceImpl({
                 logger: taskLogger.get('memory'),

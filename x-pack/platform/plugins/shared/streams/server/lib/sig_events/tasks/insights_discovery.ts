@@ -9,11 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import {
-  type Insight,
-  getImpactLevel,
-  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-} from '@kbn/streams-schema';
+import { type Insight, getImpactLevel } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '../../tasks/task_definitions';
@@ -22,7 +18,7 @@ import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
+import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
 import type { MemoryGenerationTaskParams } from '../../tasks/task_definitions/memory_generation';
 import { MEMORY_GENERATION_TASK_TYPE } from '../../tasks/task_definitions/memory_generation';
 import { MemoryServiceImpl } from '../../memory';
@@ -68,10 +64,8 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               });
 
               const taskLogger = taskContext.logger.get('insights_discovery');
-              const connectorId = await resolveConnectorForFeature({
+              const connectorId = await resolveConnectorForSignificantEventsDiscovery({
                 searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-                featureName: 'discovery',
                 request: fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
