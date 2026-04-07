@@ -111,7 +111,7 @@ describe('DashboardCanvasContent', () => {
       registerActionButtons,
       updateOrigin,
       closeCanvas,
-      checkSavedDashboardExist,
+      checkSavedDashboardExist: props.checkSavedDashboardExist,
       openSidebarConversation,
     };
   };
@@ -196,10 +196,13 @@ describe('DashboardCanvasContent', () => {
         origin: 'existing-dashboard-id',
       };
 
-      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
-        attachment: attachmentWithOrigin,
-      });
+      const { registerActionButtons, mockApi, checkSavedDashboardExist } =
+        await renderDashboardCanvasContent({
+          attachment: attachmentWithOrigin,
+          checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+        });
 
+      expect(checkSavedDashboardExist).toHaveBeenCalledWith('existing-dashboard-id');
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
       const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
 
@@ -213,6 +216,33 @@ describe('DashboardCanvasContent', () => {
         })
       );
     });
+
+    it('should not include dashboard ID when the linked saved object does not exist', async () => {
+      const attachmentWithOrigin: DashboardAttachment = {
+        ...mockAttachment,
+        origin: 'deleted-dashboard-id',
+      };
+
+      const { registerActionButtons, mockApi, checkSavedDashboardExist } =
+        await renderDashboardCanvasContent({
+          attachment: attachmentWithOrigin,
+          checkSavedDashboardExist: jest.fn().mockResolvedValue(false),
+        });
+
+      expect(checkSavedDashboardExist).toHaveBeenCalledWith('deleted-dashboard-id');
+      const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+
+      await act(async () => {
+        await editButton?.handler();
+      });
+
+      expect(mockApi.locator?.navigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dashboardId: undefined,
+        })
+      );
+    });
   });
 
   describe('Save button', () => {
@@ -222,8 +252,9 @@ describe('DashboardCanvasContent', () => {
         origin: 'existing-dashboard-id',
       };
 
-      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
+      const { registerActionButtons, mockApi, updateOrigin } = await renderDashboardCanvasContent({
         attachment: attachmentWithOrigin,
+        checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
       });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
@@ -234,6 +265,33 @@ describe('DashboardCanvasContent', () => {
       });
 
       expect(mockApi.runQuickSave).toHaveBeenCalled();
+      expect(updateOrigin).toHaveBeenCalledWith('existing-dashboard-id');
+      expect(mockApi.runInteractiveSave).not.toHaveBeenCalled();
+    });
+
+    it('should run interactive save when linked saved object no longer exists', async () => {
+      const attachmentWithOrigin: DashboardAttachment = {
+        ...mockAttachment,
+        origin: 'deleted-dashboard-id',
+      };
+
+      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const { registerActionButtons, mockApi } = await renderDashboardCanvasContent({
+        attachment: attachmentWithOrigin,
+        updateOrigin,
+        checkSavedDashboardExist: jest.fn().mockResolvedValue(false),
+      });
+
+      const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
+      const saveButton = buttons.find((b) => b.label === 'Save');
+
+      await act(async () => {
+        await saveButton?.handler();
+      });
+
+      expect(mockApi.runQuickSave).not.toHaveBeenCalled();
+      expect(mockApi.runInteractiveSave).toHaveBeenCalled();
+      expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
     });
 
     it('should run interactive save and update origin for new dashboard', async () => {
@@ -251,6 +309,46 @@ describe('DashboardCanvasContent', () => {
 
       expect(mockApi.runInteractiveSave).toHaveBeenCalled();
       expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
+    });
+  });
+
+  describe('DashboardRenderer', () => {
+    it('passes the existing saved object id when the linked dashboard exists', async () => {
+      const attachmentWithOrigin: DashboardAttachment = {
+        ...mockAttachment,
+        origin: 'existing-dashboard-id',
+      };
+
+      await renderDashboardCanvasContent({
+        attachment: attachmentWithOrigin,
+        checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+      });
+
+      expect(DashboardRenderer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedObjectId: 'existing-dashboard-id',
+        }),
+        {}
+      );
+    });
+
+    it('renders by value when the linked dashboard does not exist', async () => {
+      const attachmentWithOrigin: DashboardAttachment = {
+        ...mockAttachment,
+        origin: 'deleted-dashboard-id',
+      };
+
+      await renderDashboardCanvasContent({
+        attachment: attachmentWithOrigin,
+        checkSavedDashboardExist: jest.fn().mockResolvedValue(false),
+      });
+
+      expect(DashboardRenderer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedObjectId: undefined,
+        }),
+        {}
+      );
     });
   });
 });
