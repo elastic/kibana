@@ -17,7 +17,6 @@
  */
 
 export const DEFAULT_PRIMARY_POSITION = 'bottom' as const;
-export const DEFAULT_PRIMARY_TITLE_WEIGHT = 'bold' as const;
 export const DEFAULT_PRIMARY_LABELS_ALIGNMENT = 'left' as const;
 export const DEFAULT_PRIMARY_VALUE_ALIGNMENT = 'right' as const;
 export const DEFAULT_PRIMARY_VALUE_SIZING = 'auto' as const;

@@ -21,7 +21,6 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
-  DEFAULT_PRIMARY_TITLE_WEIGHT,
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
@@ -188,7 +187,6 @@ function convertStylingToAPIFormat(
   return stripUndefined({
     primary: stripUndefined({
       position: visualization.primaryPosition ?? DEFAULT_PRIMARY_POSITION,
-      title_weight: visualization.titleWeight ?? DEFAULT_PRIMARY_TITLE_WEIGHT,
       labels: {
         alignment: visualization.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT,
       },
