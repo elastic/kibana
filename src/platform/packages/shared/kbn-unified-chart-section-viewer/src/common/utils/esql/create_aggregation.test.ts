@@ -140,47 +140,21 @@ describe('resolveConflictingFieldTypes', () => {
   });
 
   describe('float family (double, float, half_float, scaled_float)', () => {
-    it('should resolve double + float to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
+    const floatFamilyCases: ES_FIELD_TYPES[][] = [
+      [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+      [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE],
+      [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT],
+      [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT],
+      [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.SCALED_FLOAT],
+      [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT, ES_FIELD_TYPES.SCALED_FLOAT],
+    ];
 
-    it('should resolve float + double to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should resolve double + half_float to double', () => {
-      const result = resolveConflictingFieldTypes([
-        ES_FIELD_TYPES.DOUBLE,
-        ES_FIELD_TYPES.HALF_FLOAT,
-      ]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should resolve float + half_float to double', () => {
-      const result = resolveConflictingFieldTypes([
-        ES_FIELD_TYPES.FLOAT,
-        ES_FIELD_TYPES.HALF_FLOAT,
-      ]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should resolve double + scaled_float to double', () => {
-      const result = resolveConflictingFieldTypes([
-        ES_FIELD_TYPES.DOUBLE,
-        ES_FIELD_TYPES.SCALED_FLOAT,
-      ]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should resolve float + half_float + scaled_float to double', () => {
-      const result = resolveConflictingFieldTypes([
-        ES_FIELD_TYPES.FLOAT,
-        ES_FIELD_TYPES.HALF_FLOAT,
-        ES_FIELD_TYPES.SCALED_FLOAT,
-      ]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    floatFamilyCases.forEach((types) => {
+      const typesName = types.join(' + ');
+      it(`should resolve ${typesName} to double`, () => {
+        const result = resolveConflictingFieldTypes(types);
+        expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+      });
     });
   });
 
