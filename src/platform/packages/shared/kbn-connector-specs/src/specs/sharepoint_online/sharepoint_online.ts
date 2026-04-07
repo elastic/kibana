@@ -436,7 +436,7 @@ export const SharepointOnline: ConnectorSpec = {
         ctx.log.debug(`SharePoint getting drive items from ${url}`);
         const response = await ctx.client.get(url, {
           params: {
-            select:
+            $select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         });
