@@ -194,5 +194,4 @@ describe('useGenAIConnectorsWithoutContext', () => {
     expect(result.current.connectors).toBeUndefined();
     expect(result.current.loading).toBe(false);
   });
-
 });
