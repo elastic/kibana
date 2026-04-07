@@ -38,7 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     }
   };
 
-  describe('For each artifact list under management', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/261850
+  describe.skip('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(60_000 * 5);
 
@@ -220,7 +221,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      describe(`When on the ${testData.title} entries list`, function () {
+      // Failing: See https://github.com/elastic/kibana/issues/261849
+      describe.skip(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifactLists();
