@@ -36,7 +36,7 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'count',
             field: 'test_field',
-            sub_label: 'Count of records',
+            subtitle: 'Count of records',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
         ],
@@ -522,7 +522,7 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'sales',
-            sub_label: 'Total Sales',
+            subtitle: 'Total Sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             color: {
               type: 'dynamic',

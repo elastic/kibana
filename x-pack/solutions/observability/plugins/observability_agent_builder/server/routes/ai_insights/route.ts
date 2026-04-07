@@ -17,7 +17,8 @@ import {
   getAlertAiInsight,
   type AlertDocForInsight,
 } from './alert_ai_insights/generate_alert_ai_insight';
-import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
+import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
+import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -41,9 +42,16 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
+
       const inferenceClient = inference.getClient({ request });
-      const connector = await inference.getConnectorById(connectorId, request);
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
@@ -94,9 +102,16 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
+
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
-      const connector = await inference.getConnectorById(connectorId, request);
 
       const result = await generateErrorAiInsight({
         core,
@@ -156,9 +171,16 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
+
       const inferenceClient = inference.getClient({ request });
-      const connector = await inference.getConnectorById(connectorId, request);
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
       const result = await getLogAiInsights({

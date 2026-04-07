@@ -12,7 +12,6 @@ import { schema } from '@kbn/config-schema';
 import { LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS } from '@kbn/lens-common';
 import {
   DEFAULT_PRIMARY_POSITION,
-  DEFAULT_PRIMARY_TITLE_WEIGHT,
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_FIT,
@@ -118,17 +117,6 @@ const metricStylingSchema = schema.object(
           metricValuePositionSchema({
             meta: { description: 'Position of the primary metric value (top, middle, or bottom)' },
             defaultValue: DEFAULT_PRIMARY_POSITION,
-          })
-        ),
-        /**
-         * Font weight for title. Possible values:
-         * - 'bold': Bold font weight
-         * - 'normal': Normal font weight
-         */
-        title_weight: schema.maybe(
-          schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
-            defaultValue: DEFAULT_PRIMARY_TITLE_WEIGHT,
-            meta: { description: 'Font weight for title' },
           })
         ),
         /**
@@ -307,9 +295,11 @@ const metricStatePrimaryMetricOptionsSchema = {
   // to avoid default injection in the wrong type
   type: schema.literal('primary'),
   /**
-   * Sub label
+   * Subtitle
    */
-  sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
+  subtitle: schema.maybe(
+    schema.string({ meta: { description: 'Subtitle below the primary metric value' } })
+  ),
   /**
    * Color configuration
    */

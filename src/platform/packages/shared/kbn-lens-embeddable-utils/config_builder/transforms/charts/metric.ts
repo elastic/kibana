@@ -169,7 +169,6 @@ function convertStylingToStateFormat(
     titlesTextAlign: primaryStyling?.labels?.alignment,
     primaryAlign: primaryStyling?.value?.alignment,
     primaryPosition: primaryStyling?.position,
-    titleWeight: primaryStyling?.title_weight,
     icon: iconCompat.toState(primaryStyling?.icon?.name),
     iconAlign: primaryStyling?.icon?.alignment,
     ...(hasSecondary
@@ -248,7 +247,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
-    subtitle: primaryMetric.sub_label ?? '',
+    subtitle: primaryMetric.subtitle ?? '',
     showBar: false,
     ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
     ...(secondaryMetric
@@ -458,7 +457,7 @@ function enrichConfigurationWithVisualizationProperties(
   }
   if (primaryMetric) {
     if (visualization.subtitle) {
-      primaryMetric.sub_label = visualization.subtitle;
+      primaryMetric.subtitle = visualization.subtitle;
     }
 
     if (visualization.trendlineLayerType) {

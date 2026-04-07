@@ -39,7 +39,7 @@ export function SloCardItemActions(props: Props) {
       <SloItemActions
         {...props}
         btnProps={{
-          iconType: 'boxesHorizontal',
+          iconType: 'boxesVertical',
           color: 'primary',
           display: 'empty',
         }}
