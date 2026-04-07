@@ -227,7 +227,7 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
-    const smlRules = createSmlRulesService({ logger: logger.get('sml-rules') });
+    const smlRules = createSmlRulesService({ logger: logger.get('sml-rules'), elasticsearch });
 
     this.internalStart = {
       tools,

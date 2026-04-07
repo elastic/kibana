@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isSmlRuleNotFoundError } from '@kbn/agent-builder-common';
 import { createSmlRulesService } from './sml_rules_service';
-import type { SmlRulesService } from './types';
+import type { SmlRulesClient } from './types';
 import type { SmlRuleCreateBody } from '../../../common/http_api/sml_rules';
 
 // --- Mock the storage adapter ---
@@ -50,6 +50,15 @@ const createMockLogger = () => {
 };
 
 const mockEsClient = {} as any;
+const mockRequest = {} as any;
+
+const mockElasticsearch = {
+  client: {
+    asScoped: jest.fn().mockReturnValue({
+      asInternalUser: mockEsClient,
+    }),
+  },
+} as any;
 
 const sampleRuleBody: SmlRuleCreateBody = {
   name: 'Test Rule',
@@ -64,13 +73,17 @@ const sampleRuleBody: SmlRuleCreateBody = {
 };
 
 describe('SmlRulesService', () => {
-  let service: SmlRulesService;
+  let client: SmlRulesClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-04-01T00:00:00.000Z'));
-    service = createSmlRulesService({ logger: createMockLogger() });
+    const service = createSmlRulesService({
+      logger: createMockLogger(),
+      elasticsearch: mockElasticsearch,
+    });
+    client = service.getScopedClient({ request: mockRequest });
   });
 
   afterEach(() => {
@@ -82,7 +95,7 @@ describe('SmlRulesService', () => {
       mockGet.mockRejectedValueOnce(createNotFoundError());
       mockIndex.mockResolvedValueOnce({ result: 'created' });
 
-      const result = await service.createOrUpdate('rule-1', sampleRuleBody, mockEsClient);
+      const result = await client.createOrUpdate('rule-1', sampleRuleBody);
 
       expect(result).toEqual({
         ...sampleRuleBody,
@@ -114,7 +127,7 @@ describe('SmlRulesService', () => {
       mockIndex.mockResolvedValueOnce({ result: 'updated' });
 
       const updatedBody = { ...sampleRuleBody, name: 'Updated Rule' };
-      const result = await service.createOrUpdate('rule-1', updatedBody, mockEsClient);
+      const result = await client.createOrUpdate('rule-1', updatedBody);
 
       expect(result.created_at).toBe('2026-01-01T00:00:00.000Z');
       expect(result.updated_at).toBe('2026-04-01T00:00:00.000Z');
@@ -124,7 +137,7 @@ describe('SmlRulesService', () => {
     it('propagates non-404 errors from get', async () => {
       mockGet.mockRejectedValueOnce(new Error('Connection refused'));
 
-      await expect(service.createOrUpdate('rule-1', sampleRuleBody, mockEsClient)).rejects.toThrow(
+      await expect(client.createOrUpdate('rule-1', sampleRuleBody)).rejects.toThrow(
         'Connection refused'
       );
     });
@@ -140,7 +153,7 @@ describe('SmlRulesService', () => {
       };
       mockGet.mockResolvedValueOnce({ _source: storedRule });
 
-      const result = await service.get('rule-1', mockEsClient);
+      const result = await client.get('rule-1');
 
       expect(result).toEqual(storedRule);
     });
@@ -149,7 +162,7 @@ describe('SmlRulesService', () => {
       mockGet.mockRejectedValueOnce(createNotFoundError());
 
       try {
-        await service.get('nonexistent', mockEsClient);
+        await client.get('nonexistent');
         fail('Expected error to be thrown');
       } catch (error) {
         expect(isSmlRuleNotFoundError(error)).toBe(true);
@@ -160,7 +173,7 @@ describe('SmlRulesService', () => {
       mockGet.mockResolvedValueOnce({ _source: undefined });
 
       try {
-        await service.get('rule-1', mockEsClient);
+        await client.get('rule-1');
         fail('Expected error to be thrown');
       } catch (error) {
         expect(isSmlRuleNotFoundError(error)).toBe(true);
@@ -170,7 +183,7 @@ describe('SmlRulesService', () => {
     it('propagates non-404 errors', async () => {
       mockGet.mockRejectedValueOnce(new Error('Connection refused'));
 
-      await expect(service.get('rule-1', mockEsClient)).rejects.toThrow('Connection refused');
+      await expect(client.get('rule-1')).rejects.toThrow('Connection refused');
     });
   });
 
@@ -196,7 +209,7 @@ describe('SmlRulesService', () => {
         },
       });
 
-      const result = await service.list(mockEsClient);
+      const result = await client.list();
 
       expect(result).toEqual([rule1, rule2]);
       expect(mockSearch).toHaveBeenCalledWith({
@@ -211,7 +224,7 @@ describe('SmlRulesService', () => {
         hits: { hits: [] },
       });
 
-      const result = await service.list(mockEsClient);
+      const result = await client.list();
 
       expect(result).toEqual([]);
     });
@@ -233,7 +246,7 @@ describe('SmlRulesService', () => {
         },
       });
 
-      const result = await service.list(mockEsClient);
+      const result = await client.list();
 
       expect(result).toHaveLength(1);
     });
@@ -243,7 +256,7 @@ describe('SmlRulesService', () => {
     it('returns true when rule is deleted', async () => {
       mockDelete.mockResolvedValueOnce({ result: 'deleted' });
 
-      const result = await service.delete('rule-1', mockEsClient);
+      const result = await client.delete('rule-1');
 
       expect(result).toBe(true);
       expect(mockDelete).toHaveBeenCalledWith({ id: 'rule-1' });
@@ -253,7 +266,7 @@ describe('SmlRulesService', () => {
       mockDelete.mockRejectedValueOnce(createNotFoundError());
 
       try {
-        await service.delete('nonexistent', mockEsClient);
+        await client.delete('nonexistent');
         fail('Expected error to be thrown');
       } catch (error) {
         expect(isSmlRuleNotFoundError(error)).toBe(true);
@@ -263,7 +276,7 @@ describe('SmlRulesService', () => {
     it('propagates non-404 errors', async () => {
       mockDelete.mockRejectedValueOnce(new Error('Connection refused'));
 
-      await expect(service.delete('rule-1', mockEsClient)).rejects.toThrow('Connection refused');
+      await expect(client.delete('rule-1')).rejects.toThrow('Connection refused');
     });
   });
 });

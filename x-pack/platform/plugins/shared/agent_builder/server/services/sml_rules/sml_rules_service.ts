@@ -5,28 +5,34 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchServiceStart,
+} from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import { errors } from '@elastic/elasticsearch';
+import type { SmlRule } from '@kbn/agent-builder-common';
 import { createSmlRuleNotFoundError } from '@kbn/agent-builder-common';
-import type { SmlRule, SmlRuleCreateBody } from '../../../common/http_api/sml_rules';
-import type { SmlRulesService } from './types';
+import type { SmlRuleCreateBody } from '../../../common/http_api/sml_rules';
+import type { SmlRulesService, SmlRulesClient } from './types';
 import { createSmlRulesStorage } from './storage';
 
 const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
 };
 
-export const createSmlRulesService = ({ logger }: { logger: Logger }): SmlRulesService => {
-  const getStorage = (esClient: ElasticsearchClient) => createSmlRulesStorage({ logger, esClient });
+const createSmlRulesClient = ({
+  logger,
+  esClient,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+}): SmlRulesClient => {
+  const storage = createSmlRulesStorage({ logger, esClient });
 
   return {
-    async createOrUpdate(
-      id: string,
-      body: SmlRuleCreateBody,
-      esClient: ElasticsearchClient
-    ): Promise<SmlRule> {
-      const storage = getStorage(esClient);
+    async createOrUpdate(id: string, body: SmlRuleCreateBody): Promise<SmlRule> {
       const now = new Date().toISOString();
 
       let createdAt = now;
@@ -57,8 +63,7 @@ export const createSmlRulesService = ({ logger }: { logger: Logger }): SmlRulesS
       return document;
     },
 
-    async get(id: string, esClient: ElasticsearchClient): Promise<SmlRule> {
-      const storage = getStorage(esClient);
+    async get(id: string): Promise<SmlRule> {
       try {
         const result = await storage.getClient().get({ id });
         if (!result._source) {
@@ -73,8 +78,7 @@ export const createSmlRulesService = ({ logger }: { logger: Logger }): SmlRulesS
       }
     },
 
-    async list(esClient: ElasticsearchClient): Promise<SmlRule[]> {
-      const storage = getStorage(esClient);
+    async list(): Promise<SmlRule[]> {
       const response = await storage.getClient().search({
         track_total_hits: false,
         size: 1000,
@@ -86,8 +90,7 @@ export const createSmlRulesService = ({ logger }: { logger: Logger }): SmlRulesS
         .filter((source): source is SmlRule => source !== undefined);
     },
 
-    async delete(id: string, esClient: ElasticsearchClient): Promise<boolean> {
-      const storage = getStorage(esClient);
+    async delete(id: string): Promise<boolean> {
       try {
         const { result } = await storage.getClient().delete({ id });
         return result === 'deleted';
@@ -97,6 +100,21 @@ export const createSmlRulesService = ({ logger }: { logger: Logger }): SmlRulesS
         }
         throw error;
       }
+    },
+  };
+};
+
+export const createSmlRulesService = ({
+  logger,
+  elasticsearch,
+}: {
+  logger: Logger;
+  elasticsearch: ElasticsearchServiceStart;
+}): SmlRulesService => {
+  return {
+    getScopedClient({ request }: { request: KibanaRequest }): SmlRulesClient {
+      const esClient = elasticsearch.client.asScoped(request).asInternalUser;
+      return createSmlRulesClient({ logger, esClient });
     },
   };
 };

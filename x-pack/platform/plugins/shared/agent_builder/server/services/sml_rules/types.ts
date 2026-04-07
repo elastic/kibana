@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SmlRule, SmlRuleCreateBody } from '../../../common/http_api/sml_rules';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SmlRule } from '@kbn/agent-builder-common';
+import type { SmlRuleCreateBody } from '../../../common/http_api/sml_rules';
 
 /**
- * Service interface for SML rule CRUD operations.
+ * Service interface for SML rules.
  *
- * Each method takes an `esClient` scoped to the current request
- * so that system index operations are properly attributed.
+ * Follows the scoped-client pattern: call `getScopedClient` with the
+ * current request to obtain a client whose ES operations are properly
+ * attributed to the caller.
  */
 export interface SmlRulesService {
+  getScopedClient(options: { request: KibanaRequest }): SmlRulesClient;
+}
+
+/**
+ * Request-scoped client for SML rule CRUD operations.
+ */
+export interface SmlRulesClient {
   /** Create a new rule or update an existing one. */
-  createOrUpdate(
-    id: string,
-    body: SmlRuleCreateBody,
-    esClient: ElasticsearchClient
-  ): Promise<SmlRule>;
+  createOrUpdate(id: string, body: SmlRuleCreateBody): Promise<SmlRule>;
 
   /** Get a single rule by ID. Throws if not found. */
-  get(id: string, esClient: ElasticsearchClient): Promise<SmlRule>;
+  get(id: string): Promise<SmlRule>;
 
   /** List all rules. */
-  list(esClient: ElasticsearchClient): Promise<SmlRule[]>;
+  list(): Promise<SmlRule[]>;
 
   /** Delete a rule by ID. Returns true if deleted. Throws if not found. */
-  delete(id: string, esClient: ElasticsearchClient): Promise<boolean>;
+  delete(id: string): Promise<boolean>;
 }

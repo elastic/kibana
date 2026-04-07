@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { SmlRulesService } from './types';
+export type { SmlRulesService, SmlRulesClient } from './types';
 export { createSmlRulesService } from './sml_rules_service';

@@ -10,7 +10,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerSmlRulesRoutes } from './sml_rules';
 import type { RouteDependencies } from './types';
 import { publicApiPath } from '../../common/constants';
-import type { SmlRule, SmlRuleCreateBody } from '../../common/http_api/sml_rules';
+import type { SmlRule } from '@kbn/agent-builder-common';
+import type { SmlRuleCreateBody } from '../../common/http_api/sml_rules';
 
 const sampleRuleBody: SmlRuleCreateBody = {
   name: 'Test Rule',
@@ -40,9 +41,6 @@ describe('SML Rules Routes', () => {
   let mockList: jest.Mock;
   let mockDelete: jest.Mock;
   let mockUiSettingsGet: jest.Mock;
-  let mockGetStartServices: jest.Mock;
-
-  const mockEsClient = { mock: true };
 
   const createMockContext = (experimentalFeaturesEnabled = true) => ({
     core: Promise.resolve({
@@ -76,24 +74,16 @@ describe('SML Rules Routes', () => {
     mockDelete = jest.fn().mockResolvedValue(true);
     mockUiSettingsGet = jest.fn();
 
-    mockGetStartServices = jest.fn().mockResolvedValue([
-      {
-        elasticsearch: {
-          client: {
-            asScoped: jest.fn().mockReturnValue({
-              asInternalUser: mockEsClient,
-            }),
-          },
-        },
-      },
-    ]);
+    const mockScopedClient = {
+      createOrUpdate: mockCreateOrUpdate,
+      get: mockGet,
+      list: mockList,
+      delete: mockDelete,
+    };
 
     const getInternalServices = jest.fn().mockReturnValue({
       smlRules: {
-        createOrUpdate: mockCreateOrUpdate,
-        get: mockGet,
-        list: mockList,
-        delete: mockDelete,
+        getScopedClient: jest.fn().mockReturnValue(mockScopedClient),
       },
     });
 
@@ -141,9 +131,6 @@ describe('SML Rules Routes', () => {
       router: mockRouter,
       getInternalServices,
       logger: loggingSystemMock.createLogger(),
-      coreSetup: {
-        getStartServices: mockGetStartServices,
-      },
     } as unknown as RouteDependencies);
   });
 
@@ -167,7 +154,7 @@ describe('SML Rules Routes', () => {
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockCreateOrUpdate).toHaveBeenCalledWith('rule-1', sampleRuleBody, mockEsClient);
+      expect(mockCreateOrUpdate).toHaveBeenCalledWith('rule-1', sampleRuleBody);
       expect(result).toMatchObject({ type: 'ok', body: sampleRule });
     });
   });
@@ -185,7 +172,7 @@ describe('SML Rules Routes', () => {
 
       const result = await handler(ctx, {}, mockResponse);
 
-      expect(mockList).toHaveBeenCalledWith(mockEsClient);
+      expect(mockList).toHaveBeenCalledWith();
       expect(result).toMatchObject({ type: 'ok', body: { results: [sampleRule] } });
     });
   });
@@ -204,7 +191,7 @@ describe('SML Rules Routes', () => {
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockGet).toHaveBeenCalledWith('rule-1', mockEsClient);
+      expect(mockGet).toHaveBeenCalledWith('rule-1');
       expect(result).toMatchObject({ type: 'ok', body: sampleRule });
     });
   });
@@ -223,7 +210,7 @@ describe('SML Rules Routes', () => {
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockDelete).toHaveBeenCalledWith('rule-1', mockEsClient);
+      expect(mockDelete).toHaveBeenCalledWith('rule-1');
       expect(result).toMatchObject({ type: 'ok', body: { success: true } });
     });
   });

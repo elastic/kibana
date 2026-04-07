@@ -221,6 +221,14 @@ export {
   type UpdateOriginResponse,
 } from './attachments';
 export {
+  type SmlRuleType,
+  type IndexVariableInput,
+  type IndexVariable,
+  type EsqlVariable,
+  type SmlRuleVariable,
+  type SmlRule,
+} from './base/sml_rules';
+export {
   type PluginManifestAuthor,
   type PluginManifest,
   type ParsedSkillMeta,

@@ -131,12 +131,7 @@ const SML_RULE_RESPONSE_SCHEMA = schema.object({
   updated_at: schema.string({ meta: { description: 'ISO 8601 last update timestamp.' } }),
 });
 
-export function registerSmlRulesRoutes({
-  router,
-  coreSetup,
-  getInternalServices,
-  logger,
-}: RouteDependencies) {
+export function registerSmlRulesRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
   const featureFlagConfig = {
     featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -178,9 +173,8 @@ export function registerSmlRulesRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { smlRules } = getInternalServices();
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const rule = await smlRules.createOrUpdate(request.params.ruleId, request.body, esClient);
+        const client = smlRules.getScopedClient({ request });
+        const rule = await client.createOrUpdate(request.params.ruleId, request.body);
         return response.ok<CreateOrUpdateSmlRuleResponse>({ body: rule });
       }, featureFlagConfig)
     );
@@ -221,9 +215,8 @@ export function registerSmlRulesRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { smlRules } = getInternalServices();
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const rules = await smlRules.list(esClient);
+        const client = smlRules.getScopedClient({ request });
+        const rules = await client.list();
         return response.ok<ListSmlRulesResponse>({ body: { results: rules } });
       }, featureFlagConfig)
     );
@@ -261,9 +254,8 @@ export function registerSmlRulesRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { smlRules } = getInternalServices();
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const rule = await smlRules.get(request.params.ruleId, esClient);
+        const client = smlRules.getScopedClient({ request });
+        const rule = await client.get(request.params.ruleId);
         return response.ok<GetSmlRuleResponse>({ body: rule });
       }, featureFlagConfig)
     );
@@ -306,9 +298,8 @@ export function registerSmlRulesRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { smlRules } = getInternalServices();
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-        const success = await smlRules.delete(request.params.ruleId, esClient);
+        const client = smlRules.getScopedClient({ request });
+        const success = await client.delete(request.params.ruleId);
         return response.ok<DeleteSmlRuleResponse>({ body: { success } });
       }, featureFlagConfig)
     );

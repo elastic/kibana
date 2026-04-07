@@ -9,7 +9,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
-import type { SmlRule } from '../../../common/http_api/sml_rules';
+import type { SmlRule } from '@kbn/agent-builder-common';
 
 export const smlRulesIndexName = chatSystemIndex('sml-rules');
 
