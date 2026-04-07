@@ -10,7 +10,7 @@
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { synth, BasicPrettyPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { isLegacyHistogram } from '../legacy_histogram';
 
 /**
@@ -45,18 +45,18 @@ export function resolveConflictingFieldTypes(
 
   // Check if all types are in the float family (double is the widest)
   if (uniqueTypes.every((type) => type === 'double' || FLOAT_FAMILY.includes(type as string))) {
-    return 'double' as ES_FIELD_TYPES;
+    return ES_FIELD_TYPES.DOUBLE;
   }
 
   // Check if all types are in the integer family (long is the widest)
   if (uniqueTypes.every((type) => type === 'long' || INT_FAMILY.includes(type as string))) {
-    return 'long' as ES_FIELD_TYPES;
+    return ES_FIELD_TYPES.LONG;
   }
 
   // Mixed numeric: if all types are numeric, prefer double
   const ALL_NUMERIC = ['double', ...FLOAT_FAMILY, 'long', ...INT_FAMILY];
   if (uniqueTypes.every((type) => ALL_NUMERIC.includes(type as string))) {
-    return 'double' as ES_FIELD_TYPES;
+    return ES_FIELD_TYPES.DOUBLE;
   }
 
   // Incompatible types (e.g., keyword + double, text + long)
