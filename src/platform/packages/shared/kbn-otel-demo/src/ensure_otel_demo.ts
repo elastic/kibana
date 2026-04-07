@@ -238,10 +238,12 @@ export async function deployDemo({
   }
 
   // Resolve collector image: EDOT by default, vanilla with --vanilla
-  const edotVersion = await resolveEdotCollectorVersion(log);
-  let collectorImage = `docker.elastic.co/elastic-agent/elastic-otel-collector:${edotVersion}`;
+  let collectorImage: string;
   if (useVanillaCollector) {
     collectorImage = 'otel/opentelemetry-collector-contrib:0.115.1';
+  } else {
+    const edotVersion = await resolveEdotCollectorVersion(log);
+    collectorImage = `docker.elastic.co/elastic-agent/elastic-otel-collector:${edotVersion}`;
   }
   log.info(`Using collector: ${collectorImage}`);
 

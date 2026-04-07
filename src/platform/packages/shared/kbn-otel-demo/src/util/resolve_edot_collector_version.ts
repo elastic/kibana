@@ -14,7 +14,8 @@ const EDOT_IMAGE = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
 
 /**
  * Resolves the latest available EDOT Collector image version by walking back
- * from the current Kibana version (e.g. 9.4.0 → 9.3.0 → 9.2.0).
+ * from the current Kibana version (patch first, then minor, then major).
+ * Example: 9.1.2 → 9.1.1 → 9.1.0 → 9.0.0 → 8.20.0 → …
  */
 export async function resolveEdotCollectorVersion(log: ToolingLog): Promise<string> {
   const { kibanaPackageJson } = await import('@kbn/repo-info');
@@ -45,6 +46,8 @@ export async function resolveEdotCollectorVersion(log: ToolingLog): Promise<stri
       patch = 0;
     } else {
       major--;
+      // Arbitrary upper bound for minor versions when crossing a major boundary.
+      // EDOT Collector releases may lag behind Kibana, so we probe a wide range.
       minor = 20;
       patch = 0;
     }

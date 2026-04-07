@@ -26,7 +26,7 @@ const mockLog: jest.Mocked<Pick<ToolingLog, 'debug' | 'warning'>> = {
   warning: jest.fn(),
 };
 
-const mockExecaResult = {} as execa.ExecaReturnValue<string>;
+const mockExecaResult = {} as execa.ExecaReturnValue<Buffer>;
 
 describe('resolveEdotCollectorVersion', () => {
   beforeEach(() => {
