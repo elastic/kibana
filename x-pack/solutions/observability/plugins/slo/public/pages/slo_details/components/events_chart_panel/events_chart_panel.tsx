@@ -161,7 +161,14 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
           </EuiFlexGroup>
 
           <EuiFlexItem grow={0}>
-            <EuiLink href={viewEventsHref} data-test-subj="sloDetailDiscoverLink">
+            <EuiLink
+              href={viewEventsHref}
+              data-test-subj="sloDetailDiscoverLink"
+              data-source={slo.indicator.type}
+              data-action={
+                slo.indicator.type !== 'sli.metric.timeslice' ? 'viewGoodVsBadEvents' : undefined
+              }
+            >
               <FormattedMessage
                 id="xpack.slo.sloDetails.viewEventsLink"
                 defaultMessage="View events"
