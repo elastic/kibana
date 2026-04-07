@@ -26,6 +26,7 @@ interface Props {
   onSave: (repository: Repository | EmptyRepository) => void;
   onCancel?: () => void;
   isDefaultRepository?: boolean;
+  isAlreadyDefaultRepository?: boolean;
   isFirstRepository?: boolean;
   onToggleDefault?: (value: boolean) => void;
 }
@@ -40,6 +41,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   onSave,
   onCancel,
   isDefaultRepository,
+  isAlreadyDefaultRepository,
   isFirstRepository,
   onToggleDefault,
 }) => {
@@ -125,6 +127,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       onBack={() => goToPreviousStep()}
       onCancel={onCancel}
       isDefaultRepository={isDefaultRepository}
+      isAlreadyDefaultRepository={isAlreadyDefaultRepository}
       isFirstRepository={isFirstRepository}
       onToggleDefault={onToggleDefault}
     />

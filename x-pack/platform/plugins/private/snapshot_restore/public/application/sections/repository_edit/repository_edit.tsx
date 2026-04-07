@@ -274,6 +274,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
           onSave={onSave}
           onCancel={() => history.push(`${BASE_PATH}/repositories`)}
           isDefaultRepository={isDefaultRepository}
+          isAlreadyDefaultRepository={defaultRepository === name}
           isFirstRepository={isOnlyRepository}
           onToggleDefault={setIsDefaultRepository}
         />

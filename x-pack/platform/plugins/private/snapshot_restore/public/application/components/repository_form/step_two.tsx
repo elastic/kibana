@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { Repository } from '../../../../common/types';
@@ -40,6 +41,7 @@ interface Props {
   onBack: () => void;
   onCancel?: () => void;
   isDefaultRepository?: boolean;
+  isAlreadyDefaultRepository?: boolean;
   isFirstRepository?: boolean;
   onToggleDefault?: (value: boolean) => void;
 }
@@ -56,6 +58,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   onBack,
   onCancel,
   isDefaultRepository,
+  isAlreadyDefaultRepository,
   isFirstRepository,
   onToggleDefault,
 }) => {
@@ -142,17 +145,29 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow>
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositorySwitchLabel"
-                defaultMessage="Set as default repository"
-              />
+          <EuiToolTip
+            content={
+              isAlreadyDefaultRepository ? (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryDisabledTooltip"
+                  defaultMessage="This is currently the default repository. To unassign it, you must set another repository as the default."
+                />
+              ) : undefined
             }
-            checked={isDefaultRepository ?? false}
-            onChange={(e) => onToggleDefault?.(e.target.checked)}
-            data-test-subj="setDefaultRepositorySwitch"
-          />
+          >
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositorySwitchLabel"
+                  defaultMessage="Set as default repository"
+                />
+              }
+              checked={isDefaultRepository ?? false}
+              disabled={isAlreadyDefaultRepository}
+              onChange={(e) => onToggleDefault?.(e.target.checked)}
+              data-test-subj="setDefaultRepositorySwitch"
+            />
+          </EuiToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
