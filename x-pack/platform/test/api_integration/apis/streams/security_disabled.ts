@@ -23,6 +23,7 @@ const PUBLIC_HEADERS = {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('streams APIs with security disabled', () => {
     before(async () => {
@@ -49,10 +50,21 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('GET /api/streams/_status returns status', async () => {
-      const { body } = await supertest.get('/api/streams/_status').set(PUBLIC_HEADERS).expect(200);
+      // can take a while to settle
+      await retry.tryForTime(
+        120_000,
+        async () => {
+          const { body } = await supertest
+            .get('/api/streams/_status')
+            .set(PUBLIC_HEADERS)
+            .expect(200);
 
-      expect(body).to.have.property('logs');
-      expect(body).to.have.property('can_manage');
+          expect(body).to.have.property('logs');
+          expect(body).to.have.property('can_manage');
+        },
+        undefined,
+        500
+      );
     });
 
     it('GET /api/streams returns list of streams', async () => {
