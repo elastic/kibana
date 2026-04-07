@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { useMlKibana } from '../../contexts/kibana';
 import { Y_AXIS_LABEL_WIDTH } from '../constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export interface AnomalyDetectionAlertsOverviewChart {
   seriesType?: 'bar_stacked' | 'line';
@@ -42,7 +43,7 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
       title: '',
       visualizationType: 'lnsXY',
       references: [],
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       state: {
         internalReferences: [
           {
