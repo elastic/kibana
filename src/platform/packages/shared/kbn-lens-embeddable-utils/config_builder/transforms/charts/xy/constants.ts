@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  LeftYAxisSchemaType,
-  RightYAxisSchemaType,
-  XAxisSchemaType,
-} from '../../../schema/charts/xy';
+import type { YAxisSchemaType, XAxisSchemaType } from '../../../schema/charts/xy';
 
 export const XY_DATA_LAYER_TYPES = [
   'area',
@@ -47,7 +43,7 @@ export const DEFAULT_AXIS_LABELS_ORIENTATION = 'horizontal' as const;
 export const DEFAULT_Y_AXIS_DOMAIN = {
   type: 'full',
   rounding: true,
-} satisfies LeftYAxisSchemaType['domain'] | RightYAxisSchemaType['domain'];
+} satisfies YAxisSchemaType['domain'];
 
 export const DEFAULT_X_AXIS_DOMAIN = {
   type: 'fit',

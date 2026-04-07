@@ -439,7 +439,7 @@ describe('XY', () => {
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
                     text: { visible: true },
-                    axis: 'left',
+                    axis: 'y',
                   },
                   {
                     operation: 'average',
@@ -447,7 +447,7 @@ describe('XY', () => {
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
                     text: { visible: false },
-                    axis: 'left',
+                    axis: 'y',
                   },
                 ],
               },
@@ -558,7 +558,6 @@ describe('XY', () => {
             title: 'XY Chart with Temporal Scale',
             axis: {
               x: {
-                type: 'x',
                 scale: 'temporal',
               },
             },
@@ -588,7 +587,6 @@ describe('XY', () => {
             title: 'XY Chart with Linear Scale',
             axis: {
               x: {
-                type: 'x',
                 scale: 'linear',
               },
             },
@@ -638,8 +636,7 @@ describe('XY', () => {
             type: 'xy',
             title: 'XY Chart with Y-Axis Only',
             axis: {
-              left: {
-                type: 'y',
+              y: {
                 anchor: 'start',
                 ticks: { visible: true },
                 grid: { visible: true },

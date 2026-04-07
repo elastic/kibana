@@ -190,49 +190,31 @@ export const sharedAxisSchema = {
   ),
 };
 
-const yAxisBaseSchema = schema.object(
+const yAxisAnchorSchema = schema.oneOf([schema.literal('start'), schema.literal('end')], {
+  meta: {
+    description:
+      'Position of the Y-axis relative to the chart orientation: start places it on the leading side (left in vertical charts), end on the trailing side (right in vertical charts).',
+  },
+});
+
+const yAxisSchema = schema.object(
   {
-    type: schema.literal('y'),
+    anchor: schema.maybe(yAxisAnchorSchema),
     ...sharedAxisSchema,
     scale: schema.maybe(yScaleSchema),
     domain: schema.maybe(yDomainSchema),
   },
   {
     meta: {
-      description: 'Y-axis configuration with scale and bounds.',
-    },
-  }
-);
-
-const leftYAxisSchema = yAxisBaseSchema.extends(
-  {
-    anchor: schema.literal('start'),
-  },
-  {
-    meta: {
       description:
-        'Left Y-axis configuration with scale and bounds.The anchor specifies the position of the Y-axis relative to the chart orientation: start places it on the leading side, end on the trailing side.',
+        'Y-axis configuration with optional anchor, scale, and bounds. The anchor controls which side of the chart the axis renders on.',
     },
   }
 );
-export type LeftYAxisSchemaType = TypeOf<typeof leftYAxisSchema>;
-
-const rightYAxisSchema = yAxisBaseSchema.extends(
-  {
-    anchor: schema.literal('end'),
-  },
-  {
-    meta: {
-      description:
-        'Right Y-axis configuration with scale and bounds.The anchor specifies the position of the Y-axis relative to the chart orientation: start places it on the leading side, end on the trailing side.',
-    },
-  }
-);
-export type RightYAxisSchemaType = TypeOf<typeof rightYAxisSchema>;
+export type YAxisSchemaType = TypeOf<typeof yAxisSchema>;
 
 const xAxisSchema = schema.object(
   {
-    type: schema.literal('x'),
     ...sharedAxisSchema,
     scale: schema.maybe(xScaleSchema),
     domain: schema.maybe(
@@ -478,14 +460,15 @@ const xySharedSettings = {
     schema.object(
       {
         x: schema.maybe(xAxisSchema),
-        left: schema.maybe(leftYAxisSchema),
-        right: schema.maybe(rightYAxisSchema),
+        y: schema.maybe(yAxisSchema),
+        secondary_y: schema.maybe(yAxisSchema),
       },
       {
         meta: {
           id: 'vis_api_xy_axis_config',
           title: 'Axis',
-          description: 'Axis configuration for X, left Y, and right Y axes',
+          description:
+            'Axis configuration for X, primary Y, and secondary Y axes. The primary Y axis defaults to the start (leading) side, and the secondary Y axis defaults to the end (trailing) side.',
         },
       }
     )
@@ -493,13 +476,11 @@ const xySharedSettings = {
   decorations: schema.maybe(decorationsSchema),
 };
 
-// TODO this schema currently allows only to use `left` or `right` as ids, but should be extended to use any string
-// and be described in the `axis[string]` property
-const yAxisIdReferenceSchema = schema.oneOf([schema.literal('left'), schema.literal('right')], {
-  defaultValue: 'left',
+const yAxisIdReferenceSchema = schema.oneOf([schema.literal('y'), schema.literal('secondary_y')], {
+  defaultValue: 'y',
   meta: {
     description:
-      'ID of the axis definition this Y metric is bound to; links the metric to the matching axis configuration in axis.left or axis.right. If omitted, the metric is bound to the default axis configuration.',
+      'ID of the axis definition this Y metric is bound to; links the metric to the matching axis configuration in axis.y or axis.secondary_y. If omitted, the metric is bound to the primary Y axis.',
   },
 });
 /**
@@ -639,8 +620,8 @@ const referenceLineLayerShared = {
     })
   ),
   axis: schema.maybe(
-    schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
-      defaultValue: 'left',
+    schema.oneOf([schema.literal('bottom'), schema.literal('y'), schema.literal('secondary_y')], {
+      defaultValue: 'y',
       meta: { description: 'Which axis the reference line applies to' },
     })
   ),

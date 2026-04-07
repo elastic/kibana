@@ -26,12 +26,7 @@ import {
 import { stripUndefined } from '../utils';
 import { axisLabelOrientationCompat } from '../common';
 import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
-import type {
-  LeftYAxisSchemaType,
-  RightYAxisSchemaType,
-  XAxisSchemaType,
-  YScaleSchemaType,
-} from '../../../schema/charts/xy';
+import type { YAxisSchemaType, XAxisSchemaType, YScaleSchemaType } from '../../../schema/charts/xy';
 import {
   DEFAULT_AXIS_GRID_VISIBLE,
   DEFAULT_AXIS_LABELS_ORIENTATION,
@@ -50,10 +45,7 @@ function convertFittingToStateFormat(fitting: XYState['fitting']) {
   };
 }
 
-type DomainType =
-  | XAxisSchemaType['domain']
-  | LeftYAxisSchemaType['domain']
-  | RightYAxisSchemaType['domain'];
+type DomainType = XAxisSchemaType['domain'] | YAxisSchemaType['domain'];
 
 function convertAPIDomainToStateFormat(
   domain: DomainType,
@@ -102,8 +94,11 @@ function convertAxisSettingsToStateFormat(
   | 'labelsOrientation'
 > {
   const xAxis = axis?.x;
-  const yLeftAxis = axis?.left;
-  const yRightAxis = axis?.right;
+  const yPrimaryAnchor = axis?.y?.anchor ?? 'start';
+  const ySecondaryAnchor = axis?.secondary_y?.anchor ?? 'end';
+  const yLeftAxis = yPrimaryAnchor === 'start' ? axis?.y : axis?.secondary_y;
+  const yRightAxis =
+    yPrimaryAnchor === 'end' ? axis?.y : ySecondaryAnchor === 'end' ? axis?.secondary_y : undefined;
 
   const xExtent = convertAPIDomainToStateFormat(xAxis?.domain, DEFAULT_X_AXIS_DOMAIN);
   const yLeftExtent = convertAPIDomainToStateFormat(yLeftAxis?.domain, DEFAULT_Y_AXIS_DOMAIN);
@@ -216,13 +211,21 @@ export function buildVisualizationAPI(
     );
   }
   const decorations = convertAppearanceToAPIFormat(config);
+  const { resolveAxisId, usedModes } = resolveAxisLayout(config);
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
     ...convertFittingToAPIFormat(config),
-    axis: convertAxisSettingsToAPIFormat(config, layers),
+    axis: convertAxisSettingsToAPIFormat(config, layers, usedModes),
     ...(decorations ? { decorations } : {}),
-    layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
+    layers: buildXYLayerAPI(
+      config,
+      layers,
+      adHocDataViews,
+      references,
+      internalReferences,
+      resolveAxisId
+    ),
   };
 }
 
@@ -245,10 +248,11 @@ function convertDomainStateToAPIFormat(
   defaultConfig: NonNullable<DomainType>
 ): NonNullable<DomainType> {
   if (domain) {
+    const rounding = domain.niceValues ?? defaultConfig.rounding;
     if (domain.mode === 'full') {
       return {
         type: 'full',
-        rounding: domain.niceValues ?? defaultConfig.rounding,
+        rounding,
       };
     }
     if (domain.mode === 'custom') {
@@ -259,13 +263,13 @@ function convertDomainStateToAPIFormat(
         type: 'custom',
         min: domain.lowerBound,
         max: domain.upperBound,
-        rounding: domain.niceValues ?? defaultConfig.rounding,
+        rounding,
       };
     }
     if (domain.mode === 'dataBounds') {
       return {
         type: 'fit',
-        rounding: domain.niceValues ?? defaultConfig.rounding,
+        rounding,
       };
     }
   }
@@ -282,47 +286,54 @@ function convertXDomainStateToAPIFormat(
 
 function convertYDomainStateToAPIFormat(
   axisExtent: AxisExtentConfig | undefined
-): LeftYAxisSchemaType['domain'] | RightYAxisSchemaType['domain'] {
+): YAxisSchemaType['domain'] {
   return convertDomainStateToAPIFormat(axisExtent, DEFAULT_Y_AXIS_DOMAIN);
 }
 
-type YAccessorAnchorPositions = Map<string, 'left' | 'right'>;
+type YAxisMode = 'left' | 'right';
+type YAccessorAxisModeMap = Map<string, YAxisMode>;
+export type ResolveAxisId = (mode: YAxisMode) => 'y' | 'secondary_y';
 
-export function getYAccessorsAxisPositions(
+export function getYAccessorAxisModeMap(
   layer: XYDataLayerConfig,
   accessorKey: (accessor: string) => string
-): YAccessorAnchorPositions {
-  const axisPositionPerAccessor: YAccessorAnchorPositions = new Map();
-  // use left by default also if there is an issue with the YConfig and the axisMode is bottom.
+): YAccessorAxisModeMap {
+  const modePerAccessor: YAccessorAxisModeMap = new Map();
   layer.accessors.forEach((accessor) => {
-    const key = accessorKey(accessor);
-    axisPositionPerAccessor.set(key, 'left');
+    modePerAccessor.set(accessorKey(accessor), 'left');
   });
-  // axisMode is configured within the `yConfig` property only
-  // for metrics that where manually configured with a different axis position
   layer.yConfig?.forEach((yConfig) => {
     if (yConfig.axisMode === 'right') {
-      const key = accessorKey(yConfig.forAccessor);
-      axisPositionPerAccessor.set(key, 'right');
+      modePerAccessor.set(accessorKey(yConfig.forAccessor), 'right');
     }
   });
-  return axisPositionPerAccessor;
+  return modePerAccessor;
 }
 
-function getYAccessorToAxisPositionMap(config: XYPersistedState): YAccessorAnchorPositions {
-  const axisPositionPerAccessor: YAccessorAnchorPositions = new Map();
-  config.layers.find((layer) => {
-    const { layerId } = layer;
+/**
+ * Determines which axis modes (left/right from Lens internal state) are used
+ * across all data layers and builds a resolver to map them to API axis IDs.
+ *
+ * When only one mode is used, all metrics belong to the primary axis (`y`)
+ * regardless of which physical side (left/right) they occupy. The anchor
+ * on the emitted `y` axis config captures the actual position.
+ * When both modes are used, left maps to `y` and right to `secondary_y`.
+ */
+function resolveAxisLayout(config: XYPersistedState): {
+  resolveAxisId: ResolveAxisId;
+  usedModes: Set<YAxisMode>;
+} {
+  const usedModes = new Set<YAxisMode>();
+  for (const layer of config.layers) {
     if (isLensStateDataLayer(layer)) {
-      const accessorsPositions = getYAccessorsAxisPositions(layer, (accessor) =>
-        JSON.stringify([layerId, accessor])
-      );
-      accessorsPositions.forEach((value, key) => {
-        axisPositionPerAccessor.set(key, value);
-      });
+      for (const mode of getYAccessorAxisModeMap(layer, (a) => a).values()) {
+        usedModes.add(mode);
+      }
     }
-  });
-  return axisPositionPerAccessor;
+  }
+  const resolveAxisId: ResolveAxisId =
+    usedModes.size <= 1 ? () => 'y' : (mode) => (mode === 'left' ? 'y' : 'secondary_y');
+  return { resolveAxisId, usedModes };
 }
 
 const yAxisScaleCompat = getReversibleMappings<YScaleSchemaType, YScaleType>([
@@ -333,7 +344,8 @@ const yAxisScaleCompat = getReversibleMappings<YScaleSchemaType, YScaleType>([
 
 function convertAxisSettingsToAPIFormat(
   config: XYPersistedState,
-  layers: Record<string, DataSourceStateLayer>
+  layers: Record<string, DataSourceStateLayer>,
+  usedModes: Set<YAxisMode>
 ): NonNullable<XYState['axis']> {
   let xAxisScale: XScaleSchemaType | undefined;
   const firstLayer = config.layers[0];
@@ -343,121 +355,81 @@ function convertAxisSettingsToAPIFormat(
     xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
   }
 
-  const xAxis = {
-    type: 'x',
-    title:
-      config.xTitle || config.axisTitlesVisibilitySettings?.x != null
-        ? stripUndefined({
-            text: config.xTitle,
-            visible:
-              config.axisTitlesVisibilitySettings?.x != null
-                ? config.axisTitlesVisibilitySettings.x
-                : DEFAULT_AXIS_TITLE_VISIBLE,
-          })
-        : { visible: DEFAULT_AXIS_TITLE_VISIBLE },
-
-    ticks:
-      config.tickLabelsVisibilitySettings?.x != null
-        ? { visible: config.tickLabelsVisibilitySettings.x }
-        : { visible: DEFAULT_AXIS_TICKS_VISIBLE },
-    grid:
-      config.gridlinesVisibilitySettings?.x != null
-        ? { visible: config.gridlinesVisibilitySettings.x }
-        : { visible: DEFAULT_AXIS_GRID_VISIBLE },
+  const xTitleVisible = config.axisTitlesVisibilitySettings?.x;
+  const xAxis = stripUndefined({
+    title: stripUndefined({
+      text: xTitleVisible !== false && config.xTitle ? config.xTitle : undefined,
+      visible: xTitleVisible ?? DEFAULT_AXIS_TITLE_VISIBLE,
+    }),
+    ticks: { visible: config.tickLabelsVisibilitySettings?.x ?? DEFAULT_AXIS_TICKS_VISIBLE },
+    grid: { visible: config.gridlinesVisibilitySettings?.x ?? DEFAULT_AXIS_GRID_VISIBLE },
     domain: convertXDomainStateToAPIFormat(config.xExtent),
-    ...(config.labelsOrientation?.x != null
-      ? {
-          labels: {
-            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.x),
-          },
-        }
-      : {
-          labels: {
-            orientation: DEFAULT_AXIS_LABELS_ORIENTATION,
-          },
-        }),
+    labels: {
+      orientation:
+        config.labelsOrientation?.x != null
+          ? axisLabelOrientationCompat.toAPI(config.labelsOrientation.x)
+          : DEFAULT_AXIS_LABELS_ORIENTATION,
+    },
     scale: xAxisScale,
-  } satisfies XAxisSchemaType;
+  } satisfies XAxisSchemaType);
 
-  const yAccessorToAxisPositionMap = getYAccessorToAxisPositionMap(config);
-  const usedAxes = new Set(yAccessorToAxisPositionMap.values());
+  const buildYAxisConfig = (side: 'left' | 'right', anchor: 'start' | 'end'): YAxisSchemaType => {
+    const title = side === 'left' ? config.yTitle : config.yRightTitle;
+    const titleVisible =
+      side === 'left'
+        ? config.axisTitlesVisibilitySettings?.yLeft
+        : config.axisTitlesVisibilitySettings?.yRight;
+    const scale = side === 'left' ? config.yLeftScale : config.yRightScale;
+    const ticksVisible =
+      side === 'left'
+        ? config.tickLabelsVisibilitySettings?.yLeft
+        : config.tickLabelsVisibilitySettings?.yRight;
+    const gridVisible =
+      side === 'left'
+        ? config.gridlinesVisibilitySettings?.yLeft
+        : config.gridlinesVisibilitySettings?.yRight;
+    const extent = side === 'left' ? config.yLeftExtent : config.yRightExtent;
+    const labelOrientation =
+      side === 'left' ? config.labelsOrientation?.yLeft : config.labelsOrientation?.yRight;
 
-  const leftAxis = {
-    type: 'y',
-    anchor: 'start',
-    title:
-      config.yTitle || config.axisTitlesVisibilitySettings?.yLeft != null
-        ? stripUndefined({
-            text: config.yTitle,
-            visible:
-              config.axisTitlesVisibilitySettings?.yLeft != null
-                ? config.axisTitlesVisibilitySettings.yLeft
-                : DEFAULT_AXIS_TITLE_VISIBLE,
-          })
-        : { visible: DEFAULT_AXIS_TITLE_VISIBLE },
-    scale:
-      config.yLeftScale && config.yLeftScale !== 'time'
-        ? yAxisScaleCompat.toAPI(config.yLeftScale)
-        : ('linear' as const), // default to linear
-    ticks:
-      config.tickLabelsVisibilitySettings?.yLeft != null
-        ? { visible: config.tickLabelsVisibilitySettings.yLeft }
-        : { visible: DEFAULT_AXIS_TICKS_VISIBLE },
-    grid:
-      config.gridlinesVisibilitySettings?.yLeft != null
-        ? { visible: config.gridlinesVisibilitySettings.yLeft }
-        : { visible: DEFAULT_AXIS_GRID_VISIBLE },
-    domain: convertYDomainStateToAPIFormat(config.yLeftExtent),
-    ...(config.labelsOrientation?.yLeft != null
-      ? {
-          labels: {
-            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.yLeft),
-          },
-        }
-      : { labels: { orientation: DEFAULT_AXIS_LABELS_ORIENTATION } }),
-  } satisfies LeftYAxisSchemaType;
-
-  const rightAxis = {
-    type: 'y',
-    anchor: 'end',
-    title:
-      config.yRightTitle || config.axisTitlesVisibilitySettings?.yRight != null
-        ? stripUndefined({
-            text: config.yRightTitle,
-            visible:
-              config.axisTitlesVisibilitySettings?.yRight != null
-                ? config.axisTitlesVisibilitySettings.yRight
-                : DEFAULT_AXIS_TITLE_VISIBLE,
-          })
-        : { visible: DEFAULT_AXIS_TITLE_VISIBLE },
-    scale:
-      config.yRightScale && config.yRightScale !== 'time'
-        ? yAxisScaleCompat.toAPI(config.yRightScale)
-        : ('linear' as YScaleSchemaType), // default to linear
-    ticks:
-      config.tickLabelsVisibilitySettings?.yRight != null
-        ? { visible: config.tickLabelsVisibilitySettings.yRight }
-        : { visible: DEFAULT_AXIS_TICKS_VISIBLE },
-    grid:
-      config.gridlinesVisibilitySettings?.yRight != null
-        ? { visible: config.gridlinesVisibilitySettings.yRight }
-        : { visible: DEFAULT_AXIS_GRID_VISIBLE },
-
-    domain: convertYDomainStateToAPIFormat(config.yRightExtent),
-    ...(config.labelsOrientation?.yRight != null
-      ? {
-          labels: {
-            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.yRight),
-          },
-        }
-      : { labels: { orientation: DEFAULT_AXIS_LABELS_ORIENTATION } }),
-  } satisfies RightYAxisSchemaType;
-
-  return {
-    x: xAxis,
-    ...(usedAxes.has('left') ? { left: leftAxis } : {}),
-    ...(usedAxes.has('right') ? { right: rightAxis } : {}),
+    return {
+      anchor,
+      title: stripUndefined({
+        text: titleVisible !== false && title ? title : undefined,
+        visible: titleVisible ?? DEFAULT_AXIS_TITLE_VISIBLE,
+      }),
+      scale:
+        scale && scale !== 'time' ? yAxisScaleCompat.toAPI(scale) : ('linear' as YScaleSchemaType),
+      ticks: { visible: ticksVisible ?? DEFAULT_AXIS_TICKS_VISIBLE },
+      grid: { visible: gridVisible ?? DEFAULT_AXIS_GRID_VISIBLE },
+      domain: convertYDomainStateToAPIFormat(extent),
+      labels: {
+        orientation:
+          labelOrientation != null
+            ? axisLabelOrientationCompat.toAPI(labelOrientation)
+            : DEFAULT_AXIS_LABELS_ORIENTATION,
+      },
+    } satisfies YAxisSchemaType;
   };
+
+  const hasLeft = usedModes.has('left');
+  const hasRight = usedModes.has('right');
+
+  // secondary y axis is only supported if both left and right sides are used
+  if (hasLeft && hasRight) {
+    return {
+      x: xAxis,
+      y: buildYAxisConfig('left', 'start'),
+      secondary_y: buildYAxisConfig('right', 'end'),
+    };
+  }
+  if (hasRight) {
+    return { x: xAxis, y: buildYAxisConfig('right', 'end') };
+  }
+  if (hasLeft) {
+    return { x: xAxis, y: buildYAxisConfig('left', 'start') };
+  }
+  return { x: xAxis };
 }
 
 function buildXYLayerAPI(
@@ -465,7 +437,8 @@ function buildXYLayerAPI(
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
+  adhocReferences: SavedObjectReference[] | undefined,
+  resolveAxisId: ResolveAxisId
 ): XYState['layers'] {
   const apiLayers: XYState['layers'] = [];
   for (const visLayer of visualization.layers) {
@@ -478,7 +451,8 @@ function buildXYLayerAPI(
             datasourceLayer,
             adHocDataViews,
             references,
-            adhocReferences
+            adhocReferences,
+            resolveAxisId
           )
         );
       }
@@ -490,7 +464,14 @@ function buildXYLayerAPI(
         (isFormBasedLayer(datasourceLayer) || isTextBasedLayer(datasourceLayer))
       ) {
         apiLayers.push(
-          buildAPIDataLayer(visLayer, datasourceLayer, adHocDataViews, references, adhocReferences)
+          buildAPIDataLayer(
+            visLayer,
+            datasourceLayer,
+            adHocDataViews,
+            references,
+            adhocReferences,
+            resolveAxisId
+          )
         );
       }
     }

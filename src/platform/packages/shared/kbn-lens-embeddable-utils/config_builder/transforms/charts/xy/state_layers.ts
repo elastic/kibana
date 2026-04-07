@@ -83,11 +83,12 @@ function buildDataLayer(config: XYState, layer: DataLayerType, i: number): XYDat
   ) as SeriesType;
 
   const yConfig = layer.y.map<YConfig>((yMetric, index) => {
-    const anchor = yMetric?.axis_id ? config.axis?.[yMetric?.axis_id]?.anchor : undefined;
-    const axisMode = anchor === 'end' ? 'right' : 'left'; // default to left
+    const axisId = yMetric?.axis_id ?? 'y';
+    const anchor = config.axis?.[axisId]?.anchor ?? (axisId === 'secondary_y' ? 'end' : 'start');
+    const axisMode = anchor === 'end' ? 'right' : 'left';
     return {
       ...(yMetric.color?.color ? { color: yMetric.color?.color } : {}),
-      ...{ axisMode },
+      axisMode,
       forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
     };
   });
@@ -188,17 +189,21 @@ function buildReferenceLineLayer(
   layer: ReferenceLineLayerType,
   i: number
 ): XYReferenceLineLayerConfig {
-  const yConfig = layer.thresholds.map<YConfig>((threshold, index) => ({
-    icon: threshold.icon,
-    iconPosition: threshold.position,
-    lineWidth: threshold.stroke_width,
-    lineStyle: threshold.stroke_dash,
-    textVisibility: threshold.text?.visible,
-    fill: threshold.fill,
-    color: threshold.color?.color,
-    axisMode: threshold.axis,
-    forAccessor: getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, index),
-  }));
+  const yConfig = layer.thresholds.map<YConfig>((threshold, index) => {
+    const axisMode =
+      threshold.axis === 'secondary_y' ? 'right' : threshold.axis === 'y' ? 'left' : threshold.axis;
+    return {
+      icon: threshold.icon,
+      iconPosition: threshold.position,
+      lineWidth: threshold.stroke_width,
+      lineStyle: threshold.stroke_dash,
+      textVisibility: threshold.text?.visible,
+      fill: threshold.fill,
+      color: threshold.color?.color,
+      axisMode,
+      forAccessor: getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, index),
+    };
+  });
   return {
     layerType: 'referenceLine',
     layerId: getIdForLayer(layer, i),

@@ -1084,7 +1084,6 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   },
   axis: {
     x: {
-      type: 'x',
       title: {
         visible: true,
       },
@@ -1094,8 +1093,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
         orientation: 'horizontal',
       },
     },
-    left: {
-      type: 'y',
+    y: {
       anchor: 'start',
       title: {
         visible: false,
@@ -1173,7 +1171,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   },
   axis: {
     x: {
-      type: 'x',
       title: {
         visible: true,
       },
@@ -1183,8 +1180,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
         orientation: 'horizontal',
       },
     },
-    left: {
-      type: 'y',
+    y: {
       anchor: 'start',
       title: {
         visible: false,
@@ -1257,7 +1253,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   },
   axis: {
     x: {
-      type: 'x',
       title: {
         visible: true,
       },
@@ -1267,8 +1262,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
         orientation: 'horizontal',
       },
     },
-    left: {
-      type: 'y',
+    y: {
       anchor: 'start',
       title: {
         visible: false,
