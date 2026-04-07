@@ -7,8 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
-import type { DashboardAttachment, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import { DASHBOARD_ATTACHMENT_TYPE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
+import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  attachmentDataToDashboardState,
+} from '@kbn/dashboard-agent-common';
 import { createDashboardSmlType } from './dashboard';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
@@ -83,13 +86,7 @@ const createDashboardClient = ({
   ({
     read: jest.fn().mockResolvedValue({
       id,
-      data:
-        data ??
-        attachmentToDashboardState({
-          id,
-          type: DASHBOARD_ATTACHMENT_TYPE,
-          data: attachmentData,
-        } as DashboardAttachment),
+      data: data ?? attachmentDataToDashboardState(attachmentData),
       meta: {
         outcome: 'exactMatch',
         version: 'v1',
