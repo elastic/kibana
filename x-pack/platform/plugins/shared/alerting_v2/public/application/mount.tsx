@@ -26,6 +26,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { RulesApp } from './rules_app';
 import { NotificationPoliciesApp } from './notification_policies_app';
 import { EpisodesApp } from './episodes_app';
@@ -56,9 +57,11 @@ export const mountAlertingV2App = async ({
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <Router history={history}>
-              <RulesApp />
-            </Router>
+            <I18nProvider>
+              <Router history={history}>
+                <RulesApp />
+              </Router>
+            </I18nProvider>
           </BreadcrumbProvider>
         </QueryClientProvider>
       </Context.Provider>
@@ -111,11 +114,13 @@ export const mountEpisodesApp = async ({
         <Context.Provider value={container}>
           <QueryClientProvider client={queryClient}>
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-              <Router history={history}>
-                <RedirectAppLinks coreStart={coreStart}>
-                  <EpisodesApp />
-                </RedirectAppLinks>
-              </Router>
+              <I18nProvider>
+                <Router history={history}>
+                  <RedirectAppLinks coreStart={coreStart}>
+                    <EpisodesApp />
+                  </RedirectAppLinks>
+                </Router>
+              </I18nProvider>
             </BreadcrumbProvider>
           </QueryClientProvider>
         </Context.Provider>
@@ -147,9 +152,11 @@ export const mountNotificationPoliciesApp = async ({
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <Router history={history}>
-              <NotificationPoliciesApp />
-            </Router>
+            <I18nProvider>
+              <Router history={history}>
+                <NotificationPoliciesApp />
+              </Router>
+            </I18nProvider>
           </BreadcrumbProvider>
         </QueryClientProvider>
       </Context.Provider>
