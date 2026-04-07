@@ -74,6 +74,7 @@ import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
+import { millisToNanos } from '../lib/millis_to_nanos';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -1092,10 +1093,10 @@ export class TaskManagerRunner implements TaskRunner {
     message: string,
     error?: Error | DecoratedError
   ): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
-    const scheduleDelayMs =
+    const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
+    const scheduleDelayNs =
       task.startedAt && task.scheduledAt
-        ? task.startedAt.getTime() - task.scheduledAt.getTime()
+        ? millisToNanos(task.startedAt.getTime() - task.scheduledAt.getTime())
         : undefined;
     const errorDetails = error
       ? {
@@ -1107,7 +1108,7 @@ export class TaskManagerRunner implements TaskRunner {
       event: {
         action: EVENT_LOG_ACTIONS.taskRun,
         outcome,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
         ...(error && this.isCancelled ? { reason: `Task "${this.id}" was cancelled.` } : {}),
@@ -1117,7 +1118,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
-          ...(scheduleDelayMs != null ? { schedule_delay: scheduleDelayMs } : {}),
+          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
         },
       },
       message,
@@ -1126,11 +1127,11 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private logTaskCancelEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
+    const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
     this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskCancel,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
       },
