@@ -159,7 +159,6 @@ export class ESQLService extends FtrService {
   }
 
   public async typeEsqlEditorQuery(query: string, editorSubjId = 'ESQLEditor') {
-    await this.waitESQLEditorLoaded(editorSubjId);
     await this.setEsqlEditorQuery(''); // clear the default query
     await this.monacoEditor.typeCodeEditorValue(query, editorSubjId);
   }
