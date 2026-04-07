@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -333,6 +334,7 @@ function KnowledgeIndicatorsGenerationControls({
   onGenerateSuggestionsClick: () => void;
   onCancelGenerationClick: () => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {isGenerating ? (
@@ -353,21 +355,13 @@ function KnowledgeIndicatorsGenerationControls({
           <EuiFlexItem
             grow={false}
             css={css`
-              padding: 0 8px;
+              width: 1px;
               align-self: stretch;
-              display: flex;
-              align-items: center;
+              background-color: currentColor;
+              opacity: 0.15;
+              margin: 0 ${euiTheme.size.s};
             `}
-          >
-            <div
-              style={{
-                width: 1,
-                alignSelf: 'stretch',
-                backgroundColor: 'currentColor',
-                opacity: 0.15,
-              }}
-            />
-          </EuiFlexItem>
+          />
         </>
       ) : null}
       <EuiFlexItem grow={false}>
