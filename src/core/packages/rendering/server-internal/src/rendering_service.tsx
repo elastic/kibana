@@ -317,11 +317,12 @@ export class RenderingService {
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const locale = i18nLib.getLocale();
+    const translationHashes = i18n.getTranslationHashes();
     let translationsUrl: string;
     if (usingCdn) {
       translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
     } else {
-      const translationHash = i18n.getTranslationHash();
+      const translationHash = translationHashes[locale] ?? i18n.getTranslationHash();
       translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
     }
 
@@ -367,6 +368,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          translationHashes,
           ...(browserLocale ? { browserLocale } : {}),
           ...(userSettingLocale ? { userLocale: userSettingLocale } : {}),
         },

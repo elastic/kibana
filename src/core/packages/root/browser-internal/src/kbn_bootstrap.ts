@@ -31,8 +31,15 @@ export async function __kbnBootstrap__() {
   // 3. browser Accept-Language (injected as injectedMetadata.i18n.browserLocale)
   let translationsUrl = injectedMetadata.i18n.translationsUrl;
   const resolvedLocale = injectedMetadata.i18n.userLocale ?? injectedMetadata.i18n.browserLocale;
-  if (resolvedLocale) {
-    translationsUrl = translationsUrl.replace(/\/[^/]+\.json$/, `/${resolvedLocale}.json`);
+  const resolvedHash = resolvedLocale
+    ? injectedMetadata.i18n.translationHashes[resolvedLocale]
+    : undefined;
+  if (resolvedLocale && resolvedHash) {
+    // Replace both the hash and filename segments with the correct per-locale values
+    const localeUrl = `/translations/${resolvedHash}/${resolvedLocale}.json`;
+    translationsUrl = translationsUrl
+      .replace(/\/translations\/[^/]+\/[^/]+\.json$/, localeUrl)
+      .replace(/\/translations\/[^/]+\.json$/, localeUrl);
   }
 
   let i18nError: Error | undefined;

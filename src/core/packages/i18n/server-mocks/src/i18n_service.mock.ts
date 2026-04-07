@@ -12,11 +12,14 @@ import type { I18nService, InternalI18nServicePreboot } from '@kbn/core-i18n-ser
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { lazyObject } from '@kbn/lazy-object';
 
+const MOCK_TRANSLATION_HASHES: Record<string, string> = { en: 'MOCK_HASH' };
+
 const createSetupContractMock = () => {
   const mock: jest.Mocked<I18nServiceSetup> = lazyObject({
     getLocale: jest.fn().mockReturnValue('en'),
     getTranslationFiles: jest.fn().mockReturnValue([]),
     getTranslationHash: jest.fn().mockReturnValue('MOCK_HASH'),
+    getTranslationHashes: jest.fn().mockReturnValue(MOCK_TRANSLATION_HASHES),
   });
 
   return mock;
@@ -25,9 +28,11 @@ const createSetupContractMock = () => {
 const createInternalPrebootMock = () => {
   const mock: jest.Mocked<InternalI18nServicePreboot> = lazyObject({
     getTranslationHash: jest.fn(),
+    getTranslationHashes: jest.fn(),
   });
 
   mock.getTranslationHash.mockReturnValue('MOCK_HASH');
+  mock.getTranslationHashes.mockReturnValue(MOCK_TRANSLATION_HASHES);
 
   return mock;
 };

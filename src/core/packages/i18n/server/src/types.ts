@@ -25,4 +25,9 @@ export interface I18nServiceSetup {
    * Returns the hash generated from the current translations.
    */
   getTranslationHash(): string;
+
+  /**
+   * Returns a map of locale ID to translation content hash for all supported locales.
+   */
+  getTranslationHashes(): Record<string, string>;
 }
