@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiCodeBlock,
@@ -48,7 +49,7 @@ import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/action
 import { AlertEpisodeGroupingFields } from '@kbn/alerting-v2-episodes-ui/components/grouping/grouping_fields';
 import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
 import { css } from '@emotion/react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -115,8 +116,13 @@ export function EpisodeDetailsPage() {
   const { services } = useKibana<AlertEpisodesKibanaServices>();
   const { euiTheme } = useEuiTheme();
   const { data, notifications, http, expressions } = services;
+  const history = useHistory();
 
-  const { data: eventRows = [], isLoading: isLoadingEvents } = useFetchEpisodeEventsQuery({
+  const {
+    data: eventRows = [],
+    isLoading: isLoadingEvents,
+    isError: isEventsError,
+  } = useFetchEpisodeEventsQuery({
     episodeId,
     data,
   });
@@ -203,18 +209,41 @@ export function EpisodeDetailsPage() {
         });
 
   const isLoading = isLoadingEvents || (Boolean(ruleId) && isLoadingRule);
+  const episodeNotFound = !isLoading && eventRows.length === 0;
 
-  if (!episodeId) {
+  if (!episodeId || episodeNotFound || isEventsError) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
+        color="danger"
         title={
           <h2>
             {i18n.translate('xpack.alertingV2.episodes.episodeNotFoundTitle', {
-              defaultMessage: 'Episode not found',
+              defaultMessage: 'Unable to load episode',
             })}
           </h2>
         }
+        body={
+          <p>
+            {i18n.translate('xpack.alertingV2.episodes.episodeNotFoundBody', {
+              defaultMessage:
+                'The alert episode could not be found or an error occurred while loading it.',
+            })}
+          </p>
+        }
+        actions={[
+          <EuiButton
+            color="primary"
+            fill
+            onClick={() => history.push('/')}
+            data-test-subj="episodeDetailsErrorBackButton"
+          >
+            {i18n.translate('xpack.alertingV2.episodes.backToEpisodes', {
+              defaultMessage: 'Back to alert episodes',
+            })}
+          </EuiButton>,
+        ]}
+        data-test-subj="episodeDetailsErrorPrompt"
       />
     );
   }
