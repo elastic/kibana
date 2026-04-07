@@ -17,6 +17,7 @@ import { DEFAULT_ELSER, getSemanticTextMapping } from '../create_index';
 interface Document extends OpenAPIV3.OperationObject {
   path: string;
   method: string;
+  components: OpenAPIV3.ComponentsObject;
   'x-codeSamples'?: {
     lang: string;
     source: string;
@@ -24,88 +25,73 @@ interface Document extends OpenAPIV3.OperationObject {
 }
 
 /**
- * Resolves $refs in an OpenAPI operation object by replacing references with their resolved content.
+ * Walks the operation to find all $ref strings and collects the referenced
+ * components into a minimal self-contained spec fragment.
  */
-function resolveOperationRefs(
+function collectReferencedComponents(
   operation: OpenAPIV3.OperationObject,
-  spec: OpenAPIV3.Document,
-  excludeKeys: string[] = []
-): OpenAPIV3.OperationObject {
-  const resolvedCache = new Map<string, unknown>();
-  const excludeKeySet = new Set(excludeKeys);
+  spec: OpenAPIV3.Document
+): OpenAPIV3.ComponentsObject {
+  const visited = new Set<string>();
+  const collected: Record<string, Record<string, unknown>> = {};
 
-  function resolveRef(ref: string): unknown {
-    if (!ref.startsWith('#/')) {
-      return null; // Skip external refs (e.g., URLs)
-    }
-
+  const navigateRef = (ref: string): unknown => {
+    if (!ref.startsWith('#/')) return undefined;
     const segments = ref.slice(2).split('/');
     let current: unknown = spec;
-
     for (const segment of segments) {
-      if (typeof current !== 'object' || current === null) {
-        return null;
-      }
+      if (typeof current !== 'object' || current === null) return undefined;
       current = (current as Record<string, unknown>)[segment];
     }
-
-    if (typeof current !== 'object' || current === null) {
-      return null;
-    }
-
     return current;
-  }
+  };
 
-  function recursiveResolve(obj: unknown): unknown {
-    if (obj === null || typeof obj !== 'object') return obj;
+  const collectRefs = (obj: unknown): void => {
+    if (obj === null || typeof obj !== 'object') return;
 
     if (Array.isArray(obj)) {
-      return obj.map((item) => recursiveResolve(item));
+      for (const item of obj) {
+        collectRefs(item);
+      }
+      return;
     }
 
-    const objRecord = obj as Record<string, unknown>;
+    const record = obj as Record<string, unknown>;
 
-    // Handle $ref - resolve and replace with referenced content
-    if ('$ref' in objRecord && typeof objRecord.$ref === 'string') {
-      const ref = objRecord.$ref;
+    if ('$ref' in record && typeof record.$ref === 'string') {
+      const ref = record.$ref;
+      if (!ref.startsWith('#/') || visited.has(ref)) return;
+      visited.add(ref);
 
-      // Return cached result if already resolved
-      if (resolvedCache.has(ref)) {
-        return resolvedCache.get(ref);
+      const resolved = navigateRef(ref);
+      if (resolved === undefined || resolved === null) return;
+
+      const segments = ref.slice(2).split('/');
+      if (segments.length >= 3 && segments[0] === 'components') {
+        const category = segments[1];
+        const name = segments.slice(2).join('/');
+        if (!collected[category]) {
+          collected[category] = {};
+        }
+        collected[category][name] = resolved;
       }
 
-      const resolved = resolveRef(ref);
-      if (resolved) {
-        const finalResolved = recursiveResolve(resolved);
-        resolvedCache.set(ref, finalResolved); // Cache the resolved result
-        return finalResolved;
-      }
-      return objRecord;
+      collectRefs(resolved);
+      return;
     }
 
-    // Traverse object and resolve nested values
-    let hasChanges = false;
-    const result: Record<string, unknown> = {};
-
-    for (const [key, value] of Object.entries(objRecord)) {
-      // Skip excluded keys - they are returned as-is without resolving references
-      const resolvedValue = excludeKeySet.has(key) ? value : recursiveResolve(value);
-      result[key] = resolvedValue;
-
-      if (resolvedValue !== value) {
-        hasChanges = true;
-      }
+    for (const value of Object.values(record)) {
+      collectRefs(value);
     }
+  };
 
-    // Only return new object if something actually changed
-    return hasChanges ? result : objRecord;
-  }
+  collectRefs(operation);
 
-  return recursiveResolve(operation) as OpenAPIV3.OperationObject;
+  return collected as OpenAPIV3.ComponentsObject;
 }
 
 function generateDocuments(openApiSpec: OpenAPIV3.Document, logger: ToolingLog): Document[] {
-  logger.info(`Resolving OpenAPI references...`);
+  logger.info(`Collecting OpenAPI references...`);
 
   const documents = Object.entries(openApiSpec.paths)
     .map(([path, methods]) => {
@@ -123,18 +109,21 @@ function generateDocuments(openApiSpec: OpenAPIV3.Document, logger: ToolingLog):
           throw new Error(`Invalid operation for path ${path} and method ${method}`);
         }
 
-        // Resolve references in operation specs, excluding responses and requestBody
-        const resolvedOperation = resolveOperationRefs(operation, openApiSpec, [
-          'responses',
-          'requestBody',
-        ]);
+        const referencedComponents = collectReferencedComponents(operation, openApiSpec);
 
-        return JSON.parse(JSON.stringify({ ...resolvedOperation, path, method }));
+        return JSON.parse(
+          JSON.stringify({
+            ...operation,
+            components: referencedComponents,
+            path,
+            method,
+          })
+        );
       });
     })
     .flat();
 
-  logger.info(`Resolved ${documents.length} OpenAPI operations`);
+  logger.info(`Collected ${documents.length} OpenAPI operations`);
   return documents;
 }
 
@@ -181,6 +170,14 @@ async function createOpenAPIIndex({
           type: 'object',
           enabled: false,
         },
+        requestBody: {
+          type: 'object',
+          enabled: false,
+        },
+        components: {
+          type: 'object',
+          enabled: false,
+        },
         'x-codeSamples': {
           type: 'object',
           enabled: false,
@@ -219,6 +216,8 @@ function transformDocumentsToIndexFormat(documents: Document[]): Array<Record<st
       // Store complete data for tool generation (but don't index deeply)
       parameters: doc.parameters ?? [],
       responses: doc.responses ?? {},
+      requestBody: doc.requestBody ?? {},
+      components: doc.components,
       'x-codeSamples': doc['x-codeSamples'] ?? [],
     };
     if (doc.method && doc.path) {

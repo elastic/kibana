@@ -33,6 +33,7 @@ import type {
   SecurityLabsInstallOptions,
   SecurityLabsUninstallOptions,
   SecurityLabsStatusResponse,
+  OpenApiSpecStatusResponse,
 } from './types';
 import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 import type { PerformUpdateResponse } from '../../../common/http_api/installation';
@@ -455,7 +456,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     inferenceId,
   }: {
     inferenceId: string;
-  }): Promise<SecurityLabsStatusResponse> {
+  }): Promise<OpenApiSpecStatusResponse> {
     if (!this.packageInstaller) {
       return { status: 'uninstalled' };
     }

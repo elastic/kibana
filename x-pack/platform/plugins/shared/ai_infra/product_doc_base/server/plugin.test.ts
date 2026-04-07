@@ -55,6 +55,7 @@ describe('ProductDocBasePlugin', () => {
       installSecurityLabs: jest.fn().mockResolvedValue({}),
       uninstallSecurityLabs: jest.fn().mockResolvedValue({}),
       getSecurityLabsStatus: jest.fn().mockResolvedValue({}),
+      getOpenApiSpecStatus: jest.fn().mockResolvedValue({}),
       updateSecurityLabsAll: jest.fn().mockResolvedValue({}),
     });
   });
@@ -103,6 +104,7 @@ describe('ProductDocBasePlugin', () => {
           installSecurityLabs: expect.any(Function),
           uninstallSecurityLabs: expect.any(Function),
           getSecurityLabsStatus: expect.any(Function),
+          getOpenApiSpecStatus: expect.any(Function),
         },
         search: expect.any(Function),
       });

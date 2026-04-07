@@ -20,6 +20,7 @@ const mockProductDocManager = {
   updateAll: jest.fn(),
   updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
   getSecurityLabsStatus: jest.fn(),
+  getOpenApiSpecStatus: jest.fn(),
 };
 
 describe('helpers', () => {

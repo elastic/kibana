@@ -182,6 +182,7 @@ export interface OpenapiSpecAttributes extends OpenAPIV3.OperationObject {
   path: string;
   method: OpenAPIV3.HttpMethods;
   endpoint: string;
+  components?: OpenAPIV3.ComponentsObject;
 }
 
 export const performOpenapiSpecSearch = async ({

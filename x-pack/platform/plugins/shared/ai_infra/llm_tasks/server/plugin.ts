@@ -52,6 +52,12 @@ export class LlmTasksPlugin
           });
           return status.status === 'installed';
         }
+        if (resourceType === ResourceTypes.openapiSpec) {
+          const status = await startDependencies.productDocBase.management.getOpenApiSpecStatus({
+            inferenceId: options.inferenceId,
+          });
+          return status.status === 'installed';
+        }
         const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
           inferenceId: options.inferenceId,
         });

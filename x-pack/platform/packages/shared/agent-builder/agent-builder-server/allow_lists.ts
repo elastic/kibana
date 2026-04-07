@@ -33,6 +33,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_service_topology`,
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
+  `${internalNamespaces.observability}.elasticsearch`,
   `${internalNamespaces.observability}.get_logs`,
 
   // Security Solution

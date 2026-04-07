@@ -11,6 +11,7 @@ import {
   ResourceTypes,
   getSecurityLabsIndexName,
   getOpenApiSpecIndexName,
+  DocumentationProduct,
 } from '@kbn/product-doc-common';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getIndicesForResourceTypes, mapResult } from './utils';
@@ -69,13 +70,16 @@ const mapOpenapiSpecResult = (docHit: SearchHit<OpenapiSpecAttributes>) => {
       description: source.description,
       summary: source.summary,
       parameters: source.parameters,
+      requestBody: source.requestBody,
       method: source.method,
       path: source.path,
       responses: source.responses,
       endpoint: source.endpoint,
+      components: source.components,
+      score: docHit._score,
     }),
     url: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/${source.operationId}`,
-    productName: 'elasticsearch' as const,
+    productName: DocumentationProduct.elasticsearch,
     highlights:
       (docHit.highlight as Record<string, string[] | undefined> | undefined)?.content ?? [],
   };
@@ -131,7 +135,10 @@ export class SearchService {
     }
 
     if (resourceTypes.includes(ResourceTypes.openapiSpec)) {
-      const openApiSpecIndex = getOpenApiSpecIndexName(inferenceId);
+      const openApiSpecIndex = getOpenApiSpecIndexName(
+        DocumentationProduct.elasticsearch,
+        inferenceId
+      );
       this.log.debug(
         `performing search - query=[${query}] at index=[${openApiSpecIndex}] resourceType=[${ResourceTypes.openapiSpec}]`
       );

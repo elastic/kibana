@@ -148,6 +148,7 @@ describe('AI Assistant Service', () => {
         uninstall: jest.fn(),
         uninstallSecurityLabs: jest.fn(),
         getSecurityLabsStatus: jest.fn(),
+        getOpenApiSpecStatus: jest.fn(),
       }),
     };
   });
