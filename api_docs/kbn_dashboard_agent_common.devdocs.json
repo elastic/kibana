@@ -21,21 +21,21 @@
     "functions": [
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.attachmentToDashboardState",
+        "id": "def-common.attachmentDataToDashboardState",
         "type": "Function",
         "tags": [],
-        "label": "attachmentToDashboardState",
+        "label": "attachmentDataToDashboardState",
         "description": [
-          "\nConverts a DashboardAttachment to a DashboardState.\nUses provided values from the attachment, falling back to defaults for missing fields."
+          "\nConverts dashboard attachment data to a DashboardState.\nUses provided values from the attachment data, falling back to defaults for missing fields."
         ],
         "signature": [
-          "({ data: { panels, filters, pinned_panels, access_control, options, ...rest }, }: ",
+          "({ panels = [], filters, pinned_panels, access_control, options, ...rest }: ",
           {
             "pluginId": "@kbn/dashboard-agent-common",
             "scope": "common",
             "docId": "kibKbnDashboardAgentCommonPluginApi",
-            "section": "def-common.DashboardAttachment",
-            "text": "DashboardAttachment"
+            "section": "def-common.DashboardAttachmentData",
+            "text": "DashboardAttachmentData"
           },
           ") => ",
           {
@@ -63,18 +63,18 @@
         "children": [
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.attachmentToDashboardState.$1",
+            "id": "def-common.attachmentDataToDashboardState.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  data: { panels = [], filters, pinned_panels, access_control, options, ...rest },\n}",
+            "label": "{\n  panels = [],\n  filters,\n  pinned_panels,\n  access_control,\n  options,\n  ...rest\n}",
             "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/dashboard-agent-common",
                 "scope": "common",
                 "docId": "kibKbnDashboardAgentCommonPluginApi",
-                "section": "def-common.DashboardAttachment",
-                "text": "DashboardAttachment"
+                "section": "def-common.DashboardAttachmentData",
+                "text": "DashboardAttachmentData"
               }
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/from_attachment.ts",
@@ -90,10 +90,10 @@
       },
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.dashboardStateToAttachment",
+        "id": "def-common.dashboardStateToAttachmentData",
         "type": "Function",
         "tags": [],
-        "label": "dashboardStateToAttachment",
+        "label": "dashboardStateToAttachmentData",
         "description": [
           "\nConverts a DashboardState to DashboardAttachmentData.\nPreserves all dashboard state fields for full round-trip support."
         ],
@@ -124,7 +124,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.dashboardStateToAttachment.$1",
+            "id": "def-common.dashboardStateToAttachmentData.$1",
             "type": "Object",
             "tags": [],
             "label": "state",

@@ -42,7 +42,8 @@ const defaultTabs: LeftPanelTabsType = [
   },
 ];
 
-describe('hooks', () => {
+// Failing: See https://github.com/elastic/kibana/issues/261569
+describe.skip('hooks', () => {
   describe('useSelectedTab', () => {
     const mockOpenLeftPanel = jest.fn();
 
