@@ -37,7 +37,7 @@ describe('Metric Schema', () => {
             operation: 'count',
             field: 'test_field',
             fit: false,
-            sub_label: 'Count of records',
+            subtitle: 'Count of records',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: {
               alignment: 'left',
@@ -510,7 +510,7 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'sales',
-            sub_label: 'Total Sales',
+            subtitle: 'Total Sales',
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: {
