@@ -35,7 +35,7 @@ const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'va
   progressDirection: 'vertical',
   maxCols: 5,
   color: 'static-color',
-  icon: 'compute',
+  icon: 'processor',
   palette,
   showBar: true,
   trendlineLayerId: 'second',
