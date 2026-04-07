@@ -83,9 +83,10 @@ const baseRule: RuleApiResponse = {
   updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
-const mockUseNavigateToRuleEventsInDiscover = useNavigateToRuleEventsInDiscover as jest.MockedFunction<
-  typeof useNavigateToRuleEventsInDiscover
->;
+const mockUseNavigateToRuleEventsInDiscover =
+  useNavigateToRuleEventsInDiscover as jest.MockedFunction<
+    typeof useNavigateToRuleEventsInDiscover
+  >;
 
 const renderPage = (rule: RuleApiResponse) =>
   render(
