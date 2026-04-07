@@ -50,8 +50,8 @@ function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
     [allValidationErrors]
   );
 
-  const errorCount = errors?.length;
-  const warningCount = warnings?.length;
+  const errorCount = errors.length;
+  const warningCount = warnings.length;
   const highestSeverity = errorCount ? 'error' : warningCount ? 'warning' : null;
 
   const parts = useMemo(() => {
@@ -76,7 +76,7 @@ function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
   }, [errorCount, warningCount]);
 
   const sortedValidationErrors = useMemo(() => {
-    return allValidationErrors?.sort((a, b) => {
+    return allValidationErrors?.toSorted((a, b) => {
       if (a.startLineNumber === b.startLineNumber) {
         if (a.startColumn === b.startColumn) {
           if (a.severity && b.severity) {
@@ -107,7 +107,6 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   const workflowId = useSelector(selectWorkflowId);
   const telemetry = useTelemetry();
   const previousErrorsRef = useRef<string>('');
-  const [currentState, setCurrentState] = useState('closed');
 
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
@@ -222,76 +221,71 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       isDisabled={allValidationErrors?.length === 0}
       css={styles.accordion}
       extraAction={extraAction}
-      onToggle={(open) => setCurrentState(open ? 'opened' : 'closed')}
     >
-      {currentState === 'closed' ? null : (
-        <>
-          <div css={styles.separator} />
-          <div css={styles.accordionContent} className="eui-yScrollWithShadows">
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {sortedValidationErrors?.map((error, index) => (
-                <button
-                  type="button"
-                  key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
-                  css={styles.validationError}
-                  onClick={() => onErrorClick?.(error)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onErrorClick?.(error);
-                    }
-                  }}
-                  tabIndex={0}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type={
-                        error.severity === 'error'
-                          ? 'errorFill'
-                          : error.severity === 'warning'
-                          ? 'warningFill'
-                          : 'iInCircle'
-                      }
-                      color={
-                        error.severity === 'error'
-                          ? 'danger'
-                          : error.severity === 'warning'
-                          ? euiTheme.colors.vis.euiColorVis8
-                          : 'primary'
-                      }
-                      size="s"
-                      css={styles.validationErrorIcon}
-                      aria-hidden={true}
+      <div css={styles.separator} />
+      <div css={styles.accordionContent} className="eui-yScrollWithShadows">
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {sortedValidationErrors?.map((error, index) => (
+            <button
+              type="button"
+              key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
+              css={styles.validationError}
+              onClick={() => onErrorClick?.(error)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onErrorClick?.(error);
+                }
+              }}
+              tabIndex={0}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type={
+                    error.severity === 'error'
+                      ? 'errorFill'
+                      : error.severity === 'warning'
+                      ? 'warningFill'
+                      : 'iInCircle'
+                  }
+                  color={
+                    error.severity === 'error'
+                      ? 'danger'
+                      : error.severity === 'warning'
+                      ? euiTheme.colors.vis.euiColorVis8
+                      : 'primary'
+                  }
+                  size="s"
+                  css={styles.validationErrorIcon}
+                  aria-hidden={true}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem css={styles.validationErrorText}>
+                <EuiText color="text" size="xs">
+                  <span>{error.message}</span>
+                </EuiText>
+                <EuiText color="subdued" size="xs">
+                  <span>
+                    <FormattedMessage
+                      id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
+                      defaultMessage="Ln {lineNumber}, Col {columnNumber}"
+                      values={{
+                        lineNumber: error.startLineNumber,
+                        columnNumber: error.startColumn,
+                      }}
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem css={styles.validationErrorText}>
-                    <EuiText color="text" size="xs">
-                      <span>{error.message}</span>
-                    </EuiText>
-                    <EuiText color="subdued" size="xs">
-                      <span>
-                        <FormattedMessage
-                          id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
-                          defaultMessage="Ln {lineNumber}, Col {columnNumber}"
-                          values={{
-                            lineNumber: error.startLineNumber,
-                            columnNumber: error.startColumn,
-                          }}
-                        />
-                      </span>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="xs">
-                      <span>{error.source}</span>
-                    </EuiText>
-                  </EuiFlexItem>
-                </button>
-              ))}
-            </EuiFlexGroup>
-          </div>
-        </>
-      )}
+                  </span>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  <span>{error.source}</span>
+                </EuiText>
+              </EuiFlexItem>
+            </button>
+          ))}
+        </EuiFlexGroup>
+      </div>
     </EuiAccordion>
   );
 });

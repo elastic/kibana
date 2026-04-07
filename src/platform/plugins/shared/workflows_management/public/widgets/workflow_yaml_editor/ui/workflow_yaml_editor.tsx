@@ -107,8 +107,6 @@ import {
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../styles/use_workflows_monaco_theme';
 
-const hiddenButtonStyles = css({ display: 'none' });
-
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   automaticLayout: true,
@@ -325,17 +323,16 @@ export const WorkflowYAMLEditor = ({
       return;
     }
 
-    const disposeListener = editorRef.current!.onDidScrollChange(
+    const disposeListener = editorRef.current?.onDidScrollChange(
       throttle(() => {
-        if (!focusedStepInfoRef.current) {
+        if (!focusedStepInfoRef.current || !editorRef.current) {
           return;
         }
 
-        updateContainerPosition(focusedStepInfoRef.current, editorRef.current!);
-      }),
-      50
+        updateContainerPosition(focusedStepInfoRef.current, editorRef.current);
+      }, 50)
     );
-    return () => disposeListener.dispose();
+    return () => disposeListener?.dispose();
   }, [isEditorMounted]);
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
@@ -514,10 +511,10 @@ export const WorkflowYAMLEditor = ({
   };
 
   useEffect(() => {
-    if (!focusedStepInfo) {
+    if (!focusedStepInfo || !editorRef.current) {
       return;
     }
-    updateContainerPosition(focusedStepInfo, editorRef.current!);
+    updateContainerPosition(focusedStepInfo, editorRef.current);
   }, [isEditorMounted, focusedStepInfo]);
 
   useEffect(() => {
@@ -525,7 +522,7 @@ export const WorkflowYAMLEditor = ({
       return;
     }
 
-    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
+    const disposable = editorRef.current?.onDidChangeCursorPosition((event) => {
       dispatch(
         setCursorPosition({
           lineNumber: event.position.lineNumber,
@@ -534,7 +531,7 @@ export const WorkflowYAMLEditor = ({
       );
     });
 
-    return () => disposable.dispose();
+    return () => disposable?.dispose();
   }, [isEditorMounted, dispatch]);
 
   // Scroll editor to highlighted step when selected from execution flyout.
@@ -656,15 +653,16 @@ export const WorkflowYAMLEditor = ({
     [openActionsPopover]
   );
 
-  // These two were triggering rerendering of 2 actions container
-  // even at scrolling, because they were being re-created on every render. Memoizing them prevents that.
-  const ExtraActionsComponent = useMemo(() => {
-    return <ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />;
-  }, [extraActions, isExecutionYaml]);
+  // These were triggering rerendering of the actions containers on every scroll, because they were
+  // being re-created on every render. Memoizing them prevents unnecessary child re-renders.
+  const extraActionElement = useMemo(
+    () => <ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />,
+    [extraActions, isExecutionYaml]
+  );
 
-  const ActionsMenuButtonCachedProps = useMemo(() => {
+  const actionsMenuPanelProps = useMemo(() => {
     return {
-      Component: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
+      Button: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
       css: { css: styles.actionsMenuPopoverPanel },
     };
   }, [styles.actionsMenuPopoverPanel, styles.hiddenButtonCss]);
@@ -680,12 +678,12 @@ export const WorkflowYAMLEditor = ({
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
-        button={ActionsMenuButtonCachedProps.Component}
+        button={actionsMenuPanelProps.Button}
         container={containerRef.current ?? undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
-        panelProps={ActionsMenuButtonCachedProps.css}
+        panelProps={actionsMenuPanelProps.css}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
@@ -701,7 +699,9 @@ export const WorkflowYAMLEditor = ({
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}
             isDevelopment={isDevelopment}
-            workflowJsonSchema={workflowJsonSchemaStrict as SchemasSettings['schema']}
+            workflowJsonSchema={
+              (workflowJsonSchemaStrict ?? null) as SchemasSettings['schema'] | null
+            }
             onOpenAgentChat={openAgentChat}
             onDownloadSchema={downloadSchema}
           />
@@ -730,7 +730,7 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          extraAction={ExtraActionsComponent}
+          extraAction={extraActionElement}
         />
       </div>
     </div>
