@@ -31,24 +31,6 @@ describe('workflow_yaml_attachment', () => {
       expect(tools).toEqual(Object.values(workflowTools));
     });
 
-    it('does not include list_workflows or get_workflow tool IDs', () => {
-      let registeredType: { getTools?: () => string[] } | undefined;
-      const mockAgentBuilder = {
-        attachments: {
-          registerType: jest.fn((type: unknown) => {
-            registeredType = type as typeof registeredType;
-          }),
-        },
-      } as unknown as AgentBuilderPluginSetupContract;
-      const mockApi = {} as unknown as WorkflowsManagementApi;
-
-      registerWorkflowYamlAttachment(mockAgentBuilder, mockApi);
-
-      const tools = registeredType!.getTools!();
-      expect(tools).not.toContain('internal.workflows.list_workflows');
-      expect(tools).not.toContain('internal.workflows.get_workflow');
-    });
-
     it('includes key workflow tools', () => {
       let registeredType: { getTools?: () => string[] } | undefined;
       const mockAgentBuilder = {

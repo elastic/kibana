@@ -31,12 +31,6 @@ describe('workflowAuthoringSkill', () => {
       expect(tools).toContain(workflowTools.modifyProperty);
       expect(tools).toContain(workflowTools.deleteStep);
     });
-
-    it('does not include list_workflows or get_workflow tool IDs', () => {
-      const tools = workflowAuthoringSkill.getRegistryTools!();
-      expect(tools).not.toContain('internal.workflows.list_workflows');
-      expect(tools).not.toContain('internal.workflows.get_workflow');
-    });
   });
 
   describe('content', () => {

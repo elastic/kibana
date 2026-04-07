@@ -16,7 +16,7 @@ import {
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import { workflowIndexName, type WorkflowProperties } from '../../storage/workflow_storage';
 
-const getIndexPattern = (): string => `${workflowIndexName}-*`;
+const indexPattern = `${workflowIndexName}-*`;
 
 const buildSearchContent = (source: WorkflowProperties): string => {
   const parts: Array<string | undefined> = [
@@ -35,7 +35,6 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
 
   async *list(context) {
     const pageSize = 1000;
-    const indexPattern = getIndexPattern();
     let searchAfter: SortResults | undefined;
     let hasMore = true;
 
@@ -83,7 +82,6 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
 
   getSmlData: async (originId, context) => {
     try {
-      const indexPattern = getIndexPattern();
       const response = await context.esClient.search<WorkflowProperties>({
         index: indexPattern,
         query: {
