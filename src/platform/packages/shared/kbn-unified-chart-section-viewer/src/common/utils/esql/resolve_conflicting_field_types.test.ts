@@ -34,10 +34,19 @@ describe('resolveConflictingFieldTypes', () => {
     const floatFamilyCases: Array<{ types: ES_FIELD_TYPES[]; expected: ES_FIELD_TYPES }> = [
       { types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT], expected: ES_FIELD_TYPES.DOUBLE },
       { types: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE], expected: ES_FIELD_TYPES.DOUBLE },
-      { types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT], expected: ES_FIELD_TYPES.DOUBLE },
+      {
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT],
+        expected: ES_FIELD_TYPES.DOUBLE,
+      },
       { types: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT], expected: ES_FIELD_TYPES.DOUBLE },
-      { types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.SCALED_FLOAT], expected: ES_FIELD_TYPES.DOUBLE },
-      { types: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT, ES_FIELD_TYPES.SCALED_FLOAT], expected: ES_FIELD_TYPES.DOUBLE },
+      {
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.SCALED_FLOAT],
+        expected: ES_FIELD_TYPES.DOUBLE,
+      },
+      {
+        types: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT, ES_FIELD_TYPES.SCALED_FLOAT],
+        expected: ES_FIELD_TYPES.DOUBLE,
+      },
     ];
 
     floatFamilyCases.forEach(({ types, expected }) => {
