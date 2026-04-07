@@ -10,11 +10,11 @@ export const vectorDatabaseTutorialCommands: string = `
 # 🚀 Elasticsearch Vector Database Tutorial
 # ===============================================
 
-# Vector databases are the storage and retrieval layer behind AI applications like chatbots, RAG pipelines, and recommendation engines. They also enable semantic search, which matches on meaning rather than exact words. 
+# Vector databases are the storage and retrieval layer behind AI applications like chatbots, RAG pipelines, and recommendation engines. They also enable semantic search, which matches on meaning rather than exact words. The core idea: convert text into numerical vectors (embeddings) that capture semantic meaning, then find the closest matches.
 
-# The core idea: convert text into numerical vectors (embeddings) that capture semantic meaning, then find the closest matches.
-
-# Elasticsearch is a vector database that lets you bring your own embeddings (from OpenAI, Cohere, etc.) or generate them automatically via Elastic Inference Service (EIS).
+# Elasticsearch is a high performance, efficient vector database that lets you generate emeddings automatically via Elastic Inference Service (EIS).
+# We natively provide state of the art Jina embedding and reranking models via EIS, unlocking multilingual model supporting 30+ languages with no external API key or infrastructure. You index plain text and Elasticsearch handles the rest.
+# Alternatively, bring your own embeddings (from OpenAI, Cohere, etc.).
 
 # ───────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ export const vectorDatabaseTutorialCommands: string = `
 
 
 # ╔═══════════════════════════════════════════╗
-#   PATH A — Elastic generated embeddings       
+#   PATH A — Elastic generated embeddings
 # ╚═══════════════════════════════════════════╝
 
 # After selecting a command, execute it by clicking the ▶️ button or pressing Ctrl+Enter or Cmd+Enter.
@@ -58,7 +58,7 @@ PUT /kibana_sample_data_vectordb
 {
   "mappings": {
     "properties": {
-      "title": { 
+      "title": {
         "type": "text" // Full-text search via BM25. Matches individual words: "Canyon" finds "Grand Canyon National Park".
       },
       "semantic_content": {
@@ -70,7 +70,7 @@ PUT /kibana_sample_data_vectordb
         "type": "text", // Full-text search via BM25, like "title".
         "copy_to": "semantic_content" // Copies content into the semantic_content field so embeddings are generated automatically.
       },
-      "source": { 
+      "source": {
         "type": "keyword" // Exact-match only. Designed for filtering and aggregations (e.g. source="national-parks"), not full-text search.
       }
     }
@@ -92,8 +92,8 @@ DELETE /kibana_sample_data_vectordb
 PUT /kibana_sample_data_vectordb/_mapping
 {
   "properties": {
-    "subtitle": { 
-      "type": "text" 
+    "subtitle": {
+      "type": "text"
     }
   }
 }
@@ -735,7 +735,7 @@ GET /kibana_sample_data_vectordb_byoe/_search
 # -----------------------------------------------
 # This step does two things before you go to production:
 
-# First: create an alias — a pointer to your index. 
+# First: create an alias — a pointer to your index.
 # Your application queries the alias name ("vectordb-current"), never the raw index name. This matters because changing your embedding model later means re-embedding all documents into a new index, then swapping the alias. With an alias, your application code never changes. Without one, every model upgrade requires a code deployment.
 
 # Second: verify the mapping looks correct.
