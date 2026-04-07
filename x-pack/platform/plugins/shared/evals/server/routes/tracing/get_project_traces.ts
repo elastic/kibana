@@ -184,13 +184,9 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
               };
             }
 
-            const childEnrichResponse = await esClient.search<{
-              trace_id?: string;
-              name?: string;
-              attributes?: Record<string, unknown>;
-            }>({
+            const childEnrichResponse = await esClient.search({
               index: TRACES_INDEX_PATTERN,
-              size: traceIds.length * 2,
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -205,39 +201,65 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                   minimum_should_match: 1,
                 },
               },
-              _source: [
-                'trace_id',
-                'name',
-                'attributes.gen_ai.prompt.id',
-                'attributes.gen_ai.request.model',
-                'attributes.output.value',
-                'attributes.input.value',
-              ],
-              sort: [{ '@timestamp': { order: 'asc' } }],
+              aggs: {
+                per_trace: {
+                  terms: { field: 'trace_id', size: traceIds.length },
+                  aggs: {
+                    earliest_hit: {
+                      top_hits: {
+                        size: 3,
+                        sort: [{ '@timestamp': { order: 'asc' } }],
+                        _source: [
+                          'trace_id',
+                          'name',
+                          'attributes.gen_ai.prompt.id',
+                          'attributes.gen_ai.request.model',
+                          'attributes.output.value',
+                          'attributes.input.value',
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
             });
 
-            for (const childHit of childEnrichResponse.hits?.hits ?? []) {
-              const childSource = childHit._source;
-              if (!childSource?.trace_id) continue;
-              const tid = childSource.trace_id;
-              const childAttrs = childSource.attributes ?? {};
+            const perTraceEnrichAgg = childEnrichResponse.aggregations?.per_trace as {
+              buckets: Array<{
+                key: string;
+                earliest_hit: {
+                  hits: {
+                    hits: Array<{
+                      _source?: {
+                        trace_id?: string;
+                        attributes?: Record<string, unknown>;
+                      };
+                    }>;
+                  };
+                };
+              }>;
+            };
 
-              if (!childEnrichMap[tid]) {
-                childEnrichMap[tid] = {};
-              }
+            for (const bucket of perTraceEnrichAgg?.buckets ?? []) {
+              const tid = bucket.key;
+              childEnrichMap[tid] = {};
               const entry = childEnrichMap[tid];
 
-              if (!entry.promptId && childAttrs['gen_ai.prompt.id']) {
-                entry.promptId = String(childAttrs['gen_ai.prompt.id']);
-              }
-              if (!entry.model && childAttrs['gen_ai.request.model']) {
-                entry.model = String(childAttrs['gen_ai.request.model']);
-              }
-              if (!entry.inputPreview && childAttrs['input.value']) {
-                entry.inputPreview = String(childAttrs['input.value']).substring(0, 200);
-              }
-              if (!entry.outputPreview && childAttrs['output.value']) {
-                entry.outputPreview = String(childAttrs['output.value']).substring(0, 200);
+              for (const hit of bucket.earliest_hit?.hits?.hits ?? []) {
+                const childAttrs = hit._source?.attributes ?? {};
+
+                if (!entry.promptId && childAttrs['gen_ai.prompt.id']) {
+                  entry.promptId = String(childAttrs['gen_ai.prompt.id']);
+                }
+                if (!entry.model && childAttrs['gen_ai.request.model']) {
+                  entry.model = String(childAttrs['gen_ai.request.model']);
+                }
+                if (!entry.inputPreview && childAttrs['input.value']) {
+                  entry.inputPreview = String(childAttrs['input.value']).substring(0, 200);
+                }
+                if (!entry.outputPreview && childAttrs['output.value']) {
+                  entry.outputPreview = String(childAttrs['output.value']).substring(0, 200);
+                }
               }
             }
           }
