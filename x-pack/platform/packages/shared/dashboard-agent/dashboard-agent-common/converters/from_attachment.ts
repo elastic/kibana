@@ -16,7 +16,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
-  DashboardAttachment,
+  DashboardAttachmentData,
 } from '../types';
 import { isSection } from '../types';
 
@@ -95,9 +95,15 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
  * Converts a DashboardAttachment to a DashboardState.
  * Uses provided values from the attachment, falling back to defaults for missing fields.
  */
-export const attachmentToDashboardState = ({
-  data: { panels = [], filters, query, pinned_panels, access_control, options, ...rest },
-}: DashboardAttachment): DashboardState => ({
+export const attachmentDataToDashboardState = ({
+  panels = [],
+  filters,
+  query,
+  pinned_panels,
+  access_control,
+  options,
+  ...rest
+}: DashboardAttachmentData): DashboardState => ({
   ...EMPTY_DASHBOARD_STATE,
   ...rest,
   options: {
