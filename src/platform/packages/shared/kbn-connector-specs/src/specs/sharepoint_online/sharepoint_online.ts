@@ -107,13 +107,15 @@ export const SharepointOnline: ConnectorSpec = {
   actions: {
     getAllSites: {
       isTool: true,
+      description:
+        'List all SharePoint sites the connector has access to. With app-only (client credentials) auth, returns all sites via /sites/getAllSites. With delegated (authorization code) auth, falls back to /sites?search= because getAllSites requires application permissions. Use this to discover site IDs needed by getSite, getSitePages, getSiteDrives, getSiteLists, and getSiteListItems.',
       input: z
         .object({
           search: z
             .string()
             .optional()
             .describe(
-              'Search keyword to filter sites. Used with delegated auth (oauth_authorization_code) where /sites/getAllSites is not available.'
+              'Optional search keyword to filter sites by name. Only used with delegated auth (oauth_authorization_code) where /sites/getAllSites is unavailable. With app-only auth this field is ignored. Omit or pass "*" for a wildcard that returns all accessible sites.'
             ),
         })
         .optional(),
@@ -151,8 +153,14 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSitePages: {
       isTool: true,
+      description:
+        'List all pages in a SharePoint site. Returns page metadata (id, title, description, webUrl, createdDateTime, lastModifiedDateTime). Use getAllSites to discover siteId values, and then use getSitePageContents to fetch the full content of a specific page.',
       input: z.object({
-        siteId: z.string().describe('Site ID'),
+        siteId: z
+          .string()
+          .describe(
+            'The ID of the SharePoint site whose pages you want to list. Use getAllSites to discover site IDs.'
+          ),
       }),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
@@ -179,9 +187,19 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSitePageContents: {
       isTool: true,
+      description:
+        'Fetch the full HTML content of a SharePoint site page, including its canvas layout. Use this to read wiki/news pages. Use getAllSites to discover siteId values, and getSitePages to discover pageId values for a given site.',
       input: z.object({
-        siteId: z.string().describe('Site ID'),
-        pageId: z.string().describe('Page ID'),
+        siteId: z
+          .string()
+          .describe(
+            'The ID of the SharePoint site that contains the page. Use getAllSites to discover site IDs.'
+          ),
+        pageId: z
+          .string()
+          .describe(
+            'The ID of the page to fetch. Use getSitePages to list pages and discover their IDs for a given site.'
+          ),
       }),
       output: z.any(),
       handler: async (ctx, input) => {
@@ -215,9 +233,27 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSite: {
       isTool: true,
+      description:
+        'Retrieve details for a single SharePoint site by either its site ID or its relative URL. Returns id, displayName, webUrl, siteCollection, createdDateTime, and lastModifiedDateTime. Use getAllSites to discover site IDs, or provide a relativeUrl in the format "contoso.sharepoint.com:/sites/hr:".',
       input: z.union([
-        z.object({ siteId: z.string().describe('Site ID') }).strict(),
-        z.object({ relativeUrl: z.string().describe('Relative URL path') }).strict(),
+        z
+          .object({
+            siteId: z
+              .string()
+              .describe(
+                'The ID of the SharePoint site to retrieve. Use getAllSites to discover site IDs.'
+              ),
+          })
+          .strict(),
+        z
+          .object({
+            relativeUrl: z
+              .string()
+              .describe(
+                'The relative URL of the site as a path in the format "hostname:/path:", e.g. "contoso.sharepoint.com:/sites/hr:". Use this as an alternative to siteId when you know the URL but not the ID.'
+              ),
+          })
+          .strict(),
       ]),
       handler: async (ctx, input) => {
         const typedInput = input as { siteId: string } | { relativeUrl: string };
@@ -248,8 +284,14 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteDrives: {
       isTool: true,
+      description:
+        'List all document libraries (drives) within a SharePoint site. Returns drive metadata including id, name, driveType, webUrl, and owner. Use getAllSites to discover siteId values. Drive IDs returned here are required by getDriveItems and downloadDriveItem.',
       input: z.object({
-        siteId: z.string().describe('Site ID'),
+        siteId: z
+          .string()
+          .describe(
+            'The ID of the SharePoint site whose document libraries (drives) you want to list. Use getAllSites to discover site IDs.'
+          ),
       }),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
@@ -278,9 +320,15 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteLists: {
       isTool: true,
+      description:
+        'List all SharePoint lists within a site (e.g., custom lists, document libraries represented as lists). Returns id, displayName, name, webUrl, and description for each list. Use getAllSites to discover siteId values. List IDs returned here are required by getSiteListItems.',
       input: z
         .object({
-          siteId: z.string().describe('Site ID'),
+          siteId: z
+            .string()
+            .describe(
+              'The ID of the SharePoint site whose lists you want to enumerate. Use getAllSites to discover site IDs.'
+            ),
         })
         .strict(),
       output: GraphCollectionOutputSchema,
@@ -310,9 +358,19 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteListItems: {
       isTool: true,
+      description:
+        'Fetch all items from a specific list within a SharePoint site. Returns item metadata (id, webUrl, createdDateTime, lastModifiedDateTime, createdBy, lastModifiedBy). Use getAllSites to discover siteId values and getSiteLists to discover listId values.',
       input: z.object({
-        siteId: z.string().describe('Site ID'),
-        listId: z.string().describe('List ID'),
+        siteId: z
+          .string()
+          .describe(
+            'The ID of the SharePoint site that owns the list. Use getAllSites to discover site IDs.'
+          ),
+        listId: z
+          .string()
+          .describe(
+            'The ID of the list whose items you want to retrieve. Use getSiteLists to discover list IDs for a given site.'
+          ),
       }),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
@@ -348,9 +406,20 @@ export const SharepointOnline: ConnectorSpec = {
 
     getDriveItems: {
       isTool: true,
+      description:
+        'List files and folders within a SharePoint document library (drive), optionally scoped to a subfolder path. Returns item metadata including id, name, webUrl, size, and @microsoft.graph.downloadUrl. Use getSiteDrives to discover driveId values. The @microsoft.graph.downloadUrl field can be passed to downloadItemFromURL.',
       input: z.object({
-        driveId: z.string().describe('Drive ID'),
-        path: z.string().optional().describe('Path relative to drive root'),
+        driveId: z
+          .string()
+          .describe(
+            'The ID of the document library (drive) to browse. Use getSiteDrives to discover drive IDs for a site.'
+          ),
+        path: z
+          .string()
+          .optional()
+          .describe(
+            'Optional relative path within the drive root to scope the listing (e.g. "Folder/Subfolder"). Omit to list the root of the drive.'
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { driveId: string; path?: string };
@@ -367,7 +436,7 @@ export const SharepointOnline: ConnectorSpec = {
         ctx.log.debug(`SharePoint getting drive items from ${url}`);
         const response = await ctx.client.get(url, {
           params: {
-            select:
+            $select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         });
@@ -377,9 +446,19 @@ export const SharepointOnline: ConnectorSpec = {
 
     downloadDriveItem: {
       isTool: true,
+      description:
+        'Download the content of a file from a SharePoint document library and return it as UTF-8 text. Best suited for plain-text or markdown files. For PDFs, .docx, and other binary formats that require preprocessing, use downloadItemFromURL instead (which returns base64 for Elasticsearch ingest pipeline extraction). Use getSiteDrives to find driveId and getDriveItems to find itemId.',
       input: z.object({
-        driveId: z.string().describe('Drive ID'),
-        itemId: z.string().describe('Drive item ID'),
+        driveId: z
+          .string()
+          .describe(
+            'The ID of the document library (drive) that contains the file. Use getSiteDrives to discover drive IDs.'
+          ),
+        itemId: z
+          .string()
+          .describe(
+            'The ID of the file item to download. Use getDriveItems to list items in a drive and discover their IDs.'
+          ),
       }),
       output: z.object({
         contentType: z.string().optional().describe('Content-Type header'),
@@ -417,8 +496,15 @@ export const SharepointOnline: ConnectorSpec = {
 
     downloadItemFromURL: {
       isTool: true,
+      description:
+        'Download a SharePoint file using its pre-authenticated @microsoft.graph.downloadUrl and return the content as a base64-encoded string. Use this for PDFs, .docx, and other binary formats that require preprocessing via an Elasticsearch ingest pipeline attachment processor. For plain-text or markdown files you can use downloadDriveItem instead. Use getDriveItems to find the @microsoft.graph.downloadUrl field on a file item.',
       input: z.object({
-        downloadUrl: z.string().url().describe('Pre-authenticated download URL'),
+        downloadUrl: z
+          .string()
+          .url()
+          .describe(
+            'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems. Note: these URLs are time-limited and should be used promptly.'
+          ),
       }),
       output: z.object({
         contentType: z.string().optional().describe('Content-Type header'),
@@ -498,20 +584,38 @@ export const SharepointOnline: ConnectorSpec = {
 
     search: {
       isTool: true,
+      description:
+        'Search SharePoint content using the Microsoft Graph Search API with Keyword Query Language (KQL). Supports searching across sites, lists, list items, drives, and drive items. Note: not all entity type combinations can be mixed in a single request — valid groupings are (driveItem, listItem), (site, list), or (drive) alone.',
       input: z.object({
-        query: z.string().describe('Search query'),
+        query: z
+          .string()
+          .describe(
+            'KQL search query string. Examples: "contoso product", "filename:budget filetype:xlsx", "author:jane AND filetype:docx". Supports standard KQL operators (AND, OR, NOT) and property restrictions.'
+          ),
         entityTypes: z
           .array(z.enum(['site', 'list', 'listItem', 'drive', 'driveItem']))
           .optional()
-          .describe('Entity types to search'),
+          .describe(
+            'Entity types to include in the search. Valid groupings (cannot be mixed arbitrarily): (driveItem, listItem), (site, list), or (drive) alone. Defaults to ["site"] if omitted.'
+          ),
         region: z
           .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
           .optional()
           .describe(
-            'Search region, only used with app-only (client credentials) auth. Ignored for delegated auth. (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
+            'Search region. Only used with app-only (client credentials) auth — ignored for delegated auth. NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa. Defaults to NAM when using app-only auth.'
           ),
-        from: z.number().optional().describe('Offset for pagination'),
-        size: z.number().optional().describe('Number of results to return'),
+        from: z
+          .number()
+          .default(0)
+          .describe('Zero-based pagination offset (number of results to skip). Defaults to 0.'),
+        size: z
+          .number()
+          .min(1)
+          .max(500)
+          .default(25)
+          .describe(
+            'Number of results to return per page. Must be between 1 and 500. Defaults to 25.'
+          ),
       }),
       output: z.any(),
       handler: async (ctx, input) => {
@@ -576,4 +680,33 @@ export const SharepointOnline: ConnectorSpec = {
       }
     },
   },
+
+  skill: [
+    '## SharePoint Online Connector Usage Guide',
+    '',
+    '### Navigation Pattern',
+    'Use this hierarchy to browse SharePoint content:',
+    '1. `getAllSites` — discover sites and their IDs',
+    '2. `getSiteDrives` / `getSiteLists` — discover document libraries (drives) or custom lists within a site',
+    '3. `getDriveItems` / `getSiteListItems` — list files/folders in a drive or items in a list',
+    '4. `downloadDriveItem` / `downloadItemFromURL` — download file content',
+    '',
+    'For wiki/news pages: `getAllSites` → `getSitePages` → `getSitePageContents`',
+    '',
+    '### Search vs Browse',
+    '- **Use `search`** when you have a keyword or phrase and want to find matching content across SharePoint (KQL syntax). Good for "find all budget spreadsheets" or "documents by author Jane".',
+    '- **Use browse** (`getAllSites` → `getSiteDrives` → `getDriveItems`) when you need structured navigation — e.g., listing everything in a specific folder or enumerating all items in a library.',
+    '',
+    '### Auth Mode Differences',
+    '- **App-only auth (`oauth_client_credentials`)**: `getAllSites` calls `/sites/getAllSites` and returns all sites the app has access to. The `search` parameter is ignored. The `search` action requires a `region` parameter (defaults to `NAM`).',
+    '- **Delegated auth (`oauth_authorization_code`)**: `getAllSites` falls back to `/sites?search=` — provide a keyword or omit for wildcard (`*`). The `search` action does not use `region` (omit it to avoid 400 errors).',
+    '',
+    '### Escape Hatch',
+    'Use `callGraphAPI` to call any Microsoft Graph v1.0 endpoint not covered by the named actions. Paths must start with `/v1.0/`. Useful for accessing user profiles, calendar data, or other Graph resources.',
+    '',
+    '### Common Gotchas',
+    '- `@microsoft.graph.downloadUrl` values are time-limited pre-authenticated URLs — use them promptly after calling `getDriveItems`.',
+    '- `getSite` accepts either a `siteId` or a `relativeUrl` (format: `"contoso.sharepoint.com:/sites/hr:"`) — provide one or the other, not both.',
+    '- Drive IDs and site IDs are different — always use `getSiteDrives` to get drive IDs for a given site.',
+  ].join('\n'),
 };
