@@ -47,7 +47,9 @@ export function useFetchApmIndex(): UseFetchApmIndex {
   };
 }
 
-export function useFetchApmTracesIndex(): UseFetchApmIndex {
+export function useFetchApmTracesIndex({
+  enabled = true,
+}: { enabled?: boolean } = {}): UseFetchApmIndex {
   const { apmSourcesAccess } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
@@ -63,6 +65,7 @@ export function useFetchApmTracesIndex(): UseFetchApmIndex {
       return allIndices.join(',');
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
 
   return {

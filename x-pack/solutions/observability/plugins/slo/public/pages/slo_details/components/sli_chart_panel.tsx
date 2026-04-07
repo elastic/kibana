@@ -93,7 +93,7 @@ export function SliChartPanel({
   const apmUrl = isApm ? convertSliApmParamsToApmAppDeeplinkUrl(slo, timeRange) : undefined;
   const apmLink = apmUrl ? basePath.prepend(apmUrl) : undefined;
 
-  const { data: tracesIndex } = useFetchApmTracesIndex();
+  const { data: tracesIndex } = useFetchApmTracesIndex({ enabled: isApm });
 
   const discoverLink = (() => {
     if (!isApm || !tracesIndex) return undefined;

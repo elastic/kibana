@@ -80,6 +80,7 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
           serviceOverviewTab: 'transactions',
           query: { ...base.query, transactionName: value },
         });
+      case 'service.name':
       default:
         return locator.getRedirectUrl(base);
     }
