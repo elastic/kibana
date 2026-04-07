@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // wait for scroll restoration to be persisted
       await common.sleep(500);
       await expectScrollToBeRoughly(2000);
-      const [targetRowId] = await discover.getCascadeLayoutRowIds();
+      const [targetRowId] = await discover.getCascadeLayoutVisibleRowIds();
       await discover.toggleCascadeLayoutRow(targetRowId);
       await discover.scrollCascadeLayoutBy(200);
       // wait for scroll restoration to be persisted

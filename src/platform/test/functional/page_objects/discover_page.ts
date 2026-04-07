@@ -1078,7 +1078,7 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async getCascadeLayoutRowIds() {
+  public async getCascadeLayoutVisibleRowIds() {
     const container = await this.testSubjects.find('dataCascadeScrollContainer');
     const ids = await this.browser.execute(
       `
