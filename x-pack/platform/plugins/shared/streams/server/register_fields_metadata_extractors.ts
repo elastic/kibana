@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
 import { Streams } from '@kbn/streams-schema';
 import { createStreamsStorageClient } from './lib/streams/storage/streams_storage_client';
-import type { StreamsPluginStartDependencies } from './types';
 
 interface RegistrationDeps {
-  core: CoreSetup<StreamsPluginStartDependencies>;
   fieldsMetadata: FieldsMetadataServerSetup;
   logger: Logger;
 }
@@ -21,17 +19,12 @@ interface RegistrationDeps {
 /**
  * Registers a streams field extractor with the fields_metadata service.
  * This allows the ESQL editor and field sidebar to display field descriptions
- * for streams.
+ * for streams. The extractor receives a request-scoped ES client so that
+ * Elasticsearch-level read permissions are respected.
  */
-export const registerFieldsMetadataExtractors = ({
-  core,
-  fieldsMetadata,
-  logger,
-}: RegistrationDeps) => {
-  fieldsMetadata.registerStreamsFieldsExtractor(async ({ streamName }) => {
+export const registerFieldsMetadataExtractors = ({ fieldsMetadata, logger }: RegistrationDeps) => {
+  fieldsMetadata.registerStreamsFieldsExtractor(async ({ streamName, esClient }) => {
     try {
-      const [coreStart] = await core.getStartServices();
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
       const storageClient = createStreamsStorageClient(esClient, logger);
 
       // Fetch the stream definition

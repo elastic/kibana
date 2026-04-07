@@ -8,14 +8,14 @@
 import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import { HashedCache } from '../../../../common/hashed_cache';
 import type { AnyFieldName } from '../../../../common';
-import type {
-  ExtractedStreamFields,
-  StreamsFieldsExtractor,
-  StreamsFieldsSearchParams,
-} from './types';
+import type { ExtractedStreamFields, StreamsFieldsSearchParams } from './types';
+
+type BoundStreamsFieldsExtractor = (
+  params: StreamsFieldsSearchParams
+) => Promise<ExtractedStreamFields>;
 
 interface StreamsFieldsRepositoryDeps {
-  streamsFieldsExtractor: StreamsFieldsExtractor;
+  streamsFieldsExtractor: BoundStreamsFieldsExtractor;
 }
 
 type StreamFieldsMetadata = Record<string, FieldMetadata>;
@@ -23,7 +23,7 @@ type StreamFieldsMetadata = Record<string, FieldMetadata>;
 export class StreamsFieldsRepository {
   private cache: HashedCache<StreamsFieldsSearchParams, StreamFieldsMetadata>;
 
-  private constructor(private readonly streamsFieldsExtractor: StreamsFieldsExtractor) {
+  private constructor(private readonly streamsFieldsExtractor: BoundStreamsFieldsExtractor) {
     this.cache = new HashedCache();
   }
 

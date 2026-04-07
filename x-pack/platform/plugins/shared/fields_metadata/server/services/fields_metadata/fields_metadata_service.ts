@@ -54,14 +54,16 @@ export class FieldsMetadataService {
       integrationListExtractor,
     });
     const otelFieldsRepository = OtelFieldsRepository.create({ otelFields });
-    const streamsFieldsRepository = StreamsFieldsRepository.create({
-      streamsFieldsExtractor,
-    });
 
     return {
       getClient: async (request) => {
         const { fleet, fleetv2 } = await core.capabilities.resolveCapabilities(request, {
           capabilityPath: '*',
+        });
+
+        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        const streamsFieldsRepository = StreamsFieldsRepository.create({
+          streamsFieldsExtractor: (params) => streamsFieldsExtractor({ ...params, esClient }),
         });
 
         return FieldsMetadataClient.create({

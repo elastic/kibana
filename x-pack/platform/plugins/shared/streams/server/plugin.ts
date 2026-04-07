@@ -390,7 +390,6 @@ export class StreamsPlugin
     }
 
     registerFieldsMetadataExtractors({
-      core,
       fieldsMetadata: plugins.fieldsMetadata,
       logger: this.logger,
     });
