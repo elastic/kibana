@@ -236,7 +236,7 @@ export { type IngestStreamProcessing } from './src/models/ingest/processing';
 export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
-export type { IdentifyFeaturesResult } from './src/api/features';
+export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
 
 export {
   type GenerateInsightsResult,
