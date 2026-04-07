@@ -8,11 +8,7 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  createMetricAggregation,
-  createTimeBucketAggregation,
-  resolveConflictingFieldTypes,
-} from './create_aggregation';
+import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
 describe('createMetricAggregation', () => {
   describe('with resolved metric name (column escaping)', () => {
@@ -116,130 +112,6 @@ describe('createTimeBucketAggregation', () => {
       timestampField: '@timestamp',
     });
     expect(result).toBe('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
-  });
-});
-
-describe('resolveConflictingFieldTypes', () => {
-  describe('single type', () => {
-    it('should return the type when only one type is present', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should return undefined for empty array', () => {
-      const result = resolveConflictingFieldTypes([]);
-      expect(result).toBeUndefined();
-    });
-  });
-
-  describe('duplicate types', () => {
-    it('should return undefined when duplicates are present (no cast needed)', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE]);
-      expect(result).toBeUndefined();
-    });
-  });
-
-  describe('float family (double, float, half_float, scaled_float)', () => {
-    const floatFamilyCases: ES_FIELD_TYPES[][] = [
-      [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
-      [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE],
-      [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT],
-      [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT],
-      [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.SCALED_FLOAT],
-      [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT, ES_FIELD_TYPES.SCALED_FLOAT],
-    ];
-
-    floatFamilyCases.forEach((types) => {
-      const typesName = types.join(' + ');
-      it(`should resolve ${typesName} to double`, () => {
-        const result = resolveConflictingFieldTypes(types);
-        expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-      });
-    });
-  });
-
-  describe('integer family (long, integer, short, byte)', () => {
-    it('should resolve long + integer to long', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER]);
-      expect(result).toBe(ES_FIELD_TYPES.LONG);
-    });
-
-    it('should resolve integer + long to long', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.INTEGER, ES_FIELD_TYPES.LONG]);
-      expect(result).toBe(ES_FIELD_TYPES.LONG);
-    });
-
-    it('should resolve long + short to long', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.SHORT]);
-      expect(result).toBe(ES_FIELD_TYPES.LONG);
-    });
-
-    it('should resolve long + byte to long', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.BYTE]);
-      expect(result).toBe(ES_FIELD_TYPES.LONG);
-    });
-
-    it('should resolve integer + short + byte to long', () => {
-      const result = resolveConflictingFieldTypes([
-        ES_FIELD_TYPES.INTEGER,
-        ES_FIELD_TYPES.SHORT,
-        ES_FIELD_TYPES.BYTE,
-      ]);
-      expect(result).toBe(ES_FIELD_TYPES.LONG);
-    });
-  });
-
-  describe('mixed numeric families', () => {
-    it('should resolve double + long to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should resolve float + integer to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.INTEGER]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should resolve long + double to double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.DOUBLE]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-
-    it('should resolve mixed float and integer family to double', () => {
-      const result = resolveConflictingFieldTypes([
-        ES_FIELD_TYPES.DOUBLE,
-        ES_FIELD_TYPES.FLOAT,
-        ES_FIELD_TYPES.LONG,
-        ES_FIELD_TYPES.INTEGER,
-      ]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
-    });
-  });
-
-  describe('incompatible types', () => {
-    it('should return undefined for keyword + double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE]);
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined for text + long', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.LONG]);
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined for date + double', () => {
-      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE]);
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined for mixed numeric + non-numeric (double + long + keyword)', () => {
-      const result = resolveConflictingFieldTypes([
-        ES_FIELD_TYPES.DOUBLE,
-        ES_FIELD_TYPES.LONG,
-        ES_FIELD_TYPES.KEYWORD,
-      ]);
-      expect(result).toBeUndefined();
-    });
   });
 });
 
