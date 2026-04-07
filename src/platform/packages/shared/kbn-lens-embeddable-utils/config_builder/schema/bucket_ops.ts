@@ -118,7 +118,10 @@ const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomShared
   {
     operation: schema.literal('percentile'),
     percentile: schema.number({
-      meta: { description: 'Percentile to rank by' },
+      meta: {
+        description:
+          'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
+      },
       defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
     }),
   },
@@ -126,6 +129,8 @@ const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomShared
     meta: {
       id: 'termsRankByPercentileOperation',
       title: 'Terms Rank By Percentile Operation',
+      description:
+        'Ranks terms by a percentile value of a numeric field (e.g. the 95th percentile of response time).',
     },
   }
 );
@@ -133,7 +138,10 @@ const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSh
   {
     operation: schema.literal('percentile_rank'),
     rank: schema.number({
-      meta: { description: 'Percentile to rank by' },
+      meta: {
+        description:
+          'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
+      },
       defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
     }),
   },
@@ -141,6 +149,8 @@ const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSh
     meta: {
       id: 'termsRankByPercentileRankOperation',
       title: 'Terms Rank By Percentile Rank Operation',
+      description:
+        'Ranks terms by the percentile rank of a single value — the proportion of field values at or below that value.',
     },
   }
 );
