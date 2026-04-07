@@ -43,7 +43,7 @@ interface WorkflowYamlValidationAccordionProps {
   extraAction?: React.ReactNode;
 }
 
-export function WorkflowYamlValidationAccordion({
+export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlValidationAccordion({
   isMounted,
   isLoading,
   error: errorValidating,
@@ -263,7 +263,7 @@ export function WorkflowYamlValidationAccordion({
       </div>
     </EuiAccordion>
   );
-}
+});
 
 const componentStyles = {
   accordion: ({ euiTheme }: UseEuiTheme) =>

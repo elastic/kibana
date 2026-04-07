@@ -8,11 +8,20 @@
  */
 
 import type { XYVisualizationState as XYVisualizationState } from '@kbn/lens-common';
-import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
+import type { XYCurveType, FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
-import type { XYDecorations } from '../../../schema/charts/xy';
+import type { XYStyling } from '../../../schema/charts/xy';
 import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { getReversibleMappings, stripUndefined } from '../utils';
+import {
+  DEFAULT_AREAS_FILL_OPACITY,
+  DEFAULT_BARS_MINIMUM_HEIGHT,
+  DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
+  DEFAULT_DATA_LABELS_VISIBLE,
+  DEFAULT_LINES_INTERPOLATION,
+  DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+  DEFAULT_POINTS_VISIBILITY,
+} from './defaults';
 
 type XYLensAppearanceState = Pick<
   XYVisualizationState,
@@ -23,6 +32,9 @@ type XYLensAppearanceState = Pick<
   | 'hideEndzones'
   | 'showCurrentTimeMarker'
   | 'pointVisibility'
+  | 'fittingFunction'
+  | 'emphasizeFitting'
+  | 'endValue'
 >;
 
 const curveTypeCompat = getReversibleMappings<$Values<XYApiLineInterpolation>, XYCurveType>([
@@ -37,27 +49,116 @@ const pointVisibilityCompat = getReversibleMappings([
   ['hidden', 'never'],
 ]);
 
-export function convertAppearanceToAPIFormat(config: XYLensAppearanceState): XYDecorations {
-  return stripUndefined<XYDecorations>({
-    values: config.valueLabels != null ? { visible: config.valueLabels === 'show' } : undefined,
-    line_interpolation: curveTypeCompat.toAPI(config.curveType),
-    fill_opacity: config.fillOpacity,
-    minimum_bar_height: config.minBarHeight,
-    end_zones: config.hideEndzones != null ? { visible: config.hideEndzones } : undefined,
-    current_time_marker:
-      config.showCurrentTimeMarker != null ? { visible: config.showCurrentTimeMarker } : undefined,
-    point_visibility: pointVisibilityCompat.toAPI(config.pointVisibility),
+const fittingFunctionCompat = getReversibleMappings<
+  NonNullable<XYStyling['fitting']>['type'],
+  FittingFunction
+>([
+  ['none', 'None'],
+  ['zero', 'Zero'],
+  ['linear', 'Linear'],
+  ['carry', 'Carry'],
+  ['lookahead', 'Lookahead'],
+  ['average', 'Average'],
+  ['nearest', 'Nearest'],
+]);
+
+const extendCompat = getReversibleMappings<
+  NonNullable<NonNullable<XYStyling['fitting']>['extend']>,
+  EndValue
+>([
+  ['none', 'None'],
+  ['zero', 'Zero'],
+  ['nearest', 'Nearest'],
+]);
+
+export interface LayerPresence {
+  hasBars: boolean;
+  hasLines: boolean;
+  hasAreas: boolean;
+}
+
+export function convertStylingToAPIFormat(
+  config: XYLensAppearanceState,
+  layerPresence: LayerPresence
+): XYStyling {
+  const hasLinesOrAreas = layerPresence.hasLines || layerPresence.hasAreas;
+  return stripUndefined<XYStyling>({
+    // Chart-level (always present)
+    overlays: {
+      partial_buckets: {
+        visible:
+          config.hideEndzones != null ? !config.hideEndzones : DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+      },
+      current_time_marker: {
+        visible: config.showCurrentTimeMarker ?? DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
+      },
+    },
+    // Lines + areas shared (alphabetical)
+    fitting: hasLinesOrAreas ? convertFittingToAPIFormat(config) : undefined,
+    interpolation: hasLinesOrAreas
+      ? curveTypeCompat.toAPI(config.curveType) ?? DEFAULT_LINES_INTERPOLATION
+      : undefined,
+    points: hasLinesOrAreas
+      ? {
+          visibility:
+            pointVisibilityCompat.toAPI(config.pointVisibility) ?? DEFAULT_POINTS_VISIBILITY,
+        }
+      : undefined,
+    // Series-type specific (alphabetical)
+    areas: layerPresence.hasAreas
+      ? {
+          fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
+        }
+      : undefined,
+    bars: layerPresence.hasBars
+      ? {
+          minimum_height: config.minBarHeight ?? DEFAULT_BARS_MINIMUM_HEIGHT,
+          data_labels: {
+            visible:
+              config.valueLabels != null
+                ? config.valueLabels === 'show'
+                : DEFAULT_DATA_LABELS_VISIBLE,
+          },
+        }
+      : undefined,
   });
 }
 
-export function convertAppearanceToStateFormat(config: XYDecorations): XYLensAppearanceState {
+function convertFittingToAPIFormat(
+  config: Pick<XYLensAppearanceState, 'fittingFunction' | 'emphasizeFitting' | 'endValue'>
+): XYStyling['fitting'] {
+  const type = fittingFunctionCompat.toAPI(config.fittingFunction);
+  if (!type) {
+    return undefined;
+  }
+  return {
+    type,
+    ...stripUndefined({
+      emphasize: config.emphasizeFitting,
+      extend: extendCompat.toAPI(config.endValue),
+    }),
+  };
+}
+
+export function convertStylingToStateFormat(config: XYStyling): XYLensAppearanceState {
   return stripUndefined<XYLensAppearanceState>({
-    valueLabels: config.values != null ? (config.values.visible ? 'show' : 'hide') : undefined,
-    curveType: curveTypeCompat.toState(config.line_interpolation),
-    fillOpacity: config.fill_opacity,
-    minBarHeight: config.minimum_bar_height,
-    hideEndzones: config.end_zones?.visible,
-    showCurrentTimeMarker: config.current_time_marker?.visible,
-    pointVisibility: pointVisibilityCompat.toState(config.point_visibility),
+    hideEndzones:
+      config.overlays?.partial_buckets?.visible != null
+        ? !config.overlays.partial_buckets.visible
+        : undefined,
+    showCurrentTimeMarker: config.overlays?.current_time_marker?.visible,
+    valueLabels:
+      config.bars?.data_labels != null
+        ? config.bars.data_labels.visible
+          ? 'show'
+          : 'hide'
+        : undefined,
+    pointVisibility: pointVisibilityCompat.toState(config.points?.visibility),
+    curveType: curveTypeCompat.toState(config.interpolation),
+    minBarHeight: config.bars?.minimum_height,
+    fillOpacity: config.areas?.fill_opacity,
+    fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
+    emphasizeFitting: config.fitting?.emphasize,
+    endValue: extendCompat.toState(config.fitting?.extend),
   });
 }
