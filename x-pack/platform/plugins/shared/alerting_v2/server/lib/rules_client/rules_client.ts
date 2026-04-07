@@ -30,6 +30,7 @@ import type {
   BulkOperationResponse,
   BulkRulesParams,
   CreateRuleParams,
+  FindRulesSortField,
   FindRulesParams,
   FindRulesResponse,
   RuleResponse,
@@ -45,6 +46,22 @@ import { buildFindRulesSearch } from './build_rule_search';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_PER_PAGE = 20;
+const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
+  if (!sortField) {
+    return undefined;
+  }
+
+  const sortFieldMap: Record<FindRulesSortField, string> = {
+    kind: 'kind',
+    enabled: 'enabled',
+    name: 'metadata.name.keyword',
+  };
+
+  return sortFieldMap[sortField];
+};
 
 @injectable()
 export class RulesClient {
@@ -333,15 +350,24 @@ export class RulesClient {
     return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
 
+  @withApm
+  public async getTags(): Promise<string[]> {
+    return this.rulesSavedObjectService.findTags();
+  }
+
+  @withApm
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
-    const page = params.page ?? 1;
-    const perPage = params.perPage ?? 20;
-    const soFilter = buildFindRulesSearch({ filter: params.filter, search: params.search });
+    const page = params.page ?? DEFAULT_PAGE;
+    const perPage = params.perPage ?? DEFAULT_PER_PAGE;
+    const filter = buildFindRulesSearch({ filter: params.filter, search: params.search });
+    const sortField = mapSortField(params.sortField);
 
     const res = await this.rulesSavedObjectService.find({
       page,
       perPage,
-      filter: soFilter,
+      filter,
+      sortField,
+      sortOrder: params.sortOrder,
     });
 
     return {

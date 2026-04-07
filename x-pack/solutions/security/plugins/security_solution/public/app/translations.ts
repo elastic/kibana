@@ -191,6 +191,10 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
+export const ARTIFACTS = i18n.translate('xpack.securitySolution.navigation.artifacts', {
+  defaultMessage: 'Artifacts',
+});
+
 export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
   'xpack.securitySolution.navigation.responseActionsHistory',
   {
@@ -212,13 +216,6 @@ export const PROTECTION_UPDATES = i18n.translate(
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
-
-export const AI_RULE_CREATE = i18n.translate(
-  'xpack.securitySolution.navigation.aiRuleCreationTitle',
-  {
-    defaultMessage: 'AI rule creation',
-  }
-);
 
 export const DE_SPACE_RULES_HEALTH = i18n.translate(
   'xpack.securitySolution.navigation.spaceRulesHealthTitle',
