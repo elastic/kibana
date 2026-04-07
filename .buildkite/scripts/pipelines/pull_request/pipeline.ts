@@ -28,6 +28,7 @@ import {
   getPipeline,
   type GetPipelineOptions,
   prHasFIPSLabel,
+  doAllChangesMatch,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -57,8 +58,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
-    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
-    if (onlyRunQuickChecks) {
+    if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       emitPipeline(pipeline);
@@ -82,6 +82,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
+    }
+
+    if (await doAnyChangesMatch([/^renovate\.json$/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', cancelable));
     }
 
     if (
