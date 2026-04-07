@@ -488,6 +488,7 @@ src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-utils @elastic/kibana-operations
+src/platform/packages/shared/kbn-dev-validation-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-developer-toolbar @elastic/appex-sharedux
 src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-exploration-team @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
@@ -2125,6 +2126,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/api_integration/apis/features  @elastic/kibana-security
 
 # Kibana Platform Security
+packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-security
 /src/setup_node_env/harden @elastic/kibana-security
 
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
@@ -2269,6 +2271,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elasti
 /x-pack/platform/plugins/shared/alerting/server/lib/rule_gaps @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/plugins/shared/alerting/server/routes/gaps @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group8/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 
 # Enterprise Search
 # search
