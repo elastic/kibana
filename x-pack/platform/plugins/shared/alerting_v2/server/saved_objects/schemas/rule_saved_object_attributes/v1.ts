@@ -23,7 +23,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     name: schema.string(),
     description: schema.maybe(schema.string()),
     owner: schema.maybe(schema.string()),
-    labels: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
+    tags: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
   }),
   time_field: schema.string(),
   schedule: schema.object({
