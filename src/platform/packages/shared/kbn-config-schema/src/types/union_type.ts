@@ -12,6 +12,8 @@ import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import type { ExtendsDeepOptions } from './type';
 import { Type, type TypeOptions } from './type';
+import { ObjectType } from './object_type';
+import type { NullableProps } from './object_type';
 
 export type UnionTypeOptions<T> = TypeOptions<T>;
 
@@ -29,6 +31,42 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
     super(schema, options);
     this.unionTypes = types;
     this.typeOptions = options;
+  }
+
+  /**
+   * Return a new `UnionType` whose `ObjectType` members are each extended with `newProps`.
+   * Nested `UnionType` members are extended recursively.
+   *
+   * @example
+   * ```ts
+   * const union = schema.oneOf([
+   *   schema.object({ a: schema.string() }),
+   *   schema.object({ b: schema.number() }),
+   * ]);
+   *
+   * const extended = (union as UnionType<any, any>).extends({
+   *   extra: schema.boolean(),
+   * });
+   * // equivalent to schema.oneOf([
+   * //   schema.object({ a: schema.string(), extra: schema.boolean() }),
+   * //   schema.object({ b: schema.number(), extra: schema.boolean() }),
+   * // ])
+   * ```
+   */
+  public extends(
+    newProps: NullableProps,
+    newOptions?: UnionTypeOptions<T>
+  ): UnionType<Array<Type<any>>, T> {
+    const extendedTypes = this.unionTypes.map((t): Type<any> => {
+      if (t instanceof ObjectType) {
+        return t.extends(newProps);
+      }
+      if (t instanceof UnionType) {
+        return t.extends(newProps);
+      }
+      return t;
+    });
+    return new UnionType(extendedTypes, newOptions ?? this.typeOptions);
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {

@@ -199,6 +199,79 @@ test('fails if nested union type fail', () => {
   `);
 });
 
+describe('#extends', () => {
+  test('extends each ObjectType member with new properties', () => {
+    const union = schema.oneOf([
+      schema.object({ a: schema.string() }),
+      schema.object({ b: schema.number() }),
+    ]);
+
+    const extended = (union as any).extends({ extra: schema.boolean() });
+
+    expect(extended.validate({ a: 'hello', extra: true })).toEqual({ a: 'hello', extra: true });
+    expect(extended.validate({ b: 42, extra: false })).toEqual({ b: 42, extra: false });
+  });
+
+  test('recursively extends nested UnionType members', () => {
+    const inner = schema.oneOf([
+      schema.object({ x: schema.string() }),
+      schema.object({ y: schema.number() }),
+    ]);
+    const outer = schema.oneOf([inner, schema.object({ z: schema.boolean() })]);
+
+    const extended = (outer as any).extends({ added: schema.literal('ok') });
+
+    expect(extended.validate({ x: 'hi', added: 'ok' })).toEqual({ x: 'hi', added: 'ok' });
+    expect(extended.validate({ y: 7, added: 'ok' })).toEqual({ y: 7, added: 'ok' });
+    expect(extended.validate({ z: true, added: 'ok' })).toEqual({ z: true, added: 'ok' });
+  });
+
+  test('rejects values missing the extended property', () => {
+    const union = schema.oneOf([schema.object({ a: schema.string() })]);
+    const extended = (union as any).extends({ required: schema.string() });
+
+    expect(() => extended.validate({ a: 'hello' })).toThrow();
+  });
+
+  test('preserves existing validation options on nested unions', () => {
+    const union = schema.oneOf(
+      [schema.object({ val: schema.number() }), schema.object({ val: schema.string() })],
+      {
+        validate: (value: any) => {
+          if (value.val === 'forbidden') return 'val cannot be forbidden';
+        },
+      }
+    );
+
+    const extended = (union as any).extends({ extra: schema.maybe(schema.string()) });
+
+    expect(() => extended.validate({ val: 'forbidden' })).toThrow(/val cannot be forbidden/);
+    expect(extended.validate({ val: 'ok', extra: 'yes' })).toEqual({ val: 'ok', extra: 'yes' });
+  });
+
+  test('allows overriding options with newOptions', () => {
+    const union = schema.oneOf([schema.object({ a: schema.string() })], {
+      meta: { id: 'original' },
+    });
+
+    const extended = (union as any).extends(
+      { extra: schema.maybe(schema.boolean()) },
+      { meta: { id: 'overridden' } }
+    );
+
+    expect(extended.validate({ a: 'test' })).toEqual({ a: 'test' });
+  });
+
+  test('passes through unsupported member types unchanged', () => {
+    const union = schema.oneOf([schema.string(), schema.object({ a: schema.number() })]);
+
+    const extended = (union as any).extends({ extra: schema.maybe(schema.boolean()) });
+
+    expect(extended.validate('hello')).toBe('hello');
+    expect(extended.validate({ a: 42, extra: true })).toEqual({ a: 42, extra: true });
+  });
+});
+
 describe('#extendsDeep', () => {
   const type = schema.oneOf([schema.object({ foo: schema.string() })]);
 
