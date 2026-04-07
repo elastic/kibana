@@ -5,10 +5,20 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { memo } from 'react';
-import { EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { groupBy, isEmpty } from 'lodash';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import { EnrichmentSection } from './components/threat_details_view_enrichment_section';
 import { ENRICHMENT_TYPES } from '../../../common/cti/constants';
 import { EnrichmentRangePicker } from './components/threat_intelligence_view_enrichment_range_picker';
@@ -23,6 +33,10 @@ import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
 
+const TITLE = i18n.translate('xpack.securitySolution.flyout.threatIntelligence.title', {
+  defaultMessage: 'Threat intelligence',
+});
+
 export interface ThreatIntelligenceDetailsProps {
   /**
    * The document hit to display threat intelligence for
@@ -34,6 +48,7 @@ export interface ThreatIntelligenceDetailsProps {
  * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab
  */
 export const ThreatIntelligenceDetails = memo(({ hit }: ThreatIntelligenceDetailsProps) => {
+  const { euiTheme } = useEuiTheme();
   const {
     enrichments,
     eventFields,
@@ -51,46 +66,60 @@ export const ThreatIntelligenceDetails = memo(({ hit }: ThreatIntelligenceDetail
     undefined: matchesWithNoType,
   } = groupBy(enrichments, 'matched.type');
 
-  return isEventDataLoading ? (
-    <FlyoutLoading data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
-  ) : (
-    <EuiPanel hasShadow={false} hasBorder={false}>
-      <EnrichmentSection
-        dataTestSubj={THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID}
-        enrichments={indicatorMatches}
-        type={ENRICHMENT_TYPES.IndicatorMatchRule}
-      />
-
-      {showInvestigationTimeEnrichments ? (
-        <>
-          <EuiHorizontalRule />
-          <EnrichmentSection
-            dataTestSubj={THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID}
-            enrichments={threatIntelEnrichments}
-            type={ENRICHMENT_TYPES.InvestigationTime}
-            loading={isLoading}
-          >
-            <EnrichmentRangePicker
-              setRange={setRange}
-              loading={isEnrichmentsLoading}
-              range={range}
+  return (
+    <>
+      <EuiFlyoutHeader
+        hasBorder
+        css={css`
+          padding-block-end: ${euiTheme.size.m} !important;
+        `}
+      >
+        <ToolsFlyoutHeader hit={hit} title={TITLE} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {isEventDataLoading ? (
+          <FlyoutLoading data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
+        ) : (
+          <EuiPanel hasShadow={false} hasBorder={false}>
+            <EnrichmentSection
+              dataTestSubj={THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID}
+              enrichments={indicatorMatches}
+              type={ENRICHMENT_TYPES.IndicatorMatchRule}
             />
-            <EuiSpacer size="m" />
-          </EnrichmentSection>
-        </>
-      ) : null}
 
-      {matchesWithNoType ? (
-        <>
-          <EuiHorizontalRule />
-          {indicatorMatches && <EuiSpacer size="l" />}
-          <EnrichmentSection
-            enrichments={matchesWithNoType}
-            dataTestSubj={THREAT_INTELLIGENCE_MATCHES_TEST_ID}
-          />
-        </>
-      ) : null}
-    </EuiPanel>
+            {showInvestigationTimeEnrichments ? (
+              <>
+                <EuiHorizontalRule />
+                <EnrichmentSection
+                  dataTestSubj={THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID}
+                  enrichments={threatIntelEnrichments}
+                  type={ENRICHMENT_TYPES.InvestigationTime}
+                  loading={isLoading}
+                >
+                  <EnrichmentRangePicker
+                    setRange={setRange}
+                    loading={isEnrichmentsLoading}
+                    range={range}
+                  />
+                  <EuiSpacer size="m" />
+                </EnrichmentSection>
+              </>
+            ) : null}
+
+            {matchesWithNoType ? (
+              <>
+                <EuiHorizontalRule />
+                {indicatorMatches && <EuiSpacer size="l" />}
+                <EnrichmentSection
+                  enrichments={matchesWithNoType}
+                  dataTestSubj={THREAT_INTELLIGENCE_MATCHES_TEST_ID}
+                />
+              </>
+            ) : null}
+          </EuiPanel>
+        )}
+      </EuiFlyoutBody>
+    </>
   );
 });
 
