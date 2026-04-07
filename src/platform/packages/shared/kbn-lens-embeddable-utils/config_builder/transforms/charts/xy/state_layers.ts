@@ -22,8 +22,8 @@ import { getValueColumn } from '../../columns/esql_column';
 import { toLensStateFilterLanguage } from '../../columns/filter';
 import type {
   DataLayerType,
-  ReferenceLineLayerType,
   AnnotationLayerByValueType,
+  ReferenceLineLayerType,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {

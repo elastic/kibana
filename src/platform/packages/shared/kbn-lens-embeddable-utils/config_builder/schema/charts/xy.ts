@@ -706,7 +706,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
   {
     ...layerSettingsSchema,
     ...datasetSchema,
-    type: schema.literal('referenceLines'),
+    type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
@@ -728,7 +728,7 @@ const referenceLineLayerSchemaESQL = schema.object(
   {
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
-    type: schema.literal('referenceLines'),
+    type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(esqlColumnWithFormatSchema.extends(referenceLineLayerShared), {
       meta: { description: 'Array of ES|QL-based reference line thresholds' },
       minSize: 1,
@@ -970,7 +970,7 @@ export const xyStateSchemaNoESQL = schema.object(
 );
 
 /**
- * XY chart state for ES|QL layers only (data and reference lines)
+ * XY chart state for ES|QL layers only (reference lines are not yet supported)
  */
 export const xyStateSchemaESQL = schema.object(
   {
@@ -1009,13 +1009,19 @@ export type XYState = TypeOf<typeof xyStateSchema>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
+/**
+ * @deprecated ES|QL reference lines are not yet supported
+ */
 export type ReferenceLineLayerTypeESQL = TypeOf<typeof referenceLineLayerSchemaESQL>;
 export type ReferenceLineLayerTypeNoESQL = TypeOf<typeof referenceLineLayerSchemaNoESQL>;
 export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
 export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = TypeOf<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = TypeOf<typeof annotationLayerByValueSchema>;
-export type LayerTypeESQL = TypeOf<typeof xyLayerUnionESQL>;
+/**
+ * Reference line layers are not support but included to keep existing logic
+ */
+export type LayerTypeESQL = TypeOf<typeof xyLayerUnionESQL> | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL

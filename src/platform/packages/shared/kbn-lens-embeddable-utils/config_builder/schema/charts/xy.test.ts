@@ -159,7 +159,7 @@ describe('XY', () => {
             },
             {
               dataset: { type: 'dataView', id: 'myDataView' },
-              type: 'referenceLines',
+              type: 'reference_lines',
               ignore_global_filters: false,
               sampling: 1,
               thresholds: [
@@ -324,7 +324,7 @@ describe('XY', () => {
               },
               {
                 dataset: { type: 'dataView', id: 'myDataView' },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -470,7 +470,7 @@ describe('XY', () => {
               },
               {
                 dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [

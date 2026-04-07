@@ -325,6 +325,23 @@ function convertReferenceLineLayerToAPI(
 
 export function buildAPIReferenceLinesLayer(
   visualization: XYReferenceLineLayerConfig,
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  adHocDataViews: Record<string, unknown>,
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
+): ReferenceLineLayerTypeNoESQL;
+/**
+ * @deprecated ES|QL reference lines are not yet supported
+ */
+export function buildAPIReferenceLinesLayer(
+  visualization: XYReferenceLineLayerConfig,
+  layer: TextBasedLayer,
+  adHocDataViews: Record<string, unknown>,
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
+): ReferenceLineLayerTypeESQL;
+export function buildAPIReferenceLinesLayer(
+  visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
@@ -340,7 +357,7 @@ export function buildAPIReferenceLinesLayer(
   if (isTextBasedLayer(layer)) {
     if (isEsqlTableTypeDataset(dataset)) {
       return {
-        type: 'referenceLines',
+        type: 'reference_lines',
         dataset,
         ...convertReferenceLineLayerToAPI(visualization, layer),
       };
@@ -351,7 +368,7 @@ export function buildAPIReferenceLinesLayer(
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
   return {
-    type: 'referenceLines',
+    type: 'reference_lines',
     dataset,
     ...convertReferenceLineLayerToAPI(visualization, layer),
   };

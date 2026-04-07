@@ -12,8 +12,8 @@ import type {
   AnnotationLayerType,
   DataLayerType,
   LayerTypeESQL,
-  LayerTypeNoESQL,
   ReferenceLineLayerType,
+  XYLayer,
 } from '../../../schema/charts/xy';
 import { isEsqlTableTypeDataset } from '../../../utils';
 import {
@@ -22,8 +22,6 @@ import {
   XY_DATA_LAYER_TYPES,
   XY_REFERENCE_LAYER_TYPES,
 } from './constants';
-
-type XYLayer = DataLayerType | ReferenceLineLayerType | AnnotationLayerType;
 
 export function getAccessorNameForXY(
   layer: XYLayer,
@@ -36,7 +34,7 @@ export function getAccessorNameForXY(
   return `${layer.type}_${accessorType}_${index}`;
 }
 
-export function getIdForLayer(layer: LayerTypeNoESQL | LayerTypeESQL, i: number) {
+export function getIdForLayer(layer: XYLayer, i: number) {
   return `${layer.type}_${i}`;
 }
 
