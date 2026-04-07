@@ -46,7 +46,6 @@ describe('usage_collection', () => {
     const mlUsageCollection = mlUsageCollectionProvider(undefined);
     mlUsageCollection.click('imported_anomaly_detector_jobs', 1);
     mlUsageCollection.count('imported_data_frame_analytics_jobs', 2);
-    mlUsageCollection.reportCustomRuleEditorOpened('explorer_anomalies_table');
     expect(usageCollection.reportUiCounter).toHaveBeenCalledTimes(0);
 
     expect(usageCollection.reportUiCounter).not.toHaveBeenCalledWith(
@@ -63,13 +62,14 @@ describe('usage_collection', () => {
     );
   });
 
-  test('reportCustomRuleEditorOpened reports a count UI counter with source suffix', () => {
+  test('count accepts custom rule editor opened event name', () => {
     const mlUsageCollection = mlUsageCollectionProvider(usageCollection);
-    mlUsageCollection.reportCustomRuleEditorOpened('single_metric_viewer_timeseries_chart');
+    mlUsageCollection.count('custom_rule_editor_opened__single_metric_viewer_timeseries_chart');
     expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
       'ml',
       'count',
-      'custom_rule_editor_opened__single_metric_viewer_timeseries_chart'
+      'custom_rule_editor_opened__single_metric_viewer_timeseries_chart',
+      undefined
     );
   });
 });

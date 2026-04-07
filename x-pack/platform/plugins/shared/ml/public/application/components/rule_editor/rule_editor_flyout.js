@@ -37,6 +37,8 @@ import {
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
 } from '@kbn/ml-anomaly-utils';
 
+import { getCustomRuleEditorOpenedEventName } from '../../../../common/util/usage_collection';
+
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -151,8 +153,8 @@ class RuleEditorFlyoutUI extends Component {
       focusTrapProps,
     });
 
-    this.props.kibana.services.mlServices.mlUsageCollection?.reportCustomRuleEditorOpened(
-      this.props.telemetrySource
+    this.props.kibana.services.mlServices.mlUsageCollection?.count(
+      getCustomRuleEditorOpenedEventName(this.props.telemetrySource)
     );
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
