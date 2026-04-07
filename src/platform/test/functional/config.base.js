@@ -44,7 +44,6 @@ export default async function ({ readConfigFile }) {
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
         // disable tours globally for all tests
         '--uiSettings.globalOverrides.hideAnnouncements=true',
-        '--xpack.streams.preconfigured.enabled=false',
       ],
     },
 

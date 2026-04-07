@@ -176,7 +176,6 @@ export default async () => {
         `--xpack.cloud.deployments_url=/deployments`,
         `--xpack.cloud.organization_url=/account/`,
         `--xpack.cloud.users_and_roles_url=/account/members/`,
-        '--xpack.streams.preconfigured.enabled=false',
       ],
     },
 
