@@ -425,6 +425,7 @@ src/platform/packages/shared/as-code/filters-constants @elastic/kibana-presentat
 src/platform/packages/shared/as-code/filters-schema @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-presentation
 src/platform/packages/shared/as-code/shared-schemas @elastic/kibana-presentation
+src/platform/packages/shared/as-code/shared-transforms @elastic/kibana-presentation
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/chart-test-jest-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -2415,7 +2416,6 @@ x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_str
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
-src/platform/packages/shared/kbn-connector-specs/src/get_workflow_templates* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
