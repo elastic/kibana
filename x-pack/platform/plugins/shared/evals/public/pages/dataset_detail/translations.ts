@@ -206,6 +206,33 @@ export const RUNS_EMPTY_MESSAGE = i18n.translate('xpack.evals.datasetDetail.runs
   defaultMessage: 'No runs found for this dataset.',
 });
 
+export const DATASET_NOT_FOUND_TITLE = i18n.translate(
+  'xpack.evals.datasetDetail.datasetNotFoundTitle',
+  { defaultMessage: 'Dataset not found' }
+);
+
+export const DATASET_LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.evals.datasetDetail.datasetLoadErrorTitle',
+  { defaultMessage: 'Unable to load dataset' }
+);
+
+export const BACK_TO_DATASETS = i18n.translate('xpack.evals.datasetDetail.backToDatasets', {
+  defaultMessage: 'Back to Datasets',
+});
+
+export const getDatasetNotFoundBody = (datasetId: string) =>
+  i18n.translate('xpack.evals.datasetDetail.datasetNotFoundBody', {
+    defaultMessage:
+      'The dataset {datasetId} could not be found. It may have been loaded from an external source (e.g. a GCS snapshot) and is not stored in the cluster.',
+    values: { datasetId },
+  });
+
+export const getDatasetLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.datasetDetail.datasetLoadErrorBody', {
+    defaultMessage: 'An error occurred while loading dataset details: {errorMessage}',
+    values: { errorMessage },
+  });
+
 export const getPageTitle = (name: string) =>
   i18n.translate('xpack.evals.datasetDetail.pageTitle', {
     defaultMessage: 'Dataset: {name}',

@@ -27,6 +27,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLink,
+  EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -44,6 +45,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useHistory, useParams } from 'react-router-dom';
 import type {
   DatasetExample,
@@ -520,47 +522,76 @@ export const DatasetDetailPage: React.FC = () => {
     [datasetId, history]
   );
 
+  if (isDatasetLoading) {
+    return (
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiPageSection>
+    );
+  }
+
+  if (datasetError) {
+    const isNotFound = isHttpFetchError(datasetError) && datasetError.response?.status === 404;
+    return (
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiEmptyPrompt
+          color={isNotFound ? 'subdued' : 'danger'}
+          iconType={isNotFound ? 'search' : 'warning'}
+          title={
+            <h2>{isNotFound ? i18n.DATASET_NOT_FOUND_TITLE : i18n.DATASET_LOAD_ERROR_TITLE}</h2>
+          }
+          body={
+            <p>
+              {isNotFound
+                ? i18n.getDatasetNotFoundBody(datasetId)
+                : i18n.getDatasetLoadErrorBody(String(datasetError))}
+            </p>
+          }
+          actions={[
+            <EuiButton onClick={() => history.push('/datasets')}>
+              {i18n.BACK_TO_DATASETS}
+            </EuiButton>,
+          ]}
+        />
+      </EuiPageSection>
+    );
+  }
+
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="l">
-            <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        {dataset ? (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
-                  {i18n.ADD_EXAMPLE_BUTTON}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="pencil" onClick={openMetadataModal}>
-                  {i18n.EDIT_METADATA_BUTTON}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
-        {datasetError ? (
-          <EuiText color="danger" size="s">
-            <p>{String(datasetError)}</p>
-          </EuiText>
-        ) : null}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {dataset ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
+                    {i18n.ADD_EXAMPLE_BUTTON}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty iconType="pencil" onClick={openMetadataModal}>
+                    {i18n.EDIT_METADATA_BUTTON}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+
         {runsError ? (
           <EuiText color="danger" size="s">
             <p>{String(runsError)}</p>
           </EuiText>
         ) : null}
 
-        {isDatasetLoading ? (
-          <EuiLoadingSpinner size="xl" />
-        ) : dataset ? (
+        {dataset ? (
           <>
             {formError && !selectedExample && !isCreateExampleOpen ? (
               <>
@@ -593,6 +624,7 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiBasicTable<DatasetExample>
+              tableCaption={i18n.EXAMPLES_SECTION_TITLE}
               items={filteredExamples}
               columns={examplesColumns}
               loading={addExamples.isLoading || updateExample.isLoading || deleteExample.isLoading}
@@ -620,6 +652,7 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiBasicTable<EvaluationRunSummary>
+              tableCaption={i18n.RUNS_SECTION_TITLE}
               items={runsData?.runs ?? []}
               columns={runsColumns}
               loading={isRunsLoading}
@@ -777,6 +810,7 @@ export const DatasetDetailPage: React.FC = () => {
                   </EuiText>
                 ) : (
                   <EuiBasicTable<RunScoreRow>
+                    tableCaption={i18n.FLYOUT_EXPERIMENT_RUNS_SECTION}
                     items={exampleRunRows}
                     columns={exampleRunColumns}
                     loading={isExampleScoresLoading}

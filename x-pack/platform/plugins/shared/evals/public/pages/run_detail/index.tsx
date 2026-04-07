@@ -32,7 +32,7 @@ import { css } from '@emotion/css';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
-import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
+import { useEvaluationRun, useRunDatasetExamples, useDatasets } from '../../hooks/use_evals_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
 import { TraceWaterfall } from '../../components/trace_waterfall';
 import { resolvePrUrl } from '../../utils/pr_url';
@@ -56,6 +56,7 @@ interface DatasetStatsAccordionProps {
   onDatasetClick: (datasetId: string) => void;
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
   onExampleClick: (exampleId: string) => void;
+  isDatasetInCluster: boolean;
 }
 
 const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
@@ -70,6 +71,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   onDatasetClick,
   onDatasetToggle,
   onExampleClick,
+  isDatasetInCluster,
 }) => {
   const {
     data: datasetExamples,
@@ -89,15 +91,19 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <h4>
-                  <EuiLink
-                    onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      onDatasetClick(group.datasetId);
-                    }}
-                  >
-                    {group.datasetName}
-                  </EuiLink>
+                  {isDatasetInCluster ? (
+                    <EuiLink
+                      onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onDatasetClick(group.datasetId);
+                      }}
+                    >
+                      {group.datasetName}
+                    </EuiLink>
+                  ) : (
+                    group.datasetName
+                  )}
                 </h4>
               </EuiText>
             </EuiFlexItem>
@@ -153,6 +159,11 @@ export const RunDetailPage: React.FC = () => {
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const { data: runDetail, isLoading: runLoading, error: runError } = useEvaluationRun(runId);
+  const { data: datasetsData } = useDatasets({ perPage: 10000 });
+  const clusterDatasetIds = useMemo(
+    () => new Set(datasetsData?.datasets.map((d) => d.id) ?? []),
+    [datasetsData]
+  );
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const openDatasetId = searchParams.get('dataset_id');
@@ -428,6 +439,7 @@ export const RunDetailPage: React.FC = () => {
               setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
             }
             onExampleClick={(exampleId) => setSelectedExample(exampleId)}
+            isDatasetInCluster={clusterDatasetIds.has(datasetId)}
           />
         ))}
       </EuiPageSection>

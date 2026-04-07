@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiPageSection,
   EuiSpacer,
   EuiTitle,
@@ -53,6 +54,16 @@ export const DatasetsListPage: React.FC = () => {
       {
         field: 'name',
         name: i18n.COLUMN_NAME,
+        render: (datasetName: string, item: DatasetSummary) => (
+          <EuiLink
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              history.push(`/datasets/${item.id}`);
+            }}
+          >
+            <strong>{datasetName}</strong>
+          </EuiLink>
+        ),
       },
       {
         field: 'description',
@@ -69,7 +80,7 @@ export const DatasetsListPage: React.FC = () => {
         render: (updatedAt: string) => (updatedAt ? new Date(updatedAt).toLocaleString() : '-'),
       },
     ],
-    []
+    [history]
   );
 
   const pagination = {

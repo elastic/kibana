@@ -116,6 +116,12 @@ export const useDataset = (datasetId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
   });
 };
 
