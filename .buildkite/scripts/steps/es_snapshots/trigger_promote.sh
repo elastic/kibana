@@ -12,7 +12,7 @@ export ES_SNAPSHOT_MANIFEST="${ES_SNAPSHOT_MANIFEST:-"$(buildkite-agent meta-dat
 cat << EOF | buildkite-agent pipeline upload
 steps:
   - trigger: 'kibana-elasticsearch-snapshot-promote'
-    async: false
+    async: true
     build:
       env:
         ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'

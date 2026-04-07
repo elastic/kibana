@@ -1,7 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/es_snapshots/build.sh
     label: Build ES Snapshot
-    timeout_in_minutes: 120
+    timeout_in_minutes: 30
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
