@@ -140,6 +140,7 @@ export const DatasetsListPage: React.FC = () => {
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiBasicTable<DatasetSummary>
+          tableCaption={i18n.TABLE_CAPTION}
           items={data?.datasets ?? []}
           columns={columns}
           loading={isLoading}
@@ -152,10 +153,10 @@ export const DatasetsListPage: React.FC = () => {
         />
       </EuiPageSection>
       {isCreateFlyoutOpen ? (
-        <EuiFlyout onClose={closeCreateFlyout} size="s">
+        <EuiFlyout onClose={closeCreateFlyout} size="s" aria-labelledby="createDatasetFlyoutTitle">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>{i18n.CREATE_DATASET_FLYOUT_TITLE}</h2>
+              <h2 id="createDatasetFlyoutTitle">{i18n.CREATE_DATASET_FLYOUT_TITLE}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>

@@ -60,6 +60,10 @@ export const CREATE_DATASET_SUBMIT_BUTTON = i18n.translate(
   }
 );
 
+export const TABLE_CAPTION = i18n.translate('xpack.evals.datasetsList.tableCaption', {
+  defaultMessage: 'Datasets',
+});
+
 export const COLUMN_NAME = i18n.translate('xpack.evals.datasetsList.columns.name', {
   defaultMessage: 'Name',
 });

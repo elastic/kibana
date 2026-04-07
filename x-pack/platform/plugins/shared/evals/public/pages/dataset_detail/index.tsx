@@ -292,7 +292,7 @@ export const DatasetDetailPage: React.FC = () => {
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" className={truncatedCellStyles}>
+              <EuiText size="s" tabIndex={0} className={truncatedCellStyles}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -307,7 +307,7 @@ export const DatasetDetailPage: React.FC = () => {
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" className={truncatedCellStyles}>
+              <EuiText size="s" tabIndex={0} className={truncatedCellStyles}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -322,7 +322,7 @@ export const DatasetDetailPage: React.FC = () => {
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" className={truncatedCellStyles}>
+              <EuiText size="s" tabIndex={0} className={truncatedCellStyles}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -931,9 +931,11 @@ export const DatasetDetailPage: React.FC = () => {
 
       {/* Edit metadata modal */}
       {isMetadataModalOpen ? (
-        <EuiModal onClose={closeModals}>
+        <EuiModal onClose={closeModals} aria-labelledby="editMetadataModalTitle">
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{i18n.EDIT_METADATA_MODAL_TITLE}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id="editMetadataModalTitle">
+              {i18n.EDIT_METADATA_MODAL_TITLE}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiForm component="form">
@@ -957,6 +959,7 @@ export const DatasetDetailPage: React.FC = () => {
       {/* Delete example confirmation */}
       {deletingExample ? (
         <EuiConfirmModal
+          aria-label={i18n.CONFIRM_DELETE_EXAMPLE_TITLE}
           title={i18n.CONFIRM_DELETE_EXAMPLE_TITLE}
           onCancel={closeModals}
           onConfirm={onDeleteExample}
