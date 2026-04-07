@@ -50,6 +50,12 @@ const overflowTooltipStyle = css`
   line-height: 0;
 `;
 
+const rulesListTableWithoutHeaderSortIconsStyle = css`
+  .euiTableSortIcon {
+    display: none;
+  }
+`;
+
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -580,6 +586,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
+        css={rulesListTableWithoutHeaderSortIconsStyle}
         items={items}
         itemId="id"
         columns={columns}
