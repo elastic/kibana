@@ -172,16 +172,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   if (isInferenceProviderError(error)) {
                     errorMessage = formatInferenceProviderError(error, connector);
                   }
-                } catch (connectorError) {
-                  taskContext.logger.warn(
-                    `Task ${
-                      runContext.taskInstance.id
-                    }: could not resolve connector for error enrichment: ${
-                      connectorError instanceof Error
-                        ? connectorError.message
-                        : String(connectorError)
-                    }`
-                  );
+                } catch {
+                  // Use generic error message if we cannot resolve the connector
                 }
 
                 if (
