@@ -36,7 +36,6 @@ pageLoadAssetSize:
   data: 496646
   dataQuality: 11469
   datasetQuality: 49315
-  dataSources: 6748
   dataUsage: 8743
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -137,6 +136,7 @@ pageLoadAssetSize:
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
+  queryActivity: 4326
   reindexService: 3469
   remoteClusters: 10170
   reporting: 46602
@@ -154,7 +154,6 @@ pageLoadAssetSize:
   searchAssistant: 6150
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchIndices: 9991
   searchInferenceEndpoints: 9400
   searchNavigation: 8900
   searchNotebooks: 18826
