@@ -29,6 +29,7 @@ import { enableStreams } from './util/enable_streams';
 import { createDataView } from './util/create_data_view';
 import { resolveKibanaUrl } from './util/resolve_kibana_url';
 import { buildCustomImages } from './util/build_custom_images';
+import { resolveEdotCollectorVersion } from './util/resolve_edot_collector_version';
 import type { DemoType, FailureScenario } from './types';
 import {
   getDemoConfig,
@@ -38,50 +39,6 @@ import {
 } from './demo_registry';
 
 const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
-const EDOT_IMAGE = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
-
-/**
- * Resolves the latest available EDOT Collector image version by walking back
- * from the current Kibana version (e.g. 9.4.0 → 9.3.0 → 9.2.0).
- */
-async function resolveEdotCollectorVersion(log: ToolingLog): Promise<string> {
-  const { kibanaPackageJson } = await import('@kbn/repo-info');
-  const semver = await import('semver');
-  const current = semver.parse(kibanaPackageJson.version.replace(/-SNAPSHOT$/, ''));
-  if (!current) {
-    return kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
-  }
-
-  let { major, minor, patch } = current;
-  while (major > 0) {
-    const version = `${major}.${minor}.${patch}`;
-    try {
-      await execa.command(`docker manifest inspect ${EDOT_IMAGE}:${version}`, {
-        stdio: 'ignore',
-        timeout: 10000,
-      });
-      log.debug(`Found EDOT image: ${EDOT_IMAGE}:${version}`);
-      return version;
-    } catch {
-      log.debug(`Image ${EDOT_IMAGE}:${version} not found, trying older version...`);
-    }
-
-    if (patch > 0) {
-      patch--;
-    } else if (minor > 0) {
-      minor--;
-      patch = 0;
-    } else {
-      major--;
-      minor = 20;
-      patch = 0;
-    }
-  }
-
-  const fallback = kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
-  log.warning(`Could not find any EDOT Collector image, falling back to ${fallback}`);
-  return fallback;
-}
 
 /**
  * Stops and removes a demo environment from Kubernetes.
