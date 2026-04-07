@@ -77,7 +77,10 @@ function parseBrowserLocale(acceptLanguage: string | string[] | undefined): stri
     );
     if (exactMatch) return exactMatch;
 
-    // Language-only match (e.g. "fr" matches "fr-FR")
+    // Language-only prefix match (e.g. "fr" matches "fr-FR").
+    // NOTE: If multiple supported locales share a prefix (e.g. "zh-CN" and "zh-TW"),
+    // this returns the first match in SUPPORTED_LOCALE_IDS order, which may not be
+    // the user's intent. Consider a more specific matching strategy if that happens.
     const langPrefix = lang.split('-')[0].toLowerCase();
     if (!langPrefix) continue;
     const prefixMatch = SUPPORTED_LOCALE_IDS.find((supported) =>

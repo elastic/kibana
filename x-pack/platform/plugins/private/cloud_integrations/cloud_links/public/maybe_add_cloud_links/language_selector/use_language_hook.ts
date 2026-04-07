@@ -67,16 +67,13 @@ export const useLanguage = (): LanguageAPI => {
 
   useEffect(() => {
     setLocale(localeUserProfile);
-  }, [localeUserProfile]);
-
-  useEffect(() => {
     if (userProfileLoaded) {
       const storedLocale = userProfileData?.userSettings?.locale;
       if (storedLocale) {
         setInitialLocaleValue(storedLocale);
       }
     }
-  }, [userProfileData, userProfileLoaded]);
+  }, [localeUserProfile, userProfileData, userProfileLoaded]);
 
   return {
     locale,

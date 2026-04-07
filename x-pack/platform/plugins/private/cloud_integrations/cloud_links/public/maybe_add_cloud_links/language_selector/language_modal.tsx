@@ -61,7 +61,13 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="languageModalDiscardButton" onClick={closeModal}>
+        <EuiButtonEmpty
+          data-test-subj="languageModalDiscardButton"
+          onClick={() => {
+            onChange(initialLocaleValue, false);
+            closeModal();
+          }}
+        >
           {i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalDiscardBtnLabel', {
             defaultMessage: 'Discard',
           })}
