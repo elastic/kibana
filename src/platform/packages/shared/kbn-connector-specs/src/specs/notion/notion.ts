@@ -68,7 +68,8 @@ export const NotionConnector: ConnectorSpec = {
           ),
         pageSize: z
           .number()
-          .optional()
+          .max(100)
+          .default(10)
           .describe(
             'Maximum number of results to return per page. Defaults to 10 if not specified.'
           ),
@@ -162,7 +163,8 @@ export const NotionConnector: ConnectorSpec = {
           ),
         pageSize: z
           .number()
-          .optional()
+          .max(100)
+          .default(10)
           .describe(
             'Maximum number of rows to return. Defaults to 10 if not specified. Maximum allowed by Notion is 100.'
           ),

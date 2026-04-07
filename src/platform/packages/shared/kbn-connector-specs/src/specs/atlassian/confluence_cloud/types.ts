@@ -16,7 +16,7 @@ import { z } from '@kbn/zod/v4';
 export const ListPagesInputSchema = z.object({
   limit: z
     .number()
-    .optional()
+    .default(25)
     .describe('Maximum number of pages to return per request. Defaults to 25 if omitted.'),
   cursor: z
     .string()
@@ -69,7 +69,7 @@ export type GetPageInput = z.infer<typeof GetPageInputSchema>;
 export const ListSpacesInputSchema = z.object({
   limit: z
     .number()
-    .optional()
+    .default(25)
     .describe('Maximum number of spaces to return per request. Defaults to 25 if omitted.'),
   cursor: z
     .string()

@@ -45,7 +45,8 @@ export const SearchEventsInputSchema = z.object({
     ),
   maxResults: z
     .number()
-    .optional()
+    .min(1)
+    .max(2500)
     .default(50)
     .describe('Maximum number of events to return (1-2500, default 50)'),
   orderBy: z
@@ -104,7 +105,8 @@ export const ListEventsInputSchema = z.object({
     ),
   maxResults: z
     .number()
-    .optional()
+    .min(1)
+    .max(2500)
     .default(50)
     .describe('Maximum number of events to return (1-2500, default 50)'),
   pageToken: z

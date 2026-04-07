@@ -606,12 +606,14 @@ export const SharepointOnline: ConnectorSpec = {
           ),
         from: z
           .number()
-          .optional()
+          .default(0)
           .describe('Zero-based pagination offset (number of results to skip). Defaults to 0.'),
         size: z
           .number()
-          .optional()
-          .describe('Number of results to return per page. Must be between 1 and 500.'),
+          .min(1)
+          .max(500)
+          .default(25)
+          .describe('Number of results to return per page. Must be between 1 and 500. Defaults to 25.'),
       }),
       output: z.any(),
       handler: async (ctx, input) => {

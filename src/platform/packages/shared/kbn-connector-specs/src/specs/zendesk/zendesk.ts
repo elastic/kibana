@@ -130,10 +130,11 @@ export const ZendeskConnector: ConnectorSpec = {
       description:
         'List Zendesk tickets. Use when you need to browse or filter tickets by page. For keyword or criteria-based lookups, prefer the search action instead.',
       input: z.object({
-        page: z.number().optional().describe('Page number for pagination. Defaults to 1.'),
+        page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
         perPage: z
           .number()
-          .optional()
+          .max(100)
+          .default(25)
           .describe('Number of tickets per page (max 100). Defaults to 25.'),
         include: z
           .string()
@@ -175,10 +176,11 @@ export const ZendeskConnector: ConnectorSpec = {
         'List comments on a Zendesk ticket (the conversation thread, including both public and private comments). Use when you have a ticket ID and need to read the full discussion.',
       input: z.object({
         ticketId: z.string().describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
-        page: z.number().optional().describe('Page number for pagination. Defaults to 1.'),
+        page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
         perPage: z
           .number()
-          .optional()
+          .max(100)
+          .default(25)
           .describe('Number of comments per page (max 100). Defaults to 25.'),
         include: z
           .string()
