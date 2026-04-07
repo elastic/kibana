@@ -224,6 +224,12 @@ If the module uses **Pattern B**, treat the Scout API directory as isolated:
 - Add stable `data-test-subj` attributes when selectors are unstable.
 - Centralize deep links + page-ready waits in page objects.
 
+## After migration: update the QAF cloud pipeline
+
+If the FTR configs you migrated away from were listed in `.buildkite/ftr_<solution>_serverless_configs.yml` (i.e. they ran against real cloud deployments via the `appex-qa-serverless-kibana-ftr-tests` Buildkite pipeline), **you must also update the pipeline generator in the `qaf-tests` repo** at `.buildkite/pipeline_generators/cloud/serverless/ftr-tests.py`.
+
+That script hardcodes which configs to schedule as cloud jobs. If you added new FTR config groups (e.g. `config.group13.ts`) or renamed/removed existing ones, bump `group_count` (or adjust the config list) accordingly so those tests continue to run on cloud. Groups above the hardcoded cap are silently skipped.
+
 ## Common mistakes
 
 - Migrating data validation UI tests instead of converting to API tests.
