@@ -15,6 +15,7 @@ import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { createAzureConnector } from '../../../../tasks/api_calls/connectors';
 import { openAssistant, typeAndSendMessage } from '../../../../tasks/assistant';
+import { startTrialLicenseIfEligible } from '../../../../tasks/license';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
@@ -29,6 +30,7 @@ describe(
     tags: ['@ess'],
     env: {
       ftrConfig: {
+        license: 'trial',
         kbnServerArgs: [
           '--uiSettings.overrides.aiAssistant:preferredChatExperience=classic',
           `--xpack.actions.preconfigured=${JSON.stringify({
@@ -52,6 +54,7 @@ describe(
   () => {
     before(() => {
       login();
+      startTrialLicenseIfEligible();
       visitWithTimeRange(ALERTS_URL);
       openAssistant();
       createAzureConnector();
