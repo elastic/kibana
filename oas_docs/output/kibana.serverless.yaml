@@ -20192,6 +20192,14 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              csvUpload:
+                summary: CSV file with user entities
+                value:
+                  file: |
+                    type,user.name
+                    user,john.doe
+                    user,jane.smith
             schema:
               type: object
               properties:
