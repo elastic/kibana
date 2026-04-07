@@ -28,17 +28,14 @@ const aiBreadcrumbLabel = i18n.translate('xpack.evals.stackManagement.breadcrumb
 
 export const mountManagementSection = async ({
   core,
-  mountParams: { element, setBreadcrumbs, history, basePath },
+  mountParams: { element, setBreadcrumbs, history },
 }: MountSectionParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
   coreStart.chrome.docTitle.change(PLUGIN_NAME);
 
   const queryClient = new QueryClient();
   const breadcrumbPrefix = [{ text: aiBreadcrumbLabel }, { text: PLUGIN_NAME }];
-  const getHref = (path: string) =>
-    coreStart.application.getUrlForApp('management', {
-      path: `${basePath}${path === '/' ? '' : path}`,
-    });
+  const getHref = (path: string) => path;
 
   const rootStyle = {
     display: 'flex',
