@@ -22,7 +22,7 @@ export function registerDisableAllWorkflowsRoute({
 }) {
   router.versioned
     .post({
-      path: '/internal/workflows/disable-all-workflows',
+      path: '/internal/workflows/disable_all_workflows',
       access: 'internal',
       security: WORKFLOW_UPDATE_SECURITY,
     })

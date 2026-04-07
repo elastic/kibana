@@ -126,9 +126,7 @@ export class WorkflowsPlugin
       }
     });
 
-    if (this.isWorkflowsUiEnabled) {
-      this.subscribeToWorkflowsSettingChange(core);
-    }
+    this.subscribeToWorkflowsSettingChange(core);
 
     return {};
   }
@@ -147,13 +145,13 @@ export class WorkflowsPlugin
       .pipe(
         filter(({ key }) => key === WORKFLOWS_UI_SETTING_ID),
         map(({ newValue }) => newValue as boolean),
-        startWith(true),
+        startWith(this.isWorkflowsUiEnabled),
         pairwise(),
         filter(([prev, curr]) => prev === true && curr === false)
       )
       .subscribe(() => {
         core.http
-          .post('/internal/workflows/disable-all-workflows', { version: '1' })
+          .post('/internal/workflows/disable_all_workflows', { version: '1' })
           .catch((err) => {
             // eslint-disable-next-line no-console
             console.error('Failed to disable all workflows on opt-out:', err);

@@ -102,9 +102,9 @@ describe('Internal Routes', () => {
     });
   });
 
-  it('should register the disable-all-workflows route handler', () => {
-    expect(routeHandlers[`POST:/internal/workflows/disable-all-workflows`]).toBeDefined();
-    expect(routeHandlers[`POST:/internal/workflows/disable-all-workflows`].handler).toEqual(
+  it('should register the disable_all_workflows route handler', () => {
+    expect(routeHandlers[`POST:/internal/workflows/disable_all_workflows`]).toBeDefined();
+    expect(routeHandlers[`POST:/internal/workflows/disable_all_workflows`].handler).toEqual(
       expect.any(Function)
     );
   });
@@ -115,7 +115,7 @@ describe('Internal Routes', () => {
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest();
 
-    await routeHandlers[`POST:/internal/workflows/disable-all-workflows`].handler(
+    await routeHandlers[`POST:/internal/workflows/disable_all_workflows`].handler(
       mockContext,
       request,
       response
