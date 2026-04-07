@@ -26,9 +26,7 @@ const createWrapper = (queryClient: QueryClient) => {
   return Wrapper;
 };
 
-const createMockData = (
-  overrides: Partial<LiveQueryDetailsItem> = {}
-): LiveQueryDetailsItem => ({
+const createMockData = (overrides: Partial<LiveQueryDetailsItem> = {}): LiveQueryDetailsItem => ({
   action_id: 'test-action-id',
   '@timestamp': '2026-04-07T00:00:00Z',
   agent_all: true,
