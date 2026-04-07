@@ -145,3 +145,52 @@ export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
     defaultMessage: 'No Significant Events found',
   }
 );
+
+export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
+  {
+    defaultMessage: 'Generate Features',
+  }
+);
+
+export const GENERATE_QUERIES_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateQueriesButtonLabel',
+  {
+    defaultMessage: 'Generate Queries',
+  }
+);
+
+export const ONBOARDING_CONFIG_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverAriaLabel',
+  {
+    defaultMessage: 'Configure onboarding steps and connectors',
+  }
+);
+
+export const ONBOARDING_CONFIG_POPOVER_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverTitle',
+  {
+    defaultMessage: 'Onboarding configuration',
+  }
+);
+
+export const FEATURES_STEP_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.featuresStepLabel',
+  {
+    defaultMessage: 'Feature identification',
+  }
+);
+
+export const QUERIES_STEP_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.queriesStepLabel',
+  {
+    defaultMessage: 'Query generation',
+  }
+);
+
+export const RUN_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.runButtonLabel',
+  {
+    defaultMessage: 'Run',
+  }
+);
