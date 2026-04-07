@@ -62,7 +62,7 @@ const LAUNCHPAD_PAGES: ReadonlySet<SecurityPageName> = new Set([
   SecurityPageName.landing,
   SecurityPageName.siemReadiness,
   SecurityPageName.aiValue,
-  SecurityPageName.siemMigrationsLanding,
+  SecurityPageName.siemMigrationsManage,
   SecurityPageName.siemMigrationsRules,
   SecurityPageName.siemMigrationsDashboards,
 ]);
@@ -136,9 +136,11 @@ const useSolutionSideNavItems = (isClassicNavUpdateLayout: boolean) => {
     );
 
     const areMigrationLinks = (id: SecurityPageName) =>
-      [SecurityPageName.siemMigrationsRules, SecurityPageName.siemMigrationsDashboards].includes(
-        id
-      );
+      [
+        SecurityPageName.siemMigrationsManage,
+        SecurityPageName.siemMigrationsRules,
+        SecurityPageName.siemMigrationsDashboards,
+      ].includes(id);
 
     const { launchpadPanelItems, launchpadCategories } =
       CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES.reduce<{

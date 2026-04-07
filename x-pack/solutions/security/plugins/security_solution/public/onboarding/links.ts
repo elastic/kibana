@@ -53,7 +53,11 @@ export const launchPadLinks: LinkItem = {
       label: i18n.translate('xpack.securitySolution.appLinks.category.migrations', {
         defaultMessage: 'Migrations',
       }),
-      linkIds: [SecurityPageName.siemMigrationsLanding, SecurityPageName.siemMigrationsDashboards],
+      linkIds: [
+        SecurityPageName.siemMigrationsManage,
+        SecurityPageName.siemMigrationsRules,
+        SecurityPageName.siemMigrationsDashboards,
+      ],
     },
   ],
   links: [onboardingLinks, aiValueLinks, siemMigrationsLinks, siemReadinessLinks],
@@ -71,6 +75,7 @@ export const CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES = Object.freeze([
   { id: SecurityPageName.landing },
   { id: SecurityPageName.siemReadiness },
   { id: SecurityPageName.aiValue },
+  { id: SecurityPageName.siemMigrationsManage },
   { id: SecurityPageName.siemMigrationsRules },
   { id: SecurityPageName.siemMigrationsDashboards },
 ]);
