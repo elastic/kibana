@@ -25,7 +25,7 @@
           "{ readonly email?: string | null | undefined; readonly full_name?: string | null | undefined; readonly username: string; readonly url: string; readonly roles: string[]; }"
         ],
         "path": "packages/kbn-mock-idp-plugin/server/plugin.ts",
-        "lineNumber": 80,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
