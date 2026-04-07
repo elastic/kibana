@@ -22,7 +22,7 @@ Only `legacy` is supported; additional modes may be added later.
 
   */
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
-export const GranularRulesSearchMode = z.enum(['legacy']).default('legacy');
+export const GranularRulesSearchMode = z.literal('legacy').default('legacy');
 
 /**
   * Facet dimension to include in `counts` when requested via `include_counts`.

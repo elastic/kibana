@@ -37,7 +37,7 @@ const bucketsToFacetMap = (buckets: TermsAggBuckets['buckets']): Record<string, 
 
 const facetAggForCategory = (
   category: GranularRulesFacetCategory
-): AggregationsAggregationContainer | undefined => {
+): AggregationsAggregationContainer => {
   switch (category) {
     case 'tags':
       return {
@@ -124,23 +124,16 @@ export const computeGranularFacetCounts = async ({
     return {};
   }
 
-  const aggs: Record<string, AggregationsAggregationContainer> = {};
+  const aggregations: Record<string, AggregationsAggregationContainer> = {};
   for (const c of unique) {
-    const agg = facetAggForCategory(c);
-    if (agg) {
-      aggs[`facet_${c}`] = agg;
-    }
-  }
-
-  if (Object.keys(aggs).length === 0) {
-    return {};
+    aggregations[`facet_${c}`] = facetAggForCategory(c);
   }
 
   const enrichedFilter = enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds));
 
   const raw = await rulesClient.aggregate<Record<string, TermsAggBuckets>>({
     options: { filter: enrichedFilter, page: 1, perPage: 0 },
-    aggs,
+    aggs: aggregations,
   });
 
   const counts: FacetCounts = {};

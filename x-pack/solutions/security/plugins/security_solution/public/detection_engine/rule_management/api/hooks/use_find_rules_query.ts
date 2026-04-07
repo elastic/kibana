@@ -59,7 +59,7 @@ export const useFindRulesQuery = (
       const response = await fetchRulesWithFacets({
         signal,
         ...queryArgs,
-        includeCountsCategories: ['tags'],
+        includeCountsCategories: ['tags', 'enabled'],
       });
 
       return { rules: response.data, total: response.total, warnings: response.warnings };

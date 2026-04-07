@@ -61,7 +61,6 @@ const validateSortTokens = (sort: string[] | undefined): string[] => {
   }
   return errors;
 };
-
 /**
  * Additional validation for internal `_find_with_facets` beyond generated Zod (gaps parity, KQL parse, sort fields).
  */
@@ -70,19 +69,19 @@ export const validateFindRulesWithFacetsRequestQuery = (
 ): string[] => {
   const errors = [...validateFindRulesRequestQuery(query as FindRulesRequestQueryInput)];
 
-  const searchTerm = query.search?.term;
+  const searchTerm = query.searchTerm;
   if (searchTerm != null && searchTerm.length > MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH) {
     errors.push(
-      `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+      `searchTerm exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
     );
   }
 
   errors.push(...validateFindRulesWithFacetsKqlFilter(query.filter));
   errors.push(...validateSortTokens(query.sort as string[] | undefined));
 
-  const searchMode = query.search?.mode;
+  const searchMode = query.searchMode;
   if (searchMode != null && searchMode !== 'legacy') {
-    errors.push(`unsupported search.mode "${searchMode}"`);
+    errors.push(`unsupported searchMode "${searchMode}"`);
   }
 
   return errors;

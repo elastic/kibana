@@ -69,7 +69,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule('facets-kql-search', true));
       const { body } = await findRulesWithFacets({
         filter: 'alert.attributes.enabled: true',
-        search: { term: 'Simple', mode: 'legacy' },
+        searchTerm: 'Simple',
+        searchMode: 'legacy',
       }).expect(200);
       expect(body.total).to.be(1);
     });
@@ -134,16 +135,16 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(String(body.message)).to.contain('cursor requires sort');
     });
 
-    it('returns 400 when search.term exceeds max length', async () => {
+    it('returns 400 when searchTerm exceeds max length', async () => {
       const { body } = await findRulesWithFacets({
-        search: { term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1) },
+        searchTerm: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1),
       }).expect(400);
       const status = body.status_code ?? body.statusCode;
       expect(status).to.be(400);
       const messageText = Array.isArray(body.message)
         ? body.message.join(' ')
         : String(body.message);
-      expect(messageText).to.match(/search\.term/i);
+      expect(messageText.toLowerCase()).to.match(/searchterm/);
       expect(messageText.toLowerCase()).to.contain('length');
     });
   });

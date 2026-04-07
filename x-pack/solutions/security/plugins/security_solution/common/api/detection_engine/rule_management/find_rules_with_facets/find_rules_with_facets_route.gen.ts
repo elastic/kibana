@@ -19,8 +19,8 @@ import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import {
   GranularRulesFacetCategory,
-  FacetCounts,
   GranularRulesSearchMode,
+  FacetCounts,
 } from '../granular_rules_contract.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';

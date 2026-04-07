@@ -51,40 +51,42 @@ describe('validateFindRulesWithFacetsRequestQuery', () => {
     expect(validateFindRulesWithFacetsRequestQuery(emptyQuery)).toEqual([]);
   });
 
-  it('accepts search omitted', () => {
-    expect(validateFindRulesWithFacetsRequestQuery({ ...emptyQuery, search: undefined })).toEqual(
-      []
-    );
-  });
-
-  it('accepts empty search object', () => {
-    expect(validateFindRulesWithFacetsRequestQuery({ ...emptyQuery, search: {} })).toEqual([]);
-  });
-
-  it('accepts search with legacy mode and term', () => {
+  it('accepts searchTerm and searchMode omitted', () => {
     expect(
       validateFindRulesWithFacetsRequestQuery({
         ...emptyQuery,
-        search: { term: 'hello', mode: 'legacy' },
+        searchTerm: undefined,
+        searchMode: undefined,
       })
     ).toEqual([]);
   });
 
-  it('accepts search with only term (mode defaults at runtime)', () => {
+  it('accepts searchTerm with legacy searchMode', () => {
     expect(
       validateFindRulesWithFacetsRequestQuery({
         ...emptyQuery,
-        search: { term: 'abc' },
+        searchTerm: 'hello',
+        searchMode: 'legacy',
       })
     ).toEqual([]);
   });
 
-  it('accepts search.term at max length', () => {
-    const term = 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH);
+  it('accepts searchTerm only (searchMode defaults at runtime)', () => {
     expect(
       validateFindRulesWithFacetsRequestQuery({
         ...emptyQuery,
-        search: { term, mode: 'legacy' },
+        searchTerm: 'abc',
+      })
+    ).toEqual([]);
+  });
+
+  it('accepts searchTerm at max length', () => {
+    const searchTerm = 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH);
+    expect(
+      validateFindRulesWithFacetsRequestQuery({
+        ...emptyQuery,
+        searchTerm,
+        searchMode: 'legacy',
       })
     ).toEqual([]);
   });
@@ -97,13 +99,13 @@ describe('validateFindRulesWithFacetsRequestQuery', () => {
     expect(errors.some((e) => e.includes('gap'))).toBe(true);
   });
 
-  it('rejects search.term over max length', () => {
+  it('rejects searchTerm over max length', () => {
     const errors = validateFindRulesWithFacetsRequestQuery({
       ...emptyQuery,
-      search: { term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1) },
+      searchTerm: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1),
     });
     expect(errors).toContain(
-      `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+      `searchTerm exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
     );
   });
 
@@ -131,14 +133,12 @@ describe('validateFindRulesWithFacetsRequestQuery', () => {
     expect(errors.some((e) => e.includes('invalid sort token'))).toBe(true);
   });
 
-  it('rejects unsupported search.mode', () => {
+  it('rejects unsupported searchMode', () => {
     const errors = validateFindRulesWithFacetsRequestQuery({
       ...emptyQuery,
-      search: {
-        term: 'x',
-        mode: 'vector',
-      } as unknown as NonNullable<FindRulesWithFacetsRequestQueryInput['search']>,
+      searchTerm: 'x',
+      searchMode: 'vector' as unknown as FindRulesWithFacetsRequestQueryInput['searchMode'],
     });
-    expect(errors).toContain('unsupported search.mode "vector"');
+    expect(errors).toContain('unsupported searchMode "vector"');
   });
 });
