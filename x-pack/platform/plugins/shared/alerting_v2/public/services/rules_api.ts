@@ -8,7 +8,13 @@
 import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  BulkOperationParams,
+  BulkOperationResponse,
+  CreateRuleData,
+  RuleResponse,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
@@ -27,19 +33,7 @@ export interface ListRulesParams {
   search?: string;
 }
 
-export interface BulkOperationError {
-  id: string;
-  error: { message: string; statusCode: number };
-}
-
-export interface BulkOperationResponse {
-  rules: RuleResponse[];
-  errors: BulkOperationError[];
-}
-
-export type BulkOperationParams =
-  | { ids: string[]; filter?: undefined }
-  | { filter: string; ids?: undefined };
+export type { BulkOperationParams, BulkOperationResponse };
 
 @injectable()
 export class RulesApi {

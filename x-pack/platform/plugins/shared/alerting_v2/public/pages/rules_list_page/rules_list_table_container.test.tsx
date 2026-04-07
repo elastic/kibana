@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { RulesListTableContainer } from './rules_list_table_container';
 
 const mockNavigateToUrl = jest.fn();
@@ -322,6 +323,41 @@ describe('RulesListTableContainer', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Select all 2 rules');
+      });
+    });
+
+    it('shows "Select first {max}" when total count exceeds bulk cap', async () => {
+      renderContainer({ totalItemCount: BULK_FILTER_MAX_RULES + 500 });
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        const btn = screen.getByTestId('selectAllRulesButton');
+        expect(btn).toHaveTextContent('Select first');
+        expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+      });
+
+      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+    });
+
+    it('shows capped selection count and disclosure after select all over bulk cap', async () => {
+      renderContainer({ totalItemCount: BULK_FILTER_MAX_RULES + 500 });
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkSelectAllLimitDisclosure')).toBeInTheDocument();
+        expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
+          /10,?000/
+        );
       });
     });
 

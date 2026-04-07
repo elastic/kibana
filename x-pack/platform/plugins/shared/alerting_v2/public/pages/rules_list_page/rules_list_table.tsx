@@ -26,6 +26,7 @@ import {
   type CriteriaWithPagination,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -492,6 +493,21 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 />
               </EuiPopover>
             </EuiFlexItem>
+            {isAllSelected && totalItemCount > BULK_FILTER_MAX_RULES ? (
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="bulkSelectAllLimitDisclosure"
+                >
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.bulkSelectAllLimitDisclosure"
+                    defaultMessage="Only the first {maxRules, number} rules can be selected for bulk actions."
+                    values={{ maxRules: BULK_FILTER_MAX_RULES }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
             {!isAllSelected ? (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
@@ -500,11 +516,19 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                   onClick={onSelectAll}
                   data-test-subj="selectAllRulesButton"
                 >
-                  <FormattedMessage
-                    id="xpack.alertingV2.rulesList.selectAll"
-                    defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
-                    values={{ total: totalItemCount }}
-                  />
+                  {totalItemCount > BULK_FILTER_MAX_RULES ? (
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.selectFirstMaxRules"
+                      defaultMessage="Select first {maxRules, number} rules"
+                      values={{ maxRules: BULK_FILTER_MAX_RULES }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.selectAll"
+                      defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
+                      values={{ total: totalItemCount }}
+                    />
+                  )}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             ) : null}
