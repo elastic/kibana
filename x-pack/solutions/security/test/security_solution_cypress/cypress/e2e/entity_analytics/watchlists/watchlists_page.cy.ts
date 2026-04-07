@@ -97,12 +97,16 @@ describe(
           },
         },
       }).as('watchlistsPrivileges');
+      cy.intercept('GET', `${WATCHLISTS_URL}/*/entity_source/list`, {
+        statusCode: 200,
+        body: { sources: [] },
+      }).as('entitySources');
     });
 
     it('renders page as expected', () => {
       visit(ENTITY_ANALYTICS_WATCHLISTS_TAB_URL);
       cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_WATCHLISTS_TAB_URL);
-      cy.contains('h1', 'Entity Analytics', { timeout: 60000 }).should('exist');
+      cy.contains('h1', 'Entity analytics', { timeout: 60000 }).should('exist');
     });
 
     it('shows empty state when no watchlists are returned', () => {
