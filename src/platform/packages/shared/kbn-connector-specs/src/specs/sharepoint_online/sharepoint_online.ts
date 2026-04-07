@@ -22,10 +22,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import downloadWorkflow from './workflows/download.yaml';
-import listWorkflow from './workflows/list.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 /**
  * Common output schema for Microsoft Graph API responses that return a collection.
  * Uses z.any() for the array items to avoid over-specifying the response structure.
@@ -580,6 +576,4 @@ export const SharepointOnline: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, searchWorkflow],
 };

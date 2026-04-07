@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/scout'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

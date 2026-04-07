@@ -22,6 +22,7 @@ import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux';
+import { CreateESQLRuleFlyout } from './create_esql_rule_flyout';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -126,17 +127,47 @@ export const getAlertsAppMenuItem = ({
   services,
   tabId,
   getState,
+  subscribe,
+  showCreateRuleV2,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  subscribe: (listener: () => void) => () => void;
+  showCreateRuleV2?: boolean;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
   const items: DiscoverAppMenuPopoverItem[] = [];
+
+  if (showCreateRuleV2) {
+    items.push({
+      id: 'create-esql-rule-v2',
+      order: 0,
+      label: i18n.translate('discover.alerts.createEsqlRuleV2', {
+        defaultMessage: 'Create ES|QL rule',
+      }),
+      labelBadgeText: i18n.translate('discover.alerts.newBadge', {
+        defaultMessage: 'New',
+      }),
+      iconType: 'bell',
+      testId: 'discoverCreateEsqlRuleV2Button',
+      run: ({ context: { onFinishAction } }) => {
+        return (
+          <CreateESQLRuleFlyout
+            services={services}
+            tabId={tabId}
+            getState={getState}
+            subscribe={subscribe}
+            onClose={onFinishAction}
+          />
+        );
+      },
+    });
+  }
 
   if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
     items.push({
