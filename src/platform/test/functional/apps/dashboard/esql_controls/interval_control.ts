@@ -14,7 +14,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common } = getPageObjects(['dashboard', 'timePicker', 'common']);
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker', 'common']);
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'FROM logstash* | STATS COUNT(*) BY BUCKET(@timestamp, )',
         'kibanaCodeEditor'
       );
-      console.debug('After typeEsqlEditorQuery');
+
       // Interval control uses a different typing flow (cursor moved
       // inside BUCKET argument), so we need to trigger autocomplete
       // deterministically instead of relying on default behavior
