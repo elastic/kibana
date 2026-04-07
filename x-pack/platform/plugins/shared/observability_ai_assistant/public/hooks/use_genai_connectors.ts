@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { InferenceConnector as CommonInferenceConnector } from '@kbn/inference-common';
+import { useEffect, useMemo } from 'react';
+import {
+  connectorToInference,
+  type InferenceConnector as CommonInferenceConnector,
+} from '@kbn/inference-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -19,8 +23,8 @@ import {
   type InferenceConnector,
   getInferenceConnectorInfo,
 } from '../../common/utils/get_inference_connector';
+import { OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID } from '../../common/feature';
 
-// TODO: Import from gen-ai-settings-plugin (package) once available
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export interface UseGenAIConnectorsResult {
@@ -42,11 +46,10 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
 }
 
 export function useGenAIConnectorsWithoutContext(
-  assistant: ObservabilityAIAssistantService
+  _assistant: ObservabilityAIAssistantService
 ): UseGenAIConnectorsResult {
-  const [connectors, setConnectors] = useState<CommonInferenceConnector[] | undefined>(undefined);
   const {
-    services: { uiSettings },
+    services: { uiSettings, http, settings, notifications },
   } = useKibana();
 
   const defaultConnector = uiSettings!.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
@@ -59,10 +62,43 @@ export function useGenAIConnectorsWithoutContext(
   const isConnectorSelectionRestricted =
     genAISettingsDefaultOnly && defaultConnector !== NO_DEFAULT_CONNECTOR;
 
+  const {
+    data: aiConnectors,
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useLoadConnectors({
+    http: http!,
+    featureId: OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
+    settings: settings!,
+    toasts: notifications?.toasts,
+  });
+
+  const connectors = useMemo(
+    () => aiConnectors?.map((c) => connectorToInference(c)),
+    [aiConnectors]
+  );
+
+  const error = queryError ? (queryError as unknown as Error) : undefined;
+
   const [lastUsedConnector, setLastUsedConnector] = useLocalStorage(
     `xpack.observabilityAiAssistant.lastUsedConnector`,
     ''
   );
+
+  useEffect(() => {
+    if (connectors) {
+      setLastUsedConnector((connectorId) => {
+        if (
+          connectorId &&
+          connectors.findIndex((result) => result.connectorId === connectorId) === -1
+        ) {
+          return '';
+        }
+        return connectorId;
+      });
+    }
+  }, [connectors, setLastUsedConnector]);
 
   const selectedConnector = useMemo(() => {
     if (isConnectorSelectionRestricted) {
@@ -76,58 +112,6 @@ export function useGenAIConnectorsWithoutContext(
     }
     return undefined;
   }, [isConnectorSelectionRestricted, defaultConnector, lastUsedConnector]);
-
-  const [loading, setLoading] = useState(false);
-
-  const [error, setError] = useState<Error | undefined>(undefined);
-
-  const controller = useMemo(() => new AbortController(), []);
-
-  const fetchConnectors = useCallback(async () => {
-    setLoading(true);
-    try {
-      let results: CommonInferenceConnector[];
-      if (isConnectorSelectionRestricted) {
-        const connector = await assistant.callApi(
-          'GET /internal/observability_ai_assistant/connectors/{connectorId}',
-          {
-            signal: controller.signal,
-            params: { path: { connectorId: defaultConnector } },
-          }
-        );
-        results = [connector];
-      } else {
-        results = await assistant.callApi('GET /internal/observability_ai_assistant/connectors', {
-          signal: controller.signal,
-        });
-      }
-      setConnectors(results);
-      setLastUsedConnector((connectorId) => {
-        if (
-          connectorId &&
-          results.findIndex((result) => result.connectorId === connectorId) === -1
-        ) {
-          return '';
-        }
-        return connectorId;
-      });
-      setError(undefined);
-    } catch (err) {
-      setError(err);
-      setConnectors(undefined);
-    } finally {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assistant, controller.signal, isConnectorSelectionRestricted, defaultConnector, setLoading]);
-
-  useEffect(() => {
-    fetchConnectors();
-
-    return () => {
-      controller.abort();
-    };
-  }, [controller, fetchConnectors]);
 
   const getConnector = (id: string) => {
     const connector = connectors?.find((_connector) => _connector.connectorId === id);
@@ -143,7 +127,7 @@ export function useGenAIConnectorsWithoutContext(
       setLastUsedConnector(id);
     },
     reloadConnectors: () => {
-      fetchConnectors();
+      refetch();
     },
     getConnector,
     isConnectorSelectionRestricted,

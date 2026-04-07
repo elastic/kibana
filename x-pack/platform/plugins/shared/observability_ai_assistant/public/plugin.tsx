@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { type ComponentType, lazy, type Ref } from 'react';
 import { AIChatExperience, type AssistantScope } from '@kbn/ai-assistant-common';
@@ -78,6 +79,8 @@ export class ObservabilityAIAssistantPlugin
       scopeIsMutable: !!this.scopeFromConfig,
     }));
 
+    const queryClient = new QueryClient();
+
     const withProviders = <P extends {}, R = {}>(
       Component: ComponentType<P>,
       services: Omit<CoreStart, 'plugins'> & {
@@ -86,9 +89,11 @@ export class ObservabilityAIAssistantPlugin
     ) =>
       React.forwardRef((props: P, ref: Ref<R>) => (
         <KibanaContextProvider services={services}>
-          <ObservabilityAIAssistantProvider value={service}>
-            <Component {...props} ref={ref} />
-          </ObservabilityAIAssistantProvider>
+          <QueryClientProvider client={queryClient}>
+            <ObservabilityAIAssistantProvider value={service}>
+              <Component {...props} ref={ref} />
+            </ObservabilityAIAssistantProvider>
+          </QueryClientProvider>
         </KibanaContextProvider>
       ));
 

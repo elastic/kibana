@@ -5,46 +5,58 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
-import type { InferenceConnector } from '@kbn/inference-common';
-import { InferenceConnectorType } from '@kbn/inference-common';
+import { renderHook } from '@testing-library/react';
+import type { AIConnector } from '@kbn/inference-connectors';
 import { useGenAIConnectors } from './use_genai_connectors';
 import { useKibana } from './use_kibana';
 
 jest.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockGetConnectors = jest.fn();
+const mockUseLoadConnectors = jest.fn();
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: (...args: unknown[]) => mockUseLoadConnectors(...args),
+}));
 
-const mockConnectors: InferenceConnector[] = [
+const mockUseKibana = useKibana as jest.Mock;
+const mockHttp = {};
+const mockSettings = {};
+
+const mockConnectors: AIConnector[] = [
   {
-    connectorId: 'connector-1',
+    id: 'connector-1',
     name: 'OpenAI Connector',
-    type: InferenceConnectorType.OpenAI,
+    actionTypeId: '.gen-ai',
     config: {},
-    capabilities: {},
+    secrets: {},
     isPreconfigured: false,
-    isInferenceEndpoint: false,
+    isSystemAction: false,
+    isDeprecated: false,
+    isConnectorTypeDeprecated: false,
+    isMissingSecrets: false,
   },
   {
-    connectorId: 'connector-2',
+    id: 'connector-2',
     name: 'Bedrock Connector',
-    type: InferenceConnectorType.Bedrock,
+    actionTypeId: '.bedrock',
     config: {},
-    capabilities: {},
+    secrets: {},
     isPreconfigured: false,
-    isInferenceEndpoint: false,
+    isSystemAction: false,
+    isDeprecated: false,
+    isConnectorTypeDeprecated: false,
+    isMissingSecrets: false,
   },
 ];
 
+const mockRefetch = jest.fn();
+
 describe('useGenAIConnectors', () => {
   beforeEach(() => {
-    mockGetConnectors.mockReset();
+    mockUseLoadConnectors.mockReset();
     mockUseKibana.mockReturnValue({
       services: {
-        inference: {
-          getConnectors: mockGetConnectors,
-        },
+        http: mockHttp,
+        settings: mockSettings,
       },
     });
   });
@@ -53,27 +65,48 @@ describe('useGenAIConnectors', () => {
     jest.clearAllMocks();
   });
 
-  it('should fetch connectors and set hasConnectors to true when connectors exist', async () => {
-    mockGetConnectors.mockResolvedValue(mockConnectors);
-    const { result, unmount } = renderHook(() => useGenAIConnectors());
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
+  it('calls useLoadConnectors with the correct featureId', () => {
+    mockUseLoadConnectors.mockReturnValue({
+      data: mockConnectors,
+      isLoading: false,
+      error: null,
+      refetch: mockRefetch,
     });
+    const { unmount } = renderHook(() => useGenAIConnectors());
 
-    expect(result.current.connectors).toEqual(mockConnectors);
-    expect(result.current.hasConnectors).toBe(true);
+    expect(mockUseLoadConnectors).toHaveBeenCalledWith({
+      http: mockHttp,
+      featureId: 'observability_ai_insights_inference_subfeature',
+      settings: mockSettings,
+    });
 
     unmount();
   });
 
-  it('should set hasConnectors to false when no connectors exist', async () => {
-    mockGetConnectors.mockResolvedValue([]);
+  it('should fetch connectors and set hasConnectors to true when connectors exist', () => {
+    mockUseLoadConnectors.mockReturnValue({
+      data: mockConnectors,
+      isLoading: false,
+      error: null,
+      refetch: mockRefetch,
+    });
     const { result, unmount } = renderHook(() => useGenAIConnectors());
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
+    expect(result.current.connectors).toEqual(mockConnectors);
+    expect(result.current.hasConnectors).toBe(true);
+    expect(result.current.loading).toBe(false);
+
+    unmount();
+  });
+
+  it('should set hasConnectors to false when no connectors exist', () => {
+    mockUseLoadConnectors.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+      refetch: mockRefetch,
     });
+    const { result, unmount } = renderHook(() => useGenAIConnectors());
 
     expect(result.current.connectors).toEqual([]);
     expect(result.current.hasConnectors).toBe(false);
@@ -81,13 +114,30 @@ describe('useGenAIConnectors', () => {
     unmount();
   });
 
-  it('should handle API errors', async () => {
-    mockGetConnectors.mockRejectedValue(new Error('API failed'));
+  it('should show loading state', () => {
+    mockUseLoadConnectors.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: mockRefetch,
+    });
     const { result, unmount } = renderHook(() => useGenAIConnectors());
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
+    expect(result.current.loading).toBe(true);
+    expect(result.current.connectors).toEqual([]);
+    expect(result.current.hasConnectors).toBe(false);
+
+    unmount();
+  });
+
+  it('should handle API errors', () => {
+    mockUseLoadConnectors.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('API failed'),
+      refetch: mockRefetch,
     });
+    const { result, unmount } = renderHook(() => useGenAIConnectors());
 
     expect(result.current.connectors).toEqual([]);
     expect(result.current.hasConnectors).toBe(false);

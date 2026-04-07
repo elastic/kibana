@@ -8,12 +8,15 @@
 import React, { useMemo } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilityLogsAiInsightFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import type { ObservabilityAgentBuilderPluginStartDependencies } from '../../types';
 import type { AlertAiInsightProps } from './alert_ai_insight';
 import type { ErrorSampleAiInsightProps } from './error_sample_ai_insight';
 import type { LogAiInsightProps, LogAiInsightDocument } from './log_ai_insight';
+
+const queryClient = new QueryClient();
 
 export type { AlertAiInsightProps } from './alert_ai_insight';
 export type { ErrorSampleAiInsightProps } from './error_sample_ai_insight';
@@ -42,7 +45,9 @@ export function createAlertAIInsight(
 
   return (props: AlertAiInsightProps) => (
     <KibanaReactContextProvider>
-      <AlertAiInsightLazy {...props} />
+      <QueryClientProvider client={queryClient}>
+        <AlertAiInsightLazy {...props} />
+      </QueryClientProvider>
     </KibanaReactContextProvider>
   );
 }
@@ -58,7 +63,9 @@ export function createErrorSampleAIInsight(
 
   return (props: ErrorSampleAiInsightProps) => (
     <KibanaReactContextProvider>
-      <ErrorSampleAiInsightLazy {...props} />
+      <QueryClientProvider client={queryClient}>
+        <ErrorSampleAiInsightLazy {...props} />
+      </QueryClientProvider>
     </KibanaReactContextProvider>
   );
 }
@@ -74,7 +81,9 @@ export function createLogAIInsight(
     });
     return (
       <KibanaReactContextProvider>
-        <LogAiInsightLazy {...props} />
+        <QueryClientProvider client={queryClient}>
+          <LogAiInsightLazy {...props} />
+        </QueryClientProvider>
       </KibanaReactContextProvider>
     );
   };

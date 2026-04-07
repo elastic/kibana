@@ -26,10 +26,7 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
         request
       );
       resolved.warnings.forEach((w) => logger.warn(w));
-
-      if (resolved.endpoints.length > 0) {
-        return resolved.endpoints;
-      }
+      return resolved.endpoints;
     }
 
     const inferenceStart = await plugins.inference.start();

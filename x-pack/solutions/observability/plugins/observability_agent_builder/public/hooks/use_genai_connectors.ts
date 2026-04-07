@@ -5,30 +5,27 @@
  * 2.0.
  */
 
-import useAsync from 'react-use/lib/useAsync';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { AIConnector } from '@kbn/inference-connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
 export interface UseGenAIConnectorsResult {
-  connectors: InferenceConnector[];
+  connectors: AIConnector[];
   hasConnectors: boolean;
   loading: boolean;
 }
 
-/**
- * Hook to fetch available GenAI connectors.
- */
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
   const {
-    services: { inference },
+    services: { http, settings },
   } = useKibana();
 
-  const { value: connectors = [], loading } = useAsync(async () => {
-    if (!inference) {
-      return [];
-    }
-    return inference.getConnectors();
-  }, [inference]);
+  const { data: connectors = [], isLoading: loading } = useLoadConnectors({
+    http: http!,
+    featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+    settings: settings!,
+  });
 
   return {
     connectors,
