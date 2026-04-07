@@ -21,6 +21,7 @@ export enum AgentBuilderErrorCode {
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
   pluginNotFound = 'pluginNotFound',
+  smlRecordNotFound = 'smlRecordNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
   hookExecutionError = 'hookExecutionError',
@@ -242,6 +243,37 @@ export const createPluginNotFoundError = ({
 };
 
 /**
+ * Error thrown when trying to retrieve an SML record that does not exist.
+ */
+export type AgentBuilderSmlRecordNotFoundError =
+  AgentBuilderError<AgentBuilderErrorCode.smlRecordNotFound>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderSmlRecordNotFoundError}
+ */
+export const isSmlRecordNotFoundError = (
+  err: unknown
+): err is AgentBuilderSmlRecordNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.smlRecordNotFound;
+};
+
+export const createSmlRecordNotFoundError = ({
+  recordId,
+  customMessage,
+  meta = {},
+}: {
+  recordId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderSmlRecordNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.smlRecordNotFound,
+    customMessage ?? `SML record ${recordId} not found`,
+    { ...meta, recordId, statusCode: 404 }
+  );
+};
+
+/**
  * Represents an internal error
  */
 export type AgentBuilderRequestAbortedError =
@@ -387,6 +419,7 @@ export const AgentBuilderErrorUtils = {
   isAgentNotFoundError,
   isConversationNotFoundError,
   isPluginNotFoundError,
+  isSmlRecordNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
   isAgentExecutionError,
@@ -397,6 +430,7 @@ export const AgentBuilderErrorUtils = {
   createAgentNotFoundError,
   createConversationNotFoundError,
   createPluginNotFoundError,
+  createSmlRecordNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,
   createAgentExecutionError,

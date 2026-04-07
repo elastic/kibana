@@ -14,7 +14,6 @@ const API_VERSION = '2023-10-31';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
-  const log = getService('log');
   const kibanaServer = getService('kibanaServer');
 
   describe('SML Records CRUD API', function () {

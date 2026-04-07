@@ -11,20 +11,25 @@ import { registerSmlRecordsRoutes } from './sml_records';
 import type { RouteDependencies } from './types';
 import { publicApiPath } from '../../common/constants';
 import type { SmlDocument } from '../services/sml/types';
+import type { SmlRecordCreateBody } from '../../common/http_api/sml_records';
 
-const sampleRecord: SmlDocument = {
-  id: 'index::projects::0',
+const sampleRecordBody: SmlRecordCreateBody = {
   type: 'index',
   title: 'projects',
   origin_id: 'projects',
   content: 'Index containing project records.',
+  spaces: ['*'],
+  tags: ['saas'],
+  params: { index_pattern: 'projects*' },
+};
+
+const sampleRecord: SmlDocument = {
+  ...sampleRecordBody,
+  id: 'index::projects::0',
   created_at: '2026-04-01T00:00:00.000Z',
   updated_at: '2026-04-01T00:00:00.000Z',
-  spaces: ['*'],
   permissions: [],
-  tags: ['saas'],
   user_defined: true,
-  params: { index_pattern: 'projects*' },
 };
 
 describe('SML Records Routes', () => {
@@ -32,19 +37,16 @@ describe('SML Records Routes', () => {
     string,
     { handler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown> }
   >;
-  let mockGetRecord: jest.Mock;
-  let mockCreateOrUpdateRecord: jest.Mock;
-  let mockDeleteRecord: jest.Mock;
+  let mockCreateOrUpdate: jest.Mock;
+  let mockGet: jest.Mock;
+  let mockDelete: jest.Mock;
   let mockUiSettingsGet: jest.Mock;
-  let mockGetStartServices: jest.Mock;
 
-  const mockEsClient = { mock: true };
-
-  const createMockContext = (featureFlagEnabled = true) => ({
+  const createMockContext = (experimentalFeaturesEnabled = true) => ({
     core: Promise.resolve({
       uiSettings: {
         client: {
-          get: mockUiSettingsGet.mockResolvedValue(featureFlagEnabled),
+          get: mockUiSettingsGet.mockResolvedValue(experimentalFeaturesEnabled),
         },
       },
     }),
@@ -69,28 +71,20 @@ describe('SML Records Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
-    mockGetRecord = jest.fn().mockResolvedValue(sampleRecord);
-    mockCreateOrUpdateRecord = jest.fn().mockResolvedValue(sampleRecord);
-    mockDeleteRecord = jest.fn().mockResolvedValue(true);
+    mockCreateOrUpdate = jest.fn().mockResolvedValue(sampleRecord);
+    mockGet = jest.fn().mockResolvedValue(sampleRecord);
+    mockDelete = jest.fn().mockResolvedValue(true);
     mockUiSettingsGet = jest.fn();
 
-    mockGetStartServices = jest.fn().mockResolvedValue([
-      {
-        elasticsearch: {
-          client: {
-            asScoped: jest.fn().mockReturnValue({
-              asInternalUser: mockEsClient,
-            }),
-          },
-        },
-      },
-    ]);
+    const mockScopedClient = {
+      createOrUpdate: mockCreateOrUpdate,
+      get: mockGet,
+      delete: mockDelete,
+    };
 
     const getInternalServices = jest.fn().mockReturnValue({
-      sml: {
-        getRecord: mockGetRecord,
-        createOrUpdateRecord: mockCreateOrUpdateRecord,
-        deleteRecord: mockDeleteRecord,
+      smlRecords: {
+        getScopedClient: jest.fn().mockReturnValue(mockScopedClient),
       },
     });
 
@@ -133,9 +127,6 @@ describe('SML Records Routes', () => {
       router: mockRouter,
       getInternalServices,
       logger: loggingSystemMock.createLogger(),
-      coreSetup: {
-        getStartServices: mockGetStartServices,
-      },
     } as unknown as RouteDependencies);
   });
 
@@ -143,110 +134,91 @@ describe('SML Records Routes', () => {
     routeHandlers[`${method}:${routePath}`]?.handler;
 
   describe('PUT /sml/{id} (create or update)', () => {
-    const path = `${publicApiPath}/sml/{id}`;
+    const routePath = `${publicApiPath}/sml/{id}`;
 
     it('registers the route', () => {
-      expect(getHandler('PUT', path)).toBeDefined();
+      expect(getHandler('PUT', routePath)).toBeDefined();
     });
 
-    it('calls sml.createOrUpdateRecord with correct arguments', async () => {
-      const handler = getHandler('PUT', path)!;
+    it('calls smlRecords.createOrUpdate with correct arguments', async () => {
+      const handler = getHandler('PUT', routePath)!;
       const ctx = createMockContext();
-      const body = {
-        type: 'index',
-        title: 'projects',
-        origin_id: 'projects',
-        content: 'Index containing project records.',
-        spaces: ['*'],
-        tags: ['saas'],
-        params: { index_pattern: 'projects*' },
-      };
-      const request = { params: { id: 'index::projects::0' }, body };
+      const request = { params: { id: 'index::projects::0' }, body: sampleRecordBody };
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockCreateOrUpdateRecord).toHaveBeenCalledWith({
-        id: 'index::projects::0',
-        document: body,
-        esClient: mockEsClient,
-      });
+      expect(mockCreateOrUpdate).toHaveBeenCalledWith('index::projects::0', sampleRecordBody);
       expect(result).toMatchObject({ type: 'ok', body: sampleRecord });
     });
 
     it('returns 404 when experimental features flag is disabled', async () => {
-      const handler = getHandler('PUT', path)!;
+      const handler = getHandler('PUT', routePath)!;
       const ctx = createMockContext(false);
-      const request = { params: { id: 'index::projects::0' }, body: {} };
+      const request = { params: { id: 'index::projects::0' }, body: sampleRecordBody };
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockCreateOrUpdateRecord).not.toHaveBeenCalled();
+      expect(mockCreateOrUpdate).not.toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
     });
   });
 
   describe('GET /sml/{id} (get by ID)', () => {
-    const path = `${publicApiPath}/sml/{id}`;
+    const routePath = `${publicApiPath}/sml/{id}`;
 
     it('registers the route', () => {
-      expect(getHandler('GET', path)).toBeDefined();
+      expect(getHandler('GET', routePath)).toBeDefined();
     });
 
-    it('calls sml.getRecord with correct id', async () => {
-      const handler = getHandler('GET', path)!;
+    it('calls smlRecords.get with correct id', async () => {
+      const handler = getHandler('GET', routePath)!;
       const ctx = createMockContext();
       const request = { params: { id: 'index::projects::0' } };
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockGetRecord).toHaveBeenCalledWith({
-        id: 'index::projects::0',
-        esClient: mockEsClient,
-      });
+      expect(mockGet).toHaveBeenCalledWith('index::projects::0');
       expect(result).toMatchObject({ type: 'ok', body: sampleRecord });
     });
 
     it('returns 404 when experimental features flag is disabled', async () => {
-      const handler = getHandler('GET', path)!;
+      const handler = getHandler('GET', routePath)!;
       const ctx = createMockContext(false);
       const request = { params: { id: 'index::projects::0' } };
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockGetRecord).not.toHaveBeenCalled();
+      expect(mockGet).not.toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
     });
   });
 
   describe('DELETE /sml/{id}', () => {
-    const path = `${publicApiPath}/sml/{id}`;
+    const routePath = `${publicApiPath}/sml/{id}`;
 
     it('registers the route', () => {
-      expect(getHandler('DELETE', path)).toBeDefined();
+      expect(getHandler('DELETE', routePath)).toBeDefined();
     });
 
-    it('calls sml.deleteRecord with correct id', async () => {
-      const handler = getHandler('DELETE', path)!;
+    it('calls smlRecords.delete with correct id', async () => {
+      const handler = getHandler('DELETE', routePath)!;
       const ctx = createMockContext();
       const request = { params: { id: 'index::projects::0' } };
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockDeleteRecord).toHaveBeenCalledWith({
-        id: 'index::projects::0',
-        esClient: mockEsClient,
-      });
+      expect(mockDelete).toHaveBeenCalledWith('index::projects::0');
       expect(result).toMatchObject({ type: 'ok', body: { success: true } });
     });
 
     it('returns 404 when experimental features flag is disabled', async () => {
-      const handler = getHandler('DELETE', path)!;
+      const handler = getHandler('DELETE', routePath)!;
       const ctx = createMockContext(false);
       const request = { params: { id: 'index::projects::0' } };
 
       const result = await handler(ctx, request, mockResponse);
 
-      expect(mockDeleteRecord).not.toHaveBeenCalled();
+      expect(mockDelete).not.toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
     });
   });

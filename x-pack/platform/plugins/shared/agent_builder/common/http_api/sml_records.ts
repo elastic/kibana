@@ -5,24 +5,22 @@
  * 2.0.
  */
 
+import type { SmlDocument } from '../../server/services/sml/types';
+
+/**
+ * The body payload for creating or updating an SML record.
+ */
+export type SmlRecordCreateBody = Pick<
+  SmlDocument,
+  'type' | 'title' | 'origin_id' | 'content' | 'spaces'
+> &
+  Partial<Pick<SmlDocument, 'permissions' | 'tags' | 'params'>>;
+
 /**
  * An SML record as returned by the public CRUD API.
  * Aligned with the server-side `SmlDocument` interface.
  */
-export interface SmlRecordHttpResponse {
-  id: string;
-  type: string;
-  title: string;
-  origin_id: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-  spaces: string[];
-  permissions: string[];
-  tags?: string[];
-  user_defined?: boolean;
-  params?: Record<string, unknown>;
-}
+export type SmlRecordHttpResponse = Omit<SmlDocument, 'semantic_title' | 'semantic_content'>;
 
 export type GetSmlRecordResponse = SmlRecordHttpResponse;
 

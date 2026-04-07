@@ -21,6 +21,7 @@ import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { createSmlService, type SmlServiceInstance } from './sml';
+import { SmlRecordsServiceImpl } from './sml_records';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import {
@@ -226,6 +227,11 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const smlRecords = new SmlRecordsServiceImpl({
+      logger: logger.get('sml-records'),
+      elasticsearch,
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -242,6 +248,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       sml,
+      smlRecords,
       plugins,
       consumption,
     };

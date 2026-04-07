@@ -249,31 +249,4 @@ export interface SmlService {
 
   /** List all registered type definitions */
   listTypeDefinitions: () => SmlTypeDefinition[];
-
-  /** Get a single SML record by its document ID. Throws if not found. */
-  getRecord: (params: { id: string; esClient: ElasticsearchClient }) => Promise<SmlDocument>;
-
-  /** Create or update an SML record. Always marks records as `user_defined: true`. */
-  createOrUpdateRecord: (params: {
-    id: string;
-    document: SmlRecordCreateBody;
-    esClient: ElasticsearchClient;
-  }) => Promise<SmlDocument>;
-
-  /** Delete a single SML record by its document ID. Throws if not found. */
-  deleteRecord: (params: { id: string; esClient: ElasticsearchClient }) => Promise<boolean>;
-}
-
-/**
- * The body payload for creating or updating an SML record via the public API.
- */
-export interface SmlRecordCreateBody {
-  type: string;
-  title: string;
-  origin_id: string;
-  content: string;
-  spaces: string[];
-  permissions?: string[];
-  tags?: string[];
-  params?: Record<string, unknown>;
 }

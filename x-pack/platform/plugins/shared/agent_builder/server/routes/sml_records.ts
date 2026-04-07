@@ -71,13 +71,49 @@ const RECORD_BODY_SCHEMA = schema.object({
   ),
 });
 
+/**
+ * Response schema for a single SML record.
+ */
+const SML_RECORD_RESPONSE_SCHEMA = schema.object({
+  id: schema.string({ meta: { description: 'The unique identifier of the SML record.' } }),
+  type: schema.string({ meta: { description: 'The SML record type.' } }),
+  title: schema.string({ meta: { description: 'Display title for the record.' } }),
+  origin_id: schema.string({ meta: { description: 'The origin identifier.' } }),
+  content: schema.string({ meta: { description: 'The searchable content.' } }),
+  created_at: schema.string({ meta: { description: 'ISO 8601 creation timestamp.' } }),
+  updated_at: schema.string({ meta: { description: 'ISO 8601 last update timestamp.' } }),
+  spaces: schema.arrayOf(schema.string(), {
+    meta: { description: 'Space IDs this record belongs to.' },
+  }),
+  permissions: schema.arrayOf(schema.string(), {
+    meta: { description: 'Kibana privileges required to access this record.' },
+  }),
+  tags: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      meta: { description: 'Optional tags for categorization and filtering.' },
+    })
+  ),
+  user_defined: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Whether this record was created via the public API.' },
+    })
+  ),
+  params: schema.maybe(
+    schema.recordOf(schema.string(), schema.any(), {
+      meta: { description: 'Type-specific parameters.' },
+    })
+  ),
+});
+
 export function registerSmlRecordsRoutes({
   router,
-  coreSetup,
   getInternalServices,
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+  const featureFlagConfig = {
+    featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  };
 
   // Create or update an SML record
   router.versioned
@@ -101,28 +137,24 @@ export function registerSmlRecordsRoutes({
             params: RECORD_ID_PARAMS_SCHEMA,
             body: RECORD_BODY_SCHEMA,
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () => SML_RECORD_RESPONSE_SCHEMA,
+            },
+          },
         },
         options: {
           oasOperationObject: () =>
             path.join(__dirname, 'examples/sml_records_create_or_update.yaml'),
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const { sml } = getInternalServices();
-          const [coreStart] = await coreSetup.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-          const record = await sml.createOrUpdateRecord({
-            id: request.params.id,
-            document: request.body,
-            esClient,
-          });
-          return response.ok<CreateOrUpdateSmlRecordResponse>({ body: record });
-        },
-        {
-          featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-        }
-      )
+      wrapHandler(async (ctx, request, response) => {
+        const { smlRecords } = getInternalServices();
+        const client = smlRecords.getScopedClient({ request });
+        const record = await client.createOrUpdate(request.params.id, request.body);
+        return response.ok<CreateOrUpdateSmlRecordResponse>({ body: record });
+      }, featureFlagConfig)
     );
 
   // Get an SML record by ID
@@ -145,23 +177,23 @@ export function registerSmlRecordsRoutes({
           request: {
             params: RECORD_ID_PARAMS_SCHEMA,
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () => SML_RECORD_RESPONSE_SCHEMA,
+            },
+          },
         },
         options: {
           oasOperationObject: () => path.join(__dirname, 'examples/sml_records_get_by_id.yaml'),
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const { sml } = getInternalServices();
-          const [coreStart] = await coreSetup.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-          const record = await sml.getRecord({ id: request.params.id, esClient });
-          return response.ok<GetSmlRecordResponse>({ body: record });
-        },
-        {
-          featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-        }
-      )
+      wrapHandler(async (ctx, request, response) => {
+        const { smlRecords } = getInternalServices();
+        const client = smlRecords.getScopedClient({ request });
+        const record = await client.get(request.params.id);
+        return response.ok<GetSmlRecordResponse>({ body: record });
+      }, featureFlagConfig)
     );
 
   // Delete an SML record
@@ -184,22 +216,27 @@ export function registerSmlRecordsRoutes({
           request: {
             params: RECORD_ID_PARAMS_SCHEMA,
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () =>
+                schema.object({
+                  success: schema.boolean({
+                    meta: { description: 'Whether the record was successfully deleted.' },
+                  }),
+                }),
+            },
+          },
         },
         options: {
           oasOperationObject: () => path.join(__dirname, 'examples/sml_records_delete.yaml'),
         },
       },
-      wrapHandler(
-        async (ctx, request, response) => {
-          const { sml } = getInternalServices();
-          const [coreStart] = await coreSetup.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-          const success = await sml.deleteRecord({ id: request.params.id, esClient });
-          return response.ok<DeleteSmlRecordResponse>({ body: { success } });
-        },
-        {
-          featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-        }
-      )
+      wrapHandler(async (ctx, request, response) => {
+        const { smlRecords } = getInternalServices();
+        const client = smlRecords.getScopedClient({ request });
+        const success = await client.delete(request.params.id);
+        return response.ok<DeleteSmlRecordResponse>({ body: { success } });
+      }, featureFlagConfig)
     );
 }
