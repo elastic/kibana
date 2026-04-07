@@ -54,7 +54,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           defaultMessage: 'Filter for',
         }),
         'data-test-subj': `legend-${label}-filterIn`,
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
         execute: () => {
           setPopoverOpen(false);
           onFilter();
@@ -66,7 +66,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           defaultMessage: 'Filter out',
         }),
         'data-test-subj': `legend-${label}-filterOut`,
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
         execute: () => {
           setPopoverOpen(false);
           onFilter({ negate: true });
