@@ -77,8 +77,8 @@ function toPublicEngine(
 export function registerStatus(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.STATUS,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.STATUS,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -86,7 +86,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(querySchema),
