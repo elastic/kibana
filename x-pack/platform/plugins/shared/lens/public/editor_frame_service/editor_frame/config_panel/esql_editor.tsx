@@ -9,7 +9,6 @@ import { css } from '@emotion/react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
@@ -88,6 +87,7 @@ export function ESQLEditor({
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
   const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
+  const submittedQueryRef = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
   const [query, setQuery] = useState<AggregateQuery | Query>(
     attributes?.state.query || { esql: '' }
   );
@@ -108,6 +108,13 @@ export function ESQLEditor({
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  /**
+   * After `runQuery`, the grid is already updated via `getSuggestions`; the chart then loads and
+   * `dataLoading$` completes once. Skip the post-load grid refresh for that completion to avoid a
+   * duplicate ES|QL request. Subsequent completions (e.g. time range only) still refresh the grid.
+   */
+  const suppressNextChartLoadGridRefreshRef = useRef(false);
+
   const currentAttributes = useCurrentAttributes({
     textBasedMode: isTextBasedLanguage,
     initialAttributes: attributes,
@@ -123,12 +130,37 @@ export function ESQLEditor({
       ? Object.values(attributes.state.adHocDataViews)
       : Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
 
-  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
+  const lensAdaptersRef = useRef(lensAdapters);
+  lensAdaptersRef.current = lensAdapters;
 
   const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   const dispatch = useLensDispatch();
+
+  submittedQueryRef.current = submittedQuery;
+
+  const refreshDataGridAfterChartLoad = useCallback(async () => {
+    const q = submittedQueryRef.current;
+    if (!isOfAggregateQueryType(q) || !q.esql?.trim()) {
+      return;
+    }
+    await getSuggestions(
+      q,
+      data,
+      http,
+      uiSettings,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      undefined,
+      undefined,
+      setDataGridAttrs,
+      esqlVariables,
+      false,
+      currentAttributesRef.current
+    );
+  }, [adHocDataViews, data, datasourceMap, esqlVariables, http, uiSettings, visualizationMap]);
 
   useEffect(() => {
     const s = dataLoading$?.subscribe((isDataLoading) => {
@@ -136,9 +168,14 @@ export function ESQLEditor({
       if (isDataLoading) {
         return;
       }
+      if (suppressNextChartLoadGridRefreshRef.current) {
+        suppressNextChartLoadGridRefreshRef.current = false;
+      } else {
+        void refreshDataGridAfterChartLoad();
+      }
       const activeData = getActiveDataFromDatatable(
         layerId,
-        previousAdapters.current?.tables?.tables
+        lensAdaptersRef.current?.tables?.tables
       );
       const table = activeData?.[layerId];
 
@@ -153,7 +190,7 @@ export function ESQLEditor({
       }
     });
     return () => s?.unsubscribe();
-  }, [dataLoading$, dispatch, layerId]);
+  }, [dataLoading$, dispatch, layerId, refreshDataGridAfterChartLoad]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
@@ -172,13 +209,17 @@ export function ESQLEditor({
         shouldUpdateAttrs,
         currentAttributesRef.current
       );
+
       if (attrs) {
         setCurrentAttributes?.(attrs);
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+
       prevQuery.current = q;
       setSubmittedQuery(q);
+      submittedQueryRef.current = q;
+      suppressNextChartLoadGridRefreshRef.current = true;
       setIsVisualizationLoading(false);
     },
     [
