@@ -295,6 +295,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               side="left"
               size={FLYOUT_SIZE}
               closeButtonPosition={closeFlyoutButtonPosition}
+              aria-labelledby={headingID}
               css={css`
                 // Put the page background color in the flyout version too
                 background-color: ${euiTheme.colors.backgroundBasePlain};
