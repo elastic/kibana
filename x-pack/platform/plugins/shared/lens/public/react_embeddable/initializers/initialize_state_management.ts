@@ -12,6 +12,7 @@ import {
   type PublishesSavedObjectId,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
+import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
@@ -21,6 +22,7 @@ import type {
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
+import { splitFlattenedApiConfig, type LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
@@ -60,7 +62,24 @@ export function initializeStateManagement(
     anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
     getComparators: () => {
       return {
-        attributes: initialState.ref_id === undefined ? 'deepEquality' : 'skip',
+        attributes:
+          initialState.ref_id !== undefined
+            ? 'skip'
+            : (lastAttr, currentAttr, lastSavedState, currentState) => {
+                if (lastAttr !== undefined && currentAttr !== undefined) {
+                  return deepEqual(lastAttr, currentAttr);
+                }
+                // Flattened API config — `attributes` is absent from both states, so compare
+                // the chart config portion extracted from the full serialized state.
+                return deepEqual(
+                  lastSavedState
+                    ? splitFlattenedApiConfig(lastSavedState as LensSerializedAPIConfig).chartConfig
+                    : undefined,
+                  currentState
+                    ? splitFlattenedApiConfig(currentState as LensSerializedAPIConfig).chartConfig
+                    : undefined
+                );
+              },
         ref_id: 'skip',
       };
     },
