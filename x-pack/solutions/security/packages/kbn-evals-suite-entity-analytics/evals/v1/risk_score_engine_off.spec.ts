@@ -6,7 +6,7 @@
  */
 
 import { tags } from '@kbn/scout-security';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 
 evaluate.describe(
   'SIEM Entity Analytics Skill - Risk Score Tests Without Data',

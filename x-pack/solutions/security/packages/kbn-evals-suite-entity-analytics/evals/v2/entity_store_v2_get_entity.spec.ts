@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
+import { createEntityMaintainerHelpers } from '../../src/entity_maintainer_helpers';
 
 /**
  * Entity Store V2 - get_entity tool routing evals.
@@ -25,6 +26,16 @@ evaluate.describe(
   'SIEM Entity Analytics V2 Skill - Get Entity',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ supertest }) => {
+      const maintainerHelpers = createEntityMaintainerHelpers(supertest);
+      await maintainerHelpers.enableEntityStore();
+    });
+
+    evaluate.afterAll(async ({ supertest }) => {
+      const maintainerHelpers = createEntityMaintainerHelpers(supertest);
+      await maintainerHelpers.uninstallEntityStore();
+    });
+
     evaluate('entity store v2: get entity questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {

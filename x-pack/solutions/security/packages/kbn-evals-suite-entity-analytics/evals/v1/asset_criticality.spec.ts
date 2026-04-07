@@ -6,7 +6,7 @@
  */
 
 import { tags } from '@kbn/scout-security';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * Asset criticality prompts (P-AC1, P-AC2). Uses security.entity_analytics.asset_criticality tool.

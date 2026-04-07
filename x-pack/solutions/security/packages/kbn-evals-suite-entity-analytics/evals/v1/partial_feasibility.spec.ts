@@ -6,8 +6,8 @@
  */
 
 import { tags } from '@kbn/scout-security';
-import { evaluate } from '../src/evaluate';
-import { padJobIds, lmdJobIds } from '../src/ml_helpers';
+import { evaluate } from '../../src/evaluate';
+import { padJobIds, lmdJobIds } from '../../src/ml_helpers';
 
 /**
  * Tier 2b partial-feasibility prompts. The system may produce a reasonable answer;

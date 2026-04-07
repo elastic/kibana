@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import { padJobIds, lmdJobIds } from '../../src/ml_helpers';
+import { createEntityMaintainerHelpers } from '../../src/entity_maintainer_helpers';
 
 /**
  * Entity Store V2 - multi-skill routing evals.
@@ -23,6 +24,16 @@ evaluate.describe(
   'SIEM Entity Analytics V2 Skill - Multi-Skill Routing',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ supertest }) => {
+      const maintainerHelpers = createEntityMaintainerHelpers(supertest);
+      await maintainerHelpers.enableEntityStore();
+    });
+
+    evaluate.afterAll(async ({ supertest }) => {
+      const maintainerHelpers = createEntityMaintainerHelpers(supertest);
+      await maintainerHelpers.uninstallEntityStore();
+    });
+
     evaluate('entity store v2: multi-skill routing questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {

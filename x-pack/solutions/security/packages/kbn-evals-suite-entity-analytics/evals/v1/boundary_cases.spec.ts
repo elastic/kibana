@@ -6,7 +6,7 @@
  */
 
 import { tags } from '@kbn/scout-security';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * Tier 3 negative/boundary prompts. The system cannot answer these; the AI must

@@ -6,8 +6,8 @@
  */
 
 import { tags } from '@kbn/scout-security';
-import { evaluate } from '../src/evaluate';
-import { dedJobIds, securityAuthJobIds, lmdJobIds, padJobIds } from '../src/ml_helpers';
+import { evaluate } from '../../src/evaluate';
+import { dedJobIds, securityAuthJobIds, lmdJobIds, padJobIds } from '../../src/ml_helpers';
 
 evaluate.describe(
   'SIEM ML Jobs Skill - Anomalous Behavior without ML Jobs',

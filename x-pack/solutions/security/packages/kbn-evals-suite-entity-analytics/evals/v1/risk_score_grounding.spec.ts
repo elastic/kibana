@@ -17,7 +17,7 @@ import {
 import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
 import { dataGeneratorFactory } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils';
 import { deleteAllAlerts, createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * Risk score grounding evals with deterministic seeded data.

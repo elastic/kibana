@@ -204,7 +204,7 @@ export interface TestMaintainerEntity {
   expectedEuid: string;
 }
 
-const buildTestEntity = (seed: MaintainerEntitySeed): TestMaintainerEntity => {
+export const buildTestEntity = (seed: MaintainerEntitySeed): TestMaintainerEntity => {
   const documentId = seed.documentId ?? uuidv4();
 
   if (seed.kind === 'host') {
