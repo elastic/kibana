@@ -185,12 +185,6 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
       const signature = computeSignature(stringToSign, accountKey);
       const authHeader = `SharedKey ${accountName}:${signature}`;
 
-      ctx.logger.debug(
-        `[azure-shared-key] signing ${verb} ${config.url ?? ''}\n` +
-          `  canonical-resource: ${canonicalizedResource}\n` +
-          `  string-to-sign: ${JSON.stringify(stringToSign)}`
-      );
-
       config.headers = config.headers ?? {};
       config.headers['x-ms-date'] = msDate;
       config.headers.Authorization = authHeader;
