@@ -214,9 +214,10 @@ export function registerFeatureFlags(
       name: i18n.translate('xpack.streams.wiredStreamViewsSettingsName', {
         defaultMessage: 'Wired stream views',
       }),
-      value: false,
+      value: true,
       description: i18n.translate('xpack.streams.wiredStreamViewsSettingsDescription', {
-        defaultMessage: 'Enable ES|QL views for wired streams.',
+        defaultMessage:
+          'Enable ES|QL views for wired streams (stateful). Off by default on serverless where the Views API is unavailable.',
       }),
       type: 'boolean',
       schema: schema.boolean(),
