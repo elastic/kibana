@@ -85,3 +85,17 @@ jobs:
         with:
           anthropic_api_key: ${{ needs.mint-token.outputs.api_key }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  revoke-token:
+    if: ${{ always() }}
+    needs: [mint-token, claude-review, claude-review-comment]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Revoke LiteLLM token
+        id: revoke
+        uses: elastic/github-actions/litellm-token@v3 # TODO: update to SHA after release
+        with:
+          base-url: ${{ secrets.LITELLM_BASE_URL }}
+          master-key: ${{ secrets.LITELLM_API_KEY }}
+          operation: revoke
+          api-key: ${{ needs.mint-token.outputs.api_key }}
