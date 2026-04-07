@@ -312,7 +312,9 @@ describe('Alert table context menu', () => {
         id: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID',
         title: 'Document workflows',
         'data-test-subj': 'document-workflow-context-menu-panel',
-        content: <div data-test-subj={documentWorkflowPanelContent}>{'Document workflow panel'}</div>,
+        content: (
+          <div data-test-subj={documentWorkflowPanelContent}>{'Document workflow panel'}</div>
+        ),
       },
     ];
 

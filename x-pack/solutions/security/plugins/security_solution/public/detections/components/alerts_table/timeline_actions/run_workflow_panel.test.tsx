@@ -13,11 +13,7 @@ import * as i18n from '../translations';
 const mockMutate = jest.fn();
 jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: () => ({ mutate: mockMutate }),
-  WorkflowSelector: ({
-    onWorkflowChange,
-  }: {
-    onWorkflowChange: (id: string) => void;
-  }) => (
+  WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       <button
         data-test-subj="select-workflow-option"
