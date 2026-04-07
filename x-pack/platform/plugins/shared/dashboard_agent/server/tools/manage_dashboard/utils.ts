@@ -132,7 +132,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.uid)) {
+    if (removeSet.has(panel.id)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);

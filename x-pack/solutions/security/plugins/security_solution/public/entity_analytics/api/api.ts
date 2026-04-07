@@ -59,6 +59,10 @@ import type {
   UpdateWatchlistEntitySourceRequestBodyInput,
   UpdateWatchlistEntitySourceResponse,
 } from '../../../common/api/entity_analytics/watchlists/data_source/update.gen';
+import type {
+  CreateWatchlistEntitySourceRequestBodyInput,
+  CreateWatchlistEntitySourceResponse,
+} from '../../../common/api/entity_analytics/watchlists/data_source/create.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
@@ -776,6 +780,19 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
 
+    const createWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      body: CreateWatchlistEntitySourceRequestBodyInput;
+    }) =>
+      http.fetch<CreateWatchlistEntitySourceResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          body: JSON.stringify(params.body),
+        }
+      );
+
     const searchWatchlistIndices = async (params: {
       query: string | undefined;
       signal?: AbortSignal;
@@ -901,6 +918,7 @@ export const useEntityAnalyticsRoutes = () => {
       deleteWatchlist,
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
+      createWatchlistEntitySource,
       searchWatchlistIndices,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,

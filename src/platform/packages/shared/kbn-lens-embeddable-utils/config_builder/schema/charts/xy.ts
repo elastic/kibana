@@ -18,7 +18,7 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
+import { dataSourceEsqlTableSchema, dataSourceSchema } from '../data_source';
 import {
   legendSizeSchema,
   legendVisibilitySchemaWithAuto,
@@ -178,7 +178,7 @@ const yAxisSchema = schema.object(
 /**
  * Chart types available for data layers in XY visualizations
  */
-const xyDataLayerSharedSchema = {
+export const xyDataLayerSharedSchema = {
   type: schema.oneOf(
     [
       schema.literal('area'),
@@ -561,7 +561,7 @@ const xySharedSettings = {
 const xyDataLayerSchemaNoESQL = schema.object(
   {
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
       mergeAllBucketsWithChartDimensionSchema({
@@ -598,7 +598,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
 const xyDataLayerSchemaESQL = schema.object(
   {
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
       esqlColumnWithFormatSchema.extends(
@@ -705,7 +705,7 @@ const referenceLineLayerShared = {
 const referenceLineLayerSchemaNoESQL = schema.object(
   {
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     type: schema.literal('referenceLines'),
     thresholds: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
@@ -727,7 +727,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
 const referenceLineLayerSchemaESQL = schema.object(
   {
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     type: schema.literal('referenceLines'),
     thresholds: schema.arrayOf(esqlColumnWithFormatSchema.extends(referenceLineLayerShared), {
       meta: { description: 'Array of ES|QL-based reference line thresholds' },
@@ -884,7 +884,7 @@ const annotationManualRange = schema.object(
 const annotationLayerByValueSchema = schema.object(
   {
     ...ignoringGlobalFiltersSchemaRaw,
-    ...datasetSchema,
+    ...dataSourceSchema,
     type: schema.literal('annotations'),
     events: schema.arrayOf(
       schema.oneOf([annotationQuery, annotationManualEvent, annotationManualRange]),
