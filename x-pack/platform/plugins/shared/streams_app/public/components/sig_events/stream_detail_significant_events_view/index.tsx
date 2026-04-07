@@ -340,7 +340,7 @@ function KnowledgeIndicatorsGenerationControls({
                 size="m"
                 aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
                 iconType="stop"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.currentTarget.blur();
                   onCancelGenerationClick();
                 }}
