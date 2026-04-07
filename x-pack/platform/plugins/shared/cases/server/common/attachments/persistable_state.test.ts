@@ -11,6 +11,7 @@ import {
   LENS_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
 import { persistableStateAttachmentTransformer } from './persistable_state';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
 
 describe('persistableStateAttachmentTransformer', () => {
   const transformer = persistableStateAttachmentTransformer;
@@ -77,5 +78,17 @@ describe('persistableStateAttachmentTransformer', () => {
     expect(legacy.type).toBe(AttachmentType.persistableState);
     expect(legacy.persistableStateAttachmentTypeId).toBe(LEGACY_LENS_ATTACHMENT_TYPE);
     expect(legacy.persistableStateAttachmentState).toEqual(unified.data.state);
+  });
+
+  it('does not treat non-Lens legacy persistable state as this transformer legacy payload', () => {
+    const legacy = {
+      type: AttachmentType.persistableState,
+      owner: 'securitySolution',
+      persistableStateAttachmentTypeId: '.test',
+      persistableStateAttachmentState: {},
+    };
+
+    expect(transformer.isLegacyPayload(legacy as AttachmentRequestV2)).toBe(false);
+    expect(transformer.isLegacyType(legacy)).toBe(false);
   });
 });

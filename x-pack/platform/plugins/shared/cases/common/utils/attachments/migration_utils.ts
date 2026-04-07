@@ -10,6 +10,7 @@ import {
   MIGRATED_ATTACHMENT_TYPES,
   PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
   PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
+  PERSISTABLE_ATTACHMENT_TYPES,
   UNIFIED_TO_LEGACY_MAP,
   OWNER_TO_PREFIX_MAP,
   LEGACY_EVENT_TYPE,
@@ -26,7 +27,7 @@ export const toLegacyAttachmentType = (type?: string): string | undefined => {
   if (typeof type !== 'string') {
     return undefined;
   }
-  if (Object.keys(PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP).includes(type)) {
+  if (type in PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP) {
     return toLegacyPersistableStateAttachmentType(type);
   }
   return UNIFIED_TO_LEGACY_MAP[type] ?? type;
@@ -42,6 +43,13 @@ export const toUnifiedAttachmentType = (type: string, owner: string): string => 
   }
   return LEGACY_TO_UNIFIED_MAP[type] ?? type;
 };
+
+/**
+ * True when the persistable-state subtype id (legacy `.lens` or unified `lens`) is one
+ * that this stack migrates to unified attachment attributes (currently Lens only).
+ */
+export const isPersistableType = (type: string): boolean =>
+  PERSISTABLE_ATTACHMENT_TYPES.has(toUnifiedPersistableStateAttachmentType(type));
 
 export const toUnifiedPersistableStateAttachmentType = (type: string): string => {
   return PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP[type] ?? type;

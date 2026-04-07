@@ -47,8 +47,9 @@ export const PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
   [LENS_ATTACHMENT_TYPE]: LEGACY_LENS_ATTACHMENT_TYPE,
 } as const;
 
-export const PERSISTABLE_VISUALIZATION_ATTACHMENT_TYPES = new Set<string>([LENS_ATTACHMENT_TYPE]);
-
+export const PERSISTABLE_ATTACHMENT_TYPES = new Set<string>(
+  Object.keys(PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP)
+);
 /**
  * Mapping from legacy attachment type names to unified names.
  */
@@ -71,7 +72,7 @@ export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
   
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
-  ...PERSISTABLE_VISUALIZATION_ATTACHMENT_TYPES,
+  ...PERSISTABLE_ATTACHMENT_TYPES,
   
 ]);
 

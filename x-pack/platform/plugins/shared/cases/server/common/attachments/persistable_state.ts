@@ -9,14 +9,13 @@ import type { AttachmentRequest, AttachmentRequestV2 } from '../../../common/typ
 import type {
   AttachmentAttributesV2,
   UnifiedAttachmentPayload,
-} from '../../../common/types/domain';
+} from '../../../common/types/domain/attachment/v2';
 import { AttachmentType } from '../../../common/types/domain';
 import {
-  LEGACY_LENS_ATTACHMENT_TYPE,
-  LENS_ATTACHMENT_TYPE,
-  PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
-  PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
-} from '../../../common/constants/attachments';
+  isPersistableType,
+  toLegacyPersistableStateAttachmentType,
+  toUnifiedPersistableStateAttachmentType,
+} from '../../../common/utils/attachments';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -70,160 +69,180 @@ const getStateFromUnifiedData = (
   return data as AttachmentPersistedAttributes['persistableStateAttachmentState'];
 };
 
-const getUnifiedTypeIdFromAny = (typeId: string): string | undefined => {
-  if (typeId === LEGACY_LENS_ATTACHMENT_TYPE || typeId === LENS_ATTACHMENT_TYPE) {
-    return LENS_ATTACHMENT_TYPE;
+// ---- Request layer (API / DTO) ----
+export function isLegacyPayloadPersistableStateAttachment(
+  attachment: AttachmentRequestV2
+): boolean {
+  return (
+    isLegacyPersistableState(attachment) &&
+    isPersistableType(attachment.persistableStateAttachmentTypeId)
+  );
+}
+
+export function isUnifiedPayloadPersistableStateAttachment(
+  attachment: AttachmentRequestV2
+): boolean {
+  return (
+    isRecord(attachment) &&
+    typeof attachment.type === 'string' &&
+    isPersistableType(attachment.type) &&
+    isUnifiedValueAttachmentForType(attachment, attachment.type)
+  );
+}
+
+export function toUnifiedPayloadPersistableStateAttachment(
+  attachment: AttachmentRequestV2
+): UnifiedAttachmentPayload {
+  if (
+    isLegacyPersistableState(attachment) &&
+    isPersistableType(attachment.persistableStateAttachmentTypeId)
+  ) {
+    const unifiedTypeId = toUnifiedPersistableStateAttachmentType(
+      attachment.persistableStateAttachmentTypeId
+    );
+    const legacyState = getStateFromLegacyAttachment(attachment);
+    return {
+      type: unifiedTypeId,
+      owner: attachment.owner,
+      data: { state: legacyState },
+    } as UnifiedAttachmentPayload;
   }
 
-  return PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP[typeId] ?? typeId;
-};
+  return attachment as unknown as UnifiedAttachmentPayload;
+}
 
-const getLegacyTypeIdFromAny = (typeId: string): string | undefined => {
-  if (typeId === LEGACY_LENS_ATTACHMENT_TYPE || typeId === LENS_ATTACHMENT_TYPE) {
-    return LEGACY_LENS_ATTACHMENT_TYPE;
+export function toLegacyPayloadPersistableStateAttachment(
+  unifiedPayload: AttachmentRequestV2
+): AttachmentRequest {
+  if (isRecord(unifiedPayload) && typeof unifiedPayload.type === 'string') {
+    if (
+      !isPersistableType(unifiedPayload.type) ||
+      !isUnifiedValueAttachmentForType(unifiedPayload, unifiedPayload.type)
+    ) {
+      return unifiedPayload as AttachmentRequest;
+    }
+    const legacyTypeId = toLegacyPersistableStateAttachmentType(unifiedPayload.type);
+    const legacyState = getStateFromUnifiedData(unifiedPayload.data) ?? {};
+    return {
+      type: AttachmentType.persistableState,
+      owner: unifiedPayload.owner,
+      persistableStateAttachmentTypeId: legacyTypeId,
+      persistableStateAttachmentState: legacyState,
+    };
   }
 
-  return PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP[typeId] ?? typeId;
-};
+  return unifiedPayload as AttachmentRequest;
+}
 
-const isSupportedPersistableStateTypeId = (typeId: string): boolean =>
-  getUnifiedTypeIdFromAny(typeId) != null && getLegacyTypeIdFromAny(typeId) != null;
+// ---- Persisted layer (SO attributes) ----
+function isNewSchema(attributes: AttachmentAttributesV2): boolean {
+  return (
+    isRecord(attributes) &&
+    typeof attributes.type === 'string' &&
+    isPersistableType(attributes.type) &&
+    isUnifiedValueAttachmentForType(attributes, attributes.type)
+  );
+}
 
+function isOldSchema(attributes: AttachmentAttributesV2): boolean {
+  return (
+    isLegacyPersistableState(attributes) &&
+    isPersistableType(attributes.persistableStateAttachmentTypeId)
+  );
+}
+
+/**
+ * Transformer for migrated persistable visualization attachments (e.g. Lens): legacy
+ * `persistableState` wrapper <-> unified value shape (`type` + `data.state`).
+ */
 export const persistableStateAttachmentTransformer: AttachmentTypeTransformer<
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes
 > = {
-  isLegacyPayload(attachment: AttachmentRequestV2): boolean {
-    return (
-      isLegacyPersistableState(attachment) &&
-      isSupportedPersistableStateTypeId(attachment.persistableStateAttachmentTypeId)
-    );
-  },
-
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
-    return (
-      isRecord(attachment) &&
-      typeof attachment.type === 'string' &&
-      isSupportedPersistableStateTypeId(attachment.type) &&
-      isUnifiedValueAttachmentForType(attachment, attachment.type)
-    );
-  },
-
-  toUnifiedPayload(attachment: AttachmentRequestV2): UnifiedAttachmentPayload {
-    if (isLegacyPersistableState(attachment)) {
-      const unifiedTypeId = getUnifiedTypeIdFromAny(attachment.persistableStateAttachmentTypeId);
-      if (unifiedTypeId == null) {
-        return attachment as UnifiedAttachmentPayload;
-      }
-      const legacyState = getStateFromLegacyAttachment(attachment);
-      return {
-        type: unifiedTypeId,
-        owner: attachment.owner,
-        data: { state: legacyState },
-      } as UnifiedAttachmentPayload;
-    }
-
-    return attachment as UnifiedAttachmentPayload;
-  },
-
-  toLegacyPayload(attachment: AttachmentRequestV2): AttachmentRequest {
-    if (isRecord(attachment) && typeof attachment.type === 'string') {
-      const legacyTypeId = getLegacyTypeIdFromAny(attachment.type);
-      if (legacyTypeId == null || !isUnifiedValueAttachmentForType(attachment, attachment.type)) {
-        return attachment as AttachmentRequest;
-      }
-      const legacyState = getStateFromUnifiedData(attachment.data) ?? {};
-      return {
-        type: AttachmentType.persistableState,
-        owner: attachment.owner,
-        persistableStateAttachmentTypeId: legacyTypeId,
-        persistableStateAttachmentState: legacyState,
-      };
-    }
-
-    return attachment as AttachmentRequest;
-  },
-
-  isType(attributes: AttachmentAttributesV2): boolean {
-    return this.isLegacyType(attributes) || this.isUnifiedType(attributes);
-  },
-
-  isUnifiedType(attributes: unknown): boolean {
-    return (
-      isRecord(attributes) &&
-      typeof attributes.type === 'string' &&
-      isSupportedPersistableStateTypeId(attributes.type) &&
-      isUnifiedValueAttachmentForType(attributes, attributes.type)
-    );
-  },
-
-  isLegacyType(attributes: unknown): boolean {
-    return (
-      isLegacyPersistableState(attributes) &&
-      isSupportedPersistableStateTypeId(attributes.persistableStateAttachmentTypeId)
-    );
-  },
-
   toUnifiedSchema(attributes: unknown): UnifiedAttachmentAttributes {
-    if (
-      isRecord(attributes) &&
-      typeof attributes.type === 'string' &&
-      isSupportedPersistableStateTypeId(attributes.type) &&
-      isUnifiedValueAttachmentForType(attributes, attributes.type)
-    ) {
-      return attributes;
+    const attrs = attributes as AttachmentAttributesV2;
+    if (isNewSchema(attrs)) {
+      return attrs as UnifiedAttachmentAttributes;
     }
-
-    if (isLegacyPersistableState(attributes)) {
-      const unifiedTypeId = getUnifiedTypeIdFromAny(attributes.persistableStateAttachmentTypeId);
-      if (unifiedTypeId == null) {
-        return attributes as unknown as UnifiedAttachmentAttributes;
-      }
-      const legacyState = getStateFromLegacyAttachment(attributes);
+    if (isOldSchema(attrs)) {
+      const oldAttrs = attrs as AttachmentPersistedAttributes & {
+        type: AttachmentType.persistableState;
+        persistableStateAttachmentTypeId: string;
+      };
+      const unifiedTypeId = toUnifiedPersistableStateAttachmentType(
+        oldAttrs.persistableStateAttachmentTypeId
+      );
+      const legacyState = getStateFromLegacyAttachment(oldAttrs);
       return {
         type: unifiedTypeId,
-        owner: attributes.owner,
+        owner: oldAttrs.owner,
         data: { state: legacyState },
-        created_at: attributes.created_at,
-        created_by: attributes.created_by,
-        pushed_at: attributes.pushed_at ?? null,
-        pushed_by: attributes.pushed_by ?? null,
-        updated_at: attributes.updated_at ?? null,
-        updated_by: attributes.updated_by ?? null,
+        created_at: oldAttrs.created_at,
+        created_by: oldAttrs.created_by,
+        pushed_at: oldAttrs.pushed_at ?? null,
+        pushed_by: oldAttrs.pushed_by ?? null,
+        updated_at: oldAttrs.updated_at ?? null,
+        updated_by: oldAttrs.updated_by ?? null,
       } as UnifiedAttachmentAttributes;
     }
-
-    return attributes as UnifiedAttachmentAttributes;
+    return attrs as UnifiedAttachmentAttributes;
   },
 
   toLegacySchema(attributes: unknown): AttachmentPersistedAttributes {
-    if (
-      isLegacyPersistableState(attributes) &&
-      isSupportedPersistableStateTypeId(attributes.persistableStateAttachmentTypeId)
-    ) {
-      return attributes as unknown as AttachmentPersistedAttributes;
+    const attrs = attributes as AttachmentPersistedAttributes | UnifiedAttachmentAttributes;
+    const attrsAsCombined = attrs as AttachmentAttributesV2;
+
+    if (isOldSchema(attrsAsCombined)) {
+      return attrs as unknown as AttachmentPersistedAttributes;
     }
 
-    if (isRecord(attributes) && typeof attributes.type === 'string') {
-      const legacyTypeId = getLegacyTypeIdFromAny(attributes.type);
-      if (legacyTypeId == null || !isUnifiedValueAttachmentForType(attributes, attributes.type)) {
-        return attributes as unknown as AttachmentPersistedAttributes;
-      }
-      const legacyState = getStateFromUnifiedData(attributes.data) ?? {};
+    if (isNewSchema(attrsAsCombined)) {
+      const newAttrs = attrs as UnifiedAttachmentAttributes;
+      const legacyTypeId = toLegacyPersistableStateAttachmentType(newAttrs.type);
+      const legacyState = getStateFromUnifiedData(newAttrs.data as Record<string, unknown>) ?? {};
       return {
         type: AttachmentType.persistableState,
-        owner: attributes.owner,
+        owner: newAttrs.owner,
         persistableStateAttachmentTypeId: legacyTypeId,
         persistableStateAttachmentState: legacyState,
-        created_at: attributes.created_at,
-        created_by: attributes.created_by,
-        pushed_at: attributes.pushed_at ?? null,
-        pushed_by: attributes.pushed_by ?? null,
-        updated_at: attributes.updated_at ?? null,
-        updated_by: attributes.updated_by ?? null,
+        created_at: newAttrs.created_at,
+        created_by: newAttrs.created_by,
+        pushed_at: newAttrs.pushed_at ?? null,
+        pushed_by: newAttrs.pushed_by ?? null,
+        updated_at: newAttrs.updated_at ?? null,
+        updated_by: newAttrs.updated_by ?? null,
       };
     }
 
-    return attributes as AttachmentPersistedAttributes;
+    return attrs as AttachmentPersistedAttributes;
+  },
+
+  isType(attributes: AttachmentAttributesV2): boolean {
+    return isOldSchema(attributes) || isNewSchema(attributes);
+  },
+
+  isUnifiedType(attributes: AttachmentAttributesV2): boolean {
+    return isNewSchema(attributes);
+  },
+
+  isLegacyType(attributes: AttachmentAttributesV2): boolean {
+    return isOldSchema(attributes);
+  },
+
+  // --- Request payload (API layer) ---
+  isLegacyPayload(attachment: AttachmentRequestV2): boolean {
+    return isLegacyPayloadPersistableStateAttachment(attachment);
+  },
+
+  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+    return isUnifiedPayloadPersistableStateAttachment(attachment);
+  },
+
+  toUnifiedPayload(attachment: AttachmentRequestV2): UnifiedAttachmentPayload {
+    return toUnifiedPayloadPersistableStateAttachment(attachment);
+  },
+
+  toLegacyPayload(attachment: AttachmentRequestV2): AttachmentRequest {
+    return toLegacyPayloadPersistableStateAttachment(attachment);
   },
 };

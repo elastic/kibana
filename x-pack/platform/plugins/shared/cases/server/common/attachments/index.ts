@@ -7,7 +7,7 @@
 
 import {
   COMMENT_ATTACHMENT_TYPE,
-  PERSISTABLE_VISUALIZATION_ATTACHMENT_TYPES,
+  PERSISTABLE_ATTACHMENT_TYPES,
 } from '../../../common/constants/attachments';
 import {
   toUnifiedAttachmentType,
@@ -30,8 +30,10 @@ export {
 } from './saved_object_type';
 
 /**
- * Returns the attachment type string from attributes (unified or legacy shape).
- * Used to select the correct transformer.
+ * Returns a routing key for transformer selection (not necessarily a normalized unified type).
+ * For legacy `persistableState` attachments this is `persistableStateAttachmentTypeId` (e.g. `.lens`);
+ * for all other shapes it is the top-level `type` (e.g. `user`, `alert`, unified `lens`).
+ * Use `toUnifiedAttachmentType` / `toUnifiedPersistableStateAttachmentType` from migration utils to normalize.
  * @throws Error if attributes is null or not an object
  */
 export function getAttachmentTypeFromAttributes(attributes: unknown): string {
@@ -52,10 +54,9 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
 }
 
 /**
- * Returns the persisted transformer for the given attachment type.
- * Use getAttachmentTypeFromAttributes(attributes) to derive type from decoded attributes.
- * For comment/user types returns the comment transformer; for all other types returns a
- * pass-through transformer (identity for old <-> new schema).
+ * Returns the persisted transformer for the routing key from {@link getAttachmentTypeFromAttributes}.
+ * For comment/user types returns the comment transformer; for migrated persistable
+ * types (e.g. Lens) returns the persistable-state transformer; otherwise pass-through.
  */
 export function getAttachmentTypeTransformers(
   type: string,
@@ -67,7 +68,7 @@ export function getAttachmentTypeTransformers(
   if (normalizedType === COMMENT_ATTACHMENT_TYPE || normalizedType === 'comment') {
     return commentAttachmentTransformer;
   }
-  if (PERSISTABLE_VISUALIZATION_ATTACHMENT_TYPES.has(normalizedPersistableType)) {
+  if (PERSISTABLE_ATTACHMENT_TYPES.has(normalizedPersistableType)) {
     return persistableStateAttachmentTransformer;
   }
   if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
