@@ -564,7 +564,6 @@ export const otelDemoDataset: DatasetConfig = {
       metadata: {
         difficulty: 'hard',
         failure_domain: 'checkout',
-        failure_mode: 'memory_starvation',
       },
     },
   ],
