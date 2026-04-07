@@ -89,7 +89,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const modelManagementSection = sections.find(
           (section) => section.sectionId === 'modelManagement'
         );
-        expect(modelManagementSection?.sectionLinks).to.eql(['inference_endpoints']);
+        expect(modelManagementSection?.sectionLinks).to.eql([
+          'elastic_inference_service',
+          'inference_endpoints',
+          'model_settings',
+        ]);
 
         const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
         expect(kibanaSection?.sectionLinks).to.eql([
