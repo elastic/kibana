@@ -81,12 +81,7 @@ interface UseBulkSelectProps {
   search?: string;
 }
 
-export const useBulkSelect = ({
-  totalItemCount,
-  items,
-  filter,
-  search,
-}: UseBulkSelectProps) => {
+export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulkSelectProps) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     selectedIds: new Set<string>(),
@@ -189,8 +184,7 @@ export const useBulkSelect = ({
    */
   const getBulkParams = useCallback((): BulkOperationParams => {
     if (state.isAllSelected) {
-      const listScope =
-        buildApiRulesListCombinedFilter({ filter, search }) ?? '';
+      const listScope = buildApiRulesListCombinedFilter({ filter, search }) ?? '';
       const excludedIds = [...state.selectedIds];
       if (excludedIds.length === 0) {
         return { filter: listScope };
