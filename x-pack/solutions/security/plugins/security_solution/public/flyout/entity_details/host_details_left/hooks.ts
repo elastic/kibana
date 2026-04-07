@@ -59,9 +59,16 @@ export const useTabs = ({
   entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   return useMemo(() => {
-    const isRiskScoreTabAvailable = isRiskScoreExist && hostName;
+    const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: hostName ?? '', entityType: EntityType.host, scopeId })]
+      ? [
+          getRiskInputTab({
+            entityName: hostName ?? '',
+            entityType: EntityType.host,
+            scopeId,
+            entityId: entityStoreEntityId,
+          }),
+        ]
       : [];
 
     // Determine if the Insights tab should be included

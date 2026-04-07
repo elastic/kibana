@@ -10,11 +10,11 @@
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
-import type { XYState } from '../../../schema';
+import type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { getIdForLayer, isLensStateDataLayer } from './helpers';
+import { getIdForLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -198,6 +198,14 @@ export function buildVisualizationState(
   };
 }
 
+function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYStateESQL['layers'] {
+  return apiLayers.length > 0 && apiLayers.every(isAPIesqlXYLayer);
+}
+
+function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYStateNoESQL['layers'] {
+  return apiLayers.length > 0 && apiLayers.every((l) => !isAPIesqlXYLayer(l));
+}
+
 export function buildVisualizationAPI(
   config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
@@ -216,20 +224,37 @@ export function buildVisualizationAPI(
   }
   const layerPresence = getLayerPresence(dataLayers);
   const { resolveAxisId, usedModes } = resolveAxisLayout(config);
-  return {
-    type: 'xy',
-    layers: buildXYLayerAPI(
-      config,
-      layers,
-      adHocDataViews,
-      references,
-      internalReferences,
-      resolveAxisId
-    ),
-    axis: convertAxisSettingsToAPIFormat(config, layers, usedModes),
-    styling: convertStylingToAPIFormat(config, layerPresence),
-    ...convertLegendToAPIFormat(config.legend),
-  };
+  const apiLayers = buildXYLayerAPI(
+    config,
+    layers,
+    adHocDataViews,
+    references,
+    internalReferences,
+    resolveAxisId
+  );
+  const axis = convertAxisSettingsToAPIFormat(config, layers, usedModes);
+  const styling = convertStylingToAPIFormat(config, layerPresence);
+  const legend = convertLegendToAPIFormat(config.legend);
+
+  if (areAllLayersEsql(apiLayers)) {
+    return {
+      type: 'xy',
+      layers: apiLayers,
+      axis,
+      styling,
+      ...legend,
+    };
+  }
+  if (areAllLayersNoEsql(apiLayers)) {
+    return {
+      type: 'xy',
+      layers: apiLayers,
+      axis,
+      styling,
+      ...legend,
+    };
+  }
+  throw new Error('Mixed ESQL and non-ESQL layers are not supported');
 }
 
 function convertDomainStateToAPIFormat(
@@ -428,8 +453,8 @@ function buildXYLayerAPI(
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] | undefined,
   resolveAxisId: ResolveAxisId
-): XYState['layers'] {
-  const apiLayers: XYState['layers'] = [];
+): XYLayer[] {
+  const apiLayers: XYLayer[] = [];
   for (const visLayer of visualization.layers) {
     if (visLayer.layerType === 'referenceLine') {
       const datasourceLayer = layers[visLayer.layerId];
