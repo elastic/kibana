@@ -27,7 +27,7 @@ const FIELD_MAP: Record<string, string> = {
   'metadata.name': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.name`,
   'metadata.description': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.description`,
   'metadata.owner': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.owner`,
-  'metadata.labels': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.labels`,
+  'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
   'grouping.fields': `${RULE_SAVED_OBJECT_TYPE}.attributes.grouping.fields`,
 };
 

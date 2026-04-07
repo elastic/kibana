@@ -24,7 +24,7 @@ export const buildRuleSearchQuery = (search?: string): string | undefined => {
     .filter(Boolean)
     .map((term) => {
       const escapedTerm = escapeKuery(normalizeSearchTerm(term));
-      return `(metadata.name: ${escapedTerm}* OR metadata.description: ${escapedTerm}* OR metadata.labels: ${escapedTerm}* OR grouping.fields: ${escapedTerm}*)`;
+      return `(metadata.name: ${escapedTerm}* OR metadata.description: ${escapedTerm}* OR metadata.tags: ${escapedTerm}* OR grouping.fields: ${escapedTerm}*)`;
     });
 
   return termFilters.length > 0 ? termFilters.join(' AND ') : undefined;
