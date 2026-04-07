@@ -1597,18 +1597,202 @@ describe('generateOtelcolConfig', () => {
       };
 
       const cache = new Map([['combined_pkg-1.0.0', mixedInputsPackageInfo]]);
-      const result = generateOtelcolConfig([nonDynamicOtelInput], undefined, cache);
+      const result2 = generateOtelcolConfig([nonDynamicOtelInput], undefined, cache);
 
-      const routingKey = Object.keys(result.processors ?? {}).find((k) =>
+      const routingKey2 = Object.keys(result2.processors ?? {}).find((k) =>
         k.startsWith('transform/')
       );
-      expect(routingKey).toBeDefined();
-      const routingProcessor = result.processors?.[routingKey!];
+      expect(routingKey2).toBeDefined();
+      const routingProcessor2 = result2.processors?.[routingKey2!];
 
       // otelcol in this template has no dynamic_signal_types — must produce only metric_statements
       // (from data_stream.type: metrics), not log_statements from the sibling custom_receiver input.
-      expect(routingProcessor).toHaveProperty('metric_statements');
-      expect(routingProcessor).not.toHaveProperty('log_statements');
+      expect(routingProcessor2).toHaveProperty('metric_statements');
+      expect(routingProcessor2).not.toHaveProperty('log_statements');
+    });
+  });
+
+  describe('adjustPipelineSignalType for non-dynamic OTel packages', () => {
+    const packageInfoCacheNonDynamic = new Map([
+      [
+        'otel-traces-1.0.0',
+        {
+          name: 'otel-traces',
+          version: '1.0.0',
+          policy_templates: [
+            {
+              name: 'template1',
+              title: 'OTel Traces',
+              input: 'otelcol',
+              type: 'logs',
+              template_path: 'input.yml.hbs',
+              dynamic_signal_types: false,
+              vars: [],
+            },
+          ],
+        } as any,
+      ],
+    ]);
+
+    const packageInfoCacheDynamic = new Map([
+      [
+        'otel-traces-1.0.0',
+        {
+          name: 'otel-traces',
+          version: '1.0.0',
+          policy_templates: [
+            {
+              name: 'template1',
+              title: 'OTel Traces',
+              input: 'otelcol',
+              type: 'logs',
+              template_path: 'input.yml.hbs',
+              dynamic_signal_types: true,
+              vars: [],
+            },
+          ],
+        } as any,
+      ],
+    ]);
+
+    const makeInput = (dataStreamType: string, pipelineKey: string): FullAgentPolicyInput => ({
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: 'test-otel',
+      name: 'test-otel',
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'somepolicy',
+      meta: { package: { name: 'otel-traces', version: '1.0.0' } },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: { dataset: 'mydata', type: dataStreamType },
+          receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4317' } } } },
+          service: { pipelines: { [pipelineKey]: { receivers: ['otlp'] } } },
+        },
+      ],
+    });
+
+    it('renames the pipeline key when data_stream.type differs from the package default', () => {
+      const input = makeInput('traces', 'logs/otlp');
+      const result = generateOtelcolConfig([input], defaultOutput, packageInfoCacheNonDynamic);
+      expect(result.service?.pipelines).toHaveProperty('traces/otlp/test-otel-stream-id-1');
+      expect(result.service?.pipelines).not.toHaveProperty('logs/otlp/test-otel-stream-id-1');
+    });
+
+    it('passes through unchanged when data_stream.type already matches the pipeline key', () => {
+      const input = makeInput('logs', 'logs/otlp');
+      const result = generateOtelcolConfig([input], defaultOutput, packageInfoCacheNonDynamic);
+      expect(result.service?.pipelines).toHaveProperty('logs/otlp/test-otel-stream-id-1');
+    });
+
+    it('does not rename for dynamic_signal_types packages', () => {
+      const input = makeInput('traces', 'logs/otlp');
+      const result = generateOtelcolConfig([input], defaultOutput, packageInfoCacheDynamic);
+      expect(result.service?.pipelines).toHaveProperty('logs/otlp/test-otel-stream-id-1');
+      expect(result.service?.pipelines).not.toHaveProperty('traces/otlp/test-otel-stream-id-1');
+    });
+
+    it('renames pipeline for non-dynamic input when another template in the package has dynamic_signal_types', () => {
+      const mixedPackageInfo = {
+        type: 'integration',
+        name: 'mixed_pkg',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'otel_policy',
+            title: 'OTel',
+            description: 'OTel',
+            inputs: [
+              {
+                type: OTEL_COLLECTOR_INPUT_TYPE,
+                title: 'OTel',
+                description: 'OTel',
+                dynamic_signal_types: true,
+              },
+            ],
+          },
+          {
+            name: 'metrics_policy',
+            title: 'Metrics',
+            description: 'Metrics',
+            inputs: [
+              {
+                type: OTEL_COLLECTOR_INPUT_TYPE,
+                title: 'Metrics OTel',
+                description: 'Metrics only',
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const nonDynamicInput: FullAgentPolicyInput = {
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        id: 'non-dynamic-otel',
+        name: 'non-dynamic-otel',
+        revision: 0,
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        package_policy_id: 'non-dynamic-policy',
+        meta: {
+          package: {
+            name: 'mixed_pkg',
+            version: '1.0.0',
+            policy_template: 'metrics_policy',
+          },
+        },
+        streams: [
+          {
+            id: 'stream-id-1',
+            data_stream: { dataset: 'mixed_pkg.metrics', type: 'traces' },
+            receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4317' } } } },
+            service: {
+              pipelines: {
+                'logs/otlp': { receivers: ['otlp'] },
+              },
+            },
+          },
+        ],
+      };
+
+      const cache = new Map([['mixed_pkg-1.0.0', mixedPackageInfo]]);
+      const result = generateOtelcolConfig([nonDynamicInput], defaultOutput, cache);
+
+      expect(result.service?.pipelines).toHaveProperty('traces/otlp/non-dynamic-otel-stream-id-1');
+      expect(result.service?.pipelines).not.toHaveProperty(
+        'logs/otlp/non-dynamic-otel-stream-id-1'
+      );
+    });
+
+    it('does not rename when there are multiple pipelines', () => {
+      const input: FullAgentPolicyInput = {
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        id: 'test-otel',
+        name: 'test-otel',
+        revision: 0,
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        package_policy_id: 'somepolicy',
+        meta: { package: { name: 'otel-traces', version: '1.0.0' } },
+        streams: [
+          {
+            id: 'stream-id-1',
+            data_stream: { dataset: 'mydata', type: 'traces' },
+            receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4317' } } } },
+            service: {
+              pipelines: {
+                'logs/otlp': { receivers: ['otlp'] },
+                'metrics/otlp': { receivers: ['otlp'] },
+              },
+            },
+          },
+        ],
+      };
+      const result = generateOtelcolConfig([input], defaultOutput, packageInfoCacheNonDynamic);
+      expect(result.service?.pipelines).toHaveProperty('logs/otlp/test-otel-stream-id-1');
+      expect(result.service?.pipelines).toHaveProperty('metrics/otlp/test-otel-stream-id-1');
     });
   });
 });

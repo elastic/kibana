@@ -195,20 +195,21 @@ export const bucketTermsOperationSchema = schema.object(
           type: schema.literal('significant'),
         }),
         schema.object({
-          type: schema.literal('column'),
-          /**
-           * Metric to be used for the column by index number (0 based)
-           */
-          metric: schema.number({
+          type: schema.literal('metric'),
+          metric_index: schema.number({
+            defaultValue: 0,
+            min: 0,
             meta: {
-              description: 'Metric to be used for the column by index number (0 based)',
+              description:
+                "0-based index into the metrics array (layer's metrics array if XY chart) identifying which metric to rank by. Defaults to 0 (first metric).",
             },
           }),
-          /**
-           * Direction of the column
-           */
+
           direction: builderEnums.direction({
-            meta: { id: 'termsRankByColumnDirection' },
+            meta: {
+              id: 'termsRankByMetricDirection',
+              description: 'Sort direction for metric-based ranking',
+            },
           }),
         }),
         schema.object({

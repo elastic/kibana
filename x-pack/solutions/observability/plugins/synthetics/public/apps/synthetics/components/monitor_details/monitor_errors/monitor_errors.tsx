@@ -74,7 +74,7 @@ const EmptyErrors = () => {
     <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '65vh' }}>
       <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
         <span>
-          <EuiIcon type="checkInCircleFilled" color="success" size="xl" />
+          <EuiIcon type="checkCircleFill" color="success" size="xl" />
         </span>
         <EuiSpacer size="m" />
         <EuiTitle size="m">

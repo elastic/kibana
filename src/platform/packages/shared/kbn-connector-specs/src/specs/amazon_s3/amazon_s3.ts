@@ -24,10 +24,6 @@ import type {
   AmazonS3BucketObjectListing,
   AmazonS3Object,
 } from './amazon_s3_types';
-import downloadFileWorkflow from './workflows/download_file.yaml';
-import listBucketObjectsWorkflow from './workflows/list_bucket_objects.yaml';
-import listBucketsWorkflow from './workflows/list_buckets.yaml';
-
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
  * If the user requests a file larger than this, we will return a pre-signed URL for them to download the file directly from S3 instead of through Kibana.
@@ -179,8 +175,6 @@ export const AmazonS3: ConnectorSpec = {
       },
     },
   },
-
-  agentBuilderWorkflows: [downloadFileWorkflow, listBucketObjectsWorkflow, listBucketsWorkflow],
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.amazonS3.test.description', {

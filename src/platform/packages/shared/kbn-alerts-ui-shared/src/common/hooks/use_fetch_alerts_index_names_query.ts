@@ -28,7 +28,7 @@ export const useFetchAlertsIndexNamesQuery = (
   { http, ruleTypeIds }: UseFetchAlertsIndexNamesQueryParams,
   options?: Pick<
     QueryOptionsOverrides<typeof fetchAlertsIndexNames>,
-    'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
+    'context' | 'enabled' | 'onError' | 'refetchOnWindowFocus' | 'retry' | 'staleTime'
   >
 ) => {
   return useQuery({
