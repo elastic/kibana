@@ -64,6 +64,10 @@ Beyond the two axes above, plugins vary in how they organize code: schemas in on
 
 **Always match the existing style of the plugin you are working in.** Read a few existing routes and schema files to understand the local conventions before making changes. If descriptions are centralized in constants, add to the constants. If schemas are inline, keep them inline. Do not impose a different organizational pattern.
 
+### `docs/openapi/` detection
+
+Check whether the plugin has a `docs/openapi/` directory. If it does, list all path YAML files and example YAML files — these are part of the published spec and must be updated alongside route code (see the `docs/openapi/` section under Phase 3).
+
 ## Phase 2: Analysis
 
 Run `debug-oas` for the API area to get the current issue list. Record the baseline issue count.
@@ -83,13 +87,19 @@ Work route-by-route. For each route, bundle all improvements together: schema fi
 
 These rules apply regardless of the plugin's OAS approach.
 
-**Verify against implementation.** Read the handler function and trace how each parameter is used before writing a description. Never infer behavior from parameter names alone.
+**Verify against implementation.** Read the handler function and trace how each parameter is used before writing a description. Never infer behavior from parameter names alone. Do not expose implementation details in the description — see target audience rules below.
 
 **Flag unused parameters.** If a parameter is accepted in the schema but never referenced in the handler body, flag it to the developer rather than documenting nonexistent behavior.
 
 **Summary format:** 5-45 characters, start with a verb, sentence case, no trailing period, include articles. Match the operation verb — for example, "Get a data view" on a GET and "Delete a data view" on a DELETE. Path parameters shared across methods must have context-appropriate descriptions too.
 
-**Description format:** Explain what the operation does and why a user would call it. Document constraints, side effects, and relationships to other operations. Use markdown links for references to external docs. End descriptions with a newline character in YAML.
+**Description format:** Explain what the operation does and why a user would call it. Document constraints and side effects visible to the API caller, and relationships to other API operations. Use markdown links for references to external docs. End descriptions with a newline character in YAML.
+
+**Target audience.** The reader is an API consumer — a developer integrating with Kibana from the outside, or an AI agent calling the API. They do not have access to Kibana source code and do not know internal implementation details. Descriptions should answer "what does this do for me?" not "how is this implemented?"
+
+- Do NOT mention: internal class/function names, saved-object implementation details, internal privilege names, or Kibana-internal concepts that aren't visible through the API surface.
+- DO mention: what the endpoint does in product terms, what inputs are required vs optional, what the response contains, behavioral constraints the caller should know (rate limits, side effects, ordering dependencies), and links to relevant Elastic docs.
+- Descriptions should read naturally as standalone documentation — as if they appeared on a docs page with no surrounding code.
 
 ### `@kbn/config-schema` field descriptions
 
@@ -206,9 +216,15 @@ x-codeSamples:
 - Generate `curl` from Console syntax using `@elastic/request-converter` rather than hand-writing. Apply fixups: replace `$ELASTICSEARCH_URL` with `${KIBANA_URL}`, replace `$ELASTIC_API_KEY` with `${API_KEY}`, and add `-H "kbn-xsrf: true"` for mutating methods (POST, PUT, DELETE).
 - Use `x-codeSamples` (camelCase) for new code sample keys, unless the plugin already uses `x-code-samples` (hyphenated) — in that case, match the existing key name.
 
-### Examples and code samples (`docs/openapi/` plugins)
+### `docs/openapi/` path and example files
 
-If the plugin has a `docs/openapi/` directory with path and component YAML files, add descriptions, examples, and `x-codeSamples` in those files following the existing structure. After modifying YAML files, regenerate bundled output:
+If the plugin has `docs/openapi/` path YAML files, you MUST update them. These files are merged into the published API spec and are the primary place where `x-codeSamples`, `description`, and `examples` appear for consumers. Skipping them means the published docs will be incomplete.
+
+For each path YAML file: ensure `summary` and `description` match the route-level constants, and add `x-codeSamples` with both curl and Console samples. For each example YAML file: ensure a `description` field is present.
+
+If `x-codeSamples` cannot be added via `oasOperationObject` due to typing limitations, add them to the YAML path files instead. Do not skip code samples.
+
+After modifying YAML files, regenerate bundled output:
 
 ```bash
 cd <plugin_path>/docs/openapi && npx @redocly/cli bundle 2>/dev/null
@@ -217,6 +233,17 @@ cd <plugin_path>/docs/openapi && npx @redocly/cli bundle 2>/dev/null
 ### Deprecated routes
 
 For deprecated routes, add a description that warns about deprecation and points to the replacement. Ensure `deprecated: true` is set on the route config where applicable.
+
+### Completeness check
+
+Before moving to verification, confirm every item below is complete. Do not proceed with partial coverage — but also do not fabricate descriptions to check boxes. If a field or route's behavior is unclear after reading the handler, flag it to the developer rather than guessing.
+
+- Every public route has a `summary` and `description` set.
+- Every schema field visible in the API has a `meta: { description }` (or `.describe()` for Zod).
+- Every `docs/openapi/` path YAML file has `description` and `x-codeSamples` for each operation.
+- Every `docs/openapi/` example YAML file has a `description` field.
+- Every deprecated or legacy route has deprecation metadata.
+- Bundled output (`bundled.yaml`, `bundled.json`) has been regenerated if any YAML was modified.
 
 ## Phase 4: Work organization
 
