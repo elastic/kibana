@@ -62288,7 +62288,6 @@ paths:
                   items:
                     type: string
                   maxItems: 100
-                  minItems: 1
                   type: array
                 searchIds:
                   description: Saved search IDs that should be deleted alongside the timelines
