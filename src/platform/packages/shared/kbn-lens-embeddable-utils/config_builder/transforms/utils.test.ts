@@ -577,7 +577,7 @@ describe('filtersAndQueryToLensState', () => {
       ],
       styling: {
         primary: {
-          value: { sizing: 'auto' },
+          value: { sizing: 'auto', alignment: 'left' },
           labels: { alignment: 'left' },
         },
       },
