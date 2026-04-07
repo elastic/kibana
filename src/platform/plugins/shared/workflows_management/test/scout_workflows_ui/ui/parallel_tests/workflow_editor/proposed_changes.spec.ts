@@ -84,7 +84,6 @@ const ALL_STEPS_MODIFIED = INITIAL_YAML.replace(
 test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
-      'workflows:aiAgent:enabled': true,
       'agentBuilder:experimentalFeatures': true,
     });
   });
@@ -97,10 +96,7 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
   });
 
   test.afterAll(async ({ scoutSpace, apiServices }) => {
-    await scoutSpace.uiSettings.unset(
-      'workflows:aiAgent:enabled',
-      'agentBuilder:experimentalFeatures'
-    );
+    await scoutSpace.uiSettings.unset('agentBuilder:experimentalFeatures');
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
