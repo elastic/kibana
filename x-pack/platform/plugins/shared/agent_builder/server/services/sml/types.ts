@@ -13,6 +13,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { RunAgentFn } from '@kbn/agent-builder-server';
 
 /**
  * A single SML chunk to be indexed.
@@ -44,6 +45,8 @@ export interface SmlContext {
   logger: Logger;
   /** The current user's request, when available. Absent during background crawler runs. */
   request?: KibanaRequest;
+  /** Execute an agent by ID. Available when the runner has been initialized. */
+  runAgent?: RunAgentFn;
 }
 
 /**

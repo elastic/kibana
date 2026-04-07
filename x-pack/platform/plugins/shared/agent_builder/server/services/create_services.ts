@@ -122,6 +122,7 @@ export class ServiceManager {
     const sml = this.services.sml.start({
       logger: logger.get('sml'),
       securityAuthz: securityPlugin?.authz,
+      getRunAgent: () => getRunner().runAgent,
     });
 
     const tools = this.services.tools.start({
