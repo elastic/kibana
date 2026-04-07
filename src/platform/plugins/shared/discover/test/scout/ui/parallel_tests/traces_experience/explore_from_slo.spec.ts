@@ -43,7 +43,7 @@ const APM_SLO_PAYLOAD = {
   },
   budgetingMethod: 'occurrences',
   timeWindow: {
-    duration: '730d',
+    duration: '30d',
     type: 'rolling',
   },
   objective: {

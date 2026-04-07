@@ -90,39 +90,21 @@ test.describe(
         await expect(sourcePanel.getByText('transaction.name:')).toBeVisible();
       });
 
-      await test.step('service.name links to APM service overview', async () => {
-        const link = page.testSubj.locator('sloDetailsApmSourceLink-service.name');
-        await expect(link).toBeVisible();
-        await expect(link).toHaveText(SERVICE_NAME);
-        const href = await link.getAttribute('href');
-        expect(href).toContain(`/app/apm/services/${SERVICE_NAME}/overview`);
-      });
+      await test.step('source panel fields link to APM via locator', async () => {
+        const fields = [
+          { testSubj: 'sloDetailsApmSourceLink-service.name', expectedText: SERVICE_NAME },
+          { testSubj: 'sloDetailsApmSourceLink-service.environment', expectedText: ENVIRONMENT },
+          { testSubj: 'sloDetailsApmSourceLink-transaction.type', expectedText: TRANSACTION_TYPE },
+          { testSubj: 'sloDetailsApmSourceLink-transaction.name', expectedText: TRANSACTION_NAME },
+        ];
 
-      await test.step('service.environment links to APM with environment filter', async () => {
-        const link = page.testSubj.locator('sloDetailsApmSourceLink-service.environment');
-        await expect(link).toBeVisible();
-        await expect(link).toHaveText(ENVIRONMENT);
-        const href = await link.getAttribute('href');
-        expect(href).toContain(`/app/apm/services/${SERVICE_NAME}/overview`);
-        expect(href).toContain(`environment=${ENVIRONMENT}`);
-      });
-
-      await test.step('transaction.type links to APM with transaction type filter', async () => {
-        const link = page.testSubj.locator('sloDetailsApmSourceLink-transaction.type');
-        await expect(link).toBeVisible();
-        await expect(link).toHaveText(TRANSACTION_TYPE);
-        const href = await link.getAttribute('href');
-        expect(href).toContain(`/app/apm/services/${SERVICE_NAME}/overview`);
-        expect(href).toContain(`transactionType=${TRANSACTION_TYPE}`);
-      });
-
-      await test.step('transaction.name links to APM transactions tab', async () => {
-        const link = page.testSubj.locator('sloDetailsApmSourceLink-transaction.name');
-        await expect(link).toBeVisible();
-        await expect(link).toHaveText(TRANSACTION_NAME);
-        const href = await link.getAttribute('href');
-        expect(href).toContain(`/app/apm/services/${SERVICE_NAME}/overview`);
-        expect(href).toContain('serviceOverviewTab=transactions');
+        for (const { testSubj, expectedText } of fields) {
+          const link = page.testSubj.locator(testSubj);
+          await expect(link).toBeVisible();
+          await expect(link).toHaveText(expectedText);
+          const href = await link.getAttribute('href');
+          expect(href).toContain('/app/r?l=APM_LOCATOR');
+        }
       });
 
       await test.step('SLI chart panel shows Open dropdown for APM SLOs', async () => {
