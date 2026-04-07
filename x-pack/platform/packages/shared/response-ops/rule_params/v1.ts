@@ -89,10 +89,6 @@ const ruleParamsSchemasWithRuleTypeId: Record<string, Type<unknown>> = {
   'slo.rules.burnRate': sloBurnRateParamsSchemaV1,
 };
 
-const variantsWithoutRuleTypeId = Object.values(ruleParamsSchemasWithRuleTypeId) as unknown as [
-  Type<Record<string, unknown>>
-];
-
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: { description: 'The parameters for the rule.' },
 });
@@ -125,12 +121,7 @@ export const ruleParamsSchemasForCreate = (
   });
 };
 
-export const ruleParamsSchemaForUpdate = schema.oneOf(
-  [...variantsWithoutRuleTypeId, ruleParamsSchemaWithDefaultValue] as unknown as [
-    Type<Record<string, unknown>>
-  ],
-  { meta: { description: 'The parameters for the rule.' } }
-);
+export const ruleParamsSchemaForUpdate = ruleParamsSchemaWithDefaultValue;
 
 export const createRuleParamsExamples = () =>
   path.join(__dirname, 'examples_create_rule_params.yaml');
