@@ -3403,5 +3403,66 @@ steps:
       expect(result.total).toBe(1002);
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
     });
+
+    it("should unschedule tasks per page with only that page's disabled IDs", async () => {
+      const mockTaskScheduler = {
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        scheduleWorkflowTask: jest.fn(),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      const makeHitWithSort = (id: string, sortValue: number) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: `Workflow ${id}`,
+          enabled: true,
+          yaml: `name: Workflow ${id}\nenabled: true`,
+        },
+        sort: [sortValue, 0],
+      });
+
+      const page1Hits = Array.from({ length: 1000 }, (_, i) =>
+        makeHitWithSort(`wf-${i}`, 1000 - i)
+      );
+      const page2Hits = [makeHitWithSort('wf-1000', 0), makeHitWithSort('wf-1001', -1)];
+
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: page1Hits, total: { value: 1002 } } } as any)
+        .mockResolvedValueOnce({ hits: { hits: page2Hits } } as any);
+
+      const page1Items = page1Hits.map((h) => ({ index: { _id: h._id, status: 200 } }));
+      const page2Items = page2Hits.map((h) => ({ index: { _id: h._id, status: 200 } }));
+
+      mockEsClient.bulk
+        .mockResolvedValueOnce({ errors: false, items: page1Items } as any)
+        .mockResolvedValueOnce({ errors: false, items: page2Items } as any);
+
+      await service.disableAllWorkflows();
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(1002);
+
+      const page1Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(0, 1000);
+      const page2Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(1000);
+
+      expect(page1Calls.map((c: any) => c[0])).toEqual(page1Hits.map((h) => h._id));
+      expect(page2Calls.map((c: any) => c[0])).toEqual(['wf-1000', 'wf-1001']);
+    });
+
+    it('should not call unschedule when no workflows were disabled', async () => {
+      const mockTaskScheduler = {
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        scheduleWorkflowTask: jest.fn(),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.disableAllWorkflows();
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+    });
   });
 });

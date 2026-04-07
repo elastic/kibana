@@ -989,6 +989,7 @@ export class WorkflowsService {
           refresh: true,
         });
 
+        const pageDisabledIds: string[] = [];
         bulkResponse.items.forEach((item) => {
           const operation = item.index;
           if (operation?.error) {
@@ -1000,11 +1001,14 @@ export class WorkflowsService {
                   : JSON.stringify(operation.error),
             });
           } else if (operation?._id) {
-            disabledIds.push(operation._id);
+            pageDisabledIds.push(operation._id);
           }
         });
 
-        await this.unscheduleDeletedWorkflowTasks(disabledIds);
+        if (pageDisabledIds.length > 0) {
+          disabledIds.push(...pageDisabledIds);
+          await this.unscheduleDeletedWorkflowTasks(pageDisabledIds);
+        }
       } catch (error) {
         bulkOperations.forEach((op) => {
           failures.push({
