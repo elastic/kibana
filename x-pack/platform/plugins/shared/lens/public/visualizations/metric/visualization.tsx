@@ -32,7 +32,7 @@ import {
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
 } from '@kbn/lens-common';
-import { getUpdatedMetricState } from '../../../common/content_management/v1/transforms/metric';
+import { getUpdatedMetricState as getUpdatedMetricStateV1 } from '../../../common/content_management/v1/transforms/metric';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -79,6 +79,18 @@ const isSupportedDynamicMetric = (op: OperationMetadata) =>
 export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
+
+type MetricVisualizationStateWithLegacyTitleWeight = MetricVisualizationState & {
+  titleWeight?: unknown;
+};
+
+const removeLegacyTitleWeight = (
+  state: MetricVisualizationStateWithLegacyTitleWeight
+): MetricVisualizationState => {
+  const { titleWeight: _titleWeight, ...updatedState } = state;
+
+  return updatedState;
+};
 
 const getMetricLayerConfiguration = (
   paletteService: PaletteRegistry,
@@ -453,7 +465,7 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return getUpdatedMetricState(state);
+    if (state) return removeLegacyTitleWeight(getUpdatedMetricStateV1(state));
 
     return {
       layerId: addNewLayer(),
