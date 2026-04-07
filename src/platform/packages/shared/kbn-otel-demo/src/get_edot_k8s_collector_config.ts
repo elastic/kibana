@@ -274,6 +274,7 @@ export function getEdotK8sCollectorConfig({
     attributes: [
       { key: 'service.namespace', value: namespace, action: 'upsert' },
       { key: 'deployment.environment', value: demoId, action: 'upsert' },
+      { key: 'deployment.environment.name', value: demoId, action: 'upsert' },
     ],
   };
 

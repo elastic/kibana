@@ -317,6 +317,9 @@ processors:
       - key: deployment.environment
         value: ${demoId}
         action: upsert
+      - key: deployment.environment.name
+        value: ${demoId}
+        action: upsert
 
   # Convert cumulative histograms to delta (required by Elasticsearch exporter)
   cumulativetodelta:
