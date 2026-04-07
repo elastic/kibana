@@ -35,24 +35,20 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-const mockLicensing = licensingMock.createStart();
 const license$ = new BehaviorSubject(
   licensingMock.createLicense({
     license: { type: 'platinum', mode: 'platinum' },
   })
 );
-const mockServices = {
-  ...mockUseKibanaReturnValue.services,
-  licensing: { ...mockLicensing, license$ },
-};
-mockServices.application.capabilities = {
-  ...mockServices.application.capabilities,
+mockUseKibanaReturnValue.services.licensing.license$ = license$;
+mockUseKibanaReturnValue.services.application.capabilities = {
+  ...mockUseKibanaReturnValue.services.application.capabilities,
   [MAINTENANCE_WINDOW_FEATURE_ID]: {
     save: true,
     show: true,
   },
 };
-mockServices.spaces.getActiveSpace = jest
+mockUseKibanaReturnValue.services.spaces.getActiveSpace = jest
   .fn()
   .mockImplementation(() =>
     Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
@@ -65,7 +61,7 @@ jest.mock('../../utils/kibana_react', () => ({
   useKibana: jest.fn(() => ({
     ...mockUseKibanaReturnValue,
     services: {
-      ...mockServices,
+      ...mockUseKibanaReturnValue.services,
       observabilityAIAssistant: mockObservabilityAIAssistant,
     },
   })),
@@ -80,10 +76,7 @@ usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
-    ...mockUseKibanaReturnValue,
-    services: mockServices,
-  })),
+  useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/create_use_rules_link', () => ({
