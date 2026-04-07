@@ -547,11 +547,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             </EuiFlexItem>
             {isAllSelected && totalItemCount > BULK_FILTER_MAX_RULES ? (
               <EuiFlexItem grow={false}>
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  data-test-subj="bulkSelectAllLimitDisclosure"
-                >
+                <EuiText size="xs" color="subdued" data-test-subj="bulkSelectAllLimitDisclosure">
                   <FormattedMessage
                     id="xpack.alertingV2.rulesList.bulkSelectAllLimitDisclosure"
                     defaultMessage="Only the first {maxRules, number} rules can be selected for bulk actions."
