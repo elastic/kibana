@@ -77,6 +77,7 @@ describe('metric visualization', () => {
       | 'secondaryColor'
       | 'secondaryPrefix'
       | 'valuesTextAlign'
+      | 'titleWeight'
     >
   > = {
     layerId: 'first',
@@ -98,7 +99,6 @@ describe('metric visualization', () => {
     primaryAlign: 'right',
     secondaryAlign: 'right',
     primaryPosition: 'bottom',
-    titleWeight: 'bold',
     iconAlign: 'right',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
@@ -109,7 +109,7 @@ describe('metric visualization', () => {
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
-      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign'
+      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'
     >
   > = {
     ...fullState,
@@ -128,6 +128,19 @@ describe('metric visualization', () => {
 
     test('returns persisted state', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
+    });
+
+    test('removes legacy state property titleWeight', () => {
+      const stateWithLegacyTitleWeight: MetricVisualizationState = {
+        ...fullState,
+        titleWeight: 'bold',
+      };
+      expect(
+        visualization.initialize(
+          () => stateWithLegacyTitleWeight.layerId,
+          stateWithLegacyTitleWeight
+        )
+      ).toEqual(fullState);
     });
 
     test('migrates legacy state properties secondaryPrefix and valuesTextAlign', () => {
@@ -571,9 +584,6 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
-                "titleWeight": Array [
-                  "bold",
-                ],
                 "titlesTextAlign": Array [
                   "left",
                 ],
@@ -661,9 +671,6 @@ describe('metric visualization', () => {
                 ],
                 "subtitle": Array [
                   "subtitle",
-                ],
-                "titleWeight": Array [
-                  "bold",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -984,9 +991,6 @@ describe('metric visualization', () => {
               "subtitle": Array [
                 "subtitle",
               ],
-              "titleWeight": Array [
-                "bold",
-              ],
               "titlesTextAlign": Array [
                 "left",
               ],
@@ -1229,7 +1233,6 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
-        "titleWeight": "bold",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
       }
@@ -1716,8 +1719,6 @@ describe('metric visualization', () => {
             type: 'static',
             color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });
@@ -1750,8 +1751,6 @@ describe('metric visualization', () => {
             paletteId: 'compare_to',
             baselineValue: 0,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });
