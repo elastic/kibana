@@ -10,17 +10,9 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Feature Settings', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeAll(async ({ uiSettings }) => {
-    await uiSettings.set({ 'searchInferenceEndpoints:modelSettingsEnabled': true });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.featureSettings.goto();
-  });
-
-  test.afterAll(async ({ uiSettings }) => {
-    await uiSettings.unset('searchInferenceEndpoints:modelSettingsEnabled');
   });
 
   test('page header is visible', async ({ pageObjects }) => {
@@ -75,8 +67,8 @@ test.describe('Feature Settings', { tag: tags.deploymentAgnostic }, () => {
       await expect(featureSettings.allEndpointRows).not.toHaveCount(0);
     });
 
-    await test.step('endpoint rows contain a default badge', async () => {
-      await expect(featureSettings.content).toContainText('Default');
+    await test.step('first endpoint row has a default badge', async () => {
+      await expect(featureSettings.firstEndpointRow).toContainText('Default');
     });
   });
 
@@ -89,15 +81,30 @@ test.describe('Feature Settings', { tag: tags.deploymentAgnostic }, () => {
     });
   });
 
-  test('remove button is disabled when only one endpoint remains', async ({ pageObjects }) => {
+  test('remove endpoints until one remains then reset to defaults', async ({ pageObjects }) => {
     const { featureSettings } = pageObjects;
 
-    await test.step('single-endpoint card has disabled remove button', async () => {
-      await expect(featureSettings.disabledRemoveButtons).not.toHaveCount(0);
+    await test.step('remove endpoints until only one remains', async () => {
+      await featureSettings.removeEndpointsUntilOneRemains();
+    });
+
+    await test.step('last remaining remove button is disabled', async () => {
+      await expect(featureSettings.firstCardLastRemoveButton).toBeDisabled();
+    });
+
+    await test.step('reset section to defaults', async () => {
+      await featureSettings.firstResetLink.click();
+      await expect(featureSettings.resetDefaultsModal).toBeVisible();
+      await featureSettings.resetDefaultsConfirmButton.click();
+      await expect(featureSettings.resetDefaultsModal).toBeHidden();
+    });
+
+    await test.step('save button is disabled after reset', async () => {
+      await expect(featureSettings.saveButton).toBeDisabled();
     });
   });
 
-  test('reset to defaults modal', async ({ pageObjects }) => {
+  test('reset to defaults modal cancel', async ({ pageObjects }) => {
     const { featureSettings } = pageObjects;
 
     await test.step('click reset link opens confirmation modal', async () => {

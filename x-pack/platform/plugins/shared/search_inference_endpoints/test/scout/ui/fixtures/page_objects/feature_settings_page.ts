@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/no-nth-methods */
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class FeatureSettingsPage {
   constructor(private readonly page: ScoutPage) {}
@@ -65,14 +67,13 @@ export class FeatureSettingsPage {
     return this.content.locator('[data-test-subj^="endpoint-row-"]');
   }
 
-  public get disabledRemoveButtons(): Locator {
-    return this.content.locator('[data-test-subj^="remove-endpoint-"]:disabled');
+  public get firstEndpointRow(): Locator {
+    return this.allEndpointRows.first();
   }
 
   // --- Add Model Popover ---
 
   public get firstAddModelButton(): Locator {
-    // eslint-disable-next-line playwright/no-nth-methods
     return this.content.locator('[data-test-subj="add-model-button"]').first();
   }
 
@@ -83,7 +84,6 @@ export class FeatureSettingsPage {
   // --- Copy To Modal ---
 
   public get firstCopyToButton(): Locator {
-    // eslint-disable-next-line playwright/no-nth-methods
     return this.content.locator('[data-test-subj^="copy-to-"]').first();
   }
 
@@ -98,7 +98,6 @@ export class FeatureSettingsPage {
   // --- Reset Defaults Modal ---
 
   public get firstResetLink(): Locator {
-    // eslint-disable-next-line playwright/no-nth-methods
     return this.content.locator('[data-test-subj^="reset-"]').first();
   }
 
@@ -106,7 +105,32 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator('resetDefaultsModal');
   }
 
+  public get resetDefaultsConfirmButton(): Locator {
+    return this.resetDefaultsModal.locator('[data-test-subj="confirmModalConfirmButton"]');
+  }
+
   public get resetDefaultsCancelButton(): Locator {
     return this.resetDefaultsModal.locator('[data-test-subj="confirmModalCancelButton"]');
+  }
+
+  /**
+   * Removes endpoints from the first sub-feature card until only one remains.
+   * Returns the initial count of endpoints before removal.
+   */
+  public async removeEndpointsUntilOneRemains(): Promise<number> {
+    const firstCard = this.allSubFeatureCards.first();
+    const removeButtons = firstCard.locator('[data-test-subj^="remove-endpoint-"]');
+    const initialCount = await removeButtons.count();
+
+    for (let remaining = initialCount; remaining > 1; remaining--) {
+      await removeButtons.last().click();
+      await expect(removeButtons).toHaveCount(remaining - 1);
+    }
+
+    return initialCount;
+  }
+
+  public get firstCardLastRemoveButton(): Locator {
+    return this.allSubFeatureCards.first().locator('[data-test-subj^="remove-endpoint-"]').last();
   }
 }
