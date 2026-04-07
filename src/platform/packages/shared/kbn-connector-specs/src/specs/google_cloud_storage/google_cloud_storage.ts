@@ -9,11 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
-import downloadWorkflow from './workflows/download.yaml';
-import getObjectMetadataWorkflow from './workflows/get_object_metadata.yaml';
-import listBucketsWorkflow from './workflows/list_buckets.yaml';
-import listObjectsWorkflow from './workflows/list_objects.yaml';
-import listProjectsWorkflow from './workflows/list_projects.yaml';
 import {
   ListProjectsInputSchema,
   ListBucketsInputSchema,
@@ -256,12 +251,4 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [
-    listProjectsWorkflow,
-    listBucketsWorkflow,
-    listObjectsWorkflow,
-    getObjectMetadataWorkflow,
-    downloadWorkflow,
-  ],
 };

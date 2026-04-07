@@ -45,7 +45,6 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -180,8 +179,6 @@ export const EntitiesDataTable = ({
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
   const { setQuery, deleteQuery } = useGlobalTime();
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const { agentBuilder } = useKibana().services;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -189,7 +186,7 @@ export const EntitiesDataTable = ({
     (doc?: DataTableRecord | undefined) => {
       if (doc) {
         setExpandedDoc(doc);
-        const { entityType, entityName } = getEntityFields(doc);
+        const { entityType, entityName, entityId } = getEntityFields(doc);
         if (!entityType || !entityName) return;
 
         const panelKey = EntityPanelKeyByType[entityType];
@@ -200,6 +197,7 @@ export const EntitiesDataTable = ({
           id: panelKey,
           params: {
             [panelParam]: entityName,
+            entityId,
             contextID: ENTITY_ANALYTICS_TABLE_ID,
             scopeId: ENTITY_ANALYTICS_TABLE_ID,
           },
@@ -432,8 +430,6 @@ export const EntitiesDataTable = ({
   const leadingControlColumns = useLeadingControlColumns({
     canUseTimeline,
     investigateInTimeline,
-    isAgentBuilderEnabled,
-    agentBuilder,
   });
 
   const onResetColumns = () => {

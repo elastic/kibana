@@ -686,6 +686,29 @@ export const getPackageUsageStats = async ({
   };
 };
 
+export async function getPackageDependencies(
+  pkgName: string,
+  pkgVersion: string
+): Promise<Array<{ name: string; version: string; title: string }>> {
+  const pkg = await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined);
+  if (!pkg) {
+    throw new PackageNotFoundError(`[${pkgName}-${pkgVersion}] package not found in registry`);
+  }
+
+  const deps = pkg.requires?.content ?? [];
+
+  return Promise.all(
+    deps.map(async (dep) => {
+      const depPkg = await Registry.fetchFindLatestPackageOrUndefined(dep.package);
+      return {
+        name: dep.package,
+        version: dep.version,
+        title: depPkg && 'title' in depPkg ? depPkg.title : dep.package,
+      };
+    })
+  );
+}
+
 interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
