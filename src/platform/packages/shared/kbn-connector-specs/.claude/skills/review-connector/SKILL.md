@@ -1,11 +1,11 @@
 ---
 name: review-connector
-description: Review connector spec changes (spec, workflows, docs). Use when reviewing a PR involving connector specs, doing post-creation review after create-connector or build-connector, or preparing a connector PR checklist.
+description: Review connector spec changes (spec, docs). Use when reviewing a PR involving connector specs, doing post-creation review after create-connector or build-connector, or preparing a connector PR checklist.
 ---
 
 # Review Connector
 
-Use this skill when reviewing or preparing changes to a **connector spec** (spec code, workflows, documentation). Apply the checklist below; use the optional thorough check when the user asks for deeper validation against the vendor API.
+Use this skill when reviewing or preparing changes to a **connector spec** (spec code, documentation). Apply the checklist below; use the optional thorough check when the user asks for deeper validation against the vendor API.
 
 ## When to use
 
@@ -42,27 +42,28 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   Handlers must be typed with the inferred type (e.g. `handler: async (ctx, input: SearchInput) => {}`),
   not `input as { field: string }`. See `servicenow_search/types.ts` for the canonical pattern.
 
-### Workflows
+### LLM Descriptions and Skill Content
 
-- Valid workflow YAML with correct step types
-- Proper Liquid templating syntax (no malformed `{{ }}` expressions)
-- Only pass parameters that the connector action or MCP tool actually accepts (check the tool's `inputSchema` —
-  some params in third-party docs may be outdated or unavailable)
-- **Parameter descriptions**: Every workflow input has a clear `description`. For **query/search** parameters, state
-  the **vendor-specific format** concisely (e.g. Zendesk `field:value`, JQL, Lucene) and whether it's free text, a
-  DSL, or both. For optional params with defaults or fixed options, name the default and/or list allowed values.
-- **Optional params**: For optional inputs with a default, name the default in the description. For enum-like or
-  constrained options, list allowed values or use a **choice** type in the workflow with **options** so the AI and UI
-  get valid options.
-- **Output field limiting**: If a tool returns many fields, use a `data.map` step after the connector call to select
-  only the relevant fields. This keeps context window usage low and responses focused. See the Zendesk `search.yaml`
-  workflow for the canonical pattern.
-- Short commented-out field lines inside `data.map` are fine; avoid long commented blocks.
-- Workflows that are AI tools have the right tag (e.g. `agent-builder-tool`).
-- Connector reference uses the correct template variable (e.g. `<%= github-stack-connector-id %>`); inputs use the
-  correct syntax (e.g. `${{ inputs.query }}`).
-- Workflows are imported in the connector spec and listed in `agentBuilderWorkflows`.
-- Look at existing connector specs with workflows for patterns (e.g. `slack/`, `github/`, `google_drive/`)
+- **`isTool`**: Actions intended for AI agent use should set `isTool: true` (the default is `false`, which hides the
+  action from Agent Builder). Most actions should be tools. Flag actions that are missing `isTool: true` unless there
+  is a clear reason to hide them (e.g. destructive or admin-only operations).
+- Every action has a `description` field that clearly explains its purpose, when to use it, and what it returns.
+  Flag actions with missing, vague, or generic descriptions that would not help an LLM choose the right action.
+- **Action descriptions must be plain strings** — they are for LLM consumption only and should NOT use `i18n.translate()`.
+  In contrast, `metadata.description` IS shown in the UI and MUST use `i18n.translate()`. Flag any action description
+  wrapped in `i18n.translate()`, and flag any `metadata.description` that is a plain string without i18n.
+- **Download/binary actions**: Actions that return base64-encoded or binary data must include a WARNING in their
+  description advising agents to only call them when they have a plan to process the data (e.g. via an Elasticsearch
+  ingest pipeline attachment processor). Flag download actions that lack this guidance.
+- Every Zod param has `.describe()` with useful guidance: examples, constraints, format hints (e.g. query syntax,
+  allowed values, units). Params without `.describe()` leave LLMs guessing — flag them.
+- The `skill` property (if present) covers multi-step patterns, common gotchas, and cross-action references that
+  help an LLM use the connector correctly. Review for accuracy and completeness. The `skill` should NOT repeat
+  information already in action `description` fields or param `.describe()` calls — it should add higher-level
+  guidance that cannot be expressed per-action (e.g. "call X before Y", auth-mode differences, pagination patterns,
+  typical workflows). Flag `skill` content that is redundant with individual action/param descriptions.
+- Reference ServiceNow, Slack, and GitHub connector specs as quality benchmarks for description and skill content.
+- Look at existing connector specs for patterns (e.g. `slack/`, `github/`, `servicenow_search/`)
 
 ### Documentation and Icons
 
