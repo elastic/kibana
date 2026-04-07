@@ -99,8 +99,8 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
     filters: [],
     title: 'My Dashboard',
     query: {
-      language: 'kuery',
-      query: 'hi',
+      language: 'kql',
+      expression: 'hi',
     },
     time_range: {
       to: 'now',

@@ -76,7 +76,7 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
     description: '',
     panels: [],
     time_range: DEFAULT_TIME_RANGE,
-    query: { query: '', language: 'kuery' },
+    query: { expression: '', language: 'kql' as const },
     filters: [],
     options: {
       hide_panel_titles: false,
@@ -98,7 +98,7 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
  * Uses provided values from the attachment, falling back to defaults for missing fields.
  */
 export const attachmentToDashboardState = ({
-  data: { panels = [], filters, pinned_panels, access_control, options, ...rest },
+  data: { panels = [], filters, query, pinned_panels, access_control, options, ...rest },
 }: DashboardAttachment): DashboardState => ({
   ...EMPTY_DASHBOARD_STATE,
   ...rest,
@@ -108,6 +108,7 @@ export const attachmentToDashboardState = ({
   },
   panels: normalizeWidgets(panels),
   ...(filters && { filters: filters as DashboardState['filters'] }),
+  ...(query && { query: query as DashboardState['query'] }),
   ...(pinned_panels && { pinned_panels: pinned_panels as DashboardState['pinned_panels'] }),
   ...(access_control && { access_control: access_control as DashboardState['access_control'] }),
 });

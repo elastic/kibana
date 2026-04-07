@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/core-application-common'
   - '@kbn/i18n'
   - '@kbn/features-plugin'
+  - '@kbn/search-inference-endpoints'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/logging'

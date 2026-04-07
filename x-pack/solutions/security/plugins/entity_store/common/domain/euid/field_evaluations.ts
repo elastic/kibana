@@ -63,57 +63,79 @@ function resolveSourceValue(doc: any, source: FieldEvaluationSource): string | u
   return first !== '' ? first : undefined;
 }
 
-/**
- * Cascade: walks `whenClauses` in definition order — sourceMatch branches first, then condition
- * branches — first match wins; if none match, uses raw `sourceValue` or `fallbackValue`.
- * Shared by applyFieldEvaluations and getSourceMatchSpec.
- */
+/** First resolved string from `sources`, in definition order. */
+function readRawValueFromSources(doc: any, sources: FieldEvaluationSource[]): string | undefined {
+  for (const source of sources) {
+    const candidate = resolveSourceValue(doc, source);
+    if (candidate !== undefined) {
+      return candidate;
+    }
+  }
+  return undefined;
+}
+
+/** First `whenClause` that applies to this document, in definition order. */
+function matchFirstWhenClause(
+  doc: any,
+  rawValueFromSources: string | undefined,
+  whenClauses: FieldEvaluationWhenClause[]
+) {
+  for (const clause of whenClauses) {
+    if (isSourceMatchClause(clause)) {
+      if (
+        rawValueFromSources !== undefined &&
+        clause.sourceMatchesAny.includes(rawValueFromSources)
+      ) {
+        return { then: clause.then, matchedSourceValues: clause.sourceMatchesAny };
+      }
+    } else if (isConditionClause(clause) && evaluateStreamlangCondition(doc, clause.condition)) {
+      return { then: clause.then, winningCondition: clause.condition };
+    }
+  }
+  return undefined;
+}
+
+/** Destination field value after applying optional when-clause override. */
+function resolveFinalFieldValue(
+  rawValueFromSources: string | undefined,
+  fallbackValue: string | null,
+  whenMatch: { then: string } | undefined
+): string | null {
+  if (whenMatch !== undefined) {
+    return whenMatch.then;
+  }
+  return rawValueFromSources === undefined ? fallbackValue : rawValueFromSources;
+}
+
+/** Builds `SourceMatchSpec` for filter construction without re-evaluating the document. */
+function buildEvaluationSourceMatchSpec(
+  rawValueFromSources: string | undefined,
+  whenMatch: { winningCondition?: Condition; matchedSourceValues?: string[] } | undefined
+): SourceMatchSpec {
+  if (whenMatch?.winningCondition !== undefined) {
+    return { type: 'condition', condition: whenMatch.winningCondition };
+  }
+  if (rawValueFromSources === undefined) {
+    return { type: 'unknown' };
+  }
+  if (whenMatch?.matchedSourceValues !== undefined) {
+    return { type: 'values', values: whenMatch.matchedSourceValues };
+  }
+  return { type: 'values', values: [rawValueFromSources] };
+}
+
+/** Applies one field evaluation: sources, when-clauses, value + filter spec. */
 function evaluateFieldEvaluation(
   doc: any,
   evaluation: FieldEvaluation
 ): { value: string | null; sourceMatchSpec: SourceMatchSpec } {
-  let sourceValue: string | undefined;
-  for (const source of evaluation.sources) {
-    sourceValue = resolveSourceValue(doc, source);
-    if (sourceValue !== undefined) {
-      break;
-    }
-  }
+  const rawValueFromSources = readRawValueFromSources(doc, evaluation.sources);
+  const whenMatch = matchFirstWhenClause(doc, rawValueFromSources, evaluation.whenClauses);
 
-  let value: string | null | undefined;
-  let matchedSourceClause: { sourceMatchesAny: string[] } | undefined;
-  let winningCondition: Condition | undefined;
-
-  for (const clause of evaluation.whenClauses) {
-    if (isSourceMatchClause(clause)) {
-      if (sourceValue !== undefined && clause.sourceMatchesAny.includes(sourceValue)) {
-        value = clause.then;
-        matchedSourceClause = { sourceMatchesAny: clause.sourceMatchesAny };
-        break;
-      }
-    } else if (isConditionClause(clause) && evaluateStreamlangCondition(doc, clause.condition)) {
-      value = clause.then;
-      winningCondition = clause.condition;
-      break;
-    }
-  }
-
-  if (value === undefined) {
-    value = sourceValue === undefined ? evaluation.fallbackValue : sourceValue;
-  }
-
-  let sourceMatchSpec: SourceMatchSpec;
-  if (winningCondition !== undefined) {
-    sourceMatchSpec = { type: 'condition', condition: winningCondition };
-  } else if (sourceValue === undefined) {
-    sourceMatchSpec = { type: 'unknown' };
-  } else if (matchedSourceClause !== undefined) {
-    sourceMatchSpec = { type: 'values', values: matchedSourceClause.sourceMatchesAny };
-  } else {
-    sourceMatchSpec = { type: 'values', values: [sourceValue] };
-  }
-
-  return { value, sourceMatchSpec };
+  return {
+    value: resolveFinalFieldValue(rawValueFromSources, evaluation.fallbackValue, whenMatch),
+    sourceMatchSpec: buildEvaluationSourceMatchSpec(rawValueFromSources, whenMatch),
+  };
 }
 
 /**
