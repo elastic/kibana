@@ -17,9 +17,9 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
+import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -72,6 +72,7 @@ export class AgentBuilderPlugin
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
     navigationService: NavigationService;
+    usageCollection?: UsageCollectionSetup;
   };
   private activeSidebarRef: ConversationSidebarRef | null = null;
   private sidebarCallbacks: {
@@ -93,7 +94,7 @@ export class AgentBuilderPlugin
       licenseManagement: deps.licenseManagement?.locator,
     });
 
-    this.setupServices = { navigationService };
+    this.setupServices = { navigationService, usageCollection: deps.usageCollection };
 
     registerApp({
       core,
@@ -148,19 +149,11 @@ export class AgentBuilderPlugin
     const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
-    const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-      false
-    );
-    if (isExperimentalFeaturesEnabled) {
-      enableSkillsDeepLink(this.appUpdater$);
-    }
-
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
     }
 
-    const { navigationService } = this.setupServices;
+    const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
@@ -214,6 +207,7 @@ export class AgentBuilderPlugin
       smlService,
       pluginsService,
       startDependencies,
+      usageCollection,
       accessChecker,
       eventsService,
       openSidebarConversation: (options?: OpenConversationSidebarOptions) => {

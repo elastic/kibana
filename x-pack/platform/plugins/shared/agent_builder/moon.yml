@@ -119,6 +119,8 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/react-hooks'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/response-ops-oauth-hooks'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod

@@ -50,10 +50,6 @@ import type {
   ZoomGetMeetingParticipantsInput,
   ZoomGetMeetingRegistrantsInput,
 } from './types';
-import downloadRecordingFileWorkflow from './workflows/download_recording_file.yaml';
-import getMeetingWorkflow from './workflows/get_meeting.yaml';
-import listWorkflow from './workflows/list.yaml';
-import whoAmIWorkflow from './workflows/who_am_i.yaml';
 import {
   ZOOM_DEFAULT_MAX_RECORDING_CONTENT_CHARS,
   ZoomPaginationOutputSchema,
@@ -122,6 +118,15 @@ export const Zoom: ConnectorSpec = {
               }),
             },
           },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://zoom.us/oauth/authorize',
+          tokenUrl: 'https://zoom.us/oauth/token',
+          scope:
+            'user:read:user meeting:read:meeting meeting:read:list_meetings meeting:read:past_meeting meeting:read:list_past_participants meeting:read:list_registrants cloud_recording:read:list_recording_files cloud_recording:read:list_user_recordings',
         },
       },
     ],
@@ -495,11 +500,4 @@ export const Zoom: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [
-    downloadRecordingFileWorkflow,
-    getMeetingWorkflow,
-    listWorkflow,
-    whoAmIWorkflow,
-  ],
 };

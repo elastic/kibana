@@ -681,7 +681,7 @@
             "label": "primaryPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\""
+              "\"top\" | \"bottom\" | \"middle\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 61,
@@ -1203,7 +1203,7 @@
             "label": "primaryPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\""
+              "\"top\" | \"bottom\" | \"middle\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 45,
