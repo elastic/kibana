@@ -26,7 +26,6 @@ import { HeaderAppMenu } from '../shared/header_app_menu';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
-import { HeaderLanguageSelector } from '../shared/header_language_selector';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
 import { useClassicBreadcrumbs, useHasAppMenuConfig } from '../shared/chrome_hooks';
@@ -104,9 +103,6 @@ export const ClassicHeader = React.memo(() => {
             <BreadcrumbsWithExtensionsWrapper>{Breadcrumbs}</BreadcrumbsWithExtensionsWrapper>
 
             <EuiHeaderSection side="right">
-              <EuiHeaderSectionItem>
-                <HeaderLanguageSelector />
-              </EuiHeaderSectionItem>
               <EuiHeaderSectionItem>
                 {hasAppMenuConfig ? <HeaderAppMenu /> : <HeaderActionMenu />}
               </EuiHeaderSectionItem>

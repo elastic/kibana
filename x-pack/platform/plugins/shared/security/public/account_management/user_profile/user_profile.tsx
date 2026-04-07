@@ -21,6 +21,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPopover,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -51,6 +52,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type {
   ContrastModeValue,
   DarkModeValue,
+  LocaleValue,
   UserProfileData,
 } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
@@ -99,6 +101,10 @@ export interface UserSettingsEditorProps {
   isOverriddenThemeDarkMode: boolean;
 }
 
+export interface UserLocaleEditorProps {
+  formik: ReturnType<typeof useUserProfileForm>;
+}
+
 export interface UserRoleProps {
   user: AuthenticatedUser;
 }
@@ -117,6 +123,7 @@ export interface UserProfileFormValues {
     userSettings: {
       darkMode: DarkModeValue;
       contrastMode: ContrastModeValue;
+      locale: LocaleValue;
     };
   };
   avatarType: 'initials' | 'image';
@@ -265,6 +272,61 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
 
       <FormRow name="data.userSettings.contrastMode" fullWidth>
         <ContrastKeyPadMenu name="data.userSettings.contrastMode" />
+      </FormRow>
+    </EuiDescribedFormGroup>
+  );
+};
+
+const SUPPORTED_LOCALES: Array<{ value: string; text: string }> = [
+  { value: 'en', text: 'English' },
+  { value: 'fr-FR', text: 'Français' },
+  { value: 'ja-JP', text: '日本語' },
+  { value: 'zh-CN', text: '中文' },
+  { value: 'de-DE', text: 'Deutsch' },
+];
+
+const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
+  if (!formik.values.data) {
+    return null;
+  }
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.localeGroupTitle"
+            defaultMessage="Language"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.localeGroupDescription"
+          defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data."
+        />
+      }
+    >
+      <FormRow
+        name="data.userSettings.locale"
+        label={
+          <FormLabel for="data.userSettings.locale">
+            <FormattedMessage
+              id="xpack.security.accountManagement.userProfile.localeLabel"
+              defaultMessage="Display language"
+            />
+          </FormLabel>
+        }
+        fullWidth
+      >
+        <FormField
+          as={EuiSelect}
+          name="data.userSettings.locale"
+          options={SUPPORTED_LOCALES}
+          data-test-subj="localeSelect"
+          fullWidth
+        />
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -754,6 +816,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
                     />
                   )}
+                  {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
@@ -796,6 +859,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           userSettings: {
             darkMode: data.userSettings?.darkMode || 'space_default',
             contrastMode: data.userSettings?.contrastMode || 'system',
+            locale: data.userSettings?.locale || 'en',
           },
         }
       : undefined,
@@ -850,7 +914,8 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       let isRefreshRequired = false;
       if (
         initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
-        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode
+        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
       ) {
         isRefreshRequired = true;
       }
@@ -907,7 +972,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="dot" color="success" />
+            <EuiIcon type="dot" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage

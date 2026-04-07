@@ -12,7 +12,6 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { HeaderAppMenu } from '../shared/header_app_menu';
 import { HeaderActionMenu } from '../shared/header_action_menu';
-import { HeaderLanguageSelector } from '../shared/header_language_selector';
 import { useHasLegacyActionMenu, useHasAppMenuConfig } from '../shared/chrome_hooks';
 const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   useMemo(() => {
@@ -47,7 +46,6 @@ export const AppMenuBar = React.memo(() => {
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={styles.root}
     >
-      <HeaderLanguageSelector />
       {hasAppMenuConfig ? <HeaderAppMenu /> : <HeaderActionMenu />}
     </div>
   );
