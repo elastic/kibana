@@ -644,6 +644,23 @@ export const Response4Xx = z.object({
 });
 
 /**
+  * The close reason to sync to attached alerts when closing the case. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user.
+
+  */
+export type CaseCloseSyncReason = z.infer<typeof CaseCloseSyncReason>;
+export const CaseCloseSyncReason = z.union([
+  z.enum([
+    'false_positive',
+    'duplicate',
+    'true_positive',
+    'benign_positive',
+    'automated_closure',
+    'other',
+  ]),
+  z.string(),
+]);
+
+/**
  * The update case API request body varies depending on the type of connector.
  */
 export type UpdateCaseRequest = z.infer<typeof UpdateCaseRequest>;
@@ -703,6 +720,7 @@ export const UpdateCaseRequest = z.object({
         status: CaseStatus.optional(),
         tags: CaseTags.optional(),
         title: CaseTitle.optional(),
+        closeReason: CaseCloseSyncReason.optional(),
         /**
       * The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
 

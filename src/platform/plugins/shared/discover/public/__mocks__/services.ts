@@ -335,6 +335,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
       isEmbeddedEditor: jest.fn(() => false),
+      canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
       clearEditorState: jest.fn(),
