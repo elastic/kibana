@@ -87,8 +87,14 @@ export function LensRenderer({
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
+  // TODO find where people are setting type on attributes to lens
+  const {
+    type: _type,
+    id: _id,
+    ...cleanedAttributes
+  } = props.attributes as LensRendererProps['attributes'] & { type: string; id: string };
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes ? { attributes: props.attributes } : createEmptyLensState(null, title)
+    props.attributes ? { attributes: cleanedAttributes } : createEmptyLensState(null, title)
   );
 
   const searchApi = useSearchApi({ query, filters, timeRange });
@@ -109,11 +115,11 @@ export function LensRenderer({
         ...('attributes' in initialStateRef.current
           ? initialStateRef.current.attributes
           : initialStateRef.current),
-        ...props.attributes,
+        ...cleanedAttributes,
       });
       lensApi.updateOverrides(props.overrides);
     }
-  }, [lensApi, props.attributes, props.overrides]);
+  }, [lensApi, cleanedAttributes, props.overrides]);
 
   useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {

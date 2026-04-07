@@ -23,6 +23,7 @@ export interface PackResponseData {
   updated_by_profile_uid?: string;
   policy_ids?: string[];
   shards?: SOShard;
+  read_only?: boolean;
 }
 
 export interface ReadPackResponseData {

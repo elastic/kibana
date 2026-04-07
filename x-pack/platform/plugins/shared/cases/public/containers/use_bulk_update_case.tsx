@@ -6,8 +6,10 @@
  */
 
 import { useQueryClient, useMutation } from '@kbn/react-query';
+import type { ToastInputFields } from '@kbn/core/public';
 import * as i18n from './translations';
 import { getCase, updateCases } from './api';
+import type { UpdateSummary } from '../../common/types/api';
 import type { CaseUpdateRequest, CasesUI } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
@@ -16,8 +18,12 @@ import { rebaseCaseMutationOnConflict } from './conflict_rebase';
 
 interface MutationArgs {
   cases: CaseUpdateRequest[];
-  successToasterTitle: string;
+  successToasterTitle?: string;
   originalCases: CasesUI;
+  getUpdateSuccessToast?: (args: { updateSummary?: UpdateSummary[] }) => {
+    title: string;
+    text?: ToastInputFields['text'];
+  };
 }
 
 /**
@@ -38,7 +44,7 @@ export const useUpdateCases = () => {
     (request: MutationArgs) =>
       rebaseCaseMutationOnConflict({
         request,
-        staleCases: request.originalCases.filter(({ id }) =>
+        preRequestServerState: request.originalCases.filter(({ id }) =>
           request.cases.some((caseToUpdate) => caseToUpdate.id === id)
         ),
         executeRequest: ({ cases }) => updateCases({ cases }),
@@ -53,12 +59,22 @@ export const useUpdateCases = () => {
       }),
     {
       mutationKey: casesMutationsKeys.updateCases,
-      onSuccess: (_, { successToasterTitle }) => {
+      onSuccess: (data, { successToasterTitle, getUpdateSuccessToast }) => {
         queryClient.invalidateQueries(casesQueriesKeys.casesList());
         queryClient.invalidateQueries(casesQueriesKeys.tags());
         queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
-        showSuccessToast(successToasterTitle);
+        const customToast = getUpdateSuccessToast?.({
+          updateSummary: data
+            ?.map((updatedCase) => updatedCase.updateSummary)
+            .filter((stats): stats is UpdateSummary => stats !== undefined),
+        });
+
+        if (customToast) {
+          showSuccessToast(customToast.title, customToast.text);
+        } else if (successToasterTitle) {
+          showSuccessToast(successToasterTitle);
+        }
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_UPDATING });
