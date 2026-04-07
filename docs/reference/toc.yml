@@ -75,8 +75,8 @@ toc:
         children:
           - file: connectors-kibana/abuseipdb-action-type.md
           - file: connectors-kibana/alienvault-otx-action-type.md
-          - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/amazon-s3-action-type.md
+          - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/confluence-cloud-action-type.md
           - file: connectors-kibana/gmail-action-type.md

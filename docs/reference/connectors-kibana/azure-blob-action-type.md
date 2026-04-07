@@ -1,15 +1,13 @@
 ---
 navigation_title: "Azure Blob Storage"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/azure-blob-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.4
   serverless: preview
 ---
 
 # Azure Blob Storage connector [azure-blob-action-type]
 
-The Azure Blob Storage connector integrates with Azure Blob Storage via the [Blob Service REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api). It supports listing containers, listing blobs, retrieving blob content, and getting blob properties. Use it as a data source for federated search in Workplace AI.
+The Azure Blob Storage connector integrates with Azure Blob Storage via the [Blob Service REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api). It supports listing containers, listing blobs, retrieving blob content, and getting blob properties. Use it as a data source for federated search.
 
 ## Create connectors in {{kib}} [define-azure-blob-ui]
 
