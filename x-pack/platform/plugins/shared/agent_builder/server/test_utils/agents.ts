@@ -68,5 +68,7 @@ export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
     getAgentsUsingTools: jest.fn(),
     removePluginRefsFromAgents: jest.fn(),
     getAgentsUsingPlugins: jest.fn(),
+    removeSkillRefsFromAgents: jest.fn(),
+    getAgentsUsingSkills: jest.fn(),
   };
 };

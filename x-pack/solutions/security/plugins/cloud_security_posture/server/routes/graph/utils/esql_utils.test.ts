@@ -8,7 +8,7 @@
 import {
   getFieldNamespace,
   generateFieldHintCases,
-  formatJsonProperty,
+  concatJsonObjectPropertyEsqlExprSafe,
   buildLookupJoinEsql,
 } from './esql_utils';
 
@@ -84,14 +84,14 @@ describe('ESQL utils', () => {
   });
 
   describe('formatJsonProperty', () => {
-    it('should generate ESQL that outputs JSON property with comma prefix, or empty string if null', () => {
-      const result = formatJsonProperty('name', 'entityName');
+    it('should generate ESQL that outputs JSON property, or empty string if null', () => {
+      const result = concatJsonObjectPropertyEsqlExprSafe('name', 'entityName');
 
-      expect(result).toBe('COALESCE(CONCAT(",\\"name\\":\\"", entityName, "\\""), "")');
+      expect(result).toBe('COALESCE(CONCAT("\\"name\\":\\"", entityName, "\\""), "")');
     });
 
     it('should include the property name and variable in the output', () => {
-      const result = formatJsonProperty('customProp', 'customVar');
+      const result = concatJsonObjectPropertyEsqlExprSafe('customProp', 'customVar');
 
       expect(result).toContain('customProp');
       expect(result).toContain('customVar');

@@ -22,12 +22,6 @@ import type {
   ListEventsInput,
   FreeBusyInput,
 } from './types';
-import freeBusyWorkflow from './workflows/free_busy.yaml';
-import getEventWorkflow from './workflows/get_event.yaml';
-import listCalendarsWorkflow from './workflows/list_calendars.yaml';
-import listEventsWorkflow from './workflows/list_events.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 // Google Calendar API constants
 const GOOGLE_CALENDAR_API_BASE = 'https://www.googleapis.com/calendar/v3';
 const DEFAULT_MAX_RESULTS = 50;
@@ -242,12 +236,4 @@ export const GoogleCalendar: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [
-    freeBusyWorkflow,
-    getEventWorkflow,
-    listCalendarsWorkflow,
-    listEventsWorkflow,
-    searchWorkflow,
-  ],
 };

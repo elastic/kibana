@@ -168,12 +168,29 @@ export const getArtifactImportFlyoutUiMocks = (
   const queryImportFlyout = () => renderResult.queryByTestId(dataTestSubj);
   const getCancelButton = () => renderResult.getByTestId(`${dataTestSubj}-cancelButton`);
   const getImportButton = () => renderResult.getByTestId(`${dataTestSubj}-importButton`);
+  const queryConfirmModal = () => renderResult.queryByTestId(`${dataTestSubj}-confirmModal`);
+  const getConfirmModalConfirmButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-confirmModal-confirmButton`);
+  const getConfirmModalCancelButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-confirmModal-cancelButton`);
 
-  const uploadFile = () =>
+  const uploadFile = (listIds: string[]) =>
     userEvent.upload(
       renderResult.getByTestId(`${dataTestSubj}-filePicker`),
-      new File(['random file content'], 'trusted_apps.ndjson')
+      new File(
+        // every id is duplicated to simulate multiple lines. plus one invalid line to make sure parsing errors are ignored
+        [listIds.map((id) => `{"list_id":"${id}"}\n{"list_id":"${id}"}\ninvalid line`).join('\n')],
+        'trusted_apps.ndjson'
+      )
     );
 
-  return { queryImportFlyout, getCancelButton, getImportButton, uploadFile };
+  return {
+    queryImportFlyout,
+    getCancelButton,
+    getImportButton,
+    queryConfirmModal,
+    getConfirmModalConfirmButton,
+    getConfirmModalCancelButton,
+    uploadFile,
+  };
 };
