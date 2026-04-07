@@ -27,7 +27,6 @@ import { getManagementFilteredLinks, links as managementLinks } from '../../mana
 import { exploreLinks } from '../../explore/links';
 import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
 import { entityAnalyticsLinks } from '../../entity_analytics/links';
