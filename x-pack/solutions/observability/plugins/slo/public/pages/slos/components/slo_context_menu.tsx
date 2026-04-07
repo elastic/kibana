@@ -64,7 +64,7 @@ export function SLOContextMenu({
     <EuiButtonEmpty
       data-test-subj={`${id}GroupMenuButton`}
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={handleTogglePopover}
       isLoading={loading}

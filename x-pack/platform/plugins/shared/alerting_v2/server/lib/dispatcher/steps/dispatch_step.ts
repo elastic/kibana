@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
+import pLimit from 'p-limit';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -20,11 +21,14 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   NotificationGroup,
+  NotificationPolicyId,
+  NotificationPolicy,
   NotificationPolicyWorkflowPayload,
 } from '../types';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
 const NOTIFICATION_POLICY_TRIGGER = 'notification_policy';
+const MAX_CONCURRENT_DISPATCHES = 3;
 
 @injectable()
 export class DispatchStep implements DispatcherStep {
@@ -39,7 +43,20 @@ export class DispatchStep implements DispatcherStep {
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatch = [], policies } = state;
 
-    for (const group of dispatch) {
+    const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
+
+    await Promise.allSettled(
+      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies)))
+    );
+
+    return { type: 'continue' };
+  }
+
+  private async dispatchGroup(
+    group: NotificationGroup,
+    policies?: Map<NotificationPolicyId, NotificationPolicy>
+  ): Promise<void> {
+    try {
       const policy = policies?.get(group.policyId);
       const apiKey = policy?.apiKey;
 
@@ -48,7 +65,7 @@ export class DispatchStep implements DispatcherStep {
           message: () =>
             `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`,
         });
-        continue;
+        return;
       }
 
       const fakeRequest = this.craftFakeRequest(apiKey);
@@ -58,11 +75,31 @@ export class DispatchStep implements DispatcherStep {
           continue;
         }
 
-        await this.dispatchWorkflow(group, destination.id, fakeRequest);
+        try {
+          await this.dispatchWorkflow(group, destination.id, fakeRequest);
+        } catch (err) {
+          this.logger.error({
+            error:
+              err instanceof Error
+                ? err
+                : new Error(
+                    `Failed to dispatch group ${group.id} to workflow ${destination.id}: ${String(
+                      err
+                    )}`
+                  ),
+          });
+        }
       }
+    } catch (err) {
+      this.logger.error({
+        error:
+          err instanceof Error
+            ? err
+            : new Error(
+                `Failed to dispatch group ${group.id} for policy ${group.policyId}: ${String(err)}`
+              ),
+      });
     }
-
-    return { type: 'continue' };
   }
 
   private craftFakeRequest(apiKey: string): KibanaRequest {
@@ -110,7 +147,6 @@ export class DispatchStep implements DispatcherStep {
 
     const payload: NotificationPolicyWorkflowPayload = {
       id: group.id,
-      ruleId: group.ruleId,
       policyId: group.policyId,
       groupKey: group.groupKey,
       episodes: group.episodes,
