@@ -48,7 +48,11 @@ export const useUpdateWatchlist = ({
       // For each source in the form, either update the persisted one or create a new one.
       for (const source of watchlist.entitySources ?? []) {
         const sourceType = source.type ?? 'index';
-        const existingId = ruleBasedSourceIds[sourceType];
+        // Only 'store' and 'index' sources are editable via the flyout.
+        // Integration sources (e.g. managed PUM sources like okta/AD) are
+        // never included in the form state and should not be updated here.
+        const isRuleBasedType = (t: string): t is SourceType => t === 'store' || t === 'index';
+        const existingId = isRuleBasedType(sourceType) ? ruleBasedSourceIds[sourceType] : undefined;
 
         if (existingId) {
           // Existing rule-based source of this type → update it
