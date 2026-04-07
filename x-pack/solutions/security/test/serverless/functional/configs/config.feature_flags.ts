@@ -22,7 +22,10 @@ export default createTestConfig({
   },
   suiteTags: { exclude: ['skipSvlSec'] },
   // add feature flags
-  kbnServerArgs: [],
+  kbnServerArgs: [
+    // Suppress Agent Builder announcement modal so it doesn't block tests running in Security context.
+    '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
+  ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
