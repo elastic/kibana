@@ -9,6 +9,7 @@
 
 import React, { useMemo, type ReactElement } from 'react';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getPopoverPanels, getTooltip } from '../utils';
 import type {
   AppMenuPopoverItem,
@@ -88,6 +89,9 @@ export const AppMenuPopover = ({
       panelPaddingSize="none"
       hasArrow={false}
       anchorPosition="downLeft"
+      aria-label={i18n.translate('core.chrome.appMenu.popoverAriaLabel', {
+        defaultMessage: 'App menu',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

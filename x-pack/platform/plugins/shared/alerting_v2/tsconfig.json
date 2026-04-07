@@ -77,7 +77,8 @@
     "@kbn/scout",
     "@kbn/object-utils",
     "@kbn/alerting-v2-constants",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }

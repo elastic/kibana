@@ -12,8 +12,6 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
-import searchMessagesWorkflow from './workflows/search_messages.yaml';
-import sendMessageWorkflow from './workflows/send_message.yaml';
 
 const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
@@ -677,7 +675,7 @@ export const Slack: ConnectorSpec = {
         'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.description',
         {
           defaultMessage:
-            'Resolve a Slack channel/conversation ID from a channel name (rate-limit-aware pagination)',
+            'Look up a Slack channel/conversation ID from a human-readable channel name. Use this before sendMessage when you only know the channel name.',
         }
       ),
       input: SlackResolveChannelIdInputSchema,
@@ -986,5 +984,23 @@ export const Slack: ConnectorSpec = {
     },
   },
 
-  agentBuilderWorkflows: [searchMessagesWorkflow, sendMessageWorkflow],
+  skill: [
+    '## Slack Connector Usage Guide',
+    '',
+    '### Searching Messages (searchMessages)',
+    '',
+    'Use `searchMessages` to find Slack messages. Important tips:',
+    '',
+    '- The `query` parameter is a plain text search query — do NOT embed Slack search operators like `from:` or `in:` in the query string. Use the dedicated parameters instead:',
+    '  - Use the `fromUser` parameter to filter by sender (accepts a Slack username or user ID, NOT a full name)',
+    '  - Use the `inChannel` parameter to filter by channel name',
+    '  - Use `after` and `before` parameters for date filtering (format: YYYY-MM-DD)',
+    '- If searching for messages from a person and you only know their full name, search for their name as keywords in the `query` parameter instead. Look at the `sender.username` field in results to find their Slack username for subsequent searches.',
+    '- Keep queries focused on a few keywords rather than long phrases for better results.',
+    '- Use `sort: "timestamp"` and `sortDir: "desc"` to find the most recent messages first.',
+    '',
+    '### Sending Messages (sendMessage)',
+    '',
+    'Before sending a message to a channel by name, always use `resolveChannelId` first to get the channel ID, then pass it to `sendMessage` via the `channel` parameter.',
+  ].join('\n'),
 };

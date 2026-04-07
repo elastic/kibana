@@ -17,6 +17,11 @@ const markdownByValueStateSchema = schema.object({
   content: schema.string({
     defaultValue: '',
   }),
+  settings: schema.maybe(
+    schema.object({
+      open_links_in_new_tab: schema.boolean({ defaultValue: true }),
+    })
+  ),
 });
 
 // Markdown by-reference state schema (contains savedObjectId)
@@ -46,7 +51,7 @@ const markdownByReferenceEmbeddableSchema = schema.allOf(
 export const markdownEmbeddableSchema = schema.oneOf(
   [markdownByValueEmbeddableSchema, markdownByReferenceEmbeddableSchema],
   {
-    defaultValue: { content: '' },
+    defaultValue: { content: '', settings: { open_links_in_new_tab: true } },
     meta: {
       description: 'Markdown panel config',
     },
@@ -56,3 +61,5 @@ export const markdownEmbeddableSchema = schema.oneOf(
 export type MarkdownByValueState = TypeOf<typeof markdownByValueStateSchema>;
 export type MarkdownByReferenceState = TypeOf<typeof markdownByReferenceStateSchema>;
 export type MarkdownEmbeddableState = TypeOf<typeof markdownEmbeddableSchema>;
+
+export type MarkdownSettingsState = MarkdownByValueState['settings'];
