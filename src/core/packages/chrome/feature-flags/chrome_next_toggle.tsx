@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { isNextChrome, toggleNextChrome } from './index';
+import { isNextChrome, toggleNextChrome } from '.';
 
 const badgeStyles = css`
   cursor: pointer;
@@ -29,7 +29,9 @@ export const ChromeNextToggle: React.FC<ChromeNextToggleProps> = ({ featureFlags
   }, [featureFlags]);
 
   return (
-    <EuiToolTip content={`Click to ${isEnabled ? 'disable' : 'enable'} Vibranium chrome. Page will reload.`}>
+    <EuiToolTip
+      content={`Click to ${isEnabled ? 'disable' : 'enable'} Vibranium chrome. Page will reload.`}
+    >
       <EuiBadge
         color={isEnabled ? 'success' : 'danger'}
         css={badgeStyles}
