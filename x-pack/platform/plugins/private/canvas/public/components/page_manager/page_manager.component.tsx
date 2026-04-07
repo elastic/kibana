@@ -231,7 +231,7 @@ export class PageManager extends Component<Props, State> {
                   data-test-subj="canvasAddPageButton"
                   aria-label={strings.getAddPageTooltip()}
                 >
-                  <EuiIcon color="ghost" type="plusInCircle" size="l" aria-hidden={true} />
+                  <EuiIcon color="ghost" type="plusCircle" size="l" aria-hidden={true} />
                 </button>
               </EuiToolTip>
             </EuiFlexItem>

@@ -295,7 +295,7 @@ export class FeatureProperties extends Component<Props, State> {
             })}
             data-test-subj="mapTooltipMoreActionsButton"
           >
-            <EuiIcon type="arrowRight" aria-hidden={true} />
+            <EuiIcon type="chevronSingleRight" aria-hidden={true} />
           </EuiButtonEmpty>
         </span>
       </td>

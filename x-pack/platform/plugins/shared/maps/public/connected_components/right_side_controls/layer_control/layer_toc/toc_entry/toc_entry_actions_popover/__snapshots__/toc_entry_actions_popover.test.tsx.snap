@@ -59,7 +59,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -70,7 +70,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -179,7 +179,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -190,7 +190,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -299,7 +299,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -310,7 +310,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -420,7 +420,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -540,7 +540,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -551,7 +551,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -626,7 +626,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -637,7 +637,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
                 "icon": <EuiIcon
                   aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],

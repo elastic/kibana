@@ -52,7 +52,7 @@ export class AssetPicker extends PureComponent<Props> {
               {asset.id === selected && (
                 <EuiIcon
                   className="canvasAssetPicker__selected"
-                  type="checkInCircleFilled"
+                  type="checkCircleFill"
                   aria-label={i18n.translate('xpack.canvas.assetpicker.selectedIconAriaLabel', {
                     defaultMessage: 'Selected',
                   })}

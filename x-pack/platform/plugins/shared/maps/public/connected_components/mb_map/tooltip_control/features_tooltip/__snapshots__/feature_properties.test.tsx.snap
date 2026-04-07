@@ -84,7 +84,6 @@ exports[`FeatureProperties should show filter button for filterable properties 1
             title="Filter on property"
           >
             <EuiIcon
-              aria-hidden={true}
               type="filter"
             />
           </EuiButtonEmpty>
@@ -141,7 +140,6 @@ exports[`FeatureProperties should show view actions button when there are availa
               title="Filter on property"
             >
               <EuiIcon
-                aria-hidden={true}
                 type="filter"
               />
             </EuiButtonEmpty>
@@ -153,8 +151,7 @@ exports[`FeatureProperties should show view actions button when there are availa
               title="View filter actions"
             >
               <EuiIcon
-                aria-hidden={true}
-                type="arrowRight"
+                type="chevronSingleRight"
               />
             </EuiButtonEmpty>
           </span>

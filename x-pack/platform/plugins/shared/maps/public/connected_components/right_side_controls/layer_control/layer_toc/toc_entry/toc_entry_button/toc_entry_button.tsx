@@ -99,7 +99,7 @@ export class TOCEntryButton extends Component<Props, State> {
 
     if (!this.props.layer.isVisible()) {
       return {
-        icon: <EuiIcon size="m" type="eyeClosed" aria-hidden={true} />,
+        icon: <EuiIcon size="m" type="eyeSlash" aria-hidden={true} />,
         tooltipContent: i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
           defaultMessage: `Layer is hidden.`,
         }),
@@ -111,7 +111,7 @@ export class TOCEntryButton extends Component<Props, State> {
       const minZoom = this.props.layer.getMinZoom();
       const maxZoom = this.props.layer.getMaxZoom();
       return {
-        icon: <EuiIcon size="m" type="expand" aria-hidden={true} />,
+        icon: <EuiIcon size="m" type="maximize" aria-hidden={true} />,
         tooltipContent: i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
           defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
           values: { minZoom, maxZoom },

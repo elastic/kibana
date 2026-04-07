@@ -123,7 +123,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     const actionItems = [
       {
         name: FIT_TO_DATA_LABEL,
-        icon: <EuiIcon type="expand" size="m" aria-hidden={true} />,
+        icon: <EuiIcon type="maximize" size="m" aria-hidden={true} />,
         'data-test-subj': 'fitToBoundsButton',
         toolTipContent: this.props.supportsFitToBounds
           ? null
@@ -183,7 +183,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       if (this.state.supportsFeatureEditing) {
         actionItems.push({
           name: EDIT_FEATURES_LABEL,
-          icon: <EuiIcon type="vector" size="m" aria-hidden={true} />,
+          icon: <EuiIcon type="vectorSquare" size="m" aria-hidden={true} />,
           'data-test-subj': 'editLayerButton',
           toolTipContent: this.state.isFeatureEditingEnabled
             ? null

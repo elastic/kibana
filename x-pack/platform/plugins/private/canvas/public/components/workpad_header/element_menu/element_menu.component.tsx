@@ -77,13 +77,13 @@ const strings = {
 
 // label and icon for the context menu item for each element type
 const elementTypeMeta: ElementTypeMeta = {
-  chart: { name: strings.getChartMenuItemLabel(), icon: 'visArea' },
+  chart: { name: strings.getChartMenuItemLabel(), icon: 'chartArea' },
   filter: { name: strings.getFilterMenuItemLabel(), icon: 'filter' },
   image: { name: strings.getImageMenuItemLabel(), icon: 'image' },
   other: { name: strings.getOtherMenuItemLabel(), icon: 'empty' },
   progress: { name: strings.getProgressMenuItemLabel(), icon: 'visGoal' },
-  shape: { name: strings.getShapeMenuItemLabel(), icon: 'node' },
-  text: { name: strings.getTextMenuItemLabel(), icon: 'visText' },
+  shape: { name: strings.getShapeMenuItemLabel(), icon: 'vectorTriangle' },
+  text: { name: strings.getTextMenuItemLabel(), icon: 'text' },
 };
 
 const getElementType = (element: ElementSpec): string =>
@@ -208,7 +208,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         type="primary"
         panelPaddingSize="none"
         label={strings.getElementMenuButtonLabel()}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="add-element-button"
       >
         {({ closePopover }: { closePopover: ClosePopoverFn }) => (
