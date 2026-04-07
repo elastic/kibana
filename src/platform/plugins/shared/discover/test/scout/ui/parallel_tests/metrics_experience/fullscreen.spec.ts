@@ -152,7 +152,7 @@ spaceTest.describe(
 
     spaceTest(
       'should show insights flyout without clipping in fullscreen mode',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
@@ -166,25 +166,10 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify flyout content is within viewport in fullscreen', async () => {
-          // toBeVisible() alone doesn't catch CSS clipping — an element can be
-          // "visible" to Playwright but positioned outside the viewport by
-          // incorrect top/height values. Use boundingBox() to verify the
-          // bottom-of-flyout elements are actually within the visible area.
-          const viewportSize = page.viewportSize()!;
-
-          const descriptionListBox =
-            await metricsExperience.flyout.overview.descriptionList.boundingBox();
-          expect(descriptionListBox).not.toBeNull();
-          expect(descriptionListBox!.y + descriptionListBox!.height).toBeLessThanOrEqual(
-            viewportSize.height
-          );
-
-          const paginationBox =
-            await metricsExperience.flyout.overview.dimensionsPagination.container.boundingBox();
-          expect(paginationBox).not.toBeNull();
-          expect(paginationBox!.y + paginationBox!.height).toBeLessThanOrEqual(
-            viewportSize.height
-          );
+          await expect.soft(metricsExperience.flyout.overview.descriptionList).toBeInViewport();
+          await expect
+            .soft(metricsExperience.flyout.overview.dimensionsPagination.container)
+            .toBeInViewport();
         });
 
         await spaceTest.step('close flyout and exit fullscreen', async () => {
