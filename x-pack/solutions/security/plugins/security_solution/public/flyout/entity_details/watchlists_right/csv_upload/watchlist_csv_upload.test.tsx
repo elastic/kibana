@@ -10,6 +10,23 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { WatchlistCsvUpload } from './watchlist_csv_upload';
 import { TestProviders } from '../../../../common/mock';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiFilePicker: (props: {
+      'data-test-subj'?: string;
+      onChange: (files: FileList | null) => void;
+    }) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockFilePicker'}
+        type="file"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.onChange(e.target.files)}
+      />
+    ),
+  };
+});
+
 const mockUploadWatchlistCsv = jest.fn();
 
 jest.mock('../../../../entity_analytics/api/api', () => ({

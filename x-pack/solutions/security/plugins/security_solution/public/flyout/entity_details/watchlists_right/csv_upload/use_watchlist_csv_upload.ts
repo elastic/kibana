@@ -40,7 +40,7 @@ export const useWatchlistCsvUpload = ({
 
   const onFileChange = useCallback(
     (fileList: FileList | null) => {
-      const file = fileList?.item(0);
+      const file = fileList?.[0];
 
       if (!file) {
         setStatus('idle');
