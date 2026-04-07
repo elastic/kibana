@@ -61,7 +61,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
           migrationVersion: {},
           references: [
-            { id: 'd68508f0-cf9d-11eb-a603-13e7747d215c', name: 'associated-action', type: 'action' },
+            {
+              id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+              name: 'associated-action',
+              type: 'action',
+            },
           ],
         });
       });
