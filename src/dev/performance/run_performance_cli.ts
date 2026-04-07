@@ -83,7 +83,15 @@ const getAllJourneys = (dir: string) => {
   return journeys;
 };
 
-const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?: string }) => {
+const getJourneysToRun = ({
+  journeyPath,
+  group,
+  excludeGroup,
+}: {
+  journeyPath?: string;
+  group?: string;
+  excludeGroup?: string;
+}) => {
   if (group && typeof group === 'string') {
     if (!(group in journeyTargetGroups)) {
       throw createFlagError(`Group '${group}' is not defined, try again`);
@@ -99,13 +107,23 @@ const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?
     throw createFlagError('--journey-path must be an existing path');
   }
 
+  let journeys: Journey[];
   if (journeyPath && fs.statSync(journeyPath).isFile()) {
-    return [{ name: path.parse(journeyPath).name, path: journeyPath }];
+    journeys = [{ name: path.parse(journeyPath).name, path: journeyPath }];
   } else {
-    // default dir is x-pack/performance/journeys_e2e
     const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
-    return getAllJourneys(dir);
+    journeys = getAllJourneys(dir);
   }
+
+  if (excludeGroup && typeof excludeGroup === 'string') {
+    if (!(excludeGroup in journeyTargetGroups)) {
+      throw createFlagError(`Exclude group '${excludeGroup}' is not defined, try again`);
+    }
+    const excludedNames = journeyTargetGroups[excludeGroup];
+    journeys = journeys.filter((journey) => !excludedNames.includes(journey.name));
+  }
+
+  return journeys;
 };
 
 async function startEs(props: EsRunProps) {
@@ -183,9 +201,14 @@ run(
     const kibanaInstallDir = flagsReader.path('kibana-install-dir');
     const journeyPath = flagsReader.path('journey-path');
     const group = flagsReader.string('group');
+    const excludeGroup = flagsReader.string('exclude-group');
 
     if (group && journeyPath) {
       throw createFlagError('--group and --journeyPath cannot be used simultaneously');
+    }
+
+    if (group && excludeGroup) {
+      throw createFlagError('--group and --exclude-group cannot be used simultaneously');
     }
 
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
@@ -196,7 +219,7 @@ run(
       process.on(event, () => cleanupAndExit(procRunner, event));
     });
 
-    const journeys = getJourneysToRun({ journeyPath, group });
+    const journeys = getJourneysToRun({ journeyPath, group, excludeGroup });
 
     if (journeys.length === 0) {
       throw new Error('No journeys found');
@@ -250,7 +273,7 @@ run(
   },
   {
     flags: {
-      string: ['kibana-install-dir', 'journey-path', 'group'],
+      string: ['kibana-install-dir', 'journey-path', 'group', 'exclude-group'],
       boolean: ['skip-warmup'],
       help: `
       --kibana-install-dir=dir      Run Kibana from existing install directory instead of from source
@@ -258,6 +281,7 @@ run(
                                     that should be executed. '${JOURNEY_BASE_PATH}' is run by default
       --skip-warmup                 Journey will be executed without warmup (TEST phase only)
       --group                       Run subset of journeys, defined in the specified group
+      --exclude-group               Exclude journeys belonging to the specified group
     `,
     },
   }
