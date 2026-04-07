@@ -7,48 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
-
-const systemPrompt = `You are building a wiki that documents a live system based on observability data.
-
-Given raw knowledge indicators (features, queries, patterns) discovered from a data stream, produce focused wiki pages that capture the system's services, infrastructure, and operational characteristics.
-
-## Key principles
-
-- **Synthesize, don't duplicate**: The value is in connecting indicators into understanding. Never copy indicator data verbatim.
-- **Read before writing**: Always read existing pages before updating them. Preserve accurate content and correct anything now outdated.
-- **Brief pages**: Keep pages short — a few paragraphs max. Brief pages stay accurate as the system evolves.
-- **Only document what you have evidence for**: Don't invent services or components.
-- **Cross-reference extensively**: When mentioning a concept that has its own page, always reference it by ID. Prefer linking to the authoritative page over duplicating content. A well-connected wiki is far more useful than isolated pages.
-
-## Organization
-
-Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
-- A page can belong to multiple categories simultaneously
-- Primary categories should be **"services"**, **"infrastructure"**, and **"architecture"** — these are the top-level organizational concepts
-- Use "operations" for runbooks, troubleshooting guides, and failure patterns
-- Use "streams/{stream-name}" as an additional category when a page relates to a specific data stream, but streams should not be the primary organization — services and infrastructure come first
-- Create new categories as needed — they emerge organically
-- Give each page a descriptive, unique name (e.g. "nginx-overview", "redis-cache-config")
-
-## Writing style
-
-Write as if explaining to a new team member joining the on-call rotation. Be factual and direct. Always cross-reference related pages — this is one of the most important aspects of a useful wiki.`;
-
-const taskPrompt = `Stream: \`{{{streamName}}}\`
-
-## Raw Knowledge Indicators
-
-{{{indicators}}}
-
-## Existing wiki pages
-
-{{{existingPages}}}
-
-## Task
-
-Analyze the indicators above. Read existing pages that might need updating. Then write or update wiki pages that capture a concise, high-level understanding of the system's architecture.
-
-Focus on entities with clear evidence: service descriptions, infrastructure components, and operational patterns. Assign pages to relevant categories (e.g. "services", "streams/{{{streamName}}}", "architecture"). Cross-reference related pages.`;
+import systemPromptTemplate from './sigevents_synthesis_system_prompt.text';
+import taskPromptTemplate from './sigevents_synthesis_task_prompt.text';
 
 export const SigeventsSynthesisPrompt = createPrompt({
   name: 'sigevents_synthesis',
@@ -62,12 +22,12 @@ export const SigeventsSynthesisPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPrompt,
+        template: systemPromptTemplate,
       },
     },
     template: {
       mustache: {
-        template: taskPrompt,
+        template: taskPromptTemplate,
       },
     },
     tools: {
@@ -93,7 +53,7 @@ export const SigeventsSynthesisPrompt = createPrompt({
           properties: {
             name: {
               type: 'string' as const,
-              description: 'Unique page name (e.g. "nginx-service-overview")',
+              description: 'Unique page name (e.g. "nginx-service", "streams-logs-otel-overview")',
             },
             title: {
               type: 'string' as const,
@@ -107,7 +67,7 @@ export const SigeventsSynthesisPrompt = createPrompt({
               type: 'array' as const,
               items: { type: 'string' as const },
               description:
-                'Categories this page belongs to (e.g. ["services", "streams/logs-otel"])',
+                'Categories this page belongs to (e.g. ["services", "streams/logs-otel"]). Prefer services, infrastructure, or operations; use architecture only for holistic cross-stream docs.',
             },
             references: {
               type: 'array' as const,

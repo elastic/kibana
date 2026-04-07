@@ -7,51 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
-
-const systemPrompt = `You are a concise technical writer maintaining a wiki about a live system's architecture based on observability data.
-
-## Your goal
-
-Synthesize knowledge indicators (features, insights, queries) discovered from a data stream into focused, high-level wiki pages. Each page should be a brief architectural overview — NOT a rehash of raw data.
-
-## Key principles
-
-- **Brevity over completeness**: Keep pages short (a few paragraphs max). Brief pages stay accurate as the system evolves; sprawling pages become stale and misleading.
-- **Synthesize, don't duplicate**: The value is in connecting information across multiple indicators and noting relationships. NEVER copy indicator data verbatim. Reference indicator types loosely (e.g. "based on error pattern analysis and service dependency data") rather than reproducing details.
-- **Relationships are the prize**: The most valuable insight is how things connect — which services depend on which, what infrastructure supports what, which error patterns correlate. Focus on these connections.
-- **Only fetch what you need**: You have access to indicator summaries. Use \`get_indicator_details\` selectively to understand specifics — don't fetch every indicator.
-- **Read before writing**: Before updating an existing page, read it with \`read_memory_page\` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
-- **Cross-reference**: When a page mentions a concept that has its own page, reference it. Prefer linking over duplicating content.
-
-## Organization
-
-Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
-- A page can belong to multiple categories simultaneously
-- Recommended categories: "services", "infrastructure", "streams/{stream-name}", "operations", "architecture"
-- Give each page a descriptive, unique name (e.g. "nginx-service-overview", "redis-cache-patterns")
-- Create categories as needed — they emerge organically
-
-## Writing style
-
-Write as if explaining to a new team member joining the on-call rotation. Be factual and direct. Use cross-references between pages where relevant.`;
-
-const taskPrompt = `Stream: \`{{{streamName}}}\`
-
-## Available indicators ({{indicatorCount}} total)
-
-{{{indicatorSummaries}}}
-
-## Existing wiki pages
-
-{{{existingPages}}}
-
-## Task
-
-Review the indicator summaries above. Fetch details for indicators that seem important for understanding the system architecture and relationships. Read any existing pages that need updating. Then write or update wiki pages that capture a concise, high-level understanding of this system's architecture.
-
-Assign pages to relevant categories (e.g. "services", "streams/{{{streamName}}}", "architecture"). Cross-reference related pages by ID.
-
-Remember: brief pages that capture relationships across indicators are far more valuable than detailed pages that repeat raw data.`;
+import systemPromptTemplate from './memory_synthesis_system_prompt.text';
+import taskPromptTemplate from './memory_synthesis_task_prompt.text';
 
 export const MemorySynthesisPrompt = createPrompt({
   name: 'memory_synthesis',
@@ -66,12 +23,12 @@ export const MemorySynthesisPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPrompt,
+        template: systemPromptTemplate,
       },
     },
     template: {
       mustache: {
-        template: taskPrompt,
+        template: taskPromptTemplate,
       },
     },
     tools: {
@@ -111,7 +68,7 @@ export const MemorySynthesisPrompt = createPrompt({
           properties: {
             name: {
               type: 'string' as const,
-              description: 'Unique page name (e.g. "nginx-service-overview")',
+              description: 'Unique page name (e.g. "nginx-service", "streams-logs-otel-overview")',
             },
             title: {
               type: 'string' as const,
@@ -125,7 +82,7 @@ export const MemorySynthesisPrompt = createPrompt({
               type: 'array' as const,
               items: { type: 'string' as const },
               description:
-                'Categories this page belongs to (e.g. ["services", "streams/logs-otel"])',
+                'Categories (e.g. ["services", "streams/logs-otel"]). Prefer services, infrastructure, or operations; use architecture only for holistic cross-stream docs.',
             },
             references: {
               type: 'array' as const,
