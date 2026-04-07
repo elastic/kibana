@@ -15,6 +15,7 @@ import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
+import { hasStatsCommand } from '@kbn/streams-schema';
 import { MAX_ALERTS_PER_EXECUTION, MATCH_LOOKBACK_MINUTES } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
@@ -34,6 +35,14 @@ export async function getRuleExecutor(
 ) {
   const { services, params, logger, state, startedAt, spaceId, rule } = options;
   const { scopedClusterClient, alertWithPersistence } = services;
+
+  if (hasStatsCommand(params.query)) {
+    logger.error(
+      `Rule "${rule.id}" attempted to execute a STATS query which cannot produce document-level alerts. ` +
+        `The rule should have been uninstalled when the query type changed. Skipping execution.`
+    );
+    return { state: { previousOriginalDocumentIds: [] } };
+  }
 
   const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];
 

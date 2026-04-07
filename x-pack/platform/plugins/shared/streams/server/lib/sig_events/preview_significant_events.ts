@@ -10,7 +10,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
-import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs, MS_PER_UNIT } from '@kbn/streams-schema';
+import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs, extractBucketTargetField, MS_PER_UNIT } from '@kbn/streams-schema';
 
 const PREVIEW_STATS_LIMIT = 10_000;
 
@@ -26,7 +26,9 @@ function parseBucketSize(raw: string): { value: number; unit: string } {
   // 60s (1 minute) is the smallest granularity that produces readable sparklines
   // while remaining efficient. Invalid inputs are caught upstream by the API schema.
   if (!match) return { value: 60, unit: 's' };
-  return { value: parseInt(match[1], 10), unit: match[2] };
+  const value = parseInt(match[1], 10);
+  if (value < 1) return { value: 60, unit: 's' };
+  return { value, unit: match[2] };
 }
 
 function msToEsqlBucketSize(ms: number): string {
@@ -171,19 +173,24 @@ export async function previewSignificantEvents(
   const { esqlQuery, bucketSize, from, to, timestampField = '@timestamp' } = params;
   const { scopedClusterClient, logger } = dependencies;
 
+  const isStats = hasStatsCommand(esqlQuery);
+  const effectiveTimestampField = isStats
+    ? extractBucketTargetField(esqlQuery) ?? timestampField
+    : timestampField;
+
   const filter: QueryDslQueryContainer = {
     bool: {
       filter: [
         {
           range: {
-            [timestampField]: { gte: from.toISOString(), lte: to.toISOString() },
+            [effectiveTimestampField]: { gte: from.toISOString(), lte: to.toISOString() },
           },
         },
       ],
     },
   };
 
-  if (hasStatsCommand(esqlQuery)) {
+  if (isStats) {
     return previewStatsQuery(
       { esqlQuery, filter, from, to, bucketSize },
       { scopedClusterClient, logger }

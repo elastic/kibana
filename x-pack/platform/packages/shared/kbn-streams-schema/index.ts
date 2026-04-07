@@ -64,6 +64,7 @@ export {
   ensureMetadata,
   extractBucketColumnName,
   extractBucketIntervalMs,
+  extractBucketTargetField,
   extractWhereExpression,
   getFromSources,
   getStatsQueryHints,

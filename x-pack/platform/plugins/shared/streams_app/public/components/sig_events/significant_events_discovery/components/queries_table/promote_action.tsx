@@ -38,6 +38,8 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
     onSuccess: (result) => {
       if (result.promoted > 0) {
         toasts.addSuccess(getPromoteQuerySuccessToast(item.query.title));
+      } else if (result.skipped_stats > 0) {
+        toasts.addInfo(STATS_PROMOTE_DISABLED_TOOLTIP);
       } else {
         toasts.addInfo(PROMOTE_QUERY_ALREADY_PROMOTED);
       }

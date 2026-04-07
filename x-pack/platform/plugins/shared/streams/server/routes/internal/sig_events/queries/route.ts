@@ -58,6 +58,16 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
   },
 });
 
+/**
+ * Promotes unbacked queries to rule-backed status.
+ *
+ * Returns `{ promoted, skipped_stats }`:
+ * - `promoted`: number of queries that were successfully backed by a new rule.
+ * - `skipped_stats`: number of STATS-type queries that were skipped because
+ *    they cannot produce document-level alerts required by the rule executor.
+ *
+ * Clients should branch on these values for accurate user feedback.
+ */
 export const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
   options: {

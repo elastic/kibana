@@ -83,13 +83,17 @@ export function KnowledgeIndicatorActionsCell({
     },
   });
 
-  const promoteAction = useMutation<void, Error, string>({
+  const promoteAction = useMutation<{ promoted: number; skipped_stats: number }, Error, string>({
     mutationFn: async (queryId) => {
-      await promote({ queryIds: [queryId] });
+      return promote({ queryIds: [queryId] });
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       await invalidateKnowledgeIndicatorsData();
-      toasts.addSuccess({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
+      if (result.skipped_stats > 0) {
+        toasts.addInfo({ title: KI_STATS_PROMOTE_DISABLED_TOOLTIP });
+      } else {
+        toasts.addSuccess({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
+      }
     },
     onError: (error) => {
       toasts.addError(error, { title: KI_PROMOTE_ACTION_ERROR_TOAST_TITLE });

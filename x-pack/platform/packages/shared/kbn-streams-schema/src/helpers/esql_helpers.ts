@@ -181,7 +181,7 @@ export function deriveQueryType(esql: string): QueryType {
 // Detects `<var> * <number> / <var>` — a rate computation — regardless of variable names.
 const RATE_PATTERN = /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b/i;
 
-const COMPARISON_PATTERN = /\b\w+\s*>=?\s*\d+/gi;
+const COMPARISON_PATTERN = /\b\w+\s*>=?\s*\d+(?:\.\d+)?/gi;
 
 function checkSampleSizeFloor(esql: string, hints: string[]): void {
   if (!RATE_PATTERN.test(esql)) return;
@@ -209,11 +209,13 @@ function checkIsNotNullDenominator(esql: string, hints: string[]): void {
   if (!countWhereMatches) return;
   if (countWhereMatches.length >= 2) return;
 
-  // Scope the IS NOT NULL check to the STATS clause itself, not the
-  // entire query — a pre-STATS WHERE IS NOT NULL is unrelated.
-  const statsIdx = esql.search(/\|\s*STATS\b/i);
-  const postStats = statsIdx >= 0 ? esql.slice(statsIdx) : esql;
-  if (/\bIS\s+NOT\s+NULL\b/i.test(postStats)) return;
+  // Extract the STATS command body (from `| STATS` to the next `|`).
+  // IS NOT NULL must appear in the STATS aggregation line to count as
+  // a filtered denominator; IS NOT NULL in a post-STATS WHERE clause
+  // (e.g. threshold filter) is unrelated.
+  const statsMatch = esql.match(/\|\s*STATS\b([\s\S]*?)(?:\|(?!\s*STATS\b)|$)/i);
+  const statsBody = statsMatch?.[1] ?? '';
+  if (/\bIS\s+NOT\s+NULL\b/i.test(statsBody)) return;
 
   hints.push(
     'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'
@@ -399,6 +401,19 @@ export const MS_PER_UNIT: Record<string, number> = {
   day: 86_400_000,
   days: 86_400_000,
 };
+
+/**
+ * Extracts the source field passed as the first argument to BUCKET/TBUCKET
+ * (e.g. `@timestamp` in `BUCKET(@timestamp, 5 minutes)`).
+ *
+ * Returns `null` when no temporal bucketing is found.
+ */
+export function extractBucketTargetField(esql: string): string | null {
+  const match = esql.match(
+    /(?:BUCKET|TBUCKET)\s*\(\s*([\w@.]+)\s*,/i
+  );
+  return match?.[1] ?? null;
+}
 
 /**
  * Extracts the temporal bucket interval from a STATS query's

@@ -60,6 +60,11 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
   )
 );
 
+/**
+ * Wire schema for creating/updating a query. The `type` field is intentionally
+ * omitted — the server derives it from the ES|QL content via `deriveQueryType`
+ * on every write, so client-supplied values would be ignored.
+ */
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
   esql: esqlQuerySchema,
