@@ -5,164 +5,40 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DASHBOARD_ATTACHMENT_TYPE } from './constants';
+import type {
+  DashboardAttachmentData,
+  AttachmentPanel,
+  DashboardSection,
+} from './dashboard_schema_types';
+import {
+  dashboardAttachmentDataSchema,
+  panelGridSchema,
+  sectionGridSchema,
+  isSection,
+} from './dashboard_schema_types';
 
-// ============================================================================
-// Panel Grid Schema - ideally we should import the schema from dashboard schemas, but they use config-schema library
-// which is not compatible with Zod, so we duplicate the relevant parts here for validation of attachment data.
-// ============================================================================
-
-/**
- * Grid dimensions (in dashboard grid units) for layout.
- * Dashboard grid is 48 columns wide; height is in same units.
- */
-export const panelGridSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-  w: z.number().int().min(1).max(48),
-  h: z.number().int().min(1),
-});
-
-// ============================================================================
-// Panel Schema
-// ============================================================================
-
-/**
- * Zod schema for dashboard panel entries.
- * The `type` field contains the actual embeddable type.
- */
-export const attachmentPanelSchema = z.object({
-  type: z.string(),
-  uid: z.string(),
-  config: z.record(z.string(), z.unknown()),
-  grid: panelGridSchema,
-});
-
-export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
-
-// ============================================================================
-// Section Schema
-// ============================================================================
-
-export const sectionGridSchema = z.object({
-  y: z.number(),
-});
-
-export const dashboardSectionSchema = z.object({
-  uid: z.string(),
-  title: z.string(),
-  collapsed: z.boolean(),
-  grid: sectionGridSchema,
-  panels: z.array(attachmentPanelSchema),
-});
-
-export type DashboardSection = z.infer<typeof dashboardSectionSchema>;
-
-export const isSection = (
-  widget: AttachmentPanel | DashboardSection
-): widget is DashboardSection => {
-  return 'panels' in widget;
-};
-
-// ============================================================================
-// Query Schema
-// ============================================================================
-
-const querySchema = z.object({
-  query: z.union([z.string(), z.record(z.string(), z.unknown())]),
-  language: z.string(),
-});
-
-// ============================================================================
-// Time Range Schema
-// ============================================================================
-
-const timeRangeSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  mode: z.union([z.literal('absolute'), z.literal('relative')]).optional(),
-});
-
-// ============================================================================
-// Refresh Interval Schema
-// ============================================================================
-
-const refreshIntervalSchema = z.object({
-  pause: z.boolean(),
-  value: z.number(),
-});
-
-// ============================================================================
-// Dashboard Options Schema
-// ============================================================================
-
-const optionsSchema = z.object({
-  auto_apply_filters: z.boolean().optional(),
-  hide_panel_titles: z.boolean().optional(),
-  hide_panel_borders: z.boolean().optional(),
-  use_margins: z.boolean().optional(),
-  sync_colors: z.boolean().optional(),
-  sync_tooltips: z.boolean().optional(),
-  sync_cursor: z.boolean().optional(),
-});
-
-// ============================================================================
-// Access Control Schema
-// ============================================================================
-
-const accessControlSchema = z
-  .object({
-    access_mode: z.union([z.literal('write_restricted'), z.literal('default')]).optional(),
-  })
-  .optional();
-
-// ============================================================================
-// Filter Schema
-// ============================================================================
-
-// Filters have complex union types that are difficult to express precisely in Zod.
-const filterSchema = z.record(z.string(), z.unknown());
-
-// ============================================================================
-// Pinned Panels (Controls) Schema
-// ============================================================================
-
-// Controls have complex union types. We use a permissive schema here.
-const pinnedControlSchema = z.record(z.string(), z.unknown());
-const pinnedPanelsSchema = z.array(pinnedControlSchema);
-
-// ============================================================================
-// Dashboard Attachment Data Schema (matches DashboardState)
-// ============================================================================
-
-/**
- * Zod schema for dashboard attachment data.
- * This schema matches the structure of DashboardState from @kbn/dashboard-plugin.
- */
-export const dashboardAttachmentDataSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
-  panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
-  query: querySchema.optional(),
-  time_range: timeRangeSchema.optional(),
-  refresh_interval: refreshIntervalSchema.optional(),
-  filters: z.array(filterSchema).optional(),
-  options: optionsSchema.optional(),
-  tags: z.array(z.string()).optional(),
-  pinned_panels: pinnedPanelsSchema.optional(),
-  access_control: accessControlSchema.optional(),
-  project_routing: z.string().optional(),
-});
-
-export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;
+// Re-export dashboard schema types for convenience
+// NOTE: These types are temporary and should be replaced with types from @kbn/dashboard-plugin
+// once the dashboard plugin exports its schema types.
+export type { DashboardAttachmentData, AttachmentPanel, DashboardSection };
+export { dashboardAttachmentDataSchema, panelGridSchema, sectionGridSchema, isSection };
 
 // ============================================================================
 // Attachment Type
 // ============================================================================
 
 export type DashboardAttachment = Attachment<
+  typeof DASHBOARD_ATTACHMENT_TYPE,
+  DashboardAttachmentData
+>;
+
+/**
+ * Represents a pending dashboard attachment input.
+ * Used when creating attachments before they're persisted to a conversation.
+ */
+export type PendingDashboardAttachment = AttachmentInput<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
 >;

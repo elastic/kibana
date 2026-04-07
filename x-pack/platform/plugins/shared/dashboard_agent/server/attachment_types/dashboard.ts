@@ -14,7 +14,7 @@ import deepEqual from 'fast-deep-equal';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardAttachmentDataSchema,
-  dashboardStateToAttachment,
+  dashboardStateToAttachmentData,
   isSection,
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
@@ -70,7 +70,7 @@ export const createDashboardAttachmentType = ({
           return undefined;
         }
 
-        return dashboardStateToAttachment(dashboard.data);
+        return dashboardStateToAttachmentData(dashboard.data);
       } catch (error) {
         logger.warn(`Failed to resolve dashboard attachment for origin "${origin}": ${error}`);
         return undefined;
@@ -99,7 +99,7 @@ export const createDashboardAttachmentType = ({
             return false;
           }
           // if the content is equal, we don't consider it stale
-          return !deepEqual(dashboardStateToAttachment(dashboard.data), latestVersion.data);
+          return !deepEqual(dashboardStateToAttachmentData(dashboard.data), latestVersion.data);
         }
         return false;
       } catch (error) {

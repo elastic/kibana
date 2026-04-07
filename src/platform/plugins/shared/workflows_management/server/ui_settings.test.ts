@@ -8,7 +8,7 @@
  */
 
 import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
-import { WORKFLOWS_AI_AGENT_SETTING_ID, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { registerUISettings } from './ui_settings';
 
@@ -32,16 +32,6 @@ describe('Workflows Management UI Settings', () => {
         requiresPageReload: true,
         category: expect.any(Array),
       },
-      [WORKFLOWS_AI_AGENT_SETTING_ID]: {
-        description: expect.any(String),
-        name: expect.any(String),
-        schema: expect.any(Object),
-        value: false,
-        readonly: false,
-        technicalPreview: true,
-        requiresPageReload: true,
-        category: expect.any(Array),
-      },
     });
   });
 
@@ -59,9 +49,6 @@ describe('Workflows Management UI Settings', () => {
         [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
           description: expect.stringContaining('Requires <b>enterprise</b> license'),
         }),
-        [WORKFLOWS_AI_AGENT_SETTING_ID]: expect.objectContaining({
-          description: expect.stringContaining('Requires <b>enterprise</b> license'),
-        }),
       })
     );
   });
@@ -72,9 +59,6 @@ describe('Workflows Management UI Settings', () => {
     expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
       expect.objectContaining({
         [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
-          description: expect.not.stringContaining('Requires <b>enterprise</b> license'),
-        }),
-        [WORKFLOWS_AI_AGENT_SETTING_ID]: expect.objectContaining({
           description: expect.not.stringContaining('Requires <b>enterprise</b> license'),
         }),
       })

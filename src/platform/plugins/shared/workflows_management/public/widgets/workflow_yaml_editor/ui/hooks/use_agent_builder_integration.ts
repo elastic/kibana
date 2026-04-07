@@ -11,6 +11,8 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 } from 'uuid';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
@@ -50,6 +52,9 @@ export const useAgentBuilderIntegration = ({
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
+  const isExperimentalEnabled = useUiSetting<boolean>(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
   const telemetry = useTelemetry();
   const dispatch = useDispatch();
   const proposalManagerRef = useRef<ProposalManager | null>(null);
@@ -68,7 +73,7 @@ export const useAgentBuilderIntegration = ({
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!isEditorMounted || !editor || !agentBuilder) {
+    if (!isEditorMounted || !editor || !agentBuilder || !isExperimentalEnabled) {
       return;
     }
 
@@ -253,11 +258,20 @@ export const useAgentBuilderIntegration = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__wfTestBridge;
     };
-  }, [isEditorMounted, editorRef, agentBuilder, attachmentId, workflowId, telemetry, dispatch]);
+  }, [
+    isEditorMounted,
+    editorRef,
+    agentBuilder,
+    isExperimentalEnabled,
+    attachmentId,
+    workflowId,
+    telemetry,
+    dispatch,
+  ]);
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
-      if (!agentBuilder) {
+      if (!agentBuilder || !isExperimentalEnabled) {
         return;
       }
 
@@ -288,12 +302,21 @@ export const useAgentBuilderIntegration = ({
         chatOpenedReportedRef.current = true;
       }
     },
-    [agentBuilder, editorRef, attachmentId, workflowId, workflowName, validationErrors, telemetry]
+    [
+      agentBuilder,
+      isExperimentalEnabled,
+      editorRef,
+      attachmentId,
+      workflowId,
+      workflowName,
+      validationErrors,
+      telemetry,
+    ]
   );
 
   return {
     openAgentChat,
-    isAgentBuilderAvailable: agentBuilder != null,
+    isAgentBuilderAvailable: agentBuilder != null && isExperimentalEnabled,
     proposalManager: proposalManagerRef.current,
   };
 };
