@@ -46,11 +46,11 @@ const metadataSchema = z
       .optional()
       .describe('Optional human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
-    labels: z
+    tags: z
       .array(z.string().max(MAX_TAG_LENGTH))
       .max(100)
       .optional()
-      .describe('Labels for categorization.'),
+      .describe('Tags for categorization.'),
   })
   .strict()
   .describe('Rule metadata.');

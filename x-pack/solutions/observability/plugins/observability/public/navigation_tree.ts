@@ -540,7 +540,6 @@ function createNavTree({
                       link: 'cloud_connect' as const,
                     },
                   ]),
-              { link: 'monitoring' },
             ],
           },
           ...(showAlertingV2
@@ -580,6 +579,19 @@ function createNavTree({
               },
               {
                 link: 'management:maintenanceWindows',
+              },
+            ],
+          },
+          {
+            id: 'cluster_performance',
+            title: i18n.translate('xpack.observability.obltNav.clusterPerformance', {
+              defaultMessage: 'Cluster performance',
+            }),
+            children: [
+              { link: 'monitoring' },
+              {
+                link: 'management:queryActivity',
+                badgeType: 'new',
               },
             ],
           },

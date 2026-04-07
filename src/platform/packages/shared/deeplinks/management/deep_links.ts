@@ -35,6 +35,7 @@ export type ManagementId =
   | 'aiAssistantManagementSelection'
   | 'analytics'
   | 'anomaly_detection'
+  | 'queryActivity'
   | 'evals'
   | 'securityAiAssistantManagement'
   | 'observabilityAiAssistantManagement'
