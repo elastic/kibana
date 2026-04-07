@@ -396,7 +396,7 @@ describe('XY', () => {
             layers: [
               {
                 data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
-                type: type2,
+                type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
                 x: {
