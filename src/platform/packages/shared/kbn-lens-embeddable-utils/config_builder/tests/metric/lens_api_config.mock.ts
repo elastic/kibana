@@ -62,7 +62,6 @@ export const complexMetricAPIAttributes = {
         },
       },
       position: 'top',
-      title_weight: 'normal',
     },
     {
       type: 'secondary',
