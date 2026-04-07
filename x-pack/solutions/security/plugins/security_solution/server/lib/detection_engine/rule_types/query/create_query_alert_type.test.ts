@@ -24,7 +24,7 @@ import { createMockEndpointAppContextService } from '../../../../endpoint/mocks'
 jest.mock('@kbn/data-views-plugin/server', () => ({
   ...jest.requireActual('@kbn/data-views-plugin/server'),
   IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getIndexPatternsWithMatches: jest.fn().mockResolvedValue(['some-index']),
+    getIndexPatternMatches: jest.fn().mockResolvedValue({ matchedIndexPatterns: ['some-index'] }),
   })),
 }));
 
@@ -127,7 +127,7 @@ describe('Custom Query Alerts', () => {
 
   it('short-circuits and writes a warning if no indices are found', async () => {
     (IndexPatternsFetcher as jest.Mock).mockImplementationOnce(() => ({
-      getIndexPatternsWithMatches: jest.fn().mockResolvedValue([]),
+      getIndexPatternMatches: jest.fn().mockResolvedValue({ matchedIndexPatterns: [] }),
     }));
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({

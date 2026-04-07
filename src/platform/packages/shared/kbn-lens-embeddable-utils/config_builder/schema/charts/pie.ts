@@ -21,13 +21,13 @@ import {
 } from '../shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
 import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendVisibilitySchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
@@ -42,7 +42,7 @@ const pieStateSharedSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visibility: legendVisibilitySchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {

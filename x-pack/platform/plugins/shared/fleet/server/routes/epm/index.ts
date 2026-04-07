@@ -39,6 +39,8 @@ import {
   DeletePackageWithoutVersionRequestSchema,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  GetDependenciesRequestSchema,
+  GetDependenciesResponseSchema,
   UpdatePackageRequestSchema,
   UpdatePackageWithoutVersionRequestSchema,
   ReviewUpgradeRequestSchema,
@@ -98,6 +100,7 @@ import {
   deletePackageHandler,
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
+  getDependenciesHandler,
   updatePackageHandler,
   getVerificationKeyIdHandler,
   reauthorizeTransformsHandler,
@@ -307,6 +310,79 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getStatsHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.DEPENDENCIES_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      summary: `Get package dependencies`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          stability: 'stable',
+          since: '9.4.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      dependenciesResponse: {
+                        value: {
+                          items: [
+                            { name: 'aws', version: '^2.0.0', title: 'AWS' },
+                            { name: 'system', version: '^1.0.0', title: 'System' },
+                          ],
+                        },
+                      },
+                      noDependenciesResponse: {
+                        value: {
+                          items: [],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      packageNotFoundResponse: {
+                        value: {
+                          message: '[my-package-1.0.0] package not found in registry',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+        validate: {
+          request: GetDependenciesRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetDependenciesResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getDependenciesHandler
     );
 
   router.versioned

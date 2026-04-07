@@ -42,6 +42,12 @@ export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
 export const CONFIRM_FILL_RULE_GAPS_WARNING_BTN =
   '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
+export const CONFIRM_BULK_MANUAL_RULE_RUN_BTN =
+  '[data-test-subj="schedule-bulk-action-modal"] [data-test-subj="confirmModalConfirmButton"]';
+
+export const CONFIRM_BULK_GAP_FILL_BTN =
+  '[data-test-subj="schedule-bulk-action-modal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';

@@ -21,6 +21,7 @@ import {
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
@@ -31,6 +32,15 @@ import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
 import { cornerPositionSchema } from '../alignments';
+import {
+  DEFAULT_AREAS_FILL_OPACITY,
+  DEFAULT_BARS_MINIMUM_HEIGHT,
+  DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
+  DEFAULT_DATA_LABELS_VISIBLE,
+  DEFAULT_LINES_INTERPOLATION,
+  DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+  DEFAULT_POINTS_VISIBILITY,
+} from '../../transforms/charts/xy/defaults';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -190,10 +200,7 @@ const xyDataLayerSharedSchema = {
  * Common legend configuration properties for positioning and statistics
  */
 const sharedLegendSchema = {
-  visibility: schema.oneOf(
-    [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
-    { meta: { description: 'Show the legend' } }
-  ),
+  visibility: legendVisibilitySchemaWithAuto,
   statistics: schema.maybe(
     schema.arrayOf(statisticsSchema, {
       meta: { description: 'Statistics to display in legend' },
@@ -205,22 +212,41 @@ const sharedLegendSchema = {
 /**
  * Layout Schemas
  */
-const legendTruncateMaxPixelsSchema = schema.number({
-  defaultValue: 250,
-  min: 10,
-  max: 1000,
-  meta: {
-    description: 'Maximum pixels before truncating legend items in list layout',
-    id: 'legendTruncateMaxPixels',
-  },
-});
+const legendTruncateMaxPixelsSchema = schema.maybe(
+  schema.number({
+    defaultValue: 250,
+    min: 10,
+    max: 1000,
+    meta: {
+      description: 'Maximum pixels before truncating legend items in list layout',
+      id: 'legendTruncateMaxPixels',
+    },
+  })
+);
+const legendTruncateEnabledSchema = schema.maybe(
+  schema.boolean({
+    meta: {
+      description: 'Enable truncation of legend items',
+    },
+  })
+);
 const gridLayout = schema.object({
   type: schema.literal('grid'),
-  truncate: schema.maybe(schema.object({ max_lines: legendTruncateAfterLinesSchema })),
+  truncate: schema.maybe(
+    schema.object({
+      max_lines: legendTruncateAfterLinesSchema,
+      enabled: legendTruncateEnabledSchema,
+    })
+  ),
 });
 const listLayout = schema.object({
   type: schema.literal('list'),
-  truncate: schema.maybe(schema.object({ max_pixels: legendTruncateMaxPixelsSchema })),
+  truncate: schema.maybe(
+    schema.object({
+      max_pixels: legendTruncateMaxPixelsSchema,
+      enabled: legendTruncateEnabledSchema,
+    })
+  ),
 });
 
 const XY_API_LINE_INTERPOLATION = {
@@ -231,59 +257,179 @@ const XY_API_LINE_INTERPOLATION = {
 
 export type XYApiLineInterpolation = typeof XY_API_LINE_INTERPOLATION;
 
-const decorationsSchema = schema.object(
+const xyStylingSchema = schema.object(
   {
-    end_zones: schema.maybe(
+    // Chart-level (always present)
+    overlays: schema.maybe(
       schema.object(
         {
-          visible: schema.boolean({ meta: { description: 'Show end zones' } }),
+          partial_buckets: schema.maybe(
+            schema.object(
+              {
+                visible: schema.boolean({
+                  defaultValue: DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+                  meta: { description: 'Show partial bucket indicators at time range edges' },
+                }),
+              },
+              { meta: { description: 'Partial (incomplete) bucket indicator configuration' } }
+            )
+          ),
+          current_time_marker: schema.maybe(
+            schema.object(
+              {
+                visible: schema.boolean({
+                  defaultValue: DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
+                  meta: { description: 'Show current time marker line' },
+                }),
+              },
+              { meta: { description: 'Current time marker configuration' } }
+            )
+          ),
         },
-        { meta: { description: 'End zones (partial buckets) configuration' } }
+        {
+          meta: {
+            id: 'xyStylingOverlays',
+            description: 'Visual overlays drawn on top of the chart canvas',
+          },
+        }
       )
     ),
-    current_time_marker: schema.maybe(
+
+    // Lines + areas shared (alphabetical)
+    fitting: schema.maybe(
       schema.object(
         {
-          visible: schema.boolean({ meta: { description: 'Show current time marker line' } }),
+          type: schema.oneOf(
+            [
+              schema.literal('none'),
+              schema.literal('zero'),
+              schema.literal('linear'),
+              schema.literal('carry'),
+              schema.literal('lookahead'),
+              schema.literal('average'),
+              schema.literal('nearest'),
+            ],
+            { meta: { description: 'Fitting function type for missing data' } }
+          ),
+          emphasize: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'Visually distinguish fitted segments with a dashed line style and reduced area opacity',
+              },
+            })
+          ),
+          extend: schema.maybe(
+            schema.oneOf(
+              [schema.literal('none'), schema.literal('zero'), schema.literal('nearest')],
+              {
+                meta: {
+                  description:
+                    'How to render line and area edges when data does not cover the full X domain',
+                },
+              }
+            )
+          ),
         },
-        { meta: { description: 'Current time marker configuration' } }
+        {
+          meta: {
+            id: 'xyFitting',
+            description: 'Missing data interpolation configuration for line and area series',
+          },
+        }
       )
     ),
-    point_visibility: schema.maybe(
-      schema.oneOf([schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')], {
-        meta: { description: 'Show data points on lines' },
-      })
+    interpolation: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
+          schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
+          schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
+        ],
+        {
+          defaultValue: DEFAULT_LINES_INTERPOLATION,
+          meta: { description: 'Curve interpolation method for line and area series' },
+        }
+      )
     ),
-    line_interpolation: schema.maybe(
-      schema.oneOf([
-        schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
-        schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
-        schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
-      ])
-    ),
-    minimum_bar_height: schema.maybe(
-      schema.number({ min: 0, meta: { description: 'Minimum bar height in pixels' } })
-    ),
-    values: schema.maybe(
+    points: schema.maybe(
       schema.object(
         {
-          visible: schema.boolean({ meta: { description: 'Display value labels on data points' } }),
+          visibility: schema.maybe(
+            schema.oneOf(
+              [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
+              {
+                defaultValue: DEFAULT_POINTS_VISIBILITY,
+                meta: { description: 'Data point marker visibility on line and area series' },
+              }
+            )
+          ),
         },
-        { meta: { description: 'Value label configuration' } }
+        {
+          meta: {
+            id: 'xyStylingPoints',
+            description: 'Data point marker settings for line and area series',
+          },
+        }
       )
     ),
-    fill_opacity: schema.maybe(
-      schema.number({
-        min: 0,
-        max: 2,
-        meta: { description: 'Area chart fill opacity (0-1 typical, max 2 for legacy)' },
-      })
+
+    // Series-type specific (alphabetical)
+    areas: schema.maybe(
+      schema.object(
+        {
+          fill_opacity: schema.maybe(
+            schema.number({
+              defaultValue: DEFAULT_AREAS_FILL_OPACITY,
+              min: 0,
+              max: 2,
+              meta: { description: 'Area fill opacity (0-1 typical, max 2 for legacy)' },
+            })
+          ),
+        },
+        {
+          meta: {
+            id: 'xyStylingAreas',
+            description: 'Area-specific rendering settings',
+          },
+        }
+      )
+    ),
+    bars: schema.maybe(
+      schema.object(
+        {
+          minimum_height: schema.maybe(
+            schema.number({
+              defaultValue: DEFAULT_BARS_MINIMUM_HEIGHT,
+              min: 0,
+              meta: { description: 'Minimum bar height in pixels' },
+            })
+          ),
+          data_labels: schema.maybe(
+            schema.object(
+              {
+                visible: schema.boolean({
+                  defaultValue: DEFAULT_DATA_LABELS_VISIBLE,
+                  meta: { description: 'Display value labels on bar data points' },
+                }),
+              },
+              { meta: { description: 'Data label configuration for bar series' } }
+            )
+          ),
+        },
+        {
+          meta: {
+            id: 'xyStylingBars',
+            description: 'Bar-specific rendering settings',
+          },
+        }
+      )
     ),
   },
   {
     meta: {
-      id: 'xyDecorations',
-      description: 'Visual enhancements and styling options for the chart',
+      id: 'xyStyling',
+      description: 'Visual styling options for the chart',
     },
   }
 );
@@ -362,37 +508,6 @@ const xySharedSettings = {
     )
   ),
 
-  fitting: schema.maybe(
-    schema.object(
-      {
-        type: schema.oneOf(
-          [
-            schema.literal('none'),
-            schema.literal('zero'),
-            schema.literal('linear'),
-            schema.literal('carry'),
-            schema.literal('lookahead'),
-            schema.literal('average'),
-            schema.literal('nearest'),
-          ],
-          { meta: { description: 'Fitting function type for missing data' } }
-        ),
-        dotted: schema.maybe(
-          schema.boolean({ meta: { description: 'Show fitted values as dotted lines' } })
-        ),
-        end_value: schema.maybe(
-          schema.oneOf([schema.literal('none'), schema.literal('zero'), schema.literal('nearest')])
-        ),
-      },
-      {
-        meta: {
-          id: 'xyFitting',
-          description:
-            'Missing data interpolation configuration (only valid fitting types applied per chart type)',
-        },
-      }
-    )
-  ),
   axis: schema.maybe(
     schema.object(
       {
@@ -437,7 +552,7 @@ const xySharedSettings = {
       }
     )
   ),
-  decorations: schema.maybe(decorationsSchema),
+  styling: schema.maybe(xyStylingSchema),
 };
 
 /**
@@ -813,58 +928,84 @@ const annotationLayerSchema = schema.oneOf(
   }
 );
 
+const xyLayerUnionNoESQL = schema.oneOf(
+  [xyDataLayerSchemaNoESQL, referenceLineLayerSchemaNoESQL, annotationLayerSchema],
+  {
+    meta: {
+      id: 'xyLayersNoESQL',
+      description: 'XY chart layer types for DSL queries',
+    },
+  }
+);
+
+const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL, referenceLineLayerSchemaESQL], {
+  meta: {
+    id: 'xyLayersESQL',
+    description: 'XY chart layer types for ES|QL queries',
+  },
+});
+
 /**
- * Complete XY chart state configuration with layers and visualization settings
+ * XY chart state for DSL layers
  */
-export const xyStateSchema = schema.object(
+export const xyStateSchemaNoESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
     ...xySharedSettings,
     ...dslOnlyPanelInfoSchema,
-    layers: schema.arrayOf(
-      /**
-       * Any valid XY chart layer type (data, reference line, or annotation)
-       */
-      schema.oneOf([
-        xyDataLayerSchemaNoESQL,
-        xyDataLayerSchemaESQL,
-        referenceLineLayerSchemaNoESQL,
-        referenceLineLayerSchemaESQL,
-        annotationLayerSchema,
-      ]),
-      {
-        minSize: 1,
-        maxSize: 100,
-        meta: { description: 'Chart layers (minimum 1 required)' },
-      }
-    ),
+    layers: schema.arrayOf(xyLayerUnionNoESQL, {
+      minSize: 1,
+      maxSize: 100,
+      meta: { description: 'Chart layers' },
+    }),
   },
-  { meta: { id: 'xyChart', title: 'XY Chart', description: 'Complete XY chart configuration' } }
+  {
+    meta: {
+      id: 'xyChartNoESQL',
+      title: 'XY Chart (DSL)',
+      description: 'XY chart configuration for DSL queries',
+    },
+  }
 );
 
-// TODO: temporary ESQL schema for XY chart to not feed agent with heavy schema for DSL that is not used in agent
+/**
+ * XY chart state for ES|QL layers only (data and reference lines)
+ */
 export const xyStateSchemaESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
     ...xySharedSettings,
-    layers: schema.arrayOf(xyDataLayerSchemaESQL, {
+    layers: schema.arrayOf(xyLayerUnionESQL, {
       minSize: 1,
-      maxSize: 1,
-      meta: { description: 'Only single layer ESQL charts are supported ' },
+      maxSize: 100,
+      meta: { description: 'ES|QL chart layers' },
     }),
   },
   {
     meta: {
       id: 'xyChartESQL',
       title: 'XY Chart (ES|QL)',
+      description: 'XY chart configuration for ES|QL queries',
     },
   }
 );
 
-export type XYState = TypeOf<typeof xyStateSchema>;
+/**
+ * XY chart state
+ */
+export const xyStateSchema = schema.oneOf([xyStateSchemaNoESQL, xyStateSchemaESQL], {
+  meta: {
+    id: 'xyChart',
+    title: 'XY Chart',
+    description: 'XY chart configuration',
+  },
+});
+
+export type XYStateNoESQL = TypeOf<typeof xyStateSchemaNoESQL>;
 export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
+export type XYState = TypeOf<typeof xyStateSchema>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
@@ -879,5 +1020,6 @@ export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
+export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
 
-export type XYDecorations = TypeOf<typeof decorationsSchema>;
+export type XYStyling = TypeOf<typeof xyStylingSchema>;
