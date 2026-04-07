@@ -6,16 +6,14 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/discover-utils';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { Assignees } from '../../../../flyout_v2/document/components/assignees';
+import { Timestamp } from '../../../../flyout_v2/document/components/timestamp';
 import { Notes } from '../../../../flyout_v2/shared/components/notes';
 import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
@@ -34,8 +32,6 @@ const blockStyles = {
   minWidth: 280,
 };
 
-const urlParamOverride = { timeline: { isOpen: false } };
-
 /**
  * Alert details flyout right section header
  */
@@ -43,9 +39,6 @@ export const AlertHeaderTitle = memo(() => {
   const { scopeId, isRulePreview, refetchFlyoutData, searchHit } = useDocumentDetailsContext();
   const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
-  const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
-  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
-  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
 
   const { refetch } = useRefetchByScope({ scopeId });
 
@@ -92,9 +85,9 @@ export const AlertHeaderTitle = memo(() => {
     <>
       <DocumentSeverity hit={hit} />
       <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+      <Timestamp hit={hit} />
       <EuiSpacer size="xs" />
-      <Title hit={hit} titleHref={href ?? undefined} />
+      <Title hit={hit} hideLink={isRulePreview} />
       <EuiSpacer size="m" />
       <EuiFlexGroup
         direction="row"

@@ -149,8 +149,8 @@ describe('transformDashboardOut', () => {
             },
           ],
           "query": Object {
-            "language": "KQL",
-            "query": "test",
+            "expression": "test",
+            "language": "kql",
           },
           "refresh_interval": Object {
             "pause": true,
@@ -246,8 +246,8 @@ describe('transformDashboardOut', () => {
             },
           ],
           "query": Object {
-            "language": "KQL",
-            "query": "test",
+            "expression": "test",
+            "language": "kql",
           },
           "title": "title",
         },

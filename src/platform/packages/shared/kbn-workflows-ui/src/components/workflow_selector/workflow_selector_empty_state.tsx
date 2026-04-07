@@ -22,12 +22,11 @@ export const WorkflowSelectorEmptyState: React.FC<WorkflowSelectorEmptyStateProp
     <EuiSelectableMessage>
       <EuiEmptyPrompt
         title={
-          <EuiText textAlign="center" color="textParagraph">
-            {i18n.EMPTY_STATE_TITLE}
+          <EuiText textAlign="center" color="textParagraph" size="s">
+            <strong>{i18n.EMPTY_STATE_TITLE}</strong>
           </EuiText>
         }
-        titleSize="s"
-        body={i18n.EMPTY_STATE_DESCRIPTION}
+        titleSize="xxs"
         actions={
           <EuiButton
             color="primary"

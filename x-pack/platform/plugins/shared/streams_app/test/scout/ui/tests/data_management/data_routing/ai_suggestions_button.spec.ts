@@ -42,7 +42,7 @@ test.describe('Stream data routing - AI suggestions button', { tag: tags.statefu
   test('should show button when AI features are enabled', async ({ page }) => {
     const button = page.getByTestId('streamsAppGenerateSuggestionButton');
     await expect(button).toBeVisible();
-    await expect(button).toContainText('Suggest partitions');
+    await expect(button).toContainText('Get partitions suggestions');
   });
 
   test('should disable button when no connector is selected', async ({ page }) => {

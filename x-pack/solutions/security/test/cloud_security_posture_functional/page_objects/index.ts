@@ -17,13 +17,13 @@ import { AlertsPageObject } from './alerts_page';
 import { NetworkEventsPageObject } from './network_events_page';
 import { ExpandedFlyoutGraph } from './expanded_flyout_graph';
 import { TimelinePageObject } from './timeline_page';
-import { GenericEntityFlyoutPageObject } from './generic_entity_flyout';
+import { EntityFlyoutPageObject } from './entity_flyout';
 
 export const cloudSecurityPosturePageObjects = {
   alerts: AlertsPageObject,
   networkEvents: NetworkEventsPageObject,
   expandedFlyoutGraph: ExpandedFlyoutGraph,
-  genericEntityFlyout: GenericEntityFlyoutPageObject,
+  entityFlyout: EntityFlyoutPageObject,
   timeline: TimelinePageObject,
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
