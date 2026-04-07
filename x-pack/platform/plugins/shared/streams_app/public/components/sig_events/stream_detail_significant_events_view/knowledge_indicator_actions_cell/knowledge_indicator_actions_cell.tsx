@@ -94,7 +94,7 @@ export function KnowledgeIndicatorActionsCell({
       } else if (result.skipped_stats > 0) {
         toasts.addInfo({ title: KI_STATS_PROMOTE_DISABLED_TOOLTIP });
       } else {
-        toasts.addInfo({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
+        toasts.addInfo({ title: KI_PROMOTE_ALREADY_PROMOTED_TOAST_TITLE });
       }
     },
     onError: (error) => {
@@ -321,6 +321,13 @@ const KI_PROMOTE_ACTION_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsTable.promoteActionErrorToastTitle',
   {
     defaultMessage: 'Failed to promote knowledge indicator',
+  }
+);
+
+const KI_PROMOTE_ALREADY_PROMOTED_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsTable.promoteAlreadyPromotedToastTitle',
+  {
+    defaultMessage: 'Query is already promoted',
   }
 );
 

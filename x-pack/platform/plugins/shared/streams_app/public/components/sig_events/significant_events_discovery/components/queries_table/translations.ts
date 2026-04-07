@@ -94,7 +94,7 @@ export const IMPACT_COLUMN = i18n.translate(
 export const LAST_OCCURRED_COLUMN = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.lastOccurredColumn',
   {
-    defaultMessage: 'Last occurred',
+    defaultMessage: 'Last activity',
   }
 );
 

@@ -173,7 +173,7 @@ Note: The last query has no `evidence` because it's inferred from high-confidenc
 ```
 >>> ACTION: add_queries(queries=[
   {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries.", "esql": "FROM logs | WHERE body.text:\"connection refused\" AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "evidence": ["body.text: \"connection refused to users-db:5432\""]},
-  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health and recent deployments.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level IN (\"ERROR\", \"error\", \"CRITICAL\", \"critical\"), total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65}
+  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health and recent deployments.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level IN (\"ERROR\", \"error\", \"CRITICAL\", \"critical\", \"FATAL\", \"fatal\"), total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65}
 ])
 ```
 
@@ -561,7 +561,7 @@ Fields to look for: `log.level`, `log.severity`, `event.severity`, `severity`, `
 Template:
 ```
 FROM <stream>
-| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical"),
+| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical", "FATAL", "fatal"),
         total = COUNT(*) WHERE <severity_field> IS NOT NULL
   BY bucket = BUCKET(@timestamp, 5 minutes)
 | EVAL error_rate = errors * 100.0 / total
@@ -629,7 +629,7 @@ Fields to look for: Entity grouping field (`service.name`, `host.name`, `kuberne
 Template:
 ```
 FROM <stream>
-| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical"),
+| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical", "FATAL", "fatal"),
         total = COUNT(*) WHERE <severity_field> IS NOT NULL
   BY <entity_field>, bucket = BUCKET(@timestamp, 5 minutes)
 | EVAL error_rate = errors * 100.0 / total

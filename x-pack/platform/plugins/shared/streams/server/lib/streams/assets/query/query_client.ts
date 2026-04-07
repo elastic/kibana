@@ -317,9 +317,10 @@ function toQueryLinkFromQuery({
   stream: string;
   ruleBacked?: boolean;
 }): QueryLink {
-  // STATS queries are stored as drafts (rule_backed=false) because they cannot
-  // be promoted to alerting rules yet. promoteQueries explicitly skips them.
-  const effectiveRuleBacked = query.type === QUERY_TYPE_STATS ? false : ruleBacked;
+  // Always derive type from the ES|QL source of truth to prevent stale
+  // query.type from causing rule_backed mismatches.
+  const derivedType = deriveQueryType(query.esql.query);
+  const effectiveRuleBacked = derivedType === QUERY_TYPE_STATS ? false : ruleBacked;
   const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
     'asset.uuid': assetUuid,
@@ -365,7 +366,7 @@ export class QueryClient {
 
     const nextQueryLinks = links.map((link) => {
       const ql = { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
-      if (ql.query.type === QUERY_TYPE_STATS) {
+      if (deriveQueryType(ql.query.esql.query) === QUERY_TYPE_STATS) {
         ql.rule_backed = false;
       }
       return ql;

@@ -166,7 +166,7 @@ export function replaceFromSources(esql: string, newSources: string[]): string {
  */
 export function hasStatsCommand(esql: string): boolean {
   const { root, parsed } = tryParseEsql(esql);
-  if (!parsed) return false;
+  if (!parsed) return STATS_REGEX.test(esql);
   return root.commands.some((cmd) => 'name' in cmd && cmd.name === 'stats');
 }
 
@@ -184,27 +184,35 @@ const RATE_PATTERN = /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b/i;
 // Rate computations and statistical aggregations that require a minimum
 // sample size to produce meaningful results. Simple COUNT thresholds are
 // excluded because the count itself acts as the sample size.
-const NEEDS_SAMPLE_FLOOR_PATTERN =
-  /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b|\bPERCENTILE\b|\bAVG\b|\bMEDIAN\b/i;
+const STAT_AGG_PATTERN =
+  /\bPERCENTILE\b|\bPERCENTILE_DISC\b|\bPERCENTILE_CONT\b|\bAVG\b|\bMEDIAN\b/i;
+const NEEDS_SAMPLE_FLOOR_PATTERN = new RegExp(
+  `${RATE_PATTERN.source}|${STAT_AGG_PATTERN.source}`,
+  'i'
+);
 
 const COMPARISON_PATTERN = /\b\w+\s*>=?\s*\d+(?:\.\d+)?/gi;
 
 function checkSampleSizeFloor(esql: string, hints: string[]): void {
   if (!NEEDS_SAMPLE_FLOOR_PATTERN.test(esql)) return;
 
-  // Find the last pipe-delimited WHERE command (the post-STATS threshold),
-  // not an inner WHERE inside a STATS aggregation like `COUNT(*) WHERE …`.
+  // Find all pipe-delimited WHERE commands (the post-STATS thresholds),
+  // not inner WHERE clauses inside a STATS aggregation like `COUNT(*) WHERE …`.
+  // The threshold may be split across multiple WHERE clauses
+  // (e.g. `| WHERE total > 20 | WHERE rate > 5`), so we aggregate
+  // comparisons across all of them.
   const pipeWhereMatch = esql.match(/\|\s*WHERE\b((?:(?!\|).)*)/gis);
   if (!pipeWhereMatch) return;
 
-  const lastWhereBody = pipeWhereMatch[pipeWhereMatch.length - 1]
-    .replace(/^\|\s*WHERE\b/i, '');
+  const allWhereBodies = pipeWhereMatch
+    .map((m) => m.replace(/^\|\s*WHERE\b/i, ''))
+    .join(' ');
 
   // A threshold clause needs at least two comparisons: one for the volume
   // floor (e.g. total > 20) and one for the metric threshold (e.g.
   // error_rate > 10). A single comparison is likely just the threshold
   // without a floor.
-  const matches = lastWhereBody.match(COMPARISON_PATTERN);
+  const matches = allWhereBodies.match(COMPARISON_PATTERN);
   if (!matches || matches.length < 2) {
     hints.push(
       'Warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts.'
@@ -215,17 +223,18 @@ function checkSampleSizeFloor(esql: string, hints: string[]): void {
 function checkIsNotNullDenominator(esql: string, hints: string[]): void {
   if (!RATE_PATTERN.test(esql)) return;
 
-  const countWhereMatches = esql.match(/COUNT\s*\(\s*\*\s*\)\s*WHERE\b/gi);
-  if (!countWhereMatches) return;
-  if (countWhereMatches.length >= 2) return;
-
   // Extract the STATS command body (from `| STATS` to the next `|`).
-  // IS NOT NULL must appear in the STATS aggregation line to count as
-  // a filtered denominator; IS NOT NULL in a post-STATS WHERE clause
-  // (e.g. threshold filter) is unrelated.
   const statsMatch = esql.match(/\|\s*STATS\b([\s\S]*?)(?:\|(?!\s*STATS\b)|$)/i);
   const statsBody = statsMatch?.[1] ?? '';
-  if (/\bIS\s+NOT\s+NULL\b/i.test(statsBody)) return;
+
+  // A well-formed rate denominator uses `COUNT(*) WHERE <field> IS NOT NULL`
+  // to exclude rows missing the target field in mixed streams. If no arm
+  // in the STATS body contains this pattern, warn.
+  const hasFilteredDenominator = /COUNT\s*\(\s*\*\s*\)\s*WHERE\b[^,]*\bIS\s+NOT\s+NULL\b/i.test(
+    statsBody
+  );
+
+  if (hasFilteredDenominator) return;
 
   hints.push(
     'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'

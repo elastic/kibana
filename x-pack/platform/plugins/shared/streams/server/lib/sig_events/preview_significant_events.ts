@@ -39,18 +39,20 @@ function msToEsqlBucketSize(ms: number): string {
 }
 
 function stripLimitCommand(esql: string): string {
+  let result: string;
   try {
     const { root } = Parser.parse(esql);
     const commandsWithoutLimit = root.commands.filter(
       (cmd) => !('name' in cmd && cmd.name === 'limit')
     );
     if (commandsWithoutLimit.length === root.commands.length) return esql;
-    return BasicPrettyPrinter.print(
+    result = BasicPrettyPrinter.print(
       Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
     );
   } catch {
-    return esql.replace(/\|\s*LIMIT\s+\d+/gi, '').trim();
+    result = esql.replace(/\|\s*LIMIT\s+\d+/gi, '');
   }
+  return result.replace(/\s*\|\s*$/, '').trim();
 }
 
 /**
@@ -67,7 +69,11 @@ function stripLimitCommand(esql: string): string {
  * For STATS-type queries the user's own aggregation pipeline is executed
  * directly — see {@link previewStatsQuery}.
  */
-function buildHistogramQuery(esqlQuery: string, bucketSize: string): string {
+function buildHistogramQuery(
+  esqlQuery: string,
+  bucketSize: string,
+  timestampField: string = '@timestamp'
+): string {
   let root;
   try {
     ({ root } = Parser.parse(esqlQuery));
@@ -97,7 +103,7 @@ function buildHistogramQuery(esqlQuery: string, bucketSize: string): string {
           Builder.expression.func.binary('=', [
             Builder.expression.column('bucket'),
             Builder.expression.func.call('BUCKET', [
-              Builder.expression.column('@timestamp'),
+              Builder.expression.column(timestampField),
               Builder.expression.literal.timespan(value, ESQL_UNITS[unit] || unit),
             ]),
           ]),
@@ -198,7 +204,7 @@ export async function previewSignificantEvents(
   }
 
   return previewMatchQuery(
-    { esqlQuery, filter, from, to, bucketSize },
+    { esqlQuery, filter, from, to, bucketSize, timestampField: effectiveTimestampField },
     { scopedClusterClient, logger }
   );
 }
@@ -210,14 +216,15 @@ async function previewMatchQuery(
     from: Date;
     to: Date;
     bucketSize: string;
+    timestampField?: string;
   },
   deps: { scopedClusterClient: IScopedClusterClient; logger?: Logger }
 ): Promise<SignificantEventsPreviewResponse> {
-  const { esqlQuery, filter, from, to, bucketSize } = params;
+  const { esqlQuery, filter, from, to, bucketSize, timestampField } = params;
   const { scopedClusterClient, logger } = deps;
 
   const response = await scopedClusterClient.asCurrentUser.esql.query({
-    query: buildHistogramQuery(esqlQuery, bucketSize),
+    query: buildHistogramQuery(esqlQuery, bucketSize, timestampField),
     filter,
     drop_null_columns: true,
   });

@@ -108,7 +108,11 @@ export class QueryService {
 
           const esqlQuery = migrated[QUERY_ESQL_QUERY] as string;
           // Derive type first — all subsequent migration steps depend on this.
-          const derivedType = deriveQueryType(esqlQuery);
+          // Guard against corrupt/empty ES|QL: treat unparseable queries as
+          // match (safe default) and force rule_backed=false so no alerting
+          // rule is created for a broken query.
+          const isCorruptEsql = !esqlQuery || !esqlQuery.trim();
+          const derivedType = isCorruptEsql ? 'match' : deriveQueryType(esqlQuery);
 
           migrated = { ...migrated, [QUERY_TYPE]: derivedType };
 
@@ -137,8 +141,12 @@ export class QueryService {
           // Pre-existing queries were all rule-backed; back-fill the flag.
           // STATS queries (introduced alongside the type field) are never
           // rule-backed, so force false to avoid orphaned rule state.
+          // Corrupt/empty ES|QL also gets rule_backed=false as a safe default.
           if (!(RULE_BACKED in migrated)) {
-            migrated = { ...migrated, [RULE_BACKED]: derivedType !== QUERY_TYPE_STATS };
+            migrated = {
+              ...migrated,
+              [RULE_BACKED]: !isCorruptEsql && derivedType !== QUERY_TYPE_STATS,
+            };
           }
 
           // Back-fill description for queries created before the field was introduced.
