@@ -121,9 +121,10 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   );
 
   const renderDefaultSetting = () => {
-    const isDisabled = isFirstRepository || isAlreadyDefaultRepository;
+    const isFirstRegister = isFirstRepository && !isEditing;
+    const isDisabled = isFirstRegister || isAlreadyDefaultRepository;
 
-    const tooltipContent = isFirstRepository ? (
+    const tooltipContent = isFirstRegister ? (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.firstRepositoryDefaultTooltip"
         defaultMessage="Your first repository is automatically set as the default."
@@ -164,7 +165,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
                   defaultMessage="Set as default repository"
                 />
               }
-              checked={isDisabled || (isDefaultRepository ?? false)}
+              checked={isFirstRegister || isAlreadyDefaultRepository || (isDefaultRepository ?? false)}
               disabled={isDisabled}
               onChange={(e) => onToggleDefault?.(e.target.checked)}
               data-test-subj="setDefaultRepositorySwitch"
