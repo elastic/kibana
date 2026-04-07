@@ -62,7 +62,6 @@ export const complexMetricAPIAttributes = {
         },
       },
       position: 'top',
-      title_weight: 'normal',
     },
     {
       type: 'secondary',
@@ -109,7 +108,6 @@ export const complexESQLMetricAPIAttributes = {
   metrics: [
     {
       type: 'primary',
-      operation: 'value',
       column: 'count',
       color: {
         type: 'dynamic',
@@ -119,14 +117,12 @@ export const complexESQLMetricAPIAttributes = {
       background_chart: {
         type: 'bar',
         max_value: {
-          operation: 'value',
           column: 'bytes',
         },
       },
     },
     {
       type: 'secondary',
-      operation: 'value',
       column: 'bytes',
       compare: {
         to: 'baseline',
@@ -137,7 +133,6 @@ export const complexESQLMetricAPIAttributes = {
     },
   ],
   breakdown_by: {
-    operation: 'value',
     column: 'extension.keyword',
   },
 } as MetricState;
@@ -171,8 +166,8 @@ export const metricAPIWithTermsRankedBySecondary = {
     fields: ['extension.keyword'],
     limit: 5,
     rank_by: {
-      type: 'column',
-      metric: 1,
+      type: 'metric',
+      metric_index: 1,
       direction: 'desc',
     },
   },
