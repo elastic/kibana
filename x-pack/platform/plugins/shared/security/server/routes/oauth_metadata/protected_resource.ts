@@ -53,7 +53,6 @@ export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefin
   // back to the root URL. Without this catch-all, the path-aware URL hits Kibana's
   // auth middleware and redirects to the login page (302 → 200 HTML), which the SDK
   // treats as a successful response and tries to parse as JSON, causing a failure.
-  // Returning 404 here lets the SDK fall back to the root URL.
   router.get(
     {
       path: '/.well-known/oauth-protected-resource/{path*}',
