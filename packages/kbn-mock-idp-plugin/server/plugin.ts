@@ -56,12 +56,9 @@ const readStatefulRoles = () => {
 
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
-
-export const plugin: PluginInitializer<
-  void,
-  void,
-  PluginSetupDependencies
-> = async (initializerContext): Promise<Plugin> => ({
+export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
+  initializerContext
+): Promise<Plugin> => ({
   setup(core, plugins: PluginSetupDependencies) {
     const logger = initializerContext.logger.get();
     const router = core.http.createRouter();
@@ -116,27 +113,27 @@ export const plugin: PluginInitializer<
         const pathname = core.http.basePath.prepend('/api/security/saml/callback');
 
         try {
-            const requestId = await getSAMLRequestId(request.body.url);
-            if (requestId) {
-              logger.info(`Sending SAML response for request ID: ${requestId}`);
-            }
-
-        return response.ok({
-          body: {
-            SAMLResponse: await createSAMLResponse({
-              kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
-              username: request.body.username,
-              full_name: request.body.full_name ?? undefined,
-              email: request.body.email ?? undefined,
-              roles: request.body.roles,
-              ...(requestId ? { authnRequestId: requestId } : {}),
-            }),
-          },
-        });
-         } catch (err) {
-            logger.error(`Failed to create SAMLResponse: ${err}`, err);
-            throw err;
+          const requestId = await getSAMLRequestId(request.body.url);
+          if (requestId) {
+            logger.info(`Sending SAML response for request ID: ${requestId}`);
           }
+
+          return response.ok({
+            body: {
+              SAMLResponse: await createSAMLResponse({
+                kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+                username: request.body.username,
+                full_name: request.body.full_name ?? undefined,
+                email: request.body.email ?? undefined,
+                roles: request.body.roles,
+                ...(requestId ? { authnRequestId: requestId } : {}),
+              }),
+            },
+          });
+        } catch (err) {
+          logger.error(`Failed to create SAMLResponse: ${err}`, err);
+          throw err;
+        }
       }
     );
 
