@@ -186,10 +186,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
     expect(editAction.mock.calls.length).toEqual(0);
     rerender(
-      <ServiceNowITSMParamsFields
-        {...newProps}
-        actionConnector={{ ...connector, id: '1234' }}
-      />
+      <ServiceNowITSMParamsFields {...newProps} actionConnector={{ ...connector, id: '1234' }} />
     );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
@@ -279,7 +276,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       const input = screen.getByTestId('short_descriptionInput');
       await userEvent.tripleClick(input);
       await userEvent.paste('Bug');
@@ -290,7 +289,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       const input = screen.getByTestId('correlation_idInput');
       await userEvent.tripleClick(input);
       await userEvent.paste('Bug');
@@ -301,7 +302,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       const input = screen.getByTestId('correlation_displayInput');
       await userEvent.tripleClick(input);
       await userEvent.paste('Bug');
@@ -312,7 +315,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       const input = screen.getByTestId('descriptionTextArea');
       await userEvent.tripleClick(input);
       await userEvent.paste('Bug');
@@ -323,7 +328,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       await userEvent.selectOptions(screen.getByTestId('urgencySelect'), '1');
       expect(editAction.mock.calls[0][1].incident.urgency).toEqual('1');
     });
@@ -332,7 +339,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       await userEvent.selectOptions(screen.getByTestId('severitySelect'), '2');
       expect(editAction.mock.calls[0][1].incident.severity).toEqual('2');
     });
@@ -341,7 +350,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       await userEvent.selectOptions(screen.getByTestId('impactSelect'), '1');
       expect(editAction.mock.calls[0][1].incident.impact).toEqual('1');
     });
@@ -350,7 +361,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       await userEvent.selectOptions(screen.getByTestId('categorySelect'), 'failed_login');
       expect(editAction.mock.calls[0][1].incident.category).toEqual('failed_login');
     });
@@ -359,7 +372,9 @@ describe('ServiceNowITSMParamsFields renders', () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
-      act(() => { onChoices(useGetChoicesResponse.choices); });
+      act(() => {
+        onChoices(useGetChoicesResponse.choices);
+      });
       await userEvent.selectOptions(screen.getByTestId('subcategorySelect'), 'os');
       expect(editAction.mock.calls[0][1].incident.subcategory).toEqual('os');
     });

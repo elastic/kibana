@@ -225,9 +225,9 @@ describe('IndexActionConnectorFields', () => {
     const switchEl = screen.getByTestId('hasTimeFieldCheckbox');
     expect(switchEl).toBeChecked();
 
-    expect(
-      (screen.getByTestId('executionTimeFieldSelect') as HTMLSelectElement).value
-    ).toEqual('test1');
+    expect((screen.getByTestId('executionTimeFieldSelect') as HTMLSelectElement).value).toEqual(
+      'test1'
+    );
   });
 
   test('fetches index names on index combobox input change', async () => {

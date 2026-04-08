@@ -48,7 +48,9 @@ describe.skip('UpdateConnector renders', () => {
 
     expect(screen.getByTestId('connector-servicenow-client-id-form-input')).toBeInTheDocument();
     expect(screen.getByTestId('connector-servicenow-client-secret-form-input')).toBeInTheDocument();
-    expect(screen.getByTestId('connector-servicenow-user-identifier-form-input')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('connector-servicenow-user-identifier-form-input')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('connector-servicenow-jwt-key-id-form-input')).toBeInTheDocument();
     expect(screen.getByTestId('connector-servicenow-private-key-form-input')).toBeInTheDocument();
     expect(

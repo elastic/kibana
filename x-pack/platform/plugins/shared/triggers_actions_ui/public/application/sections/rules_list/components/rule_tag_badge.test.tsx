@@ -22,9 +22,7 @@ describe('RuleTagBadge', () => {
   });
 
   it('renders the initial badge count correctly', () => {
-    render(
-      <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
-    );
+    render(<RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />);
 
     expect(screen.getByTestId('ruleTagBadge')).toBeInTheDocument();
     expect(screen.getByTestId('ruleTagBadge').textContent).toEqual(`${tags.length}`);

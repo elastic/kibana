@@ -27,7 +27,6 @@ const onLoading = jest.fn();
 const onRunRule = jest.fn();
 const onCloneRule = jest.fn();
 
-
 describe('CollapsedItemActions', () => {
   async function setup(editable: boolean = true) {
     const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -289,15 +288,9 @@ describe('CollapsedItemActions', () => {
       expect(deleteBtn).not.toBeDisabled();
       expect(deleteBtn.textContent).toEqual('Delete rule');
 
-      expect(
-        screen.getByTestId('updateApiKey').textContent
-      ).toEqual('Update API key');
-      expect(screen.getByTestId('runRule').textContent).toEqual(
-        'Run rule'
-      );
-      expect(screen.getByTestId('cloneRule').textContent).toEqual(
-        'Clone rule'
-      );
+      expect(screen.getByTestId('updateApiKey').textContent).toEqual('Update API key');
+      expect(screen.getByTestId('runRule').textContent).toEqual('Run rule');
+      expect(screen.getByTestId('cloneRule').textContent).toEqual('Clone rule');
     });
 
     test('handles case when run rule is clicked', async () => {
@@ -411,9 +404,7 @@ describe('CollapsedItemActions', () => {
       await userEvent.click(screen.getByTestId('selectActionButton'));
       await waitForEuiPopoverOpen();
 
-      expect(screen.getByTestId('snoozeButton').textContent).toEqual(
-        'Snoozed indefinitely'
-      );
+      expect(screen.getByTestId('snoozeButton').textContent).toEqual('Snoozed indefinitely');
 
       const disableBtn = screen.getByTestId('disableButton');
       expect(disableBtn).not.toBeDisabled();
@@ -439,9 +430,7 @@ describe('CollapsedItemActions', () => {
       await userEvent.click(screen.getByTestId('selectActionButton'));
       await waitForEuiPopoverOpen();
 
-      expect(screen.getByTestId('snoozeButton').textContent).toEqual(
-        'Snoozed until Feb 1'
-      );
+      expect(screen.getByTestId('snoozeButton').textContent).toEqual('Snoozed until Feb 1');
     });
 
     test('snooze is disabled for SIEM rules', async () => {

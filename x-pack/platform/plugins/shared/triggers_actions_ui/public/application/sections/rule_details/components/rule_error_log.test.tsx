@@ -276,9 +276,7 @@ describe('rule_error_log', () => {
 
     await userEvent.click(screen.getByTestId('superDatePickerToggleQuickMenuButton'));
 
-    await userEvent.click(
-      screen.getByTestId('superDatePickerCommonlyUsed_Last_15 minutes')
-    );
+    await userEvent.click(screen.getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
 
     await waitFor(() =>
       expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(

@@ -87,7 +87,9 @@ describe('ResilientParamsFields renders', () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
     render(<ResilientParamsFields {...defaultProps} />);
     // EUI ComboBox renders a loading spinner when isLoading is true
-    expect(screen.getByTestId('incidentTypeComboBox').querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('incidentTypeComboBox').querySelector('.euiLoadingSpinner')
+    ).toBeInTheDocument();
   });
 
   test('it shows loading when loading severity', () => {

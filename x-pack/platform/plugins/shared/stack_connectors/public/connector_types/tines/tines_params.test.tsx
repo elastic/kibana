@@ -319,11 +319,19 @@ describe('TinesParamsFields renders', () => {
       expect(screen.queryByTestId('tines-bodyJsonEditor')).not.toBeInTheDocument();
       expect(screen.getByTestId('tines-storySelector')).toBeInTheDocument();
       expect(
-        (within(screen.getByTestId('tines-storySelector')).getByRole('combobox') as HTMLInputElement).value
+        (
+          within(screen.getByTestId('tines-storySelector')).getByRole(
+            'combobox'
+          ) as HTMLInputElement
+        ).value
       ).toBe(story.name);
       expect(screen.getByTestId('tines-webhookSelector')).toBeInTheDocument();
       expect(
-        (within(screen.getByTestId('tines-webhookSelector')).getByRole('combobox') as HTMLInputElement).value
+        (
+          within(screen.getByTestId('tines-webhookSelector')).getByRole(
+            'combobox'
+          ) as HTMLInputElement
+        ).value
       ).toBe(webhook.name);
 
       expect(screen.queryByTestId('tines-fallbackCallout')).not.toBeInTheDocument();
@@ -479,9 +487,9 @@ describe('TinesParamsFields renders', () => {
         );
         expect(screen.queryByTestId('tines-fallbackCallout')).not.toBeInTheDocument();
         expect(screen.getByTestId('tines-webhookUrlInput')).toBeInTheDocument();
-        expect(
-          (screen.getByTestId('tines-webhookUrlInput') as HTMLInputElement).value
-        ).toBe(webhookUrl);
+        expect((screen.getByTestId('tines-webhookUrlInput') as HTMLInputElement).value).toBe(
+          webhookUrl
+        );
       });
 
       it('should render webhook url fallback when stories request has error', () => {

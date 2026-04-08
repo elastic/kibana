@@ -385,69 +385,69 @@ describe('action_form', () => {
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
     const result = render(
       <I18nProvider>
-      <QueryClientProvider client={new QueryClient()}>
-        <ActionForm
-          actions={initialAlert.actions}
-          messageVariables={{
-            params: [
-              { name: 'testVar1', description: 'test var1' },
-              { name: 'testVar2', description: 'test var2' },
-            ],
-            state: [],
-            context: [{ name: 'contextVar', description: 'context var1' }],
-          }}
-          featureId="alerting"
-          producerId="alerting"
-          defaultActionGroupId={'default'}
-          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
-            const recoveryActionGroupId = customRecoveredActionGroup
-              ? customRecoveredActionGroup
-              : 'recovered';
-            return isActionGroupDisabledForActionTypeId(
-              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
-              actionTypeId
-            );
-          }}
-          setActionIdByIndex={(id: string, index: number) => {
-            initialAlert.actions[index].id = id;
-          }}
-          actionGroups={[
-            { id: 'default', name: 'Default', defaultActionMessage },
-            {
-              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
-              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
-            },
-          ]}
-          setActionGroupIdByIndex={(group: string, index: number) => {
-            initialAlert.actions[index].group = group;
-          }}
-          setActions={(_updatedActions: RuleUiAction[]) => {}}
-          setActionParamsProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-          }
-          setActionFrequencyProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = {
-              ...initialAlert.actions[index],
-              frequency: {
-                ...initialAlert.actions[index].frequency!,
-                [key]: value,
+        <QueryClientProvider client={new QueryClient()}>
+          <ActionForm
+            actions={initialAlert.actions}
+            messageVariables={{
+              params: [
+                { name: 'testVar1', description: 'test var1' },
+                { name: 'testVar2', description: 'test var2' },
+              ],
+              state: [],
+              context: [{ name: 'contextVar', description: 'context var1' }],
+            }}
+            featureId="alerting"
+            producerId="alerting"
+            defaultActionGroupId={'default'}
+            isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+              const recoveryActionGroupId = customRecoveredActionGroup
+                ? customRecoveredActionGroup
+                : 'recovered';
+              return isActionGroupDisabledForActionTypeId(
+                actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+                actionTypeId
+              );
+            }}
+            setActionIdByIndex={(id: string, index: number) => {
+              initialAlert.actions[index].id = id;
+            }}
+            actionGroups={[
+              { id: 'default', name: 'Default', defaultActionMessage },
+              {
+                id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+                name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
               },
-            })
-          }
-          setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = {
-              ...initialAlert.actions[index],
-              alertsFilter: {
-                ...initialAlert.actions[index].alertsFilter,
-                [key]: value,
-              },
-            })
-          }
-          actionTypeRegistry={actionTypeRegistry}
-          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          ruleTypeId=".es-query"
-        />
-      </QueryClientProvider>
+            ]}
+            setActionGroupIdByIndex={(group: string, index: number) => {
+              initialAlert.actions[index].group = group;
+            }}
+            setActions={(_updatedActions: RuleUiAction[]) => {}}
+            setActionParamsProperty={(key: string, value: any, index: number) =>
+              (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+            }
+            setActionFrequencyProperty={(key: string, value: any, index: number) =>
+              (initialAlert.actions[index] = {
+                ...initialAlert.actions[index],
+                frequency: {
+                  ...initialAlert.actions[index].frequency!,
+                  [key]: value,
+                },
+              })
+            }
+            setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+              (initialAlert.actions[index] = {
+                ...initialAlert.actions[index],
+                alertsFilter: {
+                  ...initialAlert.actions[index].alertsFilter,
+                  [key]: value,
+                },
+              })
+            }
+            actionTypeRegistry={actionTypeRegistry}
+            setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+            ruleTypeId=".es-query"
+          />
+        </QueryClientProvider>
       </I18nProvider>
     );
 
@@ -582,7 +582,9 @@ describe('action_form', () => {
       await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
       // Options render in a portal (EuiComboBox), use document to find them
       await waitFor(() => {
-        const connectorOptions = document.querySelectorAll('[data-test-subj^="dropdown-connector-"]');
+        const connectorOptions = document.querySelectorAll(
+          '[data-test-subj^="dropdown-connector-"]'
+        );
         expect(connectorOptions.length).toEqual(numConnectors - numConnectorsWithMissingSecrets);
       });
     });
@@ -616,7 +618,9 @@ describe('action_form', () => {
       );
       // Confirm the selected connector is test3 (Preconfigured Only), not test4
       expect(within(combobox).getByRole('combobox')).toHaveValue('Preconfigured Only');
-      expect(document.querySelector('[data-test-subj="dropdown-connector-test4"]')).not.toBeInTheDocument();
+      expect(
+        document.querySelector('[data-test-subj="dropdown-connector-test4"]')
+      ).not.toBeInTheDocument();
     });
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {
@@ -680,18 +684,14 @@ describe('action_form', () => {
     it(`does not render beta badge when isExperimental=undefined`, async () => {
       await setup();
       await waitFor(() => {
-        expect(
-          screen.queryByTestId('action-type-form-beta-badge')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('action-type-form-beta-badge')).not.toBeInTheDocument();
       });
     });
 
     it(`does not render beta badge when isExperimental=false`, async () => {
       await setup(undefined, undefined, false);
       await waitFor(() => {
-        expect(
-          screen.queryByTestId('action-type-form-beta-badge')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('action-type-form-beta-badge')).not.toBeInTheDocument();
       });
     });
 
@@ -723,14 +723,10 @@ describe('action_form', () => {
     });
 
     it('allows multiple instances of workflows system action', async () => {
-      await setup([
-        { id: 'system-connector-.workflows', actionTypeId: '.workflows', params: {} },
-      ]);
+      await setup([{ id: 'system-connector-.workflows', actionTypeId: '.workflows', params: {} }]);
 
       await screen.findByTestId('.workflows-alerting-ActionTypeSelectOption');
-      expect(
-        screen.getByTestId('.workflows-alerting-ActionTypeSelectOption')
-      ).not.toBeDisabled();
+      expect(screen.getByTestId('.workflows-alerting-ActionTypeSelectOption')).not.toBeDisabled();
     });
   });
 });

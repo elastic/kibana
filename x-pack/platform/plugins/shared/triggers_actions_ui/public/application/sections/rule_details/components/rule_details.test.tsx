@@ -654,8 +654,12 @@ describe('rule_details', () => {
           </IntlProvider>
         </QueryClientProvider>
       );
-      await waitFor(() => expect(screen.queryByTestId('actionWithBrokenConnector')).not.toBeInTheDocument());
-      expect(screen.queryByTestId('actionWithBrokenConnectorWarningBanner')).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.queryByTestId('actionWithBrokenConnector')).not.toBeInTheDocument()
+      );
+      expect(
+        screen.queryByTestId('actionWithBrokenConnectorWarningBanner')
+      ).not.toBeInTheDocument();
     });
 
     it('should render broken connector indicator and warning if any rule actions connector does not exist', async () => {
@@ -739,7 +743,9 @@ describe('rule_details', () => {
         </QueryClientProvider>
       );
       await screen.findByTestId('actionWithBrokenConnectorWarningBanner');
-      expect(screen.queryByTestId('actionWithBrokenConnectorWarningBannerEdit')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionWithBrokenConnectorWarningBannerEdit')
+      ).not.toBeInTheDocument();
     });
   });
 

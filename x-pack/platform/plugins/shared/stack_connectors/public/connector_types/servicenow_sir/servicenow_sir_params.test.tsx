@@ -362,13 +362,48 @@ describe('ServiceNowSIRParamsFields renders', () => {
 
   describe('UI updates', () => {
     const simpleFields = [
-      { dataTestSubj: 'short_descriptionInput', key: 'short_description', changeValue: 'Bug', fieldType: 'text' as const },
-      { dataTestSubj: 'correlation_idInput', key: 'correlation_id', changeValue: 'Bug', fieldType: 'text' as const },
-      { dataTestSubj: 'correlation_displayInput', key: 'correlation_display', changeValue: 'Bug', fieldType: 'text' as const },
-      { dataTestSubj: 'descriptionTextArea', key: 'description', changeValue: 'Bug', fieldType: 'text' as const },
-      { dataTestSubj: 'prioritySelect', key: 'priority', changeValue: '1', fieldType: 'select' as const },
-      { dataTestSubj: 'categorySelect', key: 'category', changeValue: 'Denial of Service', fieldType: 'select' as const },
-      { dataTestSubj: 'subcategorySelect', key: 'subcategory', changeValue: '12', fieldType: 'select' as const },
+      {
+        dataTestSubj: 'short_descriptionInput',
+        key: 'short_description',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
+      },
+      {
+        dataTestSubj: 'correlation_idInput',
+        key: 'correlation_id',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
+      },
+      {
+        dataTestSubj: 'correlation_displayInput',
+        key: 'correlation_display',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
+      },
+      {
+        dataTestSubj: 'descriptionTextArea',
+        key: 'description',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
+      },
+      {
+        dataTestSubj: 'prioritySelect',
+        key: 'priority',
+        changeValue: '1',
+        fieldType: 'select' as const,
+      },
+      {
+        dataTestSubj: 'categorySelect',
+        key: 'category',
+        changeValue: 'Denial of Service',
+        fieldType: 'select' as const,
+      },
+      {
+        dataTestSubj: 'subcategorySelect',
+        key: 'subcategory',
+        changeValue: '12',
+        fieldType: 'select' as const,
+      },
     ];
 
     simpleFields.forEach((field) =>

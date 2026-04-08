@@ -111,9 +111,9 @@ describe('IndexParamsFields renders', () => {
     expect(screen.queryByTestId('documentsJsonEditor')).not.toBeInTheDocument();
     expect(screen.queryByTestId('documentsAddVariableButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('preconfiguredIndexToUse')).toBeInTheDocument();
-    expect(
-      (screen.getByTestId('preconfiguredIndexToUse') as HTMLInputElement).value
-    ).toBe('default');
+    expect((screen.getByTestId('preconfiguredIndexToUse') as HTMLInputElement).value).toBe(
+      'default'
+    );
     expect(screen.getByTestId('preconfiguredDocumentToIndex')).toBeInTheDocument();
   });
 
@@ -142,9 +142,9 @@ describe('IndexParamsFields renders', () => {
     expect(screen.queryByTestId('documentsJsonEditor')).not.toBeInTheDocument();
     expect(screen.queryByTestId('documentsAddVariableButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('preconfiguredIndexToUse')).toBeInTheDocument();
-    expect(
-      (screen.getByTestId('preconfiguredIndexToUse') as HTMLInputElement).value
-    ).toBe('not-the-default');
+    expect((screen.getByTestId('preconfiguredIndexToUse') as HTMLInputElement).value).toBe(
+      'not-the-default'
+    );
     expect(screen.getByTestId('preconfiguredDocumentToIndex')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('resetDefaultIndex'));
