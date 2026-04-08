@@ -103,11 +103,11 @@ export function createRuleEvaluateDataset({
     createIntegrationMatchEvaluator(),
     createPrebuiltRuleMatchEvaluator(),
     createUnsupportedPatternDetectionEvaluator(),
+    createTranslationResultEvaluator(),
     createHallucinationDetectionEvaluator(evaluators),
   ];
 
   const qradarEvaluators: Array<Evaluator<RuleExample, RuleMigrationResult>> = [
-    createTranslationResultEvaluator(),
     createNlDescriptionFaithfulnessEvaluator(evaluators),
   ];
 

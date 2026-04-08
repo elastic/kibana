@@ -122,6 +122,10 @@ export class RuleMigrationClient {
       })) as GetRulesResponse;
 
       const rules: MigratedRule[] = rulesResponse.data ?? [];
+      if (rules.length === 0) {
+        throw new Error(`Migration ${migrationId} completed but returned no rules`);
+      }
+
       this.log.info(
         `[RuleMigrationClient] Fetched ${rules.length} rule(s) for migration ${migrationId}`
       );
