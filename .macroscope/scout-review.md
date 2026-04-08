@@ -23,9 +23,14 @@ conclusion: neutral
 
 Review this PR for compliance with Kibana Scout test best practices.
 
-Only review files that are Scout test code: files under `**/test/scout*/**` paths (spec files, fixtures, page objects, API services, constants, global setup hooks). Skip all other changed files entirely.
+Only review files that are:
 
-If no Scout test files were changed in this PR, report "No Scout test files in this PR — nothing to review" and conclude with no comments.
+1. **Scout test code**: files under `**/test/scout*/**` paths (spec files, fixtures, page objects, API services, constants, global setup hooks).
+2. **Scout packages**: files under `**/kbn-scout*/**` (the core framework and solution-specific Scout packages).
+
+Skip all other changed files entirely.
+
+If no matching files were changed in this PR, report "No Scout files in this PR — nothing to review" and conclude with no comments.
 
 ## Best practices reference
 
