@@ -126,15 +126,15 @@ export default function (providerContext: FtrProviderContext) {
     }
 
     // -------------------------------------------------------------------------
-    // Test 1 (OTLP scenario): dynamic_signal_types: true → NO dataset override
+    // Test 1 (OTLP scenario): dynamic_signal_types: true → dataset set from package default
     // -------------------------------------------------------------------------
-    it('does not set data_stream.dataset in routing transforms for dynamic_signal_types packages (OTLP scenario)', async () => {
+    it('sets data_stream.dataset to the package default (generic.otel) in routing transforms for dynamic_signal_types packages (OTLP scenario)', async () => {
       const agentPolicyId = await createAgentPolicy();
 
       try {
         // Create a package policy using the dynamic OTel package.
         // Input key: {policyTemplateName}-{inputType} = otlpreceiver-otelcol
-        // Stream key: dataset = generic.otel (set by Fleet for dynamic_signal_types packages)
+        // Stream key: dataset = generic.otel (declared as default in the package manifest var)
         await supertest
           .post('/api/fleet/package_policies')
           .set('kbn-xsrf', 'xxxx')
@@ -163,15 +163,11 @@ export default function (providerContext: FtrProviderContext) {
         for (const [_, processor] of routingProcessors) {
           const statements = collectStatements(processor);
 
-          // Must set signal type so the ES exporter can route to the correct index type.
+          // Must set signal type, dataset, and namespace in routing transforms.
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
-          // Must set namespace so data lands in the correct namespace.
           expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
-
-          // Must NOT set data_stream.dataset — routing is deferred to the ES exporter so that:
-          //   a) data with no explicit attrs lands in {signal}-generic.otel-default
-          //   b) data with explicit data_stream.* attrs is routed per those attrs
-          expect(statements.some((s) => s.includes('data_stream.dataset'))).to.be(false);
+          // dataset is now set from the package manifest default (generic.otel).
+          expect(statements.some((s) => s.includes('"generic.otel"'))).to.be(true);
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);
@@ -179,13 +175,13 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // -------------------------------------------------------------------------
-    // Test 2: explicit data_stream.dataset var on dynamic package → still no override
+    // Test 2: explicit data_stream.dataset var on dynamic package → dataset IS set
     //
-    // Even if the user overrides data_stream.dataset via the package policy variable,
-    // Fleet must not hard-code that value in the OTTL routing transform. The ES exporter
-    // handles dataset routing for dynamic_signal_types packages.
+    // When the user overrides data_stream.dataset via the package policy variable,
+    // Fleet must embed that value in the OTTL routing transform so data is routed
+    // to the user-specified dataset instead of the package default.
     // -------------------------------------------------------------------------
-    it('does not set data_stream.dataset in routing transforms even when the user provides a custom dataset var', async () => {
+    it('sets data_stream.dataset in routing transforms when the user provides a custom dataset var', async () => {
       const agentPolicyId = await createAgentPolicy();
 
       try {
@@ -218,7 +214,7 @@ export default function (providerContext: FtrProviderContext) {
 
         for (const [, processor] of routingProcessors) {
           const statements = collectStatements(processor);
-          expect(statements.some((s) => s.includes('data_stream.dataset'))).to.be(false);
+          expect(statements.some((s) => s.includes('"custom.dataset"'))).to.be(true);
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);

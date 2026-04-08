@@ -22,9 +22,9 @@ policy_templates:
         default: generic.otel
         title: Dataset name
         description: >
-          Set the name for your dataset. For dynamic_signal_types packages this
-          value is intentionally not embedded in the OTTL routing transform —
-          routing is deferred to the ES exporter.
+          Set the name for your dataset. Defaults to generic.otel which routes all signals
+          to the shared generic data streams. Override to isolate this package's data
+          into named data streams.
         type: text
 owner:
   github: elastic/fleet

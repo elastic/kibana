@@ -201,7 +201,7 @@ function generateOtelTypeTransforms(
     case 'traces':
       return {
         trace_statements: [
-          { context: 'span', statements: buildDataStreamStatements('traces', null, namespace) },
+          { context: 'span', statements: buildDataStreamStatements('traces', dataset, namespace) },
           {
             context: 'spanevent',
             statements: buildDataStreamStatements('logs', null, namespace),
@@ -246,11 +246,8 @@ function generateOTelAttributesTransform(
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && signalTypes) {
-    // When dynamic_signal_types is true, do not override data_stream.dataset — defer to the ES
-    // exporter's routing logic (scope.name, explicit data_stream.* attrs, or generic.otel default).
-    // Only set type and namespace so signals land in the correct namespace.
     signalTypes.forEach((signalType) => {
-      const typeTransforms = generateOtelTypeTransforms(signalType, null, namespace);
+      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
       Object.assign(transformStatements, typeTransforms);
     });
   } else {
