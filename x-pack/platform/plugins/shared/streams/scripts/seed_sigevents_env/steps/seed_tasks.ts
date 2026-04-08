@@ -16,20 +16,18 @@ const QUERIES_TASK_TYPE = 'streams_significant_events_queries_generation';
 const ONBOARDING_TASK_TYPE = 'streams_onboarding';
 const INSIGHTS_TASK_TYPE = 'streams_insights_discovery';
 
-/** Returns the canonical task doc IDs for a given stream. Single source of truth for both
+/** Returns the per-stream task doc IDs. Single source of truth for both
  *  seedTasks (which creates them) and cleanTasks (which deletes them).
  *
- *  ID conventions mirror the live system:
- *  - Features, queries, onboarding: per-stream (`${type}_${streamName}`)
- *  - Insights: global singleton — `INSIGHTS_TASK_TYPE` is used as both type and ID,
- *    with no stream-name suffix (see route.ts: taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE).
+ *  ID conventions mirror the live system: features, queries, and onboarding
+ *  are per-stream (`${type}_${streamName}`). The insights task is a global
+ *  singleton handled separately — see `INSIGHTS_TASK_TYPE` usages below.
  */
-function taskDocIds(streamName: string): string[] {
+function streamTaskDocIds(streamName: string): string[] {
   return [
     `${FEATURES_TASK_TYPE}_${streamName}`,
     `${QUERIES_TASK_TYPE}_${streamName}`,
     `${ONBOARDING_TASK_TYPE}_${streamName}`,
-    INSIGHTS_TASK_TYPE,
   ];
 }
 
@@ -130,7 +128,9 @@ function buildTaskDocs(
 
   const tokensZero = { prompt: 0, completion: 0 };
 
-  const [featuresId, queriesId, onboardingId, insightsId] = taskDocIds(ctx.streamName);
+  const [featuresId, queriesId, onboardingId] = streamTaskDocIds(ctx.streamName);
+  // The insights task is a global singleton — its ID is the type itself (no stream suffix).
+  const insightsId = INSIGHTS_TASK_TYPE;
 
   return [
     baseTask(
@@ -197,8 +197,13 @@ export async function cleanTasks(
   log: ToolingLog
 ): Promise<void> {
   await withTempSuperuser(esClient, ctx, log, async (sysClient) => {
+    // Per-stream task docs + the global insights singleton. The insights task is deleted
+    // here because this seeder manages a single stream at a time and re-seeding recreates
+    // it. If multi-stream support is added, the insights task deletion should be guarded
+    // to only run when all seeded streams are being cleaned simultaneously.
+    const ids = [...streamTaskDocIds(ctx.streamName), INSIGHTS_TASK_TYPE];
     await Promise.all(
-      taskDocIds(ctx.streamName).map(async (id) => {
+      ids.map(async (id) => {
         try {
           await sysClient.delete({
             index: '.kibana_streams_tasks',
