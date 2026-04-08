@@ -38,6 +38,10 @@ export interface UserSettingsData {
   darkMode?: DarkModeValue;
   contrastMode?: ContrastModeValue;
   solutionNavOptOut?: boolean;
+  /**
+   * JSON-encoded `Record<spaceId, boolean>`: whether the Agent Builder announcement modal was dismissed in that space (per user).
+   */
+  agentBuilderAnnouncementModalSeenBySpaceJson?: string;
 }
 
 export interface UserProfileData {

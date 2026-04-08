@@ -86,6 +86,18 @@ describe('Update profile routes', () => {
         avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
         userSettings: { darkMode: 'dark', contrastMode: 'high' },
       });
+
+      expect(
+        bodySchema.validate({
+          userSettings: {
+            agentBuilderAnnouncementModalSeenBySpaceJson: '{"default":true}',
+          },
+        })
+      ).toEqual({
+        userSettings: {
+          agentBuilderAnnouncementModalSeenBySpaceJson: '{"default":true}',
+        },
+      });
     });
 
     it('rejects invalid darkMode enum values.', () => {

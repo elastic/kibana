@@ -87,8 +87,6 @@ export const generateConfig = async ({
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
-        // Suppress Agent Builder announcement modal in tests.
-        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
         ...kbnServerArgs,
       ],
     },
