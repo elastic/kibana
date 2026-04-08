@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import moment from 'moment-timezone';
 import React from 'react';
@@ -116,7 +116,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
         ...transformListRow.config,
         source: {
           ...transformListRow.config.source,
-          index: ['source-a', 'source-b'],
+          index: ['source-a', 'source-b', 'source-c'],
         },
       },
     } as unknown as TransformListRow;
@@ -124,7 +124,14 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
     expect(screen.getByText('source_index')).toBeInTheDocument();
-    expect(screen.getByText('source-a, source-b')).toBeInTheDocument();
+    expect(screen.getByText('source-a')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('transformSourceIndexBadge'));
+
+    const popover = screen.getByTestId('transformSourceIndexPopover');
+    expect(popover).toBeInTheDocument();
+    expect(within(popover).getByText('source-a')).toBeInTheDocument();
+    expect(within(popover).getByText('source-b')).toBeInTheDocument();
+    expect(within(popover).getByText('source-c')).toBeInTheDocument();
   });
 
   test('shows error callout when extended stats request fails', () => {

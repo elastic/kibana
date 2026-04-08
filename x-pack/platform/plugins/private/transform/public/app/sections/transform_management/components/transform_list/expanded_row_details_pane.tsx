@@ -6,10 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiPopover, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
@@ -39,6 +39,53 @@ interface ExpandedRowDetailsPaneProps {
   item: TransformListRow;
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
+
+export const SourceIndexDescription: FC<{ index: string | string[] }> = ({ index }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (!Array.isArray(index)) {
+    return index;
+  }
+  if (Array.isArray(index) && index.length === 1) {
+    return index[0];
+  }
+
+  return (
+    <>
+      {index[0]}{' '}
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        aria-label={i18n.translate(
+          'xpack.transform.transformList.transformDetails.sourceIndex.popoverLabel',
+          { defaultMessage: 'Source indices' }
+        )}
+        anchorPosition="downLeft"
+        panelPaddingSize="s"
+        button={
+          <EuiBadge
+            data-test-subj="transformSourceIndexBadge"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            onClickAriaLabel={i18n.translate(
+              'xpack.transform.transformList.transformDetails.sourceIndex.showAllLabel',
+              { defaultMessage: 'Show all source indices' }
+            )}
+          >
+            +{index.length - 1}
+          </EuiBadge>
+        }
+      >
+        <EuiText size="s" data-test-subj="transformSourceIndexPopover">
+          <ul>
+            {index.map((sourceIndex, i) => (
+              <li key={`${sourceIndex}-${i}`}>{sourceIndex}</li>
+            ))}
+          </ul>
+        </EuiText>
+      </EuiPopover>
+    </>
+  );
+};
 
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, onAlertEdit }) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
@@ -81,9 +128,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
       },
       {
         title: 'source_index',
-        description: Array.isArray(item.config.source.index)
-          ? item.config.source.index.join(', ')
-          : item.config.source.index,
+        description: <SourceIndexDescription index={item.config.source.index} />,
       },
       {
         title: 'destination_index',
