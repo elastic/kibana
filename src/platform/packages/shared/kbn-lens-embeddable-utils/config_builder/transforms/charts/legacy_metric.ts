@@ -43,8 +43,10 @@ import {
   getDatasourceLayers,
 } from './utils';
 import {
+  AUTO_COLOR,
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
+  isAutoColor,
   isColorByValueAbsolute,
 } from '../coloring';
 import { isEsqlTableTypeDataSource } from '../../utils';
@@ -64,7 +66,9 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     ...(layer.metric.apply_color_to && layer.metric.color
       ? {
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
-          palette: fromColorByValueAPIToLensState(layer.metric.color),
+          palette: !isAutoColor(layer.metric.color)
+            ? fromColorByValueAPIToLensState(layer.metric.color)
+            : undefined,
         }
       : { colorMode: 'None' }),
   };
@@ -119,13 +123,13 @@ function reverseBuildVisualizationState(
       }
     }
 
-    if (visualization.colorMode && visualization.colorMode !== 'None' && visualization.palette) {
+    if (visualization.colorMode && visualization.colorMode !== 'None') {
       props.metric.apply_color_to =
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (isColorByValueAbsolute(colorByValue)) {
-        props.metric.color = colorByValue;
+      const color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+      if (isColorByValueAbsolute(color) || isAutoColor(color)) {
+        props.metric.color = color;
       }
     }
   }
