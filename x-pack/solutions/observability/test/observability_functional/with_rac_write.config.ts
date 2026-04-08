@@ -58,7 +58,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--uiSettings.overrides.agentBuilder:announcementModalSeen=true',
         '--xpack.cloud.id=ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=',
         '--xpack.cloud.base_url=https://cloud.elastic.co',
         '--xpack.spaces.allowSolutionVisibility=true',

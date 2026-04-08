@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { SECURITY_AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 
@@ -26,15 +26,16 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.setSolutionView('classic');
-      await scoutSpace.uiSettings.unset(AI_CHAT_EXPERIENCE_TYPE);
+      await scoutSpace.uiSettings.unset(SECURITY_AI_CHAT_EXPERIENCE_TYPE);
     });
 
     spaceTest('should show Agent as default and display Agent UI', async ({ pageObjects }) => {
       await spaceTest.step(
-        'verify Agent is the default Chat Experience for Security space',
+        'verify Agent is the default Security Chat Experience for Security space',
         async () => {
-          const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-          await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
+          const securityChatExperienceField =
+            pageObjects.genAiSettings.getSecurityChatExperienceField();
+          await expect(securityChatExperienceField).toHaveValue(AIChatExperience.Agent);
         }
       );
 
@@ -56,14 +57,19 @@ spaceTest.describe(
     });
 
     spaceTest('should switch to Classic mode from Agent default', async ({ pageObjects }) => {
-      await spaceTest.step('verify Agent is the default Chat Experience', async () => {
-        const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
-      });
+      await spaceTest.step(
+        'verify Agent is the default Security Chat Experience for Security space',
+        async () => {
+          const securityChatExperienceField =
+            pageObjects.genAiSettings.getSecurityChatExperienceField();
+          await expect(securityChatExperienceField).toHaveValue(AIChatExperience.Agent);
+        }
+      );
 
       await spaceTest.step('switch to Classic mode', async () => {
-        const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await chatExperienceField.selectOption({ value: AIChatExperience.Classic });
+        const securityChatExperienceField =
+          pageObjects.genAiSettings.getSecurityChatExperienceField();
+        await securityChatExperienceField.selectOption({ value: AIChatExperience.Classic });
       });
 
       await spaceTest.step('save settings and wait for reload', async () => {

@@ -695,6 +695,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'aiAssistant:securityPreferredChatExperience': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:searchExcludedDataTiers': {
     type: 'array',
     items: {

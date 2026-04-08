@@ -30,36 +30,26 @@ spaceTest.describe(
       await scoutSpace.uiSettings.unset(AI_CHAT_EXPERIENCE_TYPE);
     });
 
-    spaceTest(
-      'should show Agent mode as default and display Agent button',
-      async ({ pageObjects }) => {
-        await spaceTest.step('verify Agent is the default chat experience', async () => {
-          const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-          await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
-        });
-
-        await spaceTest.step('verify Agent Builder nav button is visible', async () => {
-          const aiAgentNavControlButton = pageObjects.genAiSettings.getAIAgentNavButton();
-          await expect(aiAgentNavControlButton).toBeVisible();
-        });
-
-        await spaceTest.step('verify Agent mode is persisted after reload', async () => {
-          await pageObjects.genAiSettings.navigateTo();
-          const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-          await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
-        });
-      }
-    );
-
-    spaceTest('should switch to Classic mode from Agent default', async ({ pageObjects }) => {
-      await spaceTest.step('verify Agent is the default chat experience', async () => {
+    spaceTest('should switch to Agent mode and show Agent button', async ({ pageObjects }) => {
+      await spaceTest.step('verify current chat experience is Classic', async () => {
         const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
+        await expect(chatExperienceField).toHaveValue(AIChatExperience.Classic);
       });
 
-      await spaceTest.step('select Classic from dropdown', async () => {
+      await spaceTest.step('select Agent from dropdown', async () => {
         const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await chatExperienceField.selectOption({ value: AIChatExperience.Classic });
+        await chatExperienceField.selectOption({ value: AIChatExperience.Agent });
+      });
+
+      await spaceTest.step('confirm Agent selection in modal', async () => {
+        const confirmationModal = pageObjects.genAiSettings.getConfirmModal();
+        await expect(confirmationModal).toBeVisible();
+        await pageObjects.genAiSettings.getConfirmModalConfirmButton().click();
+      });
+
+      await spaceTest.step('verify Agent is selected in dropdown', async () => {
+        const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
+        await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
       });
 
       await spaceTest.step('save settings and wait for reload', async () => {
@@ -69,14 +59,14 @@ spaceTest.describe(
         await pageObjects.genAiSettings.waitForPageToLoad();
       });
 
-      await spaceTest.step('verify Classic mode is persisted after reload', async () => {
+      await spaceTest.step('verify Agent mode is persisted after reload', async () => {
         const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await expect(chatExperienceField).toHaveValue(AIChatExperience.Classic);
+        await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
       });
 
-      await spaceTest.step('verify Agent Builder nav button is hidden', async () => {
+      await spaceTest.step('verify Agent Builder nav button is visible', async () => {
         const aiAgentNavControlButton = pageObjects.genAiSettings.getAIAgentNavButton();
-        await expect(aiAgentNavControlButton).toBeHidden();
+        await expect(aiAgentNavControlButton).toBeVisible();
       });
     });
   }

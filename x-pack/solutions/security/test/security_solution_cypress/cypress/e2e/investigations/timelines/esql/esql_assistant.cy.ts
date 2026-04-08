@@ -32,7 +32,7 @@ describe(
       ftrConfig: {
         license: 'trial',
         kbnServerArgs: [
-          '--uiSettings.overrides.aiAssistant:preferredChatExperience=classic',
+          '--uiSettings.overrides.aiAssistant:securityPreferredChatExperience=classic',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'preconfigured-openai': {
               name: 'preconfigured-openai',

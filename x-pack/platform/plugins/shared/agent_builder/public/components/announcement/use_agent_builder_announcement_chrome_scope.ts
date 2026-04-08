@@ -10,12 +10,10 @@ import useObservable from 'react-use/lib/useObservable';
 import type { CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
-const STREAMS_APP_ID = 'streams';
-
 /**
- * True when the user is in an Observability- or Security-oriented navigation context:
- * - Project / serverless: active chrome solution is `oblt` or `security`
- * - Classic: current app category is observability or security, or the Streams app (management category)
+ * True when the user is in a Security-oriented navigation context:
+ * - Project / serverless: active chrome solution is `security`
+ * - Classic: current app category is security
  */
 export function useAgentBuilderAnnouncementChromeScope(core: CoreStart): boolean {
   const solutionNavId = useObservable(
@@ -26,7 +24,7 @@ export function useAgentBuilderAnnouncementChromeScope(core: CoreStart): boolean
   const applications = useObservable(core.application.applications$, new Map());
 
   return useMemo(() => {
-    if (solutionNavId === 'oblt' || solutionNavId === 'security') {
+    if (solutionNavId === 'security') {
       return true;
     }
     if (solutionNavId != null) {
@@ -35,14 +33,8 @@ export function useAgentBuilderAnnouncementChromeScope(core: CoreStart): boolean
     if (!currentAppId) {
       return false;
     }
-    if (currentAppId === STREAMS_APP_ID) {
-      return true;
-    }
     const app = applications.get(currentAppId);
     const categoryId = app?.category?.id;
-    return (
-      categoryId === DEFAULT_APP_CATEGORIES.observability.id ||
-      categoryId === DEFAULT_APP_CATEGORIES.security.id
-    );
+    return categoryId === DEFAULT_APP_CATEGORIES.security.id;
   }, [solutionNavId, currentAppId, applications]);
 }

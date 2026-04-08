@@ -7,7 +7,7 @@
 
 import {
   SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
-  AI_CHAT_EXPERIENCE_TYPE,
+  SECURITY_AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 import { EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from './common';
@@ -29,11 +29,11 @@ export const disableRelatedIntegrations = () => {
 };
 
 export const setPreferredChatExperienceToAgent = () => {
-  setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'agent');
+  setKibanaSetting(SECURITY_AI_CHAT_EXPERIENCE_TYPE, 'agent');
 };
 
 export const setPreferredChatExperienceToClassic = () => {
-  setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'classic');
+  setKibanaSetting(SECURITY_AI_CHAT_EXPERIENCE_TYPE, 'classic');
 };
 
 export const setExtendedRuleExecutionLoggingMinLevel = (level: string) => {

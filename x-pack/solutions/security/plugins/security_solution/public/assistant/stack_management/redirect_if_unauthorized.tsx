@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { SECURITY_AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
 export function RedirectIfUnauthorized({
   coreStart,
@@ -23,8 +23,8 @@ export function RedirectIfUnauthorized({
   } = coreStart;
 
   const chatExperience = coreStart.settings.client.get<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    SECURITY_AI_CHAT_EXPERIENCE_TYPE,
+    AIChatExperience.Agent
   );
 
   const securityAIAssistantEnabled =

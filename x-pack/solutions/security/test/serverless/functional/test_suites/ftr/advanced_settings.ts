@@ -15,6 +15,7 @@ import {
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   AI_CHAT_EXPERIENCE_TYPE,
+  SECURITY_AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
@@ -35,6 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
     AI_CHAT_EXPERIENCE_TYPE,
+    SECURITY_AI_CHAT_EXPERIENCE_TYPE,
     AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
     SECURITY_SOLUTION_EXCLUDED_GAP_REASONS_KEY,
   ];

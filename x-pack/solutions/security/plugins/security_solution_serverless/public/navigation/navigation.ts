@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { SECURITY_AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { ProductLine } from '../../common/product';
@@ -25,8 +25,8 @@ export const registerSolutionNavigation = async (
   );
 
   const chatExperience$ = services.settings.client.get$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    SECURITY_AI_CHAT_EXPERIENCE_TYPE,
+    AIChatExperience.Agent
   );
 
   // Get initial chat experience for setting initial navigation tree

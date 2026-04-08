@@ -20,6 +20,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
+  SECURITY_AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 
@@ -74,6 +75,11 @@ describe('GenAiSettingsApp', () => {
     },
     [AI_CHAT_EXPERIENCE_TYPE]: {
       value: AIChatExperience.Classic,
+      type: 'select',
+      options: [AIChatExperience.Classic, AIChatExperience.Agent],
+    },
+    [SECURITY_AI_CHAT_EXPERIENCE_TYPE]: {
+      value: AIChatExperience.Agent,
       type: 'select',
       options: [AIChatExperience.Classic, AIChatExperience.Agent],
     },
@@ -366,6 +372,18 @@ describe('GenAiSettingsApp', () => {
       ).toBeInTheDocument();
     });
 
+    it('should render security chat experience setting section when showChatExperienceSetting is true', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      renderComponent();
+
+      expect(
+        await screen.findByTestId(
+          'management-settings-editField-aiAssistant:securityPreferredChatExperience'
+        )
+      ).toBeInTheDocument();
+    });
+
     it('should not render chat experience setting section when showChatExperienceSetting is false', () => {
       mockUseEnabledFeatures.mockReturnValue(
         createFeatureFlagsMock({ showChatExperienceSetting: false })
@@ -375,6 +393,11 @@ describe('GenAiSettingsApp', () => {
 
       expect(
         screen.queryByTestId('management-settings-editField-aiAssistant:preferredChatExperience')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(
+          'management-settings-editField-aiAssistant:securityPreferredChatExperience'
+        )
       ).not.toBeInTheDocument();
     });
   });

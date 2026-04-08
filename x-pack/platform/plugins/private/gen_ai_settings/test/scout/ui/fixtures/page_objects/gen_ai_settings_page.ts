@@ -43,11 +43,20 @@ export class GenAiSettingsPage {
   }
 
   /**
-   * Get the chat experience field row element
+   * Get the chat experience field row element (global setting)
    */
   getChatExperienceField() {
     return this.page.testSubj.locator(
       'management-settings-editField-aiAssistant:preferredChatExperience'
+    );
+  }
+
+  /**
+   * Get the security chat experience field row element (security-scoped setting)
+   */
+  getSecurityChatExperienceField() {
+    return this.page.testSubj.locator(
+      'management-settings-editField-aiAssistant:securityPreferredChatExperience'
     );
   }
 

@@ -6,7 +6,7 @@
  */
 
 import { map, combineLatest } from 'rxjs';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { SECURITY_AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { type Services } from '../common/services';
@@ -16,7 +16,9 @@ import { createNavigationTree } from './navigation_tree';
 export const registerSolutionNavigation = async (services: Services) => {
   const { securitySolution, navigation } = services;
 
-  const chatExperience$ = services.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+  const chatExperience$ = services.settings.client.get$<AIChatExperience>(
+    SECURITY_AI_CHAT_EXPERIENCE_TYPE
+  );
 
   const navigationTree$ = chatExperience$.pipe(
     map((chatExperience) => createNavigationTree(services, chatExperience))

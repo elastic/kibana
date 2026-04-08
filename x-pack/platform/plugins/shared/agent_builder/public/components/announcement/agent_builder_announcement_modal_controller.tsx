@@ -13,7 +13,9 @@ import { useGlobalUiSetting, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   HIDE_ANNOUNCEMENTS_ID,
   AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID,
+  SECURITY_AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AgentBuilderAnnouncementModal } from '@kbn/agent-builder-browser';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -52,10 +54,12 @@ export function AgentBuilderAnnouncementModalController() {
         services.settings?.client
           .set(AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID, true)
           .catch(() => {});
+        services.settings?.client
+          .set(SECURITY_AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
+          .catch(() => {});
         services.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptOut, {
           source: 'agent_builder_nav_control',
         });
-        services.application.navigateToApp('management', { path: '/ai/genAiSettings' });
         setIsDismissed(true);
       }}
     />

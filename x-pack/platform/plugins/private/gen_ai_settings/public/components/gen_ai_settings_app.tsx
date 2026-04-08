@@ -36,6 +36,7 @@ import { DefaultAIConnector } from './default_ai_connector/default_ai_connector'
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
 import { ChatExperience } from './chat_experience/chat_experience';
+import { SecurityChatExperience } from './chat_experience/security_chat_experience';
 import { PrePromptWorkflowSection } from './pre_prompt_workflow_section';
 import { DocumentationSection } from './documentation';
 import { AnonymizationProfilesSection } from './anonymization_profiles_section';
@@ -432,6 +433,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               {showChatExperienceSetting && (
                 <EuiFlexItem>
                   <ChatExperience />
+                </EuiFlexItem>
+              )}
+              {showChatExperienceSetting && (
+                <EuiFlexItem>
+                  <SecurityChatExperience />
                 </EuiFlexItem>
               )}
               {showAiAssistantsVisibilitySetting && !isAgentExperience && (

@@ -29,7 +29,6 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
     esArchiver,
     kibanaServer,
     retry,
-    log,
     defaults: config.get('uiSettings.defaults'),
     globalDefaults: config.get('uiSettings.globalDefaults'),
   });

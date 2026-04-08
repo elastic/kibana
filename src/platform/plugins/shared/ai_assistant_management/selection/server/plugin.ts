@@ -26,10 +26,12 @@ import type {
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+  PREFERRED_SECURITY_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { chatExperienceSetting } from './src/settings/chat_experience_setting';
+import { securityChatExperienceSetting } from './src/settings/security_chat_experience_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -96,7 +98,7 @@ export class AIAssistantManagementSelectionPlugin
                   request
                 );
                 const solution = activeSpace?.solution;
-                if (solution === 'es' || solution === 'security' || solution === 'oblt') {
+                if (solution === 'es' || solution === 'oblt') {
                   return AIChatExperience.Agent;
                 }
                 if (solution != null) {
@@ -109,6 +111,16 @@ export class AIAssistantManagementSelectionPlugin
             }
             return this.config.preferredChatExperience ?? AIChatExperience.Agent;
           },
+        },
+      });
+
+      // Register the security-scoped chat experience setting. This controls the chat experience
+      // only within Security pages and takes precedence over the global chat experience setting.
+      // Defaults to Agent regardless of space solution.
+      core.uiSettings.register({
+        [PREFERRED_SECURITY_CHAT_EXPERIENCE_SETTING_KEY]: {
+          ...securityChatExperienceSetting,
+          value: AIChatExperience.Agent,
         },
       });
     }

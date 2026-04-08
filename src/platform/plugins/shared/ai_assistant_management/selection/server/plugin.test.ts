@@ -134,7 +134,7 @@ describe('plugin', () => {
       it.each([
         { solution: 'es', expected: AIChatExperience.Agent },
         { solution: 'oblt', expected: AIChatExperience.Agent },
-        { solution: 'security', expected: AIChatExperience.Agent },
+        { solution: 'security', expected: AIChatExperience.Classic },
         { solution: 'classic', expected: AIChatExperience.Classic },
       ])(
         'should return $expected when active space solution is "$solution"',

@@ -7,7 +7,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { SECURITY_AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
 import type { ExperimentalFeatures } from '../../../common';
 import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../common/constants';
@@ -64,8 +64,8 @@ export const getFilteredLinks = async (
   );
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    SECURITY_AI_CHAT_EXPERIENCE_TYPE,
+    AIChatExperience.Agent
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);

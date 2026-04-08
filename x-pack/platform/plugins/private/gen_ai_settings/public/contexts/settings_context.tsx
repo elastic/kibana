@@ -24,6 +24,7 @@ import {
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
+  SECURITY_AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
@@ -52,6 +53,7 @@ const SETTING_KEYS = [
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
+  SECURITY_AI_CHAT_EXPERIENCE_TYPE,
 ];
 
 export const SettingsContextProvider = ({ children }: { children: React.ReactNode }) => {
