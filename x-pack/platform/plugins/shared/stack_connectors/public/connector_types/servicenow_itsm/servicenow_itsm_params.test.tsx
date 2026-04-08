@@ -562,22 +562,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
       await userEvent.tripleClick(correlationInput);
       await userEvent.paste('updated correlation id');
 
-      // waitFor intentionally not awaited — editAction mock doesn't update actionParams,
-      // so the controlled input value doesn't change in the DOM
-      waitFor(() => {
-        expect(
-          (screen.getByTestId('correlation_idInput') as HTMLInputElement).value
-        ).toBe('updated correlation id');
-      });
-
       await userEvent.selectOptions(screen.getByTestId('eventActionSelect'), 'resolve');
-
-      // waitFor intentionally not awaited — same reason as above
-      waitFor(() => {
-        expect(
-          (screen.getByTestId('correlation_idInput') as HTMLInputElement).value
-        ).toBe('');
-      });
     });
   });
 });
