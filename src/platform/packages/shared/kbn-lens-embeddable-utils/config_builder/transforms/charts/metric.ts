@@ -470,11 +470,12 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.background_chart = { ...primaryMetric.background_chart, type: 'trend' };
     }
 
-    if (visualization.color) {
-      primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
-    } else if (visualization.palette) {
+    if (visualization.palette) {
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      primaryMetric.color = colorByValue?.range === 'absolute' ? colorByValue : AUTO_COLOR;
+      const isValidRange = state.breakdown_by || colorByValue?.range === 'absolute';
+      primaryMetric.color = colorByValue && isValidRange ? colorByValue : AUTO_COLOR;
+    } else if (visualization.color) {
+      primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
     } else {
       primaryMetric.color = AUTO_COLOR;
     }
