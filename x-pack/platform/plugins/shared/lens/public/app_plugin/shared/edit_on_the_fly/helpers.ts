@@ -133,6 +133,8 @@ export const getGridAttrs = async (
   });
 
   const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
+  // Use `all_columns` property if it exists in the payload,
+  // which has all columns regardless if they have data or not
   const displayColumns = allColumns.length > 0 ? allColumns : valueColumns;
 
   const rows = expandEsqlValuesToDisplayColumns({ displayColumns, valueColumns, values });
