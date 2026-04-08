@@ -136,7 +136,8 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
       openInDiscoverButton: page.testSubj.locator('unifiedDocViewerLogsOpenInDiscoverButton'),
       totalDocuments: page.testSubj
         .locator('unifiedDocViewerLogsSection')
-        .locator('[data-test-subj="savedSearchTotalDocuments"]'),
+        .locator('[data-test-subj="savedSearchTotalDocuments"]')
+        .locator('strong'),
     },
 
     spanLinks: {
