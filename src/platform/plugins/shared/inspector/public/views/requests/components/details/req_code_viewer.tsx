@@ -55,7 +55,7 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
                   <EuiButtonEmpty
                     size="xs"
                     flush="right"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     onClick={copy}
                     data-test-subj="inspectorRequestCopyClipboardButton"
                   >

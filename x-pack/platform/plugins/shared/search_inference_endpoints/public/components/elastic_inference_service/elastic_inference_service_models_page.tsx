@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiSpacer,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -103,16 +104,18 @@ export const ElasticInferenceServiceModelsPage = () => {
 
   return (
     <>
+      <EuiSpacer size="l" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem grow={true}>
               <EuiFieldSearch
                 placeholder={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
                   { defaultMessage: 'Search models...' }
                 )}
                 value={searchQuery}
+                fullWidth={true}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchbar',

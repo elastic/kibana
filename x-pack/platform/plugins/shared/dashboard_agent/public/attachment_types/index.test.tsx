@@ -7,6 +7,7 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
@@ -68,10 +69,12 @@ const createMockDashboardApi = (
   savedObjectId?: string
 ): DashboardApi & {
   setSavedObjectId: (id: string | undefined) => void;
+  emitSave: (event: DashboardSaveEvent) => void;
   setState: jest.Mock;
   getSerializedState: jest.Mock;
 } => {
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
+  const onSave$ = new Subject<DashboardSaveEvent>();
   const layout$ = new BehaviorSubject({});
   const title$ = new BehaviorSubject<string>('');
   const description$ = new BehaviorSubject<string | undefined>('');
@@ -93,6 +96,7 @@ const createMockDashboardApi = (
   const getSerializedState = jest.fn().mockReturnValue({ attributes: { title: '', panels: [] } });
   return {
     savedObjectId$,
+    onSave$,
     layout$,
     title$,
     description$,
@@ -107,12 +111,20 @@ const createMockDashboardApi = (
     setState,
     getSerializedState,
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
+    emitSave: (event: DashboardSaveEvent) => onSave$.next(event),
   } as unknown as DashboardApi & {
     setSavedObjectId: (id: string | undefined) => void;
+    emitSave: (event: DashboardSaveEvent) => void;
     setState: jest.Mock;
     getSerializedState: jest.Mock;
   };
 };
+
+const mockSavedDashboardState = {
+  title: 'Saved Dashboard',
+  description: '',
+  panels: [],
+} as unknown as DashboardSaveEvent['dashboardState'];
 
 const createMockAttachment = (id: string, origin?: string) => {
   let currentOrigin = origin;
@@ -169,12 +181,14 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
     return {
       agentBuilder,
+      addAttachment: mockAddAttachment,
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,
       dashboardAppClientApi$,
       addAttachmentType,
       updateAttachmentOrigin,
+      findDashboardsService,
       chat$,
     };
   };
@@ -204,7 +218,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   });
 
   describe('onAttachmentMount - origin sync', () => {
-    it('updates origin when new dashboard is saved', () => {
+    it('updates origin when new dashboard is saved', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
@@ -215,18 +229,28 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // First save triggers update
-      mockApi.setSavedObjectId('new-dashboard-id');
+      mockApi.emitSave({
+        previousDashboardId: undefined,
+        dashboardId: 'new-dashboard-id',
+        dashboardState: mockSavedDashboardState,
+      });
+      await Promise.resolve();
       expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
 
       // Undefined doesn't trigger
       updateOrigin.mockClear();
-      mockApi.setSavedObjectId(undefined);
+      mockApi.emitSave({
+        previousDashboardId: 'new-dashboard-id',
+        dashboardId: undefined,
+        dashboardState: mockSavedDashboardState,
+      });
+      await Promise.resolve();
       expect(updateOrigin).not.toHaveBeenCalled();
 
       cleanup?.();
     });
 
-    it('does not update origin when attachment is linked to a different dashboard', () => {
+    it('does not update origin when attachment is linked to a different dashboard', async () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'original-dashboard-id');
       const mockApi = createMockDashboardApi('different-dashboard-id');
 
@@ -235,9 +259,44 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         updateOrigin,
       });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-      mockApi.setSavedObjectId('newly-saved-id');
+      mockApi.emitSave({
+        previousDashboardId: 'different-dashboard-id',
+        dashboardId: 'newly-saved-id',
+        dashboardState: mockSavedDashboardState,
+      });
+      await Promise.resolve();
 
       expect(updateOrigin).not.toHaveBeenCalled();
+      cleanup?.();
+    });
+
+    it('relinks to the current dashboard when the attachment origin points to a deleted dashboard', async () => {
+      const { getAttachment } = createMockAttachment('attachment-1', 'deleted-dashboard-id');
+      const mockApi = createMockDashboardApi('current-dashboard-id');
+
+      deps.findDashboardsService.mockResolvedValue({
+        findById: jest.fn().mockResolvedValue({ status: 'error' }),
+      });
+      unregister();
+      unregister = registerDashboardAttachmentUiDefinition(deps);
+      uiDefinition = deps.addAttachmentType.mock.calls.at(-1)?.[1];
+
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+      mockApi.emitSave({
+        previousDashboardId: 'current-dashboard-id',
+        dashboardId: 'current-dashboard-id',
+        dashboardState: mockSavedDashboardState,
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(updateOrigin).toHaveBeenCalledWith('current-dashboard-id');
       cleanup?.();
     });
 

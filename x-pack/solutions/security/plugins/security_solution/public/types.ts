@@ -105,6 +105,7 @@ import type { SecuritySolutionUiConfigType } from './common/types';
 import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
+import type { AiRuleCreationService } from './detection_engine/common/ai_rule_creation_store';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -217,6 +218,7 @@ export type StartServices = CoreStart &
     siemMigrations: SiemMigrationsService;
     productDocBase: ProductDocBasePluginStart;
     logger: Logger;
+    aiRuleCreation: AiRuleCreationService;
   };
 
 export type StartRenderServices = Pick<
