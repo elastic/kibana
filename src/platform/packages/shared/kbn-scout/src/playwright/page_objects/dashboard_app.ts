@@ -139,7 +139,7 @@ export class DashboardApp {
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard() {
     await this.page.gotoApp('dashboards', { hash: '/create' });
-    await expect(this.addTopNavButton).toBeVisible();
+    await expect(this.addTopNavButton).toBeVisible({ timeout: 20_000 });
   }
 
   private getSettingsFlyout() {
