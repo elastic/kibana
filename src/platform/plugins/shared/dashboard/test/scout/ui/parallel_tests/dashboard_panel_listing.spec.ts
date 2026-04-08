@@ -38,9 +38,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.dashboard.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

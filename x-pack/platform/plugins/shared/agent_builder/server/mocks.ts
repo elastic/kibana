@@ -38,6 +38,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     sml: {
       registerType: jest.fn(),
     },
+    topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
 
