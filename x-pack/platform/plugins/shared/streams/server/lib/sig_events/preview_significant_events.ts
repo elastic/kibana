@@ -10,7 +10,14 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
-import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs, extractBucketTargetField, extractStatsGroupColumns, MS_PER_UNIT } from '@kbn/streams-schema';
+import {
+  hasStatsCommand,
+  extractBucketColumnName,
+  extractBucketIntervalMs,
+  extractBucketTargetField,
+  extractStatsGroupColumns,
+  MS_PER_UNIT,
+} from '@kbn/streams-schema';
 
 const PREVIEW_STATS_LIMIT = 10_000;
 
@@ -317,7 +324,9 @@ async function previewStatsQuery(
   const truncated = firingCount >= PREVIEW_STATS_LIMIT;
   const groupCols = extractStatsGroupColumns(esqlQuery);
   const bucketName = extractBucketColumnName(esqlQuery);
-  const multiGroup = groupCols.filter((col) => col !== bucketName).length > 0;
+  const multiGroup = bucketName
+    ? groupCols.filter((col) => col !== bucketName).length > 0
+    : groupCols.length > 1;
 
   if (truncated) {
     logger?.warn(
@@ -333,15 +342,15 @@ async function previewStatsQuery(
 
   if (!bucketCol && firingCount > 0) {
     logger?.warn(
-      `STATS preview returned ${firingCount} firing rows but no temporal bucket column could be resolved (astBucketName=${astBucketName ?? 'null'}, columns=${response.columns.map((c) => c.name).join(', ')}). Sparkline will be empty.`
+      `STATS preview returned ${firingCount} firing rows but no temporal bucket column could be resolved (astBucketName=${
+        astBucketName ?? 'null'
+      }, columns=${response.columns.map((c) => c.name).join(', ')}). Sparkline will be empty.`
     );
   }
 
   if (bucketCol) {
     const bucketIdx = response.columns.indexOf(bucketCol);
-    const firingDates = response.values
-      .map((row) => row[bucketIdx] as string)
-      .filter(Boolean);
+    const firingDates = response.values.map((row) => row[bucketIdx] as string).filter(Boolean);
 
     // The query's own BUCKET interval may differ from the UI's requested
     // bucketSize (e.g. query uses 5m but the UI requests 1h). We honour the

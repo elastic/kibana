@@ -464,13 +464,12 @@ export class QueryClient {
   }
 
   /**
-   * Returns promotable query links: unbacked and non-STATS.
-   * Mirrors the STATS exclusion in {@link getUnbackedQueriesCount} so the
-   * badge count and the promote candidate list always agree.
+   * Returns all unbacked query links for a stream, including STATS.
+   * Callers (e.g. {@link promoteQueries}) are responsible for filtering
+   * STATS queries and reporting skipped counts to the client.
    */
   private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
-    const links = await this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
-    return links.filter((link) => link.query.type !== QUERY_TYPE_STATS);
+    return this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
   }
 
   /**
