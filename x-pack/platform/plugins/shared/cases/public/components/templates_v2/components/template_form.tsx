@@ -47,7 +47,8 @@ const styles = {
     }),
   validationContainer: css({
     position: 'fixed',
-    bottom: '60px',
+    bottom: '57px',
+    marginLeft: '-24px',
     pointerEvents: 'none',
     display: 'flex',
     flexDirection: 'column-reverse',
