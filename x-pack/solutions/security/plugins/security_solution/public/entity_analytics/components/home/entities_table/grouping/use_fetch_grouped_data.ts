@@ -31,6 +31,7 @@ export interface EntitiesGroupingAggregation {
 export interface TargetEntityMetadata {
   name: string;
   type: EntityType;
+  riskScore: number | null;
 }
 
 export type TargetMetadataMap = Map<string, TargetEntityMetadata>;
@@ -40,6 +41,13 @@ interface TargetEntitySource {
     id?: string;
     name?: string;
     EngineMetadata?: { Type?: EntityType };
+    relationships?: {
+      resolution?: {
+        risk?: {
+          calculated_score_norm?: number;
+        };
+      };
+    };
   };
 }
 
@@ -122,6 +130,7 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
               ENTITY_FIELDS.ENTITY_ID,
               ENTITY_FIELDS.ENTITY_NAME,
               ENTITY_FIELDS.ENTITY_TYPE,
+              ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
             ],
             query: {
               bool: {
@@ -135,11 +144,13 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
 
       const result: TargetMetadataMap = new Map();
       for (const hit of hits.hits) {
-        const { id, name, EngineMetadata } = (hit._source as TargetEntitySource)?.entity ?? {};
+        const { id, name, EngineMetadata, relationships } =
+          (hit._source as TargetEntitySource)?.entity ?? {};
         const type = EngineMetadata?.Type;
+        const riskScore = relationships?.resolution?.risk?.calculated_score_norm ?? null;
 
         if (id && name && type) {
-          result.set(id, { name, type });
+          result.set(id, { name, type, riskScore });
         }
       }
 

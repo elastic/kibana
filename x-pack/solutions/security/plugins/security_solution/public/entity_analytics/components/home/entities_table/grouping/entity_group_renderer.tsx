@@ -169,28 +169,36 @@ const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefin
   );
 };
 
-export const groupStatsRenderer = (
-  selectedGroup: string,
-  bucket: RawBucket<EntitiesGroupingAggregation>
-): GroupStatsItem[] => {
-  const stats: GroupStatsItem[] = [];
+export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
+  const GroupStatsRenderer = (
+    selectedGroup: string,
+    bucket: RawBucket<EntitiesGroupingAggregation>
+  ): GroupStatsItem[] => {
+    const stats: GroupStatsItem[] = [];
 
-  if (bucket.doc_count) {
-    stats.push({
-      title: entitiesStatLabel,
-      badge: {
-        value: bucket.doc_count,
-        width: 50,
-      },
-    });
-  }
+    if (bucket.doc_count) {
+      stats.push({
+        title: entitiesStatLabel,
+        badge: {
+          value: bucket.doc_count,
+          width: 50,
+        },
+      });
+    }
 
-  if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
-    stats.push({
-      title: riskScoreLabel,
-      component: <GroupRiskScoreBadge riskScore={bucket.resolutionRiskScore?.value} />,
-    });
-  }
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
+      const entityId = String(bucket.key_as_string ?? bucket.key);
+      const metadata = targetMetadata.get(entityId);
+      const riskScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value ?? null;
 
-  return stats;
+      stats.push({
+        title: riskScoreLabel,
+        component: <GroupRiskScoreBadge riskScore={riskScore} />,
+      });
+    }
+
+    return stats;
+  };
+
+  return GroupStatsRenderer;
 };

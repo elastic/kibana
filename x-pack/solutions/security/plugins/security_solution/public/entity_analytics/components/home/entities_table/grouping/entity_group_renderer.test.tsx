@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RawBucket } from '@kbn/grouping';
-import { createGroupPanelRenderer, groupStatsRenderer } from './entity_group_renderer';
+import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ENTITY_GROUPING_OPTIONS } from '../constants';
@@ -71,7 +71,7 @@ describe('createGroupPanelRenderer', () => {
   describe('RESOLUTION group', () => {
     it('renders target entity name from metadata', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-entity-id', { name: 'bernicehuel', type: EntityType.user }],
+        ['target-entity-id', { name: 'bernicehuel', type: EntityType.user, riskScore: null }],
       ]);
       const bucket = createMockBucket({ key: 'target-entity-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -97,7 +97,7 @@ describe('createGroupPanelRenderer', () => {
 
     it('renders expand button when metadata has name and type', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test-entity', type: EntityType.user }],
+        ['target-id', { name: 'test-entity', type: EntityType.user, riskScore: null }],
       ]);
       const bucket = createMockBucket({ key: 'target-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -131,11 +131,12 @@ describe('createGroupPanelRenderer', () => {
   });
 });
 
-describe('groupStatsRenderer', () => {
+describe('createGroupStatsRenderer', () => {
   describe('entity count (all group types)', () => {
     it('returns badge with doc_count when doc_count > 0', () => {
       const bucket = createMockBucket({ doc_count: 42 });
-      const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
+      const renderer = createGroupStatsRenderer(emptyMetadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
 
       expect(stats).toHaveLength(1);
       expect(stats[0].title).toBe('Entities:');
@@ -144,7 +145,8 @@ describe('groupStatsRenderer', () => {
 
     it('returns empty array when doc_count is 0', () => {
       const bucket = createMockBucket({ doc_count: 0 });
-      const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
+      const renderer = createGroupStatsRenderer(emptyMetadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
 
       expect(stats).toHaveLength(0);
     });
@@ -152,44 +154,62 @@ describe('groupStatsRenderer', () => {
 
   describe('RESOLUTION group', () => {
     it('returns entities count + risk score stats (2 items)', () => {
-      const bucket = createMockBucket({
-        doc_count: 4,
-        resolutionRiskScore: { value: 85.42 },
-      });
-      const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+      const metadata: TargetMetadataMap = new Map([
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: 85.42 }],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 4 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
 
       expect(stats).toHaveLength(2);
       expect(stats[0].title).toBe('Entities:');
       expect(stats[1].title).toBe('Risk score:');
     });
 
-    it('risk score badge shows formatted score value', () => {
-      const bucket = createMockBucket({
-        doc_count: 3,
-        resolutionRiskScore: { value: 73.1829 },
-      });
-      const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+    it('risk score badge shows value from metadata', () => {
+      const metadata: TargetMetadataMap = new Map([
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: 73.1829 }],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
       expect(screen.getByText('73.18')).toBeInTheDocument();
     });
 
-    it('risk score badge shows en-dash for null score', () => {
+    it('risk score falls back to bucket aggregation when metadata is unavailable', () => {
       const bucket = createMockBucket({
-        doc_count: 1,
-        resolutionRiskScore: { value: null },
+        key: 'target-id',
+        doc_count: 3,
+        resolutionRiskScore: { value: 65.5 },
       });
-      const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+      const renderer = createGroupStatsRenderer(emptyMetadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('65.50')).toBeInTheDocument();
+    });
+
+    it('risk score badge shows en-dash when both metadata and bucket score are null', () => {
+      const metadata: TargetMetadataMap = new Map([
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: null }],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 1 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
       expect(screen.getByText('—')).toBeInTheDocument();
     });
 
-    it('risk score stat is present even when resolutionRiskScore is undefined', () => {
-      const bucket = createMockBucket({ doc_count: 2 });
-      const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+    it('risk score stat is present even when no metadata or bucket score exists', () => {
+      const bucket = createMockBucket({ key: 'unknown-id', doc_count: 2 });
+      const renderer = createGroupStatsRenderer(emptyMetadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
 
       expect(stats).toHaveLength(2);
 
@@ -202,7 +222,8 @@ describe('groupStatsRenderer', () => {
   describe('ENTITY_TYPE group', () => {
     it('does not include risk score stat', () => {
       const bucket = createMockBucket({ doc_count: 10 });
-      const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
+      const renderer = createGroupStatsRenderer(emptyMetadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
 
       expect(stats).toHaveLength(1);
       expect(stats[0].title).toBe('Entities:');

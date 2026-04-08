@@ -37,7 +37,7 @@ import {
   useFetchGroupedData,
   useFetchTargetMetadata,
 } from './use_fetch_grouped_data';
-import { createGroupPanelRenderer, groupStatsRenderer } from './entity_group_renderer';
+import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 
 const MAX_GROUPING_LEVELS = 3;
@@ -198,6 +198,12 @@ export const useEntityGrouping = ({
   const groupPanelRenderer = useCallback(
     (...args: Parameters<ReturnType<typeof createGroupPanelRenderer>>) =>
       createGroupPanelRenderer(targetMetadataRef.current)(...args),
+    []
+  );
+
+  const groupStatsRenderer = useCallback(
+    (...args: Parameters<ReturnType<typeof createGroupStatsRenderer>>) =>
+      createGroupStatsRenderer(targetMetadataRef.current)(...args),
     []
   );
 
