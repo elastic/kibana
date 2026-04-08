@@ -28,8 +28,8 @@ import {
   shareService,
   lensService,
 } from '../../services/kibana_services';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
