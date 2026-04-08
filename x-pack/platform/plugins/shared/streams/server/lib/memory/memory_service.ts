@@ -303,7 +303,7 @@ export class MemoryServiceImpl implements MemoryService {
 
   async search(params: SearchMemoryParams): Promise<MemorySearchResult[]> {
     const { query, tags, categories, references, size = 10 } = params;
-    const escapedQuery = query.toLowerCase().replace(/[*?]/g, '\\$&');
+    const escapedQuery = query.toLowerCase().replace(/[\\*?]/g, '\\$&');
 
     const filters: QueryDslQueryContainer[] = [];
     if (tags && tags.length > 0) {
