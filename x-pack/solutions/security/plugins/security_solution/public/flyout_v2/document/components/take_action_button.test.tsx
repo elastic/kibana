@@ -16,7 +16,6 @@ import { useAlertAssigneesActions } from '../../../detections/components/alerts_
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -30,8 +29,27 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../common/hooks/is_in_security_app');
+
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
 jest.mock(
-  '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
+  '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
+  () => ({
+    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+  })
+);
+
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
+  () => ({
+    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+  })
 );
 
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
@@ -53,8 +71,6 @@ const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['tes
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
-const mockUseRunAlertWorkflowPanel = useRunAlertWorkflowPanel as jest.Mock;
-
 const defaultProps = {
   hit: createMockHit(),
   ecsData: mockEcsData,
@@ -288,6 +304,52 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
       expect(getByText('Add note')).toBeInTheDocument();
       expect(queryByText('Run workflow')).not.toBeInTheDocument();
+    });
+
+    it('should use useRunAlertWorkflowPanel menu items for alert documents', () => {
+      const alertWorkflowItem = { name: 'Alert workflow', onClick: jest.fn() };
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [alertWorkflowItem],
+        runAlertWorkflowPanel: [],
+      });
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [{ name: 'Document workflow', onClick: jest.fn() }],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const alertHit = createMockHit({ 'event.kind': 'signal' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Alert workflow')).toBeInTheDocument();
+      expect(queryByText('Document workflow')).not.toBeInTheDocument();
+    });
+
+    it('should use useRunDocumentWorkflowPanel menu items for non-alert documents', () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [{ name: 'Alert workflow', onClick: jest.fn() }],
+        runAlertWorkflowPanel: [],
+      });
+      const documentWorkflowItem = { name: 'Document workflow', onClick: jest.fn() };
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [documentWorkflowItem],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const eventHit = createMockHit({ 'event.kind': 'event' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Document workflow')).toBeInTheDocument();
+      expect(queryByText('Alert workflow')).not.toBeInTheDocument();
     });
 
     it('should exclude some items when event.kind is not set', () => {
