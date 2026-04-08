@@ -18,22 +18,15 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import {
-  OnboardingStep,
-  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  TaskStatus,
-} from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
-import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
-import { useInferenceFeatureConnectors } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
+import { useConnectorConfig } from '../../../../../hooks/sig_events/use_connector_config';
 import type { ScheduleOnboardingOptions } from '../../../../../hooks/use_onboarding_api';
 import { useOnboardingApi } from '../../../../../hooks/use_onboarding_api';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -42,19 +35,15 @@ import { getFormattedError } from '../../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import { InsightsConnectorPopover } from './insights_connector_popover';
-import type { OnboardingConfig } from './onboarding_config_popover';
 import { OnboardingConfigPopover } from './onboarding_config_popover';
 import {
   DISCOVER_INSIGHTS_BUTTON_LABEL,
-  GENERATE_FEATURES_BUTTON_LABEL,
-  GENERATE_QUERIES_BUTTON_LABEL,
   getInsightsCompleteToastTitle,
   INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
   INSIGHTS_SCHEDULING_FAILURE_TITLE,
   NO_INSIGHTS_TOAST_TITLE,
   ONBOARDING_FAILURE_TITLE,
   ONBOARDING_SCHEDULING_FAILURE_TITLE,
-  RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
@@ -88,38 +77,20 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const [isWaitingForInsightsTask, setIsWaitingForInsightsTask] = useState(false);
   const { filterStreamsByIndexPatterns } = useIndexPatternsConfig();
 
-  const featuresConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
-  );
-  const queriesConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
-  );
-  const discoveryConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID
-  );
-
-  const [discoveryConnectorOverride, setDiscoveryConnectorOverride] = useState<
-    string | undefined
-  >();
-  const displayDiscoveryConnectorId =
-    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnectorId;
-
-  const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
-    steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
-    connectors: {},
-  });
-
-  const displayConnectors = useMemo(
-    () => ({
-      features: onboardingConfig.connectors.features ?? featuresConnectors.resolvedConnectorId,
-      queries: onboardingConfig.connectors.queries ?? queriesConnectors.resolvedConnectorId,
-    }),
-    [
-      onboardingConfig.connectors,
-      featuresConnectors.resolvedConnectorId,
-      queriesConnectors.resolvedConnectorId,
-    ]
-  );
+  const {
+    featuresConnectors,
+    queriesConnectors,
+    discoveryConnectors,
+    genAiConnectors,
+    isConnectorCatalogUnavailable,
+    discoveryConnectorOverride,
+    setDiscoveryConnectorOverride,
+    displayDiscoveryConnectorId,
+    onboardingConfig,
+    setOnboardingConfig,
+    displayConnectors,
+    dynamicButtonLabel,
+  } = useConnectorConfig();
 
   const streamsListFetch = useFetchStreams({
     select: (result) => {
@@ -138,10 +109,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     Record<string, TaskResult<OnboardingResult>>
   >({});
   const router = useStreamsAppRouter();
-  const aiFeatures = useAIFeatures();
-  const genAiConnectors = aiFeatures?.genAiConnectors;
-  const isConnectorCatalogUnavailable =
-    !genAiConnectors?.connectors?.length || !!genAiConnectors?.loading || !!genAiConnectors?.error;
   const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
   const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
     useInsightsDiscoveryApi();
@@ -316,15 +283,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const onStopOnboardingActionClick = (streamName: string) => {
     cancelOnboardingTask(streamName);
   };
-
-  const { steps: selectedSteps } = onboardingConfig;
-  const dynamicButtonLabel = useMemo(() => {
-    const hasFeatures = selectedSteps.includes(OnboardingStep.FeaturesIdentification);
-    const hasQueries = selectedSteps.includes(OnboardingStep.QueriesGeneration);
-    if (hasFeatures && !hasQueries) return GENERATE_FEATURES_BUTTON_LABEL;
-    if (hasQueries && !hasFeatures) return GENERATE_QUERIES_BUTTON_LABEL;
-    return RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL;
-  }, [selectedSteps]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

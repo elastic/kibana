@@ -20,8 +20,8 @@ import {
 import { css } from '@emotion/react';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { useBoolean } from '@kbn/react-hooks';
-import React, { useCallback } from 'react';
-import { buildConnectorSelectOptions } from './connector_select_options';
+import React, { useCallback, useMemo } from 'react';
+import { buildConnectorSelectOptions, getEffectiveConnectorId } from './connector_select_options';
 import {
   CONNECTOR_LOAD_ERROR,
   INSIGHTS_CONNECTOR_POPOVER_ARIA_LABEL,
@@ -54,11 +54,14 @@ export const InsightsConnectorPopover = ({
   const popoverId = useGeneratedHtmlId({ prefix: 'insightsConnectorPopover' });
   const selectId = useGeneratedHtmlId({ prefix: 'insightsConnectorSelect' });
 
-  const connectorOptions = buildConnectorSelectOptions(connectorList);
-  const effectiveConnectorId =
-    displayConnectorId && connectorOptions.some((opt) => opt.value === displayConnectorId)
-      ? displayConnectorId
-      : connectorOptions[0]?.value;
+  const connectorOptions = useMemo(
+    () => buildConnectorSelectOptions(connectorList),
+    [connectorList]
+  );
+  const effectiveConnectorId = useMemo(
+    () => getEffectiveConnectorId(displayConnectorId, connectorOptions),
+    [displayConnectorId, connectorOptions]
+  );
 
   const handleRun = useCallback(() => {
     close();

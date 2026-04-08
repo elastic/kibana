@@ -22,8 +22,8 @@ import { css } from '@emotion/react';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { useBoolean } from '@kbn/react-hooks';
 import { OnboardingStep } from '@kbn/streams-schema';
-import React, { useCallback } from 'react';
-import { buildConnectorSelectOptions } from './connector_select_options';
+import React, { useCallback, useMemo } from 'react';
+import { buildConnectorSelectOptions, getEffectiveConnectorId } from './connector_select_options';
 import {
   CONNECTOR_LOAD_ERROR,
   FEATURES_STEP_LABEL,
@@ -74,11 +74,14 @@ const StepRow = ({
 }: StepRowProps) => {
   const selectId = useGeneratedHtmlId({ prefix: `onboardingStep_${step}` });
 
-  const connectorOptions = buildConnectorSelectOptions(connectorList);
-  const effectiveConnectorId =
-    displayConnectorId && connectorOptions.some((opt) => opt.value === displayConnectorId)
-      ? displayConnectorId
-      : connectorOptions[0]?.value;
+  const connectorOptions = useMemo(
+    () => buildConnectorSelectOptions(connectorList),
+    [connectorList]
+  );
+  const effectiveConnectorId = useMemo(
+    () => getEffectiveConnectorId(displayConnectorId, connectorOptions),
+    [displayConnectorId, connectorOptions]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

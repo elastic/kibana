@@ -10,7 +10,14 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import React from 'react';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
 
-export const buildConnectorSelectOptions = (connectors: InferenceConnector[]) =>
+export interface ConnectorSelectOption {
+  value: string;
+  inputDisplay: React.ReactNode;
+}
+
+export const buildConnectorSelectOptions = (
+  connectors: InferenceConnector[]
+): ConnectorSelectOption[] =>
   connectors.map((connector) => ({
     value: connector.connectorId,
     inputDisplay: (
@@ -22,3 +29,11 @@ export const buildConnectorSelectOptions = (connectors: InferenceConnector[]) =>
       </EuiFlexGroup>
     ),
   }));
+
+export const getEffectiveConnectorId = (
+  displayConnectorId: string | undefined,
+  options: ConnectorSelectOption[]
+): string | undefined =>
+  displayConnectorId && options.some((opt) => opt.value === displayConnectorId)
+    ? displayConnectorId
+    : options[0]?.value;
