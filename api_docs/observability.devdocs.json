@@ -10578,6 +10578,29 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.ingestHub",
+            "type": "Object",
+            "tags": [],
+            "label": "ingestHub",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ingestHub",
+                "scope": "public",
+                "docId": "kibIngestHubPluginApi",
+                "section": "def-public.IngestHubStart",
+                "text": "IngestHubStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -19699,7 +19722,7 @@
         "; }"
       ],
       "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-      "lineNumber": 194,
+      "lineNumber": 195,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

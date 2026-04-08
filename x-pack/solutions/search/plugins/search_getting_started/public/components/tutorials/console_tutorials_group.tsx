@@ -5,50 +5,49 @@
  * 2.0.
  */
 import { consoleTutorials } from '@kbn/search-code-examples';
-import { TryInConsoleButton } from '@kbn/try-in-console';
 import {
-  EuiCard,
+  EuiBadge,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiImage,
-  EuiFlexGrid,
-  EuiButtonEmpty,
+  EuiTitle,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { orderBy } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { isNew } from '../../common/utils';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+
 interface TutorialMetadata {
   title: string;
   dataTestSubj: string;
   description: string;
   request: string;
-  image: string;
-  buttonRef: React.RefObject<HTMLButtonElement>;
   publishedAt: Date;
 }
-const EXPAND_LIMIT = 3;
 
 export const ConsoleTutorialsGroup = () => {
-  const { application, console: consolePlugin, share } = useKibana().services;
+  const { console: consolePlugin } = useKibana().services;
   const assetBasePath = useAssetBasePath();
+  const { euiTheme } = useEuiTheme();
   const isMediumBreakpoint = useIsWithinMaxBreakpoint('m');
   const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
   const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
-  const [expanded, setExpanded] = useState(false);
-  const toggleExpand = () => {
-    setExpanded((prev) => !prev);
-  };
 
-  const tutorials: TutorialMetadata[] = useMemo(() => {
-    const items = [
+  const openConsole = useCallback(
+    (request: string) =>
+      consolePlugin?.openEmbeddedConsole && consolePlugin.openEmbeddedConsole(request),
+    [consolePlugin]
+  );
+
+  const tutorials: TutorialMetadata[] = useMemo(
+    () => [
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.basicsTitle', {
           defaultMessage: 'Search basics',
@@ -62,8 +61,6 @@ export const ConsoleTutorialsGroup = () => {
           }
         ),
         request: consoleTutorials.basics,
-        image: `${assetBasePath}/search_window_illustration.svg`,
-        buttonRef: React.createRef<HTMLButtonElement>(),
         publishedAt: new Date('2025-10-31'),
       },
       {
@@ -79,8 +76,6 @@ export const ConsoleTutorialsGroup = () => {
           }
         ),
         request: consoleTutorials.semanticSearch,
-        image: `${assetBasePath}/search_results_illustration.svg`,
-        buttonRef: React.createRef<HTMLButtonElement>(),
         publishedAt: new Date('2025-10-31'),
       },
       {
@@ -90,27 +85,24 @@ export const ConsoleTutorialsGroup = () => {
         dataTestSubj: 'console_tutorials_esql',
         description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlDescription', {
           defaultMessage:
-            "Learn how to use Elastic's piped query language to simplify data investigations.",
+            "Learn how to use Elastic's piped query language to simplify and speed up data investigations.",
         }),
         request: consoleTutorials.esql,
-        image: `${assetBasePath}/search_observe_illustration.svg`,
-        buttonRef: React.createRef<HTMLButtonElement>(),
         publishedAt: new Date('2025-10-31'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.agentBuilderTitle', {
-          defaultMessage: 'Agent builder',
+          defaultMessage: 'Build a chat tool with Agent Builder',
         }),
         dataTestSubj: 'console_tutorials_agent_builder',
         description: i18n.translate(
           'xpack.searchGettingStarted.consoleTutorials.agentBuilderDescription',
           {
-            defaultMessage: 'Learn how to use the Agent Builder APIs to create and manage agents.',
+            defaultMessage:
+              'Interact with Agent Builder through the API to build and interact with tools.',
           }
         ),
         request: consoleTutorials.agentBuilder,
-        image: `${assetBasePath}/search_task_automation.svg`,
-        buttonRef: React.createRef<HTMLButtonElement>(),
         publishedAt: new Date('2026-02-18'),
       },
       {
@@ -123,19 +115,43 @@ export const ConsoleTutorialsGroup = () => {
             'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
         }),
         request: consoleTutorials.timeSeriesDataStreams,
-        image: `${assetBasePath}/search_hourglass.svg`,
-        buttonRef: React.createRef<HTMLButtonElement>(),
         publishedAt: new Date('2026-02-04'),
       },
-    ];
-    return orderBy(items, ({ publishedAt }) => publishedAt.getTime(), ['desc']).slice(
-      0,
-      expanded ? undefined : EXPAND_LIMIT
-    );
-  }, [assetBasePath, expanded]);
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.vectorSearchTitle', {
+          defaultMessage: 'Vector Database',
+        }),
+        dataTestSubj: 'console_tutorials_vector_search',
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.vectorSearchDescription',
+          {
+            defaultMessage:
+              'Store and search vectors for semantic search, chatbots, recommenders, and RAG. Generate or bring your own vectors.',
+          }
+        ),
+        request: consoleTutorials.vectorDatabase,
+        publishedAt: new Date('2026-04-01'),
+      },
+    ],
+    []
+  );
+
+  const tutorialCardStyles = css`
+    cursor: pointer;
+    border-radius: ${euiTheme.border.radius.medium};
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    padding: ${euiTheme.size.base};
+    &:hover {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      .tutorialTitle {
+        color: ${euiTheme.colors.textPrimary};
+      }
+      border-color: transparent;
+    }
+  `;
 
   return (
-    <EuiFlexGroup gutterSize="l" direction={'column'} justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="l" direction="column" justifyContent="spaceBetween">
       <SearchGettingStartedSectionHeading
         title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
           defaultMessage: 'Explore the API',
@@ -146,104 +162,41 @@ export const ConsoleTutorialsGroup = () => {
             'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
         })}
       />
-      <EuiFlexGrid gutterSize="l" columns={tutorialColumns}>
-        {tutorials.map((tutorial) => (
-          <EuiFlexItem key={tutorial.dataTestSubj}>
-            <EuiCard
-              hasBorder
-              title={tutorial.title}
-              betaBadgeProps={{
-                label: isNew(tutorial.publishedAt)
-                  ? i18n.translate('xpack.searchGettingStarted.consoleTutorials.badge', {
-                      defaultMessage: 'New',
-                    })
-                  : '',
-                color: 'accent',
-              }}
-              titleSize="xs"
-              textAlign="left"
-              onClick={() => {
-                tutorial.buttonRef.current?.click();
-              }}
+      <EuiFlexGrid columns={tutorialColumns}>
+        {orderBy(tutorials, ({ publishedAt }) => publishedAt.getTime(), ['desc']).map(
+          (tutorial) => (
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="column"
+              key={tutorial.dataTestSubj}
+              css={tutorialCardStyles}
               data-test-subj={tutorial.dataTestSubj}
-              footer={
-                <TryInConsoleButton
-                  type="emptyButton"
-                  iconType={`${assetBasePath}/command_line.svg`} // TODO: Replace with EUI icon when it's available
-                  color="text"
-                  request={tutorial.request}
-                  application={application}
-                  sharePlugin={share}
-                  consolePlugin={consolePlugin}
-                  telemetryId={tutorial.dataTestSubj}
-                  data-test-subj={`${tutorial.dataTestSubj}-btn`}
-                  buttonProps={{ buttonRef: tutorial.buttonRef }}
-                  content={
-                    <FormattedMessage
-                      id="xpack.searchGettingStarted.consoleTutorials.runInConsole"
-                      defaultMessage="Open in Console"
-                    />
-                  }
-                  onClick={(e) => {
-                    // Do not trigger the card click
-                    e.stopPropagation();
-                  }}
-                />
-              }
+              data-telemetry-id={tutorial.dataTestSubj}
+              onClick={() => openConsole(tutorial.request)}
             >
-              <EuiFlexGroup
-                gutterSize="m"
-                alignItems="flexStart"
-                justifyContent="spaceBetween"
-                wrap
-              >
-                <EuiFlexItem grow={1}>
-                  <EuiFlexGroup
-                    gutterSize="s"
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="flexStart"
-                  >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  {isNew(tutorial.publishedAt) && (
                     <EuiFlexItem grow={false}>
-                      <EuiText size="relative">{tutorial.description}</EuiText>
+                      <EuiBadge color="accent" fill>
+                        {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
+                          defaultMessage: 'New',
+                        })}
+                      </EuiBadge>
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiImage
-                    src={tutorial.image}
-                    alt={`${tutorial.title} tutorial icon`}
-                    size="original"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiCard>
-          </EuiFlexItem>
-        ))}
+                  )}
+                  <EuiTitle size="xxs" className="tutorialTitle">
+                    <h4>{tutorial.title}</h4>
+                  </EuiTitle>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiText size="xs" color="subdued">
+                {tutorial.description}
+              </EuiText>
+            </EuiFlexGroup>
+          )
+        )}
       </EuiFlexGrid>
-      <EuiFlexItem
-        css={css`
-          align-items: center;
-        `}
-      >
-        <EuiButtonEmpty
-          data-test-subj="searchGettingStartedConsoleTutorialsGroupExpandButton"
-          color="text"
-          onClick={toggleExpand}
-        >
-          {expanded ? (
-            <FormattedMessage
-              id="xpack.searchGettingStarted.consoleTutorials.showLess"
-              defaultMessage="Show less"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.searchGettingStarted.consoleTutorials.showMore"
-              defaultMessage="Show more"
-            />
-          )}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
