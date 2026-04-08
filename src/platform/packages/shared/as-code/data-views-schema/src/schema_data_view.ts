@@ -14,14 +14,14 @@ import { runtimeFieldSchema } from './schema_runtime_field';
 export const dataViewReferenceSchema = schema.object(
   {
     type: schema.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
-    id: schema.string({
+    ref_id: schema.string({
       meta: {
         description:
           'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
       },
     }),
   },
-  { meta: { id: 'dataViewReferenceDataSourceTypeSchema' } }
+  { meta: { id: 'kbn-data-view-reference-schema', title: 'Data view reference' } }
 );
 
 export const dataViewSpecSchema = schema.object(
@@ -43,7 +43,7 @@ export const dataViewSpecSchema = schema.object(
     ),
     runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldSchema, { maxSize: 100 })),
   },
-  { meta: { id: 'dataViewSpecDataSourceTypeSchema' } }
+  { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }
 );
 
 export const dataViewSchema = schema.discriminatedUnion('type', [

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useContext, useMemo, useRef } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import * as uuid from 'uuid';
 import {
   type GroupOption,
@@ -38,25 +38,9 @@ import {
   useFetchTargetMetadata,
 } from './use_fetch_grouped_data';
 import { createGroupPanelRenderer, groupStatsRenderer } from './entity_group_renderer';
+import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 
 const MAX_GROUPING_LEVELS = 3;
-
-const defaultGroupingOptions: GroupOption[] = [
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.entitiesTable.groupBy.resolution',
-      { defaultMessage: 'Resolution' }
-    ),
-    key: ENTITY_GROUPING_OPTIONS.RESOLUTION,
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.entitiesTable.groupBy.entityType',
-      { defaultMessage: 'Entity type' }
-    ),
-    key: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
-  },
-];
 
 const entitiesUnit = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.unit', {
@@ -172,6 +156,42 @@ export const useEntityGrouping = ({
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
   const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
+  const hasResolutionLicense = useHasEntityResolutionLicense();
+
+  const defaultGroupingOptions = useMemo<GroupOption[]>(() => {
+    const resolutionOption: GroupOption = {
+      label: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.entitiesTable.groupBy.resolution',
+        { defaultMessage: 'Resolution' }
+      ),
+      key: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+    };
+    const entityTypeOption: GroupOption = {
+      label: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.entitiesTable.groupBy.entityType',
+        { defaultMessage: 'Entity type' }
+      ),
+      key: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
+    };
+    if (hasResolutionLicense) {
+      return [resolutionOption, entityTypeOption];
+    }
+    return [entityTypeOption];
+  }, [hasResolutionLicense]);
+
+  const initialGroupings = useMemo(
+    () => ({
+      groupById: {
+        [LOCAL_STORAGE_GROUPING_KEY]: {
+          activeGroups: hasResolutionLicense
+            ? [ENTITY_GROUPING_OPTIONS.RESOLUTION]
+            : [ENTITY_GROUPING_OPTIONS.NONE],
+          options: defaultGroupingOptions,
+        },
+      },
+    }),
+    [defaultGroupingOptions, hasResolutionLicense]
+  );
 
   const targetMetadataRef = useRef<TargetMetadataMap>(new Map());
 
@@ -189,14 +209,7 @@ export const useEntityGrouping = ({
       groupsUnit: entitiesGroupsUnit,
     },
     defaultGroupingOptions,
-    initialGroupings: {
-      groupById: {
-        [LOCAL_STORAGE_GROUPING_KEY]: {
-          activeGroups: [ENTITY_GROUPING_OPTIONS.RESOLUTION],
-          options: defaultGroupingOptions,
-        },
-      },
-    },
+    initialGroupings,
     fields: dataViewIsLoading ? [] : dataView.fields,
     groupingId: LOCAL_STORAGE_GROUPING_KEY,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
@@ -207,6 +220,16 @@ export const useEntityGrouping = ({
       });
     },
   });
+
+  useEffect(() => {
+    const currentGroups = grouping.selectedGroups;
+    if (!hasResolutionLicense && currentGroups.includes(ENTITY_GROUPING_OPTIONS.RESOLUTION)) {
+      const filtered = currentGroups.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
+      const newGroups = filtered.length > 0 ? filtered : [ENTITY_GROUPING_OPTIONS.NONE];
+      grouping.setSelectedGroups(newGroups);
+      setUrlQuery({ groupBy: newGroups });
+    }
+  }, [hasResolutionLicense, grouping, setUrlQuery]);
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
   const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];

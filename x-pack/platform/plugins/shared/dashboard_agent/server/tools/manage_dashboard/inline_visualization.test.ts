@@ -10,6 +10,7 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createVisualizationResolver } from './inline_visualization';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   buildVisualizationConfig: jest.fn(),
@@ -65,7 +66,7 @@ describe('createVisualizationResolver', () => {
     expect(result).toEqual({
       type: 'success',
       visContent: {
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       },
     });
@@ -93,8 +94,8 @@ describe('createVisualizationResolver', () => {
       identifier: 'panel-1',
       nlQuery: 'turn this into a line chart',
       existingPanel: {
-        uid: 'panel-1',
-        type: 'lens',
+        id: 'panel-1',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { attributes: { type: 'bar' } },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
@@ -121,7 +122,7 @@ describe('createVisualizationResolver', () => {
       identifier: 'panel-1',
       nlQuery: 'refine this analysis',
       existingPanel: {
-        uid: 'panel-1',
+        id: 'panel-1',
         type: 'aiOpsLogRateAnalysis',
         config: { seriesType: 'log_rate' },
         grid: { w: 24, h: 12, x: 0, y: 0 },

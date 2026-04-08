@@ -11206,6 +11206,10 @@
                 "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
+                "plugin": "apmSourcesAccess",
+                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
+              },
+              {
                 "plugin": "links",
                 "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
               },
@@ -11232,10 +11236,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "apmSourcesAccess",
-                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
               },
               {
                 "plugin": "lens",

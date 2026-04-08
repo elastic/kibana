@@ -188,6 +188,97 @@ describe('Pipeline Editor', () => {
       });
     });
 
+    it('preserves target_field as an unknown option when editing a non-inference processor', async () => {
+      // A non-inference processor that happens to have a `target_field` unknown option should
+      // keep it after saving, because `target_field` must only be treated as "known" for
+      // inference processors.
+      onUpdate = jest.fn();
+      rerenderWithProps({
+        value: {
+          processors: [
+            {
+              set: {
+                field: 'test',
+                value: 'test',
+                target_field: 'some_unknown_target',
+              },
+            },
+          ],
+        },
+        onFlyoutOpen: jest.fn(),
+        onUpdate,
+      });
+
+      fireEvent.click(getByTestSubjectSelector('processors>0.manageItemButton'));
+      expect(screen.getByTestId('editProcessorForm')).toBeInTheDocument();
+
+      const valueInput = getByTestSubjectSelector('editProcessorForm.textValueField.input');
+      fireEvent.change(valueInput, { target: { value: 'updated_value' } });
+      fireEvent.blur(valueInput);
+
+      fireEvent.click(getByTestSubjectSelector('editProcessorForm.submitButton'));
+
+      await waitFor(() => {
+        expect(onUpdate).toHaveBeenCalled();
+      });
+
+      const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+      const { processors } = onUpdateResult.getData();
+      expect(processors[0].set).toEqual(
+        expect.objectContaining({
+          field: 'test',
+          value: 'updated_value',
+          // target_field must be preserved as an unknown option for non-inference processors
+          target_field: 'some_unknown_target',
+        })
+      );
+    });
+
+    it('drops inference-specific fields from unknownOptions when editing an inference processor', async () => {
+      // When editing an inference processor, input_output / target_field / field_map are
+      // "known" to the form, so they must NOT bleed through from unknownOptions into the
+      // serialized output (which would double-write or conflict with what the form emits).
+      onUpdate = jest.fn();
+      rerenderWithProps({
+        value: {
+          processors: [
+            {
+              inference: {
+                model_id: 'test_model',
+                input_output: [{ input_field: 'text_field', output_field: 'content_embedding' }],
+              },
+            },
+          ],
+        },
+        onFlyoutOpen: jest.fn(),
+        onUpdate,
+      });
+
+      fireEvent.click(getByTestSubjectSelector('processors>0.manageItemButton'));
+      expect(await screen.findByTestId('editProcessorForm')).toBeInTheDocument();
+
+      fireEvent.click(getByTestSubjectSelector('editProcessorForm.submitButton'));
+
+      await waitFor(() => {
+        expect(onUpdate).toHaveBeenCalled();
+      });
+
+      const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+      const { processors } = onUpdateResult.getData();
+      // input_output must appear exactly once from the form; it must not be duplicated
+      // by being merged in again from unknownOptions.
+      expect(processors[0].inference).toEqual(
+        expect.objectContaining({
+          model_id: 'test_model',
+          input_output: [{ input_field: 'text_field', output_field: 'content_embedding' }],
+        })
+      );
+      // Confirm there is exactly one key for input_output (no duplication artefacts)
+      expect(Object.keys(processors[0].inference).filter((k) => k === 'input_output')).toHaveLength(
+        1
+      );
+    });
+
     it('allows to edit an existing processor and change its type', async () => {
       // Open one of the existing processors
       fireEvent.click(getByTestSubjectSelector('processors>2.manageItemButton'));
