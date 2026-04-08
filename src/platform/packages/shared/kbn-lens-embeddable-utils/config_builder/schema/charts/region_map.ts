@@ -14,7 +14,7 @@ import {
   esqlColumnSchema,
   esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
 
@@ -33,7 +33,7 @@ export const regionMapStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     /**
      * Metric configuration
      */
@@ -51,7 +51,7 @@ export const regionMapStateSchemaESQL = schema.object(
     type: schema.literal('region_map'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     /**
      * Metric configuration
      */

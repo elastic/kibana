@@ -21,6 +21,8 @@ import { useAlertAssigneesActions } from '../../../detections/components/alerts_
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
+import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -81,7 +83,7 @@ export const TakeActionButton = memo(
 
     const isInSecurityApp = useIsInSecurityApp();
 
-    const eventId = hit.raw._id as string;
+    const documentId = hit.raw._id as string;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -101,7 +103,7 @@ export const TakeActionButton = memo(
     const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
       alertStatus,
       closePopover: closePopoverHandler,
-      eventId,
+      eventId: documentId,
       scopeId: '',
       refetch: onAlertUpdated,
     });
@@ -144,10 +146,28 @@ export const TakeActionButton = memo(
       [closePopoverHandler, onShowNotes]
     );
 
+    const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
+      ecsRowData: ecsData,
+      closePopover: closePopoverHandler,
+    });
+
+    const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
+      useRunDocumentWorkflowPanel({
+        closePopover: closePopoverHandler,
+        documents: [
+          {
+            _id: documentId,
+            _index: hit.raw._index ?? '',
+            ...hit.flattened,
+          },
+        ],
+      });
+
     const items = useMemo(
       () => [
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
+        ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
         ...(isAlert ? alertAssigneesItems : []),
         ...(isAlert ? alertTagsItems : []),
         ...(isAlert ? [] : noteItems),
@@ -155,13 +175,15 @@ export const TakeActionButton = memo(
       ],
       [
         addToCaseActionItems,
-        alertTagsItems,
-        investigateInTimelineActionItems,
         isAlert,
-        isInSecurityApp,
-        noteItems,
         statusActionItems,
+        runWorkflowMenuItem,
+        documentWorkflowMenuItem,
         alertAssigneesItems,
+        alertTagsItems,
+        noteItems,
+        isInSecurityApp,
+        investigateInTimelineActionItems,
       ]
     );
 
@@ -171,8 +193,17 @@ export const TakeActionButton = memo(
         ...(isAlert ? statusActionPanels : []),
         ...(isAlert ? alertAssigneesPanels : []),
         ...(isAlert ? alertTagsPanels : []),
+        ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
       ],
-      [alertTagsPanels, isAlert, items, statusActionPanels, alertAssigneesPanels]
+      [
+        items,
+        isAlert,
+        statusActionPanels,
+        alertAssigneesPanels,
+        alertTagsPanels,
+        runAlertWorkflowPanel,
+        runDocumentWorkflowPanel,
+      ]
     );
 
     const takeActionButton = (

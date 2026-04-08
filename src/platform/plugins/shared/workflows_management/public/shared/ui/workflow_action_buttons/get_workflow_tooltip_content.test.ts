@@ -88,13 +88,13 @@ describe('getTestRunTooltipContent', () => {
     expect(result).toBe('Fix errors to run workflow');
   });
 
-  it('returns not-allowed message when canRunWorkflow is false', () => {
+  it('returns execute privilege message when canRunWorkflow is false', () => {
     const result = getTestRunTooltipContent({
       isValid: true,
       canRunWorkflow: false,
       isExecutionsTab: false,
     });
-    expect(result).toBe('You are not allowed to run workflows');
+    expect(result).toBe('You need the Workflows "Execute" privilege to run workflows.');
   });
 
   it('returns null when all conditions are met', () => {

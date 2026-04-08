@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, ROOT_STREAM_NAMES, type RootStreamName } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -53,10 +54,12 @@ export function Wrapper({
   tabs,
   streamId,
   tab,
+  topContent,
 }: {
   tabs: ManagementTabs;
   streamId: string;
   tab: string;
+  topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
@@ -140,6 +143,24 @@ export function Wrapper({
     streamBadges.push({ key: 'classic', node: <ClassicStreamBadge /> });
   }
   if (Streams.WiredStream.GetResponse.is(definition)) {
+    if (ROOT_STREAM_NAMES.includes(definition.stream.name as RootStreamName)) {
+      streamBadges.push({
+        key: 'technicalPreview',
+        node: (
+          <EuiBetaBadge
+            tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+              defaultMessage: 'This feature is in technical preview. We are working on it...',
+            })}
+            label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+              defaultMessage: 'Technical preview',
+            })}
+            iconType="flask"
+            size="s"
+            css={{ display: 'block' }}
+          />
+        ),
+      });
+    }
     streamBadges.push({ key: 'wired', node: <WiredStreamBadge /> });
   }
   if (Streams.ingest.all.GetResponse.is(definition)) {
@@ -245,6 +266,7 @@ export function Wrapper({
         })}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {topContent}
         {Streams.ingest.all.GetResponse.is(definition) && definition.replicated && (
           <>
             <EuiCallOut
