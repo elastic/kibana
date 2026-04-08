@@ -466,7 +466,7 @@ describe('XY', () => {
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
                     text: { visible: true },
-                    axis: 'left',
+                    axis_id: 'y',
                   },
                   {
                     operation: 'average',
@@ -474,7 +474,7 @@ describe('XY', () => {
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
                     text: { visible: false },
-                    axis: 'left',
+                    axis_id: 'y',
                   },
                 ],
               },
@@ -663,7 +663,8 @@ describe('XY', () => {
             type: 'xy',
             title: 'XY Chart with Y-Axis Only',
             axis: {
-              left: {
+              y: {
+                anchor: 'start',
                 ticks: { visible: true },
                 grid: { visible: true },
               },

@@ -75,53 +75,89 @@ export const statisticsSchema = schema.oneOf(
 // Should be kept in sync with the number of statistics options
 export const statisticsOptionsSize = 17;
 
-/**
- * Y-axis extent configuration defining how the axis bounds are calculated
- */
-const yExtendSchema = schema.oneOf(
-  [
-    schema.object(
-      {
-        type: schema.literal('full'),
-        integer_rounding: schema.maybe(schema.boolean()),
-      },
-      { meta: { description: 'Full extent mode with optional integer rounding' } }
-    ),
-    schema.object(
-      {
-        type: schema.literal('focus'),
-      },
-      { meta: { description: 'Focus mode for tighter data bounds' } }
-    ),
-    schema.object(
-      {
-        type: schema.literal('custom'),
-        start: schema.number({ meta: { description: 'Custom axis start value' } }),
-        end: schema.number({ meta: { description: 'Custom axis end value' } }),
-        integer_rounding: schema.maybe(schema.boolean()),
-      },
-      { meta: { description: 'Custom extent with explicit bounds' } }
-    ),
-  ],
+const domainRoundingSchema = schema.boolean({
+  defaultValue: true,
+  meta: {
+    id: 'vis_api_domain_rounding',
+    description:
+      'Whether to round axis domain bounds outward to readable “nice” values (for example 1, 5, 10, 100) instead of exact data min/max.',
+  },
+});
+
+const domainFullConfigSchema = schema.object(
+  {
+    type: schema.literal('full'),
+    rounding: schema.maybe(domainRoundingSchema),
+  },
   {
     meta: {
-      description: 'Y-axis extent configuration defining how the axis bounds are calculated',
+      id: 'vis_api_domain_full',
+      description:
+        'Uses the full chart domain, including baseline expansion when applicable (for example, includes zero for bar-like series).',
+    },
+  }
+);
+
+const domainFitConfigSchema = schema.object(
+  {
+    type: schema.literal('fit'),
+    rounding: schema.maybe(domainRoundingSchema),
+  },
+  {
+    meta: {
+      id: 'vis_api_domain_fit',
+      description:
+        'Uses tight domain bounds from the observed data minimum to maximum, without baseline expansion.',
+    },
+  }
+);
+
+const domainCustomConfigSchema = schema.object(
+  {
+    type: schema.literal('custom'),
+    min: schema.number({ meta: { description: 'Min domain value' } }),
+    max: schema.number({ meta: { description: 'Max domain value' } }),
+    rounding: schema.maybe(domainRoundingSchema),
+  },
+  {
+    meta: {
+      id: 'vis_api_domain_custom',
+      description: 'Uses explicitly provided domain bounds (min and max).',
     },
   }
 );
 
 /**
+ * Y-axis domain configuration defining how the axis bounds are calculated
+ */
+const yDomainSchema = schema.discriminatedUnion(
+  'type',
+  [domainFullConfigSchema, domainFitConfigSchema, domainCustomConfigSchema],
+  {
+    defaultValue: {
+      type: 'full',
+      rounding: true,
+    },
+    meta: {
+      description: 'Y-axis domain configuration',
+    },
+  }
+);
+export type YDomainSchemaType = TypeOf<typeof yDomainSchema>;
+
+/**
  * Y-axis scale type for data transformation
  */
 const yScaleSchema = schema.oneOf(
-  [schema.literal('time'), schema.literal('linear'), schema.literal('log'), schema.literal('sqrt')],
+  [schema.literal('linear'), schema.literal('log'), schema.literal('sqrt')],
   { meta: { description: 'Y-axis scale type for data transformation' } }
 );
+export type YScaleSchemaType = TypeOf<typeof yScaleSchema>;
 
 /**
  * Common axis configuration properties shared across X and Y axes
  */
-const sharedAxisSchema = {
+export const sharedAxisSchema = {
   title: schema.maybe(
     schema.object(axisTitleSchemaProps, { meta: { description: 'Axis title configuration' } })
   ),
@@ -163,17 +199,46 @@ const sharedAxisSchema = {
   ),
 };
 
-/**
- * Complete Y-axis configuration including scale and extent
- */
+const yAxisAnchorSchema = schema.oneOf([schema.literal('start'), schema.literal('end')], {
+  meta: {
+    description:
+      'Position of the Y-axis relative to the chart orientation: start places it on the leading side (left in vertical charts), end on the trailing side (right in vertical charts).',
+  },
+});
+
 const yAxisSchema = schema.object(
   {
+    anchor: schema.maybe(yAxisAnchorSchema),
     ...sharedAxisSchema,
     scale: schema.maybe(yScaleSchema),
-    extent: schema.maybe(yExtendSchema),
+    domain: schema.maybe(yDomainSchema),
   },
-  { meta: { description: 'Y-axis configuration with scale and bounds' } }
+  {
+    meta: {
+      description:
+        'Y-axis configuration with optional anchor, scale, and bounds. The anchor controls which side of the chart the axis renders on.',
+    },
+  }
 );
+export type YAxisSchemaType = TypeOf<typeof yAxisSchema>;
+
+const xAxisSchema = schema.object(
+  {
+    ...sharedAxisSchema,
+    scale: schema.maybe(xScaleSchema),
+    domain: schema.maybe(
+      schema.oneOf([domainFitConfigSchema, domainCustomConfigSchema], {
+        meta: {
+          description: 'X-axis domain configuration',
+        },
+      })
+    ),
+  },
+  {
+    meta: { description: 'X-axis configuration' },
+  }
+);
+export type XAxisSchemaType = TypeOf<typeof xAxisSchema>;
 
 /**
  * Chart types available for data layers in XY visualizations
@@ -511,43 +576,16 @@ const xySharedSettings = {
   axis: schema.maybe(
     schema.object(
       {
-        x: schema.maybe(
-          schema.object(
-            {
-              ...sharedAxisSchema,
-              scale: xScaleSchema,
-              extent: schema.maybe(
-                schema.oneOf([
-                  schema.object(
-                    {
-                      type: schema.literal('full'),
-                      integer_rounding: schema.maybe(schema.boolean()),
-                    },
-                    { meta: { description: 'Full extent mode for X-axis' } }
-                  ),
-                  schema.object(
-                    {
-                      type: schema.literal('custom'),
-                      start: schema.number({ meta: { description: 'Custom X-axis start value' } }),
-                      end: schema.number({ meta: { description: 'Custom X-axis end value' } }),
-                      integer_rounding: schema.maybe(schema.boolean()),
-                    },
-                    { meta: { description: 'Custom X-axis extent' } }
-                  ),
-                ])
-              ),
-            },
-            { meta: { description: 'X-axis (horizontal) configuration' } }
-          )
-        ),
-        left: schema.maybe(yAxisSchema),
-        right: schema.maybe(yAxisSchema),
+        x: schema.maybe(xAxisSchema),
+        y: schema.maybe(yAxisSchema),
+        secondary_y: schema.maybe(yAxisSchema),
       },
       {
         meta: {
-          id: 'xyAxis',
+          id: 'vis_api_xy_axis_config',
           title: 'Axis',
-          description: 'Axis configuration for X, left Y, and right Y axes',
+          description:
+            'Axis configuration for X, primary Y, and secondary Y axes. The primary Y axis defaults to the start (leading) side, and the secondary Y axis defaults to the end (trailing) side.',
         },
       }
     )
@@ -555,6 +593,13 @@ const xySharedSettings = {
   styling: schema.maybe(xyStylingSchema),
 };
 
+const yAxisIdReferenceSchema = schema.oneOf([schema.literal('y'), schema.literal('secondary_y')], {
+  defaultValue: 'y',
+  meta: {
+    description:
+      'ID of the axis definition this Y metric is bound to; links the metric to the matching axis configuration in axis.y or axis.secondary_y. If omitted, the metric is bound to the primary Y axis.',
+  },
+});
 /**
  * Data layer configuration for standard (non-ES|QL) queries with breakdown and metrics
  */
@@ -576,7 +621,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ),
     y: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
-        axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
+        axis_id: schema.maybe(yAxisIdReferenceSchema),
         color: schema.maybe(staticColorSchema),
       }),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
@@ -612,7 +657,7 @@ const xyDataLayerSchemaESQL = schema.object(
     y: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(
         {
-          axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
+          axis_id: schema.maybe(yAxisIdReferenceSchema),
           color: schema.maybe(staticColorSchema),
         },
         { meta: { description: 'ES|QL column for Y-axis metric' } }
@@ -691,10 +736,13 @@ const referenceLineLayerShared = {
       meta: { description: 'Position of the icon and label relative to the reference line' },
     })
   ),
-  axis: schema.maybe(
-    schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
-      defaultValue: 'left',
-      meta: { description: 'Which axis the reference line applies to' },
+  axis_id: schema.maybe(
+    schema.oneOf([schema.literal('x'), schema.literal('y'), schema.literal('secondary_y')], {
+      defaultValue: 'y',
+      meta: {
+        description:
+          'ID of the axis this reference line applies to. If omitted, the reference line is bound to the primary Y axis.',
+      },
     })
   ),
 };
