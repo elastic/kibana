@@ -383,6 +383,7 @@ export async function setFailureStoreRetention(
     await dialog.getByTestId(`failureStoreDslUnitOption-${unit}`).click();
   }
 
+  await expect(page.getByTestId('failureStoreModalSaveButton')).toBeEnabled();
   await page.getByTestId('failureStoreModalSaveButton').click();
   await expect(page.getByRole('dialog')).toBeHidden();
 }
@@ -400,6 +401,7 @@ export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Pro
   // Wait for toggle to be enabled after modal opens
   await waitForElementToBeEnabled(page, 'enableFailureStoreToggle');
   await page.getByTestId('enableFailureStoreToggle').click();
+  await expect(page.getByTestId('failureStoreModalSaveButton')).toBeEnabled();
   await page.getByTestId('failureStoreModalSaveButton').click();
   await expect(page.getByRole('dialog')).toBeHidden();
 }

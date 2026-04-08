@@ -305,6 +305,7 @@ test.describe(
 
       // Toggle the inherit failure store switch
       await page.getByTestId('inheritFailureStoreSwitch').click();
+      await expect(page.getByTestId('failureStoreModalSaveButton')).toBeEnabled();
       await page.getByTestId('failureStoreModalSaveButton').click();
 
       // Verify the modal is closed
