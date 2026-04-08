@@ -471,7 +471,7 @@ export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .should('not.be.disabled')
-    .type(rule.query || '');
+    .type(rule.query || '', { force: true });
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
@@ -575,7 +575,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .should('not.be.disabled')
-    .type(rule.query || '');
+    .type(rule.query || '', { force: true });
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -625,7 +625,7 @@ export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .should('not.be.disabled')
-    .type(rule.query || '');
+    .type(rule.query || '', { force: true });
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${rule.new_terms_fields[0]}{enter}`);
 
