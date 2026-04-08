@@ -110,6 +110,7 @@ export {
   canChangeAgentVisibility,
   hasAgentReadAccess,
   hasAgentWriteAccess,
+  canCurrentUserEditAgent,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
