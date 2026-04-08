@@ -21,8 +21,8 @@ import type {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import {
-  FindRulesWithFacetsRequestQuery,
-  validateFindRulesWithFacetsRequestQuery,
+  FindRulesWithFacetsRequestBody,
+  validateFindRulesWithFacetsRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
@@ -39,7 +39,7 @@ import { transformFindAlerts } from '../../../utils/utils';
  */
 export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
-    .get({
+    .post({
       access: 'internal',
       path: DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
       security: {
@@ -53,39 +53,34 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
         version: '1',
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindRulesWithFacetsRequestQuery),
+            body: buildRouteValidationWithZod(FindRulesWithFacetsRequestBody),
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<FindRulesWithFacetsResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        const validationErrors = validateFindRulesWithFacetsRequestQuery(request.query);
+        const validationErrors = validateFindRulesWithFacetsRequestBody(request.body);
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
 
         try {
-          const { query } = request;
+          const reqBody = request.body;
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
 
           const combinedKql = buildGranularRulesKql({
-            filter: query.filter,
-            search: query.searchTerm
-              ? {
-                  term: query.searchTerm,
-                  mode: query.searchMode,
-                }
-              : undefined,
+            filter: reqBody.filter,
+            search: reqBody.search,
           });
 
-          const parsedSort = parseGranularSort(query.sort);
+          const parsedSort = parseGranularSort(reqBody.sort);
           const sortField = parsedSort?.sortField;
           const sortOrder = parsedSort?.sortOrder;
 
-          const cursorResult = resolveGranularFindCursor(query.cursor, sortField, sortOrder);
+          const cursorResult = resolveGranularFindCursor(reqBody.cursor, sortField, sortOrder);
 
           if (!cursorResult.ok) {
             return siemResponse.error({ statusCode: 400, body: cursorResult.error });
@@ -94,21 +89,21 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
 
           let ruleIds: string[] | undefined;
           let warnings: WarningSchema[] | undefined;
-          const gapFillStatuses = (query.gap_fill_statuses ?? []) as GapFillStatus[];
+          const gapFillStatuses = (reqBody.gap_fill_statuses ?? []) as GapFillStatus[];
 
-          if (gapFillStatuses.length > 0 && query.gaps_range_start && query.gaps_range_end) {
+          if (gapFillStatuses.length > 0 && reqBody.gaps_range_start && reqBody.gaps_range_end) {
             const { ruleIds: gapRuleIds, truncated } = await getGapFilteredRuleIds({
               rulesClient,
               gapRange: {
-                start: query.gaps_range_start,
-                end: query.gaps_range_end,
+                start: reqBody.gaps_range_start,
+                end: reqBody.gaps_range_end,
               },
               gapFillStatuses,
               maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
               filter: combinedKql,
               sortField,
               sortOrder,
-              schedulerId: query.gap_auto_fill_scheduler_id,
+              schedulerId: reqBody.gap_auto_fill_scheduler_id,
             });
 
             if (truncated) {
@@ -126,8 +121,8 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
                 ...transformFindAlerts(
                   {
                     data: [],
-                    page: query.page,
-                    perPage: query.per_page,
+                    page: reqBody.page,
+                    perPage: reqBody.per_page,
                     total: 0,
                   },
                   warnings
@@ -139,18 +134,18 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
             ruleIds = gapRuleIds;
           }
 
-          const includeCounts = query.include_counts ?? [];
+          const includeCounts = reqBody.aggregations?.counts ?? [];
 
           let counts: FacetCounts | undefined;
 
           const rules = await findRules({
             rulesClient,
-            perPage: query.per_page,
-            page: searchAfter != null ? 1 : query.page,
+            perPage: reqBody.per_page,
+            page: searchAfter != null ? 1 : reqBody.page,
             sortField,
             sortOrder,
             filter: combinedKql,
-            fields: query.fields,
+            fields: reqBody.fields,
             ruleIds,
             searchAfter,
             pit,
@@ -166,12 +161,12 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
           }
 
           const base = transformFindAlerts(rules, warnings);
-          const body: FindRulesWithFacetsResponse = {
+          const responseBody: FindRulesWithFacetsResponse = {
             ...base,
             ...(counts !== undefined ? { counts } : {}),
           };
 
-          return response.ok({ body });
+          return response.ok({ body: responseBody });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

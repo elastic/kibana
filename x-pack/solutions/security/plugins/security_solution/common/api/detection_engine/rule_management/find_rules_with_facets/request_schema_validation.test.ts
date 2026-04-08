@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { FindRulesWithFacetsRequestQueryInput } from './find_rules_with_facets_route.gen';
+import type { FindRulesWithFacetsRequestBodyInput } from './find_rules_with_facets_route.gen';
 import {
   MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH,
   MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
 } from './find_rules_with_facets_limits';
 import {
-  validateFindRulesWithFacetsRequestQuery,
   validateFindRulesWithFacetsKqlFilter,
+  validateFindRulesWithFacetsRequestBody,
 } from './request_schema_validation';
 
 describe('validateFindRulesWithFacetsKqlFilter', () => {
@@ -41,104 +41,101 @@ describe('validateFindRulesWithFacetsKqlFilter', () => {
   });
 });
 
-describe('validateFindRulesWithFacetsRequestQuery', () => {
-  const emptyQuery: FindRulesWithFacetsRequestQueryInput = {
+describe('validateFindRulesWithFacetsRequestBody', () => {
+  const emptyBody: FindRulesWithFacetsRequestBodyInput = {
     page: 1,
     per_page: 20,
   };
 
-  it('accepts minimal valid query', () => {
-    expect(validateFindRulesWithFacetsRequestQuery(emptyQuery)).toEqual([]);
+  it('accepts minimal valid body', () => {
+    expect(validateFindRulesWithFacetsRequestBody(emptyBody)).toEqual([]);
   });
 
-  it('accepts searchTerm and searchMode omitted', () => {
+  it('accepts search omitted', () => {
     expect(
-      validateFindRulesWithFacetsRequestQuery({
-        ...emptyQuery,
-        searchTerm: undefined,
-        searchMode: undefined,
+      validateFindRulesWithFacetsRequestBody({
+        ...emptyBody,
       })
     ).toEqual([]);
   });
 
-  it('accepts searchTerm with legacy searchMode', () => {
+  it('accepts search with term and legacy mode', () => {
     expect(
-      validateFindRulesWithFacetsRequestQuery({
-        ...emptyQuery,
-        searchTerm: 'hello',
-        searchMode: 'legacy',
+      validateFindRulesWithFacetsRequestBody({
+        ...emptyBody,
+        search: { term: 'hello', mode: 'legacy' },
       })
     ).toEqual([]);
   });
 
-  it('accepts searchTerm only (searchMode defaults at runtime)', () => {
+  it('accepts search with term only (mode defaults at runtime)', () => {
     expect(
-      validateFindRulesWithFacetsRequestQuery({
-        ...emptyQuery,
-        searchTerm: 'abc',
+      validateFindRulesWithFacetsRequestBody({
+        ...emptyBody,
+        search: { term: 'abc' },
       })
     ).toEqual([]);
   });
 
-  it('accepts searchTerm at max length', () => {
-    const searchTerm = 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH);
+  it('accepts search.term at max length', () => {
+    const term = 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH);
     expect(
-      validateFindRulesWithFacetsRequestQuery({
-        ...emptyQuery,
-        searchTerm,
-        searchMode: 'legacy',
+      validateFindRulesWithFacetsRequestBody({
+        ...emptyBody,
+        search: { term, mode: 'legacy' },
       })
     ).toEqual([]);
   });
 
   it('rejects partial gap parameters (parity with classic _find)', () => {
-    const errors = validateFindRulesWithFacetsRequestQuery({
-      ...emptyQuery,
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...emptyBody,
       gaps_range_start: '2024-01-01',
     });
     expect(errors.some((e) => e.includes('gap'))).toBe(true);
   });
 
-  it('rejects searchTerm over max length', () => {
-    const errors = validateFindRulesWithFacetsRequestQuery({
-      ...emptyQuery,
-      searchTerm: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1),
+  it('rejects search.term over max length', () => {
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...emptyBody,
+      search: {
+        term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1),
+      },
     });
     expect(errors).toContain(
-      `searchTerm exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+      `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
     );
   });
 
   it('rejects invalid filter KQL', () => {
-    const errors = validateFindRulesWithFacetsRequestQuery({
-      ...emptyQuery,
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...emptyBody,
       filter: 'not kql :',
     });
     expect(errors.some((e) => e.startsWith('invalid KQL filter'))).toBe(true);
   });
 
   it('rejects unsupported sort field token', () => {
-    const errors = validateFindRulesWithFacetsRequestQuery({
-      ...emptyQuery,
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...emptyBody,
       sort: ['not_a_real_field:asc'],
     });
     expect(errors.some((e) => e.includes('unsupported sort field'))).toBe(true);
   });
 
   it('rejects malformed sort token', () => {
-    const errors = validateFindRulesWithFacetsRequestQuery({
-      ...emptyQuery,
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...emptyBody,
       sort: ['nameasc'],
     });
     expect(errors.some((e) => e.includes('invalid sort token'))).toBe(true);
   });
 
-  it('rejects unsupported searchMode', () => {
-    const errors = validateFindRulesWithFacetsRequestQuery({
-      ...emptyQuery,
-      searchTerm: 'x',
-      searchMode: 'vector' as unknown as FindRulesWithFacetsRequestQueryInput['searchMode'],
+  it('rejects unsupported search.mode', () => {
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...emptyBody,
+      search: { term: 'x', mode: 'vector' } as FindRulesWithFacetsRequestBodyInput['search'],
     });
-    expect(errors).toContain('unsupported searchMode "vector"');
+    expect(errors).toContain('unsupported search.mode "vector"');
   });
 });

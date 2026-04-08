@@ -30,13 +30,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  const findRulesWithFacets = (query: Record<string, unknown>) =>
+  const findRulesWithFacets = (requestBody: Record<string, unknown>) =>
     supertest
-      .get(DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS)
+      .post(DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS)
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(query);
+      .send(requestBody);
 
   describe('@ess @serverless @skipInServerlessMKI find_rules_with_facets', () => {
     beforeEach(async () => {
@@ -69,16 +69,15 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule('facets-kql-search', true));
       const { body } = await findRulesWithFacets({
         filter: 'alert.attributes.enabled: true',
-        searchTerm: 'Simple',
-        searchMode: 'legacy',
+        search: { term: 'Simple', mode: 'legacy' },
       }).expect(200);
       expect(body.total).to.be(1);
     });
 
-    it('returns facet counts when include_counts is set', async () => {
+    it('returns facet counts when aggregations.counts is set', async () => {
       await createRule(supertest, log, getSimpleRule());
       const { body } = await findRulesWithFacets({
-        include_counts: ['enabled'],
+        aggregations: { counts: ['enabled'] },
       }).expect(200);
       expect(body.total).to.be(1);
       expect(body.counts).to.be.an('object');
@@ -135,16 +134,16 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(String(body.message)).to.contain('cursor requires sort');
     });
 
-    it('returns 400 when searchTerm exceeds max length', async () => {
+    it('returns 400 when search.term exceeds max length', async () => {
       const { body } = await findRulesWithFacets({
-        searchTerm: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1),
+        search: { term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1) },
       }).expect(400);
       const status = body.status_code ?? body.statusCode;
       expect(status).to.be(400);
       const messageText = Array.isArray(body.message)
         ? body.message.join(' ')
         : String(body.message);
-      expect(messageText.toLowerCase()).to.match(/searchterm/);
+      expect(messageText.toLowerCase()).to.match(/search\.term/);
       expect(messageText.toLowerCase()).to.contain('length');
     });
   });

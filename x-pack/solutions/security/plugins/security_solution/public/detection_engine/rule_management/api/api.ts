@@ -95,7 +95,6 @@ import type {
 } from '../logic/types';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { defaultRangeValue } from '../../rule_gaps/constants';
-import { RULES_TABLE_WITH_FACETS_INCLUDE_COUNTS } from './rules_table_with_facets_include_counts';
 
 /**
  * Create provided Rule
@@ -233,7 +232,7 @@ export const fetchRules = async ({
 };
 
 /**
- * Fetches rules via internal `_find_with_facets` (KQL `filter` + optional `search` term/mode, `sort` token).
+ * Fetches rules via internal `_find_with_facets` (POST JSON body: KQL `filter`, optional `search`, `sort`, …).
  * Not a public HTTP contract yet. Use {@link fetchRules} for classic `_find`.
  */
 export const fetchRulesWithFacets = async ({
@@ -246,14 +245,14 @@ export const fetchRulesWithFacets = async ({
   },
   signal,
   schedulerId,
-  includeCountsCategories = RULES_TABLE_WITH_FACETS_INCLUDE_COUNTS,
+  aggregations,
   cursor,
   gapFillStatuses,
 }: FetchRulesWithFacetsProps): Promise<FetchRulesWithFacetsResponse> => {
   const shouldApplyDefaultGapsRange = Boolean(gapFillStatuses?.length);
   const defaultGapsRange = shouldApplyDefaultGapsRange ? getGapRange(defaultRangeValue) : undefined;
 
-  const query = {
+  const body = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort: [sort],
@@ -262,19 +261,18 @@ export const fetchRulesWithFacets = async ({
       ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
       : {}),
     ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
-    searchTerm: search?.term,
-    searchMode: search?.mode,
+    ...(search != null ? { search } : {}),
     ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
-    ...(includeCountsCategories.length > 0 ? { include_counts: includeCountsCategories } : {}),
+    ...(aggregations != null ? { aggregations } : {}),
     ...(cursor ? { cursor } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesWithFacetsResponse>(
     DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
     {
-      method: 'GET',
+      method: 'POST',
       version: '1',
-      query,
+      body: JSON.stringify(body),
       signal,
     }
   );

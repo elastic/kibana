@@ -62,7 +62,7 @@ import type {
   ExportRulesRequestBodyInput,
 } from './detection_engine/rule_management/export_rules/export_rules_route.gen';
 import type {
-  FindRulesWithFacetsRequestQueryInput,
+  FindRulesWithFacetsRequestBodyInput,
   FindRulesWithFacetsResponse,
 } from './detection_engine/rule_management/find_rules_with_facets/find_rules_with_facets_route.gen';
 import type {
@@ -1693,16 +1693,13 @@ finalize it.
 first-party Security Solution UI with an internal-origin request. Subject to change
 before promotion to `access: public`.
 
-Paginated listing of installed detection rules using a KQL `filter` string (friendly field
-vocabulary, rewritten to `alert.attributes.*` server-side), optional legacy search, facet
-counts, multi-sort, and opaque cursor pagination.
+Paginated listing of installed detection rules using a JSON body: KQL `filter`, optional
+`search` (`term` + `mode`), `aggregations.counts`, multi-sort, and opaque cursor pagination.
 
-When `search_mode` is `legacy` and `search_term` is set, the server ANDs the filter KQL
-with a KQL fragment derived from `search_term` (same semantics as legacy rule management search).
+When `search.mode` is `legacy` and `search.term` is set, the server ANDs the filter KQL
+with a KQL fragment derived from `term` (same semantics as legacy rule management search).
 
-Sorting is expressed as repeated `sort` query parameters or a single comma-separated value;
-each token must be `<field>:<order>` where `<order>` is `asc` or `desc` and `<field>` is a
-supported rule sort field (see `FindRulesSortField` on the classic `_find` endpoint).
+Sorting is expressed as a `sort` array of `field:order` tokens.
 
     */
   async findRulesWithFacets(props: FindRulesWithFacetsProps) {
@@ -1713,9 +1710,8 @@ supported rule sort field (see `FindRulesSortField` on the classic `_find` endpo
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
-        method: 'GET',
-
-        query: props.query,
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3810,7 +3806,7 @@ export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
 export interface FindRulesWithFacetsProps {
-  query: FindRulesWithFacetsRequestQueryInput;
+  body: FindRulesWithFacetsRequestBodyInput;
 }
 export interface GetAllTranslationStatsDashboardMigrationProps {
   params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;

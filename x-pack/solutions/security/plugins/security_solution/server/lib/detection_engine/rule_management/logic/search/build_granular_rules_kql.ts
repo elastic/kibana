@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GranularRulesSearchMode } from '../../../../../../common/api/detection_engine/rule_management';
+import type { GranularRulesSearch } from '../../../../../../common/api/detection_engine/rule_management';
 import { convertRuleSearchTermToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 
 /**
@@ -16,7 +16,7 @@ export const buildGranularRulesKql = ({
   search,
 }: {
   filter: string | undefined;
-  search: { term: string; mode: GranularRulesSearchMode | undefined } | undefined;
+  search: GranularRulesSearch | undefined;
 }): string | undefined => {
   const parts: string[] = [];
   const trimmedFilter = filter?.trim();

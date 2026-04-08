@@ -15,63 +15,61 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import {
-  GranularRulesFacetCategory,
-  GranularRulesSearchMode,
+  GranularRulesSearch,
+  FindRulesWithFacetsAggregations,
   FacetCounts,
 } from '../granular_rules_contract.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
-export type FindRulesWithFacetsRequestQuery = z.infer<typeof FindRulesWithFacetsRequestQuery>;
-export const FindRulesWithFacetsRequestQuery = z.object({
-  /**
-   * Subset of rule fields to return (same semantics as classic `_find`).
-   */
-  fields: ArrayFromString(z.string()).optional(),
-  /**
-      * KQL filter using friendly field names (`name`, `tags`, `enabled`, …); rewritten to
-saved-object / alerting fields before execution.
-
-      */
-  filter: z.string().optional(),
-  /**
-   * Facet categories for which to compute counts over the filtered + searched set.
-   */
-  include_counts: ArrayFromString(GranularRulesFacetCategory).optional(),
-  searchTerm: z.string().optional(),
-  searchMode: GranularRulesSearchMode.optional(),
-  /**
-   * Sort criteria as `field:order` tokens (e.g. `name:asc`). Comma-separated or repeated.
-   */
-  sort: ArrayFromString(z.string()).optional(),
-  /**
-   * Page number (1-based). Ignored when `cursor` is provided.
-   */
-  page: z.coerce.number().int().min(1).optional().default(1),
-  /**
-   * Page size.
-   */
-  per_page: z.coerce.number().int().min(0).max(10000).optional().default(20),
-  /**
-   * Opaque cursor from a previous response's `next_cursor`.
-   */
-  cursor: z.string().optional(),
-  /**
-   * Gaps range start (must be used with other gap parameters; same rules as classic `_find`).
-   */
-  gaps_range_start: z.string().optional(),
-  /**
-   * Gaps range end
-   */
-  gaps_range_end: z.string().optional(),
-  gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
-  gap_auto_fill_scheduler_id: z.string().optional(),
-});
-export type FindRulesWithFacetsRequestQueryInput = z.input<typeof FindRulesWithFacetsRequestQuery>;
+export type FindRulesWithFacetsRequestBody = z.infer<typeof FindRulesWithFacetsRequestBody>;
+export const FindRulesWithFacetsRequestBody = z
+  .object({
+    /**
+     * Subset of rule fields to return (same semantics as classic `_find`).
+     */
+    fields: z.array(z.string()).optional(),
+    /**
+     * KQL filter using saved-object field paths, typically prefixed with `alert.attributes.`
+     * (same semantics as classic `_find`). The `FindRulesWithFacetsKqlFilterField` schema
+     * lists common **first segments** after `alert.attributes.`; use dotted paths for nested
+     * fields (e.g. `alert.attributes.schedule.interval`, `alert.attributes.mapped_params.severity`).
+     */
+    filter: z.string().optional(),
+    aggregations: FindRulesWithFacetsAggregations.optional(),
+    search: GranularRulesSearch.optional(),
+    /**
+     * Sort criteria as `field:order` tokens (e.g. `name:asc`). Comma-separated or repeated per element.
+     */
+    sort: z.array(z.string()).optional(),
+    /**
+     * Page number (1-based). Ignored when `cursor` is provided.
+     */
+    page: z.number().int().min(1).optional().default(1),
+    /**
+     * Page size.
+     */
+    per_page: z.number().int().min(0).max(10000).optional().default(20),
+    /**
+     * Opaque cursor from a previous response's `next_cursor`.
+     */
+    cursor: z.string().optional(),
+    /**
+     * Gaps range start (must be used with other gap parameters; same rules as classic `_find`).
+     */
+    gaps_range_start: z.string().optional(),
+    /**
+     * Gaps range end
+     */
+    gaps_range_end: z.string().optional(),
+    gap_fill_statuses: z.array(GapFillStatus).optional(),
+    gap_auto_fill_scheduler_id: z.string().optional(),
+  })
+  .strict();
+export type FindRulesWithFacetsRequestBodyInput = z.input<typeof FindRulesWithFacetsRequestBody>;
 
 export type FindRulesWithFacetsResponse = z.infer<typeof FindRulesWithFacetsResponse>;
 export const FindRulesWithFacetsResponse = z

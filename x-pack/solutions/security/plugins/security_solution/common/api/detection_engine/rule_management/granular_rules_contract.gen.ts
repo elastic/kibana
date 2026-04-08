@@ -25,7 +25,22 @@ export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
 export const GranularRulesSearchMode = z.literal('legacy').default('legacy');
 
 /**
-  * Facet dimension to include in `counts` when requested via `include_counts`.
+  * Optional free-text search combined with the KQL `filter` on `_find_with_facets`.
+When `mode` is `legacy` and `term` is set, the server ANDs the filter KQL with a KQL
+fragment derived from `term` (same semantics as legacy rule management search).
+
+  */
+export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
+export const GranularRulesSearch = z
+  .object({
+    term: z.string(),
+    mode: GranularRulesSearchMode.optional(),
+  })
+  .strict();
+
+/**
+  * Facet dimension for facet **counts** in the response when requested via
+`aggregations.counts` on `_find_with_facets`.
 The server maps friendly names to underlying rule fields.
 
   */
@@ -44,7 +59,58 @@ export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.e
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
 /**
-  * Per-category facet counts. Each key is a facet category from `include_counts`;
+  * Common **first path segment** after `alert.attributes.` when writing KQL for the
+`_find_with_facets` request `filter` field (same underlying rule document as classic `_find`).
+Filters use full paths such as `alert.attributes.enabled: true` or
+`alert.attributes.name: "My rule"`.
+
+Nested fields append further segments (not listed exhaustively here), for example
+`alert.attributes.schedule.interval`, `alert.attributes.mapped_params.severity`,
+`alert.attributes.params.ruleId`, `alert.attributes.lastRun.outcome`.
+
+This enumeration documents typical vocabulary for clients and codegen; the `filter`
+parameter remains a free-form KQL string and may reference other indexed paths when valid.
+
+  */
+export type FindRulesWithFacetsKqlFilterField = z.infer<typeof FindRulesWithFacetsKqlFilterField>;
+export const FindRulesWithFacetsKqlFilterField = z.enum([
+  'alertTypeId',
+  'consumer',
+  'createdAt',
+  'createdBy',
+  'enabled',
+  'executionStatus',
+  'lastRun',
+  'mapped_params',
+  'monitoring',
+  'name',
+  'params',
+  'revision',
+  'schedule',
+  'tags',
+  'updatedAt',
+  'updatedBy',
+]);
+export type FindRulesWithFacetsKqlFilterFieldEnum = typeof FindRulesWithFacetsKqlFilterField.enum;
+export const FindRulesWithFacetsKqlFilterFieldEnum = FindRulesWithFacetsKqlFilterField.enum;
+
+/**
+  * Aggregation-related options on `_find_with_facets` (JSON request body). Additional
+aggregation kinds may be added later alongside `counts`.
+
+  */
+export type FindRulesWithFacetsAggregations = z.infer<typeof FindRulesWithFacetsAggregations>;
+export const FindRulesWithFacetsAggregations = z
+  .object({
+    /**
+     * Facet categories for which to compute counts over the filtered + searched set.
+     */
+    counts: z.array(GranularRulesFacetCategory).optional(),
+  })
+  .strict();
+
+/**
+  * Per-category facet counts. Each key is a facet category from `aggregations.counts`;
 each value maps a displayed bucket value (string) to a non-negative count.
 
   */

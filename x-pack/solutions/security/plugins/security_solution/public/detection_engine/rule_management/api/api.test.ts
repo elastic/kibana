@@ -516,13 +516,15 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules/_find_with_facets',
         expect.objectContaining({
-          method: 'GET',
+          method: 'POST',
           version: '1',
-          query: expect.objectContaining({
+          body: JSON.stringify({
             page: 1,
             per_page: 20,
             sort: ['enabled:desc'],
-            include_counts: ['tags', 'enabled', 'type', 'customization_status', 'execution_status'],
+            aggregations: {
+              counts: ['tags', 'enabled', 'type', 'customization_status', 'execution_status'],
+            },
           }),
         })
       );
@@ -537,26 +539,34 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules/_find_with_facets',
         expect.objectContaining({
-          query: expect.objectContaining({
-            'search[term]': 'hello',
-            'search[mode]': 'legacy',
-            filter: 'alert.attributes.params.immutable: false',
+          method: 'POST',
+          version: '1',
+          body: JSON.stringify({
+            page: 1,
+            per_page: 20,
             sort: ['name:asc'],
+            filter: 'alert.attributes.params.immutable: false',
+            search: { term: 'hello', mode: 'legacy' },
+            aggregations: {
+              counts: ['tags', 'enabled', 'type', 'customization_status', 'execution_status'],
+            },
           }),
         })
       );
     });
 
-    test('omits include_counts when includeCountsCategories is empty', async () => {
+    test('omits aggregations when includeCountsCategories is empty', async () => {
       await fetchRulesWithFacets({ includeCountsCategories: [] });
       const [, options] = fetchMock.mock.calls[0];
-      expect(options.query).not.toHaveProperty('include_counts');
+      expect(JSON.parse(options.body as string)).not.toHaveProperty('aggregations');
     });
 
-    test('passes cursor in the query when provided', async () => {
+    test('passes cursor in the body when provided', async () => {
       await fetchRulesWithFacets({ cursor: 'opaque-cursor' });
       const [, options] = fetchMock.mock.calls[0];
-      expect(options.query).toEqual(expect.objectContaining({ cursor: 'opaque-cursor' }));
+      expect(JSON.parse(options.body as string)).toEqual(
+        expect.objectContaining({ cursor: 'opaque-cursor' })
+      );
     });
   });
 

@@ -10,7 +10,10 @@ import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
-import type { GranularRulesSearchMode } from '../../../../../common/api/detection_engine/rule_management';
+import type {
+  FindRulesWithFacetsAggregations,
+  GranularRulesSearch,
+} from '../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../common/constants';
 import type { PaginationOptions } from '../../logic';
 import { fetchRulesWithFacets } from '../api';
@@ -18,15 +21,15 @@ import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
   filter?: string;
-  searchMode?: GranularRulesSearchMode;
-  searchTerm?: string;
+  search?: GranularRulesSearch;
   sort?: string;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   schedulerId?: string;
   gapFillStatuses?: GapFillStatus[];
+  aggregations?: FindRulesWithFacetsAggregations;
 }
 
-const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS];
+const FIND_RULES_QUERY_KEY = ['POST', DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS];
 
 export interface RulesQueryResponse {
   rules: RuleResponse[];
@@ -58,8 +61,13 @@ export const useFindRulesQuery = (
     async ({ signal }) => {
       const response = await fetchRulesWithFacets({
         signal,
-        ...queryArgs,
-        includeCountsCategories: ['tags', 'enabled'],
+        filter: queryArgs.filter,
+        sort: queryArgs.sort,
+        pagination: queryArgs.pagination,
+        schedulerId: queryArgs.schedulerId,
+        gapFillStatuses: queryArgs.gapFillStatuses,
+        search: queryArgs.search,
+        aggregations: queryArgs.aggregations,
       });
 
       return { rules: response.data, total: response.total, warnings: response.warnings };

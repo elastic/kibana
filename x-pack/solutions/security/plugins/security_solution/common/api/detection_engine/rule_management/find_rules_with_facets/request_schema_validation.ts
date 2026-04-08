@@ -9,7 +9,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import type { FindRulesRequestQueryInput } from '../find_rules/find_rules_route.gen';
 import { validateFindRulesRequestQuery } from '../find_rules/request_schema_validation';
-import type { FindRulesWithFacetsRequestQueryInput } from './find_rules_with_facets_route.gen';
+import type { FindRulesWithFacetsRequestBodyInput } from './find_rules_with_facets_route.gen';
 import {
   MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH,
   MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
@@ -61,27 +61,28 @@ const validateSortTokens = (sort: string[] | undefined): string[] => {
   }
   return errors;
 };
+
 /**
  * Additional validation for internal `_find_with_facets` beyond generated Zod (gaps parity, KQL parse, sort fields).
  */
-export const validateFindRulesWithFacetsRequestQuery = (
-  query: FindRulesWithFacetsRequestQueryInput
+export const validateFindRulesWithFacetsRequestBody = (
+  body: FindRulesWithFacetsRequestBodyInput
 ): string[] => {
-  const errors = [...validateFindRulesRequestQuery(query as FindRulesRequestQueryInput)];
+  const errors = [...validateFindRulesRequestQuery(body as FindRulesRequestQueryInput)];
 
-  const searchTerm = query.searchTerm;
+  const searchTerm = body.search?.term;
   if (searchTerm != null && searchTerm.length > MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH) {
     errors.push(
-      `searchTerm exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+      `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
     );
   }
 
-  errors.push(...validateFindRulesWithFacetsKqlFilter(query.filter));
-  errors.push(...validateSortTokens(query.sort as string[] | undefined));
+  errors.push(...validateFindRulesWithFacetsKqlFilter(body.filter));
+  errors.push(...validateSortTokens(body.sort as string[] | undefined));
 
-  const searchMode = query.searchMode;
+  const searchMode = body.search?.mode;
   if (searchMode != null && searchMode !== 'legacy') {
-    errors.push(`unsupported searchMode "${searchMode}"`);
+    errors.push(`unsupported search.mode "${searchMode}"`);
   }
 
   return errors;

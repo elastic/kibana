@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** Matches OpenAPI `searchTerm` max length on `_find_with_facets` and prebuilt `_review` bodies. */
+/** Matches OpenAPI `search.term` max length on `_find_with_facets` and prebuilt `_review` bodies. */
 export const MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH = 1000;
 
 /** Soft guard for KQL filter size before parser work; tune with product limits as needed. */
