@@ -30,5 +30,6 @@
     "@kbn/axe-config",
     "@kbn/peggy",
     "@kbn/test-docker-servers",
+    "@kbn/test",
   ]
 }

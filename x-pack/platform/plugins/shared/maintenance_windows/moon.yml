@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/task-manager-plugin'
   - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/rule-data-utils'
+  - '@kbn/alerts-as-data-utils'
 tags:
   - plugin
   - prod
@@ -49,26 +51,6 @@ fileGroups:
     - public/**/*
     - common/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
