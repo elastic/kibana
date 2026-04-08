@@ -143,35 +143,35 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         const { protocol, hostname, port } = core.http.getServerInfo();
         const pathname = core.http.basePath.prepend('/api/security/saml/callback');
 
-          const serverlessOptions = plugins.cloud?.serverless
-            ? {
-                serverless: {
-                  organizationId: plugins.cloud.organizationId!,
-                  projectType: plugins.cloud.serverless.projectType!,
-                  uiamEnabled: !!config.uiam?.enabled,
-                },
-              }
-            : {};
-
-          try {
-            const requestId = await getSAMLRequestId(request.body.url);
-            if (requestId) {
-              logger.info(`Sending SAML response for request ID: ${requestId}`);
-            }
-
-            return response.ok({
-              body: {
-                SAMLResponse: await createSAMLResponse({
-                  kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
-                  username: request.body.username,
-                  full_name: request.body.full_name ?? undefined,
-                  email: request.body.email ?? undefined,
-                  roles: request.body.roles,
-                  ...(requestId ? { authnRequestId: requestId } : {}),
-                  ...serverlessOptions,
-                }),
+        const serverlessOptions = plugins.cloud?.serverless
+          ? {
+              serverless: {
+                organizationId: plugins.cloud.organizationId!,
+                projectType: plugins.cloud.serverless.projectType!,
+                uiamEnabled: !!config.uiam?.enabled,
               },
-            });
+            }
+          : {};
+
+        try {
+          const requestId = await getSAMLRequestId(request.body.url);
+          if (requestId) {
+            logger.info(`Sending SAML response for request ID: ${requestId}`);
+          }
+
+          return response.ok({
+            body: {
+              SAMLResponse: await createSAMLResponse({
+                kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+                username: request.body.username,
+                full_name: request.body.full_name ?? undefined,
+                email: request.body.email ?? undefined,
+                roles: request.body.roles,
+                ...(requestId ? { authnRequestId: requestId } : {}),
+                ...serverlessOptions,
+              }),
+            },
+          });
         } catch (err) {
           logger.error(`Failed to create SAMLResponse: ${err}`, err);
           throw err;
