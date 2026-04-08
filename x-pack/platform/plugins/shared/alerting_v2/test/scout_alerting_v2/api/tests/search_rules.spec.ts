@@ -171,12 +171,12 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
       { name: 'dev-cpu-alert', tags: ['development'] },
     ];
 
-    for (const { name, tags } of rules) {
+    for (const { name, tags: ruleTags } of rules) {
       const res = await apiClient.post(RULE_API_PATH, {
         headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
         body: {
           kind: 'alert',
-          metadata: { name, tags },
+          metadata: { name, tags: ruleTags },
           time_field: '@timestamp',
           schedule: { every: '5m' },
           evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
