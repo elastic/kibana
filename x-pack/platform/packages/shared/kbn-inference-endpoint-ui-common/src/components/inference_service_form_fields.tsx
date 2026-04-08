@@ -116,8 +116,8 @@ interface InferenceServicesProps {
     enableEisPromoTour?: boolean;
     /** When set, only these task types will be available for selection in the form. */
     allowedTaskTypes?: InferenceTaskType[];
-    /** When set, providers matching these keys will be hidden from the selectable list. */
-    excludeProviders?: ServiceProviderKeys[];
+    /** When set, providers matching these service keys will be hidden from the selectable list. */
+    excludeProviders?: string[];
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -469,7 +469,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
         if (excludeProviders?.length) {
           filteredProviders = filteredProviders.filter(
-            (provider) => !excludeProviders.includes(provider.service as ServiceProviderKeys)
+            (provider) => !excludeProviders.includes(provider.service)
           );
         }
 

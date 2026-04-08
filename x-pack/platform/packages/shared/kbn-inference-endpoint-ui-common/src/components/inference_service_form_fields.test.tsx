@@ -45,7 +45,7 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 
 interface RenderFormOptions {
   enforceAdaptiveAllocations?: boolean;
-  excludeProviders?: ServiceProviderKeys[];
+  excludeProviders?: string[];
 }
 
 const renderForm = (options: RenderFormOptions = {}) => {

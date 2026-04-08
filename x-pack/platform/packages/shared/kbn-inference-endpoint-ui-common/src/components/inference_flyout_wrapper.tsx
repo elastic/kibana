@@ -24,7 +24,6 @@ import React, { useCallback } from 'react';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as LABELS from '../translations';
-import type { ServiceProviderKeys } from '../constants';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
@@ -110,8 +109,8 @@ interface InferenceFlyoutWrapperProps {
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
   /** When set, only these task types will be available for selection in the form. */
   allowedTaskTypes?: InferenceTaskType[];
-  /** When set, providers matching these keys will be hidden from the selectable list. */
-  excludeProviders?: ServiceProviderKeys[];
+  /** When set, providers matching these service keys will be hidden from the selectable list. */
+  excludeProviders?: string[];
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
