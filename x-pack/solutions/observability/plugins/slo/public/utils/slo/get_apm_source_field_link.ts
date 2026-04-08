@@ -5,7 +5,21 @@
  * 2.0.
  */
 
+import type {
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+  SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
+
+type ApmIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
+
+export interface ResolvedApmParams {
+  serviceName: string;
+  environment: string;
+  transactionType: string;
+  transactionName: string;
+}
 
 export const APM_SOURCE_FIELDS = {
   SERVICE_NAME: 'service.name',
@@ -19,6 +33,21 @@ export type ApmSourceField = (typeof APM_SOURCE_FIELDS)[keyof typeof APM_SOURCE_
 interface ApmLocator {
   getRedirectUrl(params: Record<string, unknown>): string;
 }
+
+export const getResolvedApmParams = (slo: SLOWithSummaryResponse): ResolvedApmParams => {
+  const { params } = slo.indicator as ApmIndicator;
+
+  return {
+    serviceName: (slo.groupings?.['service.name'] as string | undefined) ?? params.service,
+    environment:
+      (slo.groupings?.['service.environment'] as string | undefined) ?? params.environment,
+    transactionType:
+      (slo.groupings?.['transaction.type'] as string | undefined) ?? params.transactionType,
+    transactionName:
+      (slo.groupings?.['transaction.name'] as string | undefined) ?? params.transactionName,
+  };
+};
+
 export function getApmSourceFieldLink({
   apmLocator,
   serviceName,

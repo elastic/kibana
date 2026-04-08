@@ -7,22 +7,17 @@
 
 import { EuiFlexGroup, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator,
-  SLOWithSummaryResponse,
-} from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   APM_SOURCE_FIELDS,
   getApmSourceFieldLink,
+  getResolvedApmParams,
 } from '../../../utils/slo/get_apm_source_field_link';
 
 const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
-
-type ApmIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
 interface ApmSourcePanelProps {
   slo: SLOWithSummaryResponse;
   timeRange?: { from: string; to: string };
@@ -36,36 +31,26 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
     },
   } = useKibana();
 
-  const indicator = slo.indicator as ApmIndicator;
-
-  const {
-    params: { service, environment, transactionType, transactionName },
-  } = indicator;
-
-  const serviceNameValue = (slo.groupings?.['service.name'] as string | undefined) ?? service;
-  const envValue = (slo.groupings?.['service.environment'] as string | undefined) ?? environment;
-  const transactionTypeValue =
-    (slo.groupings?.['transaction.type'] as string | undefined) ?? transactionType;
-  const transactionNameValue =
-    (slo.groupings?.['transaction.name'] as string | undefined) ?? transactionName;
-
   const defaultTimeRange = { from: `now-${slo.timeWindow.duration}`, to: 'now' };
   const effectiveTimeRange = timeRange ?? defaultTimeRange;
 
-  const hasApmReadCapabilities = !!capabilities.apm.show;
-  const isRemote = !!slo.remote;
-  const canNavigateToApm = hasApmReadCapabilities && !isRemote;
+  const resolvedApmParams = getResolvedApmParams(slo);
 
   const fields = [
-    { field: APM_SOURCE_FIELDS.SERVICE_NAME, value: serviceNameValue },
-    { field: APM_SOURCE_FIELDS.SERVICE_ENVIRONMENT, value: envValue },
-    { field: APM_SOURCE_FIELDS.TRANSACTION_TYPE, value: transactionTypeValue },
-    { field: APM_SOURCE_FIELDS.TRANSACTION_NAME, value: transactionNameValue },
+    { field: APM_SOURCE_FIELDS.SERVICE_NAME, value: resolvedApmParams.serviceName },
+    { field: APM_SOURCE_FIELDS.SERVICE_ENVIRONMENT, value: resolvedApmParams.environment },
+    { field: APM_SOURCE_FIELDS.TRANSACTION_TYPE, value: resolvedApmParams.transactionType },
+    { field: APM_SOURCE_FIELDS.TRANSACTION_NAME, value: resolvedApmParams.transactionName },
   ];
 
   const visibleFields = fields.filter((f) => f.value !== ALL_VALUE);
 
   if (visibleFields.length === 0) return null;
+
+  const hasApmReadCapabilities = !!capabilities.apm?.show;
+  const isRemote = !!slo.remote;
+
+  const canNavigateToApm = hasApmReadCapabilities && !isRemote;
 
   return (
     <EuiPanel
@@ -86,7 +71,7 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
           const link = canNavigateToApm
             ? getApmSourceFieldLink({
                 apmLocator: share.url.locators.get(APM_APP_LOCATOR_ID),
-                serviceName: serviceNameValue,
+                serviceName: resolvedApmParams.serviceName,
                 timeRange: effectiveTimeRange,
                 field,
                 value,

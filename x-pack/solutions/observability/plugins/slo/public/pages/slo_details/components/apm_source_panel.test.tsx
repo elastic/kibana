@@ -178,7 +178,7 @@ describe('ApmSourcePanel', () => {
     render(<ApmSourcePanel slo={slo} />);
 
     const link = screen.getByTestId('sloDetailsApmSourceLink-service.name');
-    expect(link).toHaveAttribute('data-action', 'navigateToApm');
+    expect(link).toHaveAttribute('data-action', 'navigateToApmSource');
     expect(link).toHaveAttribute('data-source', 'sli.apm.transactionErrorRate');
   });
 });

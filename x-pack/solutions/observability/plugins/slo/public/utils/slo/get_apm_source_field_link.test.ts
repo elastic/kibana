@@ -6,7 +6,13 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { APM_SOURCE_FIELDS, getApmSourceFieldLink } from './get_apm_source_field_link';
+import {
+  APM_SOURCE_FIELDS,
+  getApmSourceFieldLink,
+  getResolvedApmParams,
+} from './get_apm_source_field_link';
+import { buildSlo } from '../../data/slo/slo';
+import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 
 const mockLocator = {
   getRedirectUrl: jest.fn((params: Record<string, unknown>) => JSON.stringify(params)),
@@ -17,6 +23,55 @@ const baseArgs = {
   serviceName: 'my-service',
   timeRange: { from: 'now-30d', to: 'now' },
 };
+
+describe('getResolvedApmParams', () => {
+  it('returns indicator params when no groupings exist', () => {
+    const slo = buildSlo({ indicator: buildApmAvailabilityIndicator() });
+    const result = getResolvedApmParams(slo);
+
+    expect(result).toEqual({
+      serviceName: 'o11y-app',
+      environment: 'development',
+      transactionType: 'request',
+      transactionName: 'GET /flaky',
+    });
+  });
+
+  it('prefers groupings values over indicator params', () => {
+    const slo = buildSlo({
+      indicator: buildApmAvailabilityIndicator(),
+      groupings: {
+        'service.name': 'grouped-service',
+        'service.environment': 'staging',
+      },
+    });
+
+    const result = getResolvedApmParams(slo);
+
+    expect(result).toEqual({
+      serviceName: 'grouped-service',
+      environment: 'staging',
+      transactionType: 'request',
+      transactionName: 'GET /flaky',
+    });
+  });
+
+  it('falls back to indicator params when groupings are absent', () => {
+    const slo = buildSlo({
+      indicator: buildApmAvailabilityIndicator(),
+      groupings: {},
+    });
+
+    const result = getResolvedApmParams(slo);
+
+    expect(result).toEqual({
+      serviceName: 'o11y-app',
+      environment: 'development',
+      transactionType: 'request',
+      transactionName: 'GET /flaky',
+    });
+  });
+});
 
 describe('getApmSourceFieldLink', () => {
   beforeEach(() => jest.clearAllMocks());

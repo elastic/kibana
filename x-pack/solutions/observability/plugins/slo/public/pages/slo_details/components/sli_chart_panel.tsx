@@ -5,39 +5,20 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
-  EuiStat,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import type {
-  APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator,
-  SLOWithSummaryResponse,
-} from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
-import React, { useState } from 'react';
+import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
-import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import type { ChartData } from '../../../typings/slo';
 import { getSloChartState, isSloFailed } from '../utils/is_slo_failed';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
-import { getApmTracesDiscoverUrl } from '../utils/discover_links/get_discover_link';
 import type { TimeBounds } from '../types';
+import { SliChartPanelActions } from './sli_chart_panel_actions';
 import { WideChart } from './wide_chart';
-
-type APMIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
 export interface Props {
   slo: SLOWithSummaryResponse;
   data: ChartData[];
@@ -46,19 +27,6 @@ export interface Props {
   hideHeaderDurationLabel?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
-
-const openLabel = i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.open', {
-  defaultMessage: 'Open',
-});
-
-const inApmLabel = i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.inApm', {
-  defaultMessage: 'In APM',
-});
-
-const tracesInDiscoverLabel = i18n.translate(
-  'xpack.slo.sloDetails.sliHistoryChartPanel.tracesInDiscover',
-  { defaultMessage: 'Traces in Discover' }
-);
 
 export function SliChartPanel({
   slo,
@@ -69,57 +37,15 @@ export function SliChartPanel({
   onBrushed,
 }: Props) {
   const {
-    services: {
-      uiSettings,
-      share,
-      http: { basePath },
-      application: { capabilities },
-    },
+    services: { uiSettings },
   } = useKibana();
-
-  const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailedStatus = isSloFailed(slo.summary.status);
   const observedValue = data.at(-1)?.value;
 
   const hasNoData = observedValue === undefined || observedValue < 0;
-
   const isApm = isApmIndicatorType(slo.indicator);
-  const hasApmReadCapabilities = !!capabilities.apm?.show;
-  const isRemote = !!slo.remote;
-  const canNavigateToApm = isApm && hasApmReadCapabilities && !isRemote;
-
-  const apmUrl = isApm ? convertSliApmParamsToApmAppDeeplinkUrl(slo, timeRange) : undefined;
-  const apmLink = apmUrl ? basePath.prepend(apmUrl) : undefined;
-
-  const {
-    data: { traces: tracesIndex },
-  } = useFetchApmIndex({ enabled: isApm });
-
-  const discoverLink = (() => {
-    if (!isApm || !tracesIndex) return undefined;
-
-    const { params } = slo.indicator as APMIndicator;
-
-    return getApmTracesDiscoverUrl({
-      params: {
-        index: tracesIndex,
-        serviceName: (slo.groupings?.['service.name'] as string | undefined) ?? params.service,
-        environment:
-          (slo.groupings?.['service.environment'] as string | undefined) ?? params.environment,
-        transactionType:
-          (slo.groupings?.['transaction.type'] as string | undefined) ?? params.transactionType,
-        transactionName:
-          (slo.groupings?.['transaction.name'] as string | undefined) ?? params.transactionName,
-      },
-      share,
-      timeRange: timeRange ?? { from: `now-${slo.timeWindow.duration}`, to: 'now' },
-    });
-  })();
-
-  const isApmLinkEnabled = canNavigateToApm && !!apmLink;
-  const isDiscoverLinkEnabled = !!discoverLink;
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
@@ -150,45 +76,7 @@ export function SliChartPanel({
           </EuiFlexGroup>
           {isApm && (
             <EuiFlexItem grow={0}>
-              <EuiPopover
-                aria-label={openLabel}
-                button={
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={() => setIsActionsOpen(!isActionsOpen)}
-                    data-test-subj="sliChartActionsButton"
-                  >
-                    {openLabel}
-                  </EuiButtonEmpty>
-                }
-                isOpen={isActionsOpen}
-                closePopover={() => setIsActionsOpen(false)}
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-              >
-                <EuiContextMenuPanel>
-                  <EuiContextMenuItem
-                    href={apmLink}
-                    disabled={!isApmLinkEnabled}
-                    data-test-subj="slidHistoryChartViewInApmLink"
-                    data-action="openInApm"
-                    data-source={slo.indicator.type}
-                  >
-                    {inApmLabel}
-                  </EuiContextMenuItem>
-                  <EuiContextMenuItem
-                    href={discoverLink}
-                    disabled={!isDiscoverLinkEnabled}
-                    data-test-subj="slidHistoryChartOpenInDiscoverLink"
-                    data-action="openTracesInDiscover"
-                    data-source={slo.indicator.type}
-                  >
-                    {tracesInDiscoverLabel}
-                  </EuiContextMenuItem>
-                </EuiContextMenuPanel>
-              </EuiPopover>
+              <SliChartPanelActions slo={slo} timeRange={timeRange} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
