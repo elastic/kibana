@@ -11,7 +11,6 @@ import { first, Subject } from 'rxjs';
 import {
   type AppDeepLinkLocations,
   type AppMountParameters,
-  AppStatus,
   type AppUpdater,
   type CoreSetup,
   type CoreStart,
@@ -111,15 +110,6 @@ export class WorkflowsPlugin
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
     triggerSchemas.initialize(plugins.workflowsExtensions);
-
-    // License check to set app status
-    plugins.licensing.license$.subscribe((license) => {
-      if (license.isActive && license.hasAtLeast('enterprise')) {
-        this.appUpdater$.next(() => ({ status: AppStatus.accessible, visibleIn: VisibleIn }));
-      } else {
-        this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
-      }
-    });
 
     return {};
   }
