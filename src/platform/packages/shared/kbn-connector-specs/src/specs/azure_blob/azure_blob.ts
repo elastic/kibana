@@ -20,10 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import searchWorkflow from './workflows/search.yaml';
-import listBlobsWorkflow from './workflows/list_blobs.yaml';
-import listContainersWorkflow from './workflows/list_containers.yaml';
-import getBlobWorkflow from './workflows/get_blob.yaml';
 
 const AZURE_BLOB_API_VERSION = '2021-06-08';
 
@@ -100,6 +96,7 @@ export const AzureBlob: ConnectorSpec = {
       defaultMessage:
         'Connect to Azure Blob Storage to list containers and blobs, and retrieve blob content.',
     }),
+    isTechnicalPreview: true,
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
@@ -135,11 +132,26 @@ export const AzureBlob: ConnectorSpec = {
 
   actions: {
     listContainers: {
-      isTool: false,
+      isTool: true,
+      description:
+        'List all containers in the Azure Blob Storage account. Supports optional prefix filtering and cursor-based pagination via marker.',
       input: z.object({
-        prefix: z.string().optional(),
-        maxresults: z.number().optional(),
-        marker: z.string().optional(),
+        prefix: z
+          .string()
+          .optional()
+          .describe(
+            'Optional prefix to filter containers by name. Only containers whose names begin with this string are returned.'
+          ),
+        maxresults: z
+          .number()
+          .optional()
+          .describe('Maximum number of containers to return. Omit to use the service default.'),
+        marker: z
+          .string()
+          .optional()
+          .describe(
+            'Pagination cursor returned as nextMarker from a previous listContainers response. Pass this to retrieve the next page.'
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
@@ -158,12 +170,29 @@ export const AzureBlob: ConnectorSpec = {
     },
 
     listBlobs: {
-      isTool: false,
+      isTool: true,
+      description:
+        'List blobs inside a specific Azure Blob Storage container. Supports optional prefix filtering and cursor-based pagination.',
       input: z.object({
-        container: z.string(),
-        prefix: z.string().optional(),
-        maxresults: z.number().optional(),
-        marker: z.string().optional(),
+        container: z
+          .string()
+          .describe('The name of the container to list blobs from. Example: "my-container"'),
+        prefix: z
+          .string()
+          .optional()
+          .describe(
+            'Optional prefix to filter blobs by name. Only blobs whose names begin with this string are returned. Example: "logs/2024/"'
+          ),
+        maxresults: z
+          .number()
+          .optional()
+          .describe('Maximum number of blobs to return. Omit to use the service default.'),
+        marker: z
+          .string()
+          .optional()
+          .describe(
+            'Pagination cursor returned as nextMarker from a previous listBlobs response. Pass this to retrieve the next page.'
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
@@ -184,10 +213,18 @@ export const AzureBlob: ConnectorSpec = {
     },
 
     getBlob: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Download the full content of a blob from Azure Blob Storage, returned as base64. Always call getBlobProperties first to check contentLength — do not call this if the blob exceeds 131072 bytes (128 KB).',
       input: z.object({
-        container: z.string(),
-        blobName: z.string(),
+        container: z
+          .string()
+          .describe('The name of the container that holds the blob. Example: "my-container"'),
+        blobName: z
+          .string()
+          .describe(
+            'The full name (path) of the blob to download. Example: "logs/2024/january.log"'
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
@@ -206,10 +243,18 @@ export const AzureBlob: ConnectorSpec = {
     },
 
     getBlobProperties: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Get metadata for a blob (content type, size, last modified, etag) without downloading its content. Call this before getBlob to check whether the blob is small enough to download (limit: 131072 bytes / 128 KB).',
       input: z.object({
-        container: z.string(),
-        blobName: z.string(),
+        container: z
+          .string()
+          .describe('The name of the container that holds the blob. Example: "my-container"'),
+        blobName: z
+          .string()
+          .describe(
+            'The full name (path) of the blob to inspect. Example: "logs/2024/january.log"'
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
@@ -239,6 +284,25 @@ export const AzureBlob: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'Use this connector to explore and retrieve content from Azure Blob Storage.',
+    '',
+    '## Browsing',
+    'To list all containers: listContainers (no required inputs).',
+    'To list blobs in a known container: listBlobs(container).',
+    'If you have a container name, always use listBlobs. Only use listContainers when the container name is unknown.',
+    '',
+    '## Retrieving blob content',
+    'Always call getBlobProperties before getBlob to check the blob size.',
+    'If contentLength > 131072 bytes (128 KB), do not call getBlob — inform the user the blob is too large to download.',
+    'If contentLength <= 131072 or contentLength is unknown, call getBlob to retrieve the content (returned as base64).',
+    '',
+    '## Pagination',
+    'Both listContainers and listBlobs return a nextMarker field when more results exist.',
+    'Pass nextMarker as marker in the next call to retrieve the following page.',
+    'Use maxresults to control page size.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.azureBlob.test.description', {
       defaultMessage: 'Verifies Azure Blob connection by listing containers with maxresults=1',
@@ -261,11 +325,4 @@ export const AzureBlob: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [
-    searchWorkflow,
-    listBlobsWorkflow,
-    listContainersWorkflow,
-    getBlobWorkflow,
-  ],
 };
