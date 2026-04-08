@@ -23,6 +23,7 @@ export class StreamsApp {
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+  public readonly dateProcessorFormatsComboBox;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
@@ -59,6 +60,10 @@ export class StreamsApp {
     this.processorTypeComboBox = new EuiComboBoxWrapper(
       this.page,
       'streamsAppProcessorTypeSelector'
+    );
+    this.dateProcessorFormatsComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppDateProcessorFormatsComboBox'
     );
     this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
       this.page,
@@ -742,7 +747,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+    await this.dateProcessorFormatsComboBox.setCustomMultiOption(value);
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {

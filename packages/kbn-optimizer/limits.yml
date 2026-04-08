@@ -6,7 +6,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 176204
+  alertingVTwo: 47881
   apm: 25363
   apmSourcesAccess: 2278
   automaticImport: 15269
@@ -85,7 +85,7 @@ pageLoadAssetSize:
   grokdebugger: 5469
   home: 13091
   imageEmbeddable: 6189
-  indexLifecycleManagement: 29818
+  indexLifecycleManagement: 35090
   indexManagement: 39694
   inference: 10368
   infra: 56302
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 135301
+  securitySolution: 157027
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412

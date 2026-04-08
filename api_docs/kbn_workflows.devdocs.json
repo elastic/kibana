@@ -11114,7 +11114,7 @@
           "\"workflows:executionStatsBar:enabled\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
-        "lineNumber": 27,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11415,23 +11415,6 @@
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "lineNumber": 46,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.WORKFLOWS_AI_AGENT_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "WORKFLOWS_AI_AGENT_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"workflows:aiAgent:enabled\""
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
-        "lineNumber": 22,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13200,7 +13183,7 @@
           "Map<string, string>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
-        "lineNumber": 35,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
