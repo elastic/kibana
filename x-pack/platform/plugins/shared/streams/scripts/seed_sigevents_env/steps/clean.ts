@@ -79,32 +79,9 @@ export async function cleanSeedData(
     log.info(`clean: deleted ${queryIds.length} query/queries from stream "${ctx.streamName}"`);
   }
 
-  // Insights — list all then bulk-delete via the Kibana API.
-  const insightsRes = await kibanaRequest(config, 'GET', '/internal/streams/_insights');
-  if (insightsRes.status >= 300) {
-    log.warning(
-      `clean: GET /internal/streams/_insights → HTTP ${insightsRes.status} ${JSON.stringify(
-        insightsRes.data
-      )} — skipping insight cleanup`
-    );
-  }
-  const allInsights =
-    insightsRes.status < 300
-      ? (insightsRes.data as { insights?: Array<{ id: string }> })?.insights ?? []
-      : [];
-
-  if (allInsights.length > 0) {
-    const bulkRes = await kibanaRequest(config, 'POST', '/internal/streams/_insights/_bulk', {
-      operations: allInsights.map((i) => ({ delete: { id: i.id } })),
-    });
-    if (bulkRes.status >= 300) {
-      log.warning(
-        `clean: insights bulk delete → HTTP ${bulkRes.status} ${JSON.stringify(bulkRes.data)}`
-      );
-    } else {
-      log.info(`clean: deleted ${allInsights.length} insight(s)`);
-    }
-  }
+  // Insights — wipe directly via ES (avoids the Kibana list+bulk-delete round-trip
+  // which triggers a route-level bug when no query params are present).
+  await deleteByMatchAll(esClient, '.kibana_streams_insights-*', log);
 
   log.info('clean: deleting seeded task docs');
   await cleanTasks(ctx, esClient, log);
