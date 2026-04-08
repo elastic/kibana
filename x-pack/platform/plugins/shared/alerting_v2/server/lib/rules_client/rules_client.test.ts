@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -831,7 +832,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('translates search into name and label prefix query', async () => {
+    it('translates search into name and tag prefix query', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -855,13 +856,34 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.labels: alerts*'
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
           ),
         })
       );
     });
 
-    it('combines explicit filters with the search query', async () => {
+    it('trims search before passing it to the saved objects client', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ search: '  prod alerts  ' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
+          ),
+        })
+      );
+    });
+
+    it('passes filters and search together', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -875,13 +897,13 @@ describe('RulesClient', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: expect.stringContaining('alerting_rule.attributes.enabled: true'),
+          filter: expect.stringContaining(`${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`),
         })
       );
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.labels: prod*'
+            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.tags: prod*'
           ),
         })
       );
@@ -906,6 +928,46 @@ describe('RulesClient', () => {
         sortField: 'updatedAt',
         sortOrder: 'desc',
       });
+    });
+
+    it('maps kind sorting without transformation', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'kind', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'kind',
+          sortOrder: 'desc',
+        })
+      );
+    });
+
+    it('maps enabled sorting without transformation', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await client.findRules({ sortField: 'enabled', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'enabled',
+          sortOrder: 'desc',
+        })
+      );
     });
   });
 
@@ -1030,6 +1092,57 @@ describe('RulesClient', () => {
         { type: RULE_SAVED_OBJECT_TYPE, id: 'filter-rule-1' },
         { type: RULE_SAVED_OBJECT_TYPE, id: 'filter-rule-2' },
       ]);
+      expect(res.errors).toEqual([]);
+      expect(res.truncated).toBeUndefined();
+    });
+
+    it('caps filter-based bulk delete at BULK_FILTER_MAX_RULES and returns truncation metadata', async () => {
+      const client = createClient();
+      const excessTotal = BULK_FILTER_MAX_RULES + 42;
+
+      mockSavedObjectsClient.find.mockImplementation((opts: { page?: number }) => {
+        const p = opts.page ?? 1;
+        const pageSize = 100;
+        const savedObjects = Array.from({ length: pageSize }, (_, i) => ({
+          id: `cap-rule-${(p - 1) * pageSize + i}`,
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: baseSoAttrs,
+          references: [],
+          score: 0,
+        }));
+        return Promise.resolve({
+          saved_objects: savedObjects,
+          total: excessTotal,
+          page: p,
+          per_page: pageSize,
+        });
+      });
+
+      getRuleExecutorTaskIdMock.mockImplementation(({ ruleId }) => `task:${ruleId}`);
+
+      mockSavedObjectsClient.bulkDelete.mockImplementation(
+        async (docs: Array<{ type: string; id: string }>) => ({
+          statuses: docs.map(({ id }) => ({
+            id,
+            type: RULE_SAVED_OBJECT_TYPE,
+            success: true,
+          })),
+        })
+      );
+
+      const res = await client.bulkDeleteRules({ filter: 'kind: alert' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(BULK_FILTER_MAX_RULES / 100);
+      const bulkDeleteArg = mockSavedObjectsClient.bulkDelete.mock.calls[0][0] as Array<{
+        id: string;
+      }>;
+      expect(bulkDeleteArg).toHaveLength(BULK_FILTER_MAX_RULES);
+      expect(bulkDeleteArg[0].id).toBe('cap-rule-0');
+      expect(bulkDeleteArg[BULK_FILTER_MAX_RULES - 1].id).toBe(
+        `cap-rule-${BULK_FILTER_MAX_RULES - 1}`
+      );
+      expect(res.truncated).toBe(true);
+      expect(res.totalMatched).toBe(excessTotal);
       expect(res.errors).toEqual([]);
     });
 

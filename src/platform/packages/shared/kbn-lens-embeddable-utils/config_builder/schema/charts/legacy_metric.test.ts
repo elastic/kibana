@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import type { LegacyMetricState } from './legacy_metric';
+import type { LegacyMetricState, LegacyMetricStateESQL } from './legacy_metric';
 import { legacyMetricStateSchema } from './legacy_metric';
 
 describe('Legacy Metric Schema', () => {
   const baseLegacyMetricConfig = {
     type: 'legacy_metric',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   } satisfies Partial<LegacyMetricState>;
 
@@ -214,10 +215,10 @@ describe('Legacy Metric Schema', () => {
       });
     });
 
-    it('validates esql configuration', () => {
+    it('rejects esql configuration', () => {
       const input = {
         type: 'legacy_metric',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -227,10 +228,9 @@ describe('Legacy Metric Schema', () => {
           labels: { alignment: 'top' },
           values: { alignment: 'center' },
         },
-      } satisfies LegacyMetricInput;
+      } satisfies Omit<LegacyMetricStateESQL, keyof typeof defaultValues>;
 
-      const validated = legacyMetricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
   });
 });
