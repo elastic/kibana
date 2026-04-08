@@ -374,6 +374,10 @@ export interface RuleType<
   doesSetRecoveryContext?: boolean;
   alerts?: IRuleTypeAlerts<AlertData>;
   /**
+   * Optional flag to enable change tracking for the rule type.
+   */
+  trackChanges?: boolean;
+  /**
    * Determines whether framework should
    * automatically make recovery determination. Defaults to true.
    */

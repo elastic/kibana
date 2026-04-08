@@ -38,6 +38,7 @@ const createRulesClientMock = () => {
     getAuditLogger: jest.fn(),
     getAuthorization: jest.fn().mockReturnValue(alertingAuthorization),
     getExecutionLogForRule: jest.fn(),
+    getHistory: jest.fn(),
     getRuleExecutionKPI: jest.fn(),
     getGlobalExecutionKpiWithAuth: jest.fn(),
     getGlobalExecutionSummaryWithAuth: jest.fn(),
