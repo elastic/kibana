@@ -343,6 +343,7 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
+    const shouldRenderTextBasedQueryUi = Boolean(showQueryInput && isQueryLangSelected);
 
     const backgroundSearchState = useObservable(
       data.search.session.state$.pipe(
@@ -601,7 +602,7 @@ export const QueryBarTopRow = React.memo(
     function shouldShowDatePickerAsBadge(): boolean {
       return (
         (Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput()) ||
-        Boolean(isQueryLangSelected && props.query && isOfAggregateQueryType(props.query))
+        Boolean(shouldRenderTextBasedQueryUi && props.query && isOfAggregateQueryType(props.query))
       );
     }
 
@@ -744,7 +745,7 @@ export const QueryBarTopRow = React.memo(
     }
 
     const getSubmitButtonProps = () => {
-      if (isQueryLangSelected) {
+      if (shouldRenderTextBasedQueryUi) {
         const label = strings.getSearchButtonLabel();
         return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
       }
@@ -839,7 +840,7 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {isQueryLangSelected ? (
+              {shouldRenderTextBasedQueryUi ? (
                 <>
                   {shouldRenderUpdateButton() ? button : null}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
@@ -1003,7 +1004,7 @@ export const QueryBarTopRow = React.memo(
 
     function renderTextLangEditor() {
       return (
-        isQueryLangSelected &&
+        shouldRenderTextBasedQueryUi &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
           <ESQLLangEditor
@@ -1069,7 +1070,7 @@ export const QueryBarTopRow = React.memo(
           dateFormat={uiSettings.get('dateFormat')}
         />
         {!isScreenshotMode &&
-          (isQueryLangSelected ? (
+          (shouldRenderTextBasedQueryUi ? (
             <EsqlEditorActionsProvider>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
