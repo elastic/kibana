@@ -2621,9 +2621,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
       if (newPP) {
         const inputs = newPolicy.inputs.map((input) => {
+          const effectiveId = getPolicyInputEffectiveId(input);
           const defaultInput = newPP.inputs.find(
             (i) =>
-              i.type === input.type &&
+              getPolicyInputEffectiveId(i) === effectiveId &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
           return {
@@ -3871,7 +3872,9 @@ function enforceFrozenInputs(
   const resultInputs = [...newInputs];
 
   for (const input of resultInputs) {
-    const oldInput = oldInputs.find((i) => i.type === input.type);
+    const oldInput = oldInputs.find(
+      (i) => getPolicyInputEffectiveId(i) === getPolicyInputEffectiveId(input)
+    );
     if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
       input.vars = _enforceFrozenVars(oldInput.vars, input.vars, force);
@@ -4220,13 +4223,14 @@ export function preconfigurePackageInputs(
   for (const preconfiguredInput of preconfiguredInputs) {
     // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
     // policy template, so we only match on `type` in that case.
+    const preconfiguredEffectiveId = getPolicyInputEffectiveId(preconfiguredInput);
     let originalInput = preconfiguredInput.policy_template
       ? inputs.find(
           (i) =>
-            i.type === preconfiguredInput.type &&
+            getPolicyInputEffectiveId(i) === preconfiguredEffectiveId &&
             i.policy_template === preconfiguredInput.policy_template
         )
-      : inputs.find((i) => i.type === preconfiguredInput.type);
+      : inputs.find((i) => getPolicyInputEffectiveId(i) === preconfiguredEffectiveId);
 
     // If the input do not exist skip
     if (originalInput === undefined) {
@@ -4308,7 +4312,9 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
 
   if (inputs) {
     for (const input of inputs) {
-      const oldInput = oldPackagePolicy.inputs.find((i) => i.type === input.type);
+      const oldInput = oldPackagePolicy.inputs.find(
+        (i) => getPolicyInputEffectiveId(i) === getPolicyInputEffectiveId(input)
+      );
       if (oldInput) {
         for (const stream of input.streams || []) {
           const oldStream = oldInput.streams.find(
