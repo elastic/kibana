@@ -272,7 +272,11 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const isStreamActionable = (streamName: string) => {
     const status = streamOnboardingResultMap[streamName]?.status;
     return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status);
-  };
+const isStreamActionable = (streamName: string) => {
+  const result = streamOnboardingResultMap[streamName];
+  if (!result) return false; // status unknown — don't allow action
+  return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
+};
 
   const getActionableStreamNames = () =>
     selectedStreams
