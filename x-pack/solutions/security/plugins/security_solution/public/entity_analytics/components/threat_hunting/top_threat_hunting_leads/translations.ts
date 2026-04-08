@@ -50,6 +50,19 @@ export const NO_LEADS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const NO_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataTitle',
+  { defaultMessage: 'No data found' }
+);
+
+export const NO_DATA_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription',
+  {
+    defaultMessage:
+      'No entities, risk scores, or alerts were found to generate hunting leads. Ensure the Entity Store and Risk Engine are enabled with data available.',
+  }
+);
+
 export const ALL_HUNTING_LEADS_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.flyout.title',
   { defaultMessage: 'All Hunting Leads' }

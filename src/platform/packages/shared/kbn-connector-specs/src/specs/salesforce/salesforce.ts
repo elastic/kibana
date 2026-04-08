@@ -67,9 +67,18 @@ export const SalesforceConnector: ConnectorSpec = {
       {
         type: 'oauth_authorization_code',
         defaults: {
-          authorizationUrl: 'https://login.salesforce.com/services/oauth2/authorize',
-          tokenUrl: 'https://login.salesforce.com/services/oauth2/token',
           scope: 'api refresh_token',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/authorize',
+            },
+            tokenUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/token',
+            },
+            scope: { hidden: true },
+          },
         },
       },
     ],
