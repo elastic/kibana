@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback } from 'react';
-import useEvent from 'react-use/lib/useEvent';
-import { isMac } from '@kbn/shared-ux-utility';
+import { useCallback, useEffect } from 'react';
 import type { ToolItem } from '../../types';
 
 /**
@@ -20,6 +18,13 @@ import type { ToolItem } from '../../types';
 interface UseToolShortcutsProps {
   tools: ToolItem[];
 }
+
+const isMac = (() => {
+  if (typeof navigator === 'undefined') return false;
+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
+  const platform = (nav.userAgentData?.platform ?? nav.userAgent ?? '').toLowerCase();
+  return platform.includes('mac');
+})();
 
 export const useToolShortcuts = ({ tools }: UseToolShortcutsProps) => {
   const onKeyDown = useCallback(
@@ -37,5 +42,9 @@ export const useToolShortcuts = ({ tools }: UseToolShortcutsProps) => {
     },
     [tools]
   );
-  useEvent('keydown', onKeyDown);
+
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onKeyDown]);
 };

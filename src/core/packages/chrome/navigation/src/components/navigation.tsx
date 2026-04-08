@@ -46,6 +46,8 @@ import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
 import { useToolShortcuts } from '../hooks/use_tool_shortcuts';
 
+const EMPTY_TOOL_ITEMS: ToolItem[] = [];
+
 const navigationWrapperStyles = css`
   display: flex;
 `;
@@ -161,13 +163,14 @@ export const Navigation = ({
 
   const collapseToggle = onToggleCollapsed && !forcedCollapsed ? onToggleCollapsed : undefined;
 
-  const headerTools = tools?.headerTools ?? [];
-  const footerTools = tools?.footerTools ?? [];
+  const headerTools = tools?.headerTools ?? EMPTY_TOOL_ITEMS;
+  const footerTools = tools?.footerTools ?? EMPTY_TOOL_ITEMS;
   const hasHeaderTools = headerTools.length > 0;
   const hasFooterTools = footerTools.length > 0;
   const showFooterToolbar = hasFooterTools || Boolean(collapseToggle);
 
-  useToolShortcuts({ tools: [...headerTools, ...footerTools] });
+  const allTools = useMemo(() => [...headerTools, ...footerTools], [headerTools, footerTools]);
+  useToolShortcuts({ tools: allTools });
 
   const topSectionStyles = useMemo(() => getTopSectionStyles(euiThemeContext), [euiThemeContext]);
 
