@@ -2589,7 +2589,7 @@
     "@elastic/react-search-ui-views" "1.24.1"
     "@elastic/search-ui" "1.24.1"
 
-"@elastic/request-converter@9.4.0":
+"@elastic/request-converter@^9.4.0":
   version "9.4.0"
   resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.4.0.tgz#afa14b1c18550b20210a56d593be5660247fae10"
   integrity sha512-pl9UVMFKuOleeH6Mwm8IIaacZgbtx8m/EslhiXPFXAkf1NUOxoECIHpSjyD5tp+HppRXxdU6zEySQ9nFgN25OA==
