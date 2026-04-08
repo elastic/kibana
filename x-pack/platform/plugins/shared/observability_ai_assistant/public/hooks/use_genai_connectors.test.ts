@@ -191,5 +191,4 @@ describe('useGenAIConnectorsWithoutContext', () => {
     const { result } = renderUseGenAIHook();
     expect(result.current.selectedConnector).toBe('connector-1');
   });
-
 });
