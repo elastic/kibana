@@ -158,7 +158,7 @@ export function DashboardApp({
         .getStateTransfer()
         .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
       dashboardApi.addIncomingEmbeddables(lateEmbeddables);
-      dashboardApi.setViewMode('edit');
+      if (lateEmbeddables?.length) dashboardApi.setViewMode('edit');
     });
     return unlisten;
   }, [dashboardApi, history, savedDashboardId]);

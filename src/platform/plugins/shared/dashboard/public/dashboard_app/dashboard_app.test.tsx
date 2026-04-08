@@ -216,7 +216,9 @@ describe('Dashboard App', () => {
       mockHistory.push(`/view/${savedDashboardId}`);
 
       await waitFor(() => {
-        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(undefined);
+        expect(setViewModeSpy).not.toHaveBeenCalled();
       });
     });
   });

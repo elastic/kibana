@@ -13,5 +13,5 @@ export type {
   EmbeddableEditorBreadcrumb,
   EmbeddablePackageState,
   CanAddIncomingEmbeddables,
-  apiCanAddIncomingEmbeddables,
 } from './types';
+export { apiCanAddIncomingEmbeddables } from './types';
