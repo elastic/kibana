@@ -103,6 +103,6 @@ describe('EntityStoreTableTab', () => {
       </TestProviders>
     );
 
-    expect(getByPlaceholderText('Filter by field or value...')).toBeInTheDocument();
+    expect(getByPlaceholderText('Filter by field or value')).toBeInTheDocument();
   });
 });
