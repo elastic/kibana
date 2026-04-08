@@ -14,7 +14,7 @@ describe('createMetricAggregation', () => {
   describe('with resolved metric name (column escaping)', () => {
     it('should substitute and add backticks where needed', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'gauge',
         metricName: 'system.load.1m',
       });
@@ -23,7 +23,7 @@ describe('createMetricAggregation', () => {
 
     it('should substitute without adding backticks when not needed', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'gauge',
         metricName: 'system.load.normal',
       });
@@ -32,7 +32,7 @@ describe('createMetricAggregation', () => {
 
     it('should handle nested functions like SUM(RATE(...))', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'counter',
         metricName: 'system.network.in.bytes',
       });
@@ -43,7 +43,7 @@ describe('createMetricAggregation', () => {
   describe('with placeholder (no metricName)', () => {
     it('should return SUM(RATE(...)) for counter instrument', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'counter',
         placeholderName: 'metricName',
       });
@@ -58,7 +58,7 @@ describe('createMetricAggregation', () => {
       const instruments = ['gauge', 'counter', 'histogram'] as const;
       instruments.forEach((instrument) => {
         const template = createMetricAggregation({
-          type: ES_FIELD_TYPES.HISTOGRAM,
+          types: [ES_FIELD_TYPES.HISTOGRAM],
           instrument,
           placeholderName,
           customFunction,
@@ -69,7 +69,7 @@ describe('createMetricAggregation', () => {
 
     it('should return PERCENTILE for exponential histogram type', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+        types: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
         instrument: 'counter',
         placeholderName: 'metricName',
       });
@@ -78,7 +78,7 @@ describe('createMetricAggregation', () => {
 
     it('should return PERCENTILE for tdigest type', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.TDIGEST,
+        types: [ES_FIELD_TYPES.TDIGEST],
         instrument: 'counter',
         placeholderName: 'metricName',
       });
@@ -87,7 +87,7 @@ describe('createMetricAggregation', () => {
 
     it('should return PERCENTILE with TO_TDIGEST casting for legacy histogram', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'histogram',
         placeholderName: 'metricName',
       });
@@ -96,7 +96,7 @@ describe('createMetricAggregation', () => {
 
     it('should return AVG for gauge instrument', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'gauge',
         placeholderName: 'metricName',
       });
@@ -119,7 +119,7 @@ describe('createMetricAggregation with conflicting types', () => {
   describe('with resolved metric name and multiple types', () => {
     it('should cast double+float to double', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
         instrument: 'gauge',
         metricName: 'http.request.duration',
       });
@@ -128,7 +128,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should cast long+integer to long', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
+        types: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
         instrument: 'counter',
         metricName: 'requests.count',
       });
@@ -137,7 +137,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should cast float+double+half_float to double with AVG', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT],
+        types: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT],
         instrument: 'gauge',
         metricName: 'system.load.1m',
       });
@@ -146,7 +146,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should not cast when types are compatible duplicates', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
         instrument: 'gauge',
         metricName: 'cpu.usage',
       });
@@ -155,7 +155,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should cast mixed float and integer types to double', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
         instrument: 'gauge',
         metricName: 'metric.value',
       });
@@ -164,7 +164,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should handle field names with special chars in cast', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
         instrument: 'gauge',
         metricName: 'system.load.1m',
       });
@@ -175,7 +175,7 @@ describe('createMetricAggregation with conflicting types', () => {
   describe('with placeholder and multiple types', () => {
     it('should cast double+float with placeholder', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
         instrument: 'gauge',
         placeholderName: 'metricName',
       });
@@ -184,7 +184,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should cast counter with placeholder', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
+        types: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
         instrument: 'counter',
         placeholderName: 'metricName',
       });
@@ -195,7 +195,7 @@ describe('createMetricAggregation with conflicting types', () => {
   describe('incompatible types with multiple field types', () => {
     it('should return empty string when incompatible types are detected', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE],
+        types: [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE],
         instrument: 'gauge',
         metricName: 'field.name',
       });
@@ -204,7 +204,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should return empty string for text + long incompatible types', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.LONG],
+        types: [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.LONG],
         instrument: 'counter',
         metricName: 'field.name',
       });
@@ -213,7 +213,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should return empty string for date + double incompatible types', () => {
       const result = createMetricAggregation({
-        type: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE],
+        types: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE],
         instrument: 'gauge',
         placeholderName: 'metricName',
       });
@@ -221,10 +221,10 @@ describe('createMetricAggregation with conflicting types', () => {
     });
   });
 
-  describe('backward compatibility with single type', () => {
-    it('should work with single type (not in array)', () => {
+  describe('single type in array', () => {
+    it('should work with single type in array', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.DOUBLE,
+        types: [ES_FIELD_TYPES.DOUBLE],
         instrument: 'gauge',
         metricName: 'cpu.usage',
       });
@@ -233,7 +233,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should work with legacy histogram and single type', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'histogram',
         metricName: 'histogram.metric',
       });
@@ -242,7 +242,7 @@ describe('createMetricAggregation with conflicting types', () => {
 
     it('should work with counter and single type', () => {
       const result = createMetricAggregation({
-        type: ES_FIELD_TYPES.HISTOGRAM,
+        types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'counter',
         metricName: 'requests.count',
       });
