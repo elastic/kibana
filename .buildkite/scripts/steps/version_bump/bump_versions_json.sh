@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/wait_for_pr_merge.sh"
+
 # Always target main, even when the pipeline runs on another branch
 git fetch origin main
 git checkout main
@@ -118,6 +120,5 @@ echo "Opened PR: $prUrl"
 
 gh pr merge --repo elastic/kibana --auto --squash --delete-branch "$prUrl"
 
-
-
+wait_for_pr_merge "$prUrl"
 

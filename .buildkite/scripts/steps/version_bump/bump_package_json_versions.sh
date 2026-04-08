@@ -2,11 +2,15 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/wait_for_pr_merge.sh"
+
 old_version=""
 store_old_version() {
   old_version=$(jq -r '.version' package.json)
   echo "Current version: $old_version"
   echo "New version: $NEW_VERSION"
+
+  buildkite-agent meta-data set "OLD_VERSION" "$old_version"
 }
 
 update_package_json_version() {
@@ -37,9 +41,10 @@ store_old_version
 
 update_package_json_version
 
-If branch is 8.19, skip updating initial_app_data
+# If branch is 8.19, skip updating initial_app_data
 if [[ "$BRANCH" != "8.19" ]]; then
   update_initial_app_data
+fi
 
 update_kibana_migrator_utils
 
@@ -65,5 +70,7 @@ prUrl=$(gh pr create --repo elastic/kibana --base "$TARGET_BRANCH" --head "$bran
 echo "Opened PR: $prUrl"
 
 gh pr merge --repo elastic/kibana --auto --squash --delete-branch "$prUrl"
+
+wait_for_pr_merge "$prUrl"
 
 
