@@ -58,7 +58,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       });
     });
 
-    it('returns 404 for path-aware discovery requests', async () => {
+    it('returns 200 for path-aware discovery requests', async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create(mcpConfig, {
         serverless: true,
       });
@@ -70,7 +70,10 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       const mockRequest = httpServerMock.createKibanaRequest({ method: 'get' });
 
       const response = await fallbackHandler(mockContext, mockRequest, kibanaResponseFactory);
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        authorization_servers: ['https://auth.example.com'],
+      });
     });
 
     it('returns only authorization_servers when no optional fields are set', async () => {
