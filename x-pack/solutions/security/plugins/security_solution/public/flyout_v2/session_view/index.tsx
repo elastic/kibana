@@ -7,10 +7,14 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../common/types/session_view';
 import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
@@ -19,9 +23,14 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useKibana } from '../../common/lib/kibana';
 import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { flyoutProviders } from '../shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { SessionViewDetails } from './components/session_view_details';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
+
+const TITLE = i18n.translate('xpack.securitySolution.flyout.sessionView.title', {
+  defaultMessage: 'Session view',
+});
 
 const EUI_HEADER_HEIGHT = 96;
 const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = 72;
@@ -58,10 +67,12 @@ export interface SessionViewProps {
  */
 export const SessionView: FC<SessionViewProps> = memo(
   ({ hit, jumpToEntityId, jumpToCursor, renderCellActions, onAlertUpdated }) => {
+    const { euiTheme } = useEuiTheme();
     const { services } = useKibana();
     const { overlays, sessionView } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -91,15 +102,17 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-            type: 'overlay',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         ),
-      [history, onAlertUpdated, overlays, renderCellActions, services, store]
+      [
+        defaultFlyoutProperties,
+        history,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const handleJumpToEvent = useCallback(
@@ -154,16 +167,11 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          {
-            ownFocus: false,
-            resizable: true,
-            session: 'inherit',
-            size: 's',
-            type: 'overlay',
-          }
+          { ...defaultFlyoutProperties, session: 'inherit' }
         );
       },
       [
+        defaultFlyoutProperties,
         handleJumpToEvent,
         history,
         onAlertUpdated,
@@ -190,19 +198,36 @@ export const SessionView: FC<SessionViewProps> = memo(
       SESSION_VIEW_SEARCH_BAR_HEIGHT;
 
     return (
-      <div data-test-subj={SESSION_VIEW_TEST_ID}>
-        {sessionView.getSessionView({
-          ...(sessionViewConfig as SessionViewConfig),
-          height,
-          isFullScreen: true,
-          loadAlertDetails: openAlertDetails,
-          openDetails: (selectedProcess: Process | null) => openDetails(selectedProcess),
-          closeDetails: () => closeDetails(),
-          canReadPolicyManagement,
-          resetJumpToEntityId: jumpTarget.jumpToEntityId,
-          resetJumpToCursor: jumpTarget.jumpToCursor,
-        })}
-      </div>
+      <>
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            padding-block-end: ${euiTheme.size.m} !important;
+          `}
+        >
+          <ToolsFlyoutHeader
+            hit={hit}
+            title={TITLE}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <div data-test-subj={SESSION_VIEW_TEST_ID}>
+            {sessionView.getSessionView({
+              ...(sessionViewConfig as SessionViewConfig),
+              height,
+              isFullScreen: true,
+              loadAlertDetails: openAlertDetails,
+              openDetails: (selectedProcess: Process | null) => openDetails(selectedProcess),
+              closeDetails: () => closeDetails(),
+              canReadPolicyManagement,
+              resetJumpToEntityId: jumpTarget.jumpToEntityId,
+              resetJumpToCursor: jumpTarget.jumpToCursor,
+            })}
+          </div>
+        </EuiFlyoutBody>
+      </>
     );
   }
 );
