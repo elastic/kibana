@@ -81,37 +81,20 @@ describe('preflight_checks', () => {
     });
 
     describe('when last round is awaiting prompt', () => {
-      const createTimelineEventsAwaitingPrompt = (promptId: string): TimelineEvent[] => [
+      const createTimelineEventsAwaitingPrompt = (...promptIds: string[]): TimelineEvent[] => [
         {
           type: TimelineEventType.agent_response,
           status: ConversationRoundStatus.awaitingPrompt,
-          pending_prompt: {
+          pending_prompts: promptIds.map((id) => ({
             type: AgentPromptType.confirmation,
-            id: promptId,
+            id,
             title: 'Confirm',
             message: 'Do you want to proceed?',
             confirm_text: 'Yes',
             cancel_text: 'No',
-          },
+          })),
         } as AgentResponseEvent,
       ];
-
-      const createConversationAwaitingPrompt = (...promptIds: string[]) =>
-        createEmptyConversation({
-          rounds: [
-            createRound({
-              status: ConversationRoundStatus.awaitingPrompt,
-              pending_prompts: promptIds.map((id) => ({
-                type: AgentPromptType.confirmation,
-                id,
-                title: 'Confirm',
-                message: 'Do you want to proceed?',
-                confirm_text: 'Yes',
-                cancel_text: 'No',
-              })),
-            }),
-          ],
-        });
 
       it('should not throw when prompt response matches pending prompt ID', () => {
         const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-123');
@@ -133,19 +116,19 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() => ensureValidInput({ input, timelineEvents })).not.toThrow();
       });
 
       it('should throw when only some prompt responses are provided for multiple prompts', () => {
-        const conversation = createTimelineEventsAwaitingPrompt('prompt-1', 'prompt-2');
+        const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-1', 'prompt-2');
         const input: ConverseInput = {
           prompts: {
             'prompt-1': { allow: true },
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
-          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        expect(() => ensureValidInput({ input, timelineEvents })).toThrow(
+          'Conversation is awaiting prompt responses, but 1 response(s) are missing'
         );
       });
 
@@ -154,7 +137,7 @@ describe('preflight_checks', () => {
         const input: ConverseInput = {};
 
         expect(() => ensureValidInput({ input, timelineEvents })).toThrow(
-          /Conversation is awaiting a prompt response, but none was provided/
+          'Conversation is awaiting prompt responses, but 1 response(s) are missing.'
         );
       });
 
@@ -167,7 +150,7 @@ describe('preflight_checks', () => {
         };
 
         expect(() => ensureValidInput({ input, timelineEvents })).toThrow(
-          /Conversation is awaiting a prompt response, but none was provided/
+          'Conversation is awaiting prompt responses, but 1 response(s) are missing.'
         );
       });
 

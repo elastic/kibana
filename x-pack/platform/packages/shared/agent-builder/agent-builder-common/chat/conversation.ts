@@ -366,8 +366,8 @@ export interface AgentResponseEvent extends BaseTimelineEvent<'agent_response'> 
   status: ConversationRoundStatus;
   /** Persisted state to resume interrupted states */
   state?: RoundState;
-  /** If status is awaiting_prompt, contains the current prompt request */
-  pending_prompt?: PromptRequest;
+  /** if status is awaiting_prompt, contains the current prompt requests */
+  pending_prompts?: PromptRequest[];
   /** List of intermediate steps (tool calls, reasoning, compaction) */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */

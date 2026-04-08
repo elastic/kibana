@@ -48,7 +48,7 @@ export const ensureValidInput = ({
 
   // prompt pending - we need prompt responses for all pending prompts to continue
   const pendingPrompts = lastAgentResponse?.pending_prompts ?? [];
-  if (pendingPrompts.length > 0 && lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
+  if (pendingPrompts.length > 0 && lastStatus === ConversationRoundStatus.awaitingPrompt) {
     const missingResponses = pendingPrompts.filter((p) => !hasPromptResponse(p.id, input));
     if (missingResponses.length > 0) {
       throw createBadRequestError(
