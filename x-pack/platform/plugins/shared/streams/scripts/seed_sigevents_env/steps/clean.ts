@@ -42,10 +42,15 @@ export async function cleanSeedData(
     'GET',
     `/api/streams/${encodeURIComponent(ctx.streamName)}/queries`
   );
-  if (listRes.status >= 300) {
+  if (listRes.status === 404) {
+    log.info(`clean: stream "${ctx.streamName}" not found, skipping query cleanup`);
+  } else if (listRes.status >= 300) {
     throw new Error(`clean: failed to list queries (HTTP ${listRes.status})`);
   }
-  const allQueries = (listRes.data as { queries?: Array<{ id: string }> })?.queries ?? [];
+  const allQueries =
+    listRes.status < 300
+      ? (listRes.data as { queries?: Array<{ id: string }> })?.queries ?? []
+      : [];
   const queryIds = allQueries
     .map((q) => q.id)
     .filter((id): id is string => typeof id === 'string' && id.length > 0);

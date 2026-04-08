@@ -17,13 +17,19 @@ const ONBOARDING_TASK_TYPE = 'streams_onboarding';
 const INSIGHTS_TASK_TYPE = 'streams_insights_discovery';
 
 /** Returns the canonical task doc IDs for a given stream. Single source of truth for both
- *  seedTasks (which creates them) and cleanTasks (which deletes them). */
+ *  seedTasks (which creates them) and cleanTasks (which deletes them).
+ *
+ *  ID conventions mirror the live system:
+ *  - Features, queries, onboarding: per-stream (`${type}_${streamName}`)
+ *  - Insights: global singleton — `INSIGHTS_TASK_TYPE` is used as both type and ID,
+ *    with no stream-name suffix (see route.ts: taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE).
+ */
 function taskDocIds(streamName: string): string[] {
   return [
     `${FEATURES_TASK_TYPE}_${streamName}`,
     `${QUERIES_TASK_TYPE}_${streamName}`,
     `${ONBOARDING_TASK_TYPE}_${streamName}`,
-    `${INSIGHTS_TASK_TYPE}_${streamName}`,
+    INSIGHTS_TASK_TYPE,
   ];
 }
 
