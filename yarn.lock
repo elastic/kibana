@@ -2589,10 +2589,10 @@
     "@elastic/react-search-ui-views" "1.24.1"
     "@elastic/search-ui" "1.24.1"
 
-"@elastic/request-converter@9.3.0":
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.3.0.tgz#8efb90d859ad74fb46b5c65623115b77d88b5a12"
-  integrity sha512-4v2a6R3r9Ts0udmnj4NG44bv++kmDe9m8BNljJO2oGFCFf2EwEnxQfj5lK7K3y5FhOsI31hfH91w5tInoX/6dA==
+"@elastic/request-converter@9.4.0":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.4.0.tgz#afa14b1c18550b20210a56d593be5660247fae10"
+  integrity sha512-pl9UVMFKuOleeH6Mwm8IIaacZgbtx8m/EslhiXPFXAkf1NUOxoECIHpSjyD5tp+HppRXxdU6zEySQ9nFgN25OA==
   dependencies:
     base64url "^3.0.1"
     commander "^12.1.0"
@@ -22995,10 +22995,10 @@ handle-thing@^2.0.0:
   resolved "https://registry.yarnpkg.com/handle-thing/-/handle-thing-2.0.0.tgz#0e039695ff50c93fc288557d696f3c1dc6776754"
   integrity sha512-d4sze1JNC454Wdo2fkuyzCr6aHcbL6PGGuFAz0Li/NcOm1tCHGnWDRmJP85dh9IhQErTc2svWFEX5xHIOo//kQ==
 
-handlebars@4.7.8, handlebars@^4.7.6, handlebars@^4.7.8:
-  version "4.7.8"
-  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.7.8.tgz#41c42c18b1be2365439188c77c6afae71c0cd9e9"
-  integrity sha512-vafaFqs8MZkRrSX7sFVUdo3ap/eNiLnb4IakshzvP56X5Nr1iGKAIqdX6tMlm6HcNRIkr6AxO5jFEoJzzpT8aQ==
+handlebars@4.7.9, handlebars@^4.7.6, handlebars@^4.7.8:
+  version "4.7.9"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.7.9.tgz#6f139082ab58dc4e5a0e51efe7db5ae890d56a0f"
+  integrity sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==
   dependencies:
     minimist "^1.2.5"
     neo-async "^2.6.2"
