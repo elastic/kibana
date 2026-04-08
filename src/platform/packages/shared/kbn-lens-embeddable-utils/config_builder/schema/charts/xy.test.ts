@@ -166,7 +166,7 @@ describe('XY', () => {
             },
             {
               data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
-              type: 'referenceLines',
+              type: 'reference_lines',
               ignore_global_filters: false,
               sampling: 1,
               thresholds: [
@@ -331,7 +331,7 @@ describe('XY', () => {
               },
               {
                 data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -481,7 +481,7 @@ describe('XY', () => {
                   index_pattern: 'companyIndex',
                   time_field: '@timestamp',
                 },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -491,7 +491,7 @@ describe('XY', () => {
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
                     text: { visible: true },
-                    axis: 'left',
+                    axis_id: 'y',
                   },
                   {
                     operation: 'average',
@@ -499,7 +499,7 @@ describe('XY', () => {
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
                     text: { visible: false },
-                    axis: 'left',
+                    axis_id: 'y',
                   },
                 ],
               },

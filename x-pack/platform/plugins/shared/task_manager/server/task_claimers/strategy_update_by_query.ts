@@ -160,7 +160,11 @@ async function markAvailableTasksAsClaimed({
 
   return withActiveSpan(
     'mark-task-as-claimed',
-    { attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE } },
+    {
+      attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
     async () => {
       const apmTrans = apm.startTransaction(
         TASK_MANAGER_MARK_AS_CLAIMED,

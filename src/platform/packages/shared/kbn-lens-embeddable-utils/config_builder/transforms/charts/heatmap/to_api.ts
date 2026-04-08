@@ -15,7 +15,6 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { XScaleSchemaType } from '../../../schema/charts/shared';
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import {
   getDatasourceLayers,
@@ -39,6 +38,7 @@ import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
 import { legendSizeCompat } from '../legend_sizes';
 import { axisLabelOrientationCompat } from '../common';
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
@@ -68,7 +68,7 @@ function getGridConfigProps(
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
-      ...(xAxisScale ? { scale: xAxisScale } : {}),
+      scale: xAxisScale ?? 'ordinal',
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },

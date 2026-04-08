@@ -32,6 +32,7 @@ import { useTools } from '../../../hooks/tools/use_tools';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { FLYOUT_WIDTH } from '../common/constants';
+import type { SkillFormData } from '../../skills/skill_form_validation';
 import { SkillForm } from './skill_form';
 
 interface SkillCreateFlyoutProps {
@@ -68,19 +69,14 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
   );
 
   const onSubmit = useCallback(
-    async (data: {
-      id: string;
-      name: string;
-      description: string;
-      content: string;
-      tool_ids: string[];
-    }) => {
+    async (data: SkillFormData) => {
       await createSkill({
         id: data.id,
         name: data.name,
         description: data.description,
         content: data.content,
         tool_ids: data.tool_ids,
+        referenced_content: data.referenced_content,
       });
     },
     [createSkill]

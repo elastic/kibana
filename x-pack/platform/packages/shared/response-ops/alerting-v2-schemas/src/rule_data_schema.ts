@@ -300,6 +300,8 @@ export const findRulesResponseSchema = z
   })
   .describe('Paginated list of rules.');
 
+export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
+
 /** Rule tags response schema. */
 export const ruleTagsResponseSchema = z
   .object({
