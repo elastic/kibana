@@ -23,12 +23,7 @@ import type {
   StaticColorType,
   UnassignedColorType,
 } from '../../schema/color';
-export {
-  NO_COLOR,
-  AUTO_COLOR,
-  GAUGE_DEFAULT_COLOR,
-  DEFAULT_CATEGORICAL_COLOR_MAPPING,
-} from '../../schema/color';
+export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
 import { getReversibleMappings } from '../charts/utils';
 
