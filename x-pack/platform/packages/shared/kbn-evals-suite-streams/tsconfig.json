@@ -19,6 +19,5 @@
     "@kbn/kibana-api-cli",
     "@kbn/dev-cli-runner",
     "@kbn/core",
-    "@kbn/gen-ai-functional-testing"
   ]
 }
