@@ -95,7 +95,7 @@ function buildAggregationNode(
  * When `metricName` is provided the column is resolved and properly escaped.
  * Otherwise a `??placeholderName` parameter placeholder is emitted.
  *
- * @param type - The ES field type(s). Can be a single type or array of types (for conflicting mappings).
+ * @param types - The ES field types array (for conflicting mappings across backing indices).
  * @param instrument - The metric instrument type (e.g., 'counter', 'histogram', 'gauge').
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
@@ -103,20 +103,20 @@ function buildAggregationNode(
  * @returns The ES|QL aggregation string.
  */
 export function createMetricAggregation({
-  type,
+  types,
   instrument,
   metricName,
   placeholderName = 'metricName',
   customFunction,
 }: {
-  type: ES_FIELD_TYPES | ES_FIELD_TYPES[];
+  types: ES_FIELD_TYPES[];
   instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;
 }): string {
   const field = metricName ? synth.col(metricName.split('.')) : synth.dpar(placeholderName);
-  const node = buildAggregationNode(type, instrument, field, customFunction);
+  const node = buildAggregationNode(types, instrument, field, customFunction);
   if (!node) {
     return '';
   }
