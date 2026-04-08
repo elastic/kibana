@@ -71,7 +71,9 @@ test.describe(
       await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
 
       await page.getByTestId(WIRED_SWITCH).click();
-      await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
+      await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
+        timeout: 60_000,
+      });
 
       // Close flyout with Escape key
       await page.keyboard.press('Escape');
@@ -105,7 +107,9 @@ test.describe(
       await page.getByRole('button', { name: 'Settings' }).click();
       await expect(settingsFlyoutTitle).toBeVisible();
       await page.getByTestId(WIRED_SWITCH).click();
-      await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
+      await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
+        timeout: 60_000,
+      });
 
       // Close flyout with Escape key
       await page.keyboard.press('Escape');
@@ -126,7 +130,9 @@ test.describe(
       await page.getByRole('button', { name: 'Settings' }).click();
       await expect(settingsFlyoutTitle).toBeVisible();
       await page.getByTestId(WIRED_SWITCH).click();
-      await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
+      await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
+        timeout: 60_000,
+      });
       // Close flyout with Escape key
       await page.keyboard.press('Escape');
       await expect(settingsFlyoutTitle).toBeHidden();

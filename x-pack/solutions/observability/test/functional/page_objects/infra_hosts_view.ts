@@ -19,6 +19,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await retry.tryForTime(15000, async () => {
         await testSubjects.click('hostsView-flyout-button');
       });
+      await testSubjects.existOrFail('infraAssetDetailsFlyout', { timeout: 10000 });
     },
 
     async clickHostCheckbox(id: string, os: string) {
