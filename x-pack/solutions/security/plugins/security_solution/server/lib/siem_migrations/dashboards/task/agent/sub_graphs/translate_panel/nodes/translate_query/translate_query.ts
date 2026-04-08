@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { formatResourceWithSampledValues } from '@kbn/agent-builder-genai-utils';
 import {
   getTranslateSplToEsql,
   TASK_DESCRIPTION,
@@ -23,12 +24,19 @@ export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): Grap
     const description = `Dashboard description: "${state.dashboard_description}"
 Specific Panel description: "${state.description}"`;
 
+    const indexPattern = state.index_pattern ?? TRANSLATION_INDEX_PATTERN;
+
+    const indexResourceContext = state.resolved_resource
+      ? formatResourceWithSampledValues({ resource: state.resolved_resource })
+      : undefined;
+
     const { esqlQuery, comments } = await translateSplToEsql({
       title: state.parsed_panel.title,
       description,
       taskDescription: TASK_DESCRIPTION.migrate_dashboard,
       inlineQuery: state.inline_query,
-      indexPattern: TRANSLATION_INDEX_PATTERN,
+      indexPattern,
+      knowledgeBase: indexResourceContext ?? '',
     });
 
     if (!esqlQuery) {

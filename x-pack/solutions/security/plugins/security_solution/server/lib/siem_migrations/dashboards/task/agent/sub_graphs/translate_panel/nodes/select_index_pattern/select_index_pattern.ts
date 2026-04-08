@@ -7,12 +7,11 @@
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import type { GraphNode, TranslatePanelGraphParams } from '../../types';
-import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
 import { SELECT_INDEX_PATTERN_PROMPT } from './prompts';
 
 export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): GraphNode => {
-  return async (state, config) => {
-    if (!state.esql_query) {
+  return async (state) => {
+    if (!state.inline_query) {
       return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
     }
 
@@ -20,7 +19,7 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
       title: state.parsed_panel.title,
       description: state.description,
       dashboard_description: state.dashboard_description,
-      query: state.esql_query,
+      query: state.inline_query,
     });
 
     const response = await indexExplorer({
@@ -40,11 +39,6 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
 
     const indexPattern = response?.resources[0]?.name ?? MISSING_INDEX_PATTERN_PLACEHOLDER;
 
-    const esqlQuery = state.esql_query.replace(
-      `FROM ${TRANSLATION_INDEX_PATTERN}`, // Will always be at the beginning of the query
-      `FROM ${indexPattern}`
-    );
-
-    return { index_pattern: indexPattern, esql_query: esqlQuery };
+    return { index_pattern: indexPattern };
   };
 };
