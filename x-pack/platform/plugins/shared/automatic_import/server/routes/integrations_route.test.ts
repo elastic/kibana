@@ -66,7 +66,7 @@ describe('approveIntegrationRoute telemetry', () => {
       }),
     } as unknown as AutomaticImportPluginRequestHandlerContext);
 
-  const makeRequest = (integrationId = 'int-1') =>
+  const makeRequest = (integrationId = 'int_1') =>
     httpServerMock.createKibanaRequest({
       method: 'post',
       path: APPROVE_PATH,
@@ -88,7 +88,7 @@ describe('approveIntegrationRoute telemetry', () => {
 
     expect(approveIntegration).toHaveBeenCalledWith(
       expect.objectContaining({
-        integrationId: 'int-1',
+        integrationId: 'int_1',
         version: '1.0.0',
         categories: ['security'],
       })

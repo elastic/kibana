@@ -24,6 +24,16 @@ export type NonEmptyString = z.infer<typeof NonEmptyString>;
 export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
+ * An identifier containing only alphanumeric characters and underscores
+ */
+export type SafeIdentifier = z.infer<typeof SafeIdentifier>;
+export const SafeIdentifier = z
+  .string()
+  .min(1)
+  .max(255)
+  .regex(/^[a-zA-Z0-9_]+$/);
+
+/**
  * A universally unique identifier
  */
 export type UUID = z.infer<typeof UUID>;
