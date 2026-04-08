@@ -32,6 +32,7 @@ export interface DocumentStatsSearchStrategyParams {
   includeSelectedSignificantItem?: boolean;
   selectedGroup?: GroupTableItem | null;
   trackTotalHits?: boolean;
+  projectRouting?: string;
 }
 
 export const getDocumentCountStatsRequest = (
@@ -53,6 +54,7 @@ export const getDocumentCountStatsRequest = (
     includeSelectedSignificantItem,
     selectedGroup,
     trackTotalHits,
+    projectRouting,
   } = params;
 
   const filterCriteria = buildExtendedBaseFilterCriteria(
@@ -102,6 +104,7 @@ export const getDocumentCountStatsRequest = (
     },
     track_total_hits: trackTotalHits === true,
     size: 0,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   if (isPopulatedObject(runtimeFieldMap)) {

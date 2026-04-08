@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { AppPluginDependencies } from './types';
 
@@ -26,7 +26,8 @@ export const renderApp = (
       testId: 'demoNewButton',
     },
   ];
-  render(<TopNavMenu appName="demo-app" config={config} />, element);
+  const root = createRoot(element);
+  root.render(<TopNavMenu appName="demo-app" config={config} />);
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

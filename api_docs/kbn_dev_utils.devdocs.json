@@ -84,75 +84,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-common.createIndexSnapshotCommit",
-        "type": "Function",
-        "tags": [],
-        "label": "createIndexSnapshotCommit",
-        "description": [
-          "\nCreates an ephemeral commit from the current Git index without updating any refs.\nUsed by staged-scope affected checks where tooling needs a real `head` SHA for\nindex contents (for example Moon comparisons with `base=HEAD` and `head=<index snapshot>`)."
-        ],
-        "signature": [
-          "({ parentRef, message, }?: { parentRef?: string | undefined; message?: string | undefined; }) => Promise<string>"
-        ],
-        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-        "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-common.createIndexSnapshotCommit.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  parentRef = 'HEAD',\n  message = 'Temporary commit for staged-scope tooling\\n',\n}",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-            "lineNumber": 22,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/dev-utils",
-                "id": "def-common.createIndexSnapshotCommit.$1.parentRef",
-                "type": "string",
-                "tags": [],
-                "label": "parentRef",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-                "lineNumber": 23,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/dev-utils",
-                "id": "def-common.createIndexSnapshotCommit.$1.message",
-                "type": "string",
-                "tags": [],
-                "label": "message",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
-                "lineNumber": 24,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.diffStrings",
         "type": "Function",
         "tags": [],
@@ -370,6 +301,167 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.isShallowRepository",
+        "type": "Function",
+        "tags": [],
+        "label": "isShallowRepository",
+        "description": [
+          "Returns true when the current repository is a shallow Git checkout."
+        ],
+        "signature": [
+          "() => Promise<boolean>"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/is_shallow_repository.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.parseAndResolveValidationContract",
+        "type": "Function",
+        "tags": [],
+        "label": "parseAndResolveValidationContract",
+        "description": [
+          "Parses, resolves, and validates validation-contract flags in one call."
+        ],
+        "signature": [
+          "({ profile, scope, testMode, downstream, baseRef, headRef, }: { profile?: string | undefined; scope?: string | undefined; testMode?: string | undefined; downstream?: string | undefined; baseRef?: string | undefined; headRef?: string | undefined; }) => ",
+          {
+            "pluginId": "@kbn/dev-utils",
+            "scope": "common",
+            "docId": "kibKbnDevUtilsPluginApi",
+            "section": "def-common.ResolvedValidationContract",
+            "text": "ResolvedValidationContract"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+        "lineNumber": 162,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.parseAndResolveValidationContract.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  profile,\n  scope,\n  testMode,\n  downstream,\n  baseRef,\n  headRef,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 169,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.parseAndResolveValidationContract.$1.profile",
+                "type": "string",
+                "tags": [],
+                "label": "profile",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 170,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.parseAndResolveValidationContract.$1.scope",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 171,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.parseAndResolveValidationContract.$1.testMode",
+                "type": "string",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 172,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.parseAndResolveValidationContract.$1.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 173,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.parseAndResolveValidationContract.$1.baseRef",
+                "type": "string",
+                "tags": [],
+                "label": "baseRef",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 174,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.parseAndResolveValidationContract.$1.headRef",
+                "type": "string",
+                "tags": [],
+                "label": "headRef",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 175,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -707,6 +799,118 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.ResolvedValidationContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResolvedValidationContract",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.ResolvedValidationContract.profile",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "profile",
+            "description": [],
+            "signature": [
+              "\"agent\" | \"full\" | \"branch\" | \"precommit\" | \"quick\" | \"pr\""
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.ResolvedValidationContract.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [],
+            "signature": [
+              "\"full\" | \"branch\" | \"local\" | \"staged\""
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.ResolvedValidationContract.testMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "testMode",
+            "description": [],
+            "signature": [
+              "\"all\" | \"related\" | \"affected\""
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.ResolvedValidationContract.downstream",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "downstream",
+            "description": [],
+            "signature": [
+              "\"none\" | \"deep\" | \"direct\""
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.ResolvedValidationContract.baseRef",
+            "type": "string",
+            "tags": [],
+            "label": "baseRef",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.ResolvedValidationContract.headRef",
+            "type": "string",
+            "tags": [],
+            "label": "headRef",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -946,6 +1150,74 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.ValidationDownstreamMode",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidationDownstreamMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"deep\" | \"direct\""
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.ValidationProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidationProfile",
+        "description": [],
+        "signature": [
+          "\"agent\" | \"full\" | \"branch\" | \"precommit\" | \"quick\" | \"pr\""
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.ValidationScope",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidationScope",
+        "description": [],
+        "signature": [
+          "\"full\" | \"branch\" | \"local\" | \"staged\""
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.ValidationTestMode",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidationTestMode",
+        "description": [],
+        "signature": [
+          "\"all\" | \"related\" | \"affected\""
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -1005,6 +1277,400 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.VALIDATION_PROFILE_DEFAULTS",
+        "type": "Object",
+        "tags": [],
+        "label": "VALIDATION_PROFILE_DEFAULTS",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.VALIDATION_PROFILE_DEFAULTS.precommit",
+            "type": "Object",
+            "tags": [],
+            "label": "precommit",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.precommit.scope",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "\"staged\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.precommit.testMode",
+                "type": "string",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"related\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.precommit.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "\"none\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 29,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.VALIDATION_PROFILE_DEFAULTS.quick",
+            "type": "Object",
+            "tags": [],
+            "label": "quick",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.quick.scope",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "\"local\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 32,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.quick.testMode",
+                "type": "string",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"related\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 33,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.quick.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "\"none\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.VALIDATION_PROFILE_DEFAULTS.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "agent",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.agent.scope",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "\"local\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.agent.testMode",
+                "type": "string",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"related\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.agent.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "\"none\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 39,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.VALIDATION_PROFILE_DEFAULTS.branch",
+            "type": "Object",
+            "tags": [],
+            "label": "branch",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.branch.scope",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "\"branch\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.branch.testMode",
+                "type": "string",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"affected\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.branch.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "\"none\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.VALIDATION_PROFILE_DEFAULTS.pr",
+            "type": "Object",
+            "tags": [],
+            "label": "pr",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.pr.scope",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "\"branch\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.pr.testMode",
+                "type": "string",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"affected\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.pr.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "\"deep\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 49,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.VALIDATION_PROFILE_DEFAULTS.full",
+            "type": "Object",
+            "tags": [],
+            "label": "full",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.full.scope",
+                "type": "string",
+                "tags": [],
+                "label": "scope",
+                "description": [],
+                "signature": [
+                  "\"full\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.full.testMode",
+                "type": "string",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"all\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.VALIDATION_PROFILE_DEFAULTS.full.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "\"none\""
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/validation_run_contract.ts",
+                "lineNumber": 54,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

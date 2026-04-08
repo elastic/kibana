@@ -401,7 +401,7 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
       expect(response.body.total).toEqual(1);
       expect(response.body.errors.length).toEqual(1);
       expect(response.body.errors[0].message).toEqual(
-        `params invalid: [exceptionsList]: definition for this key is missing`
+        `params invalid: [exceptionsList]: Additional properties are not allowed ('exceptionsList' was unexpected)`
       );
       expect(response.body.skipped).toEqual([]);
       expect(response.body.rules).toEqual([]);
@@ -432,13 +432,12 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
       expect(response.body.errors[0].message).toEqual(
         `params invalid: [
   {
-    "code": "invalid_type",
     "expected": "array",
-    "received": "string",
+    "code": "invalid_type",
     "path": [
       "exceptionsList"
     ],
-    "message": "Expected array, received string"
+    "message": "Invalid input: expected array, received string"
   }
 ]`
       );

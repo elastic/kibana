@@ -10,7 +10,7 @@
 import { omit } from 'lodash';
 import { BehaviorSubject, combineLatest, merge, switchMap, tap } from 'rxjs';
 
-import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
@@ -28,15 +28,18 @@ export const defaultDataControlComparators: StateComparators<DataControlState> =
   ...defaultControlLabelComparators,
   data_view_id: 'referenceEquality',
   field_name: 'referenceEquality',
-  use_global_filters: (a, b) => (a ?? true) === (b ?? true),
-  ignore_validations: (a, b) => Boolean(a) === Boolean(b),
+  use_global_filters: (a, b) =>
+    (a ?? DEFAULT_DATA_CONTROL_STATE.use_global_filters) ===
+    (b ?? DEFAULT_DATA_CONTROL_STATE.use_global_filters),
+  ignore_validations: (a, b) =>
+    (a ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations) ===
+    (b ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations),
 };
 
 export const defaultDataControlState = {
+  ...DEFAULT_DATA_CONTROL_STATE,
   data_view_id: '',
   field_name: '',
-  use_global_filters: DEFAULT_USE_GLOBAL_FILTERS,
-  ignore_validations: DEFAULT_IGNORE_VALIDATIONS,
 };
 
 export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {

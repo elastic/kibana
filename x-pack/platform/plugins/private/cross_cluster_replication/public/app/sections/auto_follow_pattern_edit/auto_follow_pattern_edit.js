@@ -110,7 +110,7 @@ export class AutoFollowPatternEdit extends PureComponent {
             {...reactRouterNavigate(this.props.history, `/auto_follow_patterns`)}
             color="danger"
             flush="left"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             data-test-subj="viewAutoFollowPatternListButton"
           >
             <FormattedMessage

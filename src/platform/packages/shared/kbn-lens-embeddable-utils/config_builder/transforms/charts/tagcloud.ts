@@ -30,7 +30,7 @@ import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -70,11 +70,9 @@ function buildVisualizationState(config: TagcloudState): LensTagCloudState {
       : LENS_TAGCLOUD_DEFAULT_STATE.orientation,
     maxFontSize: layer.font_size?.max ?? LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
     minFontSize: layer.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
-    showLabel: layer.metric?.show_metric_label ?? LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
+    showLabel: layer.caption?.visible ?? LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
     tagAccessor: getAccessorName('tag'),
-    ...(layer.tag_by.color
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.tag_by.color) }
-      : {}),
+    ...(layer.tag_by.color ? { ...fromColorMappingAPIToLensState(layer.tag_by.color) } : {}),
   };
 }
 
@@ -84,14 +82,20 @@ function getTagcloudDataset(
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
-): TagcloudState['dataset'] {
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+): TagcloudState['data_source'] {
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null) {
+    throw new Error('Unsupported DataSource type');
   }
 
-  return dataset;
+  return dataSource;
 }
 
 function getTagcloudMetric(
@@ -109,7 +113,6 @@ function getTagcloudMetric(
           visualization.valueAccessor,
           layer
         ) as LensApiAllMetricOrFormulaOperations)),
-    show_metric_label: visualization.showLabel,
   };
 }
 
@@ -121,13 +124,13 @@ function getTagcloudTagBy(
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
+  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
 
   return {
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.tagAccessor, layer)
       : (operationFromColumn(visualization.tagAccessor, layer) as LensApiBucketOperations)),
-    ...(colorMapping ? { color: colorMapping } : {}),
+    ...(color && { color }),
   };
 }
 
@@ -139,13 +142,19 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): TagcloudState {
-  const dataset = getTagcloudDataset(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataSource = getTagcloudDataset(
+    layer,
+    adHocDataViews,
+    references,
+    adhocReferences,
+    layerId
+  );
   const metric = getTagcloudMetric(layer, visualization);
   const tagBy = getTagcloudTagBy(layer, visualization);
 
   return {
-    type: 'tagcloud',
-    dataset,
+    type: 'tag_cloud',
+    data_source: dataSource,
     ...generateApiLayer(layer),
     metric,
     tag_by: tagBy,
@@ -159,6 +168,7 @@ function reverseBuildVisualizationState(
       min: visualization.minFontSize,
       max: visualization.maxFontSize,
     },
+    caption: { visible: visualization.showLabel },
   } as TagcloudState;
 }
 
@@ -180,8 +190,8 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
 
 function getValueColumns(layer: TagcloudStateESQL) {
   return [
-    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    getValueColumn(getAccessorName('tag'), layer.tag_by.column),
+    getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
+    getValueColumn(getAccessorName('tag'), layer.tag_by),
   ];
 }
 
@@ -220,14 +230,14 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'tagcloud' }> {
+): Extract<LensApiState, { type: 'tag_cloud' }> {
   const { state } = config;
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);

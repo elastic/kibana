@@ -83,7 +83,7 @@ const RiskScoreBadge: React.FC<{
     >
       <EuiTextColor color="default">
         <EuiHealth
-          className="eui-alignMiddle"
+          className="eui-alignMiddle eui-textNoWrap"
           color={RISK_SEVERITY_COLOUR[severity]}
           textSize="inherit"
         >

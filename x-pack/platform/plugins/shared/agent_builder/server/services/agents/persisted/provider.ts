@@ -9,11 +9,18 @@ import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import {
+  agentBuilderDefaultAgentId,
+  createBadRequestError,
+  isAgentNotFoundError,
+} from '@kbn/agent-builder-common';
 import type { WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
 import { createClient } from './client';
+import type { AgentClient } from './client';
 import type { InternalAgentDefinition } from '../agent_registry';
 import type { PersistedAgentDefinition } from './types';
+import { getDefaultAgentCreateRequest } from '../default_agent_definition';
 
 export const createPersistedProviderFn =
   (opts: {
@@ -29,6 +36,10 @@ export const createPersistedProviderFn =
       space,
     });
   };
+
+const ensureDefaultAgent = async (client: AgentClient): Promise<PersistedAgentDefinition> => {
+  return client.ensureDefaultAgent(getDefaultAgentCreateRequest());
+};
 
 const createPersistedProvider = async ({
   space,
@@ -57,18 +68,39 @@ const createPersistedProvider = async ({
   return {
     id: 'persisted',
     readonly: false,
-    has: (agentId: string) => {
-      return client.has(agentId);
+    has: async (agentId: string) => {
+      const exists = await client.has(agentId);
+      if (!exists && agentId === agentBuilderDefaultAgentId) {
+        await ensureDefaultAgent(client);
+        return true;
+      }
+      return exists;
     },
     get: async (agentId: string) => {
-      const definition = await client.get(agentId);
-      return toInternalDefinition({ definition });
+      try {
+        const definition = await client.get(agentId);
+        return toInternalDefinition({ definition });
+      } catch (e) {
+        if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
+          const definition = await ensureDefaultAgent(client);
+          return toInternalDefinition({ definition });
+        }
+        throw e;
+      }
     },
     list: async (opts) => {
       const definitions = await client.list(opts);
+      const hasDefault = definitions.some((def) => def.id === agentBuilderDefaultAgentId);
+      if (!hasDefault) {
+        const defaultAgent = await ensureDefaultAgent(client);
+        definitions.push(defaultAgent);
+      }
       return definitions.map((definition) => toInternalDefinition({ definition }));
     },
     create: async (createRequest) => {
+      if (createRequest.id === agentBuilderDefaultAgentId) {
+        throw createBadRequestError('The default agent cannot be manually created');
+      }
       const definition = await client.create(createRequest);
       return toInternalDefinition({ definition });
     },

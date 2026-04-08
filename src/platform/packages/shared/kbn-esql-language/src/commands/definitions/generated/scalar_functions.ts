@@ -93,6 +93,7 @@ const absDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -168,6 +169,7 @@ const acosDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -240,6 +242,7 @@ const acoshDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -313,6 +316,7 @@ const asinDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -385,6 +389,7 @@ const asinhDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -458,6 +463,7 @@ const atanDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -759,6 +765,7 @@ const atan2Definition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -831,6 +838,7 @@ const atanhDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -881,6 +889,7 @@ const bitLengthDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -933,6 +942,7 @@ const byteLengthDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -1008,6 +1018,7 @@ const cbrtDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -1080,6 +1091,7 @@ const ceilDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -1125,7 +1137,7 @@ const chunkDefinition: FunctionDefinition = {
           name: 'chunking_settings',
           type: 'function_named_parameters',
           mapParams:
-            "{name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n', type=[keyword]}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n', type=[integer]}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n', type=[integer]}, {name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.', type=[keyword]}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n', type=[integer]}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n', type=[keyword]}",
+            "{name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.', type=[keyword]}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n', type=[integer]}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n', type=[integer]}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n', type=[integer]}, {name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n', type=[keyword]}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n', type=[keyword]}",
           optional: true,
           description:
             'Options to customize chunking behavior. Defaults to {"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}.',
@@ -1158,7 +1170,7 @@ const chunkDefinition: FunctionDefinition = {
           name: 'chunking_settings',
           type: 'function_named_parameters',
           mapParams:
-            "{name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n', type=[keyword]}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n', type=[integer]}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n', type=[integer]}, {name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.', type=[keyword]}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n', type=[integer]}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n', type=[keyword]}",
+            "{name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.', type=[keyword]}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n', type=[integer]}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n', type=[integer]}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n', type=[integer]}, {name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n', type=[keyword]}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n', type=[keyword]}",
           optional: true,
           description:
             'Options to customize chunking behavior. Defaults to {"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}.',
@@ -1174,6 +1186,7 @@ const chunkDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -1241,6 +1254,7 @@ const cidrMatchDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -1755,6 +1769,7 @@ const clampDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -2143,6 +2158,7 @@ const clampMaxDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -2531,6 +2547,7 @@ const clampMinDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -2654,6 +2671,24 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date_nanos',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'dense_vector',
+          optional: false,
+          description: 'Expression to evaluate.',
+        },
+        {
+          name: 'rest',
+          type: 'dense_vector',
+          optional: true,
+          description: 'Other expression to evaluate.',
+        },
+      ],
+      returnType: 'dense_vector',
       minParams: 1,
     },
     {
@@ -2964,6 +2999,7 @@ const coalesceDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -3064,6 +3100,7 @@ const concatDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -3171,6 +3208,7 @@ const containsDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -3362,6 +3400,7 @@ const copySignDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -3434,6 +3473,7 @@ const cosDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -3506,6 +3546,7 @@ const coshDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -3823,6 +3864,7 @@ const dateDiffDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -4054,6 +4096,7 @@ const dateExtractDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -4179,6 +4222,7 @@ const dateFormatDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -4464,6 +4508,7 @@ const dateParseDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -4491,7 +4536,8 @@ const dateTruncDefinition: FunctionDefinition = {
           name: 'interval',
           type: 'date_period',
           optional: false,
-          description: 'Interval; expressed using the timespan literal syntax.',
+          description:
+            'Interval; [time span](https://www.elastic.co/docs/reference/query-languages/esql/esql-time-spans) (DATE_PERIOD or TIME_DURATION).',
         },
         {
           name: 'date',
@@ -4508,7 +4554,8 @@ const dateTruncDefinition: FunctionDefinition = {
           name: 'interval',
           type: 'date_period',
           optional: false,
-          description: 'Interval; expressed using the timespan literal syntax.',
+          description:
+            'Interval; [time span](https://www.elastic.co/docs/reference/query-languages/esql/esql-time-spans) (DATE_PERIOD or TIME_DURATION).',
         },
         {
           name: 'date',
@@ -4525,7 +4572,8 @@ const dateTruncDefinition: FunctionDefinition = {
           name: 'interval',
           type: 'time_duration',
           optional: false,
-          description: 'Interval; expressed using the timespan literal syntax.',
+          description:
+            'Interval; [time span](https://www.elastic.co/docs/reference/query-languages/esql/esql-time-spans) (DATE_PERIOD or TIME_DURATION).',
         },
         {
           name: 'date',
@@ -4542,7 +4590,8 @@ const dateTruncDefinition: FunctionDefinition = {
           name: 'interval',
           type: 'time_duration',
           optional: false,
-          description: 'Interval; expressed using the timespan literal syntax.',
+          description:
+            'Interval; [time span](https://www.elastic.co/docs/reference/query-languages/esql/esql-time-spans) (DATE_PERIOD or TIME_DURATION).',
         },
         {
           name: 'date',
@@ -4561,6 +4610,7 @@ const dateTruncDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -4615,6 +4665,7 @@ const dayNameDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -4660,9 +4711,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4691,9 +4742,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4722,9 +4773,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4753,9 +4804,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4784,9 +4835,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4815,9 +4866,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4846,9 +4897,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4877,9 +4928,9 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4892,6 +4943,7 @@ const decayDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -4926,6 +4978,7 @@ const eDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5023,6 +5076,7 @@ const endsWithDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5095,6 +5149,7 @@ const expDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5167,6 +5222,7 @@ const floorDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5217,6 +5273,7 @@ const fromBase64Definition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5486,6 +5543,7 @@ const greatestDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5583,6 +5641,7 @@ const hashDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5886,6 +5945,7 @@ const hypotDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -5937,6 +5997,7 @@ const ipPrefixDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -6081,9 +6142,11 @@ const jsonExtractDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.MMR,
     Location.RERANK,
     Location.JOIN,
   ],
@@ -6129,7 +6192,7 @@ const knnDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn.md#dense-vector-knn-search-rescoring) for details.', type=[double]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}",
+            "{name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn.md#dense-vector-knn-search-rescoring) for details.', type=[double]}",
           optional: true,
           description:
             '(Optional) kNN additional options as <<esql-function-named-params,function named parameters>>. See [knn query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-knn-query) for more information.',
@@ -6156,7 +6219,7 @@ const knnDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn.md#dense-vector-knn-search-rescoring) for details.', type=[double]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}",
+            "{name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn.md#dense-vector-knn-search-rescoring) for details.', type=[double]}",
           optional: true,
           description:
             '(Optional) kNN additional options as <<esql-function-named-params,function named parameters>>. See [knn query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-knn-query) for more information.',
@@ -6172,6 +6235,7 @@ const knnDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -6204,23 +6268,11 @@ const kqlDefinition: FunctionDefinition = {
           description: 'Query string in KQL query string format.',
           constantOnly: true,
         },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'keyword',
-          optional: false,
-          description: 'Query string in KQL query string format.',
-          constantOnly: true,
-        },
         {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='time_zone', values=[UTC, Europe/Paris, America/New_York], description='UTC offset or IANA time zone used to interpret date literals in the query string.', type=[keyword]}, {name='case_insensitive', values=[true, false], description='If true, performs case-insensitive matching for keyword fields. Defaults to false.', type=[boolean]}, {name='default_field', values=[*, logs.*, title], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}",
+            "{name='case_insensitive', values=[true, false], description='If true, performs case-insensitive matching for keyword fields. Defaults to false.', type=[boolean]}, {name='time_zone', values=[UTC, Europe/Paris, America/New_York], description='UTC offset or IANA time zone used to interpret date literals in the query string.', type=[keyword]}, {name='default_field', values=[*, logs.*, title], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}",
           optional: true,
           description:
             '(Optional) KQL additional options as <<esql-function-named-params,function named parameters>>. Available in stack version 9.3.0 and later.',
@@ -6238,23 +6290,11 @@ const kqlDefinition: FunctionDefinition = {
           description: 'Query string in KQL query string format.',
           constantOnly: true,
         },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'text',
-          optional: false,
-          description: 'Query string in KQL query string format.',
-          constantOnly: true,
-        },
         {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='time_zone', values=[UTC, Europe/Paris, America/New_York], description='UTC offset or IANA time zone used to interpret date literals in the query string.', type=[keyword]}, {name='case_insensitive', values=[true, false], description='If true, performs case-insensitive matching for keyword fields. Defaults to false.', type=[boolean]}, {name='default_field', values=[*, logs.*, title], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}",
+            "{name='case_insensitive', values=[true, false], description='If true, performs case-insensitive matching for keyword fields. Defaults to false.', type=[boolean]}, {name='time_zone', values=[UTC, Europe/Paris, America/New_York], description='UTC offset or IANA time zone used to interpret date literals in the query string.', type=[keyword]}, {name='default_field', values=[*, logs.*, title], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}",
           optional: true,
           description:
             '(Optional) KQL additional options as <<esql-function-named-params,function named parameters>>. Available in stack version 9.3.0 and later.',
@@ -6531,6 +6571,7 @@ const leastDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -6594,6 +6635,7 @@ const leftDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -6644,6 +6686,7 @@ const lengthDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -6835,6 +6878,7 @@ const locateDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -7196,6 +7240,7 @@ const logDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -7272,6 +7317,7 @@ const log10Definition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -7322,6 +7368,7 @@ const ltrimDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -7365,7 +7412,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7394,7 +7441,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7423,7 +7470,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7452,7 +7499,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7481,7 +7528,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7510,7 +7557,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7539,7 +7586,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7568,7 +7615,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7597,7 +7644,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7626,7 +7673,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7655,7 +7702,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7684,7 +7731,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7713,7 +7760,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7742,7 +7789,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7771,7 +7818,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7800,7 +7847,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7829,7 +7876,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7858,7 +7905,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7887,7 +7934,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7916,7 +7963,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7945,7 +7992,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -7974,7 +8021,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8003,7 +8050,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8032,7 +8079,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8061,7 +8108,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8090,7 +8137,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8119,7 +8166,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8148,7 +8195,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8177,7 +8224,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Match additional options as <<esql-function-named-params,function named parameters>>.',
@@ -8225,7 +8272,7 @@ const matchPhraseDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='slop', values=[1], description='Maximum number of positions allowed between matching tokens. Defaults to 0. Transposed terms have a slop of 2.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='slop', values=[1], description='Maximum number of positions allowed between matching tokens. Defaults to 0. Transposed terms have a slop of 2.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}",
           optional: true,
           description:
             '(Optional) MatchPhrase additional options as <<esql-function-named-params,function named parameters>>. See [`match_phrase`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) for more information.',
@@ -8254,7 +8301,7 @@ const matchPhraseDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='slop', values=[1], description='Maximum number of positions allowed between matching tokens. Defaults to 0. Transposed terms have a slop of 2.', type=[integer]}",
+            "{name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='slop', values=[1], description='Maximum number of positions allowed between matching tokens. Defaults to 0. Transposed terms have a slop of 2.', type=[integer]}, {name='zero_terms_query', values=[none, all], description='Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.', type=[float]}",
           optional: true,
           description:
             '(Optional) MatchPhrase additional options as <<esql-function-named-params,function named parameters>>. See [`match_phrase`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) for more information.',
@@ -8308,6 +8355,7 @@ const md5Definition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -8360,6 +8408,7 @@ const monthNameDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -8369,895 +8418,6 @@ const monthNameDefinition: FunctionDefinition = {
   ],
   examples: [
     'ROW dt = to_datetime("1996-03-21T00:00:00.000Z")\n| EVAL monthName = MONTH_NAME(dt);',
-  ],
-};
-
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const multiMatchDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.SCALAR,
-  name: EsqlFunctionNames.MULTI_MATCH,
-  description: i18n.translate('kbn-esql-language.esql.definitions.multi_match', {
-    defaultMessage:
-      'Use `MULTI_MATCH` to perform a multi-match query on the specified field.\nThe multi_match query builds on the match query to allow multi-field queries.',
-  }),
-  preview: true,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'boolean',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'boolean',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'boolean',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'date',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'date',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'date',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'date_nanos',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'date_nanos',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'date_nanos',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'double',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'double',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'double',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'integer',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'double',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'double',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'long',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'integer',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'double',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'integer',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'integer',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'integer',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'integer',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'long',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'ip',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'ip',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'ip',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'keyword',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'double',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'integer',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'long',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'text',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'unsigned_long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'double',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'unsigned_long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'integer',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'unsigned_long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'unsigned_long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'long',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'unsigned_long',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'unsigned_long',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'version',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'keyword',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'query',
-          type: 'version',
-          optional: false,
-          description: 'Value to find in the provided fields.',
-          constantOnly: true,
-        },
-        {
-          name: 'fields',
-          type: 'version',
-          optional: false,
-          description: 'Fields to use for matching',
-          constantOnly: true,
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          mapParams:
-            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='tie_breaker', values=[0], description='Controls how score is blended together between field groups. Defaults to 0 (best score from each group).', type=[float]}, {name='type', values=['best_fields'], description='Controls the way multi_match is executed internally. Can be one of `best_fields`, `most_fields`, `cross_fields`, `phrase`, `phrase_prefix` or `bool_prefix`. Defaults to 'best_fields'. See <<multi-match-types,multi_match types>>.', type=[object]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to true.', type=[boolean]}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value. Defaults to OR.', type=[keyword]}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand. Defaults to 50.', type=[integer]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.', type=[keyword]}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}",
-          optional: true,
-          description:
-            '(Optional) Additional options for MultiMatch, passed as <<esql-function-named-params,function named parameters>>."  See <<query-dsl-multi-match-query,multi-match query>> for more information.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-  ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
-  examples: [
-    'FROM books\n| WHERE MULTI_MATCH("Faulkner", author, description)\n| KEEP book_no, author\n| SORT book_no\n| LIMIT 5',
-    'FROM books\n| WHERE MULTI_MATCH("Hobbit Back Again", title, description, {"operator": "AND"})\n| KEEP title;',
   ],
 };
 
@@ -9619,6 +8779,7 @@ const mvAppendDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -9648,7 +8809,7 @@ const mvAvgDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -9659,7 +8820,7 @@ const mvAvgDefinition: FunctionDefinition = {
           name: 'number',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -9670,7 +8831,7 @@ const mvAvgDefinition: FunctionDefinition = {
           name: 'number',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -9681,7 +8842,7 @@ const mvAvgDefinition: FunctionDefinition = {
           name: 'number',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -9694,6 +8855,7 @@ const mvAvgDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -9721,7 +8883,7 @@ const mvConcatDefinition: FunctionDefinition = {
           name: 'string',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -9738,7 +8900,7 @@ const mvConcatDefinition: FunctionDefinition = {
           name: 'string',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -9755,7 +8917,7 @@ const mvConcatDefinition: FunctionDefinition = {
           name: 'string',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -9772,7 +8934,7 @@ const mvConcatDefinition: FunctionDefinition = {
           name: 'string',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -9791,6 +8953,7 @@ const mvConcatDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -9821,14 +8984,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9839,14 +9002,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9857,14 +9020,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9875,14 +9038,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9893,14 +9056,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9911,14 +9074,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9929,14 +9092,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9947,14 +9110,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9965,14 +9128,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -9983,14 +9146,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10001,14 +9164,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10019,14 +9182,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10037,14 +9200,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10055,14 +9218,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10073,14 +9236,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10091,14 +9254,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10109,14 +9272,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10127,14 +9290,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10145,14 +9308,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10163,14 +9326,14 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
           supportsMultiValues: true,
         },
         {
           name: 'subset',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10183,6 +9346,7 @@ const mvContainsDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -10214,7 +9378,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10225,7 +9389,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10236,7 +9400,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10247,7 +9411,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10258,7 +9422,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10269,7 +9433,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10280,7 +9444,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10291,7 +9455,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10302,7 +9466,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10313,7 +9477,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10324,7 +9488,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10335,7 +9499,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10346,7 +9510,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10357,7 +9521,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10368,7 +9532,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10379,7 +9543,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10390,7 +9554,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10401,7 +9565,7 @@ const mvCountDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10414,6 +9578,7 @@ const mvCountDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -10440,7 +9605,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10451,7 +9616,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'cartesian_point',
@@ -10462,7 +9627,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'cartesian_shape',
@@ -10473,7 +9638,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date',
@@ -10484,7 +9649,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date_nanos',
@@ -10495,7 +9660,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -10506,7 +9671,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geo_point',
@@ -10517,7 +9682,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geo_shape',
@@ -10528,7 +9693,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geohash',
@@ -10539,7 +9704,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geohex',
@@ -10550,7 +9715,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geotile',
@@ -10561,7 +9726,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10572,7 +9737,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'ip',
@@ -10583,7 +9748,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -10594,7 +9759,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -10605,7 +9770,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -10616,7 +9781,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -10627,7 +9792,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'version',
@@ -10640,6 +9805,7 @@ const mvDedupeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -10648,6 +9814,418 @@ const mvDedupeDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: ['ROW a=["foo", "foo", "bar", "foo"]\n| EVAL dedupe_a = MV_DEDUPE(a)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const mvDifferenceDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.MV_DIFFERENCE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.mv_difference', {
+    defaultMessage:
+      'Returns the values that appear in the first field, except those that appear in the second. Returns `null` if the first expression is null (nothing to remove) or the value of the first field if the second is null.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'boolean',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'boolean',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'date',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date_nanos',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'date_nanos',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'double',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'double',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohash',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geohash',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohex',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geohex',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geotile',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'geotile',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'integer',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'integer',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'ip',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'ip',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'long',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'long',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'unsigned_long',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'unsigned_long',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'version',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
+        },
+        {
+          name: 'field2',
+          type: 'version',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns field1.',
+        },
+      ],
+      returnType: 'version',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW values = ["a", "b", "c"], element = "a"\n| EVAL result = mv_difference(values, element)',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -10667,7 +10245,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -10678,7 +10256,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'cartesian_point',
@@ -10689,7 +10267,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'cartesian_shape',
@@ -10700,7 +10278,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date',
@@ -10711,7 +10289,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date_nanos',
@@ -10722,7 +10300,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -10733,7 +10311,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geo_point',
@@ -10744,7 +10322,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geo_shape',
@@ -10755,7 +10333,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geohash',
@@ -10766,7 +10344,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geohex',
@@ -10777,7 +10355,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geotile',
@@ -10788,7 +10366,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -10799,7 +10377,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'ip',
@@ -10810,7 +10388,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -10821,7 +10399,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -10832,7 +10410,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -10843,7 +10421,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -10854,7 +10432,7 @@ const mvFirstDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'version',
@@ -10867,6 +10445,7 @@ const mvFirstDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -10894,13 +10473,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'boolean',
@@ -10911,13 +10492,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'cartesian_point',
@@ -10928,13 +10511,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'cartesian_shape',
@@ -10945,13 +10530,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'date',
@@ -10962,13 +10549,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'date_nanos',
@@ -10979,13 +10568,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'double',
@@ -10996,13 +10587,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'geo_point',
@@ -11013,13 +10606,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'geo_shape',
@@ -11030,13 +10625,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'geohash',
@@ -11047,13 +10644,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'geohex',
@@ -11064,13 +10663,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'geotile',
@@ -11081,13 +10682,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'integer',
@@ -11098,13 +10701,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'ip',
@@ -11115,13 +10720,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'keyword',
@@ -11132,13 +10739,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'keyword',
@@ -11149,13 +10758,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'long',
@@ -11166,13 +10777,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'keyword',
@@ -11183,13 +10796,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'keyword',
@@ -11200,13 +10815,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'unsigned_long',
@@ -11217,13 +10834,15 @@ const mvIntersectionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
         {
           name: 'field2',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression. If null, the function returns null.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If null, the function returns null.',
         },
       ],
       returnType: 'version',
@@ -11236,6 +10855,7 @@ const mvIntersectionDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -11269,13 +10889,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11286,13 +10906,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11303,13 +10923,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11320,13 +10940,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11337,13 +10957,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11354,13 +10974,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11371,13 +10991,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11388,13 +11008,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11405,13 +11025,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11422,13 +11042,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11439,13 +11059,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11456,13 +11076,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11473,13 +11093,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11490,13 +11110,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11507,13 +11127,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11524,13 +11144,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11541,13 +11161,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11558,13 +11178,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11575,13 +11195,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11592,13 +11212,13 @@ const mvIntersectsDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'field2',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11611,6 +11231,7 @@ const mvIntersectsDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -11642,7 +11263,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11653,7 +11274,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'cartesian_point',
@@ -11664,7 +11285,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'cartesian_shape',
@@ -11675,7 +11296,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date',
@@ -11686,7 +11307,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date_nanos',
@@ -11697,7 +11318,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -11708,7 +11329,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geo_point',
@@ -11719,7 +11340,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geo_shape',
@@ -11730,7 +11351,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geohash',
@@ -11741,7 +11362,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geohex',
@@ -11752,7 +11373,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'geotile',
@@ -11763,7 +11384,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -11774,7 +11395,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'ip',
@@ -11785,7 +11406,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -11796,7 +11417,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -11807,7 +11428,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -11818,7 +11439,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -11829,7 +11450,7 @@ const mvLastDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'version',
@@ -11842,6 +11463,7 @@ const mvLastDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -11869,7 +11491,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -11880,7 +11502,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date',
@@ -11891,7 +11513,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date_nanos',
@@ -11902,7 +11524,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -11913,7 +11535,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -11924,7 +11546,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'ip',
@@ -11935,7 +11557,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -11946,7 +11568,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -11957,7 +11579,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -11968,7 +11590,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -11979,7 +11601,7 @@ const mvMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'version',
@@ -11992,6 +11614,7 @@ const mvMaxDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -12022,7 +11645,7 @@ const mvMedianDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -12033,7 +11656,7 @@ const mvMedianDefinition: FunctionDefinition = {
           name: 'number',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -12044,7 +11667,7 @@ const mvMedianDefinition: FunctionDefinition = {
           name: 'number',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -12055,7 +11678,7 @@ const mvMedianDefinition: FunctionDefinition = {
           name: 'number',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -12068,6 +11691,7 @@ const mvMedianDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -12098,7 +11722,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -12109,7 +11733,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
           name: 'number',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -12120,7 +11744,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
           name: 'number',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -12131,7 +11755,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
           name: 'number',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -12144,6 +11768,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -12173,7 +11798,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'boolean',
@@ -12184,7 +11809,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date',
@@ -12195,7 +11820,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'date_nanos',
@@ -12206,7 +11831,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -12217,7 +11842,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -12228,7 +11853,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'ip',
@@ -12239,7 +11864,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -12250,7 +11875,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -12261,7 +11886,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -12272,7 +11897,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -12283,7 +11908,7 @@ const mvMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'version',
@@ -12296,6 +11921,7 @@ const mvMinDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -12326,7 +11952,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12344,7 +11970,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12362,7 +11988,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12380,7 +12006,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12398,7 +12024,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12416,7 +12042,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12434,7 +12060,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12452,7 +12078,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12470,7 +12096,7 @@ const mvPercentileDefinition: FunctionDefinition = {
           name: 'number',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'percentile',
@@ -12490,6 +12116,7 @@ const mvPercentileDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -12519,7 +12146,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'p',
@@ -12539,6 +12166,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -12557,7 +12185,7 @@ const mvSliceDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.MV_SLICE,
   description: i18n.translate('kbn-esql-language.esql.definitions.mv_slice', {
     defaultMessage:
-      'Returns a subset of the multivalued field using the start and end index values.\nThis is most useful when reading from a function that emits multivalued columns\nin a known order like `SPLIT` or `MV_SORT`.',
+      'Returns a subset of the multivalued field using the start and end index values. Indexes are 0-based.\nThis is most useful when reading from a function that emits multivalued columns\nin a known order like `SPLIT` or `MV_SORT`.',
   }),
   preview: false,
   alias: undefined,
@@ -12568,7 +12196,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12593,7 +12222,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12618,7 +12248,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12643,7 +12274,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12668,7 +12300,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12693,7 +12326,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12718,7 +12352,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12743,7 +12378,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12768,7 +12404,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12793,7 +12430,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12818,7 +12456,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12843,7 +12482,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12868,7 +12508,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12893,7 +12534,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12918,7 +12560,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12943,7 +12586,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12968,7 +12612,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -12993,7 +12638,8 @@ const mvSliceDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'start',
@@ -13020,6 +12666,7 @@ const mvSliceDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -13049,7 +12696,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13068,7 +12716,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13087,7 +12736,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13106,7 +12756,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13125,7 +12776,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13144,7 +12796,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13163,7 +12816,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13182,7 +12836,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13201,7 +12856,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13220,7 +12876,8 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression. If `null`, the function returns `null`.',
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
         },
         {
           name: 'order',
@@ -13241,6 +12898,7 @@ const mvSortDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -13268,7 +12926,7 @@ const mvSumDefinition: FunctionDefinition = {
           name: 'number',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'double',
@@ -13279,7 +12937,7 @@ const mvSumDefinition: FunctionDefinition = {
           name: 'number',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'integer',
@@ -13290,7 +12948,7 @@ const mvSumDefinition: FunctionDefinition = {
           name: 'number',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'long',
@@ -13301,7 +12959,7 @@ const mvSumDefinition: FunctionDefinition = {
           name: 'number',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'unsigned_long',
@@ -13314,6 +12972,7 @@ const mvSumDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -13341,13 +13000,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'boolean',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'boolean',
@@ -13358,13 +13019,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'cartesian_point',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'cartesian_point',
@@ -13375,13 +13038,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'cartesian_shape',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'cartesian_shape',
@@ -13392,13 +13057,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'date',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'date',
@@ -13409,13 +13076,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'date_nanos',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'date_nanos',
@@ -13426,13 +13095,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'double',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'double',
@@ -13443,13 +13114,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'geo_point',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'geo_point',
@@ -13460,13 +13133,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'geo_shape',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'geo_shape',
@@ -13477,13 +13152,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'geohash',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'geohash',
@@ -13494,13 +13171,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'geohex',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'geohex',
@@ -13511,13 +13190,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'geotile',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'geotile',
@@ -13528,13 +13209,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'integer',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'integer',
@@ -13545,13 +13228,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'ip',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'ip',
@@ -13562,13 +13247,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'keyword',
@@ -13579,13 +13266,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'keyword',
@@ -13596,13 +13285,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'long',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'long',
@@ -13613,13 +13304,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'keyword',
@@ -13630,13 +13323,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'keyword',
@@ -13647,13 +13342,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'unsigned_long',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'unsigned_long',
@@ -13664,13 +13361,15 @@ const mvUnionDefinition: FunctionDefinition = {
           name: 'field1',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
         {
           name: 'field2',
           type: 'version',
           optional: false,
-          description: 'Multivalue expression. Null values are treated as empty sets.',
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
         },
       ],
       returnType: 'version',
@@ -13683,6 +13382,7 @@ const mvUnionDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -13716,13 +13416,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -13733,13 +13433,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13756,13 +13456,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13779,13 +13479,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -13796,13 +13496,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13819,13 +13519,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13842,13 +13542,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -13859,13 +13559,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13882,13 +13582,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'keyword',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13905,13 +13605,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
       ],
       returnType: 'keyword',
@@ -13922,13 +13622,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13945,13 +13645,13 @@ const mvZipDefinition: FunctionDefinition = {
           name: 'string1',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'string2',
           type: 'text',
           optional: false,
-          description: 'Multivalue expression.',
+          description: 'Expression that can be null, a single value, or multiple values.',
         },
         {
           name: 'delim',
@@ -13970,6 +13670,7 @@ const mvZipDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14049,6 +13750,7 @@ const networkDirectionDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14083,6 +13785,7 @@ const nowDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14115,6 +13818,7 @@ const piDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14431,6 +14135,7 @@ const powDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14468,7 +14173,7 @@ const qstrDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.', type=[integer]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).', type=[integer]}, {name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.', type=[string]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='rewrite', values=[standard], description='Method used to rewrite the query.', type=[keyword]}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.', type=[keyword]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.', type=[keyword]}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.', type=[integer]}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.', type=[keyword]}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.', type=[boolean]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.', type=[keyword]}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.', type=[boolean]}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).', type=[keyword]}",
+            "{name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.', type=[boolean]}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.', type=[keyword]}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.', type=[boolean]}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).', type=[keyword]}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.', type=[integer]}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.', type=[integer]}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.', type=[string]}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.', type=[keyword]}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).', type=[integer]}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.', type=[keyword]}, {name='rewrite', values=[standard], description='Method used to rewrite the query.', type=[keyword]}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
@@ -14490,7 +14195,7 @@ const qstrDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.', type=[integer]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).', type=[integer]}, {name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.', type=[boolean]}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.', type=[string]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.', type=[keyword]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='rewrite', values=[standard], description='Method used to rewrite the query.', type=[keyword]}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.', type=[keyword]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.', type=[keyword]}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.', type=[integer]}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.', type=[keyword]}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.', type=[boolean]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.', type=[keyword]}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.', type=[boolean]}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).', type=[keyword]}",
+            "{name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).', type=[keyword]}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.', type=[boolean]}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.', type=[boolean]}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.', type=[keyword]}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.', type=[boolean]}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.', type=[keyword]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.', type=[float]}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.', type=[keyword]}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.', type=[boolean]}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).', type=[keyword]}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.', type=[integer]}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.', type=[integer]}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.', type=[boolean]}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.', type=[boolean]}, {name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.', type=[integer]}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.', type=[string]}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.', type=[keyword]}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).', type=[integer]}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.', type=[keyword]}, {name='rewrite', values=[standard], description='Method used to rewrite the query.', type=[keyword]}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.', type=[keyword]}",
           optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
@@ -14561,6 +14266,7 @@ const repeatDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14774,6 +14480,7 @@ const replaceDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14827,6 +14534,7 @@ const reverseDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -14893,6 +14601,7 @@ const rightDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15118,6 +14827,7 @@ const roundDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15357,6 +15067,7 @@ const roundToDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15409,6 +15120,7 @@ const rtrimDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15592,6 +15304,7 @@ const scalbDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15632,6 +15345,7 @@ const scoreDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15684,6 +15398,7 @@ const sha1Definition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15736,6 +15451,7 @@ const sha256Definition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15811,6 +15527,7 @@ const signumDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15883,6 +15600,7 @@ const sinDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15955,6 +15673,7 @@ const sinhDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -15994,6 +15713,7 @@ const spaceDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16090,6 +15810,7 @@ const splitDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16163,6 +15884,7 @@ const sqrtDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16171,6 +15893,326 @@ const sqrtDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: ['ROW d = 100.0\n| EVAL s = SQRT(d)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stBufferDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_BUFFER,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_buffer', {
+    defaultMessage:
+      'Computes a buffer area around the input geometry at the specified distance. The distance is in the units of the input spatial reference system. Positive distances expand the geometry, negative distances shrink it. Points and lines become polygons when buffered.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'double',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'float',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'integer',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'long',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'double',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'float',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'integer',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'long',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'double',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'float',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'integer',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'long',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'double',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'float',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'integer',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'distance',
+          type: 'long',
+          optional: false,
+          description: 'Buffer distance in the units of the input spatial reference system',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW wkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))"\n| EVAL buffered = ST_BUFFER(TO_GEOSHAPE(wkt), -1)',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -16344,6 +16386,7 @@ const stContainsDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16353,6 +16396,86 @@ const stContainsDefinition: FunctionDefinition = {
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))\n| KEEP abbrev, airport, region, city, city_location',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stDimensionDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_DIMENSION,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_dimension', {
+    defaultMessage:
+      'Returns the topological dimension of the supplied geometry.\nPoints and multi-points return `0`, lines and multi-lines return `1`, polygons and multi-polygons return `2`, and geometry collections return the maximum dimension of their components.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW wkt = [\n    "POINT(1.0 2.0)",\n    "LINESTRING (30 10, 10 30, 40 40)",\n    "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"]\n| MV_EXPAND wkt\n| EVAL geometry = TO_GEOSHAPE(wkt),\n       type = ST_GEOMETRYTYPE(geometry),\n       topological_dimension = ST_DIMENSION(geometry)\n| KEEP type, topological_dimension',
   ],
 };
 
@@ -16641,6 +16764,7 @@ const stDisjointDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16710,6 +16834,7 @@ const stDistanceDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16788,6 +16913,7 @@ const stEnvelopeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16862,6 +16988,7 @@ const stGeohashDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16938,6 +17065,7 @@ const stGeohexDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -16948,6 +17076,86 @@ const stGeohexDefinition: FunctionDefinition = {
   license: 'platinum',
   examples: [
     'FROM airports\n| EVAL geohex = ST_GEOHEX(location, 1)\n| STATS\n    count = COUNT(geohex),\n    centroid = ST_CENTROID_AGG(location)\n      BY geohex\n| WHERE count >= 10\n| EVAL geohexString = TO_STRING(geohex)\n| KEEP count, centroid, geohexString\n| SORT count DESC, geohexString ASC',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeometrytypeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_GEOMETRYTYPE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_geometrytype', {
+    defaultMessage:
+      'Returns the geometry type of the supplied geometry, as a string.\nFor example: `ST_Point`, `ST_LineString`, `ST_Polygon`, `ST_MultiPoint`, `ST_MultiLineString`, `ST_MultiPolygon`, or `ST_GeometryCollection`.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW wkt = [\n    "POINT(1.0 2.0)",\n    "LINESTRING (30 10, 10 30, 40 40)",\n    "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"]\n| MV_EXPAND wkt\n| EVAL geometry = TO_GEOSHAPE(wkt),\n       type = ST_GEOMETRYTYPE(geometry),\n       points = ST_NPOINTS(geometry)\n| KEEP type, points',
   ],
 };
 
@@ -17013,6 +17221,7 @@ const stGeotileDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17310,6 +17519,7 @@ const stIntersectsDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17319,6 +17529,86 @@ const stIntersectsDefinition: FunctionDefinition = {
   ],
   examples: [
     'FROM airports\n| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stIsemptyDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_ISEMPTY,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_isempty', {
+    defaultMessage:
+      'Returns true if the supplied geometry is empty.\nAn empty geometry is one that has no points, such as an empty geometry collection or an empty linestring.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW point = TO_GEOPOINT("POINT(1.0 2.0)"),\n    empty_line = TO_GEOSHAPE("LINESTRING EMPTY"),\n    empty_polygon = TO_GEOSHAPE("POLYGON EMPTY")\n| EVAL pt_empty = ST_ISEMPTY(point),\n       line_empty = ST_ISEMPTY(empty_line),\n       polygon_empty = ST_ISEMPTY(empty_polygon)\n| KEEP pt_empty, line_empty, polygon_empty',
   ],
 };
 
@@ -17388,6 +17678,7 @@ const stNpointsDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17433,6 +17724,60 @@ const stSimplifyDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
           type: 'cartesian_shape',
           optional: false,
           description:
@@ -17441,6 +17786,60 @@ const stSimplifyDefinition: FunctionDefinition = {
         {
           name: 'tolerance',
           type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
@@ -17469,6 +17868,60 @@ const stSimplifyDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
           type: 'geo_shape',
           optional: false,
           description:
@@ -17483,6 +17936,60 @@ const stSimplifyDefinition: FunctionDefinition = {
       ],
       returnType: 'geo_shape',
     },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
   ],
   locationsAvailable: [
     Location.EVAL,
@@ -17491,6 +17998,7 @@ const stSimplifyDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17500,6 +18008,326 @@ const stSimplifyDefinition: FunctionDefinition = {
   ],
   examples: [
     'ROW wkt = "POLYGON ((7.998 53.827, 9.470 53.068, 15.754 53.801, 16.523 57.160, 11.162 57.868, 8.064 57.445, 6.219 55.317, 7.998 53.827))"\n| EVAL simplified = ST_SIMPLIFY(TO_GEOSHAPE(wkt), 0.7)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stSimplifypreservetopologyDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_SIMPLIFYPRESERVETOPOLOGY,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_simplifypreservetopology', {
+    defaultMessage:
+      'Simplifies the input geometry by applying a topology-preserving variant of the Douglas-Peucker algorithm with a specified tolerance. Vertices that fall within the tolerance distance from the simplified shape are removed. Unlike `ST_SIMPLIFY`, the resulting geometry is guaranteed to be topologically valid.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW wkt = "POLYGON ((7.998 53.827, 9.470 53.068, 15.754 53.801, 16.523 57.160, 11.162 57.868, 8.064 57.445, 6.219 55.317, 7.998 53.827))"\n| EVAL simplified = ST_SIMPLIFYPRESERVETOPOLOGY(TO_GEOSHAPE(wkt), 0.7)',
   ],
 };
 
@@ -17674,6 +18502,7 @@ const stWithinDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17729,6 +18558,7 @@ const stXDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17808,6 +18638,7 @@ const stXmaxDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17887,6 +18718,7 @@ const stXminDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -17942,6 +18774,7 @@ const stYDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18021,6 +18854,7 @@ const stYmaxDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18100,6 +18934,7 @@ const stYminDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18199,6 +19034,7 @@ const startsWithDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18276,6 +19112,7 @@ const substringDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18352,6 +19189,7 @@ const tanDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18424,6 +19262,7 @@ const tanhDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18456,6 +19295,7 @@ const tauDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18510,6 +19350,7 @@ const textEmbeddingDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18600,6 +19441,7 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18653,6 +19495,7 @@ const toBase64Definition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18766,6 +19609,7 @@ const toBooleanDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18831,6 +19675,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -18910,6 +19755,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19024,6 +19870,7 @@ const toDateNanosDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19087,6 +19934,7 @@ const toDateperiodDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19214,6 +20062,7 @@ const toDatetimeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19293,6 +20142,7 @@ const toDegreesDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19366,6 +20216,7 @@ const toDenseVectorDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19527,6 +20378,7 @@ const toDoubleDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19536,6 +20388,70 @@ const toDoubleDefinition: FunctionDefinition = {
   ],
   examples: [
     'ROW str1 = "5.20128E11", str2 = "foo"\n| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const toExponentialHistogramDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.TO_EXPONENTIAL_HISTOGRAM,
+  description: i18n.translate('kbn-esql-language.esql.definitions.to_exponential_histogram', {
+    defaultMessage: 'Converts histogram-like values to an exponential histogram.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The histogram value to be converted',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'histogram',
+          optional: false,
+          description: 'The histogram value to be converted',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The histogram value to be converted',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'FROM histogram_standard_index\n | WHERE STARTS_WITH(instance, "hand-rolled")\n | EVAL converted = to_exponential_histogram(responseTime)\n | SORT instance\n | KEEP responseTime, converted\n;',
   ],
 };
 
@@ -19606,6 +20522,7 @@ const toGeohashDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19683,6 +20600,7 @@ const toGeohexDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19748,6 +20666,7 @@ const toGeopointDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19861,6 +20780,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -19940,6 +20860,7 @@ const toGeotileDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -20191,6 +21112,7 @@ const toIntegerDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -20319,6 +21241,7 @@ const toIpDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -20634,6 +21557,7 @@ const toLongDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -20690,6 +21614,7 @@ const toLowerDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -20769,6 +21694,7 @@ const toRadiansDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21061,6 +21987,7 @@ const toStringDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21079,9 +22006,20 @@ const toTdigestDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts an untyped histogram to a TDigest, assuming the values are centroids.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The histogram value to be converted',
+        },
+      ],
+      returnType: 'tdigest',
+    },
     {
       params: [
         {
@@ -21112,6 +22050,7 @@ const toTdigestDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21175,6 +22114,7 @@ const toTimedurationDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21302,6 +22242,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21356,6 +22297,7 @@ const toUpperDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21420,6 +22362,7 @@ const toVersionDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21480,7 +22423,7 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n', type=[integer]}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}",
+            "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n', type=[integer]}",
           optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
@@ -21527,7 +22470,7 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n', type=[integer]}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}",
+            "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n', type=[integer]}",
           optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
@@ -21543,6 +22486,7 @@ const topSnippetsDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21553,6 +22497,7 @@ const topSnippetsDefinition: FunctionDefinition = {
   examples: [
     'FROM books\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien")',
     'FROM books\n| WHERE MATCH(title, "Return")\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })',
+    'FROM books\n| WHERE MATCH(title, "return")\n| RERANK "Tolkien" ON TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 }) WITH { "inference_id" : "test_reranker" }',
   ],
 };
 
@@ -21674,6 +22619,7 @@ const trangeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21730,6 +22676,7 @@ const trimDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21783,6 +22730,7 @@ const urlDecodeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21836,6 +22784,7 @@ const urlEncodeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21887,6 +22836,7 @@ const urlEncodeComponentDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21932,6 +22882,7 @@ const vCosineDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -21979,6 +22930,7 @@ const vDotProductDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -22026,6 +22978,7 @@ const vHammingDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -22073,6 +23026,7 @@ const vL1NormDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -22120,6 +23074,7 @@ const vL2NormDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -22162,6 +23117,7 @@ const vMagnitudeDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -22208,6 +23164,7 @@ const caseDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
@@ -22273,13 +23230,13 @@ export const scalarFunctionDefinitions = [
   matchPhraseDefinition,
   md5Definition,
   monthNameDefinition,
-  multiMatchDefinition,
   mvAppendDefinition,
   mvAvgDefinition,
   mvConcatDefinition,
   mvContainsDefinition,
   mvCountDefinition,
   mvDedupeDefinition,
+  mvDifferenceDefinition,
   mvFirstDefinition,
   mvIntersectionDefinition,
   mvIntersectsDefinition,
@@ -22317,16 +23274,21 @@ export const scalarFunctionDefinitions = [
   spaceDefinition,
   splitDefinition,
   sqrtDefinition,
+  stBufferDefinition,
   stContainsDefinition,
+  stDimensionDefinition,
   stDisjointDefinition,
   stDistanceDefinition,
   stEnvelopeDefinition,
   stGeohashDefinition,
   stGeohexDefinition,
+  stGeometrytypeDefinition,
   stGeotileDefinition,
   stIntersectsDefinition,
+  stIsemptyDefinition,
   stNpointsDefinition,
   stSimplifyDefinition,
+  stSimplifypreservetopologyDefinition,
   stWithinDefinition,
   stXDefinition,
   stXmaxDefinition,
@@ -22351,6 +23313,7 @@ export const scalarFunctionDefinitions = [
   toDegreesDefinition,
   toDenseVectorDefinition,
   toDoubleDefinition,
+  toExponentialHistogramDefinition,
   toGeohashDefinition,
   toGeohexDefinition,
   toGeopointDefinition,

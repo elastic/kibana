@@ -19,11 +19,13 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
-import { EngineDescriptorType } from './domain/definitions/saved_objects';
-import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
-import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
-import { CRUDClient } from './domain/crud_client';
+import { EngineDescriptorType, EntityStoreGlobalStateType } from './domain/saved_objects';
+import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import { CRUDClient } from './domain/crud';
+import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
+import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
 
 export class EntityStorePlugin
   implements
@@ -74,6 +76,15 @@ export class EntityStorePlugin
 
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
+    core.savedObjects.registerType(EntityStoreGlobalStateType);
+
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: automatedResolutionMaintainerConfig,
+      core,
+      analytics: createReportEvent(core.analytics),
+    });
 
     return {
       registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>
@@ -82,6 +93,7 @@ export class EntityStorePlugin
           logger: this.logger,
           config,
           core,
+          analytics: createReportEvent(core.analytics),
         }),
     };
   }
@@ -102,6 +114,8 @@ export class EntityStorePlugin
     const logger = this.logger;
     return {
       createCRUDClient: (esClient, namespace) => new CRUDClient({ logger, esClient, namespace }),
+      createResolutionClient: (esClient, namespace) =>
+        new ResolutionClient({ logger, esClient, namespace }),
     };
   }
 

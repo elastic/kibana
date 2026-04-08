@@ -22,14 +22,12 @@ import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
-import { getCaseOwner } from './utils';
-import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
 
 export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
-  const { attachments, caseId } = args;
+  const { attachments, caseId, mode = 'legacy' } = args;
 
   const {
     logger,
@@ -47,7 +45,6 @@ export const bulkCreate = async (
       userActionService,
       userActionsToAdd: attachments.length,
     });
-    const caseOwner = await getCaseOwner(caseId, clientArgs);
 
     attachments.forEach((attachment) => {
       decodeCommentRequestV2(
@@ -69,10 +66,9 @@ export const bulkCreate = async (
     ] = attachments.reduce<[Array<{ id: string } & AttachmentRequestV2>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
-        const owner = isLegacyAttachmentRequest(attachment) ? attachment.owner : caseOwner;
         return [
           [...a, { id: savedObjectID, ...attachment }],
-          [...e, { owner, id: savedObjectID }],
+          [...e, { owner: attachment.owner, id: savedObjectID }],
         ];
       },
       [[], []]
@@ -86,10 +82,9 @@ export const bulkCreate = async (
     const model = await CaseCommentModel.create(caseId, clientArgs);
     const updatedModel = await model.bulkCreate({
       attachments: attachmentsWithIds,
-      owner: caseOwner,
     });
 
-    return await updatedModel.encodeWithComments();
+    return await updatedModel.encodeWithComments({ mode });
   } catch (error) {
     throw createCaseError({
       message: `Failed while bulk creating attachment to case id: ${caseId} error: ${error}`,

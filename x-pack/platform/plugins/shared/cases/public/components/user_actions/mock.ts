@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import { UserActionActions } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
+import { getCommentAttachmentType } from '../attachments/comment';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -53,13 +56,17 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const handleOutlineComment = jest.fn();
   const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+  const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+  unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
 
   return {
+    appId: 'cases',
     userAction,
     userProfiles: userProfilesMap,
     currentUserProfile: userProfiles[0],
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     caseData: basicCase,
     casesConfiguration: casesConfigurationsMock,
     attachments: basicCase.comments,
@@ -75,6 +82,10 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     onShowAlertDetails,
     handleDeleteComment,
     handleOutlineComment,
+    euiTheme: {
+      border: { thin: '1px solid #d3dae6' },
+      size: { s: '8px', base: '16px', xl: '24px' },
+    } as EuiThemeComputed<{}>,
   };
 };
 
@@ -93,7 +104,7 @@ export const getMockCommentRenderingContext = (
   loadingCommentIds: [],
   euiTheme: {
     border: { thin: '1px solid #d3dae6' },
-    size: { s: '8px' },
+    size: { s: '8px', base: '16px', xl: '24px' },
   } as CommentRenderingContextValue['euiTheme'],
   handleManageMarkdownEditId: jest.fn(),
   handleSaveComment: jest.fn(),

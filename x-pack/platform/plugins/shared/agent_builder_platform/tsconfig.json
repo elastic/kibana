@@ -3,16 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "../../../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -23,7 +15,6 @@
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-common",
     "@kbn/zod",
-    "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
     "@kbn/core-lifecycle-server",
     "@kbn/esql-language",
@@ -37,5 +28,10 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/share-plugin",
+    "@kbn/workflows",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/connector-specs",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/management-settings-ids"
   ]
 }

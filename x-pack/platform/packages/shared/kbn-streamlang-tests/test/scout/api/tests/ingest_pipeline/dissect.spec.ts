@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -29,7 +30,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -40,12 +41,12 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.log?.level).toBe('info');
-      expect(source?.client?.ip).toBe('127.0.0.1');
-      expect(source?.http?.version).toBe('1.1');
-      expect(source?.http?.response?.status_code).toBe('200');
-      expect(source?.http?.response?.body?.bytes).toBe('123');
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.log)?.level).toBe('info');
+      expect(asDoc(source?.client)?.ip).toBe('127.0.0.1');
+      expect(asDoc(source?.http)?.version).toBe('1.1');
+      expect(asDoc(asDoc(source?.http)?.response)?.status_code).toBe('200');
+      expect(asDoc(asDoc(asDoc(source?.http)?.response)?.body)?.bytes).toBe('123');
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -62,15 +63,15 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.client?.ip).toBeUndefined();
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.client)?.ip).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -87,7 +88,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -108,7 +109,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'value1-value2' }];
       await testBed.ingest(indexName, docs, processors);
@@ -130,18 +131,18 @@ apiTest.describe(
       },
     ].forEach(({ templateFrom, description }) => {
       apiTest(`${description}`, async () => {
-        expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'dissect',
-                from: templateFrom,
-                pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
-              } as DissectProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Added error message for Mustache templates
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'dissect',
+              from: templateFrom,
+              pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+            } as DissectProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
   }

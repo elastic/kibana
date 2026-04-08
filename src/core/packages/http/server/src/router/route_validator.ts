@@ -8,7 +8,7 @@
  */
 
 import { type ObjectType, SchemaTypeError, type Type } from '@kbn/config-schema';
-import type { ZodEsque } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod/v4';
 
 /**
  * Error to return when the validation is not successful.
@@ -81,11 +81,7 @@ export type RouteValidationFunction<T> = (
  *
  * @public
  */
-export type RouteValidationSpec<T> =
-  | ObjectType
-  | Type<T>
-  | ZodEsque<T>
-  | RouteValidationFunction<T>;
+export type RouteValidationSpec<T> = ObjectType | Type<T> | ZodType<T> | RouteValidationFunction<T>;
 
 /**
  * The configuration object to the RouteValidator class.
@@ -225,4 +221,4 @@ interface NotRouteValidatorFullConfigRequest {
  * @return A @kbn/config-schema schema
  * @public
  */
-export type LazyValidator = () => Type<unknown> | ZodEsque<unknown>;
+export type LazyValidator = () => Type<unknown> | ZodType<unknown>;

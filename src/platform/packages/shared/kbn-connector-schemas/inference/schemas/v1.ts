@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 export const TelemetryMetadataSchema = z
   .object({
     pluginId: z.string().optional(),
@@ -20,7 +20,7 @@ export const ConfigSchema = z
     taskType: z.string(),
     inferenceId: z.string(),
     providerConfig: z.object({}).passthrough().default({}),
-    taskTypeConfig: z.object({}).passthrough().default({}),
+    taskTypeConfig: z.object({}).passthrough().default({}).optional(),
     contextWindowLength: z.coerce.number().optional(),
     headers: z.record(z.string(), z.string()).optional(),
     temperature: z.coerce.number().optional(),

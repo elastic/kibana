@@ -17,17 +17,8 @@ import type { CalloutVariant } from '../components/callout/callout.translations'
 
 // Constants
 const CLOUD_ASSET_DISCOVERY_INTEGRATION_PACKAGE_NAME = 'cloud_asset_inventory' as const;
-const ENTITY_ANALYTICS_API_VERSION = '2023-10-31' as const;
 
 // Types
-
-interface EntityStoreStatusResponse {
-  status: 'not_installed' | 'installing' | 'running' | 'stopped';
-  engines?: Array<{
-    type: string;
-    status: 'installing' | 'started' | 'stopped';
-  }>;
-}
 
 export type UseCalloutStatusResult =
   | { status: 'ok' | 'error' | 'loading'; shouldShowCallout: false }
@@ -82,24 +73,6 @@ const useCloudAssetInventoryPackageQuery = (
   });
 };
 
-const useEntityStoreStatusQuery = (http: ReturnType<typeof useKibana>['services']['http']) => {
-  return useQuery<EntityStoreStatusResponse, IHttpFetchError>({
-    queryKey: ['graph', 'callout', 'entity_store', 'status'],
-    queryFn: () => {
-      if (!http) {
-        throw new Error('HTTP service is not available');
-      }
-      return http.fetch<EntityStoreStatusResponse>('/api/entity_store/status', {
-        version: ENTITY_ANALYTICS_API_VERSION,
-        method: 'GET',
-      });
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-    enabled: !!http,
-  });
-};
-
 /**
  * Hook to determine the appropriate callout state for the graph investigation.
  * Detects missing requirements and entity enrichment issues.
@@ -114,46 +87,29 @@ export const useCalloutStatus = (nodes: NodeViewModel[]): UseCalloutStatusResult
   // Memoize entity nodes to prevent unnecessary re-renders
   const entityNodesMemo = useMemo(() => nodes.filter(isEntityNode), [nodes]);
 
-  // Query 1: Check if Cloud Asset Discovery package is installed
+  // Check if Cloud Asset Discovery package is installed
   const { data: packageInfoData, error: packageInfoError } =
     useCloudAssetInventoryPackageQuery(http);
-
-  // Query 2: Check Entity Store status
-  const { data: entityStoreStatusData, error: entityStoreStatusError } =
-    useEntityStoreStatusQuery(http);
 
   // Memoize the callout variant determination
   const result = useMemo<UseCalloutStatusResult>(() => {
     try {
       // Return error status on any errors - fail gracefully
-      if (packageInfoError || entityStoreStatusError) {
+      if (packageInfoError) {
         return { status: 'error', shouldShowCallout: false };
       }
 
       // Return loading status while waiting for required data
-      if (!packageInfoData || !entityStoreStatusData) {
+      if (!packageInfoData) {
         return { status: 'loading', shouldShowCallout: false };
       }
 
       // Check if integration is installed
       const isIntegrationInstalled = checkIsIntegrationInstalled(packageInfoData);
 
-      // Check if Entity Store is enabled (status === 'running')
-      const isEntityStoreEnabled = entityStoreStatusData.status === 'running';
-
-      // Priority 1: Missing all requirements
-      if (!isIntegrationInstalled && !isEntityStoreEnabled) {
-        return { status: 'missingAllRequirements', shouldShowCallout: true };
-      }
-
-      // Priority 2: Uninstalled integration
+      // Priority 1: Uninstalled integration
       if (!isIntegrationInstalled) {
         return { status: 'uninstalledIntegration', shouldShowCallout: true };
-      }
-
-      // Priority 3: Disabled Entity Store
-      if (!isEntityStoreEnabled) {
-        return { status: 'disabledEntityStore', shouldShowCallout: true };
       }
 
       // Return early if no entity nodes to check
@@ -161,12 +117,12 @@ export const useCalloutStatus = (nodes: NodeViewModel[]): UseCalloutStatusResult
         return { status: 'ok', shouldShowCallout: false };
       }
 
-      // Priority 4: Check if any entity is unavailable in Entity Store
+      // Priority 2: Check if any entity is unavailable in Entity Store
       if (hasUnavailableEntity(entityNodesMemo)) {
         return { status: 'unavailableEntityInfo', shouldShowCallout: true };
       }
 
-      // Priority 5: Check for unenriched entities (missing type or sub_type);
+      // Priority 3: Check for unenriched entities (missing type or sub_type);
       if (hasUnenrichedEntity(entityNodesMemo)) {
         return { status: 'unknownEntityType', shouldShowCallout: true };
       }
@@ -177,13 +133,7 @@ export const useCalloutStatus = (nodes: NodeViewModel[]): UseCalloutStatusResult
       // Fail gracefully on any unexpected errors
       return { status: 'error', shouldShowCallout: false };
     }
-  }, [
-    entityNodesMemo,
-    packageInfoData,
-    entityStoreStatusData,
-    packageInfoError,
-    entityStoreStatusError,
-  ]);
+  }, [entityNodesMemo, packageInfoData, packageInfoError]);
 
   return result;
 };

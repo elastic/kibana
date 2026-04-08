@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';
@@ -17,10 +17,10 @@ import type {
   ToolHandlerContext,
   ToolHandlerReturn,
 } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
-  RunAgentStackEntry,
 } from '@kbn/agent-builder-server/runner';
 import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
 import { createErrorResult } from '@kbn/agent-builder-server';
@@ -121,8 +121,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       }
 
       if (confirmStatus === ConfirmationStatus.unprompted) {
+        const definition = tool.confirmation.getConfirmation
+          ? await tool.confirmation.getConfirmation({ toolParams })
+          : undefined;
         return {
-          prompt: createToolConfirmationPrompt({ confirmationId, tool }),
+          prompt: createToolConfirmationPrompt({ confirmationId, tool, definition }),
         };
       }
     }
@@ -272,11 +275,12 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     toolManager,
     filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    runContext: manager.context,
   };
 };
 
-const getAgentExecutionContext = (manager: RunnerManager): RunAgentStackEntry | undefined => {
-  return [...manager.context.stack].reverse().find((entry) => entry.type === 'agent');
+const getAgentExecutionContext = (manager: RunnerManager) => {
+  return getAgentFromRunContext(manager.context);
 };
 
 const reportToolCallTelemetry = ({

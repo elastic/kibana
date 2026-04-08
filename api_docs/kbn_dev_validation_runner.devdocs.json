@@ -1,0 +1,557 @@
+{
+  "id": "@kbn/dev-validation-runner",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.buildValidationCliArgs",
+        "type": "Function",
+        "tags": [],
+        "label": "buildValidationCliArgs",
+        "description": [
+          "Builds shared validation CLI args for command logs and reproduction commands."
+        ],
+        "signature": [
+          "({ contract, resolvedBase, directTarget, forceFullProfile, }: ",
+          "BuildValidationCliArgsOptions",
+          ") => ",
+          "ValidationCliArgs"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+        "lineNumber": 81,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.buildValidationCliArgs.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  contract,\n  resolvedBase,\n  directTarget,\n  forceFullProfile = false,\n}",
+            "description": [],
+            "signature": [
+              "BuildValidationCliArgsOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+            "lineNumber": 81,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.describeValidationNoTargetsScope",
+        "type": "Function",
+        "tags": [],
+        "label": "describeValidationNoTargetsScope",
+        "description": [
+          "Describes where no affected targets were searched for the current validation contract."
+        ],
+        "signature": [
+          "(baseContext: ",
+          {
+            "pluginId": "@kbn/dev-validation-runner",
+            "scope": "common",
+            "docId": "kibKbnDevValidationRunnerPluginApi",
+            "section": "def-common.ValidationBaseContext",
+            "text": "ValidationBaseContext"
+          },
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.describeValidationNoTargetsScope.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "baseContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-validation-runner",
+                "scope": "common",
+                "docId": "kibKbnDevValidationRunnerPluginApi",
+                "section": "def-common.ValidationBaseContext",
+                "text": "ValidationBaseContext"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+            "lineNumber": 80,
+            "columnNumber": 50,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.describeValidationScope",
+        "type": "Function",
+        "tags": [],
+        "label": "describeValidationScope",
+        "description": [
+          "\nDescribes what revisions/change-scope a resolved validation context represents.\nConsumers can log this once and keep command-level logs focused on tool-specific execution."
+        ],
+        "signature": [
+          "(baseContext: ",
+          {
+            "pluginId": "@kbn/dev-validation-runner",
+            "scope": "common",
+            "docId": "kibKbnDevValidationRunnerPluginApi",
+            "section": "def-common.ValidationBaseContext",
+            "text": "ValidationBaseContext"
+          },
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.describeValidationScope.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "baseContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-validation-runner",
+                "scope": "common",
+                "docId": "kibKbnDevValidationRunnerPluginApi",
+                "section": "def-common.ValidationBaseContext",
+                "text": "ValidationBaseContext"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+            "lineNumber": 48,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.describeValidationScoping",
+        "type": "Function",
+        "tags": [],
+        "label": "describeValidationScoping",
+        "description": [
+          "Formats a human-readable \"Checking ...\" message for tool-specific target sets."
+        ],
+        "signature": [
+          "({ baseContext, targetCount, targetNoun, }: ",
+          "DescribeValidationScopingOptions",
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+        "lineNumber": 111,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.describeValidationScoping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  baseContext,\n  targetCount,\n  targetNoun = 'project',\n}",
+            "description": [],
+            "signature": [
+              "DescribeValidationScopingOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+            "lineNumber": 111,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.formatReproductionCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "formatReproductionCommand",
+        "description": [
+          "Formats a reproduction command from a script name and CLI args."
+        ],
+        "signature": [
+          "(scriptName: string, args: string[]) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.formatReproductionCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "scriptName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+            "lineNumber": 63,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.formatReproductionCommand.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+            "lineNumber": 63,
+            "columnNumber": 63,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.hasValidationRunFlags",
+        "type": "Function",
+        "tags": [],
+        "label": "hasValidationRunFlags",
+        "description": [
+          "Returns true when any shared validation-contract flag is present in raw CLI args."
+        ],
+        "signature": [
+          "(args: string[]) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.hasValidationRunFlags.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+            "lineNumber": 59,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.readValidationRunFlags",
+        "type": "Function",
+        "tags": [],
+        "label": "readValidationRunFlags",
+        "description": [
+          "Reads shared validation flags from a command flags reader."
+        ],
+        "signature": [
+          "(flagsReader: ",
+          "ValidationRunFlagsReader",
+          ") => ",
+          "ValidationRunFlagsInput"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.readValidationRunFlags.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "flagsReader",
+            "description": [],
+            "signature": [
+              "ValidationRunFlagsReader"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.resolveValidationAffectedProjects",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveValidationAffectedProjects",
+        "description": [
+          "\nResolves Moon-affected project roots from pre-resolved changed files.\n\nAccepts `changedFilesJson` (Moon JSON format) to pipe directly into\n`moon query projects --affected`, avoiding duplicate Moon queries."
+        ],
+        "signature": [
+          "({ changedFilesJson, downstream, }: ",
+          "ResolveValidationAffectedProjectsOptions",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/dev-validation-runner",
+            "scope": "common",
+            "docId": "kibKbnDevValidationRunnerPluginApi",
+            "section": "def-common.ValidationAffectedProjectsContext",
+            "text": "ValidationAffectedProjectsContext"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
+        "lineNumber": 186,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.resolveValidationAffectedProjects.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  changedFilesJson,\n  downstream = 'none',\n}",
+            "description": [],
+            "signature": [
+              "ResolveValidationAffectedProjectsOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
+            "lineNumber": 186,
+            "columnNumber": 57,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.resolveValidationBaseContext",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveValidationBaseContext",
+        "description": [
+          "Resolves reusable validation context once for either direct-target or contract-driven execution."
+        ],
+        "signature": [
+          "({ flags, directTarget, runnerDescription, onWarning, }: ",
+          "ResolveValidationBaseContextOptions",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/dev-validation-runner",
+            "scope": "common",
+            "docId": "kibKbnDevValidationRunnerPluginApi",
+            "section": "def-common.ValidationBaseContext",
+            "text": "ValidationBaseContext"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+        "lineNumber": 147,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.resolveValidationBaseContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  flags,\n  directTarget,\n  runnerDescription,\n  onWarning,\n}",
+            "description": [],
+            "signature": [
+              "ResolveValidationBaseContextOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+            "lineNumber": 147,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.ValidationAffectedProjectsContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidationAffectedProjectsContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.ValidationAffectedProjectsContext.affectedSourceRoots",
+            "type": "Array",
+            "tags": [],
+            "label": "affectedSourceRoots",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-validation-runner",
+            "id": "def-common.ValidationAffectedProjectsContext.isRootProjectAffected",
+            "type": "boolean",
+            "tags": [],
+            "label": "isRootProjectAffected",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/resolve_validation_run_context.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.VALIDATION_RUN_HELP",
+        "type": "string",
+        "tags": [],
+        "label": "VALIDATION_RUN_HELP",
+        "description": [
+          "Shared validation help text block for CLI usage messages."
+        ],
+        "signature": [
+          "\"\\n        --profile [name]        Validation profile: precommit, quick, agent, branch, pr, full (default: branch)\\n        --scope [scope]         Scope: staged, local, branch, full\\n        --test-mode [mode]      Test selection mode: related, affected, all\\n        --base-ref [git-ref]    Base revision for branch scope\\n        --head-ref [git-ref]    Head revision for branch scope (default: HEAD)\\n        --downstream [mode]     Downstream mode for related/affected: none, direct, deep\\n\""
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.ValidationBaseContext",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidationBaseContext",
+        "description": [],
+        "signature": [
+          "ValidationDirectTargetContext",
+          " | ",
+          "ValidationContractContext"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/run_validation_command.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dev-validation-runner",
+        "id": "def-common.VALIDATION_RUN_STRING_FLAGS",
+        "type": "Object",
+        "tags": [],
+        "label": "VALIDATION_RUN_STRING_FLAGS",
+        "description": [
+          "Shared validation flag names used by validation-style CLIs."
+        ],
+        "signature": [
+          "readonly [\"profile\", \"scope\", \"test-mode\", \"base-ref\", \"head-ref\", \"downstream\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-validation-runner/src/validation_run_cli.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

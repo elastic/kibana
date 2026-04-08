@@ -14,7 +14,7 @@ import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface UsePackQueryErrorsProps {
-  actionId: string;
+  actionId?: string;
   interval: number;
   logsDataView?: DataView;
   skip?: boolean;

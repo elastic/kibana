@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { FindRulesRequestQueryInput } from './find_rules_route.gen';
 import { FindRulesRequestQuery } from './find_rules_route.gen';
 
@@ -106,7 +106,9 @@ describe('Find rules request schema', () => {
 
     const result = FindRulesRequestQuery.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('fields: Expected array, received number');
+    expect(stringifyZodError(result.error)).toEqual(
+      'fields: Invalid input: expected array, received number'
+    );
   });
 
   test('filter works with a string', () => {
@@ -126,7 +128,9 @@ describe('Find rules request schema', () => {
 
     const result = FindRulesRequestQuery.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('filter: Expected string, received number');
+    expect(stringifyZodError(result.error)).toEqual(
+      'filter: Invalid input: expected string, received number'
+    );
   });
 
   test('sort_order validates with desc and sort_field', () => {
@@ -150,7 +154,7 @@ describe('Find rules request schema', () => {
     const result = FindRulesRequestQuery.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      "sort_order: Invalid enum value. Expected 'asc' | 'desc', received 'some other string'"
+      'sort_order: Invalid option: expected one of "asc"|"desc"'
     );
   });
 });

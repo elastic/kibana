@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/key-value-metadata-table",
-  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-onboarding-team"],
+  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
   "group": "platform",
   "visibility": "shared"
 }

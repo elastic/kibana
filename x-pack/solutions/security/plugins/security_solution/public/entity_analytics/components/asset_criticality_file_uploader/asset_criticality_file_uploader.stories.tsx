@@ -55,7 +55,11 @@ export const FilePickerStep: StoryFn = () => {
           <EuiSpacer size="s" />
 
           <EuiPanel>
-            <AssetCriticalityFilePickerStep onFileChange={() => {}} isLoading={true} />
+            <AssetCriticalityFilePickerStep
+              onFileChange={() => {}}
+              isLoading={true}
+              isEntityStoreV2Enabled={false}
+            />
           </EuiPanel>
           <EuiSpacer size="xl" />
 
@@ -66,7 +70,20 @@ export const FilePickerStep: StoryFn = () => {
             <AssetCriticalityFilePickerStep
               onFileChange={() => {}}
               isLoading={false}
+              isEntityStoreV2Enabled={false}
               errorMessage="An error message"
+            />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+
+          <b>{'Entity store V2 enabled'}</b>
+          <EuiSpacer size="s" />
+
+          <EuiPanel>
+            <AssetCriticalityFilePickerStep
+              onFileChange={() => {}}
+              isLoading={false}
+              isEntityStoreV2Enabled={true}
             />
           </EuiPanel>
         </div>

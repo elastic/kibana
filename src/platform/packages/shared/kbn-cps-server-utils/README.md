@@ -12,9 +12,9 @@ Accepts either a `spaceId` string or a `KibanaRequest` (from which the space is 
 import { getSpaceNPRE } from '@kbn/cps-server-utils';
 
 // From a space ID string
-getSpaceNPRE('my-space');  // 'kibana_space_my-space_default'
-getSpaceNPRE('');          // 'kibana_space_default_default'
+getSpaceNPRE('my-space');  // '@kibana_space_my-space_default'
+getSpaceNPRE('');          // '@kibana_space_default_default'
 
 // From a KibanaRequest (extracts space from the URL path)
-getSpaceNPRE(request);     // e.g. 'kibana_space_my-space_default'
+getSpaceNPRE(request);     // e.g. '@kibana_space_my-space_default'
 ```

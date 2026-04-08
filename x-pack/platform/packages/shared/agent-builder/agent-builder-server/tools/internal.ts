@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerFn } from './handler';
 import type {

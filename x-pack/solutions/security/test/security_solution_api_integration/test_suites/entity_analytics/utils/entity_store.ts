@@ -6,10 +6,14 @@
  */
 
 import type { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 import expect from '@kbn/expect';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
+import { dataViewRouteHelpersFactory } from './data_view';
 
 export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
@@ -19,6 +23,8 @@ export const EntityStoreUtils = (
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
+  const supertest = getService('supertest');
+  const dataView = dataViewRouteHelpersFactory(supertest, namespace);
   const {
     expectTransformExists,
     expectTransformNotFound,
@@ -35,6 +41,35 @@ export const EntityStoreUtils = (
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
 
   const cleanEngines = async () => {
+    let settingsUrl = '/internal/kibana/settings';
+    if (namespace !== 'default') {
+      settingsUrl = `/s/${namespace}${settingsUrl}`;
+    }
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .expect(200);
+
+    // Use the supported uninstall API so maintainers are removed via
+    // entityMaintainersClient.removeAll() and don't leak task state between tests.
+    let uninstallUrl = '/api/security/entity_store/uninstall';
+    if (namespace !== 'default') {
+      uninstallUrl = `/s/${namespace}${uninstallUrl}`;
+    }
+    try {
+      await supertest
+        .post(uninstallUrl)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '2023-10-31')
+        .send({ entityTypes: ['user', 'host', 'service'] })
+        .expect(200);
+    } catch (e) {
+      log.debug(`Entity store not installed, skipping uninstall during cleanup: ${e.message}`);
+    }
+
     const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
 
     // @ts-expect-error body is any
@@ -172,14 +207,327 @@ export const EntityStoreUtils = (
     await expectEntitiesIndexNotFound(entityType, namespace);
   };
 
+  const searchEntitiesV2 = async (
+    filter: string,
+    opts: { size?: number; source?: string[] } = {}
+  ) => {
+    let url = '/api/security/entity_store/entities';
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+    const res = await supertest
+      .get(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .query({
+        filter,
+        ...(opts.size !== undefined ? { size: opts.size } : {}),
+        ...(opts.source ? { source: opts.source } : {}),
+      });
+    if (res.status !== 200) {
+      log.error(`Failed to search entities`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+    return res;
+  };
+
+  const deleteEntityV2 = async (entityId: string) => {
+    let url = '/api/security/entity_store/entities/';
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+    const res = await supertest
+      .delete(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ entityId });
+    if (res.status !== 200) {
+      log.error(`Failed to delete entity ${entityId}`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+    return res;
+  };
+
+  const enableEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
+    let settingsUrl = '/internal/kibana/settings';
+    if (namespace !== 'default') {
+      settingsUrl = `/s/${namespace}${settingsUrl}`;
+    }
+    await supertest
+      .post(settingsUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
+      .expect(200);
+
+    let url = '/api/security/entity_store/install';
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+    const res = await supertest
+      .post(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .send(body);
+    if (res.status !== 201 && res.status !== 200) {
+      log.error(`Failed to install entity store v2`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect([200, 201]).to.contain(res.status);
+
+    return res;
+  };
+
+  const installEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
+    // Default to logs-* to avoid coupling extraction to ecs_compliant fixture state.
+    const {
+      dataViewPattern = 'logs-*',
+      waitForEntities = true,
+      entityTypes = ['user', 'host'],
+      ...installBody
+    } = body;
+    const installRequestBody = { ...installBody, entityTypes };
+    await dataView.create('security-solution', dataViewPattern);
+
+    const res = await enableEntityStoreV2(installRequestBody);
+
+    await retry.waitForWithTimeout(
+      `Engines to start for entity types: ${entityTypes.join(', ')}`,
+      60_000,
+      async () => {
+        const { body: enginesBody } = await entityAnalyticsApi
+          .listEntityEngines(namespace)
+          .expect(200);
+        if (enginesBody.engines.every((engine: any) => engine.status === 'started')) {
+          return true;
+        }
+        if (enginesBody.engines.some((engine: any) => engine.status === 'error')) {
+          throw new Error(`Engines not started: ${JSON.stringify(enginesBody)}`);
+        }
+        return false;
+      }
+    );
+
+    const fromDateISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const toDateISO = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    for (const entityType of entityTypes) {
+      let extractUrl = `/internal/security/entity_store/${entityType}/force_log_extraction`;
+      if (namespace !== 'default') {
+        extractUrl = `/s/${namespace}${extractUrl}`;
+      }
+      log.info(`Force extracting entities for type: ${entityType}`);
+      const extractRes = await supertest
+        .post(extractUrl)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '2')
+        .send({ fromDateISO, toDateISO });
+      log.info(
+        `Force extraction for ${entityType}: status=${extractRes.status}, body=${JSON.stringify(
+          extractRes.body
+        )}`
+      );
+      expect([200, 202]).to.contain(extractRes.status);
+    }
+    if (waitForEntities) {
+      await waitForEntityStoreEntities({ es, log, count: 1, namespace });
+    }
+
+    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init';
+    if (namespace !== 'default') {
+      maintainersUrl = `/s/${namespace}${maintainersUrl}`;
+    }
+
+    const maintainersRes = await supertest
+      .post(maintainersUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
+      .send({});
+
+    expect([200, 201]).to.contain(maintainersRes.status);
+    return res;
+  };
+
+  const forceUpdateEntityViaCrud = async ({
+    entityType,
+    body,
+  }: {
+    entityType: EntityType;
+    body: Record<string, unknown>;
+  }) => {
+    let url = `/api/security/entity_store/entities/${entityType}?force=true`;
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+
+    const response = await supertest
+      .put(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .send(body);
+
+    if (response.status !== 200) {
+      log.error(`Failed to force-update entity via CRUD API for type "${entityType}"`);
+      log.error(JSON.stringify(response.body));
+    }
+    expect(response.status).to.eql(200);
+    return response;
+  };
+
   return {
     cleanEngines,
+    deleteEntityV2,
+    searchEntitiesV2,
     initEntityEngineForEntityTypesAndWait,
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
     enableEntityStore,
+    enableEntityStoreV2,
+    installEntityStoreV2,
+    forceUpdateEntityViaCrud,
     waitForEngineStatus,
     initEntityEngineForEntityType,
   };
+};
+
+/**
+ * Reads entities from the Entity Store V2 latest index.
+ */
+export const readEntityStoreEntities = async (
+  es: Client,
+  namespace: string = 'default'
+): Promise<Array<{ entity: { id: string; risk?: Record<string, unknown> } }>> => {
+  const index = `.entities.v2.latest.security_${namespace}`;
+  try {
+    const results = await es.search({ index, size: 1000 });
+    return results.hits.hits.map(
+      (hit: any) => hit._source as { entity: { id: string; risk?: Record<string, unknown> } }
+    );
+  } catch (e: any) {
+    if (e.meta?.statusCode === 404) {
+      return [];
+    }
+    throw e;
+  }
+};
+
+/**
+ * Waits for at least `count` entities to be present in the Entity Store V2 latest index.
+ */
+export const waitForEntityStoreEntities = async ({
+  es,
+  log,
+  count = 1,
+  namespace = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  count?: number;
+  namespace?: string;
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const entities = await readEntityStoreEntities(es, namespace);
+      return entities.length >= count;
+    },
+    'waitForEntityStoreEntities',
+    log
+  );
+};
+
+/**
+ * Polls until a specific entity document appears in the Entity Store V2 latest index,
+ * optionally requiring specific attribute values (criticality, watchlist membership).
+ */
+export const waitForEntityStoreDoc = async ({
+  es,
+  retry,
+  entityId,
+  timeoutMs = 60_000,
+  requireCriticality,
+  requiredWatchlistId,
+  namespace = 'default',
+}: {
+  es: Client;
+  retry: {
+    waitForWithTimeout: (
+      label: string,
+      timeout: number,
+      predicate: () => Promise<boolean>
+    ) => Promise<void>;
+  };
+  entityId: string;
+  timeoutMs?: number;
+  requireCriticality?: 'high_impact' | 'absent';
+  requiredWatchlistId?: string;
+  namespace?: string;
+}): Promise<void> => {
+  const index = `.entities.v2.latest.security_${namespace}`;
+  await retry.waitForWithTimeout(
+    `entity store doc present for ${entityId}`,
+    timeoutMs,
+    async () => {
+      const response = await es.search({
+        index,
+        size: 1,
+        query: { term: { 'entity.id': entityId } },
+      });
+      const hit = response.hits.hits[0]?._source as
+        | {
+            asset?: { criticality?: string };
+            entity?: { attributes?: { watchlists?: string[] } };
+          }
+        | undefined;
+      if (!hit) {
+        return false;
+      }
+
+      if (requireCriticality === 'high_impact' && hit.asset?.criticality !== 'high_impact') {
+        return false;
+      }
+      if (requireCriticality === 'absent' && hit.asset?.criticality != null) {
+        return false;
+      }
+      if (
+        requiredWatchlistId &&
+        !(hit.entity?.attributes?.watchlists?.includes(requiredWatchlistId) ?? false)
+      ) {
+        return false;
+      }
+      return true;
+    }
+  );
+};
+
+/**
+ * Asserts that risk scores have been dual-written to the Entity Store.
+ * Checks that entities in the store have `entity.risk` fields populated.
+ */
+export const assertRiskScoresWrittenToEntityStore = async ({
+  es,
+  log,
+  expectedEntityCount,
+  namespace = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  expectedEntityCount: number;
+  namespace?: string;
+}): Promise<void> => {
+  const entities = await readEntityStoreEntities(es, namespace);
+  const entitiesWithRisk = entities.filter(
+    (entity) => entity.entity?.risk && entity.entity.risk.calculated_score_norm !== undefined
+  );
+  log.info(
+    `Entity store dual-write check: ${entitiesWithRisk.length}/${entities.length} entities have risk scores (expected ${expectedEntityCount})`
+  );
+  expect(entitiesWithRisk.length).to.eql(expectedEntityCount);
 };

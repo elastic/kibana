@@ -9,6 +9,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getEcsField } from '../../document_details/right/components/table_field_name_cell';
 import {
+  HOST_ENTITY_ID_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
@@ -28,6 +29,7 @@ import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../ru
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';
 import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 // Helper function to check if the field has a flyout link
 export const isFlyoutLink = ({
@@ -52,19 +54,60 @@ interface GetFlyoutParams {
   scopeId: string;
   ruleId?: string;
   ancestorsIndexName?: string;
+  /**
+   * Fields from the source document used to resolve the entity when `entityId` is not known.
+   */
+  identityFields?: IdentityFields;
+  /** Entity Store v2 canonical id when already resolved (e.g. from table cell prefetch). */
+  entityId?: string;
 }
 
 const FLYOUT_FIELDS = [
   HOST_NAME_FIELD_NAME,
+  HOST_ENTITY_ID_FIELD_NAME,
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   EVENT_SOURCE_FIELD_DESCRIPTOR,
 ];
 
+const buildHostFlyoutParams = ({
+  value,
+  scopeId,
+  entityId,
+  preview,
+}: {
+  value: string;
+  scopeId: string;
+  entityId?: string;
+  preview: boolean;
+}) =>
+  preview
+    ? {
+        id: HostPreviewPanelKey,
+        params: {
+          hostName: value,
+          scopeId,
+          banner: HOST_PREVIEW_BANNER,
+          contextID: scopeId || 'highlighted-fields-host-preview',
+          entityId,
+        },
+      }
+    : {
+        id: HostPanelKey,
+        params: {
+          hostName: value,
+          scopeId,
+          contextID: scopeId,
+          entityId,
+        },
+      };
+
 // Helper get function to get flyout parameters based on field name and isFlyoutOpen
 // If flyout is currently open, preview panel params are returned
 // If flyout is not currently open, flyout rightpanel params are returned
 export const getRightPanelParams = ({
+  identityFields,
+  entityId,
   value,
   field,
   scopeId,
@@ -89,19 +132,16 @@ export const getRightPanelParams = ({
 
   switch (field) {
     case HOST_NAME_FIELD_NAME:
-      return {
-        id: HostPanelKey,
-        params: {
-          hostName: value,
-          scopeId,
-        },
-      };
+    case HOST_ENTITY_ID_FIELD_NAME:
+      return buildHostFlyoutParams({ value, scopeId, entityId, preview: false });
     case USER_NAME_FIELD_NAME:
       return {
         id: UserPanelKey,
         params: {
           userName: value,
           scopeId,
+          contextID: scopeId,
+          entityId,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:
@@ -122,6 +162,8 @@ export const getPreviewPanelParams = ({
   scopeId,
   ruleId,
   ancestorsIndexName,
+  identityFields,
+  entityId,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
   if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
@@ -143,14 +185,8 @@ export const getPreviewPanelParams = ({
 
   switch (field) {
     case HOST_NAME_FIELD_NAME:
-      return {
-        id: HostPreviewPanelKey,
-        params: {
-          hostName: value,
-          scopeId,
-          banner: HOST_PREVIEW_BANNER,
-        },
-      };
+    case HOST_ENTITY_ID_FIELD_NAME:
+      return buildHostFlyoutParams({ value, scopeId, entityId, preview: true });
     case USER_NAME_FIELD_NAME:
       return {
         id: UserPreviewPanelKey,
@@ -158,6 +194,8 @@ export const getPreviewPanelParams = ({
           userName: value,
           scopeId,
           banner: USER_PREVIEW_BANNER,
+          contextID: scopeId || 'highlighted-fields-user-preview',
+          entityId,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:

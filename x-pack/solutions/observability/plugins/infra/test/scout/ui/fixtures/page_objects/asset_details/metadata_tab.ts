@@ -60,4 +60,22 @@ export class MetadataTab extends AssetDetailsTab {
   public async filterField(fieldName: string) {
     await this.searchBar.pressSequentially(fieldName);
   }
+
+  public getFilterButtonsForField(fieldName: string) {
+    const fieldWrapper = this.page.getByTestId(`infraAssetDetailsMetadataField.${fieldName}`);
+    return {
+      addFilter: fieldWrapper.getByTestId('infraAssetDetailsMetadataAddFilterButton'),
+      removeFilter: fieldWrapper.getByTestId('infraAssetDetailsMetadataRemoveFilterButton'),
+    };
+  }
+
+  public async addFilter(fieldName: string) {
+    const { addFilter } = this.getFilterButtonsForField(fieldName);
+    await addFilter.click();
+  }
+
+  public async removeFilter(fieldName: string) {
+    const { removeFilter } = this.getFilterButtonsForField(fieldName);
+    await removeFilter.click();
+  }
 }

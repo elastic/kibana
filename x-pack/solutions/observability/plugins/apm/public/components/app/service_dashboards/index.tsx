@@ -76,7 +76,7 @@ export function ServiceDashboards() {
   useEffect(() => {
     const filteredServiceDashboards = (data?.serviceDashboards ?? []).reduce(
       (result: MergedServiceDashboard[], serviceDashboard: SavedApmCustomDashboard) => {
-        const matchedDashboard = allAvailableDashboards.find(
+        const matchedDashboard = allAvailableDashboards?.find(
           ({ id }) => id === serviceDashboard.dashboardSavedObjectId
         );
         if (matchedDashboard) {

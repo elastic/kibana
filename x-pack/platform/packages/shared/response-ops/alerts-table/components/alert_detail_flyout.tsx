@@ -7,7 +7,9 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiFlyout,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiFlexGroup,
@@ -18,7 +20,7 @@ import {
   EuiDescriptionList,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { JsonValue } from '@kbn/utility-types';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
 import type { Alert } from '@kbn/alerting-types';
@@ -39,6 +41,8 @@ export const AlertDetailFlyout = ({
   isLoading,
   columns,
   openLinksInNewTab,
+  alertDetailsNavigation,
+  services,
   ownFocus = false,
   hasPagination = true,
 }: Omit<RenderContext<AdditionalContext>, 'expandedAlertIndex'> & {
@@ -55,6 +59,15 @@ export const AlertDetailFlyout = ({
     alert && alert[ALERT_RULE_CATEGORY]
       ? i18n.getAlertFlyoutAriaLabel(String(alert[ALERT_RULE_CATEGORY]))
       : i18n.ALERT_FLYOUT_DEFAULT_TITLE;
+
+  const alertId = (alert?.[ALERT_UUID]?.[0] as string) ?? null;
+
+  const alertDetailsHref =
+    alertDetailsNavigation && alertId
+      ? services.application.getUrlForApp(alertDetailsNavigation.appId, {
+          path: alertDetailsNavigation.getPath(alertId),
+        })
+      : null;
 
   const overviewTab = useMemo(
     () => ({
@@ -175,6 +188,23 @@ export const AlertDetailFlyout = ({
             data-test-subj="alertFlyoutTabs"
           />
         )
+      )}
+
+      {alertDetailsHref && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="alertFlyoutAlertDetailsButton"
+                fill
+                href={alertDetailsHref}
+                target={openLinksInNewTab ? '_blank' : undefined}
+              >
+                {i18n.ALERT_FLYOUT_ALERT_DETAILS_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       )}
     </EuiFlyout>
   );

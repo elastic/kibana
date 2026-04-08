@@ -9,6 +9,9 @@ import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { GroupingSort } from '@kbn/grouping/src';
+
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import * as i18n from './translations';
 
 export const ATTACKS_TABLE_SORT_SELECT_TEST_ID = 'attacks-table-sort-select';
@@ -28,13 +31,13 @@ const options: SortOption[] = [
     key: 'mostRecent',
     label: i18n.MOST_RECENT,
     sortValue: DEFAULT_ATTACKS_SORT,
-    append: <EuiIcon type="sortDown" />,
+    append: <EuiIcon type="sortDown" aria-hidden={true} />,
   },
   {
     key: 'leastRecent',
     label: i18n.LEAST_RECENT,
     sortValue: [{ latestTimestamp: { order: 'asc' } }],
-    append: <EuiIcon type="sortUp" />,
+    append: <EuiIcon type="sortUp" aria-hidden={true} />,
   },
   {
     key: 'mostAlerts',
@@ -43,7 +46,7 @@ const options: SortOption[] = [
     // which is a numeric value that can be used for sorting.
     // https://www.elastic.co/docs/reference/aggregations/pipeline#buckets-path-syntax
     sortValue: [{ 'attackRelatedAlerts>_count': { order: 'desc' } }],
-    append: <EuiIcon type="sortDown" />,
+    append: <EuiIcon type="sortDown" aria-hidden={true} />,
   },
   {
     key: 'leastAlerts',
@@ -52,7 +55,7 @@ const options: SortOption[] = [
     // which is a numeric value that can be used for sorting.
     // https://www.elastic.co/docs/reference/aggregations/pipeline#buckets-path-syntax
     sortValue: [{ 'attackRelatedAlerts>_count': { order: 'asc' } }],
-    append: <EuiIcon type="sortUp" />,
+    append: <EuiIcon type="sortUp" aria-hidden={true} />,
   },
 ];
 
@@ -65,6 +68,9 @@ export const AttacksTableSortSelect = React.memo(
   ({ sort, onChange }: AttacksTableSortSelectProps) => {
     const { euiTheme } = useEuiTheme();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const {
+      services: { telemetry },
+    } = useKibana();
 
     const selectedOption = useMemo(() => {
       // Simple comparison based on structure
@@ -93,11 +99,22 @@ export const AttacksTableSortSelect = React.memo(
       (newOptions: SortOption[]) => {
         const selected = newOptions.find((o) => o.checked === 'on');
         if (selected) {
-          onChange(selected.sortValue);
+          const sortValue = selected.sortValue;
+          onChange(sortValue);
           closePopover();
+
+          if (sortValue && sortValue.length > 0) {
+            const field = Object.keys(sortValue[0])[0];
+            const direction = sortValue[0][field]?.order as 'asc' | 'desc';
+
+            telemetry.reportEvent(AttacksEventTypes.TableSortChanged, {
+              field,
+              direction,
+            });
+          }
         }
       },
-      [closePopover, onChange]
+      [closePopover, onChange, telemetry]
     );
 
     const button = (
@@ -106,7 +123,7 @@ export const AttacksTableSortSelect = React.memo(
         flush="both"
         iconSide="right"
         iconSize="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={onButtonClick}
         size="xs"
       >

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { SuccessResponse } from '../model/schema/common.gen';
 
@@ -32,7 +32,7 @@ export type GetEndpointSuggestionsRequestBody = z.infer<typeof GetEndpointSugges
 export const GetEndpointSuggestionsRequestBody = z.object({
   field: z.string().optional(),
   query: z.string().optional(),
-  filters: z.unknown(),
+  filters: z.array(z.object({})).max(50).optional(),
   fieldMeta: z.unknown(),
 });
 export type GetEndpointSuggestionsRequestBodyInput = z.input<

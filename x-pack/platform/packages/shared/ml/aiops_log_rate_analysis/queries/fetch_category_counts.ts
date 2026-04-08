@@ -75,6 +75,7 @@ export const getCategoryCountRequest = (
     size: 0,
     track_total_hits: false,
     aggs: wrap(filtersAgg),
+    ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
   };
 };
 

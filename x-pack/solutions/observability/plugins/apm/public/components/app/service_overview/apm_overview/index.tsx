@@ -35,6 +35,7 @@ import { ServiceOverviewInstancesChartAndTable } from '../service_overview_insta
 import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
 import { SloCallout } from '../../../shared/slo_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 const latencyChartHeight = 200;
 
@@ -84,7 +85,7 @@ export function ApmOverview() {
   const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
-  const { hasSlos } = useServiceSloContext();
+  const { hasSlos, sloFetchStatus } = useServiceSloContext();
 
   const trackEvent = useUiTracker({ app: 'apm' });
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
@@ -103,9 +104,12 @@ export function ApmOverview() {
   const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), []);
   const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
 
+  const shouldRenderCallout =
+    !sloCalloutDismissed && !hasSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
+
   return (
     <>
-      {!sloCalloutDismissed && !hasSlos && (
+      {shouldRenderCallout && (
         <>
           <SloCallout
             dismissCallout={dismissSloCallout}

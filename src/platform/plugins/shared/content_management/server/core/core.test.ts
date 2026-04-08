@@ -9,8 +9,6 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { until } from '../event_stream/tests/util';
-import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
 import { ContentClient } from '../content_client/content_client';
 import { Core } from './core';
 import { createMemoryStorage, createMockedStorage } from './mocks';
@@ -78,10 +76,8 @@ const setup = ({
     },
   };
 
-  const eventStream = setupEventStreamService().service;
   const core = new Core({
     logger,
-    eventStream,
   });
   const coreSetup = core.setup();
 
@@ -111,7 +107,6 @@ const setup = ({
     fooContentCrud,
     cleanUp,
     eventBus: coreSetup.api.eventBus,
-    eventStream,
   };
 };
 
@@ -1168,41 +1163,6 @@ describe('Content Core', () => {
 
             cleanUp();
           });
-        });
-      });
-    });
-
-    describe('eventStream', () => {
-      test('stores "delete" events', async () => {
-        const { fooContentCrud, ctx, eventStream } = setup({ registerFooType: true });
-
-        await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
-        await fooContentCrud!.delete(ctx, '1234');
-
-        const findEvent = async () => {
-          const tail = await eventStream.tail();
-
-          for (const event of tail) {
-            if (
-              event.predicate[0] === 'delete' &&
-              event.object &&
-              event.object[0] === 'foo' &&
-              event.object[1] === '1234'
-            ) {
-              return event;
-            }
-          }
-
-          return null;
-        };
-
-        await until(async () => !!(await findEvent()), 100);
-
-        const event = await findEvent();
-
-        expect(event).toMatchObject({
-          predicate: ['delete'],
-          object: ['foo', '1234'],
         });
       });
     });

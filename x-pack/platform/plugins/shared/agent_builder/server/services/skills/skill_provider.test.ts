@@ -14,6 +14,7 @@ describe('skill_provider type guards', () => {
     readonly: true,
     has: jest.fn(),
     get: jest.fn(),
+    bulkGet: jest.fn(),
     list: jest.fn(),
   });
 
@@ -22,6 +23,7 @@ describe('skill_provider type guards', () => {
     readonly: false,
     has: jest.fn(),
     get: jest.fn(),
+    bulkGet: jest.fn(),
     list: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),

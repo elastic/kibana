@@ -4,22 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboard-agent-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dashboard-agent-common'
+  title: '@kbn/dashboard-agent-common'
   description: Moon project for @kbn/dashboard-agent-common
   channel: ''
   owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common
+  sourceRoot: x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/lens-common'
 tags:
   - shared-common
   - package

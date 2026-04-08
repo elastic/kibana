@@ -7,9 +7,6 @@
 
 import { PREFIX } from '../../../shared/test_ids';
 
-export const SESSION_VIEW_UPSELL_TEST_ID = `${PREFIX}SessionViewUpsell` as const;
-export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as const;
-
 const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
 export const INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID = `${INSIGHTS_TEST_ID}AlertsCount` as const;
 export const INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID =

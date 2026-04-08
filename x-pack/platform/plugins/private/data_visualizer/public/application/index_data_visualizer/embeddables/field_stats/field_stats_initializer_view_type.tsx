@@ -20,7 +20,7 @@ const viewTypeOptions: EuiButtonGroupOptionProps[] = [
         defaultMessage="Data view"
       />
     ),
-    iconType: 'visLine',
+    iconType: 'chartLine',
   },
   {
     id: FieldStatsInitializerViewType.ESQL,
@@ -30,7 +30,7 @@ const viewTypeOptions: EuiButtonGroupOptionProps[] = [
         defaultMessage="ES|QL"
       />
     ),
-    iconType: 'visTable',
+    iconType: 'table',
   },
 ];
 

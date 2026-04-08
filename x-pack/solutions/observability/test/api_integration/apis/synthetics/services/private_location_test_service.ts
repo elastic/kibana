@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
-import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { KibanaSupertestProvider, RetryService } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   legacyPrivateLocationsSavedObjectId,
@@ -16,15 +16,25 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { omit } from 'lodash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.4.2';
+export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
 export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private readonly getService: FtrProviderContext['getService'];
+  private readonly retry: RetryService;
+  public installedVersion: string = DEFAULT_SYNTHETICS_VERSION;
 
   constructor(getService: FtrProviderContext['getService']) {
     this.supertest = getService('supertest');
     this.getService = getService;
+    this.retry = getService('retry');
+  }
+
+  async fetchSyntheticsPackageVersion(): Promise<string> {
+    const res = await this.supertest
+      .get('/api/fleet/epm/packages/synthetics')
+      .set('kbn-xsrf', 'true');
+    return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   }
 
   async cleanupFleetPolicies() {
@@ -63,38 +73,44 @@ export class PrivateLocationTestService {
 
   async installSyntheticsPackage() {
     await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-    // Attempt to delete any existing package so we can install a specific version
-    await this.supertest.delete(`/api/fleet/epm/packages/synthetics`).set('kbn-xsrf', 'true');
-    await this.supertest
-      .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
-      .set('kbn-xsrf', 'true')
-      .send({ force: true })
-      .expect(200);
+    const version = await this.fetchSyntheticsPackageVersion();
+    this.installedVersion = version;
+    await this.retry.try(async () => {
+      await this.supertest.delete(`/api/fleet/epm/packages/synthetics`).set('kbn-xsrf', 'true');
+      await this.supertest
+        .post(`/api/fleet/epm/packages/synthetics/${version}`)
+        .set('kbn-xsrf', 'true')
+        .send({ force: true })
+        .expect(200);
+    });
   }
 
-  async addFleetPolicy(name?: string) {
-    const apiRes = await this.supertest
-      .post('/api/fleet/agent_policies?sys_monitoring=true')
-      .set('kbn-xsrf', 'true')
-      .send({
-        name: name ?? 'Fleet test server policy' + Date.now(),
-        description: '',
-        namespace: 'default',
-        monitoring_enabled: [],
-      });
-    expect(apiRes.status).to.eql(200, JSON.stringify(apiRes.body));
-    return apiRes;
+  async addFleetPolicy(name?: string, spaceIds?: string[]) {
+    return await this.retry.try(async () => {
+      const apiRes = await this.supertest
+        .post('/api/fleet/agent_policies?sys_monitoring=true')
+        .set('kbn-xsrf', 'true')
+        .send({
+          name: name ?? 'Fleet test server policy' + Date.now(),
+          description: '',
+          namespace: 'default',
+          monitoring_enabled: [],
+          space_ids: spaceIds || ['default'],
+        });
+      expect(apiRes.status).to.eql(200, JSON.stringify(apiRes.body));
+      return apiRes;
+    });
   }
 
   async createPrivateLocation({
     policyId,
     label,
-    spaceId,
-  }: { policyId?: string; label?: string; spaceId?: string } = {}) {
+    spaces,
+  }: { policyId?: string; label?: string; spaces?: string[] } = {}) {
     let agentPolicyId = policyId;
 
     if (!agentPolicyId) {
-      const apiResponse = await this.addFleetPolicy();
+      const apiResponse = await this.addFleetPolicy(undefined, spaces);
       agentPolicyId = apiResponse.body.item.id;
     }
 
@@ -105,19 +121,21 @@ export class PrivateLocationTestService {
         lat: 0,
         lon: 0,
       },
-      ...(spaceId ? { spaces: [spaceId] } : {}),
+      ...(spaces ? { spaces } : {}),
     };
 
-    const response = await this.supertest
-      .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
-      .set('kbn-xsrf', 'true')
-      .send(location);
+    let url: string = SYNTHETICS_API_URLS.PRIVATE_LOCATIONS;
+    if (spaces) {
+      url = `/s/${spaces[0]}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}`;
+    }
 
-    expect(response.status).to.be(200);
+    const response = await this.supertest.post(url).set('kbn-xsrf', 'true').send(location);
+
+    expect(response.status).to.eql(200, JSON.stringify(response.body));
 
     const { isInvalid, ...loc } = response.body;
 
-    if (spaceId) {
+    if (spaces) {
       return omit(loc, ['spaces']);
     }
 
@@ -167,18 +185,20 @@ export class PrivateLocationTestService {
   async getPackagePolicy({
     monitorId,
     locId,
-    spaceId = 'default',
+    spaceId,
   }: {
     monitorId: string;
     locId: string;
     spaceId?: string;
   }) {
     const apiResponse = await this.supertest.get(
-      '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      `/s/${
+        spaceId ?? 'default'
+      }/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics`
     );
 
     return apiResponse.body.items.find(
-      (pkgPolicy: PackagePolicy) => pkgPolicy.id === `${monitorId}-${locId}-${spaceId}`
+      (pkgPolicy: PackagePolicy) => pkgPolicy.id === `${monitorId}-${locId}`
     );
   }
 }

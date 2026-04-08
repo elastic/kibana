@@ -35,12 +35,10 @@ export const ConnectorIconsMap: Map<
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
-    '.pagerduty-v2',
-    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
-  ],
-  [
-    '.pagerduty',
-    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+    '.pagerduty_mcp',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconPagerdutyMcp" */ './specs/pagerduty/icon')
+    ),
   ],
   [
     '.brave-search',
@@ -66,6 +64,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.salesforce',
+    lazy(() => import(/* webpackChunkName: "connectorIconSalesforce" */ './specs/salesforce/icon')),
+  ],
+  [
     '.abuseipdb',
     lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
   ],
@@ -88,6 +90,16 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
+  ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
+  [
+    '.confluence-cloud',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconConfluenceCloud" */ './specs/atlassian/confluence_cloud/icon'
+        )
+    ),
+  ],
   [
     '.google_drive',
     lazy(
@@ -97,6 +109,11 @@ export const ConnectorIconsMap: Map<
   [
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
+  ],
+  ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
+  [
+    '.firecrawl',
+    lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
   ],
   ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
   [
@@ -109,6 +126,57 @@ export const ConnectorIconsMap: Map<
       () =>
         import(
           /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
+        )
+    ),
+  ],
+  [
+    '.1password',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconOnePassword" */ './specs/one_password/icon')
+    ),
+  ],
+  [
+    '.tavily_mcp',
+    lazy(() => import(/* webpackChunkName: "connectorIconTavilyMcp" */ './specs/tavily/icon')),
+  ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
+    ),
+  ],
+  [
+    '.aws_lambda',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
+  ],
+  [
+    '.amazon_s3',
+    lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
+  ],
+
+  [
+    '.sharepoint-server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconsharepointserver" */ './specs/sharepoint_server/icon'
+        )
+    ),
+  ],
+  [
+    '.microsoft-teams',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconMicrosoftTeams" */ './specs/microsoft_teams/icon')
+    ),
+  ],
+  [
+    '.google_cloud_storage',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleCloudStorage" */ './specs/google_cloud_storage/icon'
         )
     ),
   ],

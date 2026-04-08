@@ -13,6 +13,11 @@ import type {
   ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
+export { reindex } from './reindex';
+export type { ReindexOptions } from './reindex';
+export { updateByQueryWithScript } from './ingest';
+export type { UpdateByQueryWithScriptOptions } from './ingest';
+
 export interface CreateOptions {
   throwIfExists?: boolean;
 }

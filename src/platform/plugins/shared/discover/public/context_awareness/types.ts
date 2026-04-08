@@ -21,7 +21,7 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
@@ -29,8 +29,10 @@ import type {
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
-import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
+import type {
+  DiscoverAppState,
+  UpdateESQLQueryActionPayload,
+} from '../application/main/state_management/redux';
 
 export type UpdateESQLQueryFn = (
   queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
@@ -181,6 +183,19 @@ export interface DocViewerExtension {
    * @returns The updated doc views registry
    */
   docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  /**
+   * Optional render function to display a custom header section above the tabs
+   * @param props The doc view render props
+   * @returns A React element to render above the tabs
+   */
+  renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  /**
+   * Optional render function to display a custom footer section at the bottom of the flyout.
+   * The footer is always visible while scrolling through the flyout content.
+   * @param props The doc view render props
+   * @returns A React element to render at the bottom of the flyout
+   */
+  renderFooter?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**
@@ -280,6 +295,10 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+  /**
+   * The state for data table visibility toggle
+   */
+  hideTable?: boolean;
 }
 
 /**

@@ -409,7 +409,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                       onClick={() => {
                         handleEndDateChange(CHART_DIRECTION.BACK);
                       }}
-                      iconType="arrowLeft"
+                      iconType="chevronSingleLeft"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -554,7 +554,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             key="messages-results-line"
                             domainType={AnnotationDomainType.XDomain}
                             dataValues={messageData}
-                            marker={<EuiIcon type="tableDensityNormal" />}
+                            marker={<EuiIcon type="table" />}
                             markerPosition={Position.Top}
                             style={{
                               line: {
@@ -615,7 +615,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                       onClick={() => {
                         handleEndDateChange(CHART_DIRECTION.FORWARD);
                       }}
-                      iconType="arrowRight"
+                      iconType="chevronSingleRight"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

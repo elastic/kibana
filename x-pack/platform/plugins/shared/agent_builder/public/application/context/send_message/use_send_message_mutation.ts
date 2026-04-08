@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
+import { useRef, useState, useMemo, useCallback } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
@@ -49,26 +49,18 @@ const buildScreenContextData = async ({
 }): Promise<ScreenContextAttachmentData | undefined> => {
   const url = window.location.href;
   const app = await firstValueFrom(services.application.currentAppId$);
-  const additionalData: Record<string, string> = {};
-
   const timefilter = services.plugins.data?.query.timefilter.timefilter;
-  if (timefilter) {
-    const time = timefilter.getTime();
-    if (time?.from) {
-      additionalData.time_from = String(time.from);
-    }
-    if (time?.to) {
-      additionalData.time_to = String(time.to);
-    }
-  }
+  const time = timefilter?.getTime();
+  const timeRange =
+    time?.from && time?.to ? { from: String(time.from), to: String(time.to) } : undefined;
 
   const data: ScreenContextAttachmentData = {
     ...(url ? { url } : {}),
     ...(app ? { app } : {}),
-    ...(Object.keys(additionalData).length > 0 ? { additional_data: additionalData } : {}),
+    ...(timeRange ? { time_range: timeRange } : {}),
   };
 
-  if (!data.url && !data.app && !data.additional_data) {
+  if (!data.url && !data.app && !data.time_range) {
     return undefined;
   }
 
@@ -125,15 +117,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
 
   const removeError = useCallback(() => {
     setError(null);
-    setErrorSteps([]);
+    setErrorSteps((prev) => (prev.length === 0 ? prev : []));
   }, []);
-
-  useEffect(() => {
-    // Clear errors any time conversation id changes - we do not persist it.
-    if (conversationId) {
-      removeError();
-    }
-  }, [conversationId, removeError]);
 
   const browserApiToolsMetadata = useMemo(() => {
     if (!browserApiTools) return undefined;
@@ -316,5 +301,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
      */
     regenerate: () => mutate({ action: 'regenerate' }),
     isRegenerating: isLoading && isRegeneratingRef.current,
+    removeError,
   };
 };

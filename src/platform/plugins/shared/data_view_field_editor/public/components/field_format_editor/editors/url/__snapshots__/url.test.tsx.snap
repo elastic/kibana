@@ -57,7 +57,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -168,8 +168,8 @@ exports[`UrlFormatEditor should render normally 1`] = `
         >
           URL template help
           <span
-            class="emotion-EuiExternalLinkIcon"
-            data-euiicon-type="popout"
+            class="css-1j75qc1"
+            data-euiicon-type="external"
             role="presentation"
           />
           <span
@@ -228,8 +228,8 @@ exports[`UrlFormatEditor should render normally 1`] = `
         >
           Label template help
           <span
-            class="emotion-EuiExternalLinkIcon"
-            data-euiicon-type="popout"
+            class="css-1j75qc1"
+            data-euiicon-type="external"
             role="presentation"
           />
           <span
@@ -263,129 +263,133 @@ exports[`UrlFormatEditor should render normally 1`] = `
         class="euiBasicTable kbnFieldFormatEditor__samples css-p1tgq2-samples"
         id="generated-id"
       >
-        <table
-          class="euiTable emotion-euiTable-fixed-compressed-hasBackground-desktop"
-          id="__table_generated-id"
-          tabindex="-1"
+        <div
+          class="emotion-euiContainerCSS"
         >
-          <caption
-            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-          />
-          <thead>
-            <tr>
-              <th
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_input_0"
-                role="columnheader"
-                scope="col"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Input"
-                  >
-                    Input
-                  </span>
-                </div>
-              </th>
-              <th
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_output_1"
-                role="columnheader"
-                scope="col"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Output"
-                  >
-                    Output
-                  </span>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="css-0"
+          <table
+            class="euiTable emotion-euiTable-fixed-compressed-hasBackground-desktop"
+            id="__table_generated-id"
+            tabindex="-1"
           >
-            <tr
-              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-            >
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <caption
+              class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+            />
+            <thead>
+              <tr>
+                <th
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_input_0"
+                  role="columnheader"
+                  scope="col"
                 >
-                  john
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-                >
-                  <div>
-                    converted url for john
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Input"
+                    >
+                      Input
+                    </span>
                   </div>
-                </div>
-              </td>
-            </tr>
-            <tr
-              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-            >
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                </th>
+                <th
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_output_1"
+                  role="columnheader"
+                  scope="col"
                 >
-                  /some/pathname/asset.png
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-                >
-                  <div>
-                    converted url for /some/pathname/asset.png
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Output"
+                    >
+                      Output
+                    </span>
                   </div>
-                </div>
-              </td>
-            </tr>
-            <tr
-              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="css-0"
             >
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <tr
+                class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
                 >
-                  1234
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-                >
-                  <div>
-                    converted url for 1234
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    john
                   </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    <div>
+                      converted url for john
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+              >
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    /some/pathname/asset.png
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    <div>
+                      converted url for /some/pathname/asset.png
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+              >
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    1234
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    <div>
+                      converted url for 1234
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

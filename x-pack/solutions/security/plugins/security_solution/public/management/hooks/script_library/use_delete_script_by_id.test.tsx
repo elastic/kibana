@@ -8,8 +8,8 @@
 import { useDeleteEndpointScript } from './use_delete_script_by_id';
 import { scriptsLibraryHttpMocks } from '../../mocks/scripts_library_http_mocks';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../common/mock/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';

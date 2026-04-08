@@ -103,37 +103,69 @@
         "label": "UnifiedDocViewer",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<Omit<Omit<Omit<Omit<",
-          {
-            "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "public",
-            "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerProps",
-            "text": "DocViewerProps"
-          },
-          ", \"docViews\">, \"ref\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "public",
-            "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerApi",
-            "text": "DocViewerApi"
-          },
+          "React.ForwardRefExoticComponent<Omit<Omit<Omit<Omit<Omit<Omit<Omit<",
+          "InternalDocViewerProps",
+          ", \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
           ">, \"ref\"> & { ref?: ((instance: ",
-          {
-            "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "public",
-            "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerApi",
-            "text": "DocViewerApi"
-          },
+          "InternalDocViewerApi",
           " | null) => void) | React.RefObject<",
+          "InternalDocViewerApi",
+          "> | null | undefined; } & Pick<",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
           {
             "pluginId": "@kbn/unified-doc-viewer",
             "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerApi",
-            "text": "DocViewerApi"
+            "section": "def-public.DocViewerRestorableState",
+            "text": "DocViewerRestorableState"
+          },
+          ">, \"initialState\" | \"onInitialStateChange\">, \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ">, \"reportEvent\" | \"docViews\">, \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ">, \"ref\"> & { ref?: ((instance: (",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ") | null) => void) | React.RefObject<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
           },
           "> | null | undefined; } & ",
           {
@@ -233,7 +265,17 @@
         "signature": [
           "React.ForwardRefExoticComponent<Omit<Omit<",
           "DocViewRenderProps",
-          " & { renderAIAssistant?: ((deps: ",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
+          "TraceWaterfallRestorableState",
+          "> & { renderAIAssistant?: ((deps: ",
           {
             "pluginId": "discoverShared",
             "scope": "public",
@@ -265,7 +307,7 @@
             "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; indexes: ",
+          ") => JSX.Element) | undefined; renderCpsWarning?: boolean | undefined; indexes: ",
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
@@ -419,7 +461,17 @@
         "signature": [
           "React.ForwardRefExoticComponent<Omit<Omit<",
           "DocViewRenderProps",
-          " & { indexes: ",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
+          "TraceWaterfallRestorableState",
+          "> & { indexes: ",
           "ObservabilityIndexes",
           "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
@@ -524,7 +576,7 @@
         "label": "LogsOverviewApi",
         "description": [],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 55,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -540,7 +592,7 @@
               "(section: \"stacktrace\" | \"quality_issues\") => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-            "lineNumber": 56,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -556,7 +608,7 @@
                   "\"stacktrace\" | \"quality_issues\""
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-                "lineNumber": 56,
+                "lineNumber": 62,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -583,18 +635,44 @@
             "section": "def-public.UnifiedDocViewerFlyoutProps",
             "text": "UnifiedDocViewerFlyoutProps"
           },
-          " extends Pick<",
+          " extends Pick<Omit<Omit<Omit<",
+          "InternalDocViewerProps",
+          ", \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          ">, \"ref\"> & { ref?: ((instance: ",
+          "InternalDocViewerApi",
+          " | null) => void) | React.RefObject<",
+          "InternalDocViewerApi",
+          "> | null | undefined; } & Pick<",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
           {
             "pluginId": "@kbn/unified-doc-viewer",
             "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-public.DocViewerProps",
-            "text": "DocViewerProps"
+            "section": "def-public.DocViewerRestorableState",
+            "text": "DocViewerRestorableState"
           },
-          ", \"initialDocViewerState\" | \"onInitialDocViewerStateChange\" | \"onUpdateSelectedTabId\">"
+          ">, \"initialState\" | \"onInitialStateChange\">, \"ref\"> & React.RefAttributes<",
+          "InternalDocViewerApi",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ">, \"initialTabId\" | \"onUpdateSelectedTabId\">"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-        "lineNumber": 37,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -608,12 +686,14 @@
             "description": [],
             "signature": [
               "React.LegacyRef<",
+              "InternalDocViewerApi",
+              " & ",
               {
-                "pluginId": "@kbn/unified-doc-viewer",
+                "pluginId": "@kbn/restorable-state",
                 "scope": "public",
-                "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-public.DocViewerApi",
-                "text": "DocViewerApi"
+                "docId": "kibKbnRestorableStatePluginApi",
+                "section": "def-public.RestorableStateProviderApi",
+                "text": "RestorableStateProviderApi"
               },
               "> | undefined"
             ],
@@ -722,32 +802,6 @@
           },
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.FlyoutCustomBody",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "FlyoutCustomBody",
-            "description": [],
-            "signature": [
-              "React.ComponentType<{ actions: Pick<",
-              "DocViewRenderProps",
-              ", \"filter\" | \"onAddColumn\" | \"onRemoveColumn\">; doc: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
-              "; renderDefaultContent: () => React.ReactNode; }> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 49,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedDocViewer",
             "id": "def-public.UnifiedDocViewerFlyoutProps.services",
             "type": "Object",
             "tags": [],
@@ -761,7 +815,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 54,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -800,7 +854,7 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 58,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -813,7 +867,7 @@
             "label": "isEsqlQuery",
             "description": [],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 59,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -829,7 +883,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 60,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -852,7 +906,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 61,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -874,7 +928,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 62,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -897,7 +951,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 63,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -919,20 +973,168 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 64,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn",
-            "type": "Function",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.hideFilteringOnComputedColumns",
+            "type": "CompoundType",
             "tags": [],
-            "label": "onAddColumn",
+            "label": "hideFilteringOnComputedColumns",
             "description": [],
             "signature": [
-              "(column: string) => void"
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.initialDocViewerState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialDocViewerState",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-public.DocViewerRestorableState",
+                "text": "DocViewerRestorableState"
+              },
+              "> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onInitialDocViewerStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialDocViewerStateChange",
+            "description": [],
+            "signature": [
+              "((initialState: Partial<",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-public.DocViewerRestorableState",
+                "text": "DocViewerRestorableState"
+              },
+              ">) => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomHeader",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCustomHeader",
+            "description": [],
+            "signature": [
+              "((props: ",
+              "DocViewRenderProps",
+              ") => React.ReactElement<any>) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedDocViewer",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomHeader.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "DocViewRenderProps"
+                ],
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+                "lineNumber": 63,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomFooter",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCustomFooter",
+            "description": [],
+            "signature": [
+              "((props: ",
+              "DocViewRenderProps",
+              ") => React.ReactElement<any>) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedDocViewer",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomFooter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "DocViewRenderProps"
+                ],
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+                "lineNumber": 64,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.setExpandedDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "setExpandedDoc",
+            "description": [],
+            "signature": [
+              "(doc?: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
             "lineNumber": 65,
@@ -942,20 +1144,27 @@
             "children": [
               {
                 "parentPluginId": "unifiedDocViewer",
-                "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn.$1",
-                "type": "string",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.setExpandedDoc.$1",
+                "type": "Object",
                 "tags": [],
-                "label": "column",
+                "label": "doc",
                 "description": [],
                 "signature": [
-                  "string"
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DataTableRecord",
+                    "text": "DataTableRecord"
+                  },
+                  " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
                 "lineNumber": 65,
-                "columnNumber": 17,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -980,20 +1189,39 @@
           },
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.onFilter",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn",
             "type": "Function",
             "tags": [],
-            "label": "onFilter",
+            "label": "onAddColumn",
             "description": [],
             "signature": [
-              "DocViewFilterFn",
-              " | undefined"
+              "(column: string) => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedDocViewer",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+                "lineNumber": 67,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "unifiedDocViewer",
@@ -1033,83 +1261,17 @@
           },
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.setExpandedDoc",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onFilter",
             "type": "Function",
             "tags": [],
-            "label": "setExpandedDoc",
+            "label": "onFilter",
             "description": [],
             "signature": [
-              "(doc?: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
-              " | undefined) => void"
+              "DocViewFilterFn",
+              " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
             "lineNumber": 69,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedDocViewer",
-                "id": "def-public.UnifiedDocViewerFlyoutProps.setExpandedDoc.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "doc",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/discover-utils",
-                    "scope": "common",
-                    "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.DataTableRecord",
-                    "text": "DataTableRecord"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 69,
-                "columnNumber": 20,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.initialTabId",
-            "type": "string",
-            "tags": [],
-            "label": "initialTabId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 70,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.hideFilteringOnComputedColumns",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideFilteringOnComputedColumns",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1129,7 +1291,17 @@
         "description": [],
         "signature": [
           "DocViewRenderProps",
-          " & { renderAIAssistant?: ((deps: ",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
+          "TraceWaterfallRestorableState",
+          "> & { renderAIAssistant?: ((deps: ",
           {
             "pluginId": "discoverShared",
             "scope": "public",
@@ -1161,14 +1333,14 @@
             "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; indexes: ",
+          ") => JSX.Element) | undefined; renderCpsWarning?: boolean | undefined; indexes: ",
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 45,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

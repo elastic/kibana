@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { InstallPrebuiltRulesAndTimelinesResponse } from './install_prebuilt_rules_and_timelines_route.gen';
 
 describe('Install prebuilt rules and timelines response schema', () => {
@@ -31,9 +31,7 @@ describe('Install prebuilt rules and timelines response schema', () => {
     };
     const result = InstallPrebuiltRulesAndTimelinesResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "Unrecognized key(s) in object: 'invalid_field'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('Unrecognized key: "invalid_field"');
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_installed" number', () => {
@@ -46,7 +44,7 @@ describe('Install prebuilt rules and timelines response schema', () => {
     const result = InstallPrebuiltRulesAndTimelinesResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_installed: Number must be greater than or equal to 0'
+      'rules_installed: Too small: expected number to be >=0'
     );
   });
 
@@ -60,7 +58,7 @@ describe('Install prebuilt rules and timelines response schema', () => {
     const result = InstallPrebuiltRulesAndTimelinesResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_updated: Number must be greater than or equal to 0'
+      'rules_updated: Too small: expected number to be >=0'
     );
   });
 
@@ -75,7 +73,9 @@ describe('Install prebuilt rules and timelines response schema', () => {
     delete payload.rules_installed;
     const result = InstallPrebuiltRulesAndTimelinesResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('rules_installed: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'rules_installed: Invalid input: expected number, received undefined'
+    );
   });
 
   test('it should NOT validate an empty prepackaged response if "rules_updated" is not there', () => {
@@ -89,6 +89,8 @@ describe('Install prebuilt rules and timelines response schema', () => {
     delete payload.rules_updated;
     const result = InstallPrebuiltRulesAndTimelinesResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('rules_updated: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'rules_updated: Invalid input: expected number, received undefined'
+    );
   });
 });

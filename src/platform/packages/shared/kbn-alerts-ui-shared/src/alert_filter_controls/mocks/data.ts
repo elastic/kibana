@@ -11,6 +11,7 @@ import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter } from '@kbn/es-query';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 export interface ControlGroupOutput {
   loading: boolean;
@@ -42,15 +43,14 @@ export const sampleOutputData: ControlGroupOutput = {
 export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlState> = {
   initialChildControlState: {
     '0': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
+      grow: true,
       order: 0,
       width: 'small',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       data_view_id: 'alert-filters-test-dv',
       field_name: ALERT_STATUS,
       title: 'Status',
-      selected_options: [],
-      exists_selected: false,
-      exclude: false,
       display_settings: {
         hide_exclude: true,
         hide_sort: true,
@@ -58,15 +58,14 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '1': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
+      grow: true,
       order: 1,
       width: 'small',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       data_view_id: 'alert-filters-test-dv',
       field_name: ALERT_RULE_NAME,
       title: 'Rule',
-      selected_options: [],
-      exists_selected: false,
-      exclude: false,
       display_settings: {
         hide_exclude: true,
         hide_sort: true,
@@ -74,15 +73,15 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '2': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
+      grow: true,
       order: 2,
       width: 'small',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       data_view_id: 'alert-filters-test-dv',
       field_name: ALERT_START,
       title: 'Started at',
-      selected_options: [],
       exists_selected: true,
-      exclude: true,
       display_settings: {
         hide_exclude: true,
         hide_sort: true,
@@ -90,15 +89,14 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '3': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
+      grow: true,
       order: 3,
       width: 'small',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       data_view_id: 'alert-filters-test-dv',
       field_name: ALERT_DURATION,
       title: 'Duration',
-      selected_options: [],
-      exists_selected: false,
-      exclude: false,
       display_settings: {
         hide_exclude: true,
         hide_sort: true,
@@ -106,15 +104,14 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '4': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
+      grow: true,
       order: 4,
       width: 'small',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       data_view_id: 'alert-filters-test-dv',
       field_name: 'host.name',
       title: 'Host',
-      selected_options: [],
-      exists_selected: false,
-      exclude: false,
       display_settings: {
         hide_exclude: true,
         hide_sort: true,

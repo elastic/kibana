@@ -41,7 +41,7 @@ export const ModelDeployed = ({
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon color="success" type="checkInCircleFilled" />
+              <EuiIcon color="success" type="checkCircleFill" />
             </EuiFlexItem>
             <EuiFlexItem grow>
               <EuiText color="success" size="xs">
@@ -88,7 +88,7 @@ export const ModelDeployed = ({
                 color="success"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-startModel`}
                 disabled={isStartButtonDisabled}
-                iconType="playFilled"
+                iconType="play"
                 onClick={() => startTextExpansionModel()}
               >
                 {i18n.translate(

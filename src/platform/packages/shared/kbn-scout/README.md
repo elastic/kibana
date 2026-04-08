@@ -121,6 +121,94 @@ The `fixtures/scope` directory contains core Scout capabilities required for tes
 - `kbnClient`
 - `esArchiver`
 - `samlAuth`
+- `linkedProject` (Cross-Project Search only -- provides `esClient` and `esArchiver` for the linked cluster)
+
+Synthetic APM / logs / infra data via [`@kbn/synthtrace`](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-synthtrace) is **not** part of `@kbn/scout`. Use the optional add-on [`@kbn/scout-synthtrace`](../kbn-scout-synthtrace/README.md) and merge its Playwright fixtures where you need `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, or `logsSynthtraceEsClient`. `@kbn/scout-oblt`, `@kbn/scout-search`, and `@kbn/scout-security` do not bundle or re-export it.
+
+#### Optional: wiring Synthtrace
+
+1. **Register the dependency** in your plugin or package `tsconfig.json` (`kbn_references`), then run Moon regeneration if your project uses it:
+
+```jsonc
+"kbn_references": [
+  "@kbn/scout",
+  "@kbn/scout-synthtrace"
+]
+```
+
+For Observability plugins that normally use `@kbn/scout-oblt`, include both `@kbn/scout-oblt` and `@kbn/scout-synthtrace`.
+
+2. **UI tests (platform)** — merge `synthtraceFixture` into the Scout `test` object, then extend with your plugin fixtures. Use `mergeTests` from `@kbn/scout` (not `playwright/test`) so Scout ESLint rules stay satisfied:
+
+```ts
+// e.g. test/scout/ui/fixtures/index.ts
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { mergeTests, test as scoutTest } from '@kbn/scout';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const base = mergeTests(scoutTest, synthtraceFixture);
+
+export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & SynthtraceFixture>({
+  // …plugin-specific fixtures
+});
+```
+
+Specs should import `test` from your **local** `fixtures` entry (so they see synthtrace), and `tags` / `expect` from `@kbn/scout` or `@kbn/scout/ui` as usual.
+
+3. **Parallel / `spaceTest`** — same pattern with `spaceTest` from `@kbn/scout`:
+
+```ts
+import { mergeTests, spaceTest as scoutSpaceTest } from '@kbn/scout';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+export const spaceTest = mergeTests(scoutSpaceTest, synthtraceFixture).extend(/* … */);
+```
+
+4. **Observability (`@kbn/scout-oblt`)** — merge `synthtraceFixture` with the Oblt `test` (or `spaceTest`) you already extend:
+
+```ts
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-oblt';
+import { mergeTests, test as obltTest } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const base = mergeTests(obltTest, synthtraceFixture);
+
+export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & SynthtraceFixture>({
+  // …
+});
+```
+
+Import `test` from `../fixtures` (or your fixtures barrel) in specs that need synthtrace clients; keep importing `tags` from `@kbn/scout-oblt` if you use Oblt tags.
+
+5. **Parallel `global.setup.ts`** — `@kbn/scout`’s `globalSetupHook` does not include synthtrace. Either use the pre-merged helper from `@kbn/scout-synthtrace`, or merge manually:
+
+```ts
+// Option A — equivalent worker stack (core + esArchiver + synthtrace + apiServices)
+import { globalSetupHookWithSynthtrace } from '@kbn/scout-synthtrace';
+
+globalSetupHookWithSynthtrace('Load data', async ({ logsSynthtraceEsClient, esArchiver, log }) => {
+  await logsSynthtraceEsClient.clean();
+  // …
+});
+```
+
+```ts
+// Option B — you already use a wrapper hook (e.g. @kbn/scout-oblt globalSetupHook)
+import { mergeTests, globalSetupHook as obltGlobalSetupHook } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+
+globalSetupHook('Load data', async ({ apmSynthtraceEsClient, log }) => {
+  // …
+});
+```
+
+6. **Setup only (no synthtrace in `test` fixtures)** — if you only need clients inside global setup, import `getSynthtraceClient` from `@kbn/scout-synthtrace` and call it with `esClient`, `log`, `config`, and optional `kbnUrl` (see that package’s README). You do not need to merge `synthtraceFixture` into `test` unless specs use the `*SynthtraceEsClient` fixtures directly.
+
+More detail and edge cases: [kbn-scout-synthtrace README](../kbn-scout-synthtrace/README.md).
 
 ```ts
 test.beforeAll(async ({ kbnClient }) => {
@@ -219,6 +307,8 @@ import { spaceTest as test, expect } from '@kbn/scout';
 
 - **`spaceTest`**: Use for parallel tests that can be isolated by Kibana spaces, allowing faster execution
 - **`test`**: Use for sequential tests that cannot run in parallel
+
+If you need **synthtrace** worker fixtures (`apmSynthtraceEsClient`, `logsSynthtraceEsClient`, etc.), add `@kbn/scout-synthtrace` and follow [Optional: wiring Synthtrace](#optional-wiring-synthtrace) under **Fixtures** above—your specs should import `test` from a local `fixtures` module that merges `synthtraceFixture`, not directly from `@kbn/scout` alone.
 
 **Example UI Test:**
 
@@ -338,6 +428,50 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 - **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
 
 This command is useful for manual testing or running tests via an IDE.
+
+#### Cross Project Search (CPS) Support
+
+Scout supports testing Cross Project Search by starting a second ("linked") Elasticsearch cluster alongside the origin. The linked cluster runs on a separate port, shares the same UIAM identity provider as the origin, and is intended exclusively for **reading data from** -- it has no Kibana instance.
+
+Important: When running tests locally, make sure your Docker Memory Allocation resources are set to **15 GB RAM** or above.
+
+To start servers with CPS enabled, use the `cps_local` server config set:
+
+```bash
+node scripts/scout start-server --arch serverless --domain security_complete --serverConfigSet cps_local
+```
+
+This starts:
+
+- **Origin ES cluster** (3 nodes, port `9220`) with UIAM
+- **Linked ES cluster** (3 nodes, port `9230`) connected to the same UIAM
+- **Kibana** (port `5620`)
+
+The linked cluster port is derived from the origin ES port plus `LINKED_CLUSTER_PORT_OFFSET` (defined in `kbn-es`). If the origin port changes, the linked port adjusts automatically via the config set.
+
+**Ingesting data into the linked cluster**
+
+Use the `linkedProject` worker fixture in your tests:
+
+```ts
+import { test } from '@kbn/scout';
+
+test.beforeAll(async ({ linkedProject }) => {
+  // Load data archive into the linked ES cluster
+  await linkedProject.esArchiver.loadIfNeeded('path/to/data/archive');
+});
+
+test('query across projects', async ({ linkedProject, page }) => {
+  // Access the linked ES client directly if needed
+  const result = await linkedProject.esClient.search({ index: 'my-index' });
+  // ...
+});
+```
+
+The `linkedProject` fixture provides:
+
+- `esArchiver` -- data-only archiver that rejects `.kibana*` indices (use `kbnArchiver` for saved objects)
+- `esClient` -- Elasticsearch client connected to the linked cluster
 
 #### Running Servers and Tests Locally
 

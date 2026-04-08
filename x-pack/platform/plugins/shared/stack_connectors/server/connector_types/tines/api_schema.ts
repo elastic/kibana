@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { TinesStoryObjectSchema } from '@kbn/connector-schemas/tines';
 
 // Tines response base schema

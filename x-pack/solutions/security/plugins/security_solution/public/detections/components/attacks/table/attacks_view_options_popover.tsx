@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -14,6 +15,9 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import * as i18n from './translations';
 import { TABLE_SECTION_TEST_ID } from './table_section';
 
@@ -32,6 +36,9 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen((isOpen) => !isOpen);
@@ -40,6 +47,28 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
   }, []);
+
+  const handleToggleShowAnonymized = useCallback(
+    (e: EuiSwitchEvent) => {
+      onToggleShowAnonymized();
+      telemetry.reportEvent(AttacksEventTypes.ViewOptionChanged, {
+        option: 'showAnonymized',
+        enabled: e.target.checked,
+      });
+    },
+    [onToggleShowAnonymized, telemetry]
+  );
+
+  const handleToggleShowAttacksOnly = useCallback(
+    (e: EuiSwitchEvent) => {
+      onToggleShowAttacksOnly();
+      telemetry.reportEvent(AttacksEventTypes.ViewOptionChanged, {
+        option: 'showAttacksOnly',
+        enabled: e.target.checked,
+      });
+    },
+    [onToggleShowAttacksOnly, telemetry]
+  );
 
   const button = (
     <EuiButtonIcon
@@ -64,7 +93,7 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
         <EuiSwitch
           label={i18n.SHOW_ANONYMIZED_LABEL}
           checked={showAnonymized}
-          onChange={onToggleShowAnonymized}
+          onChange={handleToggleShowAnonymized}
           data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized-switch`}
           compressed
         />
@@ -74,7 +103,7 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
         <EuiSwitch
           label={i18n.SHOW_ATTACKS_ONLY_LABEL}
           checked={showAttacksOnly}
-          onChange={onToggleShowAttacksOnly}
+          onChange={handleToggleShowAttacksOnly}
           data-test-subj={`${TABLE_SECTION_TEST_ID}-show-attacks-only-switch`}
           compressed
         />

@@ -4,7 +4,7 @@
 
 Every tool and AI Insight must have a Synthtrace scenario that generates realistic synthetic data for testing. Scenarios live under `tools/` and `ai_insights/` subdirectories respectively.
 
-> **See also**: [Tool Development Guidelines](../../../../../../../../x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/AGENTS.md) for tool design principles and APM data types.
+**See also**: [Tool Development Guidelines](../../../../../../../../x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/AGENTS.md) for tool design principles and APM data types.
 
 ## File Locations
 

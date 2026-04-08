@@ -38,11 +38,8 @@ spaceTest.describe(
     spaceTest(
       'should display trace-specific columns in data view mode',
       async ({ pageObjects }) => {
-        await spaceTest.step('wait for results to load', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-        });
-
         await spaceTest.step('verify trace-specific column headers', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
           for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
             await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
           }
@@ -56,6 +53,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {
+        await pageObjects.discover.waitForDocTableRendered();
         for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
           await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
         }

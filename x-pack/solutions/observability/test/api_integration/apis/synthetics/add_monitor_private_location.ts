@@ -8,6 +8,7 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   HTTPFields,
+  MonitorFields,
   PrivateLocation,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -37,38 +38,91 @@ export default function ({ getService }: FtrProviderContext) {
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
+    let _browserMonitorJson: MonitorFields;
+    let browserMonitorJson: MonitorFields;
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
 
+    let username: string;
+    let password: string;
+    let SPACE_ID: string;
+    let roleName: string;
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
+      const res = await monitorTestService.addsNewSpace();
+      username = res.username;
+      password = res.password;
+      SPACE_ID = res.SPACE_ID;
+      roleName = res.roleName;
 
       _httpMonitorJson = getFixtureJson('http_monitor');
+      _browserMonitorJson = getFixtureJson('browser_monitor');
     });
 
     beforeEach(() => {
       httpMonitorJson = _httpMonitorJson;
+      browserMonitorJson = _browserMonitorJson;
     });
 
     it('add a test private location', async () => {
-      pvtLoc = await testPrivateLocations.createPrivateLocation();
+      pvtLoc = await testPrivateLocations.createPrivateLocation({ spaces: [SPACE_ID, 'default'] });
       testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
       const testResponse: Array<PrivateLocation | ServiceLocation> = [
         ...getDevLocation('mockDevUrl'),
-        { ...pvtLoc, isInvalid: false },
+        { ...pvtLoc, spaces: ['default', SPACE_ID], isInvalid: false },
       ];
 
       expect(apiResponse.body.locations).eql(testResponse);
     });
 
-    it('handles spaces', async () => {
-      const { username, password, SPACE_ID, roleName } = await monitorTestService.addsNewSpace();
+    it('rejects browser timeout below 30s in private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout too low ${uuidv4()}`,
+        timeout: '29',
+        locations: [omit(pvtLoc, ['spaces'])],
+      };
 
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(400);
+
+      expect(apiResponse.body.message).eql(
+        'Browser monitor timeout for private locations is invalid'
+      );
+      expect(apiResponse.body.attributes.details).to.contain('Timeout of 29 seconds is too low');
+    });
+
+    it('allows browser timeout at 30s in private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout ok ${uuidv4()}`,
+        timeout: '30',
+        locations: [omit(pvtLoc, ['spaces'])],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(200);
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [apiResponse.body.id] })
+        .expect(200);
+    });
+
+    it('handles spaces', async () => {
       let monitorId = '';
       const monitor = {
         ...httpMonitorJson,
@@ -103,12 +157,11 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-${SPACE_ID}`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + pvtLoc.id
         );
 
         expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-        expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
+        expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0`);
         comparePolicies(
           packagePolicy,
           getTestSyntheticsPolicy({
@@ -116,7 +169,8 @@ export default function ({ getService }: FtrProviderContext) {
             id: monitorId,
             location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
-            spaceId: SPACE_ID,
+            spaceIds: [SPACE_ID, 'default'],
+            packageVersion: testPrivateLocations.installedVersion,
           })
         );
         await supertestWithoutAuth
