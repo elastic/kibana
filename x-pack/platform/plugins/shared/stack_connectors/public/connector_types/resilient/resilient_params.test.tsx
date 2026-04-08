@@ -96,8 +96,8 @@ describe('ResilientParamsFields renders', () => {
       isLoading: true,
     });
     render(<ResilientParamsFields {...defaultProps} />);
-    // EUI SuperSelect shows loading state
-    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+    // EUI SuperSelect is disabled when loading
+    expect(screen.getByTestId('severitySelect')).toBeDisabled();
   });
 
   test('it disabled the fields when loading issue types', () => {

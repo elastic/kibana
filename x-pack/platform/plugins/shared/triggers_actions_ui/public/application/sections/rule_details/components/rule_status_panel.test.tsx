@@ -155,7 +155,7 @@ describe('rule status panel', () => {
 
     await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
 
-    expect(screen.queryByRole('confirmModalConfirmButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalConfirmButton')).not.toBeInTheDocument();
 
     await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
   });
