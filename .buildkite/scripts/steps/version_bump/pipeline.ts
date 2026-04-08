@@ -21,7 +21,7 @@ const BUMP_TYPE = process.env.WORKFLOW;
         getPipeline('.buildkite/pipelines/version_bump/trigger_es_build_and_promote.yml', false)
       );
 
-      // Step 2: Wait for ES build to complete, then bump package.json on the release branch
+      // Step 2: Wait for ES build to complete, then bump package.json and other files on the release branch
       pipeline.push('  - wait');
       // TODO: add more file changes.
       pipeline.push(
