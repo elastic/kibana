@@ -1,7 +1,328 @@
 {
-  "lastModified": "2026-02-12T15:58:19.549Z",
-  "sha1": "c110388a77ec11d900c2552f5d393cea336dfea8",
+  "sha1": "a0447b9bc373ee74aa12381d03e8ec1996bed264",
   "tests": [
+    {
+      "id": "adde72de5d4952a-8c143bc778948f8",
+      "title": "GET /api/console/autocomplete_entities — legacy templates returns legacy templates when templates setting is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities_stateful.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-d35014d0956d221",
+      "title": "GET /api/console/autocomplete_entities returns 400 when no settings are provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-09c8a1adcf9e0b4",
+      "title": "GET /api/console/autocomplete_entities returns all entity categories when all settings are enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-6f91f99f43d9975",
+      "title": "GET /api/console/autocomplete_entities returns empty payload when all settings are disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 122,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-345a5299ecceae6",
+      "title": "GET /api/console/autocomplete_entities returns empty templates when templates setting is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 142,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-cddd2c2e5682e37",
+      "title": "GET /api/console/autocomplete_entities returns empty data streams when dataStreams setting is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 154,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-353f93a6a59ba23",
+      "title": "GET /api/console/autocomplete_entities returns empty aliases when indices setting is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 167,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-46dd06fd85cdb59",
+      "title": "GET /api/console/autocomplete_entities returns empty mappings when fields setting is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 177,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-80251213ac4650b",
+      "title": "GET /api/console/autocomplete_entities does not return mappings for test index when fieldsIndices is not specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 187,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-e13ecc03065a166",
+      "title": "GET /api/console/autocomplete_entities returns mappings for test index when fieldsIndices is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 200,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-9ac611c34862de8",
+      "title": "GET /api/console/autocomplete_entities returns aliases when indices setting is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 213,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-ab421fb2ada6e7e",
+      "title": "GET /api/console/autocomplete_entities returns data streams when dataStreams setting is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 223,
+        "column": 12
+      }
+    },
+    {
+      "id": "d8cb2a4586ac4b6-ff45a981f2a6b1e",
+      "title": "GET /api/console/autocomplete_entities returns index and component templates when templates setting is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/autocomplete_entities.spec.ts",
+        "line": 236,
+        "column": 12
+      }
+    },
+    {
+      "id": "9a9d91ed7d89850-6809f08a878c256",
+      "title": "GET /api/console/es_config returns es host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/es_config.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "687983c3f2d4b0c-14299f0857b8ae4",
+      "title": "POST /api/console/proxy — system indices warnings returns warning header for system indices requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_stateful.spec.ts",
+        "line": 27,
+        "column": 12
+      }
+    },
+    {
+      "id": "687983c3f2d4b0c-e2a471d9064f538",
+      "title": "POST /api/console/proxy — system indices warnings does not forward x-elastic-product-origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route_stateful.spec.ts",
+        "line": 37,
+        "column": 12
+      }
+    },
+    {
+      "id": "d73dfcf5c476da8-a9e9c82e0332f5c",
+      "title": "POST /api/console/proxy does not forward x-elastic-product-origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/proxy_route.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
     {
       "id": "c0a01cdf33e6b81-fab52d38008844b",
       "title": "GET /api/console/api_server returns autocomplete definitions",
@@ -18,7 +339,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/api/tests/spec_definitions.spec.ts",
-        "line": 30,
+        "line": 32,
         "column": 12
       }
     }
