@@ -20,6 +20,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import {
   OnboardingStep,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   TaskStatus,
@@ -39,6 +40,7 @@ import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
+import { InsightsConnectorPopover } from './insights_connector_popover';
 import type { OnboardingConfig } from './onboarding_config_popover';
 import { OnboardingConfigPopover } from './onboarding_config_popover';
 import {
@@ -90,6 +92,15 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const queriesConnectors = useInferenceFeatureConnectors(
     STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
   );
+  const discoveryConnectors = useInferenceFeatureConnectors(
+    STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID
+  );
+
+  const [discoveryConnectorOverride, setDiscoveryConnectorOverride] = useState<
+    string | undefined
+  >();
+  const displayDiscoveryConnectorId =
+    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnector?.connectorId;
 
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
     steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
@@ -378,7 +389,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                 <EuiButtonEmpty
                   iconType="crosshair"
                   onClick={() => scheduleInsightsTask()}
-                  disabled={isConnectorCatalogUnavailable}
+                  disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
                   isLoading={isSchedulingInsights || isWaitingForInsightsTask}
                   data-test-subj="significant_events_discover_insights_button"
                   size="xs"
@@ -389,15 +400,13 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
               <EuiFlexItem grow={false}>
                 <InsightsConnectorPopover
                   displayConnectorId={displayDiscoveryConnectorId}
-                  connectorList={genAiConnectors?.connectors ?? []}
-                  connectorError={genAiConnectors?.error}
+                  connectors={discoveryConnectors}
                   onConnectorChange={setDiscoveryConnectorOverride}
                   onRun={scheduleInsightsTask}
                   isRunDisabled={
-                    isConnectorCatalogUnavailable ||
+                    !aiFeatures?.genAiConnectors?.connectors?.length ||
                     isSchedulingInsights ||
-                    isWaitingForInsightsTask ||
-                    discoveryConnectors.loading
+                    isWaitingForInsightsTask
                   }
                 />
               </EuiFlexItem>

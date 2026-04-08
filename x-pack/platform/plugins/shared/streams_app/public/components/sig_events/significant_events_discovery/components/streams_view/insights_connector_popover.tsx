@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,12 +17,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { InferenceConnector } from '@kbn/inference-common';
 import { useBoolean } from '@kbn/react-hooks';
-import React, { useCallback, useMemo } from 'react';
-import { buildConnectorSelectOptions, getEffectiveConnectorId } from './connector_select_options';
+import React, { useCallback } from 'react';
+import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
+import { buildConnectorSelectOptions } from './connector_select_options';
 import {
-  CONNECTOR_LOAD_ERROR,
   INSIGHTS_CONNECTOR_POPOVER_ARIA_LABEL,
   INSIGHTS_CONNECTOR_POPOVER_TITLE,
   RUN_BUTTON_LABEL,
@@ -31,8 +29,7 @@ import {
 
 interface InsightsConnectorPopoverProps {
   displayConnectorId: string | undefined;
-  connectorList: InferenceConnector[];
-  connectorError: Error | undefined;
+  connectors: UseInferenceFeatureConnectorsResult;
   onConnectorChange: (connectorId: string) => void;
   onRun: () => void;
   isRunDisabled: boolean;
@@ -44,8 +41,7 @@ const popoverContentStyle = css`
 
 export const InsightsConnectorPopover = ({
   displayConnectorId,
-  connectorList,
-  connectorError,
+  connectors,
   onConnectorChange,
   onRun,
   isRunDisabled,
@@ -54,14 +50,7 @@ export const InsightsConnectorPopover = ({
   const popoverId = useGeneratedHtmlId({ prefix: 'insightsConnectorPopover' });
   const selectId = useGeneratedHtmlId({ prefix: 'insightsConnectorSelect' });
 
-  const connectorOptions = useMemo(
-    () => buildConnectorSelectOptions(connectorList),
-    [connectorList]
-  );
-  const effectiveConnectorId = useMemo(
-    () => getEffectiveConnectorId(displayConnectorId, connectorOptions),
-    [displayConnectorId, connectorOptions]
-  );
+  const connectorOptions = buildConnectorSelectOptions(connectors.allConnectors);
 
   const handleRun = useCallback(() => {
     close();
@@ -88,26 +77,19 @@ export const InsightsConnectorPopover = ({
     >
       <EuiPopoverTitle paddingSize="s">{INSIGHTS_CONNECTOR_POPOVER_TITLE}</EuiPopoverTitle>
       <EuiFlexGroup direction="column" gutterSize="m" css={popoverContentStyle}>
-        {connectorError ? (
+        {displayConnectorId && connectorOptions.length > 0 && (
           <EuiFlexItem>
-            <EuiCallOut announceOnMount color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
+            <EuiFormRow display="rowCompressed" aria-label={INSIGHTS_CONNECTOR_POPOVER_TITLE}>
+              <EuiSuperSelect
+                id={selectId}
+                options={connectorOptions}
+                valueOfSelected={displayConnectorId}
+                onChange={onConnectorChange}
+                compressed
+                fullWidth
+              />
+            </EuiFormRow>
           </EuiFlexItem>
-        ) : (
-          effectiveConnectorId &&
-          connectorOptions.length > 0 && (
-            <EuiFlexItem>
-              <EuiFormRow display="rowCompressed" aria-label={INSIGHTS_CONNECTOR_POPOVER_TITLE}>
-                <EuiSuperSelect
-                  id={selectId}
-                  options={connectorOptions}
-                  valueOfSelected={effectiveConnectorId}
-                  onChange={onConnectorChange}
-                  compressed
-                  fullWidth
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )
         )}
         <EuiFlexItem>
           <EuiButton

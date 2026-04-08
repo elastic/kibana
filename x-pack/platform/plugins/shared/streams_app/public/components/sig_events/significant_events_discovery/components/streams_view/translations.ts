@@ -194,4 +194,17 @@ export const RUN_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Run',
   }
 );
->>>>>>> d41dadb078c (feat(onboarding): add onboarding options)
+
+export const INSIGHTS_CONNECTOR_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsConnectorPopoverAriaLabel',
+  {
+    defaultMessage: 'Configure discovery connector',
+  }
+);
+
+export const INSIGHTS_CONNECTOR_POPOVER_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsConnectorPopoverTitle',
+  {
+    defaultMessage: 'Discovery connector',
+  }
+);
