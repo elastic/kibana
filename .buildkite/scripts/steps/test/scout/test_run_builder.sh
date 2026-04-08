@@ -54,28 +54,25 @@ else
     SCOUT_DISCOVERY_TARGET="local-stateful-only"
   fi
 
-  AFFECTED_MODULES_FILE=""
-  if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]] && [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]]; then
-    mkdir -p .scout
-    AFFECTED_MODULES_FILE=".scout/affected_modules.json"
-    .buildkite/pipeline-utils/affected-packages/list_affected \
-      --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
-      > "$AFFECTED_MODULES_FILE"
-  fi
+  # PR builds: GITHUB_PR_MERGE_BASE is computed by set_git_merge_base() in util.sh.
+  # On-merge builds: falls back to HEAD~1 (parent of the merge commit).
+  AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
 
-  echo "--- Discover Playwright Configs and upload to Buildkite artifacts${AFFECTED_MODULES_FILE:+ (selective testing)}"
-  AFFECTED_FLAG=()
-  if [[ -n "$AFFECTED_MODULES_FILE" ]]; then
-    AFFECTED_FLAG=(--affected-modules "$AFFECTED_MODULES_FILE")
-  fi
+  mkdir -p .scout
+  AFFECTED_MODULES_FILE=".scout/affected_modules.json"
+  .buildkite/pipeline-utils/affected-packages/list_affected \
+    --strategy git --deep --merge-base "$AFFECTED_MERGE_BASE" --json \
+    > "$AFFECTED_MODULES_FILE"
+
+  echo "--- Discover Playwright Configs and upload to Buildkite artifacts (affected modules detected)"
   SELECTIVE_SCOUT_DISCOVERY_FLAG=()
-  if [[ -n "$AFFECTED_MODULES_FILE" ]] && ! is_pr_with_label "scout:run-all-tests"; then
+  if [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]] && ! is_pr_with_label "scout:run-all-tests"; then
     SELECTIVE_SCOUT_DISCOVERY_FLAG=(--selective-testing)
   fi
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
-    "${AFFECTED_FLAG[@]}" \
+    --affected-modules "$AFFECTED_MODULES_FILE" \
     "${SELECTIVE_SCOUT_DISCOVERY_FLAG[@]}" \
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
