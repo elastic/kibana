@@ -10,6 +10,7 @@ import React from 'react';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
@@ -63,6 +64,7 @@ export const UserPanelContent = ({
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   // Extract userName from identityFields for components that need a string
   // Priority: identityFields['user.name'] > identityFields[first key]
@@ -90,7 +92,7 @@ export const UserPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
-      {entityStoreEntityId && !isPreviewMode && (
+      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
           <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />
