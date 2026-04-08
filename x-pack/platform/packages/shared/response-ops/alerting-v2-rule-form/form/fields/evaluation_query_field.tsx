@@ -29,7 +29,8 @@ export const EvaluationQueryField = ({
         required: i18n.translate('xpack.alertingV2.ruleForm.queryRequiredError', {
           defaultMessage: 'ES|QL query is required.',
         }),
-        validate: (value: string | undefined) => (value ? validateEsqlQuery(value) ?? true : true),
+        validate: (value: string | null | undefined) =>
+          value ? validateEsqlQuery(value) ?? true : true,
       }}
     />
   );

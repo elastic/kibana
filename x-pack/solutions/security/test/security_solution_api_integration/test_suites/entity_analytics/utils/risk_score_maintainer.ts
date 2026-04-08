@@ -31,7 +31,7 @@ interface RetryServiceLike {
   waitForWithTimeout: (
     label: string,
     timeout: number,
-    predicate: () => Promise<boolean> | boolean
+    predicate: () => Promise<boolean>
   ) => Promise<void>;
 }
 
@@ -87,6 +87,82 @@ export const indexListOfDocumentsFactory = ({
       throw new Error(firstError.reason ?? firstError.type ?? 'bulk_create_error');
     }
   };
+};
+
+const maintainerLogsProperties = {
+  '@timestamp': { type: 'date' },
+  data_stream: {
+    properties: {
+      type: { type: 'keyword' },
+      dataset: { type: 'keyword' },
+      namespace: { type: 'keyword' },
+    },
+  },
+  event: {
+    properties: {
+      kind: { type: 'keyword' },
+      category: { type: 'keyword' },
+      type: { type: 'keyword' },
+      outcome: { type: 'keyword' },
+      module: { type: 'keyword' },
+    },
+  },
+  host: {
+    properties: {
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
+    },
+  },
+  user: {
+    properties: {
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
+      email: { type: 'keyword' },
+      domain: { type: 'keyword' },
+    },
+  },
+  service: {
+    properties: {
+      name: { type: 'keyword' },
+    },
+  },
+} as const;
+
+export const setupMaintainerLogsDataStream = async ({
+  es,
+  index,
+  template,
+}: {
+  es: Client;
+  index: string;
+  template: string;
+}): Promise<void> => {
+  await es.indices.deleteIndexTemplate({ name: template }, { ignore: [404] });
+  await es.indices.putIndexTemplate({
+    name: template,
+    index_patterns: [index],
+    data_stream: {},
+    template: {
+      mappings: {
+        properties: maintainerLogsProperties,
+      },
+    },
+  });
+  await es.indices.deleteDataStream({ name: index }, { ignore: [404] });
+  await es.indices.createDataStream({ name: index });
+};
+
+export const cleanupMaintainerLogsDataStream = async ({
+  es,
+  index,
+  template,
+}: {
+  es: Client;
+  index: string;
+  template: string;
+}): Promise<void> => {
+  await es.indices.deleteDataStream({ name: index }, { ignore: [404] });
+  await es.indices.deleteIndexTemplate({ name: template }, { ignore: [404] });
 };
 
 export type MaintainerEntitySeed =
@@ -324,6 +400,28 @@ export const riskScoreMaintainerScenarioFactory = ({
     });
   };
 
+  const setEntityResolutionTarget = async ({
+    testEntity,
+    resolvedToEntityId,
+  }: {
+    testEntity: TestMaintainerEntity;
+    resolvedToEntityId: string;
+  }) => {
+    await entityStoreUtils.forceUpdateEntityViaCrud({
+      entityType: getEntityTypeForTestEntity(testEntity),
+      body: {
+        entity: {
+          id: testEntity.expectedEuid,
+          relationships: {
+            resolution: {
+              resolved_to: resolvedToEntityId,
+            },
+          },
+        },
+      },
+    });
+  };
+
   const setupAndRun = async ({
     entities,
     alerts,
@@ -364,6 +462,7 @@ export const riskScoreMaintainerScenarioFactory = ({
     installAndRunMaintainer,
     setEntityWatchlists,
     setEntityCriticality,
+    setEntityResolutionTarget,
     setupAndRun,
   };
 };

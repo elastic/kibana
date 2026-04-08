@@ -58,6 +58,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
                     errorIcon: (
                       <EuiIcon
                         type="error"
+                        aria-hidden={true}
                         css={css`
                           margin-top: -3px;
                         `}
@@ -241,7 +242,8 @@ export const EventAnnotationGroupTableList = ({
           defaultMessage: 'annotation groups',
         })}
         getOnClickTitle={(item) => () => editItem(item)}
-        {...parentProps}
+        onFetchSuccess={parentProps.onFetchSuccess}
+        setPageDataTestSubject={parentProps.setPageDataTestSubject}
       />
       {flyout}
     </>
