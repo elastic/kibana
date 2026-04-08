@@ -12,7 +12,10 @@ import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import type { SampleDocument, Streams } from '@kbn/streams-schema';
 import { streamRoutingMachine } from './stream_routing_state_machine';
-import { routingSamplesMachine } from './routing_samples_state_machine';
+import {
+  routingSamplesMachine,
+  buildDocumentCountProbabilitySearchParams,
+} from './routing_samples_state_machine';
 import type { RoutingSamplesInput } from './routing_samples_state_machine';
 import { routingConverter } from '../../utils';
 
@@ -205,5 +208,47 @@ describe('wired stream mode switching', () => {
 
     actor.send({ type: 'childStreams.mode.changeToIngestMode' });
     expect(actor.getSnapshot().value).toEqual({ ready: { ingestMode: 'idle' } });
+  });
+});
+
+describe('getRuntimeMappings classic stream guard', () => {
+  it('returns empty runtime_mappings for classic definitions even with a condition', () => {
+    const result = buildDocumentCountProbabilitySearchParams({
+      condition: { field: 'service.name', eq: 'my-service' },
+      definition: classicDefinition,
+      start: '2026-01-01T00:00:00.000Z',
+      end: '2026-01-02T00:00:00.000Z',
+      docCount: 1000,
+    });
+
+    expect(result.runtime_mappings).toEqual({});
+  });
+
+  it('returns runtime_mappings for wired definitions with unmapped fields', () => {
+    const wiredDefinition = {
+      privileges: { manage: true, simulate: true },
+      inherited_fields: {},
+      stream: {
+        name: 'logs.otel',
+        ingest: {
+          wired: {
+            fields: {},
+            routing: [],
+          },
+        },
+      },
+    } as unknown as Streams.WiredStream.GetResponse;
+
+    const result = buildDocumentCountProbabilitySearchParams({
+      condition: { field: 'service.name', eq: 'my-service' },
+      definition: wiredDefinition,
+      start: '2026-01-01T00:00:00.000Z',
+      end: '2026-01-02T00:00:00.000Z',
+      docCount: 1000,
+    });
+
+    expect(result.runtime_mappings).toEqual({
+      'service.name': { type: 'keyword' },
+    });
   });
 });

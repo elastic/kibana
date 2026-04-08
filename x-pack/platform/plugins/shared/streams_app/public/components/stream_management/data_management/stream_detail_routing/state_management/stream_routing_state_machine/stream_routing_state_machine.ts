@@ -19,8 +19,8 @@ import type {
 } from './types';
 import {
   createUpsertStreamActor,
-  createStreamFailureNofitier,
-  createStreamSuccessNofitier,
+  createStreamFailureNotifier,
+  createStreamSuccessNotifier,
   createForkStreamActor,
   createDeleteStreamActor,
   createQueryStreamActor,
@@ -51,8 +51,8 @@ export const streamRoutingMachine = setup({
     createQueryStream: getPlaceholderFor(createQueryStreamActor),
   },
   actions: {
-    notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNofitier),
-    notifyStreamFailure: getPlaceholderFor(createStreamFailureNofitier),
+    notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNotifier),
+    notifyStreamFailure: getPlaceholderFor(createStreamFailureNotifier),
     refreshDefinition: () => {},
     addNewRoutingRule: assign(({ context }) => {
       const newRule = routingConverter.toUIDefinition({
@@ -875,14 +875,14 @@ export const createStreamRoutingMachineImplementations = ({
   core,
   data,
   timeState$,
-  forkSuccessNofitier,
+  forkSuccessNotifier,
   telemetryClient,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
     forkStream: createForkStreamActor({
       streamsRepositoryClient,
-      forkSuccessNofitier,
+      forkSuccessNotifier,
       telemetryClient,
     }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
@@ -897,10 +897,10 @@ export const createStreamRoutingMachineImplementations = ({
   },
   actions: {
     refreshDefinition,
-    notifyStreamSuccess: createStreamSuccessNofitier({
+    notifyStreamSuccess: createStreamSuccessNotifier({
       toasts: core.notifications.toasts,
     }),
-    notifyStreamFailure: createStreamFailureNofitier({
+    notifyStreamFailure: createStreamFailureNotifier({
       toasts: core.notifications.toasts,
     }),
     notifyQueryStreamSuccess: createQueryStreamSuccessNotifier({

@@ -52,8 +52,11 @@ import { QueryModeEmptyPrompt } from './query_mode_empty_prompt';
 import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
-function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
-  if (maxNestingLevel) {
+function getReasonDisabledCreateButton(
+  canManageRoutingRules: boolean,
+  isAtMaxNestingLevel: boolean
+) {
+  if (isAtMaxNestingLevel) {
     return maxNestingLevelText;
   }
   if (!canManageRoutingRules) {
@@ -103,7 +106,7 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   const isWiredStream = Streams.WiredStream.Definition.is(definition.stream);
-  const idSelected = useStreamsRoutingSelector((snapshot) => {
+  const selectedChildStreamMode = useStreamsRoutingSelector((snapshot) => {
     if (!canUseQueryMode) {
       return 'ingestMode';
     }
@@ -144,12 +147,32 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
             options={
               isWiredStream
                 ? [
-                  { id: 'ingestMode', label: 'Index' },
-                  { id: 'queryMode', label: 'Query' },
-                ]
-                : [{ id: 'queryMode', label: 'Query' }]
+                    {
+                      id: 'ingestMode',
+                      label: i18n.translate(
+                        'xpack.streams.streamDetailRouting.childStreamList.ingestModeLabel',
+                        { defaultMessage: 'Index' }
+                      ),
+                    },
+                    {
+                      id: 'queryMode',
+                      label: i18n.translate(
+                        'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
+                        { defaultMessage: 'Query' }
+                      ),
+                    },
+                  ]
+                : [
+                    {
+                      id: 'queryMode',
+                      label: i18n.translate(
+                        'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
+                        { defaultMessage: 'Query' }
+                      ),
+                    },
+                  ]
             }
-            idSelected={idSelected}
+            idSelected={selectedChildStreamMode}
             onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
             buttonSize="compressed"
             color="primary"
@@ -157,10 +180,10 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
           />
         </div>
       )}
-      {isWiredStream && idSelected === 'ingestMode' && (
+      {isWiredStream && selectedChildStreamMode === 'ingestMode' && (
         <IngestModeChildrenList availableStreams={availableStreams} />
       )}
-      {canUseQueryMode && idSelected === 'queryMode' && <QueryModeChildrenList />}
+      {canUseQueryMode && selectedChildStreamMode === 'queryMode' && <QueryModeChildrenList />}
       {canUseQueryMode && !isWiredStream && (
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" textAlign="center">
@@ -220,7 +243,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     snapshot.can({ type: 'routingRule.reorder', routing: snapshot.context.routing })
   );
   const canManageRoutingRules = definition.privileges.manage;
-  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
+  const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
   const scrollToSuggestions = useScrollToActive(!!suggestions);
@@ -291,13 +314,13 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="bottom"
-              content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
+              content={getReasonDisabledCreateButton(canManageRoutingRules, isAtMaxNestingLevel)}
             >
               <CreateButtonComponent
                 size="s"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={createNewRule}
-                disabled={!canCreateRoutingRules || maxNestingLevel}
+                disabled={!canCreateRoutingRules || isAtMaxNestingLevel}
               >
                 {createPartitionManuallyText}
               </CreateButtonComponent>
@@ -565,12 +588,12 @@ function QueryModeChildrenList() {
                 content={
                   !canManage
                     ? i18n.translate(
-                      'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
-                      {
-                        defaultMessage:
-                          "You don't have sufficient privileges to create query streams.",
-                      }
-                    )
+                        'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
+                        {
+                          defaultMessage:
+                            "You don't have sufficient privileges to create query streams.",
+                        }
+                      )
                     : undefined
                 }
               >
@@ -581,7 +604,7 @@ function QueryModeChildrenList() {
                   disabled={!canManage}
                 >
                   {i18n.translate('xpack.streams.queryModeChildrenList.createQueryStream', {
-                    defaultMessage: 'Create query stream',
+                    defaultMessage: 'Create query sub-stream',
                   })}
                 </EuiButton>
               </EuiToolTip>

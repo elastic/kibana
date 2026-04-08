@@ -87,7 +87,7 @@ export function IdleQueryStreamEntry({ streamName, onEdit }: IdleQueryStreamEntr
           >
             <EuiLink
               href={router.link('/{key}/management/{tab}', {
-                path: { key: streamDetailsFetch.value.stream.name, tab: 'partitioning' },
+                path: { key: streamDetailsFetch.value.stream.name, tab: 'overview' },
               })}
               data-test-subj={`streamsAppQueryStreamEntryButton-${streamName}`}
               css={cssReact`
@@ -147,7 +147,7 @@ interface CreatingQueryStreamEntryProps {
   parentStreamName: string;
 }
 
-const deboucingOptions = { wait: 500 };
+const debouncingOptions = { wait: 500 };
 
 /**
  * Inline form for creating a new query stream within the routing page.
@@ -159,7 +159,7 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const { executeQuery } = useQueryStreamCreation();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
-  const isClassicParent = !Streams.WiredStream.Definition.is(definition.stream);
+  const isClassicParent = Streams.ClassicStream.Definition.is(definition.stream);
 
   const isSaving = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: { creating: 'saving' } } })
@@ -170,7 +170,7 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
     if (query && query.trim() !== '') {
       executeQuery(query);
     }
-  }, deboucingOptions);
+  }, debouncingOptions);
 
   // Validate and save the query stream
   const handleSave = useCallback(

@@ -44,8 +44,8 @@ export interface RoutingSamplesContext {
   definition: Streams.WiredStream.GetResponse;
   documents: SampleDocument[];
   documentsError?: Error;
-  approximateMatchingPercentage?: number | null;
-  approximateMatchingPercentageError?: Error;
+  approximateMatchRatio?: number | null;
+  approximateMatchRatioError?: Error;
   documentMatchFilter: DocumentMatchFilterOptions;
   selectedPreview?:
     | { type: 'suggestion'; name: string; index: number }
@@ -104,11 +104,11 @@ export const routingSamplesMachine = setup({
       documentsError: params.error,
     })),
     storeDocumentCounts: assign((_, params: { count?: number | null }) => ({
-      approximateMatchingPercentage: params.count,
-      approximateMatchingPercentageError: undefined,
+      approximateMatchRatio: params.count,
+      approximateMatchRatioError: undefined,
     })),
     storeDocumentCountsError: assign((_, params: { error: Error }) => ({
-      approximateMatchingPercentageError: params.error,
+      approximateMatchRatioError: params.error,
     })),
     setDocumentMatchFilter: assign((_, params: { filter: DocumentMatchFilterOptions }) => ({
       documentMatchFilter: params.filter,
@@ -143,10 +143,10 @@ export const routingSamplesMachine = setup({
   context: ({ input }) => ({
     condition: input.condition,
     definition: input.definition,
-    approximateMatchingPercentage: undefined,
+    approximateMatchRatio: undefined,
     documents: [],
     documentsError: undefined,
-    approximateMatchingPercentageError: undefined,
+    approximateMatchRatioError: undefined,
     selectedPreview: undefined,
     documentMatchFilter: 'matched',
   }),
@@ -491,6 +491,10 @@ function getRuntimeMappings(
   condition?: Condition
 ): MappingRuntimeFields {
   if (!condition) return {};
+
+  if (!Streams.WiredStream.Definition.is(definition.stream)) {
+    return {};
+  }
 
   const mappedFields = Object.keys({
     ...definition.inherited_fields,

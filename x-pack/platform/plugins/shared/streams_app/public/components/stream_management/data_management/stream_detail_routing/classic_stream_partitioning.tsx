@@ -38,10 +38,10 @@ export const ClassicStreamPartitioning = ({
   const { timeState$ } = useTimefilter();
 
   // No-op for classic — ingest fork success notifications are wired-only
-  const forkSuccessNofitier = useMemo(() => () => {}, []);
+  const forkSuccessNotifier = useMemo(() => () => {}, []);
 
-  // Cast to WiredStream.GetResponse at the boundary — the state machine types are narrow
-  // but runtime guards (isClassicStream, setupRouting) handle both stream types correctly.
+  // Safe: classic streams only use queryMode, which never accesses wired-only fields.
+  // Runtime guards (isClassicStream, getRuntimeMappings) prevent wired property access.
   const routingDefinition = definition as unknown as Streams.WiredStream.GetResponse;
 
   return (
@@ -52,7 +52,7 @@ export const ClassicStreamPartitioning = ({
       data={data}
       timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
-      forkSuccessNofitier={forkSuccessNofitier}
+      forkSuccessNotifier={forkSuccessNotifier}
       telemetryClient={telemetryClient}
     >
       <ClassicStreamPartitioningImpl />

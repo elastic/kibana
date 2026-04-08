@@ -67,7 +67,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
       data={data}
       timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
-      forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
+      forkSuccessNotifier={createForkSuccessNotifier({ core, router })}
       telemetryClient={telemetryClient}
     >
       <StreamDetailRoutingImpl />
@@ -256,7 +256,7 @@ export function StreamDetailRoutingImpl() {
   );
 }
 
-const createForkSuccessNofitier =
+const createForkSuccessNotifier =
   ({ core, router }: { core: CoreStart; router: StatefulStreamsAppRouter }) =>
   (streamName: string) =>
     core.notifications.toasts.addSuccess({
