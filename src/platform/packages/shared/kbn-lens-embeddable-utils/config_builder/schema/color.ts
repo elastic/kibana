@@ -278,29 +278,28 @@ const gradientColorMappingSchema = schema.object(
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );
 
-export const colorMappingWithDefault = (
-  defaultValue:
-    | ColorMappingCategoricalType
-    | ColorMappingGradientType = DEFAULT_CATEGORICAL_COLOR_MAPPING
-) =>
-  schema.oneOf(
-    [
-      /**
-       * Categorical color mapping: assigns colors from a palette to specific values.
-       */
-      categoricalColorMappingSchema,
-      /**
-       * Gradient color mapping: assigns a gradient of colors to a range of values.
-       */
-      gradientColorMappingSchema,
-    ],
-    {
-      meta: { id: 'colorMapping', title: 'Color Mapping' },
-      defaultValue,
-    }
-  );
+const DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE: TypeOf<typeof categoricalColorMappingSchema> = {
+  mode: 'categorical',
+  palette: 'default',
+  mapping: [],
+};
 
-export const colorMappingSchema = colorMappingWithDefault();
+export const colorMappingSchema = schema.oneOf(
+  [
+    /**
+     * Categorical color mapping: assigns colors from a palette to specific values.
+     */
+    categoricalColorMappingSchema,
+    /**
+     * Gradient color mapping: assigns a gradient of colors to a range of values.
+     */
+    gradientColorMappingSchema,
+  ],
+  {
+    meta: { id: 'colorMapping', title: 'Color Mapping' },
+    defaultValue: DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE,
+  }
+);
 
 export const noColorSchema = schema.object(
   { type: schema.literal('none') },
@@ -343,11 +342,8 @@ export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
 
 export const NO_COLOR: NoColorType = { type: 'none' };
 export const AUTO_COLOR: AutoColorType = { type: 'auto' };
-export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = Object.freeze({
-  mode: 'categorical',
-  palette: 'default',
-  mapping: [],
-}) satisfies ColorMappingCategoricalType;
+export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType =
+  DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE;
 
 /**
  * Schema for where to apply the color (to value or background).
