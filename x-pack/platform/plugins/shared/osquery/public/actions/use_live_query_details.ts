@@ -68,9 +68,7 @@ export const useLiveQueryDetails = ({
     () => http.get(`/api/osquery/live_queries/${actionId}`, { version: API_VERSIONS.public.v1 }),
     {
       enabled: !skip && !!actionId,
-      refetchInterval: isLive
-        ? (data) => getPollingInterval(data?.['@timestamp'])
-        : false,
+      refetchInterval: isLive ? (data) => getPollingInterval(data?.['@timestamp']) : false,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {
