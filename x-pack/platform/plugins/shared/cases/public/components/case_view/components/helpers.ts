@@ -16,7 +16,7 @@ import type {
 } from '../../../../common/ui/types';
 import {
   isLegacyEventAttachment,
-  isUnifiedReferenceAttachmentRequest,
+  isUnifiedEventAttachment,
 } from '../../../../common/utils/attachments';
 
 export const getManualAlertIds = (comments: AttachmentUIV2[]): string[] => {
@@ -97,7 +97,7 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         if (isLegacyEventAttachment(comment)) {
           return filterLegacyEventCommentByIds(comment, searchTerm);
         }
-        if (isUnifiedReferenceAttachmentRequest(comment)) {
+        if (isUnifiedEventAttachment(comment)) {
           return filterUnifiedCommentById(comment, searchTerm);
         }
         return comment;

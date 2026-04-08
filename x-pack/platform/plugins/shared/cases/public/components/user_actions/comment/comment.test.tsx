@@ -260,6 +260,41 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
+
+    it('renders correctly when deleting a unified event attachment', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        displayName: 'Event',
+        icon: 'bell',
+        getAttachmentViewObject: () => ({ event: 'added an event' }),
+        getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+      });
+
+      const userAction = getEventUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('removed event')).toBeInTheDocument();
+    });
   });
 
   describe('user comments', () => {

@@ -24,17 +24,7 @@ import {
   toStringOrStringArray,
 } from '../../../common/utils/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
-
-function legacyEventIndexToMetadata(
-  index: string | string[] | undefined
-): UnifiedReferenceAttachmentPayload['metadata'] {
-  const normalizedIndex = toStringOrStringArray(index);
-  return normalizedIndex == null ? undefined : { index: normalizedIndex };
-}
-
-const normalizeAttachmentId = (eventId: string | string[]): string | string[] => {
-  return toStringOrStringArray(eventId) ?? eventId;
-};
+import { normalizeReferenceAttachmentId, toReferenceMetadata } from './utils';
 
 function isLegacyEventSchema(attributes: AttachmentAttributesV2): boolean {
   return isLegacyEventAttachment(attributes);
@@ -69,8 +59,8 @@ export const eventAttachmentTransformer: AttachmentTypeTransformer<
       };
       return {
         type: toUnifiedAttachmentType(AttachmentType.event, legacyAttrs.owner),
-        attachmentId: normalizeAttachmentId(legacyAttrs.eventId),
-        metadata: legacyEventIndexToMetadata(legacyAttrs.index),
+        attachmentId: normalizeReferenceAttachmentId(legacyAttrs.eventId),
+        metadata: toReferenceMetadata(legacyAttrs.index),
         owner: legacyAttrs.owner,
         ...extractCommonAttributes(legacyAttrs as AttachmentAttributesV2),
       } as UnifiedAttachmentAttributes;
@@ -120,8 +110,8 @@ export const eventAttachmentTransformer: AttachmentTypeTransformer<
   toUnifiedPayload(attachment: EventAttachmentPayload): UnifiedReferenceAttachmentPayload {
     return {
       type: toUnifiedAttachmentType(AttachmentType.event, attachment.owner),
-      attachmentId: normalizeAttachmentId(attachment.eventId),
-      metadata: legacyEventIndexToMetadata(attachment.index),
+      attachmentId: normalizeReferenceAttachmentId(attachment.eventId),
+      metadata: toReferenceMetadata(attachment.index),
       owner: attachment.owner,
     };
   },

@@ -24,6 +24,7 @@ import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
 
@@ -45,6 +46,7 @@ const getDeleteLabelTitle = ({
   unifiedAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
+  const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
   if (isLegacyAttachmentRequest(comment)) {
     if (comment.type === AttachmentType.alert) {
       const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
@@ -76,6 +78,17 @@ const getDeleteLabelTitle = ({
         }),
       });
     }
+  }
+  if (isUnifiedReferenceAttachmentRequest(comment)) {
+    return getDeleteLabelFromRegistry({
+      caseData,
+      registry: unifiedAttachmentTypeRegistry,
+      getId: () => toUnifiedAttachmentType(comment.type, owner),
+      getAttachmentProps: () => ({
+        attachmentId: comment.attachmentId,
+        metadata: comment.metadata,
+      }),
+    });
   }
 
   return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
@@ -238,7 +251,10 @@ const getCreateCommentUserAction = ({
     }
   }
 
-  const type = toUnifiedAttachmentType(attachment.type, caseData.owner);
+  const type = toUnifiedAttachmentType(
+    attachment.type,
+    Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner
+  );
   const isUnified = isUnifiedAttachmentRequest(attachment);
   const registryHas = unifiedAttachmentTypeRegistry.has(type);
 

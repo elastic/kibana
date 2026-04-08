@@ -18,7 +18,7 @@ export const isIndexMetadata = (
     return true;
   }
 
-  if (typeof metadata !== 'object') {
+  if (typeof metadata !== 'object' || Array.isArray(metadata)) {
     return false;
   }
 

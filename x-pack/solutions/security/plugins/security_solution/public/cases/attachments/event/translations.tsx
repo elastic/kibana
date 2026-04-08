@@ -13,7 +13,7 @@ export const DATA_VIEW_ERROR = i18n.translate('xpack.securitySolution.caseEvents
 
 export const TABLE_UNIT = (totalEvents: number) =>
   i18n.translate('xpack.securitySolution.caseEvents.unit', {
-    defaultMessage: '{totalEvents, plural, =1 {event} other {events}}',
+    defaultMessage: '{totalEvents} {totalEvents, plural, =1 {event} other {events}}',
     values: { totalEvents },
   });
 

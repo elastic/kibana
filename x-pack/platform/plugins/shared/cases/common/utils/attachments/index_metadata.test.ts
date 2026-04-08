@@ -24,6 +24,7 @@ describe('index_metadata', () => {
       expect(isIndexMetadata({ index: 123 })).toBe(false);
       expect(isIndexMetadata({ index: ['ok', 1] })).toBe(false);
       expect(isIndexMetadata('invalid')).toBe(false);
+      expect(isIndexMetadata(['logs-endpoint-*'])).toBe(false);
     });
   });
 
@@ -50,6 +51,7 @@ describe('index_metadata', () => {
       expect(getIndexFromMetadata(undefined)).toBeUndefined();
       expect(getIndexFromMetadata(null)).toBeUndefined();
       expect(getIndexFromMetadata({ index: 1 })).toBeUndefined();
+      expect(getIndexFromMetadata(['logs-endpoint-*'])).toBeUndefined();
     });
   });
 });

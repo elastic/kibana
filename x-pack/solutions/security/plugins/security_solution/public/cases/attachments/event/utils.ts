@@ -9,15 +9,9 @@ import { isEmpty } from 'lodash';
 import { SECURITY_EVENT_ATTACHMENT_TYPE, toStringOrStringArray } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 
-const getFirstItem = (items: unknown): string | null => {
-  if (typeof items !== 'string' && !Array.isArray(items)) {
-    return null;
-  }
-  return Array.isArray(items) ? items[0] : items ?? null;
-};
-
 export function getNonEmptyField(field: unknown): string | null {
-  const firstItem = getFirstItem(field);
+  const normalizedField = toStringOrStringArray(field);
+  const firstItem = Array.isArray(normalizedField) ? normalizedField[0] : normalizedField;
   if (firstItem == null || isEmpty(firstItem)) {
     return null;
   }

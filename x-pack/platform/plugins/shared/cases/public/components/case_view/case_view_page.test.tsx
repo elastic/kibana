@@ -11,16 +11,26 @@ import { waitFor, screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useUrlParams } from '../../common/navigation/hooks';
 import { CaseViewPage } from './case_view_page';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { caseData, caseViewProps } from './mocks';
 import type { CaseViewPageProps } from './types';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
+import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../use_breadcrumbs');
 jest.mock('./use_on_refresh_case_view_page');
 jest.mock('../../common/hooks');
 jest.mock('../../common/lib/kibana');
+jest.mock(
+  '@kbn/response-ops-detections-close-reason',
+  () => ({
+    DEFAULT_CLOSING_REASON_OPTIONS: [],
+    DEFAULT_DETECTIONS_CLOSE_REASONS_KEY: 'securitySolution:closeReason',
+  }),
+  { virtual: true }
+);
 jest.mock('../../../common/utils/attachments/migration_utils', () => {
   const actual = jest.requireActual('../../../common/utils/attachments/migration_utils');
 
@@ -83,9 +93,23 @@ const caseProps: CaseViewPageProps = {
 };
 
 describe('CaseViewPage', () => {
+  let unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+
   beforeEach(() => {
     jest.clearAllMocks();
     useUrlParamsMock.mockReturnValue({});
+    unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+    unifiedAttachmentTypeRegistry.register({
+      id: 'security.event',
+      displayName: 'Event',
+      icon: 'bell',
+      getAttachmentViewObject: () => ({ event: 'added an event' }),
+      getAttachmentTabViewObject: () => ({
+        children: () => (
+          <div data-test-subj="test-case-view-events-content">{'Events content'}</div>
+        ),
+      }),
+    });
   });
 
   it('shows the header section', async () => {
@@ -124,5 +148,35 @@ describe('CaseViewPage', () => {
     renderWithTestingProviders(<CaseViewPage {...caseProps} caseData={caseDataWithStringOwner} />);
 
     expect(toUnifiedAttachmentTypeMock).toHaveBeenCalledWith('event', 'securitySolution');
+  });
+
+  it('does not render the events tab content when events feature is disabled', () => {
+    useUrlParamsMock.mockReturnValue({
+      urlParams: { tabId: CASE_VIEW_PAGE_TABS.EVENTS },
+    });
+
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />, {
+      wrapperProps: {
+        features: { events: { enabled: false } },
+        unifiedAttachmentTypeRegistry,
+      },
+    });
+
+    expect(screen.queryByTestId('test-case-view-events-content')).not.toBeInTheDocument();
+  });
+
+  it('renders the events tab content when events feature is enabled and type is registered', async () => {
+    useUrlParamsMock.mockReturnValue({
+      urlParams: { tabId: CASE_VIEW_PAGE_TABS.EVENTS },
+    });
+
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />, {
+      wrapperProps: {
+        features: { events: { enabled: true } },
+        unifiedAttachmentTypeRegistry,
+      },
+    });
+
+    expect(await screen.findByTestId('test-case-view-events-content')).toBeInTheDocument();
   });
 });
