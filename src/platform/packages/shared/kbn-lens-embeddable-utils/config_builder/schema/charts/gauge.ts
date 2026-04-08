@@ -15,7 +15,7 @@ import {
   metricOperationDefinitionSchema,
 } from '../metric_ops';
 import { colorByValueSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';
@@ -152,7 +152,7 @@ export const gaugeStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...gaugeStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
@@ -170,7 +170,7 @@ export const gaugeStateSchemaESQL = schema.object(
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...gaugeStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
