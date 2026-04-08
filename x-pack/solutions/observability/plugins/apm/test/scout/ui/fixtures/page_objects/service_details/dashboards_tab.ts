@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
@@ -15,11 +16,13 @@ export class DashboardsTab extends ServiceDetailsTab {
   public readonly tab: Locator;
 
   public readonly addServiceDashboardButton: Locator;
+  public readonly dashboardComboBox: EuiComboBoxWrapper;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
     this.addServiceDashboardButton = this.page.getByTestId('apmAddServiceDashboard');
+    this.dashboardComboBox = new EuiComboBoxWrapper(this.page, 'apmSelectServiceDashboard');
   }
 
   protected async waitForTabLoad(): Promise<void> {
@@ -34,14 +37,7 @@ export class DashboardsTab extends ServiceDetailsTab {
 
     await this.page.getByTestId('apmSelectDashboardButton').waitFor({ timeout: EXTENDED_TIMEOUT });
 
-    await this.page
-      .getByTestId('apmSelectServiceDashboard')
-      .getByTestId('comboBoxInput')
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
-    await this.page.getByTestId('apmSelectServiceDashboard').getByTestId('comboBoxInput').click();
-
-    await this.page.getByText(dashboardTitle).waitFor({ timeout: EXTENDED_TIMEOUT });
-    await this.page.getByText(dashboardTitle).click();
+    await this.dashboardComboBox.selectSingleOption(dashboardTitle);
 
     await this.page.getByTestId('apmSelectDashboardButton').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.page.getByTestId('apmSelectDashboardButton').click();
