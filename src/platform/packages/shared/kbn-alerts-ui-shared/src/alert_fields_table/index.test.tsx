@@ -85,18 +85,14 @@ describe('AlertFieldsTable', () => {
   } as unknown as AlertFieldsTableProps;
 
   it('should paginate the results', async () => {
-    const { container } = renderWithKibanaRenderContext(
-      <AlertFieldsTable {...defaultProps} />
-    );
+    const { container } = renderWithKibanaRenderContext(<AlertFieldsTable {...defaultProps} />);
     expect(container.querySelectorAll('tbody tr')).toHaveLength(25);
     await userEvent.click(screen.getByTestId('pagination-button-next'));
     expect(container.querySelectorAll('tbody tr')).toHaveLength(8);
   });
 
   it('should filter the rows according to the search string', async () => {
-    const { container } = renderWithKibanaRenderContext(
-      <AlertFieldsTable {...defaultProps} />
-    );
+    const { container } = renderWithKibanaRenderContext(<AlertFieldsTable {...defaultProps} />);
     await userEvent.type(screen.getByRole('searchbox'), 'kibana.alert.status');
     expect(container.querySelectorAll('tbody tr')).toHaveLength(1);
   });

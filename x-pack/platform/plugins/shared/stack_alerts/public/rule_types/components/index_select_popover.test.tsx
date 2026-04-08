@@ -164,7 +164,10 @@ describe('IndexSelectPopover', () => {
       expect(onIndexChange).toHaveBeenCalled();
     });
 
-    await userEvent.selectOptions(screen.getByTestId('thresholdAlertTimeFieldSelect'), '@timestamp');
+    await userEvent.selectOptions(
+      screen.getByTestId('thresholdAlertTimeFieldSelect'),
+      '@timestamp'
+    );
     expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
   });
 
