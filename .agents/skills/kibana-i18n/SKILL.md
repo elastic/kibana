@@ -78,10 +78,12 @@ Standard react-intl component, re-exported from `@kbn/i18n-react`:
 
 ## Message ID Naming
 
-Structure: `{pluginId}.{area}.[{subArea}].{descriptiveName}{TypeSuffix}`
+Structure: `{namespace}.{area}.[{subArea}].{descriptiveName}{TypeSuffix}`
 
 - All segments are **camelCase**, separated by dots.
-- Must start with the plugin's namespace (matches `plugin.id` in `kibana.jsonc`).
+- Must start with the plugin's i18n namespace from `.i18nrc.json`, **not** `plugin.id` in `kibana.jsonc`. Two roots exist:
+  - `x-pack/.i18nrc.json` has `"prefix": "xpack"`, so keys there become `xpack.{key}` (e.g., `xpack.securitySolution`).
+  - Root `.i18nrc.json` has no prefix, so keys are used directly (e.g., `share`, `discover`).
 - Must end with a **type suffix** from the table below.
 - Think of IDs as long variable names -- be descriptive, not terse.
 
@@ -233,7 +235,34 @@ i18n.translate('myPlugin.progress.ratioLabel', {
 
 ## Compound Messages (JSX inside translations)
 
-When a translated string contains JSX elements (bold, links, etc.), use the tag interpolation pattern:
+When a translated string contains JSX elements (bold, links, etc.), two patterns are available:
+
+### Tag chunking (preferred for wrapping text)
+
+XML-like tags in `defaultMessage` map to functions in `values` that receive the inner content as chunks:
+
+```tsx
+<FormattedMessage
+  id="myPlugin.myFeature.benefitTitle"
+  defaultMessage="<bold>Focused navigation</bold>. Only the tools you need."
+  values={{
+    bold: (chunks) => <strong>{chunks}</strong>,
+  }}
+/>
+
+<FormattedMessage
+  id="myPlugin.myFeature.backgroundSearchLabel"
+  defaultMessage='"{name}" is running. <link>Check progress here.</link>'
+  values={{
+    name,
+    link: (chunks) => <EuiLink href={url}>{chunks}</EuiLink>,
+  }}
+/>
+```
+
+### Nested `FormattedMessage` (for inner strings that need their own translation)
+
+Use when the interpolated value is a standalone translated string, not just a wrapper:
 
 ```tsx
 <FormattedMessage
@@ -260,8 +289,8 @@ Inner IDs follow the pattern: `{parentId}.{variableName}{TypeSuffix}` — use th
 The extraction tooling parses AST -- these must be **static literals**:
 
 - `id` -- string literal only (no variables, no template literals)
-- `defaultMessage` -- string literal, template literal without expressions, or string concatenation
-- `values` keys must match `{placeholders}` in `defaultMessage` exactly
+- `defaultMessage` -- must be a static string (string literal, template literal without expressions, or string concatenation). The content can include ICU syntax, tag chunks like `<bold>...</bold>`, etc.; the constraint is on the variable form, not the content format.
+- `values` keys must match `{placeholders}` and `<tags>` in `defaultMessage` exactly
 
 ```ts
 // WRONG -- dynamic id
