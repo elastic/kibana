@@ -68,9 +68,9 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/agent-builder-plugin'
-  - '@kbn/search-inference-endpoints'
   - '@kbn/zod'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
