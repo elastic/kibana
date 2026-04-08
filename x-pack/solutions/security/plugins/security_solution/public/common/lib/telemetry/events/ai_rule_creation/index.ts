@@ -31,27 +31,18 @@ const appliedToFormEvent: AiRuleCreationTelemetryEvent = {
         optional: false,
       },
     },
-    numberOfEdits: {
-      type: 'long',
-      _meta: {
-        description:
-          'How many times AI-generated rule has been applied to the form in this session',
-        optional: false,
-      },
-    },
     sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'Unique session ID, present only during rule creation flow',
-        optional: true,
+        description: 'Unique session ID correlating all events in an AI rule creation session',
+        optional: false,
       },
     },
     durationSinceSessionStartMs: {
       type: 'long',
       _meta: {
-        description:
-          'Milliseconds since the AI rule creation session started, present only during creation',
-        optional: true,
+        description: 'Milliseconds elapsed since the AI rule creation session started',
+        optional: false,
       },
     },
   },
@@ -78,6 +69,13 @@ const ruleCreatedEvent: AiRuleCreationTelemetryEvent = {
       type: 'boolean',
       _meta: {
         description: 'Whether the rule was saved as enabled',
+        optional: false,
+      },
+    },
+    numberOfEdits: {
+      type: 'long',
+      _meta: {
+        description: 'How many times AI-generated rule was applied to the form before saving',
         optional: false,
       },
     },

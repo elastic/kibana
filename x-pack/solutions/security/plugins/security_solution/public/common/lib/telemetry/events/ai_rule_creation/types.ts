@@ -22,15 +22,15 @@ export interface ReportCreationInitializedParams {
 
 export interface ReportAppliedToFormParams {
   ruleType: string;
-  numberOfEdits: number;
-  sessionId?: string;
-  durationSinceSessionStartMs?: number;
+  sessionId: string;
+  durationSinceSessionStartMs: number;
 }
 
 export interface ReportRuleCreatedParams {
   sessionId: string;
   ruleType: string;
   enabled: boolean;
+  numberOfEdits: number;
   threatTechniques: string[];
   durationSinceSessionStartMs: number;
 }

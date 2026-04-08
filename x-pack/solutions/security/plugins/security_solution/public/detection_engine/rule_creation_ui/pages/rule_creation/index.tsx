@@ -518,6 +518,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
             sessionId: session.sessionId,
             ruleType: createdRule.type,
             enabled: createdRule.enabled,
+            numberOfEdits: session.applyCount,
             threatTechniques: extractThreatTechniqueIds(createdRule.threat),
             durationSinceSessionStartMs: Date.now() - session.startTimestamp,
           });

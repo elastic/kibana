@@ -114,17 +114,12 @@ export const useAgentBuilderRuleCreation = ({
     (rule: RuleResponse) => {
       const stepsData = getStepsData({ rule: { ...ruleDefaultMetadataFields, ...rule } });
 
-      const session = aiRuleCreation.getSession();
-      if (session) {
-        aiRuleCreation.incrementApplyCount();
-      }
+      const session = aiRuleCreation.getSession() ?? aiRuleCreation.startSession();
+      aiRuleCreation.incrementApplyCount();
       telemetry.reportEvent(AiRuleCreationEventTypes.AppliedToForm, {
         ruleType: rule.type,
-        numberOfEdits: session ? session.applyCount : 1,
-        ...(session && {
-          sessionId: session.sessionId,
-          durationSinceSessionStartMs: Date.now() - session.startTimestamp,
-        }),
+        sessionId: session.sessionId,
+        durationSinceSessionStartMs: Date.now() - session.startTimestamp,
       });
 
       isAiRuleUpdateRef.current = true;
