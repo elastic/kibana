@@ -51,8 +51,9 @@ export const useUpdateAssetCriticality = (
         force: true,
       });
       applyEntityStoreSearchCachePatch(queryClient, entityType, updatedRecord as EntityStoreRecord);
+      onSuccess();
     },
-    [addError, http, queryClient, entityType]
+    [addError, http, queryClient, entityType, onSuccess]
   );
 
   return updateAssetCriticalityCb;

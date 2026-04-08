@@ -67,6 +67,7 @@ describe('useUpdateAssetCriticality', () => {
         force: true,
       })
     );
+    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
   });
 
   it('patches the entity store search cache after a successful update', async () => {
@@ -84,6 +85,7 @@ describe('useUpdateAssetCriticality', () => {
       'host',
       hostRecord
     );
+    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
   });
 
   it('shows an error toast when entity id is missing', async () => {
@@ -105,6 +107,7 @@ describe('useUpdateAssetCriticality', () => {
       expect.any(Error),
       expect.objectContaining({ title: expect.any(String) })
     );
+    expect(mockOnSuccess).not.toHaveBeenCalled();
   });
 
   it('uses null criticality when asset criticality is not set', async () => {
@@ -130,6 +133,7 @@ describe('useUpdateAssetCriticality', () => {
         },
       })
     );
+    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
   });
 
   it('works with user entity type', async () => {
@@ -156,5 +160,6 @@ describe('useUpdateAssetCriticality', () => {
       'user',
       userRecord
     );
+    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
   });
 });
