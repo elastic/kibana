@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 import { cloneDeep, startsWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { withSpan } from '@kbn/apm-utils';
+import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
@@ -497,7 +497,7 @@ export class ActionExecutor {
 
         if (span) {
           span.name = `${executeLabel} ${actionTypeId}`;
-          span.addLabels({
+          addSpanLabels({
             actions_connector_type_id: actionTypeId,
           });
         }

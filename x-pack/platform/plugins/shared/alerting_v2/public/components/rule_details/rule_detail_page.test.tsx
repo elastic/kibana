@@ -45,15 +45,12 @@ jest.mock('./rule_header_description', () => ({
   RuleHeaderDescription: () => <div data-test-subj="ruleHeaderDescription" />,
 }));
 
-jest.mock('./rule_conditions', () => ({
-  RuleConditions: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleConditionsSection">conditions-{rule.id}</div>
-  ),
-}));
-
-jest.mock('./rule_metadata', () => ({
-  RuleMetadata: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleMetadataSection">metadata-{rule.id}</div>
+jest.mock('./sidebar/rule_sidebar', () => ({
+  RuleSidebar: ({ rule }: { rule: RuleApiResponse }) => (
+    <div>
+      <div data-test-subj="ruleConditionsSection">conditions-{rule.id}</div>
+      <div data-test-subj="ruleMetadataSection">metadata-{rule.id}</div>
+    </div>
   ),
 }));
 
@@ -73,7 +70,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', labels: ['prod', 'infra'] },
+  metadata: { name: 'Test Signal Rule', tags: ['prod', 'infra'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
@@ -118,7 +115,7 @@ describe('RuleDetailPage', () => {
     renderPage(baseRule);
     expect(screen.getByTestId('openEditRuleFlyoutButton')).toHaveAttribute(
       'href',
-      '/app/management/insightsAndAlerting/alerting_v2/edit/rule-1'
+      '/app/management/alertingV2/rules/edit/rule-1'
     );
   });
 
