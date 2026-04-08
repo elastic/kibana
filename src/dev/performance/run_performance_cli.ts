@@ -52,6 +52,9 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'ecommerce_dashboard_map_only',
     'ecommerce_dashboard_saved_search_only',
     'ecommerce_dashboard_tsvb_gauge_only',
+    'many_fields_transform',
+    'tsdb_logs_data_visualizer',
+    'many_fields_esql_editor',
   ],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
   dashboard: [
