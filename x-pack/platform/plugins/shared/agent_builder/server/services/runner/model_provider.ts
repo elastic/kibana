@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
@@ -25,6 +26,8 @@ export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  fastToolConnectorId?: string;
+  logger: Logger;
   trackingService?: TrackingService;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
@@ -34,9 +37,12 @@ export type CreateModelProviderFactoryFn = (
   opts: Omit<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
 ) => ModelProviderFactoryFn;
 
-export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
-) => ModelProvider;
+export type ModelProviderFactoryOpts = Pick<
+  CreateModelProviderOpts,
+  'request' | 'defaultConnectorId'
+>;
+
+export type ModelProviderFactoryFn = (opts: ModelProviderFactoryOpts) => ModelProvider;
 
 /**
  * Utility function to creates a {@link ModelProviderFactoryFn}
@@ -55,6 +61,8 @@ export const createModelProvider = ({
   inference,
   request,
   defaultConnectorId,
+  fastToolConnectorId,
+  logger,
   trackingService,
   uiSettings,
   savedObjects,
@@ -136,8 +144,23 @@ export const createModelProvider = ({
     };
   };
 
+  const getFastModel = async (): Promise<ScopedModel> => {
+    if (!fastToolConnectorId) {
+      return getModel(await getDefaultConnectorId());
+    }
+    try {
+      return await getModel(fastToolConnectorId);
+    } catch (e) {
+      logger.debug(
+        `Fast tool connector "${fastToolConnectorId}" unavailable, falling back to default model: ${e instanceof Error ? e.message : String(e)}`
+      );
+      return getModel(await getDefaultConnectorId());
+    }
+  };
+
   return {
     getDefaultModel: async () => getModel(await getDefaultConnectorId()),
+    getFastModel,
     getModel: ({ connectorId }) => getModel(connectorId),
     getUsageStats,
   };

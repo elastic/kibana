@@ -294,6 +294,8 @@ export class AgentBuilderPlugin
       inference,
       uiSettings,
       savedObjects,
+      logger: this.logger.get('modelProvider'),
+      fastToolConnectorId: this.config.fastToolConnectorId,
       trackingService: this.trackingService,
     });
 

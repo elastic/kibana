@@ -22,6 +22,7 @@ export const runSearchTool = async ({
   allowPatternTarget = false,
   timeRange,
   model,
+  fastModel,
   esClient,
   logger,
   events,
@@ -34,12 +35,14 @@ export const runSearchTool = async ({
   allowPatternTarget?: boolean;
   timeRange?: TimeRange;
   model: ScopedModel;
+  fastModel?: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
 }): Promise<ToolHandlerResult[]> => {
   const toolGraph = createSearchToolGraph({
     model,
+    fastModel,
     esClient,
     logger,
     events,

@@ -62,13 +62,18 @@ Note:
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
+      const [model, fastModel] = await Promise.all([
+        modelProvider.getDefaultModel(),
+        modelProvider.getFastModel(),
+      ]);
       const results = await runSearchTool({
         nlQuery,
         index,
         allowPatternTarget: true,
         timeRange,
         esClient: esClient.asCurrentUser,
-        model: await modelProvider.getDefaultModel(),
+        model,
+        fastModel,
         events,
         logger,
       });

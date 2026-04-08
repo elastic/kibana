@@ -41,6 +41,8 @@ export interface RunnerFactoryDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   hooks: HooksServiceStart;
+  // config
+  fastToolConnectorId?: string;
 }
 
 export interface RunnerFactory {
