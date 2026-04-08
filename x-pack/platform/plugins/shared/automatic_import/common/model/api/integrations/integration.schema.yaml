@@ -310,7 +310,7 @@ components:
       properties:
         version:
           description: The version of the integration
-          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+          $ref: "../../../model/primitive.schema.yaml#/components/schemas/SemVer"
         categories:
           description: The categories of the integration
           type: array

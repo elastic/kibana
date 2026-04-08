@@ -386,6 +386,32 @@ describe('data stream schemas', () => {
       expectParseError(result);
     });
 
+    it('rejects sourceIndex exceeding 100 characters', () => {
+      const payload = {
+        sourceIndex: 'a'.repeat(101),
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('accepts sourceIndex at exactly 100 characters', () => {
+      const payload = {
+        sourceIndex: 'a'.repeat(100),
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
     it('rejects invalid source type', () => {
       const payload = {
         samples: ['Sample 1'],

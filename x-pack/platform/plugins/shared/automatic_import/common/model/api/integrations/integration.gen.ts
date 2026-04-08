@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { NonEmptyString, SafeIdentifier } from '../../primitive.gen';
+import { NonEmptyString, SafeIdentifier, SemVer } from '../../primitive.gen';
 import {
   LangSmithOptions,
   DataStream,
@@ -31,7 +31,7 @@ export const ApproveIntegrationRequest = z
     /**
      * The version of the integration
      */
-    version: NonEmptyString,
+    version: SemVer,
     /**
      * The categories of the integration
      */

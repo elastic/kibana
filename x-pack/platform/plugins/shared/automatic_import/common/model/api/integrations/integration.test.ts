@@ -102,13 +102,33 @@ describe('integration schemas', () => {
       const payload = { ...validPayload, version: '   ' };
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('version: No empty strings allowed');
     });
 
-    it('accepts non-semver version strings', () => {
+    it('rejects non-semver version strings', () => {
       const payload = { ...validPayload, version: 'build-2026-01-29' };
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
+      expectParseError(result);
+    });
+
+    it('rejects version shorter than 5 characters', () => {
+      const payload = { ...validPayload, version: '1.0' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('rejects version longer than 20 characters', () => {
+      const payload = { ...validPayload, version: '1000.1000.10000000000' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('accepts valid semver versions', () => {
+      const validVersions = ['1.0.0', '10.20.30', '0.0.1', '99.99.99'];
+      validVersions.forEach((version) => {
+        const payload = { ...validPayload, version };
+        const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+        expectParseSuccess(result);
+      });
     });
 
     it('rejects unknown properties', () => {

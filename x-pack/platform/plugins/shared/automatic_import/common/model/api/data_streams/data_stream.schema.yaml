@@ -150,6 +150,7 @@ paths:
                 sourceIndex:
                   type: string
                   minLength: 1
+                  maxLength: 100
                   description: Index name to pick samples from.
                 originalSource:
                   description: The original source of the samples (file name or index name)

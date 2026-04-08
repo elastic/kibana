@@ -192,7 +192,7 @@ export const UploadSamplesToDataStreamRequestBody = z
     /**
      * Index name to pick samples from.
      */
-    sourceIndex: z.string().min(1).optional(),
+    sourceIndex: z.string().min(1).max(100).optional(),
     /**
      * The original source of the samples (file name or index name)
      */
