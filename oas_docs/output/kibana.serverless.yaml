@@ -10927,7 +10927,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create or update an agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When updating an existing configuration, the `?overwrite=true` query parameter is required. If the configuration already exists and `overwrite` is not set to `true`, a 400 error is returned. When successful and Fleet is enabled, APM package policies are synchronized accordingly.
+        Create or update an agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When updating an existing configuration, the `?overwrite=true` query parameter is required. If the configuration already exists and `overwrite` is not set to `true`, the API returns a 400 error. When successful and Fleet is enabled, APM package policies are synchronized accordingly.
       operationId: createUpdateAgentConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -11102,7 +11102,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied. Do not use for new integrations. It searches for a single agent configuration matching the given service and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
+        DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied. Do not use for new integrations. It searches for a single agent configuration matching the given service, and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
       operationId: searchSingleConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'

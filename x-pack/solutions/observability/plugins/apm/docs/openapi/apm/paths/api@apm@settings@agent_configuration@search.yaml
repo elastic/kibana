@@ -4,7 +4,7 @@ post:
   description: >
     DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied.
     Do not use for new integrations.
-    It searches for a single agent configuration matching the given service and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
+    It searches for a single agent configuration matching the given service, and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
   operationId: searchSingleConfiguration
   tags:
     - APM agent configuration

@@ -98,7 +98,7 @@ put:
     Create or update an agent configuration.
     You must have `all` privileges for the APM and User Experience feature in Kibana.
     When updating an existing configuration, the `?overwrite=true` query parameter is required.
-    If the configuration already exists and `overwrite` is not set to `true`, a 400 error is returned.
+    If the configuration already exists and `overwrite` is not set to `true`, the API returns a 400 error.
     When successful and Fleet is enabled, APM package policies are synchronized accordingly.
   operationId: createUpdateAgentConfiguration
   tags:
