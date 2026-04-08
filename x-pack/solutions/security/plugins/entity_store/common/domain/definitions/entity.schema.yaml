@@ -521,6 +521,7 @@ components:
     # Temporary addition of risk score and asset criticality assets
     AssetCriticalityLevel:
       type: string
+      nullable: true
       enum:
         - low_impact
         - medium_impact

@@ -6,16 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useQueryClient } from '@kbn/react-query';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
-import {
-  bulkUpdateEntities,
-  FF_ENABLE_ENTITY_STORE_V2,
-  useEntityStoreEuidApi,
-} from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
@@ -39,12 +35,7 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/compon
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
-import type { Entity } from '../../../../common/api/entity_analytics';
-import {
-  applyEntityStoreSearchCachePatch,
-  useEntityFromStore,
-  type EntityStoreRecord,
-} from '../shared/hooks/use_entity_from_store';
+import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
@@ -92,8 +83,7 @@ export const UserPanel = ({
   userName,
   entityId: entityIdProp,
 }: UserPanelProps) => {
-  const { http, uiSettings } = useKibana().services;
-  const queryClient = useQueryClient();
+  const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -169,6 +159,10 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const updateAssetCriticality = useUpdateAssetCriticality('user', {
+    onSuccess: calculateEntityRiskScore,
+  });
+
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', entityFromStoreResult.entityRecord, euidApi, {
       entityStoreV2Enabled,
@@ -229,19 +223,6 @@ export const UserPanel = ({
       : null;
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
-
-  const handleSaveAssetCriticalityViaEntityStore = useCallback(
-    async (updatedRecord: Entity) => {
-      await bulkUpdateEntities(http, {
-        entityType: 'user',
-        body: updatedRecord as Record<string, unknown>,
-        force: true,
-      });
-      applyEntityStoreSearchCachePatch(queryClient, 'user', updatedRecord as EntityStoreRecord);
-      calculateEntityRiskScore();
-    },
-    [http, queryClient, calculateEntityRiskScore]
-  );
 
   const defaultTab = useMemo(() => {
     if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
@@ -322,7 +303,7 @@ export const UserPanel = ({
         }
         onSaveAssetCriticalityViaEntityStore={
           entityStoreV2Enabled && entityFromStoreResult.entityRecord
-            ? handleSaveAssetCriticalityViaEntityStore
+            ? updateAssetCriticality
             : undefined
         }
         skipRiskAndCriticality={noEntityInStore}
