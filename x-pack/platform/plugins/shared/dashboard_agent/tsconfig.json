@@ -23,6 +23,7 @@
     "@kbn/css-utils",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
+    "@kbn/lens-common",
     "@kbn/presentation-publishing",
     "@kbn/core-saved-objects-api-server"
   ],
