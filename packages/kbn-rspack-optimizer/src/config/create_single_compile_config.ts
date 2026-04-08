@@ -932,7 +932,7 @@ function createUnifiedEntry(
   // orchestration shell and enables core to download in parallel with all plugins.
   // All targets for the same plugin share a webpackChunkName so rspack merges
   // them into a single chunk.
-  const BATCH_SIZE = 30;
+  const BATCH_SIZE = 150;
 
   const importLines = pluginEntries.map((entry) => {
     const chunkName = `plugin-${entry.pluginId}`;
@@ -948,9 +948,6 @@ function createUnifiedEntry(
     )}).then(m => registerPlugin('${entry.bundleId}', m))`;
   });
 
-  // Split imports into batches separated by setTimeout(0) to yield the main
-  // thread between groups, preventing TBT concentration from executing all
-  // ~220 plugin module factories in a single long task.
   const batches: string[][] = [];
   for (let i = 0; i < importLines.length; i += BATCH_SIZE) {
     batches.push(importLines.slice(i, i + BATCH_SIZE));
