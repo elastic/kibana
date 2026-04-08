@@ -8452,7 +8452,7 @@
           "\"index-pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 53,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8649,7 +8649,7 @@
           "\"metaFields\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 47,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -29297,7 +29297,7 @@
           "\nValid `failureReason` attribute values for `has_es_data` API error responses"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 88,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29335,7 +29335,7 @@
           "\"index-pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 53,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -29985,7 +29985,7 @@
           "300"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 64,
+        "lineNumber": 68,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30004,7 +30004,7 @@
           "\"metaFields\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 47,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30150,6 +30150,23 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.PrimitiveRuntimeFieldTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "PrimitiveRuntimeFieldTypes",
+        "description": [],
+        "signature": [
+          "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\"]"
+        ],
+        "path": "src/platform/plugins/shared/data_views/common/constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.RUNTIME_FIELD_COMPOSITE_TYPE",
         "type": "string",
         "tags": [],
@@ -30181,6 +30198,23 @@
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
         "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.RuntimeFieldCompositeType",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimeFieldCompositeType",
+        "description": [],
+        "signature": [
+          "\"composite\""
+        ],
+        "path": "src/platform/plugins/shared/data_views/common/constants.ts",
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -30600,7 +30634,7 @@
           "\nUsed to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources\nthat are created by default by elastic in ese.\nWe should somehow prevent creating initial data for the users without their explicit action\ninstead of relying on these hardcoded assets"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 36,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30616,7 +30650,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-            "lineNumber": 37,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30635,7 +30669,7 @@
           "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\"]"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 16,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30652,7 +30686,7 @@
           "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\", \"composite\"]"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
