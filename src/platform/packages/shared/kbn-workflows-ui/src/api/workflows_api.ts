@@ -50,6 +50,7 @@ import type {
   WorkflowExecutionLogsResponse,
   WorkflowsConfig,
 } from './types';
+import type { PollExecutionStatusResponse } from '../components/execution_tracker/types';
 
 const BASE = '/api/workflows';
 const INTERNAL_BASE = '/internal/workflows';
@@ -280,6 +281,17 @@ export class WorkflowApi {
   async getChildrenExecutions(executionId: string): Promise<ChildWorkflowExecutionItem[]> {
     return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/children`, {
       version: API_VERSION,
+    });
+  }
+
+  async pollExecutionStatus(
+    ids: string[],
+    signal?: AbortSignal
+  ): Promise<PollExecutionStatusResponse> {
+    return this.http.post(`${BASE}/executions/_poll_status`, {
+      body: JSON.stringify({ ids }),
+      version: API_VERSION,
+      signal,
     });
   }
 
