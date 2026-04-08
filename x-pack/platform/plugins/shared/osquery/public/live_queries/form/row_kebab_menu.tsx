@@ -50,7 +50,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
     const esFilters = useMemo(
       () =>
         exportFilters?.activeFilters && exportFilters.activeFilters.length > 0
-          ? JSON.stringify(exportFilters.activeFilters)
+          ? exportFilters.activeFilters
           : undefined,
       [exportFilters?.activeFilters]
     );

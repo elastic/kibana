@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
+import { escapeKuery } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS, OSQUERY_ACTIONS_INDEX } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -48,7 +49,7 @@ export const exportLiveQueryResultsRoute = (
               schema.object({
                 kuery: schema.maybe(schema.string()),
                 agentIds: schema.maybe(schema.arrayOf(schema.string())),
-                esFilters: schema.maybe(schema.string()),
+                esFilters: schema.maybe(schema.arrayOf(schema.any())),
               })
             ),
           },
@@ -80,7 +81,7 @@ export const exportLiveQueryResultsRoute = (
           }
 
           return await handleExport(context, request, response, {
-            baseFilter: `action_id: "${actionId}"`,
+            baseFilter: `action_id: "${escapeKuery(actionId)}"`,
             metadata: {
               action_id: actionId,
               query: queryString,

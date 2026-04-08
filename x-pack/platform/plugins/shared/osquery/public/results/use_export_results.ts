@@ -7,6 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { API_VERSIONS } from '../../common/constants';
@@ -15,7 +16,7 @@ export type ExportFormat = 'ndjson' | 'json' | 'csv';
 
 export interface ExportFiltersParam {
   kuery?: string;
-  esFilters?: string;
+  esFilters?: Filter[];
 }
 
 interface UseExportResultsOptions {
@@ -56,7 +57,7 @@ export const useExportResults = ({
         }).id;
 
         const body =
-          filters?.kuery || filters?.esFilters
+          filters?.kuery || (filters?.esFilters && filters.esFilters.length > 0)
             ? { kuery: filters.kuery, esFilters: filters.esFilters }
             : undefined;
 

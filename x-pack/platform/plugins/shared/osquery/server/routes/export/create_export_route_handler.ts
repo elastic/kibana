@@ -8,11 +8,13 @@
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { escapeKuery } from '@kbn/es-query';
 import { getQueryFilter } from '../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -35,7 +37,7 @@ export const createExportRouteHandler =
   (osqueryContext: OsqueryAppContext) =>
   async (
     context: RequestHandlerContext & DataRequestHandlerContext,
-    request: KibanaRequest<unknown, { format: string }, { kuery?: string; agentIds?: string[]; esFilters?: string } | null>,
+    request: KibanaRequest<unknown, { format: string }, { kuery?: string; agentIds?: string[]; esFilters?: unknown[] } | null>,
     response: KibanaResponseFactory,
     params: ExportRouteParams
   ) => {
@@ -43,14 +45,14 @@ export const createExportRouteHandler =
     const format = request.query.format as ExportFormat;
     const kuery = request.body?.kuery;
     const agentIds = request.body?.agentIds;
-    const esFiltersRaw = request.body?.esFilters;
+    const esFilters = request.body?.esFilters;
 
     const logger = osqueryContext.logFactory.get('export_results');
 
     // Build filter query
     let filter = baseFilter;
     if (agentIds && agentIds.length > 0) {
-      const agentFilter = agentIds.map((id) => `agent.id: "${id}"`).join(' OR ');
+      const agentFilter = agentIds.map((id) => `agent.id: "${escapeKuery(id)}"`).join(' OR ');
       filter += ` AND (${agentFilter})`;
     }
     if (kuery) {
@@ -59,14 +61,14 @@ export const createExportRouteHandler =
 
     const kqlFilterClause = getQueryFilter({ filter });
 
-    // Parse ES filters (from the SearchBar filter pills)
-    let esFilterClauses: Array<Record<string, unknown>> = [];
-    if (esFiltersRaw) {
+    // Build ES filter clauses from SearchBar filter pills
+    let esFilterClauses: estypes.QueryDslQueryContainer[] = [];
+    if (esFilters && esFilters.length > 0) {
       try {
-        const parsedFilters = JSON.parse(esFiltersRaw) as Filter[];
-        esFilterClauses = buildQueryFromFilters(parsedFilters, undefined).filter;
+        const built = buildQueryFromFilters(esFilters as unknown as Filter[], undefined);
+        esFilterClauses = built.filter as estypes.QueryDslQueryContainer[];
       } catch {
-        logger.debug('Failed to parse esFilters, ignoring');
+        logger.debug('Failed to build query from esFilters, ignoring');
       }
     }
 

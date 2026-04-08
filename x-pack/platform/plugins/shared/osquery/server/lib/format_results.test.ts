@@ -134,7 +134,7 @@ describe('format_results', () => {
       // First line is empty (separator)
       expect(lines[0]).toBe('');
       expect(lines[1]).toBe('_export.action_id,test-action-123');
-      expect(lines[2]).toBe('_export.query,SELECT pid name FROM processes');
+      expect(lines[2]).toBe('_export.query,"SELECT pid, name FROM processes"');
       expect(lines[3]).toBe('_export.timestamp,2024-01-01T00:00:00.000Z');
       expect(lines[4]).toBe('_export.exported_by,analyst@elastic.co');
       expect(lines[5]).toBe('_export.total_results,42');

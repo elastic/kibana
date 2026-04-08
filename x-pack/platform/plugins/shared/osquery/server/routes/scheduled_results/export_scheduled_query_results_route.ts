@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
+import { escapeKuery } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -49,7 +50,7 @@ export const exportScheduledQueryResultsRoute = (
               schema.object({
                 kuery: schema.maybe(schema.string()),
                 agentIds: schema.maybe(schema.arrayOf(schema.string())),
-                esFilters: schema.maybe(schema.string()),
+                esFilters: schema.maybe(schema.arrayOf(schema.any())),
               })
             ),
           },
@@ -60,7 +61,7 @@ export const exportScheduledQueryResultsRoute = (
           const { scheduleId, executionCount } = request.params;
 
           return await handleExport(context, request, response, {
-            baseFilter: `schedule_id: "${scheduleId}" AND osquery_meta.schedule_execution_count: ${executionCount}`,
+            baseFilter: `schedule_id: "${escapeKuery(scheduleId)}" AND osquery_meta.schedule_execution_count: ${executionCount}`,
             metadata: {
               action_id: scheduleId,
               query: `Scheduled query: ${scheduleId}`,

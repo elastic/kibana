@@ -14,7 +14,7 @@ import type { Observable } from 'rxjs';
 import { flattenOsqueryHit } from '../../common/utils/flatten_osquery_hit';
 import type { ResultFormatter, ExportMetadata } from './format_results';
 
-const EXPORT_PAGE_SIZE = 100;
+const EXPORT_PAGE_SIZE = 1_000;
 const MAX_EXPORT_RESULTS = 500_000;
 
 /**
@@ -171,7 +171,7 @@ export async function exportResultsToStream({
 
           for (const hit of page.hits.hits) {
             if (abortController.signal.aborted) break;
-            const flattened = flattenOsqueryHit(hit);
+            const flattened = deduplicateFields(flattenOsqueryHit(hit));
             stream.write(formatter.row(flattened, isFirstRow));
             isFirstRow = false;
           }

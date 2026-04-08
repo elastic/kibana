@@ -40,7 +40,7 @@ const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
   const hasActiveFilters = !!(kuery || (activeFilters && activeFilters.length > 0));
 
   const esFilters = useMemo(
-    () => (activeFilters && activeFilters.length > 0 ? JSON.stringify(activeFilters) : undefined),
+    () => (activeFilters && activeFilters.length > 0 ? activeFilters : undefined),
     [activeFilters]
   );
 
