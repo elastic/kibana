@@ -79,8 +79,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: GROUP_1, action_type: 'deactivate' },
-          { group_hash: GROUP_4, action_type: 'deactivate' },
+          { group_hash: GROUP_1, action_type: 'deactivate', reason: 'resolved by test setup' },
+          { group_hash: GROUP_4, action_type: 'deactivate', reason: 'resolved by test setup' },
         ]);
 
       expect(response.status).to.be(200);
