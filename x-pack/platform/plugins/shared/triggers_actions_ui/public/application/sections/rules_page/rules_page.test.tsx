@@ -7,7 +7,6 @@
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -68,16 +67,18 @@ describe('rulesPage', () => {
 
   it('shows the correct number of tabs', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
-    const home = mountWithIntl(
-      <Router history={history}>
-        <QueryClientProvider client={queryClient}>
-          <RulesPage />
-        </QueryClientProvider>
-      </Router>
+    render(
+      <IntlProvider locale="en">
+        <Router history={history}>
+          <QueryClientProvider client={queryClient}>
+            <RulesPage />
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
     );
 
     // Just rules and logs
-    expect(home.find('span.euiTab__content').length).toBe(2);
+    expect(screen.getAllByRole('tab').length).toBe(2);
   });
 
   it('hides the logs tab if the read rules privilege is missing', async () => {
@@ -86,16 +87,18 @@ describe('rulesPage', () => {
     });
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    const home = mountWithIntl(
-      <Router history={history}>
-        <QueryClientProvider client={queryClient}>
-          <RulesPage />
-        </QueryClientProvider>
-      </Router>
+    render(
+      <IntlProvider locale="en">
+        <Router history={history}>
+          <QueryClientProvider client={queryClient}>
+            <RulesPage />
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
     );
 
     // Just rules
-    expect(home.find('span.euiTab__content').length).toBe(1);
+    expect(screen.getAllByRole('tab').length).toBe(1);
   });
 
   describe('setHeaderActions', () => {

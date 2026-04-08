@@ -6,20 +6,19 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { EuiSuperSelectProps } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import type { RuleAction } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { DEFAULT_FREQUENCY } from '../constants';
 
 describe('ruleActionsNotifyWhen', () => {
-  async function setup(
+  function setup(
     frequency: RuleAction['frequency'] = DEFAULT_FREQUENCY,
     hasAlertsMappings: boolean = true
   ) {
-    const wrapper = mountWithIntl(
+    return renderWithKibanaRenderContext(
       <RuleActionsNotifyWhen
         frequency={frequency}
         throttle={frequency.throttle ? Number(frequency.throttle[0]) : null}
@@ -29,74 +28,59 @@ describe('ruleActionsNotifyWhen', () => {
         hasAlertsMappings={hasAlertsMappings}
       />
     );
-
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    return wrapper;
   }
 
-  it('renders the passed-in frequency on load', async () => {
-    const wrapperDefault = await setup();
+  it('renders the passed-in frequency on load', () => {
+    // Default frequency: summary=false, notifyWhen=CHANGE
+    setup();
     {
-      const summaryOrPerRuleSelect = wrapperDefault.find(
-        '[data-test-subj="summaryOrPerRuleSelect"]'
-      );
-      expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
+      const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
+      expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
 
-      const notifyWhenSelect = wrapperDefault.find('[data-test-subj="notifyWhenSelect"]');
-      expect(notifyWhenSelect.exists()).toBeTruthy();
-      expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
-        RuleNotifyWhen.CHANGE
-      );
+      // EuiSuperSelect renders a button; selected option's inputDisplay text is shown
+      const notifyWhenSelect = screen.getByTestId('notifyWhenSelect');
+      expect(notifyWhenSelect.textContent).toContain('On status changes');
     }
-    const wrapperForEach = await setup(DEFAULT_FREQUENCY);
+
+    // Re-render with DEFAULT_FREQUENCY again
+    setup(DEFAULT_FREQUENCY);
     {
-      const summaryOrPerRuleSelect = wrapperForEach.find(
-        '[data-test-subj="summaryOrPerRuleSelect"]'
-      );
-      expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
+      const summaryOrPerRuleSelect = screen.getAllByTestId('summaryOrPerRuleSelect')[1];
+      expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
 
-      const notifyWhenSelect = wrapperForEach.find('[data-test-subj="notifyWhenSelect"]');
-      expect(notifyWhenSelect.exists()).toBeTruthy();
-      expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
-        RuleNotifyWhen.CHANGE
-      );
+      const notifyWhenSelect = screen.getAllByTestId('notifyWhenSelect')[1];
+      expect(notifyWhenSelect.textContent).toContain('On status changes');
     }
-    const wrapperSummaryThrottle = await setup({
+
+    // Render with throttle frequency
+    setup({
       ...DEFAULT_FREQUENCY,
       throttle: '5h',
       notifyWhen: RuleNotifyWhen.THROTTLE,
     });
     {
-      const summaryOrPerRuleSelect = wrapperSummaryThrottle.find(
-        '[data-test-subj="summaryOrPerRuleSelect"]'
-      );
-      expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
+      const summaryOrPerRuleSelects = screen.getAllByTestId('summaryOrPerRuleSelect');
+      const summaryOrPerRuleSelect = summaryOrPerRuleSelects[summaryOrPerRuleSelects.length - 1];
+      expect(summaryOrPerRuleSelect.textContent).toContain('For each alert');
 
-      const notifyWhenSelect = wrapperSummaryThrottle.find('[data-test-subj="notifyWhenSelect"]');
-      expect(notifyWhenSelect.exists()).toBeTruthy();
-      expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
-        RuleNotifyWhen.THROTTLE
-      );
+      const notifyWhenSelects = screen.getAllByTestId('notifyWhenSelect');
+      const notifyWhenSelect = notifyWhenSelects[notifyWhenSelects.length - 1];
+      expect(notifyWhenSelect.textContent).toContain('On custom action intervals');
     }
-    expect(
-      wrapperSummaryThrottle.find('[data-test-subj="throttleInput"]').first().props().value
-    ).toEqual(5);
-    expect(
-      wrapperSummaryThrottle.find('[data-test-subj="throttleUnitInput"]').first().props().value
-    ).toEqual('h');
+
+    const throttleInputs = screen.getAllByTestId('throttleInput');
+    const throttleInput = throttleInputs[throttleInputs.length - 1] as HTMLInputElement;
+    expect(Number(throttleInput.value)).toEqual(5);
+
+    const throttleUnitInputs = screen.getAllByTestId('throttleUnitInput');
+    const throttleUnitInput = throttleUnitInputs[
+      throttleUnitInputs.length - 1
+    ] as HTMLSelectElement;
+    expect(throttleUnitInput.value).toEqual('h');
   });
 
-  it('hides the summary selector when hasAlertsMappings is false', async () => {
-    const wrapper = await setup(DEFAULT_FREQUENCY, false);
-    const summaryOrPerRuleSelect = wrapper.find('[data-test-subj="summaryOrPerRuleSelect"]');
-    expect(summaryOrPerRuleSelect.exists()).toBeFalsy();
+  it('hides the summary selector when hasAlertsMappings is false', () => {
+    setup(DEFAULT_FREQUENCY, false);
+    expect(screen.queryByTestId('summaryOrPerRuleSelect')).not.toBeInTheDocument();
   });
 });

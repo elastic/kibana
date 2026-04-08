@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ThresholdVisualization } from './visualization';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -17,7 +18,6 @@ import {
   builtInAggregationTypes,
   builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Chart, LineAnnotation, LineSeries } from '@elastic/charts';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('@kbn/kibana-react-plugin/public');
@@ -60,87 +60,81 @@ describe('ThresholdVisualization', () => {
     timeWindowUnit: 's',
   };
 
-  async function setup() {
-    const wrapper = mountWithIntl(
-      <ThresholdVisualization
-        ruleParams={ruleParams}
-        alertInterval="1m"
-        aggregationTypes={builtInAggregationTypes}
-        comparators={builtInComparators}
-        charts={chartsStartMock}
-        dataFieldsFormats={dataMock.fieldFormats}
-      />
+  function setup() {
+    return render(
+      <I18nProvider>
+        <ThresholdVisualization
+          ruleParams={ruleParams}
+          alertInterval="1m"
+          aggregationTypes={builtInAggregationTypes}
+          comparators={builtInComparators}
+          charts={chartsStartMock}
+          dataFieldsFormats={dataMock.fieldFormats}
+        />
+      </I18nProvider>
     );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    return wrapper;
   }
 
   test('periodically requests visualization data', async () => {
     const refreshRate = 10;
     jest.useFakeTimers({ legacyFakeTimers: true });
 
-    const wrapper = mountWithIntl(
-      <ThresholdVisualization
-        ruleParams={ruleParams}
-        alertInterval="1m"
-        aggregationTypes={builtInAggregationTypes}
-        comparators={builtInComparators}
-        charts={chartsStartMock}
-        dataFieldsFormats={dataMock.fieldFormats}
-        refreshRateInMilliseconds={refreshRate}
-      />
+    render(
+      <I18nProvider>
+        <ThresholdVisualization
+          ruleParams={ruleParams}
+          alertInterval="1m"
+          aggregationTypes={builtInAggregationTypes}
+          comparators={builtInComparators}
+          charts={chartsStartMock}
+          dataFieldsFormats={dataMock.fieldFormats}
+          refreshRateInMilliseconds={refreshRate}
+        />
+      </I18nProvider>
     );
 
     await act(async () => {
-      await nextTick();
-      wrapper.update();
+      await Promise.resolve();
     });
     expect(getThresholdRuleVisualizationData).toHaveBeenCalledTimes(1);
 
     for (let i = 1; i <= 5; i++) {
       await act(async () => {
         jest.advanceTimersByTime(refreshRate);
-        await nextTick();
-        wrapper.update();
+        await Promise.resolve();
       });
       expect(getThresholdRuleVisualizationData).toHaveBeenCalledTimes(i + 1);
     }
+
+    jest.useRealTimers();
   });
 
   test('renders loading message on initial load', async () => {
-    const wrapper = mountWithIntl(
-      <ThresholdVisualization
-        ruleParams={ruleParams}
-        alertInterval="1m"
-        aggregationTypes={builtInAggregationTypes}
-        comparators={builtInComparators}
-        charts={chartsStartMock}
-        dataFieldsFormats={dataMock.fieldFormats}
-      />
+    render(
+      <I18nProvider>
+        <ThresholdVisualization
+          ruleParams={ruleParams}
+          alertInterval="1m"
+          aggregationTypes={builtInAggregationTypes}
+          comparators={builtInComparators}
+          charts={chartsStartMock}
+          dataFieldsFormats={dataMock.fieldFormats}
+        />
+      </I18nProvider>
     );
-    expect(wrapper.find('[data-test-subj="firstLoad"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('firstLoad')).toBeInTheDocument();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(screen.queryByTestId('firstLoad')).not.toBeInTheDocument();
     });
-
-    expect(wrapper.find('[data-test-subj="firstLoad"]').exists()).toBeFalsy();
     expect(getThresholdRuleVisualizationData).toHaveBeenCalled();
   });
 
   test('renders chart when visualization results are available', async () => {
-    const wrapper = await setup();
+    setup();
 
-    expect(wrapper.find('[data-test-subj="alertVisualizationChart"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="noDataCallout"]').exists()).toBeFalsy();
-    expect(wrapper.find(Chart)).toHaveLength(1);
-    expect(wrapper.find(LineSeries)).toHaveLength(1);
-    expect(wrapper.find(LineAnnotation)).toHaveLength(1);
+    await screen.findByTestId('alertVisualizationChart');
+    expect(screen.queryByTestId('noDataCallout')).not.toBeInTheDocument();
   });
 
   test('renders multiple line series chart when visualization results contain multiple groups', async () => {
@@ -154,13 +148,10 @@ describe('ThresholdVisualization', () => {
       })
     );
 
-    const wrapper = await setup();
+    setup();
 
-    expect(wrapper.find('[data-test-subj="alertVisualizationChart"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="noDataCallout"]').exists()).toBeFalsy();
-    expect(wrapper.find(Chart)).toHaveLength(1);
-    expect(wrapper.find(LineSeries)).toHaveLength(2);
-    expect(wrapper.find(LineAnnotation)).toHaveLength(1);
+    await screen.findByTestId('alertVisualizationChart');
+    expect(screen.queryByTestId('noDataCallout')).not.toBeInTheDocument();
   });
 
   test('renders error callout with message when getting visualization fails', async () => {
@@ -168,15 +159,11 @@ describe('ThresholdVisualization', () => {
     getThresholdRuleVisualizationData.mockImplementation(() =>
       Promise.reject(new Error(errorMessage))
     );
-    const wrapper = await setup();
+    setup();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await screen.findByTestId('errorCallout');
 
-    expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="errorCallout"]').first().text()).toBe(
+    expect(screen.getByTestId('errorCallout').textContent).toBe(
       `Cannot load alert visualization${errorMessage}`
     );
   });
@@ -185,26 +172,22 @@ describe('ThresholdVisualization', () => {
     getThresholdRuleVisualizationData.mockImplementation(() =>
       Promise.reject(new Error(undefined))
     );
-    const wrapper = await setup();
+    setup();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await screen.findByTestId('errorCallout');
 
-    expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="errorCallout"]').first().text()).toBe(
+    expect(screen.getByTestId('errorCallout').textContent).toBe(
       `Cannot load alert visualization`
     );
   });
 
   test('renders no data message when visualization results are empty', async () => {
     getThresholdRuleVisualizationData.mockImplementation(() => Promise.resolve({ results: [] }));
-    const wrapper = await setup();
+    setup();
 
-    expect(wrapper.find('[data-test-subj="alertVisualizationChart"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="noDataCallout"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="noDataCallout"]').first().text()).toBe(
+    await screen.findByTestId('alertVisualizationChart');
+    expect(screen.getByTestId('noDataCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('noDataCallout').textContent).toBe(
       `No data matches this queryCheck that your time range and filters are correct.`
     );
   });

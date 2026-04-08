@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { DataViewSelectPopoverProps } from './data_view_select_popover';
 import { DataViewSelectPopover } from './data_view_select_popover';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { DataViewSelector } from '@kbn/unified-search-plugin/public';
-import { act } from 'react-dom/test-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 const selectedDataView = {
@@ -99,75 +99,50 @@ const mount = () => {
   };
 
   return {
-    wrapper: mountWithIntl(<DataViewSelectPopover {...props} />),
+    result: render(
+      <I18nProvider>
+        <DataViewSelectPopover {...props} />
+      </I18nProvider>
+    ),
     dataViewsMock,
   };
 };
 
 describe('DataViewSelectPopover', () => {
   test('renders properly', async () => {
-    const { wrapper, dataViewsMock } = mount();
+    const { dataViewsMock } = mount();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(dataViewsMock.getIds).toHaveBeenCalled();
     });
 
-    expect(dataViewsMock.getIds).toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="selectDataViewExpression"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('selectDataViewExpression')).toBeInTheDocument();
 
     const getIdsResult = await dataViewsMock.getIds.mock.results[0].value;
     expect(getIdsResult).toBe(dataViewIds);
   });
 
-  test('should open a popover on click', async () => {
-    const { wrapper } = mount();
+  test('should open a popover on click and display loaded data views', async () => {
+    const { dataViewsMock } = mount();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(dataViewsMock.getIds).toHaveBeenCalled();
     });
 
-    await wrapper.find('[data-test-subj="selectDataViewExpression"]').first().simulate('click');
+    await userEvent.click(screen.getByTestId('selectDataViewExpression'));
 
-    expect(wrapper.find(DataViewSelector).prop('dataViewsList')).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "mock-data-logs-id",
-          "isAdhoc": false,
-          "name": undefined,
-          "title": "kibana_sample_data_logs",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-ecommerce-id",
-          "isAdhoc": false,
-          "name": undefined,
-          "title": "kibana_sample_data_ecommerce",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-test-id",
-          "isAdhoc": false,
-          "name": undefined,
-          "title": "test",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-ad-hoc-id",
-          "isAdhoc": true,
-          "name": undefined,
-          "title": "ad-hoc data view",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-ad-hoc-esql-id",
-          "isAdhoc": true,
-          "name": undefined,
-          "title": "ad-hoc data view esql",
-          "type": "esql",
-        },
-      ]
-    `);
+    // The popover should display the filtered data views
+    // (excludes flights which isn't in dataViewIds, excludes esql type)
+    await waitFor(() => {
+      expect(screen.getAllByRole('option')).toHaveLength(4);
+    });
+
+    expect(screen.getAllByTitle('kibana_sample_data_logs').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('kibana_sample_data_ecommerce').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('test').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('ad-hoc data view').length).toBeGreaterThan(0);
+
+    // flights should NOT appear (its id is not in dataViewIds)
+    expect(screen.queryByTitle('kibana_sample_data_flights')).not.toBeInTheDocument();
   });
 });

@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ExchangeFormFields from './exchange_form';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -33,14 +32,14 @@ describe('ExchangeFormFields renders', () => {
   });
 
   test('should display exchange form fields', () => {
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <ExchangeFormFields readOnly={false} />
       </ConnectorFormTestProvider>
     );
-    expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailTenantId"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('emailClientSecret')).toBeInTheDocument();
+    expect(screen.getByTestId('emailClientId')).toBeInTheDocument();
+    expect(screen.getByTestId('emailTenantId')).toBeInTheDocument();
   });
 
   test('exchange field defaults to empty when not defined', () => {
@@ -52,19 +51,19 @@ describe('ExchangeFormFields renders', () => {
       },
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={connector}>
         <ExchangeFormFields readOnly={false} />
       </ConnectorFormTestProvider>
     );
-    expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
-    expect(wrapper.find('input[data-test-subj="emailClientSecret"]').prop('value')).toEqual('');
+    expect(screen.getByTestId('emailClientSecret')).toBeInTheDocument();
+    expect((screen.getByTestId('emailClientSecret') as HTMLInputElement).value).toEqual('');
 
-    expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('input[data-test-subj="emailClientId"]').prop('value')).toEqual('');
+    expect(screen.getByTestId('emailClientId')).toBeInTheDocument();
+    expect((screen.getByTestId('emailClientId') as HTMLInputElement).value).toEqual('');
 
-    expect(wrapper.find('[data-test-subj="emailTenantId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('input[data-test-subj="emailTenantId"]').prop('value')).toEqual('');
+    expect(screen.getByTestId('emailTenantId')).toBeInTheDocument();
+    expect((screen.getByTestId('emailTenantId') as HTMLInputElement).value).toEqual('');
   });
 
   describe('Validation', () => {
@@ -81,14 +80,14 @@ describe('ExchangeFormFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <ExchangeFormFields readOnly={false} />
         </ConnectorFormTestProvider>
       );
 
       await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       });
 
       await waitFor(() => {

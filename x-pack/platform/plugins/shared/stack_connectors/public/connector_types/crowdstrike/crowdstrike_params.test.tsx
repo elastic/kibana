@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 import { SUB_ACTION } from '@kbn/connector-schemas/crowdstrike/constants';
 import type { CrowdstrikeActionParams } from '@kbn/connector-schemas/crowdstrike';
 import CrowdstrikeParamsFields from './crowdstrike_params';
@@ -20,7 +20,7 @@ const actionParams = {
 
 describe('CrowdstrikeParamsFields renders', () => {
   test('all params fields are rendered', () => {
-    const wrapper = mountWithIntl(
+    render(
       <CrowdstrikeParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
@@ -29,10 +29,8 @@ describe('CrowdstrikeParamsFields renders', () => {
         messageVariables={[]}
       />
     );
-    expect(wrapper.find('[data-test-subj="actionTypeSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="actionTypeSelect"]').first().prop('readOnly')).toEqual(
-      true
-    );
-    expect(wrapper.find('[data-test-subj="agentIdSelect"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('actionTypeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('actionTypeSelect')).toBeDisabled();
+    expect(screen.getByTestId('agentIdSelect')).toBeInTheDocument();
   });
 });

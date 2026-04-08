@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCommonExpressions } from './rule_common_expressions';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import {
@@ -50,7 +51,7 @@ describe('RuleCommonExpressions', () => {
     } as unknown as CommonEsQueryRuleParams;
   }
 
-  async function setup({
+  function setup({
     ruleParams,
     hasValidationErrors = false,
     excludeHitsFromPreviousRun = true,
@@ -59,93 +60,91 @@ describe('RuleCommonExpressions', () => {
     hasValidationErrors?: boolean;
     excludeHitsFromPreviousRun?: boolean;
   }) {
-    const wrapper = mountWithIntl(
-      <RuleCommonExpressions
-        esFields={[]}
-        thresholdComparator={ruleParams.thresholdComparator}
-        threshold={ruleParams.threshold}
-        timeWindowSize={ruleParams.timeWindowSize}
-        timeWindowUnit={ruleParams.timeWindowUnit}
-        size={ruleParams.size}
-        aggType={ruleParams.aggType}
-        aggField={ruleParams.aggField}
-        groupBy={ruleParams.groupBy}
-        termSize={ruleParams.termSize}
-        termField={ruleParams.termField}
-        onChangeSelectedAggField={() => {}}
-        onChangeSelectedAggType={() => {}}
-        onChangeSelectedGroupBy={() => {}}
-        onChangeSelectedTermField={() => {}}
-        onChangeSelectedTermSize={() => {}}
-        onChangeThreshold={() => {}}
-        onChangeThresholdComparator={() => {}}
-        onChangeWindowSize={() => {}}
-        onChangeWindowUnit={() => {}}
-        onChangeSizeValue={() => {}}
-        errors={errors}
-        hasValidationErrors={hasValidationErrors}
-        onTestFetch={async () => {
-          return {
-            testResults: { results: [], truncated: false },
-            isGrouped: false,
-            timeWindow: '1m',
-          };
-        }}
-        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
-        onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRunFn}
-      />
+    return render(
+      <I18nProvider>
+        <RuleCommonExpressions
+          esFields={[]}
+          thresholdComparator={ruleParams.thresholdComparator}
+          threshold={ruleParams.threshold}
+          timeWindowSize={ruleParams.timeWindowSize}
+          timeWindowUnit={ruleParams.timeWindowUnit}
+          size={ruleParams.size}
+          aggType={ruleParams.aggType}
+          aggField={ruleParams.aggField}
+          groupBy={ruleParams.groupBy}
+          termSize={ruleParams.termSize}
+          termField={ruleParams.termField}
+          onChangeSelectedAggField={() => {}}
+          onChangeSelectedAggType={() => {}}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermField={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeThreshold={() => {}}
+          onChangeThresholdComparator={() => {}}
+          onChangeWindowSize={() => {}}
+          onChangeWindowUnit={() => {}}
+          onChangeSizeValue={() => {}}
+          errors={errors}
+          hasValidationErrors={hasValidationErrors}
+          onTestFetch={async () => {
+            return {
+              testResults: { results: [], truncated: false },
+              isGrouped: false,
+              timeWindow: '1m',
+            };
+          }}
+          excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+          onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRunFn}
+        />
+      </I18nProvider>
     );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    return wrapper;
   }
 
   test(`should render RuleCommonExpressions with expected components when aggType doesn't require field`, async () => {
-    const wrapper = await setup({ ruleParams: getCommonParams() });
-    expect(wrapper.find('[data-test-subj="thresholdHelpPopover"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="whenExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="aggTypeExpression"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="groupByExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="sizeValueExpression"]').exists()).toBeTruthy();
-    const excludeHitsButton = wrapper.find(
-      '[data-test-subj="excludeHitsFromPreviousRunExpression"]'
-    );
-    expect(excludeHitsButton.exists()).toBeTruthy();
-    expect(excludeHitsButton.first().prop('checked')).toBeTruthy();
-    expect(excludeHitsButton.first().prop('disabled')).toBe(false);
+    setup({ ruleParams: getCommonParams() });
+    expect(screen.getByTestId('thresholdHelpPopover')).toBeInTheDocument();
 
-    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
-    expect(testQueryButton.exists()).toBeTruthy();
-    expect(testQueryButton.prop('disabled')).toBe(false);
+    // Expression items are lazy-loaded; wait for them to render
+    await screen.findByTestId('whenExpression');
+    expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
+    expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('sizeValueExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeInTheDocument();
+    expect(
+      (screen.getByTestId('excludeHitsFromPreviousRunExpression') as HTMLInputElement).checked
+    ).toBe(true);
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).not.toBeDisabled();
+
+    expect(screen.getByTestId('testQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('testQuery')).not.toBeDisabled();
   });
 
   test(`should render RuleCommonExpressions with expected components when aggType does require field`, async () => {
-    const wrapper = await setup({ ruleParams: getCommonParams({ aggType: 'avg' }) });
-    expect(wrapper.find('[data-test-subj="thresholdHelpPopover"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="whenExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="aggTypeExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="groupByExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="sizeValueExpression"]').exists()).toBeTruthy();
-    const excludeHitsButton = wrapper.find(
-      '[data-test-subj="excludeHitsFromPreviousRunExpression"]'
-    );
-    expect(excludeHitsButton.exists()).toBeTruthy();
-    expect(excludeHitsButton.first().prop('checked')).toBeTruthy();
+    setup({ ruleParams: getCommonParams({ aggType: 'avg' }) });
+    expect(screen.getByTestId('thresholdHelpPopover')).toBeInTheDocument();
 
-    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
-    expect(testQueryButton.exists()).toBeTruthy();
-    expect(testQueryButton.prop('disabled')).toBe(false);
+    // Expression items are lazy-loaded; wait for them to render
+    await waitFor(() => {
+      expect(screen.getByTestId('whenExpression')).toBeInTheDocument();
+      expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('sizeValueExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeInTheDocument();
+    expect(
+      (screen.getByTestId('excludeHitsFromPreviousRunExpression') as HTMLInputElement).checked
+    ).toBe(true);
+
+    expect(screen.getByTestId('testQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('testQuery')).not.toBeDisabled();
   });
 
-  test(`should set default rule common params when params are undefined`, async () => {
-    const wrapper = await setup({
+  test(`should set default rule common params when params are undefined`, () => {
+    setup({
       ruleParams: getCommonParams({
         aggType: undefined,
         thresholdComparator: undefined,
@@ -156,19 +155,19 @@ describe('RuleCommonExpressions', () => {
       }),
     });
 
-    expect(wrapper.find('button[data-test-subj="whenExpression"]').text()).toEqual(
+    expect(screen.getByTestId('whenExpression').textContent).toEqual(
       `when ${builtInAggregationTypes[DEFAULT_VALUES.AGGREGATION_TYPE].text}`
     );
-    expect(wrapper.find('button[data-test-subj="groupByExpression"]').text()).toEqual(
+    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
       `over ${DEFAULT_VALUES.GROUP_BY} documents `
     );
-    expect(wrapper.find('[data-test-subj="aggTypeExpression"]').exists()).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="thresholdPopover"]').text()).toEqual(
+    expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
+    expect(screen.getByTestId('thresholdPopover').textContent).toEqual(
       `${builtInComparators[DEFAULT_VALUES.THRESHOLD_COMPARATOR].text} ${
         DEFAULT_VALUES.THRESHOLD[0]
       }`
     );
-    expect(wrapper.find('button[data-test-subj="forLastExpression"]').text()).toEqual(
+    expect(screen.getByTestId('forLastExpression').textContent).toEqual(
       `for the last ${DEFAULT_VALUES.TIME_WINDOW_SIZE} ${getTimeUnitLabel(
         DEFAULT_VALUES.TIME_WINDOW_UNIT as TIME_UNITS,
         DEFAULT_VALUES.TIME_WINDOW_SIZE.toString()
@@ -176,7 +175,7 @@ describe('RuleCommonExpressions', () => {
     );
   });
 
-  test(`should use rule params when common params are defined`, async () => {
+  test(`should use rule params when common params are defined`, () => {
     const aggType = 'avg';
     const thresholdComparator = 'between';
     const timeWindowSize = 987;
@@ -186,7 +185,7 @@ describe('RuleCommonExpressions', () => {
     const termSize = '27';
     const termField = 'host.name';
 
-    const wrapper = await setup({
+    setup({
       ruleParams: getCommonParams({
         aggType,
         thresholdComparator,
@@ -199,17 +198,17 @@ describe('RuleCommonExpressions', () => {
       }),
     });
 
-    expect(wrapper.find('button[data-test-subj="whenExpression"]').text()).toEqual(
+    expect(screen.getByTestId('whenExpression').textContent).toEqual(
       `when ${builtInAggregationTypes[aggType].text}`
     );
-    expect(wrapper.find('button[data-test-subj="groupByExpression"]').text()).toEqual(
+    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
       `grouped over ${groupBy} ${termSize} '${termField}'`
     );
 
-    expect(wrapper.find('button[data-test-subj="thresholdPopover"]').text()).toEqual(
+    expect(screen.getByTestId('thresholdPopover').textContent).toEqual(
       `${builtInComparators[thresholdComparator].text} ${threshold[0]} AND ${threshold[1]}`
     );
-    expect(wrapper.find('button[data-test-subj="forLastExpression"]').text()).toEqual(
+    expect(screen.getByTestId('forLastExpression').textContent).toEqual(
       `for the last ${timeWindowSize} ${getTimeUnitLabel(
         timeWindowUnit as TIME_UNITS,
         timeWindowSize.toString()
@@ -217,7 +216,7 @@ describe('RuleCommonExpressions', () => {
     );
   });
 
-  test(`should use multiple group by terms`, async () => {
+  test(`should use multiple group by terms`, () => {
     const aggType = 'avg';
     const thresholdComparator = 'between';
     const timeWindowSize = 987;
@@ -227,7 +226,7 @@ describe('RuleCommonExpressions', () => {
     const termSize = '27';
     const termField = ['term', 'term2'];
 
-    const wrapper = await setup({
+    setup({
       ruleParams: getCommonParams({
         aggType,
         thresholdComparator,
@@ -239,12 +238,12 @@ describe('RuleCommonExpressions', () => {
         threshold,
       }),
     });
-    expect(wrapper.find('button[data-test-subj="groupByExpression"]').text()).toEqual(
+    expect(screen.getByTestId('groupByExpression').textContent).toEqual(
       `grouped over ${groupBy} ${termSize} 'term,term2'`
     );
   });
 
-  test(`should disable excludeHitsFromPreviousRuns when groupBy is not all`, async () => {
+  test(`should disable excludeHitsFromPreviousRuns when groupBy is not all`, () => {
     const aggType = 'avg';
     const thresholdComparator = 'between';
     const timeWindowSize = 987;
@@ -254,7 +253,7 @@ describe('RuleCommonExpressions', () => {
     const termSize = '27';
     const termField = 'host.name';
 
-    const wrapper = await setup({
+    setup({
       ruleParams: getCommonParams({
         aggType,
         thresholdComparator,
@@ -267,35 +266,26 @@ describe('RuleCommonExpressions', () => {
       }),
     });
 
-    expect(
-      wrapper
-        .find('[data-test-subj="excludeHitsFromPreviousRunExpression"]')
-        .first()
-        .prop('disabled')
-    ).toBe(true);
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeDisabled();
   });
 
   test(`should render excludeHitsFromPreviousRuns as unchecked when excludeHitsFromPreviousRun is false`, async () => {
-    const wrapper = await setup({
+    setup({
       ruleParams: getCommonParams(),
       excludeHitsFromPreviousRun: false,
     });
-    const excludeHitsButton = wrapper.find(
-      '[data-test-subj="excludeHitsFromPreviousRunExpression"]'
-    );
-    expect(excludeHitsButton.exists()).toBeTruthy();
-    expect(excludeHitsButton.first().prop('checked')).toBeFalsy();
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeInTheDocument();
+    expect(
+      (screen.getByTestId('excludeHitsFromPreviousRunExpression') as HTMLInputElement).checked
+    ).toBe(false);
 
-    wrapper
-      .find('input[data-test-subj="excludeHitsFromPreviousRunExpression"]')
-      .simulate('change', { target: { checked: true } });
+    await userEvent.click(screen.getByTestId('excludeHitsFromPreviousRunExpression'));
     expect(onChangeExcludeHitsFromPreviousRunFn).toHaveBeenCalledWith(true);
   });
 
-  test(`should render test query button disabled if hasValidationErrors is true`, async () => {
-    const wrapper = await setup({ ruleParams: getCommonParams(), hasValidationErrors: true });
-    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
-    expect(testQueryButton.exists()).toBeTruthy();
-    expect(testQueryButton.prop('disabled')).toBe(true);
+  test(`should render test query button disabled if hasValidationErrors is true`, () => {
+    setup({ ruleParams: getCommonParams(), hasValidationErrors: true });
+    expect(screen.getByTestId('testQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('testQuery')).toBeDisabled();
   });
 });
