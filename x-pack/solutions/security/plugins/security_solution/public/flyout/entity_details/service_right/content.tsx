@@ -14,7 +14,6 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
@@ -54,7 +53,7 @@ export const ServicePanelContent = ({
   const observedFields = useObservedServiceItems(observedService);
 
   return (
-    <FlyoutBody>
+    <>
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -75,10 +74,12 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion
-        entity={{ name: serviceName, type: EntityType.service }}
-        onChange={onAssetCriticalityChange}
-      />
+      {!entityRecord && (
+        <AssetCriticalityAccordion
+          entity={{ name: serviceName, type: EntityType.service }}
+          onChange={onAssetCriticalityChange}
+        />
+      )}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
@@ -97,6 +98,6 @@ export const ServicePanelContent = ({
         observedFields={observedFields}
       />
       <EuiHorizontalRule margin="m" />
-    </FlyoutBody>
+    </>
   );
 };

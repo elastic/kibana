@@ -8,7 +8,6 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import type { Entity } from '../../../../common/api/entity_analytics';
-import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -17,7 +16,6 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import type { IdentityFields } from '../../document_details/shared/utils';
@@ -43,8 +41,6 @@ interface UserPanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
   entityRecord?: Entity;
-  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
-  onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
   entityStoreEntityId?: string;
@@ -61,8 +57,6 @@ export const UserPanelContent = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
-  criticalityFromEntityStore,
-  onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
 }: UserPanelContentProps) => {
@@ -76,7 +70,7 @@ export const UserPanelContent = ({
     identityFields[EntityIdentifierFields.userName] || Object.values(identityFields)[0] || '';
 
   return (
-    <FlyoutBody>
+    <>
       {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
       )}
@@ -102,13 +96,10 @@ export const UserPanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {!skipRiskAndCriticality && (
+      {!skipRiskAndCriticality && !entityRecord && (
         <AssetCriticalityAccordion
           entity={{ name: userName, type: EntityType.user }}
           onChange={onAssetCriticalityChange}
-          entityRecord={entityRecord}
-          criticalityFromEntityStore={criticalityFromEntityStore}
-          onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
         />
       )}
       <EntityInsight
@@ -137,6 +128,6 @@ export const UserPanelContent = ({
         queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
-    </FlyoutBody>
+    </>
   );
 };

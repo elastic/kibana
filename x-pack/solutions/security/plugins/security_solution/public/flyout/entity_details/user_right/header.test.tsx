@@ -112,16 +112,6 @@ describe('UserPanelHeader', () => {
     expect(queryByTestId('user-panel-header-managed-badge')).not.toBeInTheDocument();
   });
 
-  it('renders entity id when provided', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserPanelHeader {...mockProps} entityId="user-entity-store-id" />
-      </TestProviders>
-    );
-
-    expect(getByTestId('user-panel-header-entity-id')).toHaveTextContent('user-entity-store-id');
-  });
-
   it('renders skeleton when loading', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>

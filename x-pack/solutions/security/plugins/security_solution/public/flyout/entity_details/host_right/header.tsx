@@ -23,12 +23,16 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { RISK_SEVERITY_COLOUR } from '../../../entity_analytics/common/utils';
 
 interface HostPanelHeaderProps {
   hostName: string;
   lastSeen: FirstLastSeenData;
   entityId?: string;
   identityFields?: IdentityFields;
+  isEntityInStore?: boolean;
+  riskLevel?: RiskSeverity;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
@@ -40,6 +44,8 @@ export const HostPanelHeader = ({
   lastSeen,
   entityId,
   identityFields,
+  isEntityInStore,
+  riskLevel,
 }: HostPanelHeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
@@ -90,13 +96,6 @@ export const HostPanelHeader = ({
                 <FlyoutTitle title={hostName} iconType={'storage'} isLink />
               </SecuritySolutionLinkAnchor>
             </EuiFlexItem>
-            {entityId ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="host-panel-header-entity-id">
-                  {entityId}
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
         {isLoading ? (
@@ -111,15 +110,41 @@ export const HostPanelHeader = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                {lastSeenDateFormatted && (
+                <EuiBadge data-test-subj="host-panel-header-entity-type-badge" color="hollow">
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.host.entityTypeBadge"
+                    defaultMessage="Host"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {(lastSeenDateFormatted || isEntityInStore) && (
                   <EuiBadge data-test-subj="host-panel-header-observed-badge" color="hollow">
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"
-                      defaultMessage="Observed"
-                    />
+                    {isEntityInStore ? (
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.host.entityStoreBadge"
+                        defaultMessage="Entity Store"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"
+                        defaultMessage="Observed"
+                      />
+                    )}
                   </EuiBadge>
                 )}
               </EuiFlexItem>
+              {isEntityInStore && riskLevel && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={RISK_SEVERITY_COLOUR[riskLevel]}>
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.host.riskBadge"
+                      defaultMessage="Risk: {level}"
+                      values={{ level: riskLevel }}
+                    />
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
