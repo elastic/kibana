@@ -373,7 +373,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 115
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -391,7 +391,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 115
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
