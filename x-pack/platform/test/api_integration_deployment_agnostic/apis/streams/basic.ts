@@ -156,7 +156,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after enabling', () => {
         before(async () => {
-          await enableStreams(apiClient);
+          await retry.tryForTime(
+            120_000,
+            async () => {
+              await enableStreams(apiClient);
+            },
+            undefined,
+            500
+          );
+          // Wired roots may use deferred data stream materialization; ES|QL views use
+          // `FROM logs.otel` / `FROM logs.ecs` and need the backing data stream to exist.
+          // Views may also appear shortly after enablement, so poll until assertions pass.
+          const ts = new Date().toISOString();
+          await indexDocument(esClient, LOGS_OTEL_STREAM_NAME, {
+            '@timestamp': ts,
+            message: 'FTR: materialize logs.otel for wired ES|QL view assertion',
+          });
+          await indexDocument(esClient, LOGS_ECS_STREAM_NAME, {
+            '@timestamp': ts,
+            message: 'FTR: materialize logs.ecs for wired ES|QL view assertion',
+          });
         });
 
         it('reports enabled status', async () => {
@@ -176,18 +195,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (!isServerless) {
           it('creates ES|QL views for wired root streams', async () => {
             if (!viewsApiAvailable) return;
-            // Wired roots may use deferred data stream materialization; ES|QL views use
-            // `FROM logs.otel` / `FROM logs.ecs` and need the backing data stream to exist.
-            // Views may also appear shortly after enablement, so poll until assertions pass.
-            const ts = new Date().toISOString();
-            await indexDocument(esClient, LOGS_OTEL_STREAM_NAME, {
-              '@timestamp': ts,
-              message: 'FTR: materialize logs.otel for wired ES|QL view assertion',
-            });
-            await indexDocument(esClient, LOGS_ECS_STREAM_NAME, {
-              '@timestamp': ts,
-              message: 'FTR: materialize logs.ecs for wired ES|QL view assertion',
-            });
             await retry.tryForTime(
               120_000,
               async () => {
