@@ -917,6 +917,7 @@ x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/ai-infra/security-labs-artifact-builder @elastic/security-generative-ai
 x-pack/packages/kbn-synthetics-private-location @elastic/actionable-obs-team
+x-pack/packages/test-management-ui @elastic/actionable-obs-team
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/private/feedback-registry @elastic/appex-sharedux
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
