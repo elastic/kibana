@@ -21,6 +21,42 @@ jest.mock('@kbn/esql-language', () => ({
 describe('ESQLLang', () => {
   describe('getSuggestionProvider', () => {
     describe('resolveCompletionItem', () => {
+      const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
+
+      beforeEach(() => {
+        mockSuggest.mockResolvedValue([]);
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      const createModel = (query: string) =>
+        ({
+          getValue: jest.fn().mockReturnValue(query),
+        } as unknown as monaco.editor.ITextModel);
+
+      const makeFieldSuggestion = (label: string) => ({
+        label,
+        text: label,
+        kind: 'Variable' as const,
+        detail: 'field',
+      });
+
+      const getItemFromProvider = async (
+        suggestionProvider: ReturnType<typeof ESQLLang.getSuggestionProvider>,
+        model: monaco.editor.ITextModel,
+        label: string
+      ) => {
+        const result = await suggestionProvider.provideCompletionItems(
+          model,
+          new monaco.Position(1, 1),
+          {} as any,
+          {} as any
+        );
+        return result?.suggestions.find((s) => s.label === label)!;
+      };
+
       it('should resolve completion item with field metadata', async () => {
         const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
           find: jest.fn().mockResolvedValue({
@@ -38,13 +74,9 @@ describe('ESQLLang', () => {
           getFieldsMetadata: mockGetFieldsMetadata,
         });
 
-        const ecsItem: monaco.languages.CompletionItem = {
-          label: 'test.field',
-          kind: 4,
-          insertText: 'test.field',
-          range: new monaco.Range(0, 0, 0, 0),
-        };
-
+        mockSuggest.mockResolvedValue([makeFieldSuggestion('test.field')]);
+        const model = createModel('FROM index | EVAL test.field');
+        const ecsItem = await getItemFromProvider(suggestionProvider, model, 'test.field');
         const resolvedItem = await suggestionProvider.resolveCompletionItem!(ecsItem, {} as any);
 
         expect(resolvedItem).toEqual({
@@ -54,13 +86,12 @@ describe('ESQLLang', () => {
           },
         });
 
-        const ecsItemWithKeywordSuffix: monaco.languages.CompletionItem = {
-          label: 'test.field.keyword',
-          kind: 4,
-          insertText: 'test.field.keyword',
-          range: new monaco.Range(0, 0, 0, 0),
-        };
-
+        mockSuggest.mockResolvedValue([makeFieldSuggestion('test.field.keyword')]);
+        const ecsItemWithKeywordSuffix = await getItemFromProvider(
+          suggestionProvider,
+          model,
+          'test.field.keyword'
+        );
         const resolvedItemWithKeywordSuffix = await suggestionProvider.resolveCompletionItem!(
           ecsItemWithKeywordSuffix,
           {} as any
@@ -86,12 +117,9 @@ describe('ESQLLang', () => {
           getFieldsMetadata: mockGetFieldsMetadata,
         });
 
-        const item: monaco.languages.CompletionItem = {
-          label: 'test.field',
-          kind: 4,
-          insertText: 'test.field',
-          range: new monaco.Range(0, 0, 0, 0),
-        };
+        mockSuggest.mockResolvedValue([makeFieldSuggestion('test.field')]);
+        const model = createModel('FROM index | WHERE test.field');
+        const item = await getItemFromProvider(suggestionProvider, model, 'test.field');
         const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
 
         expect(resolvedItem).toEqual(item);
@@ -100,6 +128,7 @@ describe('ESQLLang', () => {
       it('should never call metadata find API if not needed', async () => {
         const mockFind = jest.fn().mockResolvedValue({
           fields: {},
+          streamFields: {},
         });
         const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
           find: mockFind,
@@ -109,13 +138,14 @@ describe('ESQLLang', () => {
           getFieldsMetadata: mockGetFieldsMetadata,
         });
 
-        const notFieldItem: monaco.languages.CompletionItem = {
-          label: 'CASE',
-          kind: 1,
-          insertText: 'CASE',
-          range: new monaco.Range(0, 0, 0, 0),
-        };
+        // Use a wildcard query so streamNames is empty — stream fetch won't fire
+        const model = createModel('FROM logs-* | EVAL');
 
+        // Keyword kind (not Variable) — ECS check still fires, then early return
+        mockSuggest.mockResolvedValue([
+          { label: 'CASE', text: 'CASE', kind: 'Keyword', detail: 'CASE' },
+        ]);
+        const notFieldItem = await getItemFromProvider(suggestionProvider, model, 'CASE');
         const notFieldResolvedItem = await suggestionProvider.resolveCompletionItem!(
           notFieldItem,
           {} as any
@@ -124,12 +154,14 @@ describe('ESQLLang', () => {
         expect(notFieldResolvedItem).toEqual(notFieldItem);
 
         mockFind.mockClear();
-        const notECSFieldItem: monaco.languages.CompletionItem = {
-          label: 'not.ecs.field',
-          kind: 4,
-          insertText: 'not.ecs.field',
-          range: new monaco.Range(0, 0, 0, 0),
-        };
+
+        // Variable kind but field not in ECS
+        mockSuggest.mockResolvedValue([makeFieldSuggestion('not.ecs.field')]);
+        const notECSFieldItem = await getItemFromProvider(
+          suggestionProvider,
+          model,
+          'not.ecs.field'
+        );
         const notECSFieldResolvedItem = await suggestionProvider.resolveCompletionItem!(
           notECSFieldItem,
           {} as any
@@ -139,28 +171,6 @@ describe('ESQLLang', () => {
       });
 
       describe('stream descriptions', () => {
-        const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
-
-        beforeEach(() => {
-          mockSuggest.mockResolvedValue([]);
-        });
-
-        afterEach(() => {
-          jest.clearAllMocks();
-        });
-
-        const makeFieldItem = (label: string): monaco.languages.CompletionItem => ({
-          label,
-          kind: 4, // Variable
-          insertText: label,
-          range: new monaco.Range(0, 0, 0, 0),
-        });
-
-        const createModel = (query: string) =>
-          ({
-            getValue: jest.fn().mockReturnValue(query),
-          } as unknown as monaco.editor.ITextModel);
-
         it('should show stream description for a field when the query sources a stream', async () => {
           const mockFind = jest.fn().mockImplementation(({ streamNames, source }) => {
             if (streamNames?.includes('logs-kibana.otel-default') && source?.includes('streams')) {
@@ -180,21 +190,13 @@ describe('ESQLLang', () => {
             getFieldsMetadata: Promise.resolve({ find: mockFind }),
           });
 
+          mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
           const model = createModel('FROM logs-kibana.otel-default | WHERE body.text');
-          await suggestionProvider.provideCompletionItems(
-            model,
-            new monaco.Position(1, 1),
-            {} as any,
-            {} as any
-          );
-
-          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
-            makeFieldItem('body.text'),
-            {} as any
-          );
+          const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
 
           expect(resolvedItem).toEqual({
-            ...makeFieldItem('body.text'),
+            ...item,
             documentation: {
               value: 'Per **logs-kibana.otel-default** stream: Kibana body.text description',
             },
@@ -225,21 +227,13 @@ describe('ESQLLang', () => {
             getFieldsMetadata: Promise.resolve({ find: mockFind }),
           });
 
+          mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
           const model = createModel('FROM logs-kibana.otel-default | WHERE body.text');
-          await suggestionProvider.provideCompletionItems(
-            model,
-            new monaco.Position(1, 1),
-            {} as any,
-            {} as any
-          );
-
-          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
-            makeFieldItem('body.text'),
-            {} as any
-          );
+          const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
 
           expect(resolvedItem).toEqual({
-            ...makeFieldItem('body.text'),
+            ...item,
             documentation: {
               value:
                 'ECS description\n\n---\n\nPer **logs-kibana.otel-default** stream: Stream description',
@@ -270,21 +264,13 @@ describe('ESQLLang', () => {
             getFieldsMetadata: Promise.resolve({ find: mockFind }),
           });
 
+          mockSuggest.mockResolvedValue([makeFieldSuggestion('my.field')]);
           const model = createModel('FROM stream-a, stream-b | WHERE my.field');
-          await suggestionProvider.provideCompletionItems(
-            model,
-            new monaco.Position(1, 1),
-            {} as any,
-            {} as any
-          );
-
-          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
-            makeFieldItem('my.field'),
-            {} as any
-          );
+          const item = await getItemFromProvider(suggestionProvider, model, 'my.field');
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
 
           expect(resolvedItem).toEqual({
-            ...makeFieldItem('my.field'),
+            ...item,
             documentation: {
               value:
                 'Per **stream-a** stream: Description from stream-a\n\nPer **stream-b** stream: Description from stream-b',
@@ -299,13 +285,13 @@ describe('ESQLLang', () => {
             getFieldsMetadata: Promise.resolve({ find: mockFind }),
           });
 
-          // provideCompletionItems not called — lastStreamNames stays empty
-          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
-            makeFieldItem('body.text'),
-            {} as any
-          );
+          mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
+          // No FROM clause — streamNames will be empty, so no stream fetch
+          const model = createModel('ROW 1 | EVAL body_text = "test"');
+          const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
 
-          expect(resolvedItem).toEqual(makeFieldItem('body.text'));
+          expect(resolvedItem).toEqual(item);
           // Only the upfront ECS list check, no stream fetch
           expect(mockFind).toBeCalledTimes(1);
         });
@@ -333,21 +319,13 @@ describe('ESQLLang', () => {
             getFieldsMetadata: Promise.resolve({ find: mockFind }),
           });
 
+          mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text.keyword')]);
           const model = createModel('FROM logs-kibana.otel-default | WHERE body.text.keyword');
-          await suggestionProvider.provideCompletionItems(
-            model,
-            new monaco.Position(1, 1),
-            {} as any,
-            {} as any
-          );
-
-          const resolvedItem = await suggestionProvider.resolveCompletionItem!(
-            makeFieldItem('body.text.keyword'),
-            {} as any
-          );
+          const item = await getItemFromProvider(suggestionProvider, model, 'body.text.keyword');
+          const resolvedItem = await suggestionProvider.resolveCompletionItem!(item, {} as any);
 
           expect(resolvedItem).toEqual({
-            ...makeFieldItem('body.text.keyword'),
+            ...item,
             documentation: {
               value: 'Per **logs-kibana.otel-default** stream: Kibana body.text description',
             },
@@ -361,15 +339,10 @@ describe('ESQLLang', () => {
             getFieldsMetadata: Promise.resolve({ find: mockFind }),
           });
 
+          mockSuggest.mockResolvedValue([makeFieldSuggestion('body.text')]);
           const model = createModel('FROM logs-* | WHERE body.text');
-          await suggestionProvider.provideCompletionItems(
-            model,
-            new monaco.Position(1, 1),
-            {} as any,
-            {} as any
-          );
-
-          await suggestionProvider.resolveCompletionItem!(makeFieldItem('body.text'), {} as any);
+          const item = await getItemFromProvider(suggestionProvider, model, 'body.text');
+          await suggestionProvider.resolveCompletionItem!(item, {} as any);
 
           // Wildcard source excluded — only the ECS list check, no stream fetch
           expect(mockFind).toBeCalledTimes(1);
@@ -386,7 +359,6 @@ describe('ESQLLang', () => {
         };
 
         // Mock the suggest function to return suggestions with custom commands
-        const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
         mockSuggest.mockResolvedValue([
           {
             label: 'EVAL',

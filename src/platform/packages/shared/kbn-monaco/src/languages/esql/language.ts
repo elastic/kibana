@@ -179,8 +179,13 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     return provider;
   },
   getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
-    let lastStreamNames: string[] = [];
-    let lastModel: monaco.editor.ITextModel | undefined;
+    const itemContext = new WeakMap<
+      monaco.languages.CompletionItem,
+      {
+        streamNames: string[];
+        getFieldsMetadata: ESQLDependencies['getFieldsMetadata'];
+      }
+    >();
 
     return {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
@@ -188,7 +193,6 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
-        lastModel = model;
         const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
         const resolvedDeps = resolvedCallbacks
           ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
@@ -216,17 +220,21 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           model.getLineCount()
         );
 
-        lastStreamNames = getStreamNamesFromQuery(fullText);
+        const streamNames = getStreamNamesFromQuery(fullText);
+        for (const suggestion of result.suggestions) {
+          itemContext.set(suggestion, {
+            streamNames,
+            getFieldsMetadata: resolvedDeps?.getFieldsMetadata,
+          });
+        }
 
         return result;
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
-        const resolvedDeps = lastModel
-          ? { ...deps, ...(deps?.getModelDependencies?.(lastModel) ?? {}) }
-          : deps;
-        if (!resolvedDeps?.getFieldsMetadata) return item;
+        const context = itemContext.get(item);
+        if (!context?.getFieldsMetadata) return item;
 
-        const fieldsMetadataClient = await resolvedDeps.getFieldsMetadata;
+        const fieldsMetadataClient = await context.getFieldsMetadata;
         if (!fieldsMetadataClient) return item;
 
         // Fetch the full ECS field list upfront as a single lightweight check.
@@ -237,7 +245,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         if (typeof item.label !== 'string') return item;
 
         const strippedFieldName = removeKeywordSuffix(item.label);
-        const streamNames = lastStreamNames;
+        const { streamNames } = context;
         const documentationParts: string[] = [];
 
         // 1. ECS description
