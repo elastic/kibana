@@ -329,11 +329,16 @@ async function extraDockerParamsForUiamOauthContainer(): Promise<string[]> {
   const metadataDir = await mkdtemp(join(tmpdir(), 'uiam-mock-idp-metadata-'));
   const metadataPath = join(metadataDir, 'metadata.xml');
   await writeFile(metadataPath, await createMockIdpMetadataForUiam(kibanaUrl), 'utf8');
+
+  const oauthPort = +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1;
+
   return [
     '--volume',
     `${metadataPath}:/tmp/mock-idp-metadata.xml:z`,
     '--env',
     'uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml',
+    '--env',
+    `uiam.saml.acs.url=https://localhost:${oauthPort}/saml/consume`,
   ];
 }
 
