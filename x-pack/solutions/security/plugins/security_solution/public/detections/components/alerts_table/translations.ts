@@ -401,3 +401,10 @@ export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
     defaultMessage: 'Workflows',
   }
 );
+
+export const ALERTS_COUNT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.alertsCount',
+  {
+    defaultMessage: 'Alerts',
+  }
+);

@@ -11,7 +11,9 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiPanel, EuiFlexGroup } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
+  useOptionalExecutionTracker,
   useRunWorkflow,
+  useWorkflows,
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
   WorkflowSelector,
@@ -47,7 +49,9 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
   const { addSuccess: workflowTriggerSuccess, addError: workflowTriggerFailed } = useAppToasts();
 
+  const executionTracker = useOptionalExecutionTracker();
   const runWorkflow = useRunWorkflow();
+  const { data: workflowsData } = useWorkflows({ size: 1000, page: 1 });
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -70,6 +74,20 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
       },
       {
         onSuccess: (data: RunWorkflowResponseDto) => {
+          const workflowName = workflowsData?.results.find((w) => w.id === selectedId)?.name;
+          executionTracker?.trackExecutions([
+            {
+              id: data.workflowExecutionId,
+              workflowId: selectedId,
+              workflowName,
+              inputSummary: [
+                {
+                  label: i18n.ALERTS_COUNT_LABEL,
+                  value: String(alertIds.length),
+                },
+              ],
+            },
+          ]);
           workflowTriggerSuccess({
             title: i18n.WORKFLOW_START_SUCCESS_TOAST,
             ...(rendering && {
@@ -113,6 +131,8 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
     onClose,
     onExecute,
     alertIds,
+    executionTracker,
+    workflowsData?.results,
   ]);
 
   const workflowSelector = useMemo(

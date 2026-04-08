@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { Observable } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
@@ -43,6 +44,12 @@ import type {
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+
+export interface PollExecutionStatusEntry {
+  status: WorkflowExecutionDto['status'];
+  error: WorkflowExecutionDto['error'];
+  output: Record<string, unknown> | undefined;
+}
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -393,6 +400,73 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+  }
+
+  /**
+   * Long polls for the given workflow executions waiting for one to finish.
+   * If any executions were already finished before the call was made, the function will return immediately with the current state.
+   * It is the responsibility of the caller to remove ids of finished executions.
+   * @param ids
+   * @param spaceId
+   * @param aborted$
+   */
+  public async pollExecutionStatus(
+    ids: string[],
+    spaceId: string,
+    aborted$?: Observable<void>
+  ): Promise<Record<string, PollExecutionStatusEntry>> {
+    const POLL_INTERVAL_MS = 1_000;
+    const MAX_POLL_DURATION_MS = 30_000;
+    const deadline = Date.now() + MAX_POLL_DURATION_MS;
+
+    let aborted = false;
+    const subscription = aborted$?.subscribe(() => {
+      aborted = true;
+    });
+
+    const buildResultMap = (
+      results: Array<WorkflowExecutionDto | null>
+    ): Record<string, PollExecutionStatusEntry> => {
+      const map: Record<string, PollExecutionStatusEntry> = {};
+      for (let i = 0; i < ids.length; i++) {
+        const execution = results[i];
+        if (execution !== null) {
+          map[ids[i]] = {
+            status: execution.status,
+            error: execution.error,
+            output: execution.context?.output as Record<string, unknown> | undefined,
+          };
+        }
+      }
+      return map;
+    };
+
+    try {
+      while (Date.now() < deadline && !aborted) {
+        const results = await Promise.all(ids.map((id) => this.getWorkflowExecution(id, spaceId)));
+        const someHasFinished = results.some((ex) => ex !== null && ex.finishedAt);
+
+        if (someHasFinished) {
+          return buildResultMap(results);
+        }
+
+        await new Promise<void>((resolve) => {
+          const timer = setTimeout(() => {
+            sub?.unsubscribe();
+            resolve();
+          }, POLL_INTERVAL_MS);
+          const sub = aborted$?.subscribe(() => {
+            clearTimeout(timer);
+            resolve();
+          });
+        });
+      }
+
+      const results = await Promise.all(ids.map((id) => this.getWorkflowExecution(id, spaceId)));
+      return buildResultMap(results);
+    } finally {
+      subscription?.unsubscribe();
+    }
   }
 
   public async getWorkflowExecutionLogs(params: {
