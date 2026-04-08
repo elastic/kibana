@@ -18,12 +18,13 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { GaugeState, LensApiState } from '../../schema';
 import {
+  AUTO_COLOR,
   NO_COLOR,
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
+  isAutoColor,
   isNoColor,
 } from '../coloring';
-import { GAUGE_DEFAULT_COLOR } from './gauge/defaults';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
@@ -77,6 +78,8 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
       : 'horizontalBullet',
     ...(isNoColor(layer.metric.color)
       ? { colorMode: 'none' }
+      : isAutoColor(layer.metric.color)
+      ? { colorMode: 'palette' }
       : {
           colorMode: 'palette',
           palette: fromColorByValueAPIToLensState(layer.metric.color),
@@ -195,8 +198,7 @@ function reverseBuildVisualizationState(
     if (visualization.colorMode === 'none') {
       props.metric.color = NO_COLOR;
     } else {
-      props.metric.color =
-        fromColorByValueLensStateToAPI(visualization.palette) ?? GAUGE_DEFAULT_COLOR;
+      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
     }
   }
 
