@@ -38,7 +38,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils';
+import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
 import { formatRuntime } from '../../lib/format_runtime';
 import { useQueryActivityAppContext } from '../app_context';
 import { notAvailableLabel } from './query_activity_table';
