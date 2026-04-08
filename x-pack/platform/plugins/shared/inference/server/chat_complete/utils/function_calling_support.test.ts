@@ -19,6 +19,7 @@ const createConnector = (
     config: {},
     capabilities: {},
     isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...parts,
   };
 };

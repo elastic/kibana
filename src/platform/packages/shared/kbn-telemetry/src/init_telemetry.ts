@@ -40,6 +40,14 @@ export const initTelemetry = (
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
   const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
+  if (apmConfig.active !== false && telemetryConfig.tracing.enabled) {
+    throw new Error(
+      'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.\n' +
+        'To use OpenTelemetry tracing, disable APM by setting `elastic.apm.active: false` in your Kibana configuration.\n' +
+        'To use Elastic APM, disable OpenTelemetry tracing by setting `telemetry.tracing.enabled: false`.'
+    );
+  }
+
   // resource.attributes.*
   const resource = resources
     .detectResources({

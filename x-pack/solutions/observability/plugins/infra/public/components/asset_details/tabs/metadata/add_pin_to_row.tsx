@@ -73,7 +73,7 @@ export const AddMetadataPinToRow = ({
         <EuiButtonIcon
           size="s"
           color="primary"
-          iconType={isPinned ? 'pinFilled' : 'pin'}
+          iconType={isPinned ? 'pinFill' : 'pin'}
           data-test-subj={
             isPinned ? 'infraAssetDetailsMetadataRemovePin' : 'infraAssetDetailsMetadataAddPin'
           }

@@ -7,25 +7,34 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import type { Entity } from '../../../../common/api/entity_analytics';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
-import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
-import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
+import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
-export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
+export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
+  entityRecord?: EntityStoreRecord | null;
+  refetchEntityStore?: () => void;
+};
 
 interface UserPanelContentProps {
-  userName: string;
+  identityFields: IdentityFields;
   observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
@@ -34,10 +43,16 @@ interface UserPanelContentProps {
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
+  entityRecord?: Entity;
+  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
+  onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
+  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
+  skipRiskAndCriticality?: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const UserPanelContent = ({
-  userName,
+  identityFields,
   observedUser,
   riskScoreState,
   recalculatingScore,
@@ -46,45 +61,82 @@ export const UserPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
+  entityRecord,
+  criticalityFromEntityStore,
+  onSaveAssetCriticalityViaEntityStore,
+  skipRiskAndCriticality = false,
+  entityStoreEntityId,
 }: UserPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
+  // Extract userName from identityFields for components that need a string
+  // Priority: identityFields['user.name'] > identityFields[first key]
+  const userName =
+    identityFields[EntityIdentifierFields.userName] || Object.values(identityFields)[0] || '';
 
   return (
     <FlyoutBody>
-      {isEntityDetailsHighlightsAIEnabled && (
+      {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
       )}
-      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
+      {!skipRiskAndCriticality &&
+        riskScoreState.hasEngineBeenInstalled &&
+        riskScoreState.data?.length !== 0 && (
+          <>
+            <FlyoutRiskSummary
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              entityType={EntityType.user}
+              entityId={entityRecord?.entity.id}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
+      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
-          <FlyoutRiskSummary
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            entityType={EntityType.user}
-          />
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion
-        entity={{ name: userName, type: EntityType.user }}
-        onChange={onAssetCriticalityChange}
-      />
+      {!skipRiskAndCriticality && (
+        <AssetCriticalityAccordion
+          entity={{ name: userName, type: EntityType.user }}
+          onChange={onAssetCriticalityChange}
+          entityRecord={entityRecord}
+          criticalityFromEntityStore={criticalityFromEntityStore}
+          onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
+        />
+      )}
       <EntityInsight
-        value={userName}
-        field={EntityIdentifierFields.userName}
+        identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
+        entityType={EntityType.user}
       />
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedDataSection
+        identityFields={identityFields}
         userName={userName}
         observedUser={observedUser}
         contextID={contextID}
         scopeId={scopeId}
-        queryId={OBSERVED_USER_QUERY_ID}
+        queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
     </FlyoutBody>

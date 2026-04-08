@@ -666,6 +666,22 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
     category: SuggestionCategory.CUSTOM_ACTION,
   });
 
+export const getTimeseriesDateHistogramCompletionItem: (
+  histogramBarTarget?: number
+) => ISuggestionItem = (histogramBarTarget: number = 50) =>
+  withAutoSuggest({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.addTimeseriesDateHistogram', {
+      defaultMessage: 'Add date histogram',
+    }),
+    text: `TBUCKET(${histogramBarTarget})`,
+    kind: 'Issue',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.addTimeseriesDateHistogramDetail', {
+      defaultMessage: 'Add date histogram using tbucket()',
+    }),
+    sortText: '1',
+    category: SuggestionCategory.CUSTOM_ACTION,
+  });
+
 export function createResourceBrowserSuggestion(options: {
   label: string;
   description: string;

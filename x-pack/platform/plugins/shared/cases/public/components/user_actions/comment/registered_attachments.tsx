@@ -128,7 +128,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
-      attachmentId: attachment.id,
+      savedObjectId: attachment.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 

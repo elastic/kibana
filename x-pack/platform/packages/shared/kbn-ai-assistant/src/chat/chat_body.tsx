@@ -34,7 +34,6 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
-  getElasticManagedLlmConnector,
   InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -58,6 +57,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
+import { DefaultExperienceCallout } from './default_experience_callout';
 import { useConversationContextMenu, useScopes } from '../hooks';
 
 const fullHeightClassName = css`
@@ -413,13 +413,12 @@ export function ChatBody({
     conversation.refresh();
   };
 
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
   const { conversationCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
-    !!elasticManagedLlm &&
-    connectors.selectedConnector === elasticManagedLlm.id &&
-    !conversationCalloutDismissed;
+    (connectors.connectors || []).some(
+      (connector) => connector.connectorId === connectors.selectedConnector && connector.isEis
+    ) && !conversationCalloutDismissed;
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
@@ -734,6 +733,9 @@ export function ChatBody({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DefaultExperienceCallout isConversationApp={!showLinkToConversationsApp} />
       </EuiFlexItem>
       {footer}
     </EuiFlexGroup>

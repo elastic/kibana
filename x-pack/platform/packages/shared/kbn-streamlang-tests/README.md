@@ -11,7 +11,7 @@ One such circular dependency chain is illustrated below:
 ```mermaid
 graph TD
     A["@kbn/streamlang"] -->|_imports for co-living tests_| B["@kbn/scout"]
-    B -->|_imports_| C["@kbn/synthtrace"]
+    B -.->|_optional: @kbn/scout-synthtrace_| C["@kbn/synthtrace"]
     C -->|_imports_| D["@kbn/streams-schema"]
     D -->|_imports_| A
 
@@ -24,11 +24,10 @@ graph TD
     class A,D circular
 ```
 
-**The circular dependency chain:**
-1. `@kbn/streamlang` needs `@kbn/scout` for testing
-2. `@kbn/scout` imports `@kbn/synthtrace`
-3. `@kbn/synthtrace` imports from `@kbn/streams-schema`
-4. `@kbn/streams-schema` imports from `@kbn/streamlang` ← **CIRCULAR!**
+**Why this package exists (dependency story):**
+1. `@kbn/streamlang` tests want `@kbn/scout` for Playwright helpers
+2. `@kbn/scout` no longer depends on `@kbn/synthtrace` (synthtrace is in `@kbn/scout-synthtrace`)
+3. If `@kbn/scout` still pulled `@kbn/synthtrace` unconditionally, you could get: `@kbn/synthtrace` → `@kbn/streams-schema` → `@kbn/streamlang` ← **cycle**
 
 By isolating the test code into this independent package:
 - Eliminates circular dependencies in the build graph

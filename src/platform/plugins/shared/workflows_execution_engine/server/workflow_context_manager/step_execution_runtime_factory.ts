@@ -43,9 +43,14 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  */
 function removeCurrentNodeFromStackFrames(nodeId: string, stackFrames: StackFrame[]): StackFrame[] {
   const workflowScopeStack = WorkflowScopeStack.fromStackFrames(stackFrames);
+
+  if (workflowScopeStack.isEmpty()) {
+    return stackFrames;
+  }
+
   const onTop = workflowScopeStack.getCurrentScope();
 
-  if (onTop?.nodeId === nodeId) {
+  if (onTop.nodeId === nodeId) {
     return workflowScopeStack.exitScope().stackFrames;
   }
 

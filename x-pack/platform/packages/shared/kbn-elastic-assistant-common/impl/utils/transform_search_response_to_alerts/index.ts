@@ -66,6 +66,7 @@ export const transformSearchResponseToAlerts = ({
       attackDiscoveryAlertDocument: source,
       enableFieldRendering,
       id: hit._id ?? '',
+      index: hit._index,
       withReplacements,
     });
   });

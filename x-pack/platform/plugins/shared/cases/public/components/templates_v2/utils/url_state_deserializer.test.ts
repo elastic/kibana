@@ -82,4 +82,32 @@ describe('templatesUrlStateDeserializer', () => {
     expect(result).toEqual({ page: 2 });
     expect((result as Record<string, unknown>).unknownField).toBeUndefined();
   });
+
+  it('parses isEnabled as boolean (true)', () => {
+    const result = templatesUrlStateDeserializer({ isEnabled: true });
+
+    expect(result.isEnabled).toBe(true);
+  });
+
+  it('parses isEnabled as boolean (false)', () => {
+    const result = templatesUrlStateDeserializer({ isEnabled: false });
+
+    expect(result.isEnabled).toBe(false);
+  });
+
+  it('parses isEnabled from string "true"', () => {
+    const result = templatesUrlStateDeserializer({
+      isEnabled: 'true' as unknown as boolean,
+    });
+
+    expect(result.isEnabled).toBe(true);
+  });
+
+  it('parses isEnabled from string "false"', () => {
+    const result = templatesUrlStateDeserializer({
+      isEnabled: 'false' as unknown as boolean,
+    });
+
+    expect(result.isEnabled).toBe(false);
+  });
 });

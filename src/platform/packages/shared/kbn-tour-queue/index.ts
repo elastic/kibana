@@ -13,7 +13,7 @@ export type { TourQueueResult } from './hooks/use_tour_queue';
 export type { Tour } from './state/tour_queue_state';
 
 const TOUR_REGISTRY = {
-  siemMigrationSetupTour: 1,
+  spacesSolutionViewSwitchTour: 1,
 } as const;
 
 /**
@@ -22,7 +22,7 @@ const TOUR_REGISTRY = {
  * @public
  */
 export const TOURS = {
-  SECURITY_SIEM_MIGRATION: 'siemMigrationSetupTour',
+  SPACES_SOLUTION_VIEW_SWITCH: 'spacesSolutionViewSwitchTour',
 } as const;
 
 /**

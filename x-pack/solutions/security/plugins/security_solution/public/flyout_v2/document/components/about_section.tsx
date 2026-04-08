@@ -9,15 +9,20 @@ import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { isEcsAllowedValue } from '../utils/event_utils';
 import { AlertDescription } from './alert_description';
 import { AlertReason } from './alert_reason';
 import { AlertStatus } from './alert_status';
 import { MitreAttack } from './mitre_attack';
+import { EventCategoryDescription } from './event_category_description';
+import { EventKindDescription } from './event_kind_description';
+import { EventRenderer } from './event_renderer';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 
@@ -44,10 +49,9 @@ export interface AboutSectionProps {
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection = memo(({ hit }: AboutSectionProps) => {
-  const isAlert = useMemo(
-    () => (getFieldValue(hit, 'event.kind') as string) === EventKind.signal,
-    [hit]
-  );
+  const eventKind = useMemo(() => getFieldValue(hit, EVENT_KIND) as string, [hit]);
+  const isAlert = eventKind === EventKind.signal;
+  const eventKindInECS = eventKind ? isEcsAllowedValue(EVENT_KIND, eventKind) : false;
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -79,7 +83,23 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
             <AlertStatus hit={hit} />
           </EuiFlexItem>
         </>
-      ) : null}
+      ) : (
+        <>
+          {eventKindInECS &&
+            (eventKind === EventKind.event ? (
+              <EuiFlexItem grow={false}>
+                <EventCategoryDescription hit={hit} />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <EventKindDescription hit={hit} />
+              </EuiFlexItem>
+            ))}
+          <EuiFlexItem grow={false}>
+            <EventRenderer hit={hit} />
+          </EuiFlexItem>
+        </>
+      )}
     </ExpandableSection>
   );
 });

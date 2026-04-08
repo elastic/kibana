@@ -685,6 +685,13 @@ workflowsExecutionEngine:
     enabled: true
     # When false, trigger subscriptions are not resolved and events are not written to the trigger-events data stream
     logEvents: true
+    # Maximum depth for event-triggered chains (each emit that schedules workflows increments depth).
+    # When exceeded, matching workflows are not scheduled (warning logged). Default 10, minimum 1.
+    maxChainDepth: 10
+
+  # Maximum depth of nested workflow execution (workflow calling another via workflow.execute).
+  # When exceeded, nested execution is not started. Default 10, minimum 1 (see server/config.ts).
+  maxWorkflowDepth: 10
 
   # Enable console logging for debugging
   logging:
@@ -693,6 +700,12 @@ workflowsExecutionEngine:
   http:
     allowedHosts: ['*']  # Use specific hosts in production
 ```
+
+### Event-driven and depth settings
+
+- **`eventDriven.maxChainDepth`** — Maximum depth for **event-triggered** chains (each `emitEvent` that schedules workflows advances depth). Default **`10`**; minimum **`1`**. When a run would exceed this value, matching workflows are **not** scheduled and the server logs a warning.
+
+- **`maxWorkflowDepth`** — Maximum depth of **nested** workflow execution when one workflow invokes another via the **`workflow.execute`** step. Default **`10`**; minimum **`1`**. When exceeded, the nested run is not started.
 
 ---
 

@@ -44,7 +44,7 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
     <EuiFlexItem grow={false}>
       <MyEuiButton
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={isNested ? onAddClickWhenNested : onAndClicked}
         data-test-subj="exceptionsAndButton"
         isDisabled={isAndDisabled}
@@ -57,7 +57,7 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
         <MyEuiButton
           fill
           size="s"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={onOrClicked}
           isDisabled={isOrDisabled}
           data-test-subj="exceptionsOrButton"

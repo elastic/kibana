@@ -61,7 +61,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
               <EuiButtonIcon
                 isDisabled={disableActions}
                 aria-label="Exception item actions menu"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={onItemActionsClick}
                 data-test-subj={`${dataTestSubj}-actionButton`}
               />

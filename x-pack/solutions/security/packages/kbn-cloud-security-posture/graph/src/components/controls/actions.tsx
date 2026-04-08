@@ -151,7 +151,7 @@ export const Actions = ({
           >
             <EuiToolTip title={tooltipTitle} content={tooltipContent} position="left">
               <EuiButton
-                iconType="search"
+                iconType="magnify"
                 color={searchToggled ? 'primary' : 'text'}
                 fill={searchToggled}
                 css={[

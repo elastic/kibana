@@ -33,7 +33,13 @@ export {
 export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
-export { isOtelStream } from './src/helpers/is_otel_stream';
+export {
+  isOtelStream,
+  OTEL_CONTENT_FIELD,
+  ECS_CONTENT_FIELD,
+  OTEL_SEVERITY_FIELD,
+  ECS_SEVERITY_FIELD,
+} from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
@@ -204,6 +210,8 @@ export {
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
+  mergeFeature,
+  toBaseFeature,
   featureSchema,
   baseFeatureSchema,
   identifiedFeatureSchema,
@@ -228,7 +236,7 @@ export { type IngestStreamProcessing } from './src/models/ingest/processing';
 export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
-export type { IdentifyFeaturesResult } from './src/api/features';
+export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
 
 export {
   type GenerateInsightsResult,
@@ -257,3 +265,10 @@ export type { StreamsOasDefinitions } from './src/oas_definitions';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
+
+export {
+  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+} from './src/inference_feature_ids';

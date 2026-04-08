@@ -1130,10 +1130,122 @@ groups:
             - note
             - requirement_level
             - stability
-  - id: attributes.gen_ai.common.client
+  - id: attributes.gen_ai.common
     type: attribute_group
     brief: |
       Common attributes for all GenAI spans.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: if the operation ended in an error
+        note: |
+          The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,
+          the canonical name of exception that occurred, or another low-cardinality error identifier.
+          Instrumentations SHOULD document the list of errors they report.
+        stability: stable
+      - name: gen_ai.operation.name
+        type:
+          members:
+            - id: chat
+              value: chat
+              brief: Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)
+              stability: development
+            - id: generate_content
+              value: generate_content
+              brief: Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)
+              stability: development
+            - id: text_completion
+              value: text_completion
+              brief: Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)
+              stability: development
+            - id: embeddings
+              value: embeddings
+              brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
+            - id: create_agent
+              value: create_agent
+              brief: Create GenAI agent
+              stability: development
+            - id: invoke_agent
+              value: invoke_agent
+              brief: Invoke GenAI agent
+              stability: development
+            - id: execute_tool
+              value: execute_tool
+              brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
+        brief: The name of the operation being performed.
+        requirement_level: required
+        note: |
+          If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
+        stability: development
+      - name: gen_ai.request.model
+        type: string
+        brief: The name of the GenAI model a request is being made to.
+        examples: gpt-4
+        requirement_level:
+          conditionally_required: If available.
+        note: |
+          The name of the GenAI model a request is being made to. If the model is supplied by a vendor, then the value must be the exact name of the model requested. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/spans.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.operation.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.model:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+  - id: attributes.gen_ai.common.client
+    type: attribute_group
+    brief: |
+      Common attributes for GenAI client spans.
     stability: development
     attributes:
       - name: error.type
@@ -2691,6 +2803,2177 @@ groups:
             - brief
             - requirement_level
             - sampling_relevant
+  - id: attributes.gen_ai.invoke_agent.client
+    type: attribute_group
+    brief: |
+      Describes GenAI invoke_agent client attributes.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: if the operation ended in an error
+        note: |
+          The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,
+          the canonical name of exception that occurred, or another low-cardinality error identifier.
+          Instrumentations SHOULD document the list of errors they report.
+        stability: stable
+      - name: gen_ai.agent.description
+        type: string
+        brief: Free-form description of the GenAI agent provided by the application.
+        examples:
+          - Helps with math problems
+          - Generates fiction stories
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.id
+        type: string
+        brief: The unique identifier of the GenAI agent.
+        examples:
+          - asst_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: if applicable.
+        stability: development
+      - name: gen_ai.agent.name
+        type: string
+        brief: Human-readable name of the GenAI agent provided by the application.
+        examples:
+          - Math Tutor
+          - Fiction Writer
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.version
+        type: string
+        brief: The version of the GenAI agent.
+        examples:
+          - 1.0.0
+          - 2025-05-01T00:00:00.000Z
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.conversation.id
+        type: string
+        brief: The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.
+        examples:
+          - conv_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: when available
+        note: |
+          Instrumentations SHOULD populate conversation id when they have it readily available
+          for a given operation, for example:
+
+          - when client framework being instrumented manages conversation history
+          (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
+          - when instrumenting GenAI client libraries that maintain conversation on the backend side
+          (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
+          [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
+
+          Application developers that manage conversation history MAY add conversation id to GenAI and other
+          spans or logs using custom span or log record processors or hooks provided by instrumentation
+          libraries.
+        stability: development
+      - name: gen_ai.data_source.id
+        type: string
+        brief: The data source identifier.
+        examples:
+          - H7STPQYOND
+        requirement_level:
+          conditionally_required: if applicable.
+        note: |
+          Data sources are used by AI agents and RAG applications to store grounding data. A data source may be an external database, object store, document collection, website, or any other storage system used by the GenAI agent or application. The `gen_ai.data_source.id` SHOULD match the identifier used by the GenAI system rather than a name specific to the external storage, such as a database or object store. Semantic conventions referencing `gen_ai.data_source.id` MAY also leverage additional attributes, such as `db.*`, to further identify and describe the data source.
+        stability: development
+      - name: gen_ai.input.messages
+        type: any
+        brief: |
+          The chat history provided to the model as an input.
+        examples:
+          - |
+            [
+              {
+                "role": "user",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "Weather in Paris?"
+                  }
+                ]
+              },
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "tool_call",
+                    "id": "call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "name": "get_weather",
+                    "arguments": {
+                      "location": "Paris"
+                    }
+                  }
+                ]
+              },
+              {
+                "role": "tool",
+                "parts": [
+                  {
+                    "type": "tool_call_response",
+                    "id": " call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "result": "rainy, 57°F"
+                  }
+                ]
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Messages MUST be provided in the order they were sent to the model.
+          Instrumentations MAY provide a way for users to filter or truncate
+          input messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.operation.name
+        type:
+          members:
+            - id: chat
+              value: chat
+              brief: Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)
+              stability: development
+            - id: generate_content
+              value: generate_content
+              brief: Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)
+              stability: development
+            - id: text_completion
+              value: text_completion
+              brief: Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)
+              stability: development
+            - id: embeddings
+              value: embeddings
+              brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
+            - id: create_agent
+              value: create_agent
+              brief: Create GenAI agent
+              stability: development
+            - id: invoke_agent
+              value: invoke_agent
+              brief: Invoke GenAI agent
+              stability: development
+            - id: execute_tool
+              value: execute_tool
+              brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
+        brief: The name of the operation being performed.
+        requirement_level: required
+        note: |
+          If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
+        stability: development
+      - name: gen_ai.output.messages
+        type: any
+        brief: Messages returned by the model where each message represents a specific model response (choice, candidate).
+        examples:
+          - |
+            [
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "The weather in Paris is currently rainy with a temperature of 57°F."
+                  }
+                ],
+                "finish_reason": "stop"
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+
+          Each message represents a single output choice/candidate generated by
+          the model. Each message corresponds to exactly one generation
+          (choice/candidate) and vice versa - one choice cannot be split across
+          multiple messages or one message cannot contain parts from multiple choices.
+
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          output messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.output.type
+        type:
+          members:
+            - id: text
+              value: text
+              brief: Plain text
+              stability: development
+            - id: json
+              value: json
+              brief: JSON object with known or unknown schema
+              stability: development
+            - id: image
+              value: image
+              brief: Image
+              stability: development
+            - id: speech
+              value: speech
+              brief: Speech
+              stability: development
+        brief: Represents the content type requested by the client.
+        requirement_level:
+          conditionally_required: when applicable and if the request includes an output format.
+        note: |
+          This attribute SHOULD be used when the client requests output of a specific type. The model may return zero or more outputs of this type.
+          This attribute specifies the output modality and not the actual output format. For example, if an image is requested, the actual output could be a URL pointing to an image file.
+          Additional output format details may be recorded in the future in the `gen_ai.output.{type}.*` attributes.
+        stability: development
+      - name: gen_ai.request.choice.count
+        type: int
+        brief: The target number of candidate completions to return.
+        examples:
+          - 3
+        requirement_level:
+          conditionally_required: if available, in the request, and !=1
+        stability: development
+      - name: gen_ai.request.frequency_penalty
+        type: double
+        brief: The frequency penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.max_tokens
+        type: int
+        brief: The maximum number of tokens the model generates for a request.
+        examples:
+          - 100
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.model
+        type: string
+        brief: The name of the GenAI model a request is being made to.
+        examples: gpt-4
+        requirement_level:
+          conditionally_required: If available.
+        note: |
+          The name of the GenAI model a request is being made to. If the model is supplied by a vendor, then the value must be the exact name of the model requested. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.request.presence_penalty
+        type: double
+        brief: The presence penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.seed
+        type: int
+        brief: Requests with same seed value more likely to return same result.
+        examples:
+          - 100
+        requirement_level:
+          conditionally_required: if applicable and if the request includes a seed
+        stability: development
+      - name: gen_ai.request.stop_sequences
+        type: string[]
+        brief: List of sequences that the model will use to stop generating further tokens.
+        examples:
+          - - forest
+            - lived
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.temperature
+        type: double
+        brief: The temperature setting for the GenAI request.
+        examples:
+          - 0
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.top_p
+        type: double
+        brief: The top_p sampling setting for the GenAI request.
+        examples:
+          - 1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.response.finish_reasons
+        type: string[]
+        brief: Array of reasons the model stopped generating tokens, corresponding to each generation received.
+        examples:
+          - - stop
+          - - stop
+            - length
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.system_instructions
+        type: any
+        brief: The system message or instructions provided to the GenAI model separately from the chat history.
+        examples:
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are an Agent that greet users, always use greetings tool to respond"
+              }
+            ]
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are a language translator."
+              },
+              {
+                "type": "text",
+                "content": "Your mission is to translate text in English to French."
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          This attribute SHOULD be used when the corresponding provider or API
+          allows to provide system instructions or messages separately from the
+          chat history.
+
+          Instructions that are part of the chat history SHOULD be recorded in
+          `gen_ai.input.messages` attribute instead.
+
+          Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
+
+          When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          system instructions.
+
+          > [!Warning]
+          > This attribute may contain sensitive information.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.tool.definitions
+        type: any
+        brief: The list of source system tool definitions available to the GenAI agent or model.
+        examples:
+          - |
+            [
+              {
+                "type": "function",
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "The city and state, e.g. San Francisco, CA"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "enum": [
+                        "celsius",
+                        "fahrenheit"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "location",
+                    "unit"
+                  ]
+                }
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          The value of this attribute matches source system tool definition format.
+
+          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
+          to the instrumentation, the instrumentation SHOULD do the best effort to
+          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Since this attribute could be large, it's NOT RECOMMENDED to populate
+          it by default. Instrumentations MAY provide a way to enable
+          populating this attribute.
+        stability: development
+      - name: gen_ai.usage.cache_creation.input_tokens
+        type: int
+        brief: The number of input tokens written to a provider-managed cache.
+        examples:
+          - 25
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.cache_read.input_tokens
+        type: int
+        brief: The number of input tokens served from a provider-managed cache.
+        examples:
+          - 50
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.input_tokens
+        type: int
+        brief: The number of tokens used in the GenAI input (prompt).
+        examples:
+          - 100
+        requirement_level: recommended
+        note: |
+          This value SHOULD include all types of input tokens, including cached tokens.
+          Instrumentations SHOULD make a best effort to populate this value, using a total
+          provided by the provider when available or, depending on the provider API,
+          by summing different token types parsed from the provider output.
+        stability: development
+      - name: gen_ai.usage.output_tokens
+        type: int
+        brief: The number of tokens used in the GenAI response (completion).
+        examples:
+          - 180
+        requirement_level: recommended
+        stability: development
+      - name: server.address
+        type: string
+        brief: GenAI server address.
+        examples:
+          - example.com
+          - 10.1.2.80
+          - /tmp/my.sock
+        requirement_level: recommended
+        note: |
+          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+        stability: stable
+      - name: server.port
+        type: int
+        brief: GenAI server port.
+        examples:
+          - 80
+          - 8080
+          - 443
+        requirement_level:
+          conditionally_required: If `server.address` is set.
+        note: |
+          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+        stability: stable
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/spans.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.agent.description:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.version:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.conversation.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.data_source.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.input.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.operation.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.output.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.output.type:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.choice.count:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.frequency_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.max_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.model:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.request.presence_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.seed:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.stop_sequences:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.temperature:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.top_p:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.response.finish_reasons:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.system_instructions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.tool.definitions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_creation.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_read.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.output_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        server.address:
+          source_group: registry.server
+          inherited_fields:
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - brief
+            - requirement_level
+        server.port:
+          source_group: registry.server
+          inherited_fields:
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - brief
+            - requirement_level
+  - id: attributes.gen_ai.invoke_agent.common
+    type: attribute_group
+    brief: |
+      Common attributes for GenAI invoke_agent spans.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: if the operation ended in an error
+        note: |
+          The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,
+          the canonical name of exception that occurred, or another low-cardinality error identifier.
+          Instrumentations SHOULD document the list of errors they report.
+        stability: stable
+      - name: gen_ai.agent.description
+        type: string
+        brief: Free-form description of the GenAI agent provided by the application.
+        examples:
+          - Helps with math problems
+          - Generates fiction stories
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.id
+        type: string
+        brief: The unique identifier of the GenAI agent.
+        examples:
+          - asst_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: if applicable.
+        stability: development
+      - name: gen_ai.agent.name
+        type: string
+        brief: Human-readable name of the GenAI agent provided by the application.
+        examples:
+          - Math Tutor
+          - Fiction Writer
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.version
+        type: string
+        brief: The version of the GenAI agent.
+        examples:
+          - 1.0.0
+          - 2025-05-01T00:00:00.000Z
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.conversation.id
+        type: string
+        brief: The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.
+        examples:
+          - conv_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: when available
+        note: |
+          Instrumentations SHOULD populate conversation id when they have it readily available
+          for a given operation, for example:
+
+          - when client framework being instrumented manages conversation history
+          (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
+          - when instrumenting GenAI client libraries that maintain conversation on the backend side
+          (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
+          [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
+
+          Application developers that manage conversation history MAY add conversation id to GenAI and other
+          spans or logs using custom span or log record processors or hooks provided by instrumentation
+          libraries.
+        stability: development
+      - name: gen_ai.data_source.id
+        type: string
+        brief: The data source identifier.
+        examples:
+          - H7STPQYOND
+        requirement_level:
+          conditionally_required: if applicable.
+        note: |
+          Data sources are used by AI agents and RAG applications to store grounding data. A data source may be an external database, object store, document collection, website, or any other storage system used by the GenAI agent or application. The `gen_ai.data_source.id` SHOULD match the identifier used by the GenAI system rather than a name specific to the external storage, such as a database or object store. Semantic conventions referencing `gen_ai.data_source.id` MAY also leverage additional attributes, such as `db.*`, to further identify and describe the data source.
+        stability: development
+      - name: gen_ai.input.messages
+        type: any
+        brief: |
+          The chat history provided to the model as an input.
+        examples:
+          - |
+            [
+              {
+                "role": "user",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "Weather in Paris?"
+                  }
+                ]
+              },
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "tool_call",
+                    "id": "call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "name": "get_weather",
+                    "arguments": {
+                      "location": "Paris"
+                    }
+                  }
+                ]
+              },
+              {
+                "role": "tool",
+                "parts": [
+                  {
+                    "type": "tool_call_response",
+                    "id": " call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "result": "rainy, 57°F"
+                  }
+                ]
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Messages MUST be provided in the order they were sent to the model.
+          Instrumentations MAY provide a way for users to filter or truncate
+          input messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.operation.name
+        type:
+          members:
+            - id: chat
+              value: chat
+              brief: Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)
+              stability: development
+            - id: generate_content
+              value: generate_content
+              brief: Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)
+              stability: development
+            - id: text_completion
+              value: text_completion
+              brief: Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)
+              stability: development
+            - id: embeddings
+              value: embeddings
+              brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
+            - id: create_agent
+              value: create_agent
+              brief: Create GenAI agent
+              stability: development
+            - id: invoke_agent
+              value: invoke_agent
+              brief: Invoke GenAI agent
+              stability: development
+            - id: execute_tool
+              value: execute_tool
+              brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
+        brief: The name of the operation being performed.
+        requirement_level: required
+        note: |
+          If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
+        stability: development
+      - name: gen_ai.output.messages
+        type: any
+        brief: Messages returned by the model where each message represents a specific model response (choice, candidate).
+        examples:
+          - |
+            [
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "The weather in Paris is currently rainy with a temperature of 57°F."
+                  }
+                ],
+                "finish_reason": "stop"
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+
+          Each message represents a single output choice/candidate generated by
+          the model. Each message corresponds to exactly one generation
+          (choice/candidate) and vice versa - one choice cannot be split across
+          multiple messages or one message cannot contain parts from multiple choices.
+
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          output messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.output.type
+        type:
+          members:
+            - id: text
+              value: text
+              brief: Plain text
+              stability: development
+            - id: json
+              value: json
+              brief: JSON object with known or unknown schema
+              stability: development
+            - id: image
+              value: image
+              brief: Image
+              stability: development
+            - id: speech
+              value: speech
+              brief: Speech
+              stability: development
+        brief: Represents the content type requested by the client.
+        requirement_level:
+          conditionally_required: when applicable and if the request includes an output format.
+        note: |
+          This attribute SHOULD be used when the client requests output of a specific type. The model may return zero or more outputs of this type.
+          This attribute specifies the output modality and not the actual output format. For example, if an image is requested, the actual output could be a URL pointing to an image file.
+          Additional output format details may be recorded in the future in the `gen_ai.output.{type}.*` attributes.
+        stability: development
+      - name: gen_ai.request.choice.count
+        type: int
+        brief: The target number of candidate completions to return.
+        examples:
+          - 3
+        requirement_level:
+          conditionally_required: if available, in the request, and !=1
+        stability: development
+      - name: gen_ai.request.frequency_penalty
+        type: double
+        brief: The frequency penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.max_tokens
+        type: int
+        brief: The maximum number of tokens the model generates for a request.
+        examples:
+          - 100
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.model
+        type: string
+        brief: The name of the GenAI model a request is being made to.
+        examples: gpt-4
+        requirement_level:
+          conditionally_required: If available.
+        note: |
+          The name of the GenAI model a request is being made to. If the model is supplied by a vendor, then the value must be the exact name of the model requested. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.request.presence_penalty
+        type: double
+        brief: The presence penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.seed
+        type: int
+        brief: Requests with same seed value more likely to return same result.
+        examples:
+          - 100
+        requirement_level:
+          conditionally_required: if applicable and if the request includes a seed
+        stability: development
+      - name: gen_ai.request.stop_sequences
+        type: string[]
+        brief: List of sequences that the model will use to stop generating further tokens.
+        examples:
+          - - forest
+            - lived
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.temperature
+        type: double
+        brief: The temperature setting for the GenAI request.
+        examples:
+          - 0
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.top_p
+        type: double
+        brief: The top_p sampling setting for the GenAI request.
+        examples:
+          - 1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.response.finish_reasons
+        type: string[]
+        brief: Array of reasons the model stopped generating tokens, corresponding to each generation received.
+        examples:
+          - - stop
+          - - stop
+            - length
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.system_instructions
+        type: any
+        brief: The system message or instructions provided to the GenAI model separately from the chat history.
+        examples:
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are an Agent that greet users, always use greetings tool to respond"
+              }
+            ]
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are a language translator."
+              },
+              {
+                "type": "text",
+                "content": "Your mission is to translate text in English to French."
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          This attribute SHOULD be used when the corresponding provider or API
+          allows to provide system instructions or messages separately from the
+          chat history.
+
+          Instructions that are part of the chat history SHOULD be recorded in
+          `gen_ai.input.messages` attribute instead.
+
+          Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
+
+          When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          system instructions.
+
+          > [!Warning]
+          > This attribute may contain sensitive information.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.tool.definitions
+        type: any
+        brief: The list of source system tool definitions available to the GenAI agent or model.
+        examples:
+          - |
+            [
+              {
+                "type": "function",
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "The city and state, e.g. San Francisco, CA"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "enum": [
+                        "celsius",
+                        "fahrenheit"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "location",
+                    "unit"
+                  ]
+                }
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          The value of this attribute matches source system tool definition format.
+
+          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
+          to the instrumentation, the instrumentation SHOULD do the best effort to
+          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Since this attribute could be large, it's NOT RECOMMENDED to populate
+          it by default. Instrumentations MAY provide a way to enable
+          populating this attribute.
+        stability: development
+      - name: gen_ai.usage.cache_creation.input_tokens
+        type: int
+        brief: The number of input tokens written to a provider-managed cache.
+        examples:
+          - 25
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.cache_read.input_tokens
+        type: int
+        brief: The number of input tokens served from a provider-managed cache.
+        examples:
+          - 50
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.input_tokens
+        type: int
+        brief: The number of tokens used in the GenAI input (prompt).
+        examples:
+          - 100
+        requirement_level: recommended
+        note: |
+          This value SHOULD include all types of input tokens, including cached tokens.
+          Instrumentations SHOULD make a best effort to populate this value, using a total
+          provided by the provider when available or, depending on the provider API,
+          by summing different token types parsed from the provider output.
+        stability: development
+      - name: gen_ai.usage.output_tokens
+        type: int
+        brief: The number of tokens used in the GenAI response (completion).
+        examples:
+          - 180
+        requirement_level: recommended
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/spans.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.agent.description:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.version:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.conversation.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.data_source.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.input.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.operation.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.output.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.output.type:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.choice.count:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.frequency_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.max_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.model:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.request.presence_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.seed:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.stop_sequences:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.temperature:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.top_p:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.response.finish_reasons:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.system_instructions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.tool.definitions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_creation.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_read.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.output_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+  - id: attributes.gen_ai.invoke_agent.internal
+    type: attribute_group
+    brief: |
+      Describes GenAI invoke_agent internal attributes.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: if the operation ended in an error
+        note: |
+          The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,
+          the canonical name of exception that occurred, or another low-cardinality error identifier.
+          Instrumentations SHOULD document the list of errors they report.
+        stability: stable
+      - name: gen_ai.agent.description
+        type: string
+        brief: Free-form description of the GenAI agent provided by the application.
+        examples:
+          - Helps with math problems
+          - Generates fiction stories
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.id
+        type: string
+        brief: The unique identifier of the GenAI agent.
+        examples:
+          - asst_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: if applicable.
+        stability: development
+      - name: gen_ai.agent.name
+        type: string
+        brief: Human-readable name of the GenAI agent provided by the application.
+        examples:
+          - Math Tutor
+          - Fiction Writer
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.version
+        type: string
+        brief: The version of the GenAI agent.
+        examples:
+          - 1.0.0
+          - 2025-05-01T00:00:00.000Z
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.conversation.id
+        type: string
+        brief: The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.
+        examples:
+          - conv_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: when available
+        note: |
+          Instrumentations SHOULD populate conversation id when they have it readily available
+          for a given operation, for example:
+
+          - when client framework being instrumented manages conversation history
+          (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
+          - when instrumenting GenAI client libraries that maintain conversation on the backend side
+          (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
+          [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
+
+          Application developers that manage conversation history MAY add conversation id to GenAI and other
+          spans or logs using custom span or log record processors or hooks provided by instrumentation
+          libraries.
+        stability: development
+      - name: gen_ai.data_source.id
+        type: string
+        brief: The data source identifier.
+        examples:
+          - H7STPQYOND
+        requirement_level:
+          conditionally_required: if applicable.
+        note: |
+          Data sources are used by AI agents and RAG applications to store grounding data. A data source may be an external database, object store, document collection, website, or any other storage system used by the GenAI agent or application. The `gen_ai.data_source.id` SHOULD match the identifier used by the GenAI system rather than a name specific to the external storage, such as a database or object store. Semantic conventions referencing `gen_ai.data_source.id` MAY also leverage additional attributes, such as `db.*`, to further identify and describe the data source.
+        stability: development
+      - name: gen_ai.input.messages
+        type: any
+        brief: |
+          The chat history provided to the model as an input.
+        examples:
+          - |
+            [
+              {
+                "role": "user",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "Weather in Paris?"
+                  }
+                ]
+              },
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "tool_call",
+                    "id": "call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "name": "get_weather",
+                    "arguments": {
+                      "location": "Paris"
+                    }
+                  }
+                ]
+              },
+              {
+                "role": "tool",
+                "parts": [
+                  {
+                    "type": "tool_call_response",
+                    "id": " call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "result": "rainy, 57°F"
+                  }
+                ]
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Messages MUST be provided in the order they were sent to the model.
+          Instrumentations MAY provide a way for users to filter or truncate
+          input messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.operation.name
+        type:
+          members:
+            - id: chat
+              value: chat
+              brief: Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)
+              stability: development
+            - id: generate_content
+              value: generate_content
+              brief: Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)
+              stability: development
+            - id: text_completion
+              value: text_completion
+              brief: Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)
+              stability: development
+            - id: embeddings
+              value: embeddings
+              brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
+            - id: create_agent
+              value: create_agent
+              brief: Create GenAI agent
+              stability: development
+            - id: invoke_agent
+              value: invoke_agent
+              brief: Invoke GenAI agent
+              stability: development
+            - id: execute_tool
+              value: execute_tool
+              brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
+        brief: The name of the operation being performed.
+        requirement_level: required
+        note: |
+          If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
+        stability: development
+      - name: gen_ai.output.messages
+        type: any
+        brief: Messages returned by the model where each message represents a specific model response (choice, candidate).
+        examples:
+          - |
+            [
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "The weather in Paris is currently rainy with a temperature of 57°F."
+                  }
+                ],
+                "finish_reason": "stop"
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+
+          Each message represents a single output choice/candidate generated by
+          the model. Each message corresponds to exactly one generation
+          (choice/candidate) and vice versa - one choice cannot be split across
+          multiple messages or one message cannot contain parts from multiple choices.
+
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          output messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.output.type
+        type:
+          members:
+            - id: text
+              value: text
+              brief: Plain text
+              stability: development
+            - id: json
+              value: json
+              brief: JSON object with known or unknown schema
+              stability: development
+            - id: image
+              value: image
+              brief: Image
+              stability: development
+            - id: speech
+              value: speech
+              brief: Speech
+              stability: development
+        brief: Represents the content type requested by the client.
+        requirement_level:
+          conditionally_required: when applicable and if the request includes an output format.
+        note: |
+          This attribute SHOULD be used when the client requests output of a specific type. The model may return zero or more outputs of this type.
+          This attribute specifies the output modality and not the actual output format. For example, if an image is requested, the actual output could be a URL pointing to an image file.
+          Additional output format details may be recorded in the future in the `gen_ai.output.{type}.*` attributes.
+        stability: development
+      - name: gen_ai.request.choice.count
+        type: int
+        brief: The target number of candidate completions to return.
+        examples:
+          - 3
+        requirement_level:
+          conditionally_required: if available, in the request, and !=1
+        stability: development
+      - name: gen_ai.request.frequency_penalty
+        type: double
+        brief: The frequency penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.max_tokens
+        type: int
+        brief: The maximum number of tokens the model generates for a request.
+        examples:
+          - 100
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.model
+        type: string
+        brief: The name of the GenAI model a request is being made to.
+        examples: gpt-4
+        requirement_level:
+          conditionally_required: If available.
+        note: |
+          The name of the GenAI model a request is being made to. If the model is supplied by a vendor, then the value must be the exact name of the model requested. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.request.presence_penalty
+        type: double
+        brief: The presence penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.seed
+        type: int
+        brief: Requests with same seed value more likely to return same result.
+        examples:
+          - 100
+        requirement_level:
+          conditionally_required: if applicable and if the request includes a seed
+        stability: development
+      - name: gen_ai.request.stop_sequences
+        type: string[]
+        brief: List of sequences that the model will use to stop generating further tokens.
+        examples:
+          - - forest
+            - lived
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.temperature
+        type: double
+        brief: The temperature setting for the GenAI request.
+        examples:
+          - 0
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.top_p
+        type: double
+        brief: The top_p sampling setting for the GenAI request.
+        examples:
+          - 1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.response.finish_reasons
+        type: string[]
+        brief: Array of reasons the model stopped generating tokens, corresponding to each generation received.
+        examples:
+          - - stop
+          - - stop
+            - length
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.system_instructions
+        type: any
+        brief: The system message or instructions provided to the GenAI model separately from the chat history.
+        examples:
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are an Agent that greet users, always use greetings tool to respond"
+              }
+            ]
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are a language translator."
+              },
+              {
+                "type": "text",
+                "content": "Your mission is to translate text in English to French."
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          This attribute SHOULD be used when the corresponding provider or API
+          allows to provide system instructions or messages separately from the
+          chat history.
+
+          Instructions that are part of the chat history SHOULD be recorded in
+          `gen_ai.input.messages` attribute instead.
+
+          Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
+
+          When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          system instructions.
+
+          > [!Warning]
+          > This attribute may contain sensitive information.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.tool.definitions
+        type: any
+        brief: The list of source system tool definitions available to the GenAI agent or model.
+        examples:
+          - |
+            [
+              {
+                "type": "function",
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "The city and state, e.g. San Francisco, CA"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "enum": [
+                        "celsius",
+                        "fahrenheit"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "location",
+                    "unit"
+                  ]
+                }
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          The value of this attribute matches source system tool definition format.
+
+          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
+          to the instrumentation, the instrumentation SHOULD do the best effort to
+          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Since this attribute could be large, it's NOT RECOMMENDED to populate
+          it by default. Instrumentations MAY provide a way to enable
+          populating this attribute.
+        stability: development
+      - name: gen_ai.usage.cache_creation.input_tokens
+        type: int
+        brief: The number of input tokens written to a provider-managed cache.
+        examples:
+          - 25
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.cache_read.input_tokens
+        type: int
+        brief: The number of input tokens served from a provider-managed cache.
+        examples:
+          - 50
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.input_tokens
+        type: int
+        brief: The number of tokens used in the GenAI input (prompt).
+        examples:
+          - 100
+        requirement_level: recommended
+        note: |
+          This value SHOULD include all types of input tokens, including cached tokens.
+          Instrumentations SHOULD make a best effort to populate this value, using a total
+          provided by the provider when available or, depending on the provider API,
+          by summing different token types parsed from the provider output.
+        stability: development
+      - name: gen_ai.usage.output_tokens
+        type: int
+        brief: The number of tokens used in the GenAI response (completion).
+        examples:
+          - 180
+        requirement_level: recommended
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/spans.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.agent.description:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.version:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.conversation.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.data_source.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.input.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.operation.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.output.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.output.type:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.choice.count:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.frequency_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.max_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.model:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.request.presence_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.seed:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.stop_sequences:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.temperature:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.top_p:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.response.finish_reasons:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.system_instructions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.tool.definitions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_creation.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_read.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.output_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
   - id: attributes.http.client
     type: attribute_group
     brief: HTTP Client attributes
@@ -6421,7 +8704,7 @@ groups:
       - name: container.runtime.description
         type: string
         brief: |
-          A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.
+          A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.
         examples:
           - 'docker://19.3.1 - CRI: 1.22.0'
         requirement_level: recommended
@@ -6489,7 +8772,24 @@ groups:
     stability: development
     attributes:
       - name: deployment.environment.name
-        type: string
+        type:
+          members:
+            - id: production
+              value: production
+              brief: Production environment
+              stability: development
+            - id: staging
+              value: staging
+              brief: Staging environment
+              stability: development
+            - id: test
+              value: test
+              brief: Testing environment
+              stability: development
+            - id: development
+              value: development
+              brief: Development environment
+              stability: development
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -20898,7 +23198,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -34056,7 +36356,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -34200,7 +36500,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -34400,7 +36700,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -58007,6 +60307,160 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.limit
+    type: metric
+    brief: Total number of hugepages available.
+    stability: development
+    metric_name: system.memory.linux.hugepages.limit
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.page_size
+    type: metric
+    brief: System hugepage size in bytes.
+    stability: development
+    metric_name: system.memory.linux.hugepages.page_size
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.reserved
+    type: metric
+    brief: Number of reserved hugepages.
+    note: |
+      Hugepages for which a commitment to allocate has been made, but no allocation has yet been made.
+      This is reported as a separate metric rather than a `usage` state because reserved pages are already counted in `free` pages.
+      They represent a subset of free pages that cannot be used for non-reserved allocations.
+    stability: development
+    metric_name: system.memory.linux.hugepages.reserved
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.surplus
+    type: metric
+    brief: Number of surplus hugepages.
+    note: |
+      Overcommitted hugepages beyond the persistent pool.
+      This is reported as a separate metric rather than a `usage` state because surplus pages can be in either `used` or `free` state.
+      Including them in `usage` would break the convention that `usage` states sum to the `limit`.
+    stability: development
+    metric_name: system.memory.linux.hugepages.surplus
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.usage
+    type: metric
+    brief: Number of hugepages in use by state.
+    stability: development
+    attributes:
+      - name: system.memory.linux.hugepages.state
+        type:
+          members:
+            - id: free
+              value: free
+              stability: development
+            - id: used
+              value: used
+              stability: development
+        brief: The Linux HugePages memory state
+        examples:
+          - free
+          - used
+        requirement_level: recommended
+        stability: development
+    metric_name: system.memory.linux.hugepages.usage
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+      attributes:
+        system.memory.linux.hugepages.state:
+          source_group: registry.system.memory
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.utilization
+    type: metric
+    brief: Percentage of hugepages in use by state.
+    stability: development
+    attributes:
+      - name: system.memory.linux.hugepages.state
+        type:
+          members:
+            - id: free
+              value: free
+              stability: development
+            - id: used
+              value: used
+              stability: development
+        brief: The Linux HugePages memory state
+        examples:
+          - free
+          - used
+        requirement_level: recommended
+        stability: development
+    metric_name: system.memory.linux.hugepages.utilization
+    instrument: gauge
+    unit: '1'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+      attributes:
+        system.memory.linux.hugepages.state:
+          source_group: registry.system.memory
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: double
   - id: metric.system.memory.linux.shared
     type: metric
     brief: Shared memory used (mostly by tmpfs).
@@ -63677,7 +66131,7 @@ groups:
       - name: aws.secretsmanager.secret.arn
         type: string
         brief: |
-          The ARN of the Secret stored in the Secrets Mangger
+          The ARN of the Secret stored in the Secrets Manager
         examples:
           - arn:aws:secretsmanager:us-east-1:123456789012:secret:SecretName-6RandomCharacters
         requirement_level: recommended
@@ -65157,7 +67611,7 @@ groups:
       - name: container.runtime.description
         type: string
         brief: |
-          A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.
+          A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.
         examples:
           - 'docker://19.3.1 - CRI: 1.22.0'
         requirement_level: recommended
@@ -66493,7 +68947,24 @@ groups:
       This document defines attributes for software deployments.
     attributes:
       - name: deployment.environment.name
-        type: string
+        type:
+          members:
+            - id: production
+              value: production
+              brief: Production environment
+              stability: development
+            - id: staging
+              value: staging
+              brief: Staging environment
+              stability: development
+            - id: test
+              value: test
+              brief: Testing environment
+              stability: development
+            - id: development
+              value: development
+              brief: Development environment
+              stability: development
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -69178,7 +71649,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -75416,6 +77887,21 @@ groups:
     type: attribute_group
     brief: Describes System Memory attributes
     attributes:
+      - name: system.memory.linux.hugepages.state
+        type:
+          members:
+            - id: free
+              value: free
+              stability: development
+            - id: used
+              value: used
+              stability: development
+        brief: The Linux HugePages memory state
+        examples:
+          - free
+          - used
+        requirement_level: recommended
+        stability: development
       - name: system.memory.linux.slab.state
         type:
           members:
@@ -90669,7 +93155,7 @@ groups:
         brief: Name of the tool utilized by the agent.
         examples:
           - Flights
-        requirement_level: recommended
+        requirement_level: required
         stability: development
       - name: gen_ai.tool.type
         type: string
@@ -91598,7 +94084,7 @@ groups:
   - id: span.gen_ai.invoke_agent.client
     type: span
     brief: |
-      Describes GenAI agent invocation.
+      Describes GenAI agent invocation over a remote service.
     note: |
       The `gen_ai.operation.name` SHOULD be `invoke_agent`.
 
@@ -91606,16 +94092,7 @@ groups:
       When `gen_ai.agent.name` is not available, it SHOULD be `invoke_agent`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format.
 
-      **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
-      invocation of agents running in the same process.
-      It's RECOMMENDED to use `CLIENT` kind when the agent being instrumented usually runs
-      in a different process than its caller or when the agent invocation happens over
-      instrumented protocol such as HTTP.
-
-      Examples of span kinds for different agent scenarios:
-
-      - `CLIENT`: Remote agent services (e.g., OpenAI Assistants API, AWS Bedrock Agents)
-      - `INTERNAL`: In-process agents (e.g., LangChain agents, CrewAI agents)
+      Examples: OpenAI Assistants API, AWS Bedrock Agents.
     stability: development
     attributes:
       - name: error.type
@@ -92044,22 +94521,6 @@ groups:
             - length
         requirement_level: recommended
         stability: development
-      - name: gen_ai.response.id
-        type: string
-        brief: The unique identifier for the completion.
-        examples:
-          - chatcmpl-123
-        requirement_level: recommended
-        stability: development
-      - name: gen_ai.response.model
-        type: string
-        brief: The name of the model that generated the response.
-        examples:
-          - gpt-4-0613
-        requirement_level: recommended
-        note: |
-          If available. The name of the GenAI model that provided the response. If the model is supplied by a vendor, then the value must be the exact name of the model actually used. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
-        stability: development
       - name: gen_ai.system_instructions
         type: any
         brief: The system message or instructions provided to the GenAI model separately from the chat history.
@@ -92193,8 +94654,7 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level:
-          recommended: when span kind is `CLIENT`.
+        requirement_level: recommended
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
@@ -92416,24 +94876,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        gen_ai.response.id:
-          source_group: registry.gen_ai
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        gen_ai.response.model:
-          source_group: registry.gen_ai
-          inherited_fields:
-            - brief
-            - examples
-            - stability
-          locally_overridden_fields:
-            - note
-            - requirement_level
         gen_ai.system_instructions:
           source_group: registry.gen_ai
           inherited_fields:
@@ -92508,6 +94950,830 @@ groups:
             - brief
             - requirement_level
             - sampling_relevant
+  - id: span.gen_ai.invoke_agent.internal
+    type: span
+    brief: |
+      Describes GenAI agent invocation within the same process.
+    note: |
+      The `gen_ai.operation.name` SHOULD be `invoke_agent`.
+
+      **Span name** SHOULD be `invoke_agent {gen_ai.agent.name}` if `gen_ai.agent.name` is readily available.
+      When `gen_ai.agent.name` is not available, it SHOULD be `invoke_agent`.
+      Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format.
+
+      Examples: LangChain agents, CrewAI agents.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: if the operation ended in an error
+        note: |
+          The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,
+          the canonical name of exception that occurred, or another low-cardinality error identifier.
+          Instrumentations SHOULD document the list of errors they report.
+        stability: stable
+      - name: gen_ai.agent.description
+        type: string
+        brief: Free-form description of the GenAI agent provided by the application.
+        examples:
+          - Helps with math problems
+          - Generates fiction stories
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.id
+        type: string
+        brief: The unique identifier of the GenAI agent.
+        examples:
+          - asst_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: if applicable.
+        stability: development
+      - name: gen_ai.agent.name
+        type: string
+        brief: Human-readable name of the GenAI agent provided by the application.
+        examples:
+          - Math Tutor
+          - Fiction Writer
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.agent.version
+        type: string
+        brief: The version of the GenAI agent.
+        examples:
+          - 1.0.0
+          - 2025-05-01T00:00:00.000Z
+        requirement_level:
+          conditionally_required: when available
+        stability: development
+      - name: gen_ai.conversation.id
+        type: string
+        brief: The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.
+        examples:
+          - conv_5j66UpCpwteGg4YSxUnt7lPY
+        requirement_level:
+          conditionally_required: when available
+        note: |
+          Instrumentations SHOULD populate conversation id when they have it readily available
+          for a given operation, for example:
+
+          - when client framework being instrumented manages conversation history
+          (see [LlamaIndex chat store](https://docs.llamaindex.ai/en/stable/module_guides/storing/chat_stores/))
+          - when instrumenting GenAI client libraries that maintain conversation on the backend side
+          (see [AWS Bedrock agent sessions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html),
+          [OpenAI Assistant threads](https://platform.openai.com/docs/api-reference/threads))
+
+          Application developers that manage conversation history MAY add conversation id to GenAI and other
+          spans or logs using custom span or log record processors or hooks provided by instrumentation
+          libraries.
+        stability: development
+      - name: gen_ai.data_source.id
+        type: string
+        brief: The data source identifier.
+        examples:
+          - H7STPQYOND
+        requirement_level:
+          conditionally_required: if applicable.
+        note: |
+          Data sources are used by AI agents and RAG applications to store grounding data. A data source may be an external database, object store, document collection, website, or any other storage system used by the GenAI agent or application. The `gen_ai.data_source.id` SHOULD match the identifier used by the GenAI system rather than a name specific to the external storage, such as a database or object store. Semantic conventions referencing `gen_ai.data_source.id` MAY also leverage additional attributes, such as `db.*`, to further identify and describe the data source.
+        stability: development
+      - name: gen_ai.input.messages
+        type: any
+        brief: |
+          The chat history provided to the model as an input.
+        examples:
+          - |
+            [
+              {
+                "role": "user",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "Weather in Paris?"
+                  }
+                ]
+              },
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "tool_call",
+                    "id": "call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "name": "get_weather",
+                    "arguments": {
+                      "location": "Paris"
+                    }
+                  }
+                ]
+              },
+              {
+                "role": "tool",
+                "parts": [
+                  {
+                    "type": "tool_call_response",
+                    "id": " call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "result": "rainy, 57°F"
+                  }
+                ]
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Messages MUST be provided in the order they were sent to the model.
+          Instrumentations MAY provide a way for users to filter or truncate
+          input messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.operation.name
+        type:
+          members:
+            - id: chat
+              value: chat
+              brief: Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)
+              stability: development
+            - id: generate_content
+              value: generate_content
+              brief: Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)
+              stability: development
+            - id: text_completion
+              value: text_completion
+              brief: Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)
+              stability: development
+            - id: embeddings
+              value: embeddings
+              brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
+            - id: create_agent
+              value: create_agent
+              brief: Create GenAI agent
+              stability: development
+            - id: invoke_agent
+              value: invoke_agent
+              brief: Invoke GenAI agent
+              stability: development
+            - id: execute_tool
+              value: execute_tool
+              brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
+        brief: The name of the operation being performed.
+        requirement_level: required
+        sampling_relevant: true
+        note: |
+          If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
+        stability: development
+      - name: gen_ai.output.messages
+        type: any
+        brief: Messages returned by the model where each message represents a specific model response (choice, candidate).
+        examples:
+          - |
+            [
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "The weather in Paris is currently rainy with a temperature of 57°F."
+                  }
+                ],
+                "finish_reason": "stop"
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+
+          Each message represents a single output choice/candidate generated by
+          the model. Each message corresponds to exactly one generation
+          (choice/candidate) and vice versa - one choice cannot be split across
+          multiple messages or one message cannot contain parts from multiple choices.
+
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          output messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.output.type
+        type:
+          members:
+            - id: text
+              value: text
+              brief: Plain text
+              stability: development
+            - id: json
+              value: json
+              brief: JSON object with known or unknown schema
+              stability: development
+            - id: image
+              value: image
+              brief: Image
+              stability: development
+            - id: speech
+              value: speech
+              brief: Speech
+              stability: development
+        brief: Represents the content type requested by the client.
+        requirement_level:
+          conditionally_required: when applicable and if the request includes an output format.
+        note: |
+          This attribute SHOULD be used when the client requests output of a specific type. The model may return zero or more outputs of this type.
+          This attribute specifies the output modality and not the actual output format. For example, if an image is requested, the actual output could be a URL pointing to an image file.
+          Additional output format details may be recorded in the future in the `gen_ai.output.{type}.*` attributes.
+        stability: development
+      - name: gen_ai.provider.name
+        type:
+          members:
+            - id: openai
+              value: openai
+              brief: '[OpenAI](https://openai.com/)'
+              stability: development
+            - id: gcp.gen_ai
+              value: gcp.gen_ai
+              brief: Any Google generative AI endpoint
+              note: |
+                May be used when specific backend is unknown.
+              stability: development
+            - id: gcp.vertex_ai
+              value: gcp.vertex_ai
+              brief: '[Vertex AI](https://cloud.google.com/vertex-ai)'
+              note: |
+                Used when accessing the 'aiplatform.googleapis.com' endpoint.
+              stability: development
+            - id: gcp.gemini
+              value: gcp.gemini
+              brief: '[Gemini](https://cloud.google.com/products/gemini)'
+              note: |
+                Used when accessing the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API.
+              stability: development
+            - id: anthropic
+              value: anthropic
+              brief: '[Anthropic](https://www.anthropic.com/)'
+              stability: development
+            - id: cohere
+              value: cohere
+              brief: '[Cohere](https://cohere.com/)'
+              stability: development
+            - id: azure.ai.inference
+              value: azure.ai.inference
+              brief: Azure AI Inference
+              stability: development
+            - id: azure.ai.openai
+              value: azure.ai.openai
+              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              stability: development
+            - id: ibm.watsonx.ai
+              value: ibm.watsonx.ai
+              brief: '[IBM Watsonx AI](https://www.ibm.com/products/watsonx-ai)'
+              stability: development
+            - id: aws.bedrock
+              value: aws.bedrock
+              brief: '[AWS Bedrock](https://aws.amazon.com/bedrock)'
+              stability: development
+            - id: perplexity
+              value: perplexity
+              brief: '[Perplexity](https://www.perplexity.ai/)'
+              stability: development
+            - id: x_ai
+              value: x_ai
+              brief: '[xAI](https://x.ai/)'
+              stability: development
+            - id: deepseek
+              value: deepseek
+              brief: '[DeepSeek](https://www.deepseek.com/)'
+              stability: development
+            - id: groq
+              value: groq
+              brief: '[Groq](https://groq.com/)'
+              stability: development
+            - id: mistral_ai
+              value: mistral_ai
+              brief: '[Mistral AI](https://mistral.ai/)'
+              stability: development
+        brief: The Generative AI provider as identified by the client or server instrumentation.
+        requirement_level: required
+        sampling_relevant: true
+        note: |
+          The attribute SHOULD be set based on the instrumentation's best
+          knowledge and may differ from the actual model provider.
+
+          Multiple providers, including Azure OpenAI, Gemini, and AI hosting platforms
+          are accessible using the OpenAI REST API and corresponding client libraries,
+          but may proxy or host models from different providers.
+
+          The `gen_ai.request.model`, `gen_ai.response.model`, and `server.address`
+          attributes may help identify the actual system in use.
+
+          The `gen_ai.provider.name` attribute acts as a discriminator that
+          identifies the GenAI telemetry format flavor specific to that provider
+          within GenAI semantic conventions.
+          It SHOULD be set consistently with provider-specific attributes and signals.
+          For example, GenAI spans, metrics, and events related to AWS Bedrock
+          should have the `gen_ai.provider.name` set to `aws.bedrock` and include
+          applicable `aws.bedrock.*` attributes and are not expected to include
+          `openai.*` attributes.
+        stability: development
+      - name: gen_ai.request.choice.count
+        type: int
+        brief: The target number of candidate completions to return.
+        examples:
+          - 3
+        requirement_level:
+          conditionally_required: if available, in the request, and !=1
+        stability: development
+      - name: gen_ai.request.frequency_penalty
+        type: double
+        brief: The frequency penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.max_tokens
+        type: int
+        brief: The maximum number of tokens the model generates for a request.
+        examples:
+          - 100
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.model
+        type: string
+        brief: The name of the GenAI model a request is being made to.
+        examples: gpt-4
+        requirement_level:
+          conditionally_required: If available.
+        sampling_relevant: true
+        note: |
+          The name of the GenAI model a request is being made to. If the model is supplied by a vendor, then the value must be the exact name of the model requested. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.request.presence_penalty
+        type: double
+        brief: The presence penalty setting for the GenAI request.
+        examples:
+          - 0.1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.seed
+        type: int
+        brief: Requests with same seed value more likely to return same result.
+        examples:
+          - 100
+        requirement_level:
+          conditionally_required: if applicable and if the request includes a seed
+        stability: development
+      - name: gen_ai.request.stop_sequences
+        type: string[]
+        brief: List of sequences that the model will use to stop generating further tokens.
+        examples:
+          - - forest
+            - lived
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.temperature
+        type: double
+        brief: The temperature setting for the GenAI request.
+        examples:
+          - 0
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.request.top_p
+        type: double
+        brief: The top_p sampling setting for the GenAI request.
+        examples:
+          - 1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.response.finish_reasons
+        type: string[]
+        brief: Array of reasons the model stopped generating tokens, corresponding to each generation received.
+        examples:
+          - - stop
+          - - stop
+            - length
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.system_instructions
+        type: any
+        brief: The system message or instructions provided to the GenAI model separately from the chat history.
+        examples:
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are an Agent that greet users, always use greetings tool to respond"
+              }
+            ]
+          - |
+            [
+              {
+                "type": "text",
+                "content": "You are a language translator."
+              },
+              {
+                "type": "text",
+                "content": "Your mission is to translate text in English to French."
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          This attribute SHOULD be used when the corresponding provider or API
+          allows to provide system instructions or messages separately from the
+          chat history.
+
+          Instructions that are part of the chat history SHOULD be recorded in
+          `gen_ai.input.messages` attribute instead.
+
+          Instrumentations MUST follow [System instructions JSON schema](/docs/gen-ai/gen-ai-system-instructions.json).
+
+          When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          system instructions.
+
+          > [!Warning]
+          > This attribute may contain sensitive information.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.tool.definitions
+        type: any
+        brief: The list of source system tool definitions available to the GenAI agent or model.
+        examples:
+          - |
+            [
+              {
+                "type": "function",
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "The city and state, e.g. San Francisco, CA"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "enum": [
+                        "celsius",
+                        "fahrenheit"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "location",
+                    "unit"
+                  ]
+                }
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          The value of this attribute matches source system tool definition format.
+
+          It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
+          to the instrumentation, the instrumentation SHOULD do the best effort to
+          deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Since this attribute could be large, it's NOT RECOMMENDED to populate
+          it by default. Instrumentations MAY provide a way to enable
+          populating this attribute.
+        stability: development
+      - name: gen_ai.usage.cache_creation.input_tokens
+        type: int
+        brief: The number of input tokens written to a provider-managed cache.
+        examples:
+          - 25
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.cache_read.input_tokens
+        type: int
+        brief: The number of input tokens served from a provider-managed cache.
+        examples:
+          - 50
+        requirement_level: recommended
+        note: |
+          The value SHOULD be included in `gen_ai.usage.input_tokens`.
+        stability: development
+      - name: gen_ai.usage.input_tokens
+        type: int
+        brief: The number of tokens used in the GenAI input (prompt).
+        examples:
+          - 100
+        requirement_level: recommended
+        note: |
+          This value SHOULD include all types of input tokens, including cached tokens.
+          Instrumentations SHOULD make a best effort to populate this value, using a total
+          provided by the provider when available or, depending on the provider API,
+          by summing different token types parsed from the provider output.
+        stability: development
+      - name: gen_ai.usage.output_tokens
+        type: int
+        brief: The number of tokens used in the GenAI response (completion).
+        examples:
+          - 180
+        requirement_level: recommended
+        stability: development
+    span_kind: internal
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/spans.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.agent.description:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.agent.version:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.conversation.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.data_source.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.input.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.operation.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - sampling_relevant
+        gen_ai.output.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.output.type:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.provider.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - sampling_relevant
+        gen_ai.request.choice.count:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.frequency_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.max_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.model:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+            - sampling_relevant
+        gen_ai.request.presence_penalty:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.seed:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.stop_sequences:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.temperature:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.top_p:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.response.finish_reasons:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.system_instructions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.tool.definitions:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_creation.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.cache_read.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.input_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.usage.output_tokens:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
   - id: span.gen_ai.invoke_workflow.internal
     type: span
     brief: |

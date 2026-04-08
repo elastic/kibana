@@ -3,16 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "../../../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -83,6 +75,7 @@
     "@kbn/licensing-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/elastic-assistant",
+    "@kbn/inference-connectors",
     "@kbn/react-query",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
@@ -106,7 +99,6 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-data-streams-server",
     "@kbn/task-manager-plugin",
-    "@kbn/deeplinks-data-sources",
     "@kbn/evals-plugin",
     "@kbn/usage-api-plugin",
     "@kbn/es-query",
@@ -115,5 +107,8 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/fs",
     "@kbn/react-hooks",
+    "@kbn/search-inference-endpoints",
+    "@kbn/response-ops-oauth-hooks",
+    "@kbn/connector-specs"
   ]
 }

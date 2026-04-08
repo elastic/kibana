@@ -48,18 +48,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
       ];
     },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
     getIndexOptions: () => {
       return Promise.resolve([
         {
@@ -80,6 +68,30 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   };
 });
 
+const dataViewsMock =
+  dataViewPluginMocks.createStartContract() as jest.Mocked<DataViewsPublicPluginStart>;
+
+const setupDataViewsMock = () => {
+  dataViewsMock.getFieldsForWildcard = jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]);
+};
+
 describe('IndexSelectPopover', () => {
   const onIndexChange = jest.fn();
   const onTimeFieldChange = jest.fn();
@@ -91,12 +103,14 @@ describe('IndexSelectPopover', () => {
       index: [],
       timeField: [],
     },
+    dataViews: dataViewsMock,
     onIndexChange,
     onTimeFieldChange,
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
+    setupDataViewsMock();
   });
 
   test('renders closed popover initially and opens on click', async () => {

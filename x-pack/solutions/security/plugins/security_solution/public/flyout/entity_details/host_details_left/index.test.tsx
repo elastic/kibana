@@ -45,7 +45,12 @@ jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
 describe('HostDetailsPanel', () => {
   it('render risk inputs panel', () => {
     const { getByTestId } = render(
-      <HostDetailsPanel name="elastic" isRiskScoreExist={true} scopeId={'scopeId'} />,
+      <HostDetailsPanel
+        hostName="elastic"
+        entityId="elastic"
+        isRiskScoreExist={true}
+        scopeId={'scopeId'}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -55,7 +60,12 @@ describe('HostDetailsPanel', () => {
 
   it("doesn't render risk inputs panel when no alerts ids are provided", () => {
     const { queryByTestId } = render(
-      <HostDetailsPanel name="elastic" isRiskScoreExist={false} scopeId={'scopeId'} />,
+      <HostDetailsPanel
+        hostName="elastic"
+        entityId="elastic"
+        isRiskScoreExist={false}
+        scopeId={'scopeId'}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -66,7 +76,8 @@ describe('HostDetailsPanel', () => {
   it("doesn't render insights panel when there no misconfiguration findings", () => {
     const { queryByTestId } = render(
       <HostDetailsPanel
-        name="elastic"
+        hostName="elastic"
+        entityId="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
         hasMisconfigurationFindings={false}
@@ -81,7 +92,8 @@ describe('HostDetailsPanel', () => {
   it('render insights panel when there are misconfiguration findings', () => {
     const { queryByTestId } = render(
       <HostDetailsPanel
-        name="elastic"
+        hostName="elastic"
+        entityId="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
         hasMisconfigurationFindings={true}

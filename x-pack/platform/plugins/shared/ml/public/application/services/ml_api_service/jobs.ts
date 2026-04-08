@@ -120,8 +120,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  stopDatafeeds(datafeedIds: string[]) {
-    const body = JSON.stringify({ datafeedIds });
+  stopDatafeeds(datafeedIds: string[], closeJobs?: boolean) {
+    const body = JSON.stringify({ datafeedIds, closeJobs });
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/stop_datafeeds`,
       method: 'POST',

@@ -6,25 +6,15 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { NewSavedQueryForm } from './form';
 import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_query';
-
-const contentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
-  maxWidth: 1200,
-  margin: '0 auto',
-  width: '100%',
-});
 
 const NewSavedQueryPageComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -42,7 +32,7 @@ const NewSavedQueryPageComponent = () => {
 
   const backLink = useMemo(
     () => (
-      <EuiButtonEmpty iconType="arrowLeft" {...savedQueryListProps} flush="left" size="xs">
+      <EuiButtonEmpty iconType="chevronSingleLeft" {...savedQueryListProps} flush="left" size="xs">
         <FormattedMessage
           id="xpack.osquery.addSavedQuery.viewSavedQueriesListTitle"
           defaultMessage="View all saved queries"
@@ -54,7 +44,7 @@ const NewSavedQueryPageComponent = () => {
 
   if (isHistoryEnabled) {
     return (
-      <div css={contentCss}>
+      <div css={fullWidthFormContentCss}>
         <EuiSpacer size="l" />
         {backLink}
         <EuiSpacer size="m" />

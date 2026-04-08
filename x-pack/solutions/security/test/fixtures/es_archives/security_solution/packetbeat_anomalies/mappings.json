@@ -3,15 +3,15 @@
   "value": {
     "index": ".ml-anomalies-packetbeat",
     "aliases": {
-      ".ml-anomalies-.write-packetbeat_rare_server_domain": {
+      ".ml-anomalies-.write-packetbeat_rare_server_domain_ea": {
         "is_hidden": true,
         "is_write_index": true
       },
-      ".ml-anomalies-packetbeat_rare_server_domain": {
+      ".ml-anomalies-packetbeat_rare_server_domain_ea": {
         "filter": {
           "term": {
             "job_id": {
-              "value": "packetbeat_rare_server_domain"
+              "value": "packetbeat_rare_server_domain_ea"
             }
           }
         },

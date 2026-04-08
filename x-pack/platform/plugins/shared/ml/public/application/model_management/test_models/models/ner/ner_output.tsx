@@ -49,7 +49,7 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   },
   LOC: {
     label: 'Location',
-    icon: 'visMapCoordinate',
+    icon: 'waypoint',
     colorIndex: 2,
   },
   ORG: {
