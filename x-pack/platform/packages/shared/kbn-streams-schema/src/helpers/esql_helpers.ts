@@ -165,6 +165,11 @@ export function replaceFromSources(esql: string, newSources: string[]): string {
  * On parse failure a regex fallback (`STATS_REGEX`) is used so that
  * unparseable queries containing `| STATS` are still classified
  * correctly rather than silently defaulting to `match`.
+ *
+ * **Limitation**: the regex fallback can misclassify if `| STATS`
+ * appears inside a string literal or comment. Callers in validation
+ * paths (e.g. {@link validateEsqlQueryForStreamOrThrow}) should
+ * parse independently so a parse failure surfaces before classification.
  */
 export function hasStatsCommand(esql: string): boolean {
   const { root, parsed } = tryParseEsql(esql);
@@ -217,7 +222,7 @@ function checkSampleSizeFloor(esql: string, hints: string[]): void {
   const matches = allWhereBodies.match(COMPARISON_PATTERN);
   if (!matches || matches.length < 2) {
     hints.push(
-      'Warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts.'
+      'Heuristic warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts. This check is approximate — compound predicates may not be detected.'
     );
   }
 }
@@ -301,12 +306,12 @@ export function getStatsQueryHints(esql: string): string[] {
   checkIsNotNullDenominator(esql, hints);
 
   const disallowed = ['sort', 'limit', 'keep'];
-  const found = commands
+  const found = commandsAfterStats
     .filter((cmd) => disallowed.includes(cmd.name))
     .map((cmd) => cmd.name.toUpperCase());
   if (found.length > 0) {
     hints.push(
-      `Warning: ${found.join(', ')} should not be used in STATS queries. The system manages ordering and limits.`
+      `Warning: ${found.join(', ')} after STATS should not be used. The system manages ordering and limits.`
     );
   }
 
@@ -361,10 +366,10 @@ function getAssignmentRhsFnName(arg: ByArg): string | null {
 
 /**
  * Extracts the output column names from the STATS command's BY clause.
- * Used to identify group-by dimensions for alert identity hashing,
- * avoiding the fragile numeric-type heuristic.
+ * Used to identify group-by dimensions for preview multi-group detection
+ * and potential future alert identity hashing.
  *
- * Returns column names in sorted order for deterministic hashing.
+ * Returns column names in sorted order for deterministic comparison.
  * Returns an empty array when no STATS or BY clause is found, or on parse failure.
  */
 export function extractStatsGroupColumns(esql: string): string[] {

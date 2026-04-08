@@ -192,7 +192,7 @@ export async function previewSignificantEvents(
   const resolvedBucketTarget = isStats ? extractBucketTargetField(esqlQuery) : null;
   if (isStats && !resolvedBucketTarget) {
     logger?.warn(
-      'STATS preview could not resolve a bucket target field from the ES|QL query; falling back to @timestamp. ' +
+      `STATS preview could not resolve a bucket target field from the ES|QL query; falling back to "${timestampField}". ` +
         'Results may be incorrect if the query uses a custom temporal field.'
     );
   }
@@ -294,7 +294,13 @@ async function previewMatchQuery(
 /**
  * STATS queries already contain their own aggregation pipeline. Execute them
  * as-is (including the threshold WHERE clause). Each returned row represents
- * a time bucket that exceeded the threshold -- a "would have fired" event.
+ * a group cell that exceeded the threshold -- a "would have fired" event.
+ *
+ * **Bucket size**: the sparkline uses the query's own BUCKET interval (extracted
+ * via {@link extractBucketIntervalMs}) rather than the caller's `bucketSize`.
+ * When extraction fails (no BUCKET call, unusual syntax), the caller's
+ * `bucketSize` is used as fallback — the sparkline granularity may not match
+ * the actual query in that case.
  */
 async function previewStatsQuery(
   params: {

@@ -36,10 +36,13 @@ export async function getRuleExecutor(
   const { services, params, logger, state, startedAt, spaceId, rule } = options;
   const { scopedClusterClient, alertWithPersistence } = services;
 
+  // The executor cannot self-heal (no rulesClient access); cleanup is
+  // handled by syncQueries / the demotedToStats path in QueryClient.
+  // This guard prevents wasted ES queries until the next sync cycle runs.
   if (hasStatsCommand(params.query)) {
     logger.error(
-      `Rule "${rule.id}" attempted to execute a STATS query which cannot produce document-level alerts. ` +
-        `The rule should have been uninstalled when the query type changed. Skipping execution.`
+      `Rule "${rule.id}" contains a STATS query that cannot produce document-level alerts. ` +
+        `This is a transient state — the rule will be uninstalled on the next syncQueries cycle. Skipping execution.`
     );
     return { state: { previousOriginalDocumentIds: state.previousOriginalDocumentIds ?? [] } };
   }
@@ -105,7 +108,7 @@ export async function getRuleExecutor(
     if (docId) {
       originalDocumentIds.push(docId);
     } else {
-      logger.debug(`Alert "${alert._id}" has no mapped original document ID; skipping dedup entry`);
+      logger.warn(`Alert "${alert._id}" has no mapped original document ID; skipping dedup entry — this may cause duplicate alerts on the next run`);
     }
   }
 

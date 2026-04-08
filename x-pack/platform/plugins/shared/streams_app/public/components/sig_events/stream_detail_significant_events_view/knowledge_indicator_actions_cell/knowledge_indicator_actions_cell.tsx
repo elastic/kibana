@@ -10,7 +10,6 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
@@ -24,6 +23,10 @@ import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/u
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
+import {
+  PROMOTE_QUERY_ALREADY_PROMOTED,
+  STATS_PROMOTE_DISABLED_TOOLTIP,
+} from '../../significant_events_discovery/components/queries_table/translations';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -92,9 +95,9 @@ export function KnowledgeIndicatorActionsCell({
       if (result.promoted > 0) {
         toasts.addSuccess({ title: KI_PROMOTE_ACTION_SUCCESS_TOAST_TITLE });
       } else if (result.skipped_stats > 0) {
-        toasts.addInfo({ title: KI_STATS_PROMOTE_DISABLED_TOOLTIP });
+        toasts.addInfo({ title: STATS_PROMOTE_DISABLED_TOOLTIP });
       } else {
-        toasts.addInfo({ title: KI_PROMOTE_ALREADY_PROMOTED_TOAST_TITLE });
+        toasts.addInfo({ title: PROMOTE_QUERY_ALREADY_PROMOTED });
       }
     },
     onError: (error) => {
@@ -178,11 +181,12 @@ export function KnowledgeIndicatorActionsCell({
     const isPromoteDisabled =
       isActionInProgress || knowledgeIndicator.rule.backed || isStats;
 
-    const promoteMenuItem = (
+    return [
       <EuiContextMenuItem
         key="query-promote"
         icon="plusInCircle"
         disabled={isPromoteDisabled}
+        toolTipContent={isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined}
         onClick={() =>
           withActionLoading(() =>
             promoteAction.mutate(knowledgeIndicator.query.id, {
@@ -194,17 +198,7 @@ export function KnowledgeIndicatorActionsCell({
         }
       >
         {KI_ACTION_PROMOTE_LABEL}
-      </EuiContextMenuItem>
-    );
-
-    return [
-      isStats ? (
-        <EuiToolTip key="query-promote-wrapper" content={KI_STATS_PROMOTE_DISABLED_TOOLTIP}>
-          <span>{promoteMenuItem}</span>
-        </EuiToolTip>
-      ) : (
-        promoteMenuItem
-      ),
+      </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="query-delete"
         icon="trash"
@@ -325,16 +319,5 @@ const KI_PROMOTE_ACTION_ERROR_TOAST_TITLE = i18n.translate(
   }
 );
 
-const KI_PROMOTE_ALREADY_PROMOTED_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsTable.promoteAlreadyPromotedToastTitle',
-  {
-    defaultMessage: 'Query is already promoted',
-  }
-);
 
-const KI_STATS_PROMOTE_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.streams.significantEventsTable.statsPromoteDisabledTooltip',
-  {
-    defaultMessage: 'STATS queries cannot be promoted to rules yet',
-  }
-);
+

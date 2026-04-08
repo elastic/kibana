@@ -223,7 +223,7 @@ interface QueryBulkDeleteOperation {
 
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
-function fromStorage(link: StoredQueryLink, logger?: Logger): QueryLink {
+function fromStorage(link: StoredQueryLink): QueryLink {
   const esql = link[QUERY_ESQL_QUERY];
   const storedType = link[QUERY_TYPE] as QueryType | undefined;
 
@@ -258,10 +258,9 @@ function fromStorage(link: StoredQueryLink, logger?: Logger): QueryLink {
 }
 
 function mapSearchHits<TSearchRequest extends StorageClientSearchRequest>(
-  response: StorageClientSearchResponse<StoredQueryLink, TSearchRequest>,
-  logger?: Logger
+  response: StorageClientSearchResponse<StoredQueryLink, TSearchRequest>
 ) {
-  return response.hits.hits.map((hit) => fromStorage(hit._source, logger));
+  return response.hits.hits.map((hit) => fromStorage(hit._source));
 }
 
 export function buildSearchEmbeddingText(
@@ -362,7 +361,7 @@ export class QueryClient {
       },
     });
 
-    const existingQueryLinks = mapSearchHits(assetsResponse, this.dependencies.logger);
+    const existingQueryLinks = mapSearchHits(assetsResponse);
 
     const nextQueryLinks = links.map((link) => {
       const ql = { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
@@ -431,7 +430,7 @@ export class QueryClient {
         );
         return;
       }
-      const asset = fromStorage(hit._source, this.dependencies.logger);
+      const asset = fromStorage(hit._source);
       queriesPerName[name].push(asset);
     });
 
@@ -460,7 +459,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(queriesResponse, this.dependencies.logger);
+    return mapSearchHits(queriesResponse);
   }
 
   /**
@@ -522,7 +521,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(assetsResponse, this.dependencies.logger);
+    return mapSearchHits(assetsResponse);
   }
 
   async findQueries(
@@ -597,7 +596,7 @@ export class QueryClient {
       query: buildKeywordQuery(query, filter),
     });
 
-    return mapSearchHits(assetsResponse, this.dependencies.logger);
+    return mapSearchHits(assetsResponse);
   }
 
   private async findQueriesBySemantic(
@@ -618,7 +617,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(assetsResponse, this.dependencies.logger);
+    return mapSearchHits(assetsResponse);
   }
 
   private async findQueriesByHybrid(
@@ -662,7 +661,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(assetsResponse, this.dependencies.logger);
+    return mapSearchHits(assetsResponse);
   }
 
   private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {

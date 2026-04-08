@@ -226,6 +226,9 @@ const bulkQueriesRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
+    // Validation is all-or-nothing: if any index operation fails validation,
+    // the entire batch is rejected. Operations that pass validation are
+    // collected in typedOperations and applied atomically via queryClient.bulk.
     const validationErrors: Array<{ id: string; message: string }> = [];
     const typedOperations: Array<{ index?: StreamQuery; delete?: { id: string } }> = [];
 

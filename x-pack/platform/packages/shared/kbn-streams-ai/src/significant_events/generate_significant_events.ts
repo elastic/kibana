@@ -40,6 +40,11 @@ import {
  * Uses a flat `esql` string (vs the wrapped `EsqlQuery` in the wire type)
  * and carries the `category` from the tool schema.
  */
+// Allows the agent to fetch features once, refine queries, then submit.
+// 5 steps gives enough room for a get_stream_features → add_queries →
+// retry cycle when the first batch has validation failures.
+const MAX_REASONING_STEPS = 5;
+
 interface ParsedToolQuery {
   type: QueryType;
   esql: string;
@@ -99,7 +104,7 @@ export async function generateSignificantEvents({
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
-      maxSteps: 5,
+      maxSteps: MAX_REASONING_STEPS,
       prompt,
       inferenceClient,
       toolCallbacks: {

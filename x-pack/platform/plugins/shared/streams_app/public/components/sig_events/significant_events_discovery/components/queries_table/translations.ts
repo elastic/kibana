@@ -160,7 +160,7 @@ export const STATS_NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
 
 export const STATS_LAST_OCCURRED_PLACEHOLDER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.statsLastOccurredPlaceholder',
-  { defaultMessage: 'Preview in Discover' }
+  { defaultMessage: 'Not monitored yet' }
 );
 
 export const getPromoteAllCalloutTitle = (count: number) =>
