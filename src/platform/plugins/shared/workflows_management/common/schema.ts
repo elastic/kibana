@@ -366,8 +366,12 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
     }
   }
 
-  stepSchemas.setDeprecatedStepMetadataCache(deprecatedStepMetadata);
-  return deprecatedStepMetadata;
+  const frozenDeprecatedStepMetadata = Object.freeze(deprecatedStepMetadata) as Readonly<
+    Record<string, StepDeprecationInfo>
+  >;
+
+  stepSchemas.setDeprecatedStepMetadataCache(frozenDeprecatedStepMetadata);
+  return frozenDeprecatedStepMetadata;
 }
 
 export function getDeprecatedStepMetadata(stepType: string): StepDeprecationInfo | undefined {

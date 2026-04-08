@@ -568,6 +568,22 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
     });
   });
 
+  describe('provideHover cancellation', () => {
+    it('should return null without querying markers when the request is already cancelled', async () => {
+      const getModelMarkersSpy = jest.spyOn(monaco.editor, 'getModelMarkers');
+
+      const result = await provider.provideHover(
+        createMockModel('type: kibana.createCaseDefaultSpace'),
+        createMockPosition(1, 15),
+        { isCancellationRequested: true } as monaco.CancellationToken
+      );
+
+      expect(result).toBeNull();
+      expect(getModelMarkersSpy).not.toHaveBeenCalled();
+      expect(getInterceptedHover).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createUnifiedHoverProvider', () => {
     it('should return a valid hover provider', () => {
       const createdProvider = createUnifiedHoverProvider({

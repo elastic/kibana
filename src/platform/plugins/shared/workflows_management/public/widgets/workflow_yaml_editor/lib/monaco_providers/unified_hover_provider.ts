@@ -62,8 +62,21 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     position: monaco.Position,
     cancellationToken: monaco.CancellationToken
   ): Promise<monaco.languages.Hover | null> {
+    if (cancellationToken.isCancellationRequested) {
+      return null;
+    }
+
+    const customHover = await this.provideCustomHover(model, position);
+    if (customHover) {
+      return customHover;
+    }
+
+    if (cancellationToken.isCancellationRequested) {
+      return null;
+    }
+
     const markers = monaco.editor.getModelMarkers({ resource: model.uri });
-    const deprecatedStepMarkersNearby = markers.filter(
+    const deprecatedStepMarkerNearby = markers.find(
       (marker) =>
         marker.source === 'deprecated-step-validation' &&
         marker.startLineNumber === position.lineNumber &&
@@ -72,14 +85,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
           Math.abs(marker.endColumn - position.column) <= 3)
     );
 
-    if (deprecatedStepMarkersNearby.length > 0) {
-      return this.provideDeprecatedStepHover(model, position, deprecatedStepMarkersNearby[0]);
+    if (deprecatedStepMarkerNearby) {
+      return this.provideDeprecatedStepHover(model, position, deprecatedStepMarkerNearby);
     }
 
-    const customHover = await this.provideCustomHover(model, position);
-    if (customHover) {
-      return customHover;
-    }
     return getInterceptedHover(model, position, cancellationToken);
   }
 
