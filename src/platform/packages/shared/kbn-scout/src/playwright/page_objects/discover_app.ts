@@ -116,7 +116,7 @@ export class DiscoverApp {
   async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitForDiscoverPage();
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
