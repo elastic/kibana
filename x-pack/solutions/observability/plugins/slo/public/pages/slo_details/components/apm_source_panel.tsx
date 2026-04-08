@@ -15,20 +15,14 @@ import type {
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
+import {
+  APM_SOURCE_FIELDS,
+  getApmSourceFieldLink,
+} from '../../../utils/slo/get_apm_source_field_link';
 
 const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
-const APM_SOURCE_FIELDS = {
-  SERVICE_NAME: 'service.name',
-  SERVICE_ENVIRONMENT: 'service.environment',
-  TRANSACTION_TYPE: 'transaction.type',
-  TRANSACTION_NAME: 'transaction.name',
-} as const;
-
-type ApmSourceField = (typeof APM_SOURCE_FIELDS)[keyof typeof APM_SOURCE_FIELDS];
-
 type ApmIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
-
 interface ApmSourcePanelProps {
   slo: SLOWithSummaryResponse;
   timeRange?: { from: string; to: string };
@@ -62,41 +56,7 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
   const isRemote = !!slo.remote;
   const canNavigateToApm = hasApmReadCapabilities && !isRemote;
 
-  const locator = canNavigateToApm ? share.url.locators.get(APM_APP_LOCATOR_ID) : undefined;
-
-  const getFieldLink = (field: ApmSourceField, value: string): string | undefined => {
-    if (!locator || serviceNameValue === ALL_VALUE) return undefined;
-
-    const base = {
-      serviceName: serviceNameValue,
-      query: {
-        environment: 'ENVIRONMENT_ALL',
-        rangeFrom: effectiveTimeRange.from,
-        rangeTo: effectiveTimeRange.to,
-      },
-    };
-
-    switch (field) {
-      case APM_SOURCE_FIELDS.SERVICE_ENVIRONMENT:
-        return locator.getRedirectUrl({ ...base, query: { ...base.query, environment: value } });
-      case APM_SOURCE_FIELDS.TRANSACTION_TYPE:
-        return locator.getRedirectUrl({
-          ...base,
-          query: { ...base.query, transactionType: value },
-        });
-      case APM_SOURCE_FIELDS.TRANSACTION_NAME:
-        return locator.getRedirectUrl({
-          ...base,
-          serviceOverviewTab: 'transactions',
-          query: { ...base.query, transactionName: value },
-        });
-      case APM_SOURCE_FIELDS.SERVICE_NAME:
-      default:
-        return locator.getRedirectUrl(base);
-    }
-  };
-
-  const fields: Array<{ field: ApmSourceField; value: string }> = [
+  const fields = [
     { field: APM_SOURCE_FIELDS.SERVICE_NAME, value: serviceNameValue },
     { field: APM_SOURCE_FIELDS.SERVICE_ENVIRONMENT, value: envValue },
     { field: APM_SOURCE_FIELDS.TRANSACTION_TYPE, value: transactionTypeValue },
@@ -123,7 +83,16 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
           </h3>
         </EuiTitle>
         {visibleFields.map(({ field, value }) => {
-          const link = getFieldLink(field, value);
+          const link = canNavigateToApm
+            ? getApmSourceFieldLink({
+                apmLocator: share.url.locators.get(APM_APP_LOCATOR_ID),
+                serviceName: serviceNameValue,
+                timeRange: effectiveTimeRange,
+                field,
+                value,
+              })
+            : undefined;
+
           return (
             <EuiText key={field} size="s">
               {field}:{' '}
