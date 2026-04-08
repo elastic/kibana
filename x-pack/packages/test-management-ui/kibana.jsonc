@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/test-management-ui",
+  "owner": ["@elastic/actionable-obs-team"],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true,
+  "description": "Standalone UI for discovering and running Jest, Scout, and FTR test configs"
+}

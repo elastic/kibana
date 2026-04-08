@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/test-management-ui",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "start": "node ../../scripts/test_management_ui.js"
+  }
+}
