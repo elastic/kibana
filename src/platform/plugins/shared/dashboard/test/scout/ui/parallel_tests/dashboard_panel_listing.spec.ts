@@ -60,6 +60,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify total panel count', async () => {
+        expect(await pageObjects.dashboard.getPanelTypeCount()).toEqual([]);
         expect(await pageObjects.dashboard.getPanelTypeCount()).toBeGreaterThanOrEqual(
           DASHBOARD_PANEL_TYPE_COUNT
         );
