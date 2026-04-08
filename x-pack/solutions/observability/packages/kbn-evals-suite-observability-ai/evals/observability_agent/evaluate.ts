@@ -10,7 +10,6 @@ import {
   createQuantitativeCorrectnessEvaluators,
   createSpanLatencyEvaluator,
   createTrajectoryEvaluator,
-  getCurrentTraceId,
   type EvaluationDataset,
   type Example,
 } from '@kbn/evals';
@@ -88,14 +87,12 @@ export const evaluate = base.extend<
                     metadata,
                   })
                 : undefined;
-              const traceId = getCurrentTraceId();
-
               return {
                 errors: response.errors,
                 messages: response.messages,
                 steps: response.steps,
                 correctnessAnalysis: correctnessResult?.metadata,
-                traceId,
+                traceId: response.traceId,
               };
             },
           },
