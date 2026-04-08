@@ -11,7 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -32,7 +32,7 @@ import {
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
 } from '@kbn/lens-common';
-import { getUpdatedMetricState } from '../../../common/content_management/v1/transforms/metric';
+import { getUpdatedMetricState as getUpdatedMetricStateV1 } from '../../../common/content_management/v1/transforms/metric';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -60,7 +60,7 @@ export const showingBar = (
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
   if (showingBar(state) && isMetricNumeric) {
-    return euiLightVars.euiColorPrimary;
+    return euiThemeVars.euiColorVis2;
   }
   if (state.applyColorTo === 'value') {
     return euiThemeVars.euiColorVisText0;
@@ -79,6 +79,18 @@ const isSupportedDynamicMetric = (op: OperationMetadata) =>
 export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
+
+type MetricVisualizationStateWithLegacyTitleWeight = MetricVisualizationState & {
+  titleWeight?: unknown;
+};
+
+const removeLegacyTitleWeight = (
+  state: MetricVisualizationStateWithLegacyTitleWeight
+): MetricVisualizationState => {
+  const { titleWeight: _titleWeight, ...updatedState } = state;
+
+  return updatedState;
+};
 
 const getMetricLayerConfiguration = (
   paletteService: PaletteRegistry,
@@ -394,9 +406,7 @@ const cleanupMetricState = (
   ) {
     return {
       ...updatedState,
-      secondaryLabel: undefined,
       secondaryTrend: getDefaultConfigForMode(colorMode),
-      secondaryLabelPosition: 'before',
     };
   }
 
@@ -453,7 +463,7 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return getUpdatedMetricState(state);
+    if (state) return removeLegacyTitleWeight(getUpdatedMetricStateV1(state));
 
     return {
       layerId: addNewLayer(),

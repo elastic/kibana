@@ -11,12 +11,13 @@ import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 /**
  * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
  * get the pinned panel schema from a pinned panel registry **independent** from controls
  */
-import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
-import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
+import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
@@ -53,12 +54,7 @@ export const panelGridSchema = schema.object(
 export function getPanelSchema(isDashboardAppRequest: boolean) {
   const basePanelProps = {
     grid: panelGridSchema,
-    /**
-     * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
-     * represent ids of library items in by-reference panels. This was previously called `panelIndex` in DashboardPanelState.
-     * In the stored object, `uid` continues to map to `panelIndex`.
-     */
-    uid: schema.maybe(
+    id: schema.maybe(
       schema.string({
         meta: { description: 'The unique ID of the panel.' },
       })
@@ -105,7 +101,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
     panelSchemas as [
       ObjectType<{
         grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
-        uid: Type<string | undefined>;
+        id: Type<string | undefined>;
         version: Type<string | undefined>;
         type: Type<string>;
         config: ObjectType<{}>;
@@ -134,7 +130,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         defaultValue: [],
         maxSize: MAX_PANELS,
       }),
-      uid: schema.maybe(
+      id: schema.maybe(
         schema.string({
           meta: { description: 'The unique ID of the section.' },
         })
@@ -202,7 +198,7 @@ export const accessControlSchema = schema.maybe(
 export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object(
     {
-      pinned_panels: pinnedPanelsSchema,
+      pinned_panels: getPinnedPanelsSchema(),
       description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
       filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
       options: optionsSchema,
@@ -217,7 +213,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         }
       ),
       project_routing: schema.maybe(schema.string()),
-      query: schema.maybe(querySchema),
+      query: schema.maybe(asCodeQuerySchema),
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
         schema.arrayOf(
