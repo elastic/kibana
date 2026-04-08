@@ -99,7 +99,7 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
               {link ? (
                 <EuiLink
                   data-test-subj={`sloDetailsApmSourceLink-${field}`}
-                  data-action="navigateToApm"
+                  data-action="navigateToApmSource"
                   data-source={slo.indicator.type}
                   href={link}
                 >
