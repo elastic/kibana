@@ -10,7 +10,7 @@ import { type Criteria, EuiBasicTable, type EuiBasicTableColumn } from '@elastic
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { DataProvider } from '../../../../common/types';
-import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/investigate_in_timeline_button';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
