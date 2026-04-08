@@ -11,7 +11,7 @@ import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api
 import { synth, BasicPrettyPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import { EsqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
+import { FunctionNames } from '@kbn/esql-language';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
 
@@ -23,9 +23,9 @@ import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types'
 function getCastFunctionForType(fieldType: ES_FIELD_TYPES | undefined): string | undefined {
   switch (fieldType) {
     case 'double':
-      return EsqlFunctionNames.TO_DOUBLE;
+      return FunctionNames.TO_DOUBLE;
     case 'long':
-      return EsqlFunctionNames.TO_LONG;
+      return FunctionNames.TO_LONG;
     default:
       return undefined;
   }
