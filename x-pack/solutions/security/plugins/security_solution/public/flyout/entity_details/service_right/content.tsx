@@ -7,6 +7,7 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { ServiceItem } from '../../../../common/search_strategy';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -37,6 +38,10 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   entityStoreEntityId?: string;
+  /** When using Entity Store v2: criticality from store. */
+  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
+  /** When using Entity Store v2: save criticality via entity store API. */
+  onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
 }
 
 export const ServicePanelContent = ({
@@ -51,6 +56,8 @@ export const ServicePanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   entityStoreEntityId,
+  criticalityFromEntityStore,
+  onSaveAssetCriticalityViaEntityStore,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
@@ -80,6 +87,9 @@ export const ServicePanelContent = ({
       <AssetCriticalityAccordion
         entity={{ name: serviceName, type: EntityType.service }}
         onChange={onAssetCriticalityChange}
+        entityRecord={entityRecord}
+        criticalityFromEntityStore={criticalityFromEntityStore}
+        onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
       />
       {entityStoreEntityId && (
         <>
