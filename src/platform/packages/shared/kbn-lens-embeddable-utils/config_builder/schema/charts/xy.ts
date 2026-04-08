@@ -1018,7 +1018,7 @@ export const xyStateSchemaNoESQL = schema.object(
 );
 
 /**
- * XY chart state for ES|QL layers only (reference lines are not yet supported)
+ * XY chart state for ES|QL layers only (reference lines are not supported)
  */
 export const xyStateSchemaESQL = schema.object(
   {
