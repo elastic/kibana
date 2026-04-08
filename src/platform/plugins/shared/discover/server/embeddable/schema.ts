@@ -195,7 +195,7 @@ const panelOverridesSchema = schema.object(
           defaultValue: [],
           meta: {
             description:
-              'When set, overrides column order for the data table relative to the referenced saved object (`discover_session_id`) or the inline tab in `tabs`. If omitted, the source configuration is used.',
+              'When set, overrides column order for the data table relative to the referenced saved object (`ref_id`) or the inline tab in `tabs`. If omitted, the source configuration is used.',
           },
         }
       )
@@ -349,33 +349,35 @@ function withPanelSchemas<P extends Props>(
     );
 }
 
-const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
-  schema.object({
-    tabs: schema.arrayOf(tabSchema, {
-      minSize: 1,
-      maxSize: 1,
-      meta: {
-        description:
-          'Inline tab configuration. Used when no `discover_session_id` is set. Currently supports one tab.',
-      },
-    }),
+const discoverSessionByValuePropsSchema = schema.object({
+  tabs: schema.arrayOf(tabSchema, {
+    minSize: 1,
+    maxSize: 1,
+    meta: {
+      description:
+        'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
+    },
   }),
+});
+const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
+  discoverSessionByValuePropsSchema,
   { meta: BY_VALUE_SCHEMA_META }
 );
 
+const discoverSessionByReferencePropsSchema = schema.object({
+  ref_id: schema.string(),
+  selected_tab_id: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
+      },
+    })
+  ),
+  overrides: panelOverridesSchema,
+});
 const getDiscoverSessionByReferenceEmbeddableSchema = withPanelSchemas(
-  schema.object({
-    discover_session_id: schema.string(),
-    selected_tab_id: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
-        },
-      })
-    ),
-    overrides: panelOverridesSchema,
-  }),
+  discoverSessionByReferencePropsSchema,
   { meta: BY_REF_SCHEMA_META }
 );
 
@@ -391,6 +393,12 @@ export type DiscoverSessionPanelOverrides = TypeOf<typeof panelOverridesSchema>;
 export type DiscoverSessionClassicTab = TypeOf<typeof classicTabSchema>;
 export type DiscoverSessionEsqlTab = TypeOf<typeof esqlTabSchema>;
 export type DiscoverSessionTab = TypeOf<typeof tabSchema>;
+export type DiscoverSessionEmbeddableByValueProps = TypeOf<
+  typeof discoverSessionByValuePropsSchema
+>;
+export type DiscoverSessionEmbeddableByReferenceProps = TypeOf<
+  typeof discoverSessionByReferencePropsSchema
+>;
 
 export type DiscoverSessionEmbeddableByValueState = TypeOf<
   ReturnType<typeof getDiscoverSessionByValueEmbeddableSchema>
