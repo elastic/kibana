@@ -28,6 +28,8 @@ import type { Connector, ConnectorWithExtraFindData } from '../application/conne
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
+import { getAuthStatus } from '../application/connector/methods/get_auth_status';
+import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
@@ -270,6 +272,13 @@ export class ActionsClient {
    */
   public async getAllSystemConnectors(): Promise<ConnectorWithExtraFindData[]> {
     return getAllSystemConnectors({ context: this.context });
+  }
+
+  /**
+   * Auth status for all connectors visible in the current space (persisted + in-memory).
+   */
+  public async getAuthStatus(): Promise<GetAuthStatusResult> {
+    return getAuthStatus({ context: this.context });
   }
 
   /**

@@ -91,7 +91,8 @@ export async function getAllUnsecured({
   spaceId,
   connectorTypeRegistry,
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
-  const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
+  const isUnsetOrDefaultSpace = !spaceId || spaceId === 'default';
+  const namespace = isUnsetOrDefaultSpace ? undefined : spaceId;
 
   return await getAllHelper({
     esClient,

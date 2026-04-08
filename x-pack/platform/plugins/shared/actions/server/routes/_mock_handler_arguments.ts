@@ -19,14 +19,11 @@ export function mockHandlerArguments(
     actionsClient = actionsClientMock.create(),
     listTypes: listTypesRes = [],
     getCurrentUser,
-  }: {
-    actionsClient?: ActionsClientMock;
-    listTypes?: ConnectorType[];
-    getCurrentUser?: jest.Mock;
     getSkippedPreconfiguredConnectorIds = () => new Set<string>(),
   }: {
     actionsClient?: ActionsClientMock;
     listTypes?: ConnectorType[];
+    getCurrentUser?: jest.Mock;
     getSkippedPreconfiguredConnectorIds?: () => Set<string>;
   },
   request: unknown,
