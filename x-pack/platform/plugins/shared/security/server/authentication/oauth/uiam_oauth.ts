@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
@@ -91,10 +93,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Trying to update OAuth client ${clientId}`);
 
     try {
-      const result = await this.uiam.updateOAuthClient(accessToken, clientId, {
-        client_name: params.client_name,
-        client_metadata: params.client_metadata,
-      });
+      const result = await this.uiam.updateOAuthClient(accessToken, clientId, params);
       this.logger.debug(`OAuth client ${clientId} updated successfully`);
       return result;
     } catch (e) {
@@ -184,11 +183,11 @@ export class UiamOAuth implements UiamOAuthType {
     const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
 
     if (!authorization) {
-      throw new Error('Request does not contain an authorization header');
+      throw Boom.unauthorized('Request does not contain an authorization header');
     }
 
     if (!isUiamCredential(authorization)) {
-      throw new Error('Provided credential is not compatible with UIAM');
+      throw Boom.badRequest('Provided credential is not compatible with UIAM');
     }
 
     return authorization.credentials;

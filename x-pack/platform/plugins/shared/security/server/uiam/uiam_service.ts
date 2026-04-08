@@ -12,6 +12,13 @@ import { Agent } from 'undici';
 import type { Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
+  CreateUiamOAuthClientParams,
+  UiamOAuthClientLogo,
+  UiamOAuthClientResponse,
+  UiamOAuthConnectionResponse,
+  UpdateUiamOAuthClientParams,
+} from '@kbn/core-security-server';
+import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
@@ -90,82 +97,11 @@ export interface ConvertUiamApiKeysResponse {
   >;
 }
 
-/**
- * Represents a client logo provided as a URL.
- */
-export interface OAuthClientLogoUrl {
-  type: 'url';
-  url: string;
-}
-
-/**
- * Represents a client logo provided as base64-encoded image data.
- */
-export interface OAuthClientLogoBase64 {
-  type: 'base64';
-  media_type: string;
-  data: string;
-}
-
-export type OAuthClientLogo = OAuthClientLogoUrl | OAuthClientLogoBase64;
-
-/**
- * Summary of active and revoked connection IDs for a client.
- */
-export interface OAuthConnectionsSummary {
-  active?: string[];
-  revoked?: string[];
-}
-
-/**
- * Represents the request body for creating an OAuth client via UIAM.
- */
-export interface CreateOAuthClientRequestBody {
-  resource: string;
-  client_name?: string;
-  client_metadata?: Record<string, string>;
-  client_logo?: OAuthClientLogo;
-}
-
-/**
- * Represents the request body for patching an OAuth client via UIAM.
- */
-export interface PatchOAuthClientRequestBody {
-  client_name?: string | null;
-  client_metadata: Record<string, string>;
-  client_logo?: OAuthClientLogo | null;
-}
-
-/**
- * Represents a single OAuth client returned by the UIAM service.
- */
-export interface OAuthClientResponse {
-  id: string;
-  client_name?: string;
-  resource: string;
-  type?: string;
-  creation?: string;
-  revoked?: boolean;
-  revocation?: string;
-  revocation_reason?: string;
-  client_metadata?: Record<string, string>;
-  client_logo?: OAuthClientLogo;
-  connections?: OAuthConnectionsSummary;
-}
-
-/**
- * Represents a single OAuth connection returned by the UIAM service.
- */
-export interface OAuthConnectionResponse {
-  id: string;
-  client_id: string;
-  resource: string;
-  creation?: string;
-  revoked?: boolean;
-  revocation?: string;
-  revocation_reason?: string;
-  scopes?: string[];
-}
+export type OAuthClientLogo = UiamOAuthClientLogo;
+export type OAuthClientResponse = UiamOAuthClientResponse;
+export type OAuthConnectionResponse = UiamOAuthConnectionResponse;
+export type CreateOAuthClientRequestBody = CreateUiamOAuthClientParams;
+export type PatchOAuthClientRequestBody = UpdateUiamOAuthClientParams;
 
 /**
  * Response containing a list of OAuth clients.

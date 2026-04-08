@@ -31,7 +31,22 @@ export function defineUpdateOAuthClientRoute({
         }),
         body: schema.object({
           client_name: schema.maybe(schema.nullable(schema.string())),
-          client_metadata: schema.recordOf(schema.string(), schema.string()),
+          client_metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+          client_logo: schema.maybe(
+            schema.nullable(
+              schema.oneOf([
+                schema.object({
+                  type: schema.literal('url'),
+                  url: schema.string(),
+                }),
+                schema.object({
+                  type: schema.literal('base64'),
+                  media_type: schema.string(),
+                  data: schema.string(),
+                }),
+              ])
+            )
+          ),
         }),
       },
       options: {
