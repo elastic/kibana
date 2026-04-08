@@ -4,11 +4,6 @@ model: claude-opus-4-6
 reasoning: high
 effort: high
 input: full_diff
-tools:
-  - browse_code
-  - git_tools
-  - github_api_read_only
-  - modify_pr
 conclusion: neutral
 ---
 
