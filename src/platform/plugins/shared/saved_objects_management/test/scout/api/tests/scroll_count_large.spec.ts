@@ -15,6 +15,8 @@ import { apiTest, testData } from '../fixtures';
 
 const { MANAGEMENT_API } = testData;
 
+const IMPORT_TIMEOUT = 120_000;
+
 function generateVisualizationNdjson(startIdx: number, endIdx: number): string {
   const lines: string[] = [];
   for (let i = startIdx; i <= endIdx; i++) {
@@ -38,6 +40,7 @@ apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentA
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
+    apiTest.setTimeout(IMPORT_TIMEOUT);
     adminCredentials = await requestAuth.getApiKey('admin');
 
     for (const [start, end] of [
@@ -61,6 +64,7 @@ apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentA
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
+    apiTest.setTimeout(IMPORT_TIMEOUT);
     await kbnClient.savedObjects.cleanStandardList();
   });
 
