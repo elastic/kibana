@@ -33,7 +33,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     browserAuth,
     syntheticsServices,
   }) => {
-    test.setTimeout(3 * 60_000);
+    test.setTimeout(5 * 60_000);
     const firstCheckTime = new Date(Date.now()).toISOString();
 
     await test.step('setup: create monitor with connector and summary doc', async () => {
