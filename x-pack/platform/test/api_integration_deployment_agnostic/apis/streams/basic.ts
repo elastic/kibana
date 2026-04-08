@@ -176,6 +176,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (!isServerless) {
           it('creates ES|QL views for wired root streams', async () => {
             if (!viewsApiAvailable) return;
+            // Wired roots may use deferred data stream materialization; ES|QL views use
+            // `FROM logs.otel` / `FROM logs.ecs` and need the backing data stream to exist.
+            const ts = new Date().toISOString();
+            await indexDocument(esClient, LOGS_OTEL_STREAM_NAME, {
+              '@timestamp': ts,
+              message: 'FTR: materialize logs.otel for wired ES|QL view assertion',
+            });
+            await indexDocument(esClient, LOGS_ECS_STREAM_NAME, {
+              '@timestamp': ts,
+              message: 'FTR: materialize logs.ecs for wired ES|QL view assertion',
+            });
             for (const streamName of ['logs.otel', 'logs.ecs']) {
               const response = await esClient.transport.request<{
                 views: Array<{ name: string; query: string }>;

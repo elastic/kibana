@@ -68,11 +68,18 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('GET /api/streams returns list of streams', async () => {
-      const { body } = await supertest.get('/api/streams').set(PUBLIC_HEADERS).expect(200);
+      await retry.tryForTime(
+        120_000,
+        async () => {
+          const { body } = await supertest.get('/api/streams').set(PUBLIC_HEADERS).expect(200);
 
-      expect(body).to.have.property('streams');
-      expect(body.streams).to.be.an('array');
-      expect(body.streams.length).to.be.greaterThan(0);
+          expect(body).to.have.property('streams');
+          expect(body.streams).to.be.an('array');
+          expect(body.streams.length).to.be.greaterThan(0);
+        },
+        undefined,
+        500
+      );
     });
 
     it('GET /api/streams/logs.ecs returns the root stream', async () => {
