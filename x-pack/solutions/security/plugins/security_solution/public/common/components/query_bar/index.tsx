@@ -175,6 +175,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
           }
         };
         createDataView();
+      } else {
+        setIsCreatingDataView(false);
       }
       return () => {
         cancelled = true;
