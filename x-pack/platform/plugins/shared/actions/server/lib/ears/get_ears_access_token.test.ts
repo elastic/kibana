@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getEarsAccessToken } from './get_ears_access_token';
@@ -104,15 +105,14 @@ describe('getEarsAccessToken', () => {
       );
     });
 
-    it('returns null and warns when no token is stored (user has not authorized yet)', async () => {
+    it('throws ConnectorAuthorizationError with reason no_token when no token is stored', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: null });
 
-      const result = await getEarsAccessToken(baseOpts);
+      const error = await getEarsAccessToken(baseOpts).catch((e) => e);
 
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'No access token found for connectorId: connector-1. User must complete OAuth authorization flow.'
-      );
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('no_token');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
     it('returns the stored token without refreshing when it has not expired', async () => {
@@ -141,21 +141,20 @@ describe('getEarsAccessToken', () => {
   });
 
   describe('token refresh', () => {
-    it('returns null and warns when access token is expired but no refresh token is stored', async () => {
+    it('throws ConnectorAuthorizationError with reason token_expired when access token is expired but no refresh token is stored', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: { ...expiredToken, refreshToken: undefined },
       });
 
-      const result = await getEarsAccessToken(baseOpts);
+      const error = await getEarsAccessToken(baseOpts).catch((e) => e);
 
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Access token expired and no refresh token available for connectorId: connector-1. User must re-authorize.'
-      );
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('token_expired');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
-    it('returns null and warns when the refresh token itself is expired', async () => {
+    it('throws ConnectorAuthorizationError with reason refresh_token_expired when the refresh token itself is expired', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: {
@@ -164,12 +163,11 @@ describe('getEarsAccessToken', () => {
         },
       });
 
-      const result = await getEarsAccessToken(baseOpts);
+      const error = await getEarsAccessToken(baseOpts).catch((e) => e);
 
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Refresh token expired for connectorId: connector-1. User must re-authorize.'
-      );
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('refresh_token_expired');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
     it('returns the refreshed token formatted as "tokenType accessToken"', async () => {
