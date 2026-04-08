@@ -18,6 +18,7 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ConfigSchema } from './config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
@@ -61,6 +62,7 @@ export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
   dataViews: DataViewsServerPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class DataServerPlugin
@@ -109,10 +111,11 @@ export class DataServerPlugin
     };
   }
 
-  public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
+  public start(core: CoreStart, { fieldFormats, dataViews, spaces }: DataPluginStartDependencies) {
     const search = this.searchService.start(core, {
       fieldFormats,
       indexPatterns: dataViews,
+      spaces,
     });
     const datatableUtilities = new DatatableUtilitiesService(
       search.aggs,

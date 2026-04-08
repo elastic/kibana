@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { LRUCache } from 'lru-cache';
 import { UI_SETTINGS } from '../../../common';
 
 export interface SearchSettings {
@@ -20,17 +21,33 @@ const searchSettingsDefaults: SearchSettings = {
   maxConcurrentShardRequests: 0, // use Elasticsearch default by setting to 0
 };
 
+const DEFAULT_SPACE_ID = 'default';
+const MAX_SPACES = 100;
+
+interface CacheEntry {
+  settings: SearchSettings;
+  lastRefreshTime: number;
+  refreshPromise: Promise<void> | null;
+}
+
+/**
+ * Minimal interface for the spaces service. This allows the data plugin
+ * to use spaces without having a direct dependency on the spaces plugin.
+ */
+interface SpacesService {
+  getSpaceId(request: KibanaRequest): string;
+}
+
 /**
  * Caches UI settings used by search strategies.
  * Automatically refreshes at most every 30 seconds to minimize performance overhead.
  */
 export class SearchSettingsCache {
-  private cache: SearchSettings | null = null;
-  private lastRefreshTime: number = 0;
+  private cache?: LRUCache<string, CacheEntry>;
   private readonly MIN_SETTINGS_REFRESH_INTERVAL_MS = 30_000;
   private uiSettings?: CoreStart['uiSettings'];
   private savedObjects?: CoreStart['savedObjects'];
-  private refreshPromise: Promise<void> | null = null;
+  private spacesService?: SpacesService;
 
   constructor(private readonly logger: Logger) {}
 
@@ -40,12 +57,17 @@ export class SearchSettingsCache {
    */
   public async start(
     uiSettings: CoreStart['uiSettings'],
-    savedObjects: CoreStart['savedObjects']
+    savedObjects: CoreStart['savedObjects'],
+    spacesService?: SpacesService
   ): Promise<void> {
     this.uiSettings = uiSettings;
     this.savedObjects = savedObjects;
+    this.spacesService = spacesService;
 
-    await this.refreshCache();
+    this.cache = new LRUCache<string, CacheEntry>({
+      max: MAX_SPACES,
+      ttl: this.MIN_SETTINGS_REFRESH_INTERVAL_MS,
+    });
   }
 
   /**
@@ -53,85 +75,116 @@ export class SearchSettingsCache {
    * Should be called during service shutdown.
    */
   public stop(): void {
-    this.cache = null;
-    this.lastRefreshTime = 0;
+    this.cache?.clear();
+    this.cache = undefined;
     this.uiSettings = undefined;
     this.savedObjects = undefined;
-    this.refreshPromise = null;
+    this.spacesService = undefined;
   }
 
   /**
-   * Returns the cached search settings, or defaults if cache is not initialized.
+   * Returns the cached search settings for the request's space, or defaults if not cached.
    */
-  public getSettings(): SearchSettings {
-    if (!this.cache) {
-      // Fallback if cache not initialized yet
-      return searchSettingsDefaults;
-    }
-    return this.cache;
+  public getSettings(request: KibanaRequest): SearchSettings {
+    const spaceId = this.getSpaceId(request);
+    const entry = this.cache?.get(spaceId);
+    return entry?.settings ?? searchSettingsDefaults;
   }
 
   /**
-   * Refreshes the cache if enough time has passed since the last refresh.
-   * This method is safe to call on every search request as it rate-limits itself.
+   * Refreshes the cache for the request's space if enough time has passed since the last refresh.
+   * This method is safe to call on every search request as it rate-limits itself per space.
    */
-  public maybeRefresh(): void {
+  public maybeRefresh(request: KibanaRequest): void {
     if (!this.uiSettings || !this.savedObjects) {
       return;
     }
 
+    const spaceId = this.getSpaceId(request);
+    const entry = this.cache?.get(spaceId);
     const now = Date.now();
-    const timeSinceLastRefresh = now - this.lastRefreshTime;
+    const timeSinceLastRefresh = entry ? now - entry.lastRefreshTime : Infinity;
 
     if (timeSinceLastRefresh >= this.MIN_SETTINGS_REFRESH_INTERVAL_MS) {
-      this.refreshCache().catch((error) => {
-        this.logger.error('Failed to refresh search settings cache on demand', error);
+      this.refreshCache(request, spaceId).catch((error) => {
+        this.logger.error(`Failed to refresh search settings cache for space ${spaceId}`, error);
       });
     }
   }
 
   /**
-   * Fetches the current UI settings from the global scope and updates the cache.
+   * Extracts the space ID from the request, or returns default space if spaces plugin unavailable.
    */
-  private async refreshCache(): Promise<void> {
-    if (!this.uiSettings || !this.savedObjects) {
-      throw new Error('Cannot refresh cache: uiSettings or savedObjects not initialized');
+  private getSpaceId(request: KibanaRequest): string {
+    if (!this.spacesService) {
+      return DEFAULT_SPACE_ID;
+    }
+    return this.spacesService.getSpaceId(request);
+  }
+
+  /**
+   * Fetches the current UI settings for the given space and updates the cache.
+   */
+  private async refreshCache(request: KibanaRequest, spaceId: string): Promise<void> {
+    if (!this.uiSettings || !this.savedObjects || !this.cache) {
+      throw new Error('Cannot refresh cache: uiSettings, savedObjects, or cache not initialized');
     }
 
-    if (this.refreshPromise) {
-      return this.refreshPromise;
+    // Check for in-flight promise for this space
+    const existingEntry = this.cache.get(spaceId);
+    if (existingEntry?.refreshPromise) {
+      return existingEntry.refreshPromise;
     }
 
-    this.refreshPromise = (async () => {
+    const refreshPromise = (async () => {
       try {
-        const internalClient = this.savedObjects!.createInternalRepository();
-        const globalClient = this.uiSettings!.globalAsScopedToClient(internalClient);
+        const savedObjectsClient = this.savedObjects!.getScopedClient(request);
+        const scopedClient = this.uiSettings!.asScopedToClient(savedObjectsClient);
 
         const [includeFrozen, maxConcurrentShardRequests] = await Promise.all([
-          globalClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-          globalClient.get<number>(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS),
+          scopedClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+          scopedClient.get<number>(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS),
         ]);
 
-        this.cache = {
+        const settings = {
           includeFrozen,
           maxConcurrentShardRequests,
         };
 
-        this.lastRefreshTime = Date.now();
+        const entry: CacheEntry = {
+          settings,
+          lastRefreshTime: Date.now(),
+          refreshPromise: null,
+        };
+
+        this.cache!.set(spaceId, entry);
 
         this.logger.debug(
-          `Search settings cache initialized: includeFrozen=${includeFrozen}, maxConcurrentShardRequests=${maxConcurrentShardRequests}`
+          `Search settings cache refreshed for space ${spaceId}: includeFrozen=${includeFrozen}, maxConcurrentShardRequests=${maxConcurrentShardRequests}`
         );
       } catch (error) {
-        this.logger.error('Failed to initialize search settings cache', error);
+        this.logger.error(`Failed to refresh search settings cache for space ${spaceId}`, error);
         // Fallback to defaults
-        this.cache = searchSettingsDefaults;
-        this.lastRefreshTime = Date.now();
-      } finally {
-        this.refreshPromise = null;
+        const entry: CacheEntry = {
+          settings: searchSettingsDefaults,
+          lastRefreshTime: Date.now(),
+          refreshPromise: null,
+        };
+        this.cache!.set(spaceId, entry);
       }
     })();
 
-    return this.refreshPromise;
+    // Store the promise in the cache entry to deduplicate concurrent refreshes
+    const tempEntry: CacheEntry = existingEntry
+      ? { ...existingEntry, refreshPromise }
+      : {
+          settings: searchSettingsDefaults,
+          lastRefreshTime: 0,
+          refreshPromise,
+        };
+
+    this.cache.set(spaceId, tempEntry);
+
+    return refreshPromise;
   }
 }

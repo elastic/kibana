@@ -108,6 +108,16 @@ import { esqlAsyncSearchStrategyProvider } from './strategies/esql_async_search'
 
 type StrategyMap = Map<string | symbol, ISearchStrategy<any, any>>;
 
+/**
+ * Minimal interface for the spaces service. This allows the data plugin
+ * to use spaces without having a direct dependency on the spaces plugin.
+ */
+interface SpacesService {
+  spacesService: {
+    getSpaceId(request: KibanaRequest): string;
+  };
+}
+
 /** @internal */
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsServerSetup;
@@ -118,6 +128,7 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
+  spaces?: SpacesService;
 }
 
 /** @internal */
@@ -274,16 +285,18 @@ export class SearchService {
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, spaces }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
     this.sessionService.start(core, {});
 
     // Initialize settings cache at startup
-    this.searchSettingsCache.start(uiSettings, savedObjects).catch((error) => {
-      this.logger.error('Failed to initialize search settings cache on startup', error);
-    });
+    this.searchSettingsCache
+      .start(uiSettings, savedObjects, spaces?.spacesService)
+      .catch((error) => {
+        this.logger.error('Failed to initialize search settings cache on startup', error);
+      });
 
     const aggs = this.aggsService.start({
       fieldFormats,
@@ -340,8 +353,11 @@ export class SearchService {
     this.aggsService.stop();
   }
 
-  public getSearchSettings(): { includeFrozen: boolean; maxConcurrentShardRequests: number } {
-    return this.searchSettingsCache.getSettings();
+  public getSearchSettings(request: KibanaRequest): {
+    includeFrozen: boolean;
+    maxConcurrentShardRequests: number;
+  } {
+    return this.searchSettingsCache.getSettings(request);
   }
 
   private registerSearchStrategy = <
@@ -378,7 +394,7 @@ export class SearchService {
     options: ISearchOptions
   ) => {
     try {
-      this.searchSettingsCache.maybeRefresh();
+      this.searchSettingsCache.maybeRefresh(deps.request);
 
       const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
         options.strategy
@@ -562,7 +578,7 @@ export class SearchService {
         searchSessionsClient,
         savedObjectsClient,
         esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
-        getSearchSettings: () => this.getSearchSettings(),
+        getSearchSettings: () => this.getSearchSettings(request),
         request,
         rollupsEnabled,
       };

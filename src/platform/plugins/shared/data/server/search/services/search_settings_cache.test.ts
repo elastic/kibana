@@ -8,24 +8,33 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 import { SearchSettingsCache } from './search_settings_cache';
 
 describe('SearchSettingsCache', () => {
   const logger = loggingSystemMock.createLogger();
 
+  const createMockRequest = (spaceId: string = 'default'): KibanaRequest => {
+    return { headers: {}, spaceId } as any;
+  };
+
   const createMockUiSettings = () => {
-    const globalClient = {
+    const scopedClient = {
       get: jest.fn(),
     };
 
     return {
-      globalAsScopedToClient: jest.fn().mockReturnValue(globalClient),
-      _globalClient: globalClient,
+      asScopedToClient: jest.fn().mockReturnValue(scopedClient),
+      _scopedClient: scopedClient,
     };
   };
 
   const createMockSavedObjects = () => ({
-    createInternalRepository: jest.fn().mockReturnValue({}),
+    getScopedClient: jest.fn().mockReturnValue({}),
+  });
+
+  const createMockSpacesService = () => ({
+    getSpaceId: jest.fn((request: KibanaRequest) => (request as any).spaceId || 'default'),
   });
 
   beforeEach(() => {
@@ -37,21 +46,27 @@ describe('SearchSettingsCache', () => {
       const cache = new SearchSettingsCache(logger);
       const uiSettings = createMockUiSettings();
       const savedObjects = createMockSavedObjects();
+      const spacesService = createMockSpacesService();
+      const request = createMockRequest('default');
 
-      uiSettings._globalClient.get
+      uiSettings._scopedClient.get
         .mockResolvedValueOnce(true) // includeFrozen
         .mockResolvedValueOnce(100); // maxConcurrentShardRequests
 
-      await cache.start(uiSettings as any, savedObjects as any);
+      await cache.start(uiSettings as any, savedObjects as any, spacesService as any);
 
-      const settings = cache.getSettings();
+      // Trigger refresh for default space
+      cache.maybeRefresh(request);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const settings = cache.getSettings(request);
       expect(settings.includeFrozen).toBe(true);
       expect(settings.maxConcurrentShardRequests).toBe(100);
 
       cache.stop();
 
       // After stop, should return defaults
-      const settingsAfterStop = cache.getSettings();
+      const settingsAfterStop = cache.getSettings(request);
       expect(settingsAfterStop.includeFrozen).toBe(false);
       expect(settingsAfterStop.maxConcurrentShardRequests).toBe(0);
     });
@@ -60,8 +75,26 @@ describe('SearchSettingsCache', () => {
   describe('getSettings', () => {
     it('should return defaults when not initialized', () => {
       const cache = new SearchSettingsCache(logger);
+      const request = createMockRequest();
 
-      const settings = cache.getSettings();
+      const settings = cache.getSettings(request);
+
+      expect(settings).toEqual({
+        includeFrozen: false,
+        maxConcurrentShardRequests: 0,
+      });
+    });
+
+    it('should return defaults when space not cached yet', async () => {
+      const cache = new SearchSettingsCache(logger);
+      const uiSettings = createMockUiSettings();
+      const savedObjects = createMockSavedObjects();
+      const spacesService = createMockSpacesService();
+
+      await cache.start(uiSettings as any, savedObjects as any, spacesService as any);
+
+      const request = createMockRequest('uncached-space');
+      const settings = cache.getSettings(request);
 
       expect(settings).toEqual({
         includeFrozen: false,
@@ -70,33 +103,176 @@ describe('SearchSettingsCache', () => {
     });
   });
 
-  describe('concurrent refreshes', () => {
-    it('should deduplicate concurrent refresh calls', async () => {
+  describe('space isolation', () => {
+    it('should cache settings per space', async () => {
       const cache = new SearchSettingsCache(logger);
       const uiSettings = createMockUiSettings();
       const savedObjects = createMockSavedObjects();
+      const spacesService = createMockSpacesService();
+
+      await cache.start(uiSettings as any, savedObjects as any, spacesService as any);
+
+      const requestSpace1 = createMockRequest('space1');
+      const requestSpace2 = createMockRequest('space2');
+
+      // Mock different settings for each space
+      uiSettings._scopedClient.get
+        .mockResolvedValueOnce(true) // space1 includeFrozen
+        .mockResolvedValueOnce(100) // space1 maxConcurrentShardRequests
+        .mockResolvedValueOnce(false) // space2 includeFrozen
+        .mockResolvedValueOnce(50); // space2 maxConcurrentShardRequests
+
+      // Refresh both spaces
+      cache.maybeRefresh(requestSpace1);
+      cache.maybeRefresh(requestSpace2);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Verify each space has its own settings
+      const settingsSpace1 = cache.getSettings(requestSpace1);
+      expect(settingsSpace1.includeFrozen).toBe(true);
+      expect(settingsSpace1.maxConcurrentShardRequests).toBe(100);
+
+      const settingsSpace2 = cache.getSettings(requestSpace2);
+      expect(settingsSpace2.includeFrozen).toBe(false);
+      expect(settingsSpace2.maxConcurrentShardRequests).toBe(50);
+    });
+  });
+
+  describe('default space fallback', () => {
+    it('should use default space when spaces plugin unavailable', async () => {
+      const cache = new SearchSettingsCache(logger);
+      const uiSettings = createMockUiSettings();
+      const savedObjects = createMockSavedObjects();
+
+      uiSettings._scopedClient.get
+        .mockResolvedValueOnce(true) // includeFrozen
+        .mockResolvedValueOnce(100); // maxConcurrentShardRequests
+
+      // Start without spaces service
+      await cache.start(uiSettings as any, savedObjects as any);
+
+      const request = createMockRequest('any-space');
+      cache.maybeRefresh(request);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const settings = cache.getSettings(request);
+      expect(settings.includeFrozen).toBe(true);
+      expect(settings.maxConcurrentShardRequests).toBe(100);
+    });
+  });
+
+  describe('concurrent refreshes', () => {
+    it('should deduplicate concurrent refresh calls for same space', async () => {
+      const cache = new SearchSettingsCache(logger);
+      const uiSettings = createMockUiSettings();
+      const savedObjects = createMockSavedObjects();
+      const spacesService = createMockSpacesService();
 
       let resolveGet: ((value: any) => void) | undefined;
       const getPromise = new Promise((resolve) => {
         resolveGet = resolve;
       });
 
-      uiSettings._globalClient.get.mockReturnValue(getPromise);
+      uiSettings._scopedClient.get.mockReturnValue(getPromise);
 
-      // Start the cache (triggers first refresh)
-      const startPromise = cache.start(uiSettings as any, savedObjects as any);
+      await cache.start(uiSettings as any, savedObjects as any, spacesService as any);
 
-      // Trigger maybeRefresh multiple times while the first refresh is still pending
-      cache.maybeRefresh();
-      cache.maybeRefresh();
-      cache.maybeRefresh();
+      const request = createMockRequest('space1');
+
+      // Trigger maybeRefresh multiple times for the same space
+      cache.maybeRefresh(request);
+      cache.maybeRefresh(request);
+      cache.maybeRefresh(request);
 
       // Resolve the UI settings calls
       resolveGet!(true);
-      await startPromise;
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Should only have called get twice (once for each setting), not multiple times
-      expect(uiSettings._globalClient.get).toHaveBeenCalledTimes(2);
+      expect(uiSettings._scopedClient.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should allow concurrent refreshes for different spaces', async () => {
+      const cache = new SearchSettingsCache(logger);
+      const uiSettings = createMockUiSettings();
+      const savedObjects = createMockSavedObjects();
+      const spacesService = createMockSpacesService();
+
+      uiSettings._scopedClient.get.mockResolvedValue(true);
+
+      await cache.start(uiSettings as any, savedObjects as any, spacesService as any);
+
+      const requestSpace1 = createMockRequest('space1');
+      const requestSpace2 = createMockRequest('space2');
+
+      // Trigger refreshes for different spaces
+      cache.maybeRefresh(requestSpace1);
+      cache.maybeRefresh(requestSpace2);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Should have called get 4 times (2 settings × 2 spaces)
+      expect(uiSettings._scopedClient.get).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe('LRU eviction', () => {
+    it('should evict oldest space when cache is full', async () => {
+      const cache = new SearchSettingsCache(logger);
+      const uiSettings = createMockUiSettings();
+      const savedObjects = createMockSavedObjects();
+      const spacesService = createMockSpacesService();
+
+      uiSettings._scopedClient.get.mockResolvedValue(true);
+
+      await cache.start(uiSettings as any, savedObjects as any, spacesService as any);
+
+      // Create 101 spaces (max is 100)
+      const requests = Array.from({ length: 101 }, (_, i) => createMockRequest(`space${i}`));
+
+      // Refresh all spaces
+      for (const request of requests) {
+        cache.maybeRefresh(request);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // The first space should have been evicted, so it should return defaults
+      const settingsSpace0 = cache.getSettings(requests[0]);
+      expect(settingsSpace0).toEqual({
+        includeFrozen: false,
+        maxConcurrentShardRequests: 0,
+      });
+
+      // The last space should still be cached
+      const settingsSpace100 = cache.getSettings(requests[100]);
+      expect(settingsSpace100.includeFrozen).toBe(true);
+    });
+  });
+
+  describe('error handling', () => {
+    it('should fallback to defaults on fetch failure', async () => {
+      const cache = new SearchSettingsCache(logger);
+      const uiSettings = createMockUiSettings();
+      const savedObjects = createMockSavedObjects();
+      const spacesService = createMockSpacesService();
+
+      uiSettings._scopedClient.get.mockRejectedValue(new Error('fetch failed'));
+
+      await cache.start(uiSettings as any, savedObjects as any, spacesService as any);
+
+      const request = createMockRequest('space1');
+      cache.maybeRefresh(request);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const settings = cache.getSettings(request);
+      expect(settings).toEqual({
+        includeFrozen: false,
+        maxConcurrentShardRequests: 0,
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to refresh search settings cache for space space1'),
+        expect.any(Error)
+      );
     });
   });
 });
