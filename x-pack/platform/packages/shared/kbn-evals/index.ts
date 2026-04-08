@@ -26,7 +26,7 @@ export * as cli from './src/cli';
 
 export { evaluate } from './src/evaluate';
 export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
-export type { EvaluationCriterion } from './src/evaluators/criteria';
+export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
   Example,

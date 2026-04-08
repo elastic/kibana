@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import {
@@ -16,22 +16,6 @@ import {
 } from '../../src/datasets';
 
 const SAMPLE_DOCS_MAX = 50;
-const ERROR_SAMPLE_BUDGET = 5;
-
-const LOG_MESSAGE_FIELDS = ['body.text', 'message'];
-const ERROR_KEYWORDS = ['error', 'exception'];
-
-const ERROR_FILTER: QueryDslQueryContainer = {
-  bool: {
-    should: [
-      { term: { 'log.level': 'error' } },
-      ...LOG_MESSAGE_FIELDS.flatMap((field) =>
-        ERROR_KEYWORDS.map((keyword) => ({ match_phrase: { [field]: keyword } }))
-      ),
-    ],
-    minimum_should_match: 1,
-  },
-};
 
 const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
   const app = fields['resource.attributes.app'];
@@ -39,29 +23,6 @@ const getAppNameFromFields = (fields: Record<string, unknown>): string | undefin
     return app[0];
   }
   return undefined;
-};
-
-const extractRequiredAppsFromCriteria = (scenario: KIFeatureExtractionScenario): string[] => {
-  const apps = new Set<string>();
-
-  for (const criteria of scenario.output.criteria) {
-    if (typeof criteria === 'string') continue;
-
-    const id = (criteria as { id?: unknown }).id;
-    if (typeof id !== 'string') continue;
-
-    if (id.startsWith('entity-')) {
-      apps.add(id.slice('entity-'.length));
-      continue;
-    }
-
-    if (id.startsWith('dep-')) {
-      const parts = id.slice('dep-'.length).split('-').filter(Boolean);
-      for (const part of parts) apps.add(part);
-    }
-  }
-
-  return [...apps].filter(Boolean);
 };
 
 const addUniqueHitsToSample = ({
@@ -112,81 +73,55 @@ export const collectSampleDocuments = async ({
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
   const uniqueApps = new Set<string>();
   const seen = new Set<string>();
-  const requiredApps = extractRequiredAppsFromCriteria(scenario);
-
-  const requiredAppResults = await Promise.all(
-    requiredApps.map((app) =>
-      getSampleDocuments({
-        esClient,
-        index: MANAGED_STREAM_SEARCH_PATTERN,
-        start: 0,
-        end: Date.now(),
-        filter: [...query, { term: { 'resource.attributes.app': app } }],
-        size: 1,
-      })
-    )
+  const criteriaWithFilters = scenario.output.criteria.filter(
+    (criterion) => (criterion.sampling_filters?.length ?? 0) > 0
   );
 
-  addUniqueHitsToSample({
-    hits: requiredAppResults.flatMap(({ hits }) => hits),
-    docs,
-    seen,
-    uniqueApps,
-  });
+  const samplingFilterResults = await Promise.all(
+    criteriaWithFilters.flatMap((criterion) => {
+      const { sampling_filters = [], ...details } = criterion;
 
-  const representativeCount = docs.length;
-
-  // Per-app error sampling: fetch 1 error-specific doc per required app so failure
-  // signals aren't drowned out by higher-volume normal operation logs.
-  const requiredAppErrorResults = await Promise.all(
-    requiredApps.map((app) =>
-      getSampleDocuments({
-        esClient,
-        index: MANAGED_STREAM_SEARCH_PATTERN,
-        start: 0,
-        end: Date.now(),
-        filter: [
-          ...query,
-          { term: { 'resource.attributes.app': app } },
-          ERROR_FILTER,
-          ...(seen.size > 0 ? [{ bool: { must_not: [{ ids: { values: [...seen] } }] } }] : []),
-        ],
-        size: 1,
-      })
-    )
-  );
-
-  addUniqueHitsToSample({
-    hits: requiredAppErrorResults.flatMap(({ hits }) => hits),
-    docs,
-    seen,
-    uniqueApps,
-  });
-
-  const perAppErrorCount = docs.length - representativeCount;
-
-  // General error fill: additional error docs across all apps for cross-cutting patterns.
-  if (docs.length < SAMPLE_DOCS_MAX) {
-    const errorBudget = Math.min(
-      Math.max(ERROR_SAMPLE_BUDGET - perAppErrorCount, 0),
-      SAMPLE_DOCS_MAX - docs.length
-    );
-
-    if (errorBudget > 0) {
-      const { hits } = await getSampleDocuments({
-        esClient,
-        index: MANAGED_STREAM_SEARCH_PATTERN,
-        start: 0,
-        end: Date.now(),
-        filter: [...query, ERROR_FILTER, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
-        size: errorBudget,
+      return sampling_filters.map(async (filter) => {
+        const { hits } = await getSampleDocuments({
+          esClient,
+          index: MANAGED_STREAM_SEARCH_PATTERN,
+          start: 0,
+          end: Date.now(),
+          filter: [...query, filter],
+          size: 1,
+        });
+        return { hits, criterion: details, filter };
       });
+    })
+  );
 
-      addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
+  for (const { hits, criterion } of samplingFilterResults) {
+    const hit = hits[0];
+    if (!hit) {
+      log.warning(`  [${criterion.id}] no matching document found`);
+      continue;
     }
+    const app = hit.fields ? getAppNameFromFields(hit.fields) : undefined;
+    const logLevel = hit.fields?.['log.level']?.[0] ?? 'unknown';
+    log.debug(
+      `  [${criterion.id}] matched doc ${hit._id} (app=${app ?? 'n/a'}, level=${logLevel})`
+    );
   }
 
-  const totalErrorCount = docs.length - representativeCount;
+  const preDedupe = samplingFilterResults.reduce((sum, { hits }) => sum + hits.length, 0);
+  addUniqueHitsToSample({
+    hits: samplingFilterResults.flatMap(({ hits }) => hits),
+    docs,
+    seen,
+    uniqueApps,
+  });
+  const criteriaCount = docs.length;
+  const duplicateCount = preDedupe - criteriaCount;
+  if (duplicateCount > 0) {
+    log.debug(
+      `${duplicateCount} duplicate doc(s) skipped across criteria filters (multiple filters matched the same document)`
+    );
+  }
 
   if (docs.length < SAMPLE_DOCS_MAX) {
     const { hits } = await getSampleDocuments({
@@ -201,25 +136,21 @@ export const collectSampleDocuments = async ({
     addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
   }
 
-  const generalCount = docs.length - representativeCount - totalErrorCount;
+  const appCounts = new Map<string, number>();
+  for (const doc of docs) {
+    const app = doc.fields ? getAppNameFromFields(doc.fields) : undefined;
+    appCounts.set(app ?? 'unknown', (appCounts.get(app ?? 'unknown') ?? 0) + 1);
+  }
+  const distribution = [...appCounts.entries()]
+    .sort(([, a], [, b]) => b - a)
+    .map(([app, count]) => `${app}:${count}`)
+    .join(', ');
 
   log.info(
-    `Collected ${docs.length} sample document(s) across ${uniqueApps.size} app(s): ${[
-      ...uniqueApps,
-    ].join(', ')} ` +
-      `(${representativeCount} representative, ${totalErrorCount} error [${perAppErrorCount} per-app + ${
-        totalErrorCount - perAppErrorCount
-      } general], ${generalCount} general fill)`
+    `Collected ${docs.length} sample document(s) across ${uniqueApps.size} app(s) ` +
+      `(${criteriaCount} from criteria filters, ${docs.length - criteriaCount} general fill). ` +
+      `Distribution: ${distribution}`
   );
-
-  const missingApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (missingApps.length > 0) {
-    log.warning(
-      `Sample is missing required app(s) from criteria: ${missingApps.join(
-        ', '
-      )} (criteria may not be satisfiable from available logs)`
-    );
-  }
 
   return docs;
 };

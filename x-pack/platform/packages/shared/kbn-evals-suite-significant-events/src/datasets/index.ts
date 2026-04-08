@@ -100,5 +100,6 @@ export type {
   KIFeatureExtractionScenario,
   KIFeatureExclusionScenario,
   KIFeatureDuplicationScenario,
+  SamplingCriterion,
   SnapshotSourceOverride,
 } from './types';
