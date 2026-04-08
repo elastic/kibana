@@ -18,7 +18,17 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
-type APMIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
+const APM_SOURCE_FIELDS = {
+  SERVICE_NAME: 'service.name',
+  SERVICE_ENVIRONMENT: 'service.environment',
+  TRANSACTION_TYPE: 'transaction.type',
+  TRANSACTION_NAME: 'transaction.name',
+} as const;
+
+type ApmSourceField = (typeof APM_SOURCE_FIELDS)[keyof typeof APM_SOURCE_FIELDS];
+
+type ApmIndicator = APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
+
 interface ApmSourcePanelProps {
   slo: SLOWithSummaryResponse;
   timeRange?: { from: string; to: string };
@@ -32,13 +42,13 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
     },
   } = useKibana();
 
-  const indicator = slo.indicator as APMIndicator;
+  const indicator = slo.indicator as ApmIndicator;
 
   const {
     params: { service, environment, transactionType, transactionName },
   } = indicator;
 
-  const serviceName = (slo.groupings?.['service.name'] as string | undefined) ?? service;
+  const serviceNameValue = (slo.groupings?.['service.name'] as string | undefined) ?? service;
   const envValue = (slo.groupings?.['service.environment'] as string | undefined) ?? environment;
   const transactionTypeValue =
     (slo.groupings?.['transaction.type'] as string | undefined) ?? transactionType;
@@ -54,11 +64,11 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
 
   const locator = canNavigateToApm ? share.url.locators.get(APM_APP_LOCATOR_ID) : undefined;
 
-  const getFieldLink = (field: string, value: string): string | undefined => {
-    if (!locator || serviceName === ALL_VALUE) return undefined;
+  const getFieldLink = (field: ApmSourceField, value: string): string | undefined => {
+    if (!locator || serviceNameValue === ALL_VALUE) return undefined;
 
     const base = {
-      serviceName,
+      serviceName: serviceNameValue,
       query: {
         environment: 'ENVIRONMENT_ALL',
         rangeFrom: effectiveTimeRange.from,
@@ -67,30 +77,30 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
     };
 
     switch (field) {
-      case 'service.environment':
+      case APM_SOURCE_FIELDS.SERVICE_ENVIRONMENT:
         return locator.getRedirectUrl({ ...base, query: { ...base.query, environment: value } });
-      case 'transaction.type':
+      case APM_SOURCE_FIELDS.TRANSACTION_TYPE:
         return locator.getRedirectUrl({
           ...base,
           query: { ...base.query, transactionType: value },
         });
-      case 'transaction.name':
+      case APM_SOURCE_FIELDS.TRANSACTION_NAME:
         return locator.getRedirectUrl({
           ...base,
           serviceOverviewTab: 'transactions',
           query: { ...base.query, transactionName: value },
         });
-      case 'service.name':
+      case APM_SOURCE_FIELDS.SERVICE_NAME:
       default:
         return locator.getRedirectUrl(base);
     }
   };
 
-  const fields = [
-    { field: 'service.name', label: 'service.name', value: serviceName },
-    { field: 'service.environment', label: 'service.environment', value: envValue },
-    { field: 'transaction.type', label: 'transaction.type', value: transactionTypeValue },
-    { field: 'transaction.name', label: 'transaction.name', value: transactionNameValue },
+  const fields: Array<{ field: ApmSourceField; value: string }> = [
+    { field: APM_SOURCE_FIELDS.SERVICE_NAME, value: serviceNameValue },
+    { field: APM_SOURCE_FIELDS.SERVICE_ENVIRONMENT, value: envValue },
+    { field: APM_SOURCE_FIELDS.TRANSACTION_TYPE, value: transactionTypeValue },
+    { field: APM_SOURCE_FIELDS.TRANSACTION_NAME, value: transactionNameValue },
   ];
 
   const visibleFields = fields.filter((f) => f.value !== ALL_VALUE);
@@ -112,22 +122,22 @@ export function ApmSourcePanel({ slo, timeRange }: ApmSourcePanelProps) {
             })}
           </h3>
         </EuiTitle>
-        {visibleFields.map((field) => {
-          const link = getFieldLink(field.field, field.value);
+        {visibleFields.map(({ field, value }) => {
+          const link = getFieldLink(field, value);
           return (
-            <EuiText key={field.field} size="s">
-              {field.label}:{' '}
+            <EuiText key={field} size="s">
+              {field}:{' '}
               {link ? (
                 <EuiLink
-                  data-test-subj={`sloDetailsApmSourceLink-${field.field}`}
+                  data-test-subj={`sloDetailsApmSourceLink-${field}`}
                   data-action="navigateToApm"
                   data-source={slo.indicator.type}
                   href={link}
                 >
-                  {field.value}
+                  {value}
                 </EuiLink>
               ) : (
-                <strong>{field.value}</strong>
+                <strong>{value}</strong>
               )}
             </EuiText>
           );
