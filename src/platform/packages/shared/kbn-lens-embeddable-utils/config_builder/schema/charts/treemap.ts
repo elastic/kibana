@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 
 import {
   collapseBySchema,
@@ -118,7 +118,7 @@ export const treemapStateSchemaNoESQL = schema.object(
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...treemapSharedStateSchema,
     ...dslOnlyPanelInfoSchema,
@@ -165,7 +165,7 @@ export const treemapStateSchemaESQL = schema.object(
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...treemapSharedStateSchema,
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.

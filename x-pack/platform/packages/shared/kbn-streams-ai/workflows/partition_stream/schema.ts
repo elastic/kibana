@@ -26,7 +26,7 @@ export const schema: object = {
       },
       UnaryOperator: {
         type: 'string',
-        enum: ['exists', 'notExists'],
+        enum: ['exists'],
         description: 'Operator for unary conditions.',
       },
       BinaryFilterCondition: {
@@ -103,7 +103,11 @@ export const schema: object = {
         type: 'object',
         properties: {
           field: { type: 'string', minLength: 1, description: 'The document field to check.' },
-          exists: { type: 'boolean', description: 'Indicates whether the field exists or not.' },
+          exists: {
+            type: 'boolean',
+            description:
+              'Checks field existence. Use `true` to match documents where the field exists, `false` to match documents where it does not. There is no separate `notExists` key — use `{ "field": "x", "exists": false }` instead.',
+          },
         },
         required: ['field'],
         description: 'A condition that checks for the existence or non-existence of a field.',
