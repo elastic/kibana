@@ -268,6 +268,7 @@ export function createNavigationTree({
                   breadcrumbStatus: 'hidden' as const,
                   children: [
                     { link: 'management:rules' as const, breadcrumbStatus: 'hidden' as const },
+                    { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
                     {
                       link: 'management:notification_policies' as const,
                       breadcrumbStatus: 'hidden' as const,

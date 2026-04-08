@@ -99,8 +99,8 @@ export class SecuritySolutionServerlessPlugin
       projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     }
 
-    // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
-    // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
+    // Workflows is enabled by default since 9.4.0. The setting is retained so admins can opt out.
+    // It is only registered in complete and EASE tiers; adding it while in the essentials tier causes an error.
     if (
       this.config.productTypes.some(
         (productType) => productType.product_tier !== ProductTier.essentials

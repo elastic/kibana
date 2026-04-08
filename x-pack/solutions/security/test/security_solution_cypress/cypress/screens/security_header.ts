@@ -88,6 +88,15 @@ export const TRANSLATED_RULES_PAGE = Cypress.env('IS_SERVERLESS')
   ? getDataTestSubjectSelectorMatch('nav-item-id-siem_migrations-rules')
   : getDataTestSubjectSelector('solutionSideNavPanelLink-siem_migrations-rules');
 
+export const LAUNCHPAD_PANEL_BTN = getDataTestSubjectSelector(
+  'solutionSideNavItemLink-securityGroup:launchpad'
+);
+
+export const LAUNCHPAD_TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-rules'
+);
+
+// not used anywhere (added in https://github.com/elastic/kibana/pull/238116/files)
 export const TRANSLATED_DASHBOARDS_PAGE = getDataTestSubjectSelector(
   'solutionSideNavPanelLink-siem_migrations-dashboards'
 );

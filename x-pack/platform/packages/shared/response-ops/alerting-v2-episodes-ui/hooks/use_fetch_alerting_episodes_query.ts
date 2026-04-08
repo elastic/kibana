@@ -12,10 +12,7 @@ import { queryKeys } from '../query_keys';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import {
-  type EpisodesFilterState,
-  type EpisodesSortState,
-} from '../utils/build_episodes_esql_query';
+import { type EpisodesFilterState, type EpisodesSortState } from '../queries/episodes_query';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
@@ -46,19 +43,15 @@ export const useFetchAlertingEpisodesQuery = ({
   const query = useQuery({
     enabled: dataView != null,
     queryKey,
-    queryFn: async ({ signal: abortSignal }) => {
-      if (!dataView) {
-        return { type: 'datatable' as const, columns: [], rows: [], total: 0 };
-      }
-      return await fetchAlertingEpisodes({
+    queryFn: ({ signal: abortSignal }) =>
+      fetchAlertingEpisodes({
         abortSignal,
         pageSize,
         services,
         filterState,
         sortState,
         timeRange,
-      });
-    },
+      }),
     keepPreviousData: true,
   });
 
