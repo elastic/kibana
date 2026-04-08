@@ -171,9 +171,9 @@ export async function getTemplateInputs(
       }
     }
   }
-
+  const logger = appContextService.getLogger();
   const assetsMap = await getAgentTemplateAssetsMap({
-    logger: appContextService.getLogger(),
+    logger,
     packageInfo,
     savedObjectsClient: soClient,
     ignoreUnverified,
@@ -222,7 +222,11 @@ export async function getTemplateInputs(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(inputs, undefined, undefined, packageInfo);
+    otelcolConfig = generateOtelcolConfig({
+      inputs,
+      logger,
+      defaultPackageInfo: packageInfo,
+    });
   }
   // filter out the otelcol inputs, they will be added at the root of the config
   const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);
