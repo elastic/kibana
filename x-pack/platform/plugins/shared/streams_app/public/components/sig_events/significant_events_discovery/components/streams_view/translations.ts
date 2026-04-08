@@ -245,3 +245,10 @@ export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
       'Runs only query generation on selected streams using the configured model.',
   }
 );
+
+export const DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsConfigAriaLabel',
+  {
+    defaultMessage: 'Configure discovery model',
+  }
+);

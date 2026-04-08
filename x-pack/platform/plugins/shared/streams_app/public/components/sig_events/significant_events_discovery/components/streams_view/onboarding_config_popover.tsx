@@ -118,7 +118,7 @@ interface ConnectorSubPanelProps {
   onSelect: (connectorId: string) => void;
 }
 
-const ConnectorSubPanel = ({
+export const ConnectorSubPanel = ({
   connectors,
   resolvedConnector,
   selectedConnectorId,
@@ -165,7 +165,6 @@ export const OnboardingConfigPopover = ({
   isRunDisabled,
 }: OnboardingConfigPopoverProps) => {
   const {
-    core,
     dependencies: {
       start: { share },
     },
