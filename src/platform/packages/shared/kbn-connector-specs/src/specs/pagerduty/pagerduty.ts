@@ -109,10 +109,8 @@ export const PagerdutyConnector: ConnectorSpec = {
   actions: {
     getUserData: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.getUserData.description', {
-        defaultMessage:
-          'Get the authenticated PagerDuty user profile including name, email, role, and teams.',
-      }),
+      description:
+        'Return the current PagerDuty user — i.e. the account that owns the API key. Returns id, name, email, summary, role, and teams. No inputs required. Use this to confirm which user the connector is authenticated as.',
       input: GetUserDataInputSchema,
       handler: async (ctx) => {
         return callToolJson(ctx, 'get_user_data');
@@ -121,9 +119,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listSchedules: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.listSchedules.description', {
-        defaultMessage: 'List PagerDuty schedules with optional filtering by query, team, or user.',
-      }),
+      description:
+        'List PagerDuty on-call schedules. Supports free-text search across name and description fields (e.g., "primary" or "weekend"), filtering by team or user IDs, and including related resources such as schedule_layers, overrides_subschedule, or final_schedule.',
       input: ListSchedulesInputSchema,
       handler: async (ctx, input: ListSchedulesInput) => {
         return callToolJson(ctx, 'list_schedules', { query_model: input });
@@ -132,13 +129,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listEscalationPolicies: {
       isTool: true,
-      description: i18n.translate(
-        'connectorSpecs.pagerduty.actions.listEscalationPolicies.description',
-        {
-          defaultMessage:
-            'List PagerDuty escalation policies with optional filtering by query, user, or team.',
-        }
-      ),
+      description:
+        'List PagerDuty escalation policies. Supports free-text search across name and description fields (e.g., "production" or "on-call"), and filtering by user or team IDs. Returns each policy\'s escalation rules, targets, associated services, and teams.',
       input: ListEscalationPoliciesInputSchema,
       handler: async (ctx, input: ListEscalationPoliciesInput) => {
         return callToolJson(ctx, 'list_escalation_policies', { query_model: input });
@@ -147,10 +139,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listIncidents: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.listIncidents.description', {
-        defaultMessage:
-          'List PagerDuty incidents with filtering by status, service, date range, urgency, and sort.',
-      }),
+      description:
+        'List PagerDuty incidents. Supports filtering by status (triggered, acknowledged, resolved), service IDs, user IDs, urgency, and date range. Dates use ISO 8601 format. Results can be scoped to all incidents, team incidents, or those assigned to the current user. Supports sorting by incident_number, created_at, resolved_at, or urgency.',
       input: ListIncidentsInputSchema,
       handler: async (ctx, input: ListIncidentsInput) => {
         return callToolJson(ctx, 'list_incidents', { query_model: input });
@@ -159,10 +149,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listOncalls: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.listOncalls.description', {
-        defaultMessage:
-          'Get current on-call assignments in PagerDuty with filtering by schedule, user, or escalation policy.',
-      }),
+      description:
+        'Get current on-call assignments in PagerDuty. Use this to find who is currently on call for specific schedules or escalation policies. Supports filtering by schedule IDs, user IDs, or escalation policy IDs, and time range queries using ISO 8601 dates. Set earliest=true to return only the first on-call entry per user+policy combination.',
       input: ListOncallsInputSchema,
       handler: async (ctx, input: ListOncallsInput) => {
         return callToolJson(ctx, 'list_oncalls', { query_model: input });
@@ -171,9 +159,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listUsers: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.listUsers.description', {
-        defaultMessage: 'List PagerDuty users with optional query filter.',
-      }),
+      description:
+        "List PagerDuty users. Supports free-text search across name and email fields. Returns each user's id, name, email, summary, and role.",
       input: ListUsersInputSchema,
       handler: async (ctx, input: ListUsersInput) => {
         return callToolJson(ctx, 'list_users', { query_model: input });
@@ -182,9 +169,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listTeams: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.listTeams.description', {
-        defaultMessage: 'List PagerDuty teams with optional query filter.',
-      }),
+      description:
+        "List PagerDuty teams. Supports free-text search across name and description fields. Returns each team's id, name, description, and summary.",
       input: ListTeamsInputSchema,
       handler: async (ctx, input: ListTeamsInput) => {
         return callToolJson(ctx, 'list_teams', { query_model: input });
@@ -193,9 +179,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getSchedule: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.getSchedule.description', {
-        defaultMessage: 'Get a specific PagerDuty schedule by ID.',
-      }),
+      description:
+        "Get a specific PagerDuty on-call schedule by its ID. Returns the schedule's name, description, time zone, schedule layers (including rotation settings and assigned users), and the list of users on the schedule.",
       input: GetScheduleInputSchema,
       handler: async (ctx, input: GetScheduleInput) => {
         return callToolJson(ctx, 'get_schedule', { schedule_id: input.schedule_id });
@@ -204,9 +189,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getIncident: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.getIncident.description', {
-        defaultMessage: 'Get a specific PagerDuty incident by ID.',
-      }),
+      description:
+        "Get a specific PagerDuty incident by its ID. Returns the incident's summary, status, urgency, service, current assignments (who is assigned and when), and creation/update timestamps.",
       input: GetIncidentInputSchema,
       handler: async (ctx, input: GetIncidentInput) => {
         return callToolJson(ctx, 'get_incident', { incident_id: input.incident_id });
@@ -215,12 +199,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getEscalationPolicy: {
       isTool: true,
-      description: i18n.translate(
-        'connectorSpecs.pagerduty.actions.getEscalationPolicy.description',
-        {
-          defaultMessage: 'Get a specific PagerDuty escalation policy by ID.',
-        }
-      ),
+      description:
+        "Get a specific PagerDuty escalation policy by its ID. Returns the policy's name, description, escalation rules (with delay minutes and targets), associated services, and teams.",
       input: GetEscalationPolicyInputSchema,
       handler: async (ctx, input: GetEscalationPolicyInput) => {
         return callToolJson(ctx, 'get_escalation_policy', { policy_id: input.policy_id });
@@ -229,9 +209,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     getTeam: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.getTeam.description', {
-        defaultMessage: 'Get a specific PagerDuty team by ID.',
-      }),
+      description:
+        "Get a specific PagerDuty team by its ID. Returns the team's id, name, description, and summary.",
       input: GetTeamInputSchema,
       handler: async (ctx, input: GetTeamInput) => {
         return callToolJson(ctx, 'get_team', { team_id: input.team_id });
@@ -240,10 +219,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.listTools.description', {
-        defaultMessage:
-          'List all tools available on the PagerDuty MCP server. Use this to discover available capabilities.',
-      }),
+      description:
+        'List all tools available on the PagerDuty MCP server. Use this to discover available capabilities.',
       input: ListToolsInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -255,10 +232,8 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.pagerduty.actions.callTool.description', {
-        defaultMessage:
-          'Call any tool on the PagerDuty MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
-      }),
+      description:
+        'Call any tool on the PagerDuty MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       input: CallToolInputSchema,
       handler: async (ctx, input: CallToolInput) => {
         return callToolContent(ctx, input.name, input.arguments);
@@ -280,4 +255,41 @@ export const PagerdutyConnector: ConnectorSpec = {
       });
     },
   },
+
+  skill: [
+    '## PagerDuty Connector Usage Guide',
+    '',
+    '### Identifying the Authenticated User (getUserData)',
+    '',
+    'Call `getUserData` with no inputs to retrieve the currently authenticated PagerDuty user.',
+    "This returns the user's id, name, email, summary, role, and team memberships.",
+    "Use this to confirm which account the connector is acting as, or to obtain the current user's ID for subsequent filtered queries.",
+    '',
+    '### Finding Who Is On Call',
+    '',
+    'To find who is currently on call for a named schedule:',
+    '1. Call `listSchedules` with a `query` matching the schedule name (e.g., "primary" or "database") to get candidate schedule IDs.',
+    '2. Call `listOncalls` with `schedule_ids` set to the IDs returned in step 1 to get the current on-call assignments.',
+    '',
+    'If you only need to know who is on call right now without knowing which schedule, call `listOncalls` directly with a `since`/`until` time range (ISO 8601 format) and optionally an `escalation_policy_ids` filter.',
+    'Set `earliest: true` to return only the first on-call entry per user+policy combination and reduce noise.',
+    '',
+    '### Investigating Incidents',
+    '',
+    'To investigate incidents, use `listIncidents` with one or more of these filters:',
+    '- `status`: array of statuses — "triggered", "acknowledged", or "resolved"',
+    '- `urgencies`: array — "high" or "low"',
+    '- `since` / `until`: ISO 8601 date range to scope by creation time',
+    '- `service_ids`: limit to specific services',
+    '- `request_scope`: "all" (default), "teams", or "assigned" (incidents assigned to the current user)',
+    '- `sort_by`: array of sort fields with direction, e.g. ["created_at:desc"]',
+    '',
+    'Once you have an incident ID from the list, call `getIncident` for full details including assignments, service, and timestamps.',
+    '',
+    '### Working with Escalation Policies',
+    '',
+    'To explore escalation policies:',
+    '1. Call `listEscalationPolicies` with an optional `query` (free-text name/description search) or `team_ids` / `user_ids` filters.',
+    '2. Use the returned IDs to call `getEscalationPolicy` for full details: escalation rules, delay minutes, targets, associated services, and teams.',
+  ].join('\n'),
 };
