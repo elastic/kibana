@@ -14,7 +14,7 @@ import {
   type PaginationParams,
 } from './query_builder_commons';
 
-/** Column produced by {@link buildLogPaginationCursorProbeEsql} via `INLINE STATS`; rows in the capped page. */
+/** Column produced by {@link buildLogPaginationCursorProbeEsql} via `INLINE STATS` before `LIMIT` (total matching raw rows in the window from the probe). */
 export const LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD = 'total_logs';
 
 /**
@@ -41,7 +41,7 @@ export function buildLogPaginationCursorProbeEsql(
 
 export interface LogPaginationCursorParsedRow {
   logsPaginationCursor: PaginationParams;
-  /** Number of raw log rows still to be processed. */
+  /** Total raw log rows matching the probe `WHERE` before `LIMIT` (remaining in the window from the cursor). */
   missingLogsToProcess: number;
 }
 
@@ -85,10 +85,12 @@ export function interpretLogPaginationCursorRows(
   if (row === undefined) {
     return { noMoreLogsToProcess: true };
   }
-  const { logsPaginationCursor, missingLogsToProcess: totalLogsInSlice } = row;
+  const { logsPaginationCursor, missingLogsToProcess: totalMatchingLogs } = row;
+  // total_logs is count(*) before LIMIT — total rows still in the window. If that fits in one slice (<= max),
+  // this slice exhausts the window (including the exact full-page case).
   return {
     noMoreLogsToProcess: false,
     logsPaginationCursor,
-    isLastLogsPage: totalLogsInSlice < maxLogsPerPage,
+    isLastLogsPage: totalMatchingLogs <= maxLogsPerPage,
   };
 }

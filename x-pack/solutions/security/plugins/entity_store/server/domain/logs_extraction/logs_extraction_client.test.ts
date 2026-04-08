@@ -27,10 +27,11 @@ const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
   { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
 ];
 
+/** Default total_logs > maxLogsPerPage so interpret marks a non-final slice (matches default config cap). */
 function mockLogPaginationCursorProbeRow(
   timestamp: string,
   id: string,
-  totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT
+  totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT + 1
 ): ESQLSearchResponse {
   return {
     columns: LOG_PAGINATION_CURSOR_PROBE_COLUMNS,
@@ -83,12 +84,26 @@ const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEn
 
 function createMockEngineDescriptor(
   type: EntityType = 'user',
-  overrides?: Partial<{ lookbackPeriod: string; delay: string; paginationTimestamp: string }>
+  overrides?: Partial<{
+    lookbackPeriod: string;
+    delay: string;
+    paginationTimestamp: string;
+    paginationId: string;
+    lastExecutionTimestamp: string;
+    logsPageCursorStartTimestamp: string;
+    logsPageCursorStartId: string;
+    logsPageCursorEndTimestamp: string;
+    logsPageCursorEndId: string;
+  }>
 ) {
   const logExtractionState = {
     paginationTimestamp: overrides?.paginationTimestamp,
-    paginationId: undefined,
-    lastExecutionTimestamp: undefined,
+    paginationId: overrides?.paginationId,
+    lastExecutionTimestamp: overrides?.lastExecutionTimestamp,
+    logsPageCursorStartTimestamp: overrides?.logsPageCursorStartTimestamp,
+    logsPageCursorStartId: overrides?.logsPageCursorStartId,
+    logsPageCursorEndTimestamp: overrides?.logsPageCursorEndTimestamp,
+    logsPageCursorEndId: overrides?.logsPageCursorEndId,
   };
   return {
     type,
@@ -301,6 +316,47 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
         query: expect.stringContaining(expectedTo),
+      });
+
+      jest.useRealTimers();
+    });
+
+    it('should use logsPageCursorStartTimestamp as from when no lastExecutionTimestamp (not lookback)', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+
+      const logPageCursorStart = '2025-01-15T06:00:00.000Z';
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      const globalStateWithDelay5s = {
+        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+      } as EntityStoreGlobalState;
+      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
+      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          logsPageCursorStartTimestamp: logPageCursorStart,
+          logsPageCursorStartId: 'cursor-doc',
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      const lookbackFrom = moment.utc(fixedNow).subtract(3, 'hours').toISOString();
+      expect(lookbackFrom).not.toBe(logPageCursorStart);
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(logPageCursorStart),
+      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.not.stringContaining(lookbackFrom),
       });
 
       jest.useRealTimers();

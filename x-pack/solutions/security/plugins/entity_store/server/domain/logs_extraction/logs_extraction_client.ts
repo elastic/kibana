@@ -671,7 +671,9 @@ export class LogsExtractionClient {
   // 2. PaginationTimestamp is present:
   //    fromDate = paginationTimestamp | toDate = now - delay
   // 3. LastExecutionTimestamp is present:
-  //    fromDate = lastExecutionTimestamp | toDate = now - delay
+  //    fromDate = lastExecutionTimestamp - delay | toDate = now - delay
+  // 4. Log page cursors present without lastExecutionTimestamp (e.g. interrupted before first full run):
+  //    fromDate = logsPageCursorStartTimestamp | toDate = now - delay — avoids shifting to lookback and skipping data before the cursor.
   private getExtractionWindow(
     config: LogExtractionConfig,
     engineState: EngineLogExtractionState,
@@ -681,16 +683,35 @@ export class LogsExtractionClient {
       engineState.logsPageCursorStartTimestamp || engineState.logsPageCursorEndTimestamp
     );
 
-    const fromDateISO = hasLogPaginationCursorProgress
-      ? this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
-        this.getFromDateBasedOnLookback(config)
-      : engineState.paginationTimestamp ||
+    let fromDateISO: string;
+    if (hasLogPaginationCursorProgress) {
+      // Mid log-page: use last run, then persisted cursor start, else lookback—so `from` stays before the cursor.
+      fromDateISO =
+        this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
+        this.getFromDateISOFromPersistedLogPageCursorStart(engineState) ||
+        this.getFromDateBasedOnLookback(config);
+    } else {
+      // No log-page cursor: entity pagination, then last run, then lookback.
+      fromDateISO =
+        engineState.paginationTimestamp ||
         this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
         this.getFromDateBasedOnLookback(config);
+    }
 
     const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
     return { fromDateISO, toDateISO };
+  }
+
+  /** Persisted log-page slice start; used so `fromDateISO` does not jump past an in-flight cursor. */
+  private getFromDateISOFromPersistedLogPageCursorStart(
+    engineState: EngineLogExtractionState
+  ): string | undefined {
+    const ts = engineState.logsPageCursorStartTimestamp;
+    if (ts !== undefined && ts !== '') {
+      return ts;
+    }
+    return undefined;
   }
 
   private getDelayedLastExecutionTimestamp(

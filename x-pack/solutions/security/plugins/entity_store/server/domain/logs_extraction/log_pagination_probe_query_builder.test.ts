@@ -37,10 +37,10 @@ describe('interpretLogPaginationCursorRows', () => {
     expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ noMoreLogsToProcess: true });
   });
 
-  it('returns slice end with lastLogsPages false when page is full', () => {
+  it('returns isLastLogsPage false when more matching logs remain than one page', () => {
     const row = {
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
-      missingLogsToProcess: 100,
+      missingLogsToProcess: 101,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       noMoreLogsToProcess: false,
@@ -49,7 +49,19 @@ describe('interpretLogPaginationCursorRows', () => {
     });
   });
 
-  it('returns lastLogsPages when fewer logs than max remain in the window', () => {
+  it('returns isLastLogsPage true when exactly maxLogsPerPage logs remain (last full page)', () => {
+    const row = {
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      missingLogsToProcess: 100,
+    };
+    expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
+      noMoreLogsToProcess: false,
+      logsPaginationCursor: row.logsPaginationCursor,
+      isLastLogsPage: true,
+    });
+  });
+
+  it('returns isLastLogsPage true when fewer than maxLogsPerPage logs remain', () => {
     const row = {
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
       missingLogsToProcess: 3,

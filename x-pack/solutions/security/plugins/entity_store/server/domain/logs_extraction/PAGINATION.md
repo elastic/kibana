@@ -87,7 +87,7 @@ flowchart TD
 
 ### Ordering of raw documents
 
-Boundary ESQL sorts **ascending** by `@timestamp`, `_id`, keeps the first `maxLogsPerPage` rows, applies **`INLINE STATS total_logs = count(*)`** on that capped set (so we know how many raw rows the slice contains), then takes the **last** of that batch (sort descending, `LIMIT 1`). That row is the **inclusive** slice end for the bounded extraction WHERE clause. If `total_logs` is **less than** `maxLogsPerPage`, there are no further raw documents after this slice in the window; the client can finish without issuing another boundary query.
+Boundary ESQL applies **`INLINE STATS total_logs = count(*)`** on the full filtered set **before** `LIMIT` (so `total_logs` is how many raw rows remain in the window from the probe). It then sorts ascending by `@timestamp`, `_id`, keeps the first `maxLogsPerPage` rows, and takes the **last** of that batch (sort descending, `LIMIT 1`) as the **inclusive** slice end for the bounded extraction WHERE clause. If `total_logs` **≤** `maxLogsPerPage`, this slice exhausts the window (including an exactly full last page); the client can finish without issuing another boundary query.
 
 ```mermaid
 flowchart LR

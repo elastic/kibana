@@ -113,7 +113,9 @@ apiTest.describe(
     apiTest(
       'Should run more ESQL pages when maxLogsPerPage narrows log slices',
       async ({ apiClient, esClient }) => {
-        const expectedResultCount = 20;
+        // We process some entities twice because they didn't fall in the same logs page
+        const expectedProcessedEntities = 24;
+        const expectedStoredEntities = 20;
         const minimumPagesWithEntityPaginationOnly = 4;
 
         const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
@@ -148,7 +150,7 @@ apiTest.describe(
         );
         expect(extractionResponse.statusCode).toBe(200);
         expect(extractionResponse.body.success).toBe(true);
-        expect(extractionResponse.body.count).toBe(expectedResultCount);
+        expect(extractionResponse.body.count).toBe(expectedProcessedEntities);
         expect(extractionResponse.body.pages).toBeGreaterThan(minimumPagesWithEntityPaginationOnly);
 
         const entities = await esClient.search({
@@ -164,7 +166,7 @@ apiTest.describe(
           size: 1000,
         });
 
-        expect(entities.hits.hits).toHaveLength(expectedResultCount);
+        expect(entities.hits.hits).toHaveLength(expectedStoredEntities);
         expect(entities.hits.hits).toMatchObject(expectedHostEntities);
       }
     );
