@@ -625,7 +625,9 @@ describe('MonitorIntegrationHealthApi', () => {
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-      const fleetGetAgentStatusForAgentPolicy = jest.fn().mockResolvedValue({ all: 0, active: 0, online: 0 });
+      const fleetGetAgentStatusForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue({ all: 0, active: 0, online: 0 });
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
@@ -654,7 +656,9 @@ describe('MonitorIntegrationHealthApi', () => {
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-      const fleetGetAgentStatusForAgentPolicy = jest.fn().mockResolvedValue({ all: 2, active: 2, online: 0 });
+      const fleetGetAgentStatusForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue({ all: 2, active: 2, online: 0 });
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
@@ -681,7 +685,9 @@ describe('MonitorIntegrationHealthApi', () => {
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-      const fleetGetAgentStatusForAgentPolicy = jest.fn().mockResolvedValue({ all: 3, active: 3, online: 1 });
+      const fleetGetAgentStatusForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue({ all: 3, active: 3, online: 1 });
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
