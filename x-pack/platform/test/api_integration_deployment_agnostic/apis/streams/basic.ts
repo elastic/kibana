@@ -178,6 +178,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             if (!viewsApiAvailable) return;
             // Wired roots may use deferred data stream materialization; ES|QL views use
             // `FROM logs.otel` / `FROM logs.ecs` and need the backing data stream to exist.
+            // Views may also appear shortly after enablement, so poll until assertions pass.
             const ts = new Date().toISOString();
             await indexDocument(esClient, LOGS_OTEL_STREAM_NAME, {
               '@timestamp': ts,
@@ -187,17 +188,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               '@timestamp': ts,
               message: 'FTR: materialize logs.ecs for wired ES|QL view assertion',
             });
-            for (const streamName of ['logs.otel', 'logs.ecs']) {
-              const response = await esClient.transport.request<{
-                views: Array<{ name: string; query: string }>;
-              }>({
-                method: 'GET',
-                path: `/_query/view/%24.${streamName}`,
-              });
-              expect(response.views).to.have.length(1);
-              expect(response.views[0].name).to.eql(`$.${streamName}`);
-              expect(response.views[0].query).to.eql(`FROM ${streamName}`);
-            }
+            await retry.tryForTime(
+              120_000,
+              async () => {
+                for (const streamName of ['logs.otel', 'logs.ecs']) {
+                  const response = await esClient.transport.request<{
+                    views: Array<{ name: string; query: string }>;
+                  }>({
+                    method: 'GET',
+                    path: `/_query/view/%24.${streamName}`,
+                  });
+                  expect(response.views).to.have.length(1);
+                  expect(response.views[0].name).to.eql(`$.${streamName}`);
+                  expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+                }
+              },
+              undefined,
+              500
+            );
           });
         }
 
