@@ -66,7 +66,6 @@ export class SearchSettingsCache {
 
     this.cache = new LRUCache<string, CacheEntry>({
       max: MAX_SPACES,
-      ttl: this.MIN_SETTINGS_REFRESH_INTERVAL_MS,
     });
   }
 
