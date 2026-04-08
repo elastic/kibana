@@ -15,10 +15,12 @@
         "editorconfig.editorconfig",
         "timonwong.shellcheck",
         "eamodio.gitlens",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "anthropic.claude-code"
       ]
     }
   },
+  "runArgs": [],
   "forwardPorts": [
     9200,
     5601,
@@ -28,6 +30,11 @@
     9001
   ],
   "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
+  "mounts": [
+    "source=kibana-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=kibana-es-data,target=${containerWorkspaceFolder}/.es,type=volume",
+    "source=kibana-target,target=${containerWorkspaceFolder}/target,type=volume"
+  ],
   "remoteUser": "vscode",
   "containerEnv": {
     "KBN_DIR": "${containerWorkspaceFolder}"
@@ -40,9 +47,6 @@
     "ghcr.io/devcontainers/features/github-cli:1": {
       "installDirectlyFromGitHubRelease": true,
       "version": "latest"
-    },
-    "ghcr.io/kreemer/features/chrometesting:1": {
-      "version": "stable"
     }
   }
 }

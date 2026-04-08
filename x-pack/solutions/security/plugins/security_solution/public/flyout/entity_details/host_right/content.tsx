@@ -11,6 +11,7 @@ import type { Entity } from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
@@ -68,6 +69,7 @@ export const HostPanelContent = ({
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   // Extract hostName from identityFields for components that need a string
   // Priority: identityFields['host.name'] > identityFields[first key]
@@ -95,7 +97,7 @@ export const HostPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
-      {entityStoreEntityId && !isPreviewMode && (
+      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
           <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />

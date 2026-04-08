@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { WaffleStateNoESQL, WaffleStateESQL } from './waffle';
 import { waffleStateSchema } from './waffle';
 
@@ -16,9 +17,9 @@ describe('Waffle Schema', () => {
       type: 'waffle',
       ignore_global_filters: false,
       sampling: 1,
-      dataset: {
-        type: 'dataView',
-        id: 'test-data-view',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'test-data-view',
       },
     } satisfies Partial<WaffleStateNoESQL>;
 
@@ -450,7 +451,7 @@ describe('Waffle Schema', () => {
       type: 'waffle',
       ignore_global_filters: false,
       sampling: 1,
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | STATS count() BY category',
       },
@@ -467,7 +468,7 @@ describe('Waffle Schema', () => {
       };
 
       const validated = waffleStateSchema.validate(input);
-      expect(validated.dataset.type).toBe('esql');
+      expect(validated.data_source.type).toBe('esql');
       expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
 

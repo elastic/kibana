@@ -91,7 +91,7 @@ export function fromStoredSearchEmbeddableByRef(
   if (!savedObjectId) throw new Error(`Missing reference of type "${SavedSearchType}"`);
   return {
     ...otherAttrs,
-    discover_session_id: savedObjectId,
+    ref_id: savedObjectId,
     selected_tab_id: selectedTabId,
     overrides: toDiscoverSessionPanelOverrides(storedState),
   };
@@ -104,9 +104,9 @@ export function toStoredSearchEmbeddableByRef(
   const discoverSessionReference: SavedObjectReference = {
     name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
     type: SavedSearchType,
-    id: apiState.discover_session_id,
+    id: apiState.ref_id,
   };
-  const { discover_session_id, selected_tab_id, overrides, ...otherAttrs } = apiState;
+  const { ref_id, selected_tab_id, overrides, ...otherAttrs } = apiState;
   const state: StoredSearchEmbeddableByReferenceState = {
     ...otherAttrs,
     ...fromDiscoverSessionPanelOverrides(overrides ?? {}),
