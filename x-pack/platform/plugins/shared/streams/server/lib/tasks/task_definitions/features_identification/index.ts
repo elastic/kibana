@@ -335,6 +335,7 @@ export interface FeaturesIdentificationTaskParams {
   start: number;
   end: number;
   streamName: string;
+  connectorId?: string;
 }
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
@@ -355,8 +356,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               }
               const { fakeRequest } = runContext;
 
-              const { start, end, streamName, _task } = runContext.taskInstance
-                .params as TaskParams<FeaturesIdentificationTaskParams>;
+              const {
+                start,
+                end,
+                streamName,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance.params as TaskParams<FeaturesIdentificationTaskParams>;
 
               const runId = uuid();
               const trackEmptyTelemetry = (state: 'canceled' | 'failure') => {
@@ -395,12 +401,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               });
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
-              const connectorId = await resolveConnectorForFeature({
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-                featureName: 'knowledge indicator extraction',
-                request: fakeRequest,
-              });
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                  featureName: 'knowledge indicator extraction',
+                  request: fakeRequest,
+                }));
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               let hasTrackedIteration = false;
@@ -509,7 +517,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { start, end, streamName },
+                  { start, end, streamName, connectorId: connectorIdOverride },
                   {
                     features: allFeatures,
                     durationMs,
@@ -566,7 +574,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { start, end, streamName },
+                  { start, end, streamName, connectorId: connectorIdOverride },
                   errorMessage,
                   {
                     features: [],
