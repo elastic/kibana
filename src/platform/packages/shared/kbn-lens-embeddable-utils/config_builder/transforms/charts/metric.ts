@@ -27,6 +27,7 @@ import {
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+  DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from './metric/defaults';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
@@ -63,11 +64,14 @@ import {
   stripUndefined,
 } from './utils';
 import {
+  AUTO_COLOR,
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
+  isAutoColor,
   isColorByValueColor,
+  NO_COLOR,
 } from '../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/utils';
 
@@ -78,7 +82,6 @@ type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'data_s
 const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
-export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT: KbnPaletteId = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
 type MetricIconName = NonNullable<NonNullable<MetricStyling['primary']>['icon']>['name'];
@@ -130,8 +133,7 @@ function fromCompareAPIToLensState(compareToConfig: MetricApiCompareType): {
         compareToConfig.to === 'primary' ? compareToConfig.to : compareToConfig.baseline,
       visuals: getCompareVisualsState(compareToConfig),
       reversed: compareToConfig.palette?.includes('reversed') ?? LENS_METRIC_COMPARE_TO_REVERSED,
-      paletteId:
-        (compareToConfig.palette as KbnPaletteId) ?? LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
+      paletteId: (compareToConfig.palette as KbnPaletteId) ?? DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
     },
   };
 }
@@ -260,7 +262,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
-          ...(secondaryMetric.color?.type === 'static'
+          ...(!isAutoColor(secondaryMetric.color ?? AUTO_COLOR) &&
+          secondaryMetric.color?.type === 'static'
             ? { secondaryTrend: { type: 'static', color: secondaryMetric.color.color } }
             : {}),
         }
@@ -470,13 +473,11 @@ function enrichConfigurationWithVisualizationProperties(
 
     if (visualization.color) {
       primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
-    }
-
-    if (visualization.palette) {
+    } else if (visualization.palette) {
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (colorByValue?.range === 'absolute') {
-        primaryMetric.color = colorByValue;
-      }
+      primaryMetric.color = colorByValue?.range === 'absolute' ? colorByValue : AUTO_COLOR;
+    } else {
+      primaryMetric.color = AUTO_COLOR;
     }
 
     if (visualization.applyColorTo) {
@@ -499,6 +500,8 @@ function enrichConfigurationWithVisualizationProperties(
         type: 'static',
         color: visualization.secondaryTrend.color,
       };
+    } else {
+      secondaryMetric.color = NO_COLOR;
     }
   }
 
