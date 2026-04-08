@@ -145,6 +145,7 @@ export function ESQLEditor({
     if (!isOfAggregateQueryType(q) || !q.esql?.trim()) {
       return;
     }
+
     await getSuggestions(
       q,
       data,
@@ -164,19 +165,24 @@ export function ESQLEditor({
 
   useEffect(() => {
     const s = dataLoading$?.subscribe((isDataLoading) => {
-      // go thru only when the loading is complete
+      // Only refresh the grid and sync activeData once loading completes
       if (isDataLoading) {
         return;
       }
+
+      // When a refresh was already driven elsewhere (e.g. query submit), skip one redundant
+      // grid refresh on the subsequent chart load completion
       if (suppressNextChartLoadGridRefreshRef.current) {
         suppressNextChartLoadGridRefreshRef.current = false;
       } else {
         void refreshDataGridAfterChartLoad();
       }
+
       const activeData = getActiveDataFromDatatable(
         layerId,
         lensAdaptersRef.current?.tables?.tables
       );
+
       const table = activeData?.[layerId];
 
       if (table) {
@@ -189,6 +195,7 @@ export function ESQLEditor({
         dispatch(onActiveDataChange({ activeData }));
       }
     });
+
     return () => s?.unsubscribe();
   }, [dataLoading$, dispatch, layerId, refreshDataGridAfterChartLoad]);
 
@@ -218,8 +225,10 @@ export function ESQLEditor({
 
       prevQuery.current = q;
       setSubmittedQuery(q);
+
       submittedQueryRef.current = q;
       suppressNextChartLoadGridRefreshRef.current = true;
+
       setIsVisualizationLoading(false);
     },
     [
