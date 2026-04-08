@@ -7,9 +7,8 @@
 
 import type { CustomRuleEditorSource } from '../constants/usage_collection';
 
-export type CustomRuleEditorOpenedEventName =
-  `custom_rule_editor_opened__${CustomRuleEditorSource}`;
+export type CustomRuleEditorOpenedEventName = `custom_rule_editor_opened_${CustomRuleEditorSource}`;
 
 export const getCustomRuleEditorOpenedEventName = (
   source: CustomRuleEditorSource
-): CustomRuleEditorOpenedEventName => `custom_rule_editor_opened__${source}`;
+): CustomRuleEditorOpenedEventName => `custom_rule_editor_opened_${source}`;

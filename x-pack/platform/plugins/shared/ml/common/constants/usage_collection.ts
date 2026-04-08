@@ -21,7 +21,7 @@ export type CustomRuleEditorSource =
   | 'explorer_single_metric_chart'
   | 'explorer_distribution_chart'
   | 'single_metric_viewer_anomalies_table'
-  | 'single_metric_viewer_timeseries_chart'
+  | 'single_metric_viewer_chart'
   | 'embeddable_single_metric_chart'
   | 'embeddable_distribution_chart'
-  | 'embeddable_timeseries_chart';
+  | 'embeddable_single_metric_viewer_chart';

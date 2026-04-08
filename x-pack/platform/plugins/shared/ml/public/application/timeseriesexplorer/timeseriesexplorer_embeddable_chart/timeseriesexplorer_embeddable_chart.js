@@ -1001,7 +1001,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 lastRefresh={lastRefresh}
                 tableData={tableData}
                 sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
-                telemetrySource={'embeddable_timeseries_chart'}
+                telemetrySource={'embeddable_single_metric_viewer_chart'}
               />
             </div>
           )}

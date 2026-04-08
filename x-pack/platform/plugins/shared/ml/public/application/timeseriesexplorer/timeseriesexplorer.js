@@ -1223,7 +1223,7 @@ export class TimeSeriesExplorer extends React.Component {
                 lastRefresh={lastRefresh}
                 tableData={tableData}
                 sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
-                telemetrySource={'single_metric_viewer_timeseries_chart'}
+                telemetrySource={'single_metric_viewer_chart'}
               />
               {focusAnnotationError !== undefined && (
                 <>

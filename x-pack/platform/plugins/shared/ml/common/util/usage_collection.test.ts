@@ -10,10 +10,10 @@ import { getCustomRuleEditorOpenedEventName } from './usage_collection';
 describe('usage_collection utils', () => {
   test('getCustomRuleEditorOpenedEventName resolves event name from source', () => {
     expect(getCustomRuleEditorOpenedEventName('explorer_anomalies_table')).toBe(
-      'custom_rule_editor_opened__explorer_anomalies_table'
+      'custom_rule_editor_opened_explorer_anomalies_table'
     );
-    expect(getCustomRuleEditorOpenedEventName('single_metric_viewer_timeseries_chart')).toBe(
-      'custom_rule_editor_opened__single_metric_viewer_timeseries_chart'
+    expect(getCustomRuleEditorOpenedEventName('single_metric_viewer_chart')).toBe(
+      'custom_rule_editor_opened_single_metric_viewer_chart'
     );
   });
 });
