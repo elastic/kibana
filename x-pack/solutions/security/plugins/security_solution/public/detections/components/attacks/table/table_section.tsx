@@ -40,6 +40,7 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
+import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { buildConnectorIdFilter, buildAttacksOnlyFilter } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
@@ -116,9 +117,7 @@ export const TableSection = React.memo(
 
     const { loading: listsConfigLoading } = useListsConfig();
 
-    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
-      TableId.alertsOnAttacksPage
-    );
+    const { showOnlyThreatIndicatorAlerts } = useDataTableFilters(TableId.alertsOnAttacksPage);
 
     // for showing / hiding anonymized data:
     const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
@@ -195,7 +194,7 @@ export const TableSection = React.memo(
     // AlertsTable manages global filters itself, so not including `filters`
     const defaultFilters = useMemo(() => {
       return [
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+        ...buildShowBuildingBlockFilter(true),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
@@ -203,7 +202,6 @@ export const TableSection = React.memo(
         ...(showAttacksOnly ? buildAttacksOnlyFilter() : []),
       ];
     }, [
-      showBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
       pageFilters,
       assignees,
@@ -303,6 +301,8 @@ export const TableSection = React.memo(
       [sort, setSort]
     );
 
+    const dslFilter = useMemo(() => dsl.isNotAttack(), []);
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -326,6 +326,7 @@ export const TableSection = React.memo(
           settings={groupingSettings}
           emptyGroupingComponent={emptyGroupingComponent}
           sort={sort}
+          unitsCountFilter={dslFilter}
         />
       </div>
     );

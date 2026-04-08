@@ -23,7 +23,10 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { defaultAlertsTableSort } from '@kbn/response-ops-alerts-table/configuration';
-import type { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertDetailsNavigation,
+  AlertsTableSupportedConsumers,
+} from '@kbn/response-ops-alerts-table/types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import type { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
@@ -174,6 +177,23 @@ const PageContentComponent: React.FC<PageContentProps> = ({
     [ruleTypeIdsByFeatureId]
   );
 
+  const { capabilities } = application;
+  const hasObservabilityAccess = [
+    capabilities.navLinks.apm,
+    capabilities.navLinks.metrics,
+    capabilities.navLinks.uptime,
+    capabilities.navLinks.synthetics,
+    capabilities.navLinks.slo,
+    capabilities.logs?.show,
+  ].some(Boolean);
+
+  const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
+    ? {
+        appId: 'observability',
+        getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+      }
+    : undefined;
+
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];
     if (ruleTypeIdsByFeatureIdEntries.length > 0) {
@@ -280,6 +300,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             renderActionsCell={RuleAlertActionsCell}
             actionsColumnWidth={120}
             getAlertFormatter={getAlertFormatter}
+            alertDetailsNavigation={alertDetailsNavigation}
             services={{
               data,
               http,

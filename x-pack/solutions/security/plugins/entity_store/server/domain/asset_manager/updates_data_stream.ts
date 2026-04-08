@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getEntityIndexPattern, ENTITY_SCHEMA_VERSION_V2, ENTITY_UPDATES } from '../constants';
+import {
+  getEntityIndexPattern,
+  ENTITY_SCHEMA_VERSION_V2,
+  ENTITY_UPDATES,
+} from '../../../common/domain/entity_index';
 
 export const getUpdatesEntitiesDataStreamName = (namespace: string) =>
   getEntityIndexPattern({

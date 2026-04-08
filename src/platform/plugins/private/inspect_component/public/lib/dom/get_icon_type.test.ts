@@ -14,12 +14,12 @@ describe('getIconType', () => {
   it('should return icon type from HTML element with SVG child that has EUI_DATA_ICON_TYPE attribute', () => {
     const divElement = document.createElement('div');
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svgElement.setAttribute(EUI_DATA_ICON_TYPE, 'arrowDown');
+    svgElement.setAttribute(EUI_DATA_ICON_TYPE, 'chevronSingleDown');
     divElement.appendChild(svgElement);
 
     const iconType = getIconType(divElement);
 
-    expect(iconType).toBe('arrowDown');
+    expect(iconType).toBe('chevronSingleDown');
   });
 
   it('should return null from HTML element with SVG child without EUI_DATA_ICON_TYPE attribute', () => {

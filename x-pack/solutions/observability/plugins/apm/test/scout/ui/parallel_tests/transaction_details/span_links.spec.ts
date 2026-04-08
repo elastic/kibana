@@ -123,7 +123,7 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: '1 View details for' }).click();
+        await page.getByRole('button', { name: /View details for Transaction C/ }).click();
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const consumerMultipleLink = page.getByRole('link', {
@@ -160,7 +160,7 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: '1 View details for' }).click();
+        await page.getByRole('button', { name: /View details for Transaction D/ }).click();
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const producerConsumerLink = page.getByRole('link', { name: 'zzz-producer-consumer' });

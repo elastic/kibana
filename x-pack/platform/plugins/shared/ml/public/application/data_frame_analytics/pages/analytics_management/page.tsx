@@ -69,10 +69,22 @@ export const Page: FC = () => {
       <MlPageHeader
         wrapHeader
         rightSideItems={[
-          <SynchronizeSavedObjectsButton refreshJobs={refresh} />,
-          <ExportJobsFlyout isDisabled={!canCreateAnalytics} currentTab={'data-frame-analytics'} />,
-          <ImportJobsFlyout isDisabled={!canCreateAnalytics} onImportComplete={refresh} />,
+          <SynchronizeSavedObjectsButton
+            key="synchronize-saved-objects-button"
+            refreshJobs={refresh}
+          />,
+          <ExportJobsFlyout
+            key="export-jobs-flyout"
+            isDisabled={!canCreateAnalytics}
+            currentTab={'data-frame-analytics'}
+          />,
+          <ImportJobsFlyout
+            key="import-jobs-flyout"
+            isDisabled={!canCreateAnalytics}
+            onImportComplete={refresh}
+          />,
           <CreateAnalyticsButton
+            key="create-analytics-button"
             size="m"
             navigateToSourceSelection={navigateToSourceSelection}
             isDisabled={!canCreateAnalytics}

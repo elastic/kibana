@@ -223,6 +223,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       cascadingChanges.push({
         type: 'upsert',
         definition: {
+          type: 'wired',
           name: parentId,
           description: '',
           updated_at: now,
@@ -256,6 +257,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: routeTarget,
               description: '',
               updated_at: now,
@@ -288,9 +290,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: now,
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -338,9 +342,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: new Date().toISOString(),
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -729,6 +735,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const settings = getInheritedSettings(ancestors);
     const failureStore = this.getInheritedFailureStoreFromAncestors(ancestors);
 
+    const shouldDeferDataStream =
+      !existsAsManagedDataStream &&
+      this.dependencies.deferRootDataStreamMaterialization === true &&
+      isRootStreamDefinition(this._definition);
+
     const actions: ElasticsearchAction[] = [
       {
         type: 'upsert_component_template',
@@ -741,7 +752,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       },
       {
         type: 'upsert_ingest_pipeline',
@@ -752,48 +767,45 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'upsert_index_template',
-        request: generateIndexTemplate(this._definition.name),
-      },
-      existsAsManagedDataStream
-        ? {
-            type: 'rollover' as const,
-            request: {
-              name: this._definition.name,
-            },
-          }
-        : {
-            type: 'upsert_datastream' as const,
-            request: {
-              name: this._definition.name,
-            },
-          },
-      {
-        type: 'update_lifecycle',
-        request: {
-          name: this._definition.name,
+        request: generateIndexTemplate(
+          this._definition.name,
           lifecycle,
-        },
-      },
-      {
-        type: 'update_ingest_settings',
-        request: {
-          name: this._definition.name,
-          settings: formatSettings(settings, this.dependencies.isServerless),
-        },
-      },
-      {
-        type: 'update_failure_store',
-        request: {
-          name: this._definition.name,
-          failure_store: failureStore,
-          definition: this._definition,
-        },
+          failureStore,
+          this.dependencies.isServerless,
+          shouldDeferDataStream
+            ? formatSettings(settings, this.dependencies.isServerless)
+            : undefined
+        ),
       },
       {
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
     ];
+
+    if (!shouldDeferDataStream) {
+      actions.push(
+        existsAsManagedDataStream
+          ? { type: 'rollover' as const, request: { name: this._definition.name } }
+          : { type: 'upsert_datastream' as const, request: { name: this._definition.name } },
+        { type: 'update_lifecycle', request: { name: this._definition.name, lifecycle } },
+        {
+          type: 'update_ingest_settings',
+          request: {
+            name: this._definition.name,
+            settings: formatSettings(settings, this.dependencies.isServerless),
+          },
+        },
+        {
+          type: 'update_failure_store',
+          request: {
+            name: this._definition.name,
+            failure_store: failureStore,
+            definition: this._definition,
+          },
+        }
+      );
+    }
 
     if (this.dependencies.isWiredStreamViewsEnabled) {
       actions.push({
@@ -909,7 +921,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();

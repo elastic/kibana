@@ -89,6 +89,32 @@ describe('SloOverviewPanelContent', () => {
     expect(queryByTestId(container, 'slo-overview')).not.toBeInTheDocument();
   });
 
+  it('renders GroupSloView inside group overview panel', () => {
+    const { container } = render(
+      <SloOverviewPanelContent
+        {...defaultProps}
+        overviewMode="groups"
+        groupFilters={{ group_by: 'slo.tags', groups: ['tag1'], kql_query: 'my-query' }}
+      />
+    );
+
+    expect(getByTestId(container, 'group-slo-view')).toBeInTheDocument();
+  });
+
+  it('renders group overview panel with default groupFilters', () => {
+    const { container } = render(
+      <SloOverviewPanelContent
+        {...defaultProps}
+        overviewMode="groups"
+        groupFilters={{ group_by: 'status' }}
+      />
+    );
+
+    expect(getByTestId(container, 'sloGroupOverviewPanel')).toBeInTheDocument();
+    expect(getByTestId(container, 'group-slo-view')).toBeInTheDocument();
+    expect(queryByTestId(container, 'slo-overview')).not.toBeInTheDocument();
+  });
+
   it('renders single overview (SloOverview) when overviewMode is single and SLO has no group_by', () => {
     useFetchSloDetailsMock.mockReturnValue({
       data: sloWithoutGroupBy,

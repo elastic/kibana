@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import type { AIConnector } from '@kbn/inference-connectors';
 import type { ConnectorsAuthz } from '../../common/connectors/authz';
 
 export interface AIConnectorCardMetadata extends ConnectorsAuthz {
-  connectors: ActionConnector[];
+  connectors: AIConnector[];
 }

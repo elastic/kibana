@@ -12,7 +12,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import type { PinnedControlLayoutState, PinnedControlState } from '@kbn/controls-schemas';
 import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type { PanelPackage } from '@kbn/presentation-publishing';
@@ -75,8 +75,7 @@ export const useLayoutApi = (
         if (serializedState) childrenApi?.setSerializedStateForChild(uuid, serializedState);
         const oldControls = layout$Ref.current.getValue().controls;
         const controlState = {
-          width: DEFAULT_CONTROL_WIDTH as PinnedControlState['width'],
-          grow: DEFAULT_CONTROL_GROW as PinnedControlState['grow'],
+          ...DEFAULT_PINNED_CONTROL_STATE,
           ...serializedState,
         };
         layout$Ref.current.next({
@@ -109,6 +108,7 @@ export const useLayoutApi = (
         }
         controls[uuid] = {
           type: type as PinnedControlState['type'],
+          ...DEFAULT_PINNED_CONTROL_STATE,
           ...serializedState,
           order: newOrder,
         };

@@ -11,7 +11,7 @@ import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, runLinkedServerlessCluster } from '@kbn/es/src/utils';
 import { MOCK_IDP_UIAM_PROJECT_ID2 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test';
+import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test-es-server';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolve } from 'path';
 import Url from 'url';

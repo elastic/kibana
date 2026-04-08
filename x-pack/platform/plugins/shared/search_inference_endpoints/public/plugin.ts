@@ -10,6 +10,9 @@ import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
+  ELASTIC_INFERENCE_SERVICE_APP_ID,
+  ELASTIC_INFERENCE_SERVICE_TITLE,
+  EXTERNAL_INFERENCE_TITLE,
   INFERENCE_ENDPOINTS_APP_ID,
   MODEL_SETTINGS_APP_ID,
   MODEL_SETTINGS_SECTION_TITLE,
@@ -24,7 +27,7 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from './types';
 import { registerLocators } from './locators';
-import { isModelSettingsEnabled } from './feature_flag';
+import { isElasticInferenceServiceEnabled, isModelSettingsEnabled } from './feature_flag';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
@@ -32,6 +35,7 @@ export class SearchInferenceEndpointsPlugin
   private config: SearchInferenceEndpointsConfigType;
   private registerInferenceEndpoints?: ManagementApp;
   private registerModelSettings?: ManagementApp;
+  private registerElasticInferenceService?: ManagementApp;
   private licenseSubscription?: Subscription;
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
@@ -45,10 +49,12 @@ export class SearchInferenceEndpointsPlugin
 
     registerLocators(plugins.share);
 
+    const eisEnabled = isElasticInferenceServiceEnabled(core.uiSettings);
+
     this.registerInferenceEndpoints =
-      plugins.management.sections.section.machineLearning.registerApp({
+      plugins.management.sections.section.modelManagement.registerApp({
         id: INFERENCE_ENDPOINTS_APP_ID,
-        title: PLUGIN_TITLE,
+        title: eisEnabled ? EXTERNAL_INFERENCE_TITLE : PLUGIN_TITLE,
         order: 2,
         async mount({ element, history }: ManagementAppMountParams) {
           const { renderInferenceEndpointsMgmtApp } = await import('./application');
@@ -63,25 +69,47 @@ export class SearchInferenceEndpointsPlugin
       });
 
     if (isModelSettingsEnabled(core.uiSettings)) {
-      this.registerModelSettings = plugins.management.sections.section.machineLearning.registerApp({
+      this.registerModelSettings = plugins.management.sections.section.modelManagement.registerApp({
         id: MODEL_SETTINGS_APP_ID,
         title: MODEL_SETTINGS_SECTION_TITLE,
         order: 3,
         async mount({ element, history }: ManagementAppMountParams) {
-          const { renderModelSettingsApp } = await import('./model_settings_application');
+          const { renderSettingsMgmtApp } = await import('./application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
           };
 
-          return renderModelSettingsApp(coreStart, startDeps, element);
+          return renderSettingsMgmtApp(coreStart, startDeps, element);
         },
       });
     }
 
+    if (eisEnabled) {
+      this.registerElasticInferenceService =
+        plugins.management.sections.section.modelManagement.registerApp({
+          id: ELASTIC_INFERENCE_SERVICE_APP_ID,
+          title: ELASTIC_INFERENCE_SERVICE_TITLE,
+          order: 1,
+          async mount({ element, history }: ManagementAppMountParams) {
+            const { renderElasticInferenceServiceApp } = await import(
+              './elastic_inference_service_application'
+            );
+            const [coreStart, depsStart] = await core.getStartServices();
+            const startDeps: AppPluginStartDependencies = {
+              ...depsStart,
+              history,
+            };
+
+            return renderElasticInferenceServiceApp(coreStart, startDeps, element);
+          },
+        });
+    }
+
     this.registerInferenceEndpoints.disable();
     this.registerModelSettings?.disable();
+    this.registerElasticInferenceService?.disable();
 
     return {};
   }
@@ -94,14 +122,17 @@ export class SearchInferenceEndpointsPlugin
 
     this.licenseSubscription = licensing.license$.subscribe((license) => {
       const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
-      const hasAccess = core.application.capabilities.management?.ml?.inference_endpoints === true;
+      const hasAccess =
+        core.application.capabilities.management?.modelManagement?.inference_endpoints === true;
 
       if (hasEnterpriseLicense && hasAccess) {
         this.registerInferenceEndpoints?.enable();
         this.registerModelSettings?.enable();
+        this.registerElasticInferenceService?.enable();
       } else {
         this.registerInferenceEndpoints?.disable();
         this.registerModelSettings?.disable();
+        this.registerElasticInferenceService?.disable();
       }
     });
 

@@ -21,9 +21,11 @@ import type { KueryNode } from '@kbn/es-query';
 import * as esKuery from '@kbn/es-query';
 import type { File } from '@kbn/files-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
+import { once } from 'lodash';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
-import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
+import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/script_library';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
@@ -63,12 +65,12 @@ export interface ScriptsLibraryClientOptions {
 }
 
 export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
-  protected readonly filesClient: FileClient;
   protected readonly logger: Logger;
   protected readonly esClient: ElasticsearchClient;
   protected readonly soClient: SavedObjectsClientContract;
   protected readonly username: string;
   protected readonly rulesClient: RulesClient | undefined;
+  protected readonly getFilesClient: () => Promise<FileClient>;
 
   constructor(options: ScriptsLibraryClientOptions) {
     this.logger = options.endpointService.createLogger('ScriptsLibraryClient');
@@ -79,13 +81,48 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       spaceId: options.spaceId,
       readonly: false,
     });
-    this.filesClient = createEsFileClient({
+
+    const filesClient = createEsFileClient({
       metadataIndex: SCRIPTS_LIBRARY_FILE_METADATA_INDEX_NAME,
       blobStorageIndex: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME,
       elasticsearchClient: this.esClient,
-      logger: this.logger,
+      logger: this.logger.get('files'),
       maxSizeBytes: options.endpointService.getServerConfigValue('maxEndpointScriptFileSize'),
     });
+
+    const initIndexes = once(async () => {
+      this.logger.debug(`initializing indexes (if needed)`);
+
+      // Ensure the File `data` index is created first since it includes some mappings that
+      // are needed for Fleet Server. This ensures we don't use the Files plugin defaults
+      await this.esClient.indices
+        .create({ index: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME })
+        .then(() => {
+          this.logger.debug(
+            `Index [${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME}] created for use with scripts library`
+          );
+        })
+        .catch((error) => {
+          // Ignore error if the index already exists
+          if (error.body?.error?.type !== 'resource_already_exists_exception') {
+            throw new ScriptLibraryError(
+              `Attempt to create index [${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME}] failed with: ${error.message}`,
+              500,
+              error
+            );
+          }
+
+          this.logger.debug(
+            `Nothing to do - index [${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME}] already exists`
+          );
+        })
+        .catch(catchAndWrapError);
+    });
+
+    this.getFilesClient = async () => {
+      await initIndexes();
+      return filesClient;
+    };
   }
 
   protected mapToSavedObjectProperties({
@@ -254,7 +291,8 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     /** The file name. By Default, an attempt will be made to get it from the File stream unless this option is set. */
     fileName?: string;
   }): Promise<File> {
-    const fileStorage = await this.filesClient
+    const filesClient = await this.getFilesClient();
+    const fileStorage = await filesClient
       .create({
         metadata: {
           name: fileName || (file.hapi.filename ?? 'script_file'),
@@ -316,7 +354,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }
 
   protected async findRulesUsingScripts(
-    scriptIds: string | string[]
+    scriptIds: string | string[],
+    /** List of OS types to check usage for. Defaults to checking all supported OS types */
+    osType?: SupportedHostOsType[]
   ): ReturnType<typeof findRules> {
     if (!this.rulesClient) {
       throw new ScriptLibraryError('Unable to query for rules - no Rules client available!');
@@ -326,9 +366,14 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       .map((id) => `"${id}"`)
       .join(' OR ');
 
-    const kuery = `alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (${SUPPORTED_HOST_OS_TYPE.map(
-      (os) => `alert.attributes.params.responseActions.params.config.${os}.scriptId:(${scriptList})`
-    ).join(' OR ')})`;
+    const kuery = `alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (${(
+      osType ?? SUPPORTED_HOST_OS_TYPE
+    )
+      .map(
+        (os) =>
+          `alert.attributes.params.responseActions.params.config.${os}.scriptId:(${scriptList})`
+      )
+      .join(' OR ')})`;
 
     this.logger.debug(() => `Searching for rules using scripts with KQL: ${kuery}`);
 
@@ -463,6 +508,28 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       );
     }
 
+    // if OS types were removed in the update, then check/validate that rules are not using it
+    if (scriptUpdates.platform) {
+      const osTypesToRemove = currentScriptSoItem.attributes.platform.filter(
+        (osType) => !scriptUpdates.platform?.includes(osType as SupportedHostOsType)
+      ) as SupportedHostOsType[];
+
+      if (osTypesToRemove.length > 0) {
+        const rulesResults = await this.findRulesUsingScripts(id, osTypesToRemove);
+
+        if (rulesResults.total > 0) {
+          throw new ScriptLibraryError(
+            `Cannot remove platform(s) [${osTypesToRemove.join(
+              ', '
+            )}] from script. The following detection rules currently have 'runscript' configurations that reference their use:\n${rulesResults.data
+              .map((rule) => `${rule.name} (ID: ${rule.id})`)
+              .join('\n')}`,
+            409
+          );
+        }
+      }
+    }
+
     if (file) {
       newFileStorage = await this.storeFile({ scriptId: id, file: file as HapiReadableStream });
 
@@ -530,14 +597,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         `Update to script [${id}] with new file upload info successful. Deleting old file id [${currentScriptSoItem.attributes.file_id}]`
       );
 
-      this.filesClient
-        .delete({ id: currentScriptSoItem.attributes.file_id })
-        .catch((deleteError) => {
-          this.logger.error(
-            `Error encountered while attempting to delete old file [${currentScriptSoItem.attributes.file_id}] for script [${id}]: ${deleteError.message}. File is now orphaned!`,
-            { error: deleteError }
-          );
-        });
+      const filesClient = await this.getFilesClient();
+      filesClient.delete({ id: currentScriptSoItem.attributes.file_id }).catch((deleteError) => {
+        this.logger.error(
+          `Error encountered while attempting to delete old file [${currentScriptSoItem.attributes.file_id}] for script [${id}]: ${deleteError.message}. File is now orphaned!`,
+          { error: deleteError }
+        );
+      });
     }
 
     return this.mapSoAttributesToEndpointScript(await this.getScriptSavedObject(id));
@@ -594,14 +660,21 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
   public async delete(scriptId: string): Promise<void> {
     const scriptSo = await this.getScriptSavedObject(scriptId);
-    const rulesUsingScript = await this.findRulesUsingScripts(scriptId);
+    const filesClient = await this.getFilesClient();
+    const rulesUsingScript: Awaited<ReturnType<typeof this.findRulesUsingScripts>> | undefined =
+      await this.findRulesUsingScripts(scriptId).catch(() => {
+        this.logger.error(
+          `Proceeding with deletion of script [${scriptId}] even though check for script usage in rules failed`
+        );
+        return undefined;
+      });
 
-    if (rulesUsingScript.total > 0) {
+    if (rulesUsingScript && rulesUsingScript.total > 0) {
       throw new ScriptLibraryError(
-        `Cannot delete script [${scriptId}] because it is referenced by the following rules:\n${rulesUsingScript.data
+        `Cannot delete script [${scriptId}]. The following detection rules have 'runscript' configurations that reference it:\n${rulesUsingScript.data
           .map((rule) => `${rule.name} (ID: ${rule.id})`)
           .join('\n')}`,
-        400
+        409
       );
     }
 
@@ -610,7 +683,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       .catch(catchAndWrapError.withMessage(`Failed to delete script with id: ${scriptId}`));
 
     try {
-      await this.filesClient.delete({ id: scriptSo.attributes.file_id }).catch(catchAndWrapError);
+      await filesClient.delete({ id: scriptSo.attributes.file_id }).catch(catchAndWrapError);
     } catch (error) {
       this.logger.error(
         `Failed to delete file [${scriptSo.attributes.file_id}] for script [${scriptId}].File is now orphaned. ${error.message}`,
@@ -621,8 +694,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
   public async download(scriptId: string): Promise<ScriptDownloadResponse> {
     const scriptSo = await this.getScriptSavedObject(scriptId);
+    const filesClient = await this.getFilesClient();
 
-    const file = await this.filesClient
+    const file = await filesClient
       .get({ id: scriptSo.attributes.file_id })
       .catch(
         catchAndWrapError.withMessage(

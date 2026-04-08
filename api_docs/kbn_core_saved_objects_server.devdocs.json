@@ -6323,7 +6323,39 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
           },
           {
             "plugin": "actions",
@@ -6332,6 +6364,14 @@
           {
             "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
           },
           {
             "plugin": "actions",
@@ -6412,14 +6452,6 @@
           {
             "plugin": "savedSearch",
             "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
-          },
-          {
-            "plugin": "dataCatalog",
-            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
           },
           {
             "plugin": "canvas",
@@ -8878,6 +8910,14 @@
             "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
           },
           {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
             "plugin": "@kbn/core",
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
           },
@@ -11166,6 +11206,10 @@
                 "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
+                "plugin": "apmSourcesAccess",
+                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
+              },
+              {
                 "plugin": "links",
                 "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
               },
@@ -11192,10 +11236,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "apmSourcesAccess",
-                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
               },
               {
                 "plugin": "lens",

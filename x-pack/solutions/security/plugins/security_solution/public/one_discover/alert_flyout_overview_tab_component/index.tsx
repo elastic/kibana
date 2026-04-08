@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useSelector } from 'react-redux';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
 import type { SecurityAppStore, State } from '../../common/store/types';
 import type { StartServices } from '../../types';
@@ -46,12 +47,17 @@ export interface AlertFlyoutOverviewTabProps {
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
 }
 
 export const AlertFlyoutOverviewTab = ({
   hit,
   servicesPromise,
   storePromise,
+  onAlertUpdated,
 }: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -90,7 +96,12 @@ export const AlertFlyoutOverviewTab = ({
     children: (
       <>
         <DataViewManagerBootstrap />
-        <OverviewTab hit={hit} />
+        {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
+        <OverviewTab
+          hit={hit}
+          renderCellActions={noopCellActionRenderer}
+          onAlertUpdated={onAlertUpdated}
+        />
       </>
     ),
   });

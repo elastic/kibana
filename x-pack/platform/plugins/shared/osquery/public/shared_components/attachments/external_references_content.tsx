@@ -21,6 +21,8 @@ const AttachmentContent = (props: IExternalReferenceMetaDataProps) => {
           actionId={externalReferenceMetadata.actionId}
           queryId={externalReferenceMetadata.queryId}
           agentIds={externalReferenceMetadata.agentIds}
+          scheduleId={externalReferenceMetadata.scheduleId}
+          executionCount={externalReferenceMetadata.executionCount}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

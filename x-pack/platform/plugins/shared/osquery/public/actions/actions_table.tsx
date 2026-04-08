@@ -48,7 +48,7 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ act
 
   return (
     <EuiToolTip position="top" content={detailsText} disableScreenReaderOutput>
-      <EuiButtonIcon iconType="visTable" {...navProps} aria-label={detailsText} />
+      <EuiButtonIcon iconType="table" {...navProps} aria-label={detailsText} />
     </EuiToolTip>
   );
 };

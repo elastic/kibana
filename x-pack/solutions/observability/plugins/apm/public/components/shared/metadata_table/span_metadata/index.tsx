@@ -17,13 +17,19 @@ interface Props {
 }
 
 export function SpanMetadata({ span }: Props) {
+  const spanId = span.span?.id;
+
   const { data: spanEvent, status } = useFetcher(
     (callApmApi) => {
+      if (!spanId) {
+        return;
+      }
+
       return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
         params: {
           path: {
             processorEvent: ProcessorEvent.span,
-            id: span.span.id,
+            id: spanId,
           },
           query: {
             start: span['@timestamp'],
@@ -32,7 +38,7 @@ export function SpanMetadata({ span }: Props) {
         },
       });
     },
-    [span]
+    [span, spanId]
   );
 
   const sections = useMemo(

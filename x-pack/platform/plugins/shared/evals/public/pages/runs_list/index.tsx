@@ -7,26 +7,29 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  EuiPageTemplate,
   EuiBasicTable,
   EuiBadge,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
+  EuiPageSection,
   EuiSelect,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import type { EvaluationRunSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
+import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
+  const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
@@ -113,12 +116,37 @@ export const RunsListPage: React.FC = () => {
         name: i18n.COLUMN_CI,
         render: (ci: EvaluationRunSummary['ci']) =>
           ci?.build_url ? (
-            <EuiLink href={ci.build_url} target="_blank" external>
+            <EuiLink
+              href={ci.build_url}
+              target="_blank"
+              external
+              onClick={(event) => event.stopPropagation()}
+            >
               {i18n.CI_BUILD_LINK}
             </EuiLink>
           ) : (
             '-'
           ),
+      },
+      {
+        field: 'ci',
+        name: i18n.COLUMN_PULL_REQUEST,
+        render: (ci: EvaluationRunSummary['ci']) => {
+          const prRaw = ci?.pull_request;
+          if (!prRaw) return '-';
+          const prUrl = resolvePrUrl(prRaw);
+          if (!prUrl) return '-';
+          return (
+            <EuiLink
+              href={prUrl}
+              target="_blank"
+              external
+              onClick={(event) => event.stopPropagation()}
+            >
+              {i18n.PR_LINK}
+            </EuiLink>
+          );
+        },
       },
     ],
     [history]
@@ -139,54 +167,51 @@ export const RunsListPage: React.FC = () => {
   };
 
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle={i18n.PAGE_TITLE} />
-      <EuiPageTemplate.Section>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              placeholder={i18n.SEARCH_PLACEHOLDER}
-              value={searchText}
-              onChange={(e) => {
-                setSearchText(e.target.value);
-                setPageIndex(0);
-              }}
-              isClearable
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
-            <EuiSelect
-              aria-label={i18n.SUITE_FILTER_ARIA_LABEL}
-              options={suiteOptions}
-              value={suiteIdFilter}
-              onChange={(event) => {
-                setSuiteIdFilter(event.target.value);
-                setPageIndex(0);
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        {error ? (
-          <>
-            <EuiText color="danger" size="s">
-              <p>{String(error)}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-        <EuiBasicTable<EvaluationRunSummary>
-          items={data?.runs ?? []}
-          columns={columns}
-          loading={isLoading}
-          pagination={pagination}
-          onChange={onTableChange}
-          rowProps={(item) => ({
-            onClick: () => history.push(`/runs/${item.run_id}`),
-            style: { cursor: 'pointer' },
-          })}
-        />
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            placeholder={i18n.SEARCH_PLACEHOLDER}
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setPageIndex(0);
+            }}
+            isClearable
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
+          <EuiSelect
+            aria-label={i18n.SUITE_FILTER_ARIA_LABEL}
+            options={suiteOptions}
+            value={suiteIdFilter}
+            onChange={(event) => {
+              setSuiteIdFilter(event.target.value);
+              setPageIndex(0);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {error ? (
+        <>
+          <EuiText color="danger" size="s">
+            <p>{String(error)}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+      <EuiBasicTable<EvaluationRunSummary>
+        items={data?.runs ?? []}
+        columns={columns}
+        loading={isLoading}
+        pagination={pagination}
+        onChange={onTableChange}
+        rowProps={(item) => ({
+          onClick: () => history.push(`/runs/${item.run_id}`),
+          style: { cursor: 'pointer' },
+        })}
+      />
+    </EuiPageSection>
   );
 };

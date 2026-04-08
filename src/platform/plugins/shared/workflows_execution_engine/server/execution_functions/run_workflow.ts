@@ -9,8 +9,10 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ExecutionStatus, isEventDrivenWorkflowTriggerSource } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -26,6 +28,7 @@ export async function runWorkflow({
   dependencies,
   workflowsExecutionEngine,
   meteringService,
+  isEventDrivenExecutionEnabled,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -36,6 +39,7 @@ export async function runWorkflow({
   dependencies: ContextDependencies;
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
+  isEventDrivenExecutionEnabled?: () => boolean;
 }): Promise<void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -49,6 +53,7 @@ export async function runWorkflow({
     workflowTaskManager,
     workflowExecutionRepository,
     esClient,
+    telemetryClient,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
@@ -59,6 +64,42 @@ export async function runWorkflow({
     workflowsExecutionEngine
   );
   setupSpan?.end();
+
+  // Execution-time gate: skip event-driven runs when the kill switch is disabled
+  if (isEventDrivenExecutionEnabled) {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (execution) {
+      const triggeredBy = execution.triggeredBy;
+      const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+      if (isEventDriven && !isEventDrivenExecutionEnabled()) {
+        const cancelledAt = new Date().toISOString();
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: workflowRunId,
+          status: ExecutionStatus.SKIPPED,
+          cancellationReason: 'Event-driven execution disabled by operator',
+          cancelledAt,
+          cancelledBy: 'system',
+        });
+        logger.debug(
+          `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
+        );
+        telemetryClient.reportEventDrivenExecutionSuppressed({
+          workflowExecution: {
+            ...execution,
+            status: ExecutionStatus.SKIPPED,
+            cancellationReason: 'Event-driven execution disabled by operator',
+            cancelledAt,
+            cancelledBy: 'system',
+          },
+          logTriggerEventsEnabled: workflowsExecutionEngine?.isLogTriggerEventsEnabled() ?? false,
+        });
+        return;
+      }
+    }
+  }
 
   // Span for runtime initialization (graph building, topsort, etc.)
   const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
@@ -101,6 +142,16 @@ export async function runWorkflow({
     throw error;
   } finally {
     loopSpan?.end();
+
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      workflowsExtensions: dependencies.workflowsExtensions,
+      spaceId,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
   }
 
   // Report metering after execution completes and state is flushed.

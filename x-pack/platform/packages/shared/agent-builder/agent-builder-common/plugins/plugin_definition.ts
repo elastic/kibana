@@ -19,7 +19,6 @@ export interface PluginManifestAuthor {
  * Each field contains the list of file paths found for that asset type.
  */
 export interface UnmanagedPluginAssets {
-  commands: string[];
   agents: string[];
   hooks: string[];
   mcp_servers: string[];
@@ -48,6 +47,11 @@ export interface PluginDefinition {
   name: string;
   version: string;
   description: string;
+  /**
+   * Whether the plugin is read-only (built-in) or user-managed (persisted).
+   * Built-in plugins are registered programmatically and cannot be modified or deleted.
+   */
+  readonly: boolean;
   manifest: PluginManifestMetadata;
   source_url?: string;
   skill_ids: string[];

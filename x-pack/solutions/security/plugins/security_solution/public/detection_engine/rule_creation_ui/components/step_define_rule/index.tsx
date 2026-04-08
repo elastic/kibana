@@ -364,7 +364,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             defaultMessage: 'Index Patterns',
           }
         ),
-        iconType: dataSourceType === DataSourceType.IndexPatterns ? 'checkInCircleFilled' : 'empty',
+        iconType: dataSourceType === DataSourceType.IndexPatterns ? 'checkCircleFill' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.IndexPatterns}`,
       },
       {
@@ -372,7 +372,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         label: i18nCore.translate('xpack.securitySolution.ruleDefine.indexTypeSelect.dataView', {
           defaultMessage: 'Data View',
         }),
-        iconType: dataSourceType === DataSourceType.DataView ? 'checkInCircleFilled' : 'empty',
+        iconType: dataSourceType === DataSourceType.DataView ? 'checkCircleFill' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.DataView}`,
       },
     ],

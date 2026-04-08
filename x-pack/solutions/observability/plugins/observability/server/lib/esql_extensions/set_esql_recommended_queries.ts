@@ -66,12 +66,12 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
-const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
+const METRICS_ESQL_RECOMMENDED_QUERIES = [
   {
     name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.name', {
       defaultMessage: 'Kubernetes pods sorted by memory usage',
     }),
-    query: `FROM ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.memory.usage.limit.pct IS NOT NULL | STATS memory_limit_pct = MAX(kubernetes.pod.memory.usage.limit.pct) BY kubernetes.pod.name | SORT memory_limit_pct DESC`,
+    query: `TS ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.memory.usage.limit.pct IS NOT NULL | STATS memory_limit_pct = MAX(kubernetes.pod.memory.usage.limit.pct) BY kubernetes.pod.name | SORT memory_limit_pct DESC`,
     description: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.description', {
       defaultMessage:
         'Lists Kubernetes pods sorted by memory usage percentage relative to their limit',
@@ -81,12 +81,15 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByCpu.name', {
       defaultMessage: 'Kubernetes pods sorted by CPU usage',
     }),
-    query: `FROM ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.cpu.usage.limit.pct IS NOT NULL | STATS cpu_limit_pct = MAX(kubernetes.pod.cpu.usage.limit.pct) BY kubernetes.pod.name | SORT cpu_limit_pct DESC`,
+    query: `TS ${METRICS_INDEX_PATTERN} | WHERE kubernetes.pod.cpu.usage.limit.pct IS NOT NULL | STATS cpu_limit_pct = MAX(kubernetes.pod.cpu.usage.limit.pct) BY kubernetes.pod.name | SORT cpu_limit_pct DESC`,
     description: i18n.translate('xpack.observability.esqlQueries.k8sPodsByCpu.description', {
       defaultMessage:
         'Lists Kubernetes pods sorted by CPU usage percentage relative to their limit',
     }),
   },
+];
+
+const LOGS_ESQL_RECOMMENDED_QUERIES = [
   {
     name: i18n.translate('xpack.observability.esqlQueries.logsWithErrorOrWarn.name', {
       defaultMessage: 'Logs with "error" or "warn" messages',
@@ -123,19 +126,18 @@ export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
   const observabilityRecommendedQueries = [
     ...TRACES_ESQL_RECOMMENDED_QUERIES,
-    ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES,
-    SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY,
+    ...METRICS_ESQL_RECOMMENDED_QUERIES,
+    ...LOGS_ESQL_RECOMMENDED_QUERIES,
   ];
 
   // Register full observability-specific recommendations for observability solution view.
   esqlExtensionsRegistry.setRecommendedQueries(observabilityRecommendedQueries, 'oblt');
 
-  // Register only the "Search all metrics" recommendation for security and search solution views.
+  // Register "Search all metrics" under classic so it surfaces in all views (classic + every solution).
   esqlExtensionsRegistry.setRecommendedQueries(
     [SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY],
-    'security'
+    'classic'
   );
-  esqlExtensionsRegistry.setRecommendedQueries([SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY], 'es');
 
   // Register recommended fields
   esqlExtensionsRegistry.setRecommendedFields(ALL_RECOMMENDED_FIELDS_FOR_ESQL, 'oblt');

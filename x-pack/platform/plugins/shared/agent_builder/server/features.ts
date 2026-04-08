@@ -84,6 +84,17 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 savedObject: { all: [], read: [] },
                 ui: [uiPrivileges.manageTools],
               },
+              {
+                id: subFeaturePrivilegeIds.manageSkills,
+                name: i18n.translate(
+                  'xpack.agentBuilder.featureRegistry.subFeatures.manageSkills.privilege',
+                  { defaultMessage: 'Create and edit skills' }
+                ),
+                includeIn: 'all',
+                api: [apiPrivileges.manageSkills],
+                savedObject: { all: [], read: [] },
+                ui: [uiPrivileges.manageSkills],
+              },
             ],
           },
         ],

@@ -23,3 +23,10 @@ export const maintainerIdParamsSchema = z
     id: z.string().min(1, 'id is required'),
   })
   .superRefine(validateMaintainerIdExists);
+
+export const maintainerIdsQuerySchema = z.object({
+  ids: z
+    .union([z.string().min(1), z.array(z.string().min(1))])
+    .transform((value) => (Array.isArray(value) ? value : [value]))
+    .optional(),
+});

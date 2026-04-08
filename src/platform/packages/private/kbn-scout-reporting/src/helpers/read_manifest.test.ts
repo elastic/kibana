@@ -152,6 +152,41 @@ describe('read_manifest', () => {
       );
     });
 
+    it('should normalize a string owner to an array', () => {
+      const fileContent = `
+        {
+          "id": "@kbn/example-plugin",
+          "type": "plugin",
+          "group": "platform",
+          "visibility": "private",
+          "owner": "@elastic/kibana-core",
+          "plugin": { "id": "examplePlugin" }
+        }
+      `;
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
+
+      const result = readKibanaModuleManifest(pluginFilePath);
+      expect(result.owner).toEqual(['@elastic/kibana-core']);
+    });
+
+    it('should default owner to empty array when missing', () => {
+      const fileContent = `
+        {
+          "id": "@kbn/example-plugin",
+          "type": "plugin",
+          "group": "platform",
+          "visibility": "private",
+          "plugin": { "id": "examplePlugin" }
+        }
+      `;
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
+
+      const result = readKibanaModuleManifest(pluginFilePath);
+      expect(result.owner).toEqual([]);
+    });
+
     it('should throw an error for missing required fields', () => {
       const fileContent = `{
         "group": "platform",

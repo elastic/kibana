@@ -11,7 +11,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import { v4 as uuidV4 } from 'uuid';
 
-import { EuiFlyout, getFlyoutManagerStore, type EuiFlyoutMenuProps } from '@elastic/eui';
+import type { EuiFlyoutMenuProps } from '@elastic/eui';
+import { EuiFlyout, getFlyoutManagerStore } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -83,12 +84,19 @@ export class SystemFlyoutService {
           mergedFlyoutMenuProps = { title, ...flyoutMenuProps };
         }
 
-        // Subscribe to EUI flyout manager store to detect cascade closes
-        // This ensures child flyouts close when their parent closes, even across separate React roots
-        if (session !== 'never') {
-          // Use the EUI flyout ID (from options.id) for store lookups, not our internal container ID
+        // Subscribe to CLOSE_SESSION events for cascade closes of child flyouts.
+        // When a parent session closes, child flyouts in separate React roots must
+        // be explicitly closed since their deferred useEffect detection may not fire
+        // reliably across roots.
+        //
+        // IMPORTANT: We only handle child flyouts here (session === 'inherit').
+        // Main flyouts (session === 'start') must NOT be closed synchronously via
+        // this handler because unmountComponentAtNode triggers a useLayoutEffect
+        // cleanup that reads a stale ref (flyoutExistsInManagerRef) and calls
+        // closeAllFlyouts(), which would inadvertently close unrelated sessions
+        // (e.g., during goBack navigation).
+        if (session === 'inherit') {
           const euiFlyoutId = options.id || flyoutId;
-
           const { subscribeToEvents } = getFlyoutManagerStore();
 
           const unsubscribe = subscribeToEvents((event) => {
@@ -96,8 +104,10 @@ export class SystemFlyoutService {
               return;
             }
 
-            const { mainFlyoutId, childFlyoutId } = event.session;
-            const shouldClose = euiFlyoutId === mainFlyoutId || euiFlyoutId === childFlyoutId;
+            const { childFlyoutId, childHistory } = event.session;
+            const shouldClose =
+              euiFlyoutId === childFlyoutId ||
+              childHistory?.some((entry) => entry.flyoutId === euiFlyoutId);
 
             if (shouldClose && !flyoutRef.isClosed) {
               flyoutRef.close();
@@ -143,13 +153,13 @@ export class SystemFlyoutService {
   /**
    * Cleanup method for when the service is stopped
    */
-  public stop(): void {
-    this.closeAllSystemFlyouts();
-    this.targetDomElement = null;
-  }
-
-  private closeAllSystemFlyouts(): void {
+  public closeAllFlyouts(): void {
     this.activeFlyouts.forEach((flyout) => flyout.close());
     this.activeFlyouts.clear();
+  }
+
+  public stop(): void {
+    this.closeAllFlyouts();
+    this.targetDomElement = null;
   }
 }

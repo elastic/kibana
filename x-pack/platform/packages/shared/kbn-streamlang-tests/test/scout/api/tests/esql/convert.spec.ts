@@ -28,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest(indexName, docs);
@@ -55,7 +55,7 @@ apiTest.describe(
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed'
       );
     });
@@ -76,7 +76,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest(indexName, docs);
@@ -109,7 +109,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpile(streamlangDSL)).toThrowError(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           /Convert processor must have the .*?to.*? parameter when there is a .*?where.*? condition/
         );
       }

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AppDeepLinkLocations } from '@kbn/core/public';
 import type { CreateManagementItemArgs } from '../types';
 
 export class ManagementItem {
@@ -16,6 +17,7 @@ export class ManagementItem {
   public readonly order: number;
   public readonly hideFromSidebar?: boolean;
   public readonly hideFromGlobalSearch?: boolean;
+  public readonly visibleIn?: AppDeepLinkLocations[];
   public readonly euiIconType?: string;
   public readonly icon?: string;
   public readonly capabilitiesId?: string;
@@ -30,6 +32,7 @@ export class ManagementItem {
     order = 100,
     hideFromSidebar = false,
     hideFromGlobalSearch = false,
+    visibleIn,
     euiIconType,
     icon,
     capabilitiesId,
@@ -41,6 +44,7 @@ export class ManagementItem {
     this.order = order;
     this.hideFromSidebar = hideFromSidebar;
     this.hideFromGlobalSearch = hideFromGlobalSearch;
+    this.visibleIn = visibleIn;
     this.euiIconType = euiIconType;
     this.icon = icon;
     this.capabilitiesId = capabilitiesId;

@@ -59,6 +59,7 @@ export const getSLOTransformTemplate = (
       version: SLO_RESOURCES_VERSION,
       managed: true,
       managed_by: 'observability',
+      deletion_protected: true,
     },
   };
 };

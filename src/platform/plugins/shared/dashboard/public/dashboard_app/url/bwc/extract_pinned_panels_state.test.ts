@@ -10,7 +10,7 @@
 import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {
-  describe('>=9.4 state', () => {
+  describe('>9.4 state', () => {
     test('should extract controls', () => {
       const controlGroupInput94 = {
         controls: [
@@ -62,6 +62,64 @@ describe('extractDashboardState', () => {
         },
       ]);
     });
+
+    test('should keep explicit empty pinned panels', () => {
+      const dashboardState = extractDashboardState({
+        pinned_panels: [],
+      });
+
+      expect(dashboardState.pinned_panels).toEqual([]);
+    });
+
+    test('should not set pinned panels when not provided', () => {
+      const dashboardState = extractDashboardState({
+        pinned_panels: undefined,
+      });
+
+      expect(dashboardState.pinned_panels).toBeUndefined();
+    });
+  });
+
+  describe('9.4 state', () => {
+    test('should switch `uid` to `id`', () => {
+      const controlGroupInput94 = {
+        controls: [
+          {
+            config: {},
+            uid: 'control1',
+            grow: true,
+            type: 'optionsListControl',
+            width: 'small',
+          },
+          {
+            config: {},
+            uid: 'control2',
+            grow: false,
+            type: 'optionsListControl',
+            width: 'medium',
+          },
+        ],
+      };
+      const dashboardState = extractDashboardState({
+        controlGroupInput: controlGroupInput94,
+      });
+      expect(dashboardState.pinned_panels).toEqual([
+        {
+          config: {},
+          id: 'control1',
+          grow: true,
+          type: 'options_list_control',
+          width: 'small',
+        },
+        {
+          config: {},
+          id: 'control2',
+          grow: false,
+          type: 'options_list_control',
+          width: 'medium',
+        },
+      ]);
+    });
   });
 
   describe('>= 8.19 to <9.4 state', () => {
@@ -70,6 +128,7 @@ describe('extractDashboardState', () => {
         controlGroupInput: {
           controls: [
             {
+              uid: 'control1',
               controlConfig: {
                 dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
                 fieldName: 'machine.os.keyword',
@@ -84,6 +143,7 @@ describe('extractDashboardState', () => {
       });
       expect(dashboardState.pinned_panels).toEqual([
         {
+          id: 'control1',
           config: {
             data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
             field_name: 'machine.os.keyword',
@@ -270,7 +330,7 @@ describe('extractDashboardState', () => {
           type: 'options_list_control',
           grow: true,
           width: 'small',
-          uid: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
         },
         {
           config: {
@@ -280,7 +340,7 @@ describe('extractDashboardState', () => {
           },
           type: 'options_list_control',
           grow: false,
-          uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
+          id: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
         },
       ]);
     });
@@ -318,7 +378,7 @@ describe('extractDashboardState', () => {
             use_global_filters: false,
             ignore_validations: false,
           },
-          uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
+          id: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
           type: 'options_list_control',
         },
       ]);
@@ -350,7 +410,7 @@ describe('extractDashboardState', () => {
             field_name: 'machine.os.keyword',
             selected_options: ['win 7'],
           },
-          uid: '8311639d-92e5-4aa5-99a4-9502b10eead5',
+          id: '8311639d-92e5-4aa5-99a4-9502b10eead5',
           grow: true,
           type: 'options_list_control',
           width: 'small',

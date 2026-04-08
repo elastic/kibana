@@ -414,7 +414,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
           throw new FleetError(
-            `No enough permissions to create policies in space ${requestedSpaceId}`
+            `Not enough permissions to create policies in space ${requestedSpaceId}`
           );
         }
       }

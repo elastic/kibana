@@ -93,9 +93,9 @@ export const allowedExperimentalValues = Object.freeze({
   entityDetailsHighlightsEnabled: true,
 
   /**
-   * Enables the experimental Threat Hunting home experience.
+   * Enables the new Entity Analytics home page experience.
    */
-  entityThreatHuntingEnabled: false,
+  entityAnalyticsNewHomePageEnabled: false,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
@@ -117,9 +117,14 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables the storing of gaps in the event log
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: false,
+
+  /**
+   * Enables the redesigned execution results table on the rule details page
+   */
+  newExecutionResultsTableEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -184,10 +189,6 @@ export const allowedExperimentalValues = Object.freeze({
   automaticDashboardsMigration: true,
 
   /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
-  /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
    */
@@ -245,6 +246,22 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: false,
+
+  /**
+   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
+   */
+  securityClassicNavUpdate: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

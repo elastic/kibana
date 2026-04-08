@@ -9,364 +9,105 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { manageDashboardTool } from '../tools';
 import { dashboardTools } from '../../common';
 import { gridLayoutPrompt } from './grid_layout_prompt';
+import { dashboardCompositionPrompt } from './dashboard_composition_prompt';
 
 export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
   description:
-    'Compose and update in-memory Kibana dashboards using ordered operations and visualization attachment IDs.',
+    'Compose and update in-memory Kibana dashboards using ordered operations, visualization attachments, and inline visualization editing.',
   content: `## When to Use This Skill
 
 Use this skill when:
-- A user asks to create a dashboard composed of one or more visualizations.
-- A user asks to update an in-memory dashboard from a previous tool result.
-- A request includes ordered panel-management actions (add/remove panels, markdown, metadata, section edits).
-- You need to add existing visualization attachments to a dashboard.
+- A user asks to find, list, inspect, or modify existing Kibana dashboards.
+- A user asks to create a dashboard from one or more visualizations.
+- A user asks to update an in-memory dashboard created earlier in the conversation.
+- A request involves dashboard metadata, markdown, panel, or section changes.
 
 Do **not** use this skill when:
-- The user asks for a standalone chart without asking for a dashboard.
-- The user needs help discovering data, fields, or query logic.
-- The user asks about saved or persisted dashboards in Kibana. This skill manages in-memory dashboards only.
-
-## Workflow Handoff
-
-Use this end-to-end sequence for dashboard requests:
-
-1. **Explore the data** when index, field, or query context is unclear.
-2. **Create visualizations** to produce panel-ready \`attachment_id\` values.
-3. **Compose or update the dashboard** in this skill using ordered operations with ${dashboardTools.manageDashboard}.
-
-Enter this skill with:
-- An ordered list of visualization \`attachment_id\` values matching desired panel order.
-- A \`dashboardAttachmentId\` when updating an existing dashboard.
-
-## Available Tool
-
-- **${dashboardTools.manageDashboard}**: Create or update an in-memory dashboard with ordered \`operations[]\`.
+- The user asks for a standalone visualization rather than a dashboard.
+- The user needs help exploring data, fields, or query logic.
 
 ## Core Instructions
 
-### Step 1: Compose ordered dashboard operations
+For dashboard discovery:
+- When a user asks what dashboards are available, search for existing saved dashboards with \`platform.core.sml_search\`.
+- Use specific keywords from the user's request. For a broad listing of available dashboards, you may use \`keywords: ["*"]\`.
+- Summarize matches in plain language by title and description, and include lightweight structure when available such as panel and section counts.
+- Do **not** attach dashboards by default when only listing or comparing available dashboards.
+- When the user wants to inspect or modify a saved dashboard, attach it with \`platform.core.sml_attach\` using the exact \`chunk_id\` from the search result.
+- After attaching a saved dashboard, treat the returned dashboard attachment as the editable working copy. Use its \`attachment_id\` in conversation context for later dashboard updates.
 
-Use this contract:
+Build the request for ${dashboardTools.manageDashboard} as an ordered \
+\`operations\` array. Operations run in order, so earlier operations should set up state needed by later ones.
 
-\`\`\`json
-{
-  "dashboardAttachmentId": "optional-existing-id",
-  "operations": [
-    { "operation": "set_metadata", "title": "optional", "description": "optional" },
-    { "operation": "upsert_markdown", "markdownContent": "..." },
-    { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
-    { "operation": "add_section", "title": "Section title", "grid": { "y": 16 }, "panels": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }] },
-    { "operation": "remove_section", "sectionId": "existing-section-id", "panelAction": "promote" },
-    { "operation": "remove_panels", "panelIds": ["panel-id"] }
-  ]
-}
-\`\`\`
+When a dashboard needs sections, prefer a single batched call:
+1. Use \`add_section\` with its optional \`panels\` array when you already know the inline visualizations that belong in the new section.
+2. Use follow-up \`create_visualization_panels\` or \`add_panels_from_attachments\` with \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
 
-#### Creating a new dashboard
+Do **not** make one ${dashboardTools.manageDashboard} call per section unless a later step truly depends on the result of an earlier section-specific change.
 
-When creating a dashboard, prefer this sequence:
-1. \`set_metadata\` to set title/description
-2. \`upsert_markdown\` to add a summary panel
-3. Add visualizations with \`add_panels_from_attachments\` using \`items[]\` — each item specifies \`attachmentId\` and a required \`grid: { x, y, w, h }\`
-4. For sectioned dashboards, use \`add_section\` (with \`grid.y\`) and add section panels with section-relative coordinates
+For a new dashboard:
+- Start with \`set_metadata\` and provide both \`title\` and \`description\`.
+- Use \`add_markdown\` when a summary panel is useful.
+- Use \`create_visualization_panels\` to create Lens visualization panels inline from natural language.
+- Use \`add_panels_from_attachments\` when the user already has standalone visualization attachments they want to place on the dashboard.
+- Use \`add_section\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability. Include \`panels\` on the section when you can create that section's inline visualizations immediately.
 
-If you omit metadata on a new dashboard, creation can fail.
+For an existing dashboard:
+- Reuse \`data.dashboardAttachment.id\` from the latest dashboard tool result as \`dashboardAttachmentId\`.
+- Use \`remove_panels\` to remove existing panels by \`id\`.
+- Use \`create_visualization_panels\` to add new Lens visualization panels inline.
+- Use \`edit_visualization_panels\` only to change existing ES|QL-backed Lens visualization panels in place by \`panelId\`.
+- If a requested change targets a DSL, form-based, or other non-ES|QL panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
+- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
+- Use \`add_panels_from_attachments\` to add existing standalone visualization attachments.
+- Use \`add_section\` or \`remove_section\` for section changes.
+- Use \`set_metadata\` or \`add_markdown\` to update dashboard text.
 
-#### Updating an existing dashboard
+Supported operations:
+- \`set_metadata\`: set or update dashboard title and description.
+- \`add_markdown\`: add a markdown summary panel.
+- \`add_panels_from_attachments\`: add panels from visualization attachments, each with explicit \`grid\` coordinates and an optional \`sectionId\`.
+- \`create_visualization_panels\`: create Lens visualization panels inline from natural language, with optional \`chartType\`, \`index\`, and \`esql\`.
+- Batch multiple panel creations into the same \`create_visualization_panels\` operation whenever they can be planned together, even when they target different \`sectionId\` values.
+- \`edit_visualization_panels\`: update existing ES|QL-backed Lens visualization panels by \`panelId\`, preserving their current placement.
+- \`update_panel_layouts\`: resize, reposition, or move existing panels by \`panelId\` by updating \`grid\` and optionally changing \`sectionId\`.
+- \`add_section\`: create a new section with its own \`grid.y\`, and optionally create that section's initial inline Lens visualization panels with \`panels\`. Those nested panel grids are section-relative and do not need a \`sectionId\`.
+- \`remove_section\`: remove a section by \`id\` with \`panelAction: "promote" | "delete"\`.
+- \`remove_panels\`: remove existing panels by \`id\`.
 
-1. Extract the dashboard attachment ID from the previous tool result: look for \`data.dashboardAttachment.id\`.
-2. Call ${dashboardTools.manageDashboard} with \`dashboardAttachmentId\` and an ordered \`operations[]\` list.
-3. Use:
-   - \`add_panels_from_attachments\` with \`items[]\` to add visualization attachments with their dashboard grid layout, optionally targeting an existing section via \`sectionId\`
-   - \`add_section\` to create a new section (server generates \`sectionId\`)
-   - \`remove_section\` with required \`panelAction: "promote" | "delete"\`
-   - \`remove_panels\` to remove by \`panelId\`
-   - \`set_metadata\` / \`upsert_markdown\` for dashboard metadata and summary updates
+After a successful call:
+- Render the dashboard attachment inline so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition - only the final dashboard attachment should be rendered.
+- Remember \`data.dashboardAttachment.id\` for follow-up updates.
+- Use returned \`id\` values for future panel removals.
+- Use returned \`sectionId\` values for future section-targeted changes.
+- If \`data.failures\` is present, explain which attachments failed and why.
 
-**Keeping the markdown summary in sync:** After adding or removing panels, the existing markdown summary panel may no longer reflect the current dashboard content. If the update changes the panel composition (new panels added or existing ones removed), check whether the markdown summary still accurately describes the dashboard. If it does not, ask the user whether they would like you to update the markdown summary to match the new dashboard state. Do not update it silently — let the user decide.
+## Attachments
 
-### Step 2: Interpret results and report clearly
+- A visualization attachment is a previously created visualization artifact identified by \`attachmentId\`.
+- \`add_panels_from_attachments\` consumes those visualization attachment IDs and turns them into dashboard panels.
+- \`create_visualization_panels\` and \`edit_visualization_panels\` work directly on dashboard panels and do not create standalone visualization attachments.
+- A successful dashboard call returns a dashboard attachment in \`data.dashboardAttachment\`.
+- Use \`data.dashboardAttachment.id\` as \`dashboardAttachmentId\` when updating that dashboard later.
+- Never invent \`dashboardAttachmentId\`, \`id\`, or \`sectionId\`. Reuse the values returned by prior tool results.
 
-After a successful call, the tool returns:
-- \`data.dashboardAttachment.id\`: the attachment ID needed for future updates.
-- \`data.dashboardAttachment.content.panels\`: array of \`{ type, panelId, title }\` for each panel on the dashboard.
-- \`data.dashboardAttachment.content.sections\`: ordered section list with \`sectionId\`, \`title\`, \`collapsed\`, \`grid.y\`, and section panels.
-- \`data.failures\`: array of \`{ type, identifier, error }\` for attachment resolution failures. Only present when there are failures.
-- \`data.version\`: the version number of the dashboard attachment, incrementing with each update.
-
-See \`./examples/tool-result-format\` for the complete result structure with examples.
-
-**After a successful call:**
-- Summarize what was created or updated. List each panel by title so the user knows what is included.
-- If \`failures\` is present and non-empty, explain which attachments could not be resolved and include the error message. Offer to recreate those visualizations and retry adding them.
-- Remember the \`dashboardAttachment.id\` for follow-up updates. Do not ask the user for it again.
-
-## Dashboard Composition Guidelines
-
-A well-composed dashboard tells a coherent story about the data:
-
-1. **Start with a markdown panel** to set context: what the dashboard monitors, what the data source is, and any important notes.
-2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
-3. **Follow with time-series trends** (XY line/area panels): how the key metrics change over time.
-4. **Add breakdowns and distributions** (XY bar, Heatmap, Tagcloud panels): top-N rankings, categorical splits, and density views.
-5. **Include as many panels as are valuable for the underlying data and user intent.** Let the richness and diversity of the available fields drive the panel count instead of a fixed numeric target.
-6. **Every panel should serve a clear purpose.** Do not add panels just to fill space, but do not artificially limit the dashboard when more panels would provide genuine insight.
-
-When the user's request is vague (e.g., "create a dashboard for my logs"), explore the discovered index mapping thoroughly and compose a rich dashboard that covers the breadth of the available data — overview metrics, time-series trends, breakdowns, and distributions. Let the fields drive the panel count rather than defaulting to a minimal set.
-
-## Section Guidelines
-
-- Use sections when the dashboard spans multiple topics or has roughly 6+ visualization panels.
-- Keep simple dashboards flat when a single story is clearer than grouping.
-- Section IDs are server-generated. Never invent IDs; always reuse \`sectionId\` from the latest tool result.
-- New sections should default to \`collapsed: false\`.
-- Panel coordinates inside a section are section-relative (\`y: 0\` is the top of that section).
-- Reorganizing existing panels between top-level and sections is not supported yet; use add/remove operations instead.
-
-## Edge Cases
-
-- **Missing \`attachment_id\` from visualization creation:** Treat that panel as failed for dashboard composition and do not include it in \`attachmentIds\`.
+${dashboardCompositionPrompt}
 
 ${gridLayoutPrompt}
 
-- **Missing dashboard attachment ID on updates:** If the user asks to update a dashboard but the prior \`dashboardAttachment.id\` is not available in conversation context, ask the user to clarify which dashboard they mean or offer to create a new one.
-- **User asks to update a panel in place:** Prefer ordered remove + add operations in the same call.
+## Edge Cases
 
-See \`./examples/manage-dashboard-payloads\` for complete payload examples covering all scenarios.
+- If a visualization attachment is missing or cannot be resolved, do not invent a replacement attachment ID. Call the tool only with valid attachment IDs and report unresolved attachments clearly.
+- If the user asks to update a dashboard but the latest \`dashboardAttachmentId\` is not available in conversation context, ask which dashboard they mean or offer to create a new one.
+- Use \`update_panel_layouts\` when the user wants to resize, reposition, or move panels without changing panel content.
+- If a user wants to change a dashboard panel's visualization semantics, prefer \`edit_visualization_panels\` over removing and re-adding the panel, but only for ES|QL-backed Lens panels.
+- Attached dashboards can include DSL-based, form-based, or other non-ES|QL panels. Do not attempt to edit those panels directly.
+- If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
+- Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before calling \`remove_panels\`, \`create_visualization_panels\`, or any other replacement operations.
+- If the tool returns partial failures, explain which attachments failed and include the reported error for each one.
 `,
-  referencedContent: [
-    {
-      relativePath: './examples',
-      name: 'manage-dashboard-payloads',
-      content: `# Manage Dashboard Payload Examples
-
-## Create a new dashboard
-
-\`\`\`json
-{
-  "operations": [
-    {
-      "operation": "set_metadata",
-      "title": "Web Server Performance",
-      "description": "Overview of web server request traffic and host resource usage"
-    },
-    {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Web Server Performance\n\nThis dashboard tracks nginx access logs and system metrics across all production hosts."
-    },
-    {
-      "operation": "add_panels_from_attachments",
-      "items": [
-        { "attachmentId": "viz-1", "grid": { "x": 0, "y": 0, "w": 24, "h": 5 } },
-        { "attachmentId": "viz-2", "grid": { "x": 24, "y": 0, "w": 24, "h": 5 } },
-        { "attachmentId": "viz-3", "grid": { "x": 0, "y": 5, "w": 48, "h": 8 } }
-      ]
-    }
-  ]
-}
-\`\`\`
-
-## Create a new sectioned dashboard
-
-\`\`\`json
-{
-  "operations": [
-    {
-      "operation": "set_metadata",
-      "title": "Web Server Performance",
-      "description": "Overview by metrics, trends, and breakdowns"
-    },
-    {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Web Server Performance\n\nTraffic health and anomaly overview."
-    },
-    {
-      "operation": "add_section",
-      "title": "Key Metrics",
-      "grid": { "y": 4 },
-      "panels": [
-        { "attachmentId": "viz-1", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
-        { "attachmentId": "viz-2", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } }
-      ]
-    },
-    {
-      "operation": "add_section",
-      "title": "Traffic Trends",
-      "grid": { "y": 16 },
-      "panels": [
-        { "attachmentId": "viz-3", "grid": { "x": 0, "y": 0, "w": 24, "h": 10 } },
-        { "attachmentId": "viz-4", "grid": { "x": 24, "y": 0, "w": 24, "h": 10 } }
-      ]
-    }
-  ]
-}
-\`\`\`
-
-## Update a dashboard — ordered remove + add + markdown
-
-\`\`\`json
-{
-  "dashboardAttachmentId": "abc-123",
-  "operations": [
-    { "operation": "remove_panels", "panelIds": ["panel-xyz"] },
-    {
-      "operation": "add_panels_from_attachments",
-      "items": [{ "attachmentId": "viz-attachment-789", "grid": { "x": 0, "y": 0, "w": 24, "h": 8 } }]
-    },
-    {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Updated Summary\n\nNow includes response-size trend."
-    }
-  ]
-}
-\`\`\`
-
-## Update a dashboard — add existing attachment panels
-
-Use this when the user wants to add a visualization that was already created earlier in the conversation.
-
-\`\`\`json
-{
-  "dashboardAttachmentId": "abc-123",
-  "operations": [
-    {
-      "operation": "add_panels_from_attachments",
-      "items": [{ "attachmentId": "viz-attachment-456", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }]
-    }
-  ]
-}
-\`\`\`
-
-## Update a dashboard — add panels to an existing section
-
-\`\`\`json
-{
-  "dashboardAttachmentId": "abc-123",
-  "operations": [
-    {
-      "operation": "add_panels_from_attachments",
-      "items": [
-        {
-          "attachmentId": "viz-attachment-999",
-          "sectionId": "sec-uuid-1",
-          "grid": { "x": 0, "y": 10, "w": 24, "h": 10 }
-        }
-      ]
-    }
-  ]
-}
-\`\`\`
-
-## Update a dashboard — metadata only
-
-\`\`\`json
-{
-  "dashboardAttachmentId": "abc-123",
-  "operations": [
-    {
-      "operation": "set_metadata",
-      "title": "Web Server Performance (Production)"
-    },
-    {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Updated Summary\n\nNow filtered to production hosts only."
-    }
-  ]
-}
-\`\`\`
-`,
-    },
-    {
-      relativePath: './examples',
-      name: 'tool-result-format',
-      content: `# Tool Result Format Reference
-
-## Successful dashboard creation or update
-
-\`\`\`json
-{
-  "type": "dashboard",
-  "data": {
-    "version": 1,
-    "dashboardAttachment": {
-      "id": "abc-123",
-      "content": {
-        "title": "Web Server Performance",
-        "description": "Overview of web server request traffic and host resource usage",
-        "panels": [
-          { "type": "lens", "panelId": "viz-001", "title": "Total Requests", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
-          { "type": "lens", "panelId": "viz-002", "title": "Average CPU Usage", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } },
-          { "type": "lens", "panelId": "viz-003", "title": "Requests Over Time", "grid": { "x": 0, "y": 5, "w": 24, "h": 10 } }
-        ]
-      }
-    }
-  }
-}
-\`\`\`
-
-Key fields to remember:
-- \`data.dashboardAttachment.id\` — save this value. Pass it as \`dashboardAttachmentId\` in follow-up update calls.
-- \`data.dashboardAttachment.content.panels[].panelId\` — use these when the user asks to remove a specific panel via \`remove_panels.panelIds\`.
-- \`data.dashboardAttachment.content.panels[].grid\` — current position and size of each panel. Use this to find gaps when adding new panels to an existing dashboard.
-- \`data.dashboardAttachment.content.sections[]\` — section metadata and section-level panel lists. Use each section's \`sectionId\` for section-targeted updates.
-- \`data.version\` — increments with each update to the dashboard.
-- Panels with \`type: "generic"\` are non-visualization panels (e.g., markdown summary). Panels with \`type: "lens"\` are visualizations.
-
-## Successful result with partial failures
-
-\`\`\`json
-{
-  "type": "dashboard",
-  "data": {
-    "version": 1,
-    "failures": [
-      {
-        "type": "attachment_panels",
-        "identifier": "viz-missing-999",
-        "error": "Attachment not found"
-      }
-    ],
-    "dashboardAttachment": {
-      "id": "abc-123",
-      "content": {
-        "title": "Server Metrics",
-        "description": "System performance overview",
-        "panels": [
-          { "type": "lens", "panelId": "viz-001", "title": "CPU Usage Over Time" }
-        ]
-      }
-    }
-  }
-}
-\`\`\`
-
-When \`failures\` is present:
-- The dashboard was still created or updated with the panels that succeeded.
-- Report each failure to the user: include \`identifier\` (the attachment that failed) and \`error\` (the reason).
-- Offer to recreate failed visualizations and retry attachment ingestion.
-
-## Error result
-
-\`\`\`json
-{
-  "type": "error",
-  "data": {
-    "message": "Title and description are required when creating a new dashboard.",
-    "metadata": {
-      "title": null,
-      "description": null,
-      "dashboardAttachmentId": null
-    }
-  }
-}
-\`\`\`
-
-On error, the dashboard was not created or updated. Inform the user about what went wrong and how to fix it (e.g., provide missing required fields).
-`,
-    },
-  ],
   getInlineTools: () => [manageDashboardTool()],
 });

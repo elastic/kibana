@@ -12,7 +12,7 @@ import type {
   FindAnonymizationProfilesResponse,
 } from '@kbn/anonymization-common';
 import { anonymizationProfileSchema as profileSchema } from '@kbn/anonymization-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ProfilesListQuery, UpdateProfileInput } from '../../types/profiles';
 
 const findProfilesResponseSchema = z.object({

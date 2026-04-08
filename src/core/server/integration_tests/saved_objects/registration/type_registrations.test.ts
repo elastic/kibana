@@ -55,6 +55,7 @@ const previouslyRegisteredTypes = [
   'csp_rule',
   'dashboard',
   'data_connector',
+  'data_stream-config',
   'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
@@ -63,6 +64,7 @@ const previouslyRegisteredTypes = [
   'enterprise_search_telemetry',
   'entity-analytics-monitoring-entity-source',
   'watchlist-config',
+  'watchlist-entity-source',
   'entity-definition',
   'privmon-api-key',
   'entity-discovery-api-key',
@@ -108,6 +110,7 @@ const previouslyRegisteredTypes = [
   'ingest-outputs',
   'ingest-package-policies',
   'ingest_manager_settings',
+  'integration-config',
   'inventory-view',
   'investigation',
   'kql-telemetry',
@@ -126,6 +129,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'oauth_state',
   'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',
@@ -173,6 +177,7 @@ const previouslyRegisteredTypes = [
   'timelion-sheet',
   'tsvb-validation-telemetry',
   'threshold-explorer-view',
+  'uiam_api_keys_provisioning_status',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
@@ -184,10 +189,12 @@ const previouslyRegisteredTypes = [
   'url',
   'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
   'usage-counters', // deprecated in favor of 'usage-counter'
+  'user_connector_token',
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
+  'streams-significant-events-settings',
 ].sort();
 
 describe('SO type registrations', () => {

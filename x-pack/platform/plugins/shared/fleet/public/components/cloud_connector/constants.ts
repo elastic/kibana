@@ -9,6 +9,7 @@ export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';
 export const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';
+export const CLOUD_SHELL_URL_CLOUD_CONNECTORS = 'cloud_shell_url_cloud_connectors';
 
 export const AWS_PROVIDER = 'aws';
 export const GCP_PROVIDER = 'gcp';
@@ -19,6 +20,7 @@ export {
   ORGANIZATION_ACCOUNT,
   AWS_ACCOUNT_TYPE_VAR_NAME as AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME as AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  GCP_ACCOUNT_TYPE_VAR_NAME as GCP_ACCOUNT_TYPE_INPUT_VAR_NAME,
 } from '../../../common';
 
 export const TABS = {
@@ -46,6 +48,14 @@ export const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
 } as const;
 
+export const GCP_CLOUD_CONNECTOR_FIELD_NAMES = {
+  SERVICE_ACCOUNT: 'service_account',
+  AUDIENCE: 'audience',
+  GCP_SERVICE_ACCOUNT: 'gcp.credentials.service_account_email',
+  GCP_AUDIENCE: 'gcp.credentials.audience',
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID: 'gcp_credentials_cloud_connector_id',
+} as const;
+
 // Minimum version required for AWS cloud connector reusability feature
 export const CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION = '3.1.0-preview06';
 export const CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.1.5';
@@ -53,3 +63,6 @@ export const CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.1.5';
 // Minimum version required for Azure cloud connector reusability feature
 export const CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION = '3.1.0';
 export const CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.2.2';
+//
+export const CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION = '3.3.0-preview06';
+export const CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.5.0-preview04';

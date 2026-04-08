@@ -6200,7 +6200,7 @@
         "label": "UnifiedFieldListSidebarContainerApi",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-        "lineNumber": 106,
+        "lineNumber": 115,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6216,7 +6216,7 @@
               "SidebarVisibility"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-            "lineNumber": 107,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6232,7 +6232,7 @@
               "(dataViewId?: string | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-            "lineNumber": 108,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6267,7 +6267,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-            "lineNumber": 109,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6285,7 +6285,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-            "lineNumber": 111,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6301,7 +6301,7 @@
               "((fieldName: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-            "lineNumber": 112,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6317,7 +6317,7 @@
               "((fieldName: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-            "lineNumber": 113,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6845,7 +6845,7 @@
           " | undefined) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
-        "lineNumber": 116,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

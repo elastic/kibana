@@ -361,6 +361,58 @@ describe('config validation', () => {
       );
     });
 
+    test('throws if OAuth2 accessTokenUrl is not added to allowedHosts', () => {
+      const disallowedTokenUrl = 'http://token.not.in.allowlist/oauth';
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (uri: string) => {
+          if (uri === disallowedTokenUrl) {
+            throw new Error(
+              `target url "${disallowedTokenUrl}" is not added to the Kibana config xpack.actions.allowedHosts`
+            );
+          }
+        },
+      };
+
+      const config = {
+        method: 'post',
+        url: 'https://webhook.example/webhook',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: disallowedTokenUrl,
+        clientId: 'client-id',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities: configUtils });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation webhook action config: target url \\"http://token.not.in.allowlist/oauth\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+      );
+    });
+
+    test('calls ensureUriAllowed for main url and accessTokenUrl when OAuth2 config is valid', () => {
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: jest.fn(),
+      };
+      const mainUrl = 'https://webhook.example/webhook';
+      const tokenUrl = 'https://token.example/oauth';
+      const config = {
+        method: 'post',
+        url: mainUrl,
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: tokenUrl,
+        clientId: 'client-id',
+      };
+
+      validateConfig(connectorType, config, { configurationUtilities: configUtils });
+
+      expect(configUtils.ensureUriAllowed).toHaveBeenCalledTimes(2);
+      expect(configUtils.ensureUriAllowed).toHaveBeenNthCalledWith(1, mainUrl);
+      expect(configUtils.ensureUriAllowed).toHaveBeenNthCalledWith(2, tokenUrl);
+    });
+
     test('throws when additionalFields is no valid JSON', async () => {
       const config = {
         method: 'post',

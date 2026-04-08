@@ -9,14 +9,18 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
+import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
-import { stripUnmappedKeys } from '../scope_tooling';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { telemetryHandler } from '../telemetry_handler';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
@@ -24,6 +28,13 @@ export function registerReadRoute(
     path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
     ...routeConfig,
+  });
+
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(isDashboardAppRequest);
   });
 
   readRoute.addVersion(
@@ -42,38 +53,45 @@ export function registerReadRoute(
         response: {
           200: {
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
+            description: 'success',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          404: {
+            description: 'not found',
           },
         },
       }),
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await read(ctx, req.params.id, isDashboardAppRequest);
-        const { data, warnings } = !isDashboardAppRequest
-          ? stripUnmappedKeys(result.data)
-          : { data: result.data, warnings: [] };
-        return res.ok({
-          body: {
-            ...result,
-            data,
-            ...(warnings?.length && { warnings }),
-          },
-        });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with ID [${req.params.id}] was not found.`,
-            },
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const { body, resolveHeaders } = await read(
+            ctx,
+            getCachedDashboardStateSchema(),
+            req.params.id,
+            isDashboardAppRequest
+          );
+          return res.ok({
+            body,
+            ...(isDashboardAppRequest && { headers: resolveHeaders }),
           });
-        }
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 404) {
+            return res.notFound({
+              body: {
+                message: `A dashboard with ID [${req.params.id}] was not found.`,
+              },
+            });
+          }
 
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
+          if (e.isBoom && e.output.statusCode === 403) {
+            return res.forbidden({ body: { message: e.message } });
+          }
 
-        return res.badRequest(e.message);
-      }
-    }
+          return res.badRequest({ body: { message: e.message } });
+        }
+      })
   );
 }

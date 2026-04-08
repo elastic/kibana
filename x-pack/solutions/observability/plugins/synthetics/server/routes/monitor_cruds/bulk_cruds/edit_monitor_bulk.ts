@@ -6,7 +6,7 @@
  */
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import type { RouteContext } from '../../types';
 import type { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
 import type {
@@ -75,6 +75,7 @@ export const syncEditedMonitorBulk = async ({
   const namespace = spaceId !== routeContext.spaceId ? spaceId : undefined;
 
   try {
+    const packagePolicySoType = await getPackagePolicySavedObjectType();
     const data = monitorsToUpdate.map(
       ({ normalizedMonitor, monitorWithRevision, decryptedPreviousMonitor }) => {
         const monitorId = decryptedPreviousMonitor.id;
@@ -84,7 +85,7 @@ export const syncEditedMonitorBulk = async ({
         const references = monitorPrivateLocations.map((loc) => ({
           id: `${monitorId}-${loc.id}`,
           name: `${monitorId}-${loc.id}`,
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          type: packagePolicySoType,
         }));
         return {
           id: monitorId,

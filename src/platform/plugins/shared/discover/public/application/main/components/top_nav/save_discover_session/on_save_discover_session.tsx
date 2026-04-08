@@ -16,20 +16,24 @@ import {
   type SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
   getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
   selectTabSavedSearch,
+  type DiscoverInternalState,
+  type InternalStateDispatch,
+  type RuntimeStateManager,
 } from '../../../state_management/redux';
 import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
 import { DiscoverSessionSaveModal } from './save_modal';
 
 export interface OnSaveDiscoverSessionParams {
   services: DiscoverServices;
-  state: DiscoverStateContainer;
+  dispatch: InternalStateDispatch;
+  getState: () => DiscoverInternalState;
+  runtimeStateManager: RuntimeStateManager;
   initialCopyOnSave?: boolean;
   onClose?: () => void;
   onSaveCb?: (valueState?: SavedSearchByValueAttributes) => void;
@@ -37,16 +41,20 @@ export interface OnSaveDiscoverSessionParams {
 
 export const onSaveDiscoverSession = async ({
   services,
-  state,
+  dispatch,
+  getState,
+  runtimeStateManager,
   initialCopyOnSave,
   onClose,
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
+  const internalState = getState();
+  const tabId = internalState.tabs.unsafeCurrentId;
   if (services.embeddableEditor.isByValueEditor() && onSaveCb) {
     const savedSearch = await selectTabSavedSearch({
-      tabId: state.getCurrentTab().id,
-      getState: state.internalState.getState,
-      runtimeStateManager: state.runtimeStateManager,
+      tabId,
+      getState,
+      runtimeStateManager,
       services,
     });
 
@@ -55,13 +63,12 @@ export const onSaveDiscoverSession = async ({
 
     onSaveCb({ ...attributes, references });
   } else {
-    const internalState = state.internalState.getState();
     const persistedDiscoverSession = internalState.persistedDiscoverSession;
     const allTabs = selectAllTabs(internalState);
 
     const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
     const isTimeBased = allTabs.some((tab) => {
-      const tabRuntimeState = selectTabRuntimeState(state.runtimeStateManager, tab.id);
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
       const tabDataView = tabRuntimeState.currentDataView$.getValue();
 
       if (tabDataView) {
@@ -90,19 +97,17 @@ export const onSaveDiscoverSession = async ({
       };
 
       try {
-        response = await state.internalState
-          .dispatch(
-            internalStateActions.saveDiscoverSession({
-              newTitle,
-              newTimeRestore,
-              newCopyOnSave,
-              newDescription,
-              newTags,
-              isTitleDuplicateConfirmed,
-              onTitleDuplicate,
-            })
-          )
-          .unwrap();
+        response = await dispatch(
+          internalStateActions.saveDiscoverSession({
+            newTitle,
+            newTimeRestore,
+            newCopyOnSave,
+            newDescription,
+            newTags,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          })
+        ).unwrap();
       } catch (error) {
         services.toastNotifications.addDanger({
           title: i18n.translate('discover.notifications.notSavedSearchTitle', {

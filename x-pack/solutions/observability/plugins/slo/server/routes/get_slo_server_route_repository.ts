@@ -7,8 +7,16 @@
 
 import { getSloRouteRepository } from './slo/route';
 
-export function getSloServerRouteRepository({ isServerless }: { isServerless?: boolean } = {}) {
-  return getSloRouteRepository(isServerless);
+interface RouteRepositoryOptions {
+  isServerless?: boolean;
+  isCompositeSloEnabled?: boolean;
+}
+
+export function getSloServerRouteRepository({
+  isServerless,
+  isCompositeSloEnabled,
+}: RouteRepositoryOptions = {}) {
+  return getSloRouteRepository({ isServerless, isCompositeSloEnabled });
 }
 
 export type SLORouteRepository = ReturnType<typeof getSloServerRouteRepository>;

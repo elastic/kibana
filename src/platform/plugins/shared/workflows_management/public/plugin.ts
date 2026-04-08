@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { first, Subject } from 'rxjs';
 import {
   type AppDeepLinkLocations,
   type AppMountParameters,
@@ -19,10 +19,12 @@ import {
   type Plugin,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import { triggerSchemas } from './trigger_schemas';
 import type {
+  AgentBuilderPluginStartContract,
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
   WorkflowsPublicPluginStart,
@@ -46,6 +48,7 @@ export class WorkflowsPlugin
 {
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
 
   constructor() {
     this.appUpdater$ = new Subject<AppUpdater>();
@@ -77,6 +80,8 @@ export class WorkflowsPlugin
     };
 
     registerConnectorType();
+
+    this.setupAiIntegration(core);
 
     core.application.register({
       id: PLUGIN_ID,
@@ -121,6 +126,42 @@ export class WorkflowsPlugin
 
   public stop() {}
 
+  /**
+   * Sets up AI authoring features: subscribes to `agentBuilder:experimentalFeatures`
+   * reactively via `get$` so that toggling the setting registers renderers without
+   * a page reload. Once registered, renderers stay (addAttachmentType is idempotent-safe
+   * via the guard flag) — this is fine because the server-side tools independently gate
+   * on the same setting and won't create attachments when it's off.
+   */
+  private setupAiIntegration(
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
+  ): void {
+    const register = async () => {
+      const aiIntegrationModule = import('./features/ai_integration');
+
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
+        .then(async ({ agentBuilder }) => {
+          if (agentBuilder.found) {
+            const [coreStart] = await core.getStartServices();
+            const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
+            registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
+              core: coreStart,
+              telemetry: this.telemetryService.getClient(),
+            });
+            return agentBuilder.contract;
+          }
+          return undefined;
+        })
+        .catch(() => undefined);
+    };
+
+    core.uiSettings
+      .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .pipe(first((enabled) => enabled))
+      .subscribe(() => register());
+  }
+
   /** Creates the start services to be used in the Kibana services context of the workflows application */
   private async createWorkflowsStartServices(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
@@ -128,9 +169,14 @@ export class WorkflowsPlugin
     // Get start services as specified in kibana.jsonc
     const [coreStart, depsStart] = await core.getStartServices();
 
+    const agentBuilder = await this.agentBuilderPromise;
+
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
-      workflowsManagement: { telemetry: this.telemetryService.getClient() },
+      workflowsManagement: {
+        telemetry: this.telemetryService.getClient(),
+        agentBuilder,
+      },
     };
 
     // Make sure the workflows extensions registries are ready before using the services

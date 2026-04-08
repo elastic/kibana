@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-security-ai-rules'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-detection-engine'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-security-ai-rules'
+  title: '@kbn/evals-suite-security-ai-rules'
   description: Moon project for @kbn/evals-suite-security-ai-rules
   channel: ''
   owner: '@elastic/security-detection-engine'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
+  sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
 dependsOn:
   - '@kbn/evals'
   - '@kbn/inference-common'
@@ -33,16 +32,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

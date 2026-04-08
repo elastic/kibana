@@ -7,10 +7,9 @@
 
 import { Router } from '@kbn/shared-ux-router';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { useMemo } from 'react';
 import styled from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -87,6 +86,7 @@ const AppRoot = React.memo(
                     indices={[]}
                     shouldUpdate={false}
                     filters={{}}
+                    renderCellActions={() => <></>}
                   />
                 </Wrapper>
               </Provider>

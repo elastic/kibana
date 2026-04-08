@@ -58,10 +58,20 @@ describe('Workflow Insights', () => {
         expect(() => validateQuery(validQuery)).not.toThrow();
       });
 
-      it('should validate successfully with noisy_process_tree and policy_response_failure', () => {
+      it('should validate successfully with custom type', () => {
         const validQuery = {
           query: {
-            types: ['noisy_process_tree', 'policy_response_failure'],
+            types: ['custom'],
+          },
+        };
+
+        expect(() => validateQuery(validQuery)).not.toThrow();
+      });
+
+      it('should validate successfully with all three types', () => {
+        const validQuery = {
+          query: {
+            types: ['incompatible_antivirus', 'policy_response_failure', 'custom'],
           },
         };
 
@@ -114,6 +124,48 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateQuery(validQuery)).not.toThrow();
+    });
+
+    describe('maxSize bounds', () => {
+      it('should not accept more than 50 ids', () => {
+        expect(() => validateQuery({ query: { ids: Array(51).fill('valid-id') } })).toThrow();
+      });
+
+      it('should not accept more than 50 sourceIds', () => {
+        expect(() =>
+          validateQuery({ query: { sourceIds: Array(51).fill('source-id') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 targetIds', () => {
+        expect(() =>
+          validateQuery({ query: { targetIds: Array(51).fill('target-id') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 categories', () => {
+        expect(() =>
+          validateQuery({ query: { categories: Array(21).fill('endpoint') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 types', () => {
+        expect(() =>
+          validateQuery({ query: { types: Array(21).fill('incompatible_antivirus') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 sourceTypes', () => {
+        expect(() =>
+          validateQuery({ query: { sourceTypes: Array(21).fill('llm-connector') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 actionTypes', () => {
+        expect(() =>
+          validateQuery({ query: { actionTypes: Array(21).fill('refreshed') } })
+        ).toThrow();
+      });
     });
 
     it('should throw an error for unsupported categories or types', () => {
@@ -239,7 +291,7 @@ describe('Workflow Insights', () => {
     "[body.type]: types that failed validation:
     - [body.type.0]: expected value to equal [incompatible_antivirus]
     - [body.type.1]: expected value to equal [policy_response_failure]
-    - [body.type.2]: expected value to equal [noisy_process_tree]"
+    - [body.type.2]: expected value to equal [custom]"
     `);
     });
 
@@ -337,6 +389,117 @@ describe('Workflow Insights', () => {
         };
 
         expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+    });
+
+    describe('custom type validation in PUT requests', () => {
+      it('should validate successfully with custom type', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            type: 'custom',
+            action: { type: 'refreshed' },
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+
+      it('should validate successfully with custom type and body fields', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            type: 'custom',
+            message: 'Custom insight message',
+            category: 'endpoint',
+            action: { type: 'remediated', timestamp: '2024-11-29T00:00:00Z' },
+            value: 'custom-value',
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+    });
+
+    describe('maxSize bounds', () => {
+      const baseRequest = {
+        params: { insightId: 'valid-insight-id' },
+        body: {},
+      };
+
+      it('should not accept more than 50 target ids', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { target: { ids: Array(51).fill('target-id') } },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 100 exception_list_items', () => {
+        const item = {
+          list_id: 'list-id',
+          name: 'Exception',
+          entries: [],
+        };
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { remediation: { exception_list_items: Array(101).fill(item) } },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 250 entries in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', entries: Array(251).fill({}) }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 tags in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', tags: Array(51).fill('tag') }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 os_types in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', os_types: Array(21).fill('windows') }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 message_variables', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { metadata: { message_variables: Array(51).fill('var') } },
+          })
+        ).toThrow();
       });
     });
 

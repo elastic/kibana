@@ -29,13 +29,13 @@
           "\nComposes grouping query and aggregations"
         ],
         "signature": [
-          "({ additionalFilters, groupByField, pageNumber, rootAggregations, runtimeMappings, size, sort, statsAggregations, uniqueValue, timeRange, multiValueFieldsToFlatten, countByKeyForMultiValueFields, }: ",
+          "({ additionalFilters, groupByField, pageNumber, rootAggregations, runtimeMappings, size, sort, statsAggregations, uniqueValue, timeRange, multiValueFieldsToFlatten, countByKeyForMultiValueFields, unitsCountFilter, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/index.ts",
-        "lineNumber": 43,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,13 +45,13 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  uniqueValue,\n  timeRange,\n  multiValueFieldsToFlatten = [],\n  countByKeyForMultiValueFields,\n}",
+            "label": "{\n  additionalFilters = [],\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  uniqueValue,\n  timeRange,\n  multiValueFieldsToFlatten = [],\n  countByKeyForMultiValueFields,\n  unitsCountFilter,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/index.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
