@@ -147,9 +147,9 @@ export function DashboardApp({
   useEffect(() => {
     if (!dashboardApi) return;
     const unlisten = history.listen((location) => {
-      const viewPrefix = `${VIEW_DASHBOARD_URL}/`;
+      const dashboardPath = `${VIEW_DASHBOARD_URL}/${savedDashboardId}`;
       const isNavigatingToSameDashboard =
-        savedDashboardId && location.pathname === `${viewPrefix}${savedDashboardId}`;
+        savedDashboardId && location.pathname.match(`^${dashboardPath}\/?`);
       // Bail out if the history update is navigating to a different dashboard. Otherwise the following code
       // will eat the state transfer intended for the next dashboard
       if (!isNavigatingToSameDashboard) return;
@@ -157,8 +157,15 @@ export function DashboardApp({
       const lateEmbeddables = embeddableService
         .getStateTransfer()
         .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
-      dashboardApi.addIncomingEmbeddables(lateEmbeddables);
-      if (lateEmbeddables?.length) dashboardApi.setViewMode('edit');
+
+      if (lateEmbeddables?.length) {
+        // If a panel is expanded, minimize it so that the user can see the newly added embeddables
+        if (dashboardApi.expandedPanelId$.value) {
+          dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+        }
+        dashboardApi.addIncomingEmbeddables(lateEmbeddables);
+        dashboardApi.setViewMode('edit');
+      }
     });
     return unlisten;
   }, [dashboardApi, history, savedDashboardId]);

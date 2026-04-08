@@ -163,6 +163,40 @@ describe('Dashboard App', () => {
       });
     });
 
+    it('adds incoming embeddables directly when navigating to the same dashboard with a maximized panel', async () => {
+      const savedDashboardId = 'test-dashboard-123';
+      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}/panel`] });
+
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId={savedDashboardId}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      const incomingEmbeddables = [
+        {
+          type: 'lens',
+          serializedState: { title: 'Chart from the AI sidebar' },
+        },
+      ];
+      mockGetIncomingEmbeddablePackage.mockReturnValueOnce(incomingEmbeddables);
+
+      mockHistory.push(`/view/${savedDashboardId}/panel`);
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(incomingEmbeddables);
+        expect(setViewModeSpy).toHaveBeenCalledWith('edit');
+      });
+    });
+
     it('does not consume embeddables when navigating to a different dashboard', async () => {
       const savedDashboardId = 'dashboard-a';
       mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}`] });
@@ -216,8 +250,7 @@ describe('Dashboard App', () => {
       mockHistory.push(`/view/${savedDashboardId}`);
 
       await waitFor(() => {
-        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
-        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(undefined);
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
         expect(setViewModeSpy).not.toHaveBeenCalled();
       });
     });
