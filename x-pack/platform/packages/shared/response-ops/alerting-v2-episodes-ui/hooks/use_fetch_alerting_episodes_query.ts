@@ -14,10 +14,7 @@ import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { useFetchDeactivatedGroupHashes } from './use_fetch_deactivated_group_hashes';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import {
-  type EpisodesFilterState,
-  type EpisodesSortState,
-} from '../utils/build_episodes_esql_query';
+import { type EpisodesFilterState, type EpisodesSortState } from '../queries/episodes_query';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
@@ -72,19 +69,15 @@ export const useFetchAlertingEpisodesQuery = ({
   const query = useQuery({
     enabled: dataView != null && (!isStatusFilterActive || isDeactivatedReady),
     queryKey,
-    queryFn: async ({ signal: abortSignal }) => {
-      if (!dataView) {
-        return { type: 'datatable' as const, columns: [], rows: [], total: 0 };
-      }
-      return await fetchAlertingEpisodes({
+    queryFn: ({ signal: abortSignal }) =>
+      fetchAlertingEpisodes({
         abortSignal,
         pageSize,
         services,
         filterState: enrichedFilterState,
         sortState,
         timeRange,
-      });
-    },
+      }),
     keepPreviousData: true,
   });
 

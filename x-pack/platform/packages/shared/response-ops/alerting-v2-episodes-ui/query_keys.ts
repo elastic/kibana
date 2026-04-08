@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EpisodesFilterState, EpisodesSortState } from './utils/build_episodes_esql_query';
+import type { EpisodesFilterState, EpisodesSortState } from './queries/episodes_query';
 
 export const queryKeys = {
   all: ['alert-episodes'] as const,
@@ -32,4 +32,7 @@ export const queryKeys = {
       timeRange,
       deactivatedGroupHashes,
     ] as const,
+  episodeEvents: (episodeId: string) => [...queryKeys.all, 'episode-events', episodeId] as const,
+  relatedEpisodes: (ruleId: string, excludeEpisodeId: string, pageSize: number) =>
+    [...queryKeys.all, 'related-episodes', ruleId, excludeEpisodeId, pageSize] as const,
 };

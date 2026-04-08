@@ -235,6 +235,14 @@ export class WorkflowsManagementApi {
     return this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
   }
 
+  public async disableAllWorkflows(): Promise<{
+    total: number;
+    disabled: number;
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    return this.workflowsService.disableAllWorkflows();
+  }
+
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
