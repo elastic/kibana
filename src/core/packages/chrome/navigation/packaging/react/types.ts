@@ -26,10 +26,11 @@ export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
  * A navigation item within a secondary/nested menu.
+ * At least one of `href` or `onClick` must be provided.
  */
 export interface SecondaryMenuItem {
   /** URL or hash for navigation. */
-  href: string;
+  href?: string;
   /** Unique identifier for this item. */
   id: string;
   /** Display text for the menu item. */
@@ -40,6 +41,8 @@ export interface SecondaryMenuItem {
   badgeType?: BadgeType;
   /** If true, opens link in a new tab with an external icon. */
   isExternal?: boolean;
+  /** Click handler for action items (e.g. opening a flyout or modal). */
+  onClick?: () => void;
 }
 
 /**

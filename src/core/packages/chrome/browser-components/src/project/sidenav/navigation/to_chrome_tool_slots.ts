@@ -99,13 +99,16 @@ const getUserMenuToolItem = (
     return undefined;
   }
 
-  const items: SecondaryMenuItem[] = config.items.map((item) => ({
-    id: item.id,
-    label: item.label,
-    href: item.href,
-    isExternal: item.isExternal,
-    'data-test-subj': item['data-test-subj'],
-  }));
+  const items: SecondaryMenuItem[] = config.items
+    .filter((item) => Boolean(item.href) || Boolean(item.onClick))
+    .map((item) => ({
+      id: item.id,
+      label: item.label,
+      ...(item.href && { href: item.href }),
+      ...(item.onClick && { onClick: item.onClick }),
+      isExternal: item.isExternal,
+      'data-test-subj': item['data-test-subj'],
+    }));
 
   if (items.length === 0) {
     return undefined;
@@ -158,17 +161,14 @@ const buildHelpSections = (helpLinks: HelpLinks): SecondaryMenuSection[] => {
 const toSecondaryItems = (items: HelpMenuLinkItem[]): SecondaryMenuItem[] =>
   items
     .filter(
-      (
-        item
-      ): item is typeof item & {
-        href: string;
-        label: string;
-      } => Boolean(item.href) && typeof item.label === 'string'
+      (item): item is typeof item & { label: string } =>
+        (Boolean(item.href) || Boolean(item.onClick)) && typeof item.label === 'string'
     )
-    .map(({ id, label, href, 'data-test-subj': dataTestSubj, isExternal }) => ({
+    .map(({ id, label, href, onClick, 'data-test-subj': dataTestSubj, isExternal }) => ({
       id,
       label,
-      href,
+      ...(href && { href }),
+      ...(onClick && { onClick }),
       'data-test-subj': dataTestSubj,
       isExternal,
     }));

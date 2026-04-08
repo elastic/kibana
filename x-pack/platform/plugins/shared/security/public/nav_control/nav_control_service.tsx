@@ -171,13 +171,18 @@ export class SecurityNavControlService {
           }
 
           for (const link of sorted) {
-            if (link.content || !link.label || !link.href) {
+            if (!link.label || (!link.href && !link.onClick)) {
               continue;
             }
             items.push({
               id: `userMenuLink__${link.label}`,
               label: link.label,
-              href: link.href,
+              ...(link.href && { href: link.href }),
+              ...(link.onClick && {
+                onClick: () => {
+                  link.onClick?.();
+                },
+              }),
               'data-test-subj': `userMenuLink__${link.label}`,
             });
           }

@@ -17,6 +17,39 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { AppearanceModal } from './appearance_modal';
 import { useAppearance } from './use_appearance_hook';
 
+interface OpenAppearanceModalParams {
+  core: CoreStart;
+  security: SecurityPluginStart;
+  isServerless: boolean;
+}
+
+let appearanceModalRef: OverlayRef | null = null;
+
+export const openAppearanceModal = ({
+  core,
+  security,
+  isServerless,
+}: OpenAppearanceModalParams) => {
+  const closeModal = () => {
+    appearanceModalRef?.close();
+    appearanceModalRef = null;
+  };
+
+  appearanceModalRef = core.overlays.openModal(
+    toMountPoint(
+      <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
+        <AppearanceModal
+          closeModal={closeModal}
+          uiSettingsClient={core.uiSettings}
+          isServerless={isServerless}
+        />
+      </UserProfilesKibanaProvider>,
+      core
+    ),
+    { 'data-test-subj': 'appearanceModal', maxWidth: 600 }
+  );
+};
+
 interface Props {
   security: SecurityPluginStart;
   core: CoreStart;

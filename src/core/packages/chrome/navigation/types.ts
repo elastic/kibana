@@ -15,12 +15,14 @@ export type BadgeType = 'beta' | 'techPreview' | 'new';
 /**
  * A navigation item within a secondary/nested menu.
  * Secondary items appear when a top-level navigation item with sections is clicked or hovered.
+ *
+ * At least one of `href` or `onClick` must be provided.
  */
 export interface SecondaryMenuItem {
   /**
-   * The URL for the menu item link.
+   * (optional) The URL for the menu item link.
    */
-  href: string;
+  href?: string;
   /**
    * The unique identifier of the menu item.
    */
@@ -41,6 +43,10 @@ export interface SecondaryMenuItem {
    * (optional) Whether the link opens in a new tab.
    */
   isExternal?: boolean;
+  /**
+   * (optional) Click handler for action items (e.g. opening a flyout or modal).
+   */
+  onClick?: () => void;
 }
 
 /**

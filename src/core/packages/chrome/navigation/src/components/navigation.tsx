@@ -257,6 +257,7 @@ export const Navigation = ({
                                 const subItemAriaDescribedBy = isFirstSubItem
                                   ? ids.popoverNavigationInstructionsId
                                   : undefined;
+                                const { onClick: subItemOnClick, ...subItemRest } = subItem;
                                 return (
                                   <SideNav.SecondaryMenu.Item
                                     aria-describedby={subItemAriaDescribedBy}
@@ -265,13 +266,14 @@ export const Navigation = ({
                                     isCurrent={actualActiveItemId === subItem.id}
                                     isNew={getIsNewSecondary(subItem.id)}
                                     onClick={() => {
+                                      subItemOnClick?.();
                                       onItemClick?.(subItem);
                                       if (subItem.href) {
                                         closePopover();
                                       }
                                     }}
                                     testSubjPrefix={popoverItemPrefix}
-                                    {...subItem}
+                                    {...subItemRest}
                                   >
                                     {subItem.label}
                                   </SideNav.SecondaryMenu.Item>
@@ -378,22 +380,26 @@ export const Navigation = ({
                                   key={section.id}
                                   label={section.label}
                                 >
-                                  {section.items.map((subItem) => (
-                                    <SideNav.NestedSecondaryMenu.Item
-                                      key={subItem.id}
-                                      isHighlighted={subItem.id === visuallyActiveSubpageId}
-                                      isCurrent={actualActiveItemId === subItem.id}
-                                      isNew={getIsNewSecondary(subItem.id)}
-                                      onClick={() => {
-                                        onItemClick?.(subItem);
-                                        closePopover();
-                                        focusMainContent();
-                                      }}
-                                      {...subItem}
-                                    >
-                                      {subItem.label}
-                                    </SideNav.NestedSecondaryMenu.Item>
-                                  ))}
+                                  {section.items.map((subItem) => {
+                                    const { onClick: subItemOnClick, ...subItemRest } = subItem;
+                                    return (
+                                      <SideNav.NestedSecondaryMenu.Item
+                                        key={subItem.id}
+                                        isHighlighted={subItem.id === visuallyActiveSubpageId}
+                                        isCurrent={actualActiveItemId === subItem.id}
+                                        isNew={getIsNewSecondary(subItem.id)}
+                                        onClick={() => {
+                                          subItemOnClick?.();
+                                          onItemClick?.(subItem);
+                                          closePopover();
+                                          focusMainContent();
+                                        }}
+                                        {...subItemRest}
+                                      >
+                                        {subItem.label}
+                                      </SideNav.NestedSecondaryMenu.Item>
+                                    );
+                                  })}
                                 </SideNav.NestedSecondaryMenu.Section>
                               ))}
                             </>
@@ -470,6 +476,7 @@ export const Navigation = ({
                       const ariaDescribedBy = isFirstItem
                         ? secondaryNavigationInstructionsId
                         : undefined;
+                      const { onClick: subItemOnClick, ...subItemRest } = subItem;
 
                       return (
                         <SideNav.SecondaryMenu.Item
@@ -478,9 +485,12 @@ export const Navigation = ({
                           isCurrent={actualActiveItemId === subItem.id}
                           isHighlighted={subItem.id === visuallyActiveSubpageId}
                           isNew={getIsNewSecondary(subItem.id)}
-                          onClick={() => onItemClick?.(subItem)}
+                          onClick={() => {
+                            subItemOnClick?.();
+                            onItemClick?.(subItem);
+                          }}
                           testSubjPrefix={sidePanelItemPrefix}
-                          {...subItem}
+                          {...subItemRest}
                         >
                           {subItem.label}
                         </SideNav.SecondaryMenu.Item>
@@ -570,6 +580,7 @@ const renderFooterNavItems = ({
                     const subItemAriaDescribedBy = isFirstSubItem
                       ? ids.popoverNavigationInstructionsId
                       : undefined;
+                    const { onClick: subItemOnClick, ...subItemRest } = subItem;
 
                     return (
                       <SideNav.SecondaryMenu.Item
@@ -579,12 +590,13 @@ const renderFooterNavItems = ({
                         isCurrent={actualActiveItemId === subItem.id}
                         isNew={getIsNewSecondary(subItem.id)}
                         onClick={() => {
+                          subItemOnClick?.();
                           onItemClick?.(subItem);
                           if (subItem.href) {
                             closePopover();
                           }
                         }}
-                        {...subItem}
+                        {...subItemRest}
                         testSubjPrefix={popoverItemPrefix}
                       >
                         {subItem.label}
@@ -671,6 +683,7 @@ const renderToolItems = ({
                     const subItemAriaDescribedBy = isFirstSubItem
                       ? ids.popoverNavigationInstructionsId
                       : undefined;
+                    const { onClick: subItemOnClick, ...subItemRest } = subItem;
 
                     return (
                       <SideNav.SecondaryMenu.Item
@@ -680,9 +693,10 @@ const renderToolItems = ({
                         isCurrent={false}
                         isNew={false}
                         onClick={() => {
+                          subItemOnClick?.();
                           closePopover();
                         }}
-                        {...subItem}
+                        {...subItemRest}
                         testSubjPrefix={popoverItemPrefix}
                       >
                         {subItem.label}

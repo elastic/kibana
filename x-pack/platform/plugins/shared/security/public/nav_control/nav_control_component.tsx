@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent, MouseEvent, ReactNode } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
 import React, { Fragment, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -30,7 +30,7 @@ import { useCurrentUser, useUserProfile } from '../components';
 
 type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content' | 'onClick'> & {
   content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
-  onClick?: (event: MouseEvent<Element>) => void;
+  onClick?: () => void;
 };
 
 interface ContextMenuProps {

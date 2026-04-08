@@ -18,7 +18,8 @@ export interface ChromeNextUserMenuConfig {
 export interface ChromeNextUserMenuItem {
   id: string;
   label: string;
-  href: string;
+  href?: string;
   isExternal?: boolean;
   'data-test-subj'?: string;
+  onClick?: () => void;
 }
