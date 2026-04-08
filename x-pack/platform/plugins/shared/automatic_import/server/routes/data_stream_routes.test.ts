@@ -148,6 +148,27 @@ describe('Data stream routes - upload samples', () => {
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
     });
 
+    it('rejects sourceIndex starting with a dot (system indices)', async () => {
+      const request = {
+        params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
+        body: {
+          sourceIndex: '.kibana_task_manager',
+          originalSource: { sourceType: 'index' as const, sourceValue: '.kibana_task_manager' },
+        },
+      };
+
+      await routeHandler!(createMockContext(), request, mockResponse);
+
+      expect(mockEsSearch).not.toHaveBeenCalled();
+      expect(mockAddSamplesToDataStream).not.toHaveBeenCalled();
+      expect(mockResponse.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'Reading from system indices is not allowed.',
+        })
+      );
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
     it('returns badRequest when index has no documents with event.original', async () => {
       mockEsSearch.mockResolvedValue({ hits: { hits: [] } });
 

@@ -82,6 +82,12 @@ const uploadSamplesRoute = (
 
           let rawSamples: string[];
           if (sourceIndex) {
+            if (sourceIndex.startsWith('.')) {
+              return response.badRequest({
+                body: 'Reading from system indices is not allowed.',
+              });
+            }
+
             const searchResult = await esClient.search({
               index: sourceIndex,
               size: 100,
