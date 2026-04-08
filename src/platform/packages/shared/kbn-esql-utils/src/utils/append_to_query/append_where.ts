@@ -30,8 +30,8 @@ function createFilterExpression(
   field: string,
   value: unknown,
   operation: SupportedOperation,
-  fieldType?: string,
-  esFieldType?: string
+  kibanaFieldType?: string,
+  esMappingType?: string
 ): { expression: string; isMultiValue?: boolean } {
   // Handle is not null / is null operations
   if (operation === 'is_not_null' || operation === 'is_null') {
@@ -50,13 +50,13 @@ function createFilterExpression(
       typeof val === 'string' ? escapeStringValue(val) : val
     );
     let expression: string;
-    if (esFieldType) {
+    if (esMappingType) {
       const mvContainsValue =
         escapedValues.length === 1 ? escapedValues[0] : `[${escapedValues.join(', ')}]`;
       expression =
         operation === '-'
-          ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esFieldType})`
-          : `MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esFieldType})`;
+          ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`
+          : `MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`;
     } else {
       const matchClauses = escapedValues.map((val) => `MATCH(${fieldName}, ${val})`);
       expression =
@@ -78,7 +78,10 @@ function createFilterExpression(
     return { expression: '', isMultiValue: false };
   }
 
-  if (fieldType === undefined || !PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType)) {
+  if (
+    kibanaFieldType === undefined ||
+    !PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(kibanaFieldType)
+  ) {
     fieldName = `${fieldName}::string`;
   }
 
