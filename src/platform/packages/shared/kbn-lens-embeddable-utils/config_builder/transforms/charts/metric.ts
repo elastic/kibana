@@ -69,8 +69,8 @@ import {
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
-  isAutoColor,
   isColorByValueColor,
+  isNoColor,
   NO_COLOR,
 } from '../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/utils';
@@ -262,9 +262,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
-          ...(!isAutoColor(secondaryMetric.color ?? AUTO_COLOR) &&
-          secondaryMetric.color?.type === 'static'
-            ? { secondaryTrend: { type: 'static', color: secondaryMetric.color.color } }
+          ...(secondaryMetric.color && !isNoColor(secondaryMetric.color)
+            ? { secondaryTrend: { type: 'static', color: secondaryMetric.color?.color } }
             : {}),
         }
       : {}),
