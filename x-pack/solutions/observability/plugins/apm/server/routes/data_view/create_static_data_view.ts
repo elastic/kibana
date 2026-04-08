@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
-import { TRACE_ID, TRANSACTION_ID, TRANSACTION_DURATION } from '../../../common/es_fields/apm';
+import { TRANSACTION_ID, TRANSACTION_DURATION } from '../../../common/es_fields/apm';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
@@ -132,15 +132,7 @@ function createAndSaveStaticDataView({
       title: apmDataViewIndexPattern,
       timeFieldName: '@timestamp',
 
-      // link to APM from Discover
       fieldFormats: {
-        [TRACE_ID]: {
-          id: 'url',
-          params: {
-            urlTemplate: 'apm/link-to/trace/{{value}}',
-            labelTemplate: '{{value}}',
-          },
-        },
         [TRANSACTION_ID]: {
           id: 'url',
           params: {
