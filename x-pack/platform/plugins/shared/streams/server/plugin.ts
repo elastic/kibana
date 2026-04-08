@@ -372,16 +372,16 @@ export class StreamsPlugin
               },
             } as unknown as RulesClient;
 
-            const [attachmentClient, featureClient, queryClient] = await Promise.all([
-              attachmentService.getClient({ soClient, rulesClient }),
-              featureService.getClient(),
-              queryService.getClient({ esClient, soClient, rulesClient }),
-            ]);
+            const attachmentClient = await attachmentService.getClient({ soClient, rulesClient });
 
+            // featureClient and queryClient are not needed for enableStreams()
+            // and bulkUpsert() during preconfiguration. Avoid creating them here
+            // because their initialization probes ELSER inference endpoints via
+            // the inference API, which triggers lazy model deployment in
+            // Elasticsearch — an unwanted side effect during startup that can
+            // interfere with ML tests and waste cluster resources.
             const streamsClient = await streamsService.getClient({
               attachmentClient,
-              queryClient,
-              featureClient,
               esClient,
               esClientAsInternalUser: esClient,
               uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
