@@ -41,7 +41,7 @@ function getCastFunctionForType(fieldType: ES_FIELD_TYPES | undefined): string |
  * to resolve the ambiguity if the types are compatible.
  */
 function buildAggregationNode(
-  types: ES_FIELD_TYPES | ES_FIELD_TYPES[],
+  types: ES_FIELD_TYPES[],
   instrument: MappingTimeSeriesMetricType,
   field: ESQLAstExpression,
   customFunction?: string
