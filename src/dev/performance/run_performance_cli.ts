@@ -42,20 +42,16 @@ interface JourneyTargetGroups {
 const journeyTargetGroups: JourneyTargetGroups = {
   kibanaStartAndLoad: ['login'],
   daily: [
-    'login',
     'web_logs_dashboard_long_running',
     'web_logs_dashboard_esql_long_running',
     'web_logs_dashboard',
-    'promotion_tracking_dashboard',
-    'many_fields_lens_editor',
     'data_stress_test_lens_esql',
-    'many_fields_esql_editor',
     'web_logs_dashboard_esql',
-    'tsdb_logs_data_visualizer',
-    'many_fields_transform',
     'many_fields_discover_esql',
     'data_stress_test_lens',
-    'flight_dashboard',
+    'ecommerce_dashboard_map_only',
+    'ecommerce_dashboard_saved_search_only',
+    'ecommerce_dashboard_tsvb_gauge_only',
   ],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
   dashboard: [
