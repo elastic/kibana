@@ -167,7 +167,7 @@ export const getSearchEmbeddableFactory = ({
               ...drilldownsManager.comparators,
               ...titleComparators,
               ...timeRangeComparators,
-              discover_session_id: 'skip',
+              ref_id: 'skip',
               selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
               overrides: shouldSkipTabComparators ? 'skip' : 'deepEquality',
               tabs: !isByValue || shouldSkipTabComparators ? 'skip' : 'deepEquality',

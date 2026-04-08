@@ -35,8 +35,8 @@ export function transformPanelsIn(
 
   widgets.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
-      const idx = uid ?? uuidv4();
+      const { panels: sectionPanels, grid, id, ...restOfSection } = widget as DashboardSection;
+      const idx = id ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
         try {
@@ -78,8 +78,8 @@ function transformPanelIn(
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
-  const { uid, grid, config, ...restPanel } = panel;
-  const idx = uid ?? uuidv4();
+  const { id, grid, config, ...restPanel } = panel;
+  const idx = id ?? uuidv4();
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
