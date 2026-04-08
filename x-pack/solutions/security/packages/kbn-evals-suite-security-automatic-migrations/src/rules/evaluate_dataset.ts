@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { DefaultEvaluators, Evaluator, EvaluationDataset, EvalsExecutorClient } from '@kbn/evals';
+import type {
+  DefaultEvaluators,
+  Evaluator,
+  EvaluationDataset,
+  EvalsExecutorClient,
+} from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleExample, RuleInput } from '../../datasets/rules/types';
 import type { RuleMigrationClient, RuleMigrationResult } from './migration_client';

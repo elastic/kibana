@@ -141,11 +141,7 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
             combinedColumnName: 'Rule Structural Checks',
           },
           {
-            evaluatorNames: [
-              'Custom Query Accuracy',
-              'Integration Match',
-              'Prebuilt Rule Match',
-            ],
+            evaluatorNames: ['Custom Query Accuracy', 'Integration Match', 'Prebuilt Rule Match'],
             combinedColumnName: 'Rule Matching',
           },
           {

@@ -46,7 +46,9 @@ export const createPrebuiltRuleMatchEvaluator = (): Evaluator<
     return {
       score: 0,
       label: 'FAIL',
-      explanation: `Expected prebuilt rule "${expectedId ?? 'none'}" but got "${actualId ?? 'none'}"`,
+      explanation: `Expected prebuilt rule "${expectedId ?? 'none'}" but got "${
+        actualId ?? 'none'
+      }"`,
     };
   },
 });

@@ -116,10 +116,10 @@ export class RuleMigrationClient {
       this.log.debug(`[RuleMigrationClient] Migration completed: ${migrationId}`);
 
       // Step 6: Fetch translated rule
-      const rulesResponse = (await this.fetch(
-        `${SIEM_RULE_MIGRATIONS_PATH}/${migrationId}/rules`,
-        { method: 'GET', headers: { 'elastic-api-version': '1' } }
-      )) as GetRulesResponse;
+      const rulesResponse = (await this.fetch(`${SIEM_RULE_MIGRATIONS_PATH}/${migrationId}/rules`, {
+        method: 'GET',
+        headers: { 'elastic-api-version': '1' },
+      })) as GetRulesResponse;
 
       const rules: MigratedRule[] = rulesResponse.data ?? [];
       this.log.info(
@@ -164,7 +164,9 @@ export class RuleMigrationClient {
       // Log progress every 6th attempt (every 30s) at info level so it's visible
       if (attempt % 6 === 1 || attempt <= 3) {
         this.log.info(
-          `[RuleMigrationClient] Polling migration ${migrationId} (attempt ${attempt}/${MAX_POLL_ATTEMPTS}): ${JSON.stringify(stats)}`
+          `[RuleMigrationClient] Polling migration ${migrationId} (attempt ${attempt}/${MAX_POLL_ATTEMPTS}): ${JSON.stringify(
+            stats
+          )}`
         );
       }
 

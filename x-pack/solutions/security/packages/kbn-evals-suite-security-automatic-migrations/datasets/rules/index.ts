@@ -6,3 +6,5 @@
  */
 
 export type { RuleExample, RuleInput, RuleExpected, RuleMetadata } from './types';
+export { splunkRules } from './splunk';
+export { qradarRules } from './qradar';

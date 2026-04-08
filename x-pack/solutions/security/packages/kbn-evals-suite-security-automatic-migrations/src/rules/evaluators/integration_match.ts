@@ -9,10 +9,7 @@ import type { Evaluator, EvaluationResult } from '@kbn/evals';
 import type { RuleExample, RuleExpected } from '../../../datasets/rules/types';
 import type { RuleMigrationResult } from '../migration_client';
 
-export const createIntegrationMatchEvaluator = (): Evaluator<
-  RuleExample,
-  RuleMigrationResult
-> => ({
+export const createIntegrationMatchEvaluator = (): Evaluator<RuleExample, RuleMigrationResult> => ({
   name: 'Integration Match',
   kind: 'CODE',
   evaluate: async ({
