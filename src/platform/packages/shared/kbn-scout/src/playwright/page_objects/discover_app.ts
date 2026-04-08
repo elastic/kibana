@@ -115,7 +115,6 @@ export class DiscoverApp {
   }
 
   async getHitCountInt(): Promise<number> {
-    await this.page.waitForLoadingIndicatorHidden();
     const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
   }
