@@ -109,7 +109,6 @@ const getBreadcrumbs = ({
   const runsHref = getHref(ROOT_PATH);
   const datasetsHref = getHref(DATASETS_PATH);
   const tracingHref = getHref(TRACING_PATH);
-  const remotesHref = getHref(REMOTES_PATH);
 
   if (pathname.startsWith(`${TRACING_PATH}/`)) {
     const parts = pathname.split('/').filter(Boolean);
@@ -132,7 +131,7 @@ const getBreadcrumbs = ({
   }
 
   if (pathname === REMOTES_PATH) {
-    return [{ text: remotesTabLabel, href: remotesHref }];
+    return [{ text: remotesTabLabel }];
   }
 
   if (pathname.startsWith('/runs/')) {
