@@ -173,9 +173,9 @@ const resumeAgentResponse = ({
   modelProvider: ModelProvider;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
-}): ConversationRound => {
+}): AgentResponseEvent => {
   // Replay tool events for all pending steps (those with empty results)
-  const pendingAgentResponse = pendingRound.steps
+  const pendingSteps = pendingAgentResponse.steps
     .filter(isToolCallStep)
     .filter((step) => step.results.length === 0);
 
@@ -233,18 +233,6 @@ const mergeAgentResponses = (
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
-  };
-
-  return mergedRound;
-};
-
-const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
-  const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
-  return {
-    ...previous,
-    ...next,
-    message: next.message || previous.message,
-    ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
   };
 };
 
