@@ -1,8 +1,8 @@
 ---
 title: Scout Test Review
 model: claude-opus-4-6
-reasoning: low
-effort: medium
+reasoning: high
+effort: high
 input: full_diff
 tools:
   - browse_code
@@ -115,6 +115,7 @@ Reference: the canonical best-practices document lives at `docs/extend/scout/bes
 ## Migration Parity (when applicable)
 
 If this PR removes or changes FTR tests alongside new Scout specs, verify migration parity:
+
 - Confirm the right test type: if the old FTR suite is primarily "data correctness", prefer a Scout API test over a Scout UI test.
 - Check that all scenarios, roles, setup/teardown, assertions, and cleanup are covered in the new Scout tests.
 - Flag any coverage gaps, weakened assertions, changed auth/roles, or environment scope changes.
@@ -122,6 +123,7 @@ If this PR removes or changes FTR tests alongside new Scout specs, verify migrat
 ## Output Format
 
 Group findings by severity: 🔴 Blocker → 🟡 Major → 🔵 Minor → ⚪ Nit. For each finding:
+
 - State the rule violated (use the section heading)
 - Quote the file and line
 - Explain the issue in 1–2 sentences
