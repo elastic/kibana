@@ -45,7 +45,7 @@ import type {
 } from './types';
 
 import { AggsService } from './aggs';
-import { SearchSettingsCache } from './services';
+import { SearchSettingsCache } from './search_settings_cache';
 
 import { registerSearchRoute, registerSessionRoutes } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';

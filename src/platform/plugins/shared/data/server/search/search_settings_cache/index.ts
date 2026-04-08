@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CachedUiSettingsClient } from './cached_ui_settings_client';
 export { SearchSettingsCache } from './search_settings_cache';
