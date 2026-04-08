@@ -2422,6 +2422,8 @@
       "@kbn/test-jest-helpers/*": ["src/platform/packages/shared/kbn-test-jest-helpers/*"],
       "@kbn/test-kibana-server": ["src/platform/packages/shared/kbn-test-kibana-server"],
       "@kbn/test-kibana-server/*": ["src/platform/packages/shared/kbn-test-kibana-server/*"],
+      "@kbn/test-management-ui": ["x-pack/packages/test-management-ui"],
+      "@kbn/test-management-ui/*": ["x-pack/packages/test-management-ui/*"],
       "@kbn/test-saml-auth": ["src/platform/packages/shared/kbn-test-saml-auth"],
       "@kbn/test-saml-auth/*": ["src/platform/packages/shared/kbn-test-saml-auth/*"],
       "@kbn/test-subj-selector": ["src/platform/packages/shared/kbn-test-subj-selector"],
