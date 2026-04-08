@@ -56,7 +56,7 @@ export class ReferencedPanelManager {
     references: Reference[];
     panel: DashboardPanel;
   }) {
-    const { uid, type } = panel;
+    const { id: uid, type } = panel;
     if (!uid) return;
 
     const panelReference = references.find((r) => r.name.includes(uid) && r.type === type);

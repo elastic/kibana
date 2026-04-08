@@ -59,6 +59,7 @@
       "unifiedSearch",
       "savedObjects",
       "presentationPanel",
+      "presentationUtil",
       "esql"
     ],
     "extraPublicDirs": [

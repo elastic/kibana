@@ -33,10 +33,11 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/share-plugin'
   - '@kbn/css-utils'
-  - '@kbn/core-saved-objects-api-server'
   - '@kbn/logging'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/lens-common'
   - '@kbn/presentation-publishing'
+  - '@kbn/core-saved-objects-api-server'
 tags:
   - plugin
   - prod

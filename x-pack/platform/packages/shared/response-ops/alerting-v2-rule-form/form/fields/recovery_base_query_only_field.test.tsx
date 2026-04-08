@@ -43,22 +43,14 @@ const FormRefCapture = () => {
 const createMockValidation = (
   overrides: Partial<ReturnType<typeof useRecoveryValidation>> = {}
 ): ReturnType<typeof useRecoveryValidation> => ({
-  hasEvaluationCondition: false,
-  effectiveBaseQuery: '',
-  assembledEvaluationQuery: 'FROM logs | STATS count() BY host',
-  assembledRecoveryQuery: '',
   recoveryMatchesEvaluation: false,
   evaluationBaseQuery: 'FROM logs | STATS count() BY host',
-  evaluationCondition: undefined,
   recoveryBaseQuery: undefined,
-  recoveryCondition: undefined,
   groupingValidationError: undefined,
   fullBaseQueryRules: {
     required: 'Recovery query is required when using a custom recovery condition.',
     validate: () => true,
   },
-  splitBaseQueryRules: { validate: () => true },
-  conditionRules: { validate: () => true },
   ...overrides,
 });
 

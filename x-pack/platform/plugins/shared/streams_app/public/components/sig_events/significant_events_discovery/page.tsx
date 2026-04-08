@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingElastic,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useIsMutating } from '@kbn/react-query';
 import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -48,6 +56,8 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
   const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
+
+  const isPromotingQueries = useIsMutating({ mutationKey: ['promoteAll'] }) > 0;
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -92,20 +102,14 @@ export function SignificantEventsDiscoveryPage() {
     },
     {
       id: 'queries',
-      label: (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
-              defaultMessage: 'Queries',
-            })}
-          </EuiFlexItem>
-          {unbackedQueriesCount > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+        defaultMessage: 'Rules',
+      }),
+      append: isPromotingQueries ? (
+        <EuiLoadingSpinner />
+      ) : unbackedQueriesCount > 0 ? (
+        <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
+      ) : undefined,
       href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
       isSelected: tab === 'queries',
     },
