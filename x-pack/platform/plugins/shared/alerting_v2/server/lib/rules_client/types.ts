@@ -6,6 +6,7 @@
  */
 
 import type {
+  BulkOperationResponse,
   CreateRuleData,
   UpdateRuleData,
   RuleResponse,
@@ -13,7 +14,15 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
-export type { CreateRuleData, UpdateRuleData, RuleResponse, FindRulesSortField };
+export type {
+  BulkOperationResponse,
+  CreateRuleData,
+  UpdateRuleData,
+  RuleResponse,
+  FindRulesSortField,
+};
+
+export type BulkOperationError = BulkOperationResponse['errors'][number];
 
 export interface CreateRuleParams {
   data: CreateRuleData;
@@ -39,13 +48,3 @@ export interface FindRulesResponse {
 export type BulkRulesParams =
   | { ids: string[]; filter?: undefined }
   | { filter: string; ids?: undefined };
-
-export interface BulkOperationError {
-  id: string;
-  error: { message: string; statusCode: number };
-}
-
-export interface BulkOperationResponse {
-  rules: RuleResponse[];
-  errors: BulkOperationError[];
-}

@@ -16,7 +16,7 @@ import type {
   LayerTypeNoESQL,
   ReferenceLineLayerType,
 } from '../../../schema/charts/xy';
-import { isEsqlTableTypeDataset } from '../../../utils';
+import { isEsqlTableTypeDataSource } from '../../../utils';
 import {
   AVAILABLE_XY_LAYER_TYPES,
   XY_ANNOTATION_LAYER_TYPES,
@@ -65,7 +65,7 @@ export function isAPIXYLayer(layer: unknown): layer is XYLayer {
 }
 
 export function isAPIesqlXYLayer(layer: XYLayer): layer is LayerTypeESQL {
-  return 'dataset' in layer && isEsqlTableTypeDataset(layer.dataset);
+  return 'data_source' in layer && isEsqlTableTypeDataSource(layer.data_source);
 }
 
 export function isLensStateDataLayer(

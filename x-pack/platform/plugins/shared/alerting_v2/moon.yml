@@ -92,6 +92,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - common/**/*
     - server/**/*
     - server/**/*.json
     - public/**/*

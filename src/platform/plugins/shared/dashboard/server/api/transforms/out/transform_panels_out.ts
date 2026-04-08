@@ -34,7 +34,7 @@ export function transformPanelsOut(
       collapsed: restOfSection.collapsed ?? false,
       grid: restOfGrid,
       panels: [],
-      uid: sectionId,
+      id: sectionId,
     };
   });
 
@@ -111,7 +111,7 @@ function transformPanel(
   return {
     grid: restOfGrid,
     config: transformedPanelConfig,
-    uid: panelIndex,
+    id: panelIndex,
     type,
   };
 }

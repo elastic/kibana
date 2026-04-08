@@ -79,18 +79,3 @@ export const useEntityAnalyticsIntegrations = () => {
     };
   });
 };
-
-export const usePrivilegedAccessDetectionIntegration = () => {
-  const { data: pad } = useGetPackageInfoByKeyQuery(
-    'pad',
-    undefined, // When package version is undefined it gets the latest version
-    {
-      prerelease: true, // This is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
-    },
-    {
-      suspense: false,
-    }
-  );
-
-  return isGetInfoResponse(pad) ? pad.item : undefined;
-};

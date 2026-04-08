@@ -8,13 +8,13 @@
 import React, { Suspense } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { IntegrationCardsProps } from './integrations_cards';
-import { IntegrationCards } from './integrations_cards';
-import { TestProviders } from '../../../../common/mock';
+import type { IntegrationCardsProps } from './integration_cards';
+import { IntegrationCards } from './integration_cards';
+import { TestProviders } from '../../../common/mock';
 
 const mockNavigateTo = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
   return {
     ...original,
     useNavigation: () => ({
@@ -23,12 +23,12 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/integrations/use_integration_link_state', () => ({
+jest.mock('../../../common/hooks/integrations/use_integration_link_state', () => ({
   useIntegrationLinkState: jest.fn(() => {}),
 }));
 
 const mockAddPathParamToUrl = jest.fn((...args: unknown[]) => 'URL_WITH_PARAMS');
-jest.mock('../../../../common/utils/integrations', () => ({
+jest.mock('../../../common/utils/integrations', () => ({
   addPathParamToUrl: (...args: unknown[]) => mockAddPathParamToUrl(...args),
 }));
 
@@ -60,7 +60,7 @@ const mockIntegrations = [uninstalledOktaIntegration, installedAdIntegration];
 
 const mockUseEntityAnalyticsIntegrations = jest.fn(() => mockIntegrations);
 
-jest.mock('../hooks/use_integrations', () => ({
+jest.mock('./hooks/use_entity_analytics_integrations', () => ({
   useEntityAnalyticsIntegrations: () => mockUseEntityAnalyticsIntegrations(),
 }));
 
@@ -156,6 +156,66 @@ describe('IntegrationCards', () => {
     await waitForIntegrationCardsToLoad();
 
     expect(screen.getByText('Installed')).toBeInTheDocument();
+  });
+
+  describe('accessibility when isClickable is false', () => {
+    it('sets aria-disabled on card wrappers', async () => {
+      render(
+        <IntegrationCardsWithSuspense
+          onIntegrationInstalled={mockOnIntegrationInstalled}
+          isClickable={false}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await waitForIntegrationCardsToLoad();
+
+      const cards = screen.getAllByTestId('entity_analytics-integration-card');
+      cards.forEach((card) => {
+        expect(card).toHaveAttribute('aria-disabled', 'true');
+      });
+    });
+
+    it('sets tabIndex to -1 on card wrappers to prevent keyboard focus', async () => {
+      render(
+        <IntegrationCardsWithSuspense
+          onIntegrationInstalled={mockOnIntegrationInstalled}
+          isClickable={false}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await waitForIntegrationCardsToLoad();
+
+      const cards = screen.getAllByTestId('entity_analytics-integration-card');
+      cards.forEach((card) => {
+        expect(card).toHaveAttribute('tabindex', '-1');
+      });
+    });
+
+    it('does NOT set aria-disabled or tabIndex when isClickable is true', async () => {
+      render(
+        <IntegrationCardsWithSuspense
+          onIntegrationInstalled={mockOnIntegrationInstalled}
+          isClickable={true}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await waitForIntegrationCardsToLoad();
+
+      const cards = screen.getAllByTestId('entity_analytics-integration-card');
+      cards.forEach((card) => {
+        expect(card).not.toHaveAttribute('aria-disabled');
+        expect(card).not.toHaveAttribute('tabindex');
+      });
+    });
   });
 });
 
