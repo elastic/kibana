@@ -12,7 +12,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFieldNumber,
+  useGeneratedHtmlId,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -68,6 +70,9 @@ export function SettingsTab() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const resetModalTitleId = useGeneratedHtmlId();
 
   const hasChanges = indexPatterns !== savedIndexPatterns || continuousExtraction.hasChanged;
 
@@ -107,6 +112,33 @@ export function SettingsTab() {
     savedIndexPatterns,
     continuousExtraction,
   ]);
+
+  const handleResetData = useCallback(async () => {
+    setIsResetting(true);
+    try {
+      await core.http.post('/internal/streams/_significant_events/features/_reset');
+      core.notifications.toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.settings.resetSuccessTitle',
+          { defaultMessage: 'Knowledge indicators data reset' }
+        ),
+        text: i18n.translate('xpack.streams.significantEventsDiscovery.settings.resetSuccessText', {
+          defaultMessage:
+            'All knowledge indicators have been deleted. The index will be recreated with the latest mappings on next use.',
+        }),
+      });
+    } catch (err) {
+      core.notifications.toasts.addDanger({
+        title: i18n.translate('xpack.streams.significantEventsDiscovery.settings.resetErrorTitle', {
+          defaultMessage: 'Failed to reset knowledge indicators data',
+        }),
+        text: getFormattedError(err).message,
+      });
+    } finally {
+      setIsResetting(false);
+      setIsResetModalVisible(false);
+    }
+  }, [core.http, core.notifications.toasts]);
 
   return (
     <>
@@ -365,6 +397,99 @@ export function SettingsTab() {
           </EuiFlexGroup>
         </EuiPanel>
       </EuiPanel>
+
+      <EuiSpacer />
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.resetDataSectionTitle',
+                { defaultMessage: 'Reset knowledge indicators data' }
+              )}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="m">
+                    <h4>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.resetDataLabel',
+                        { defaultMessage: 'Delete all data' }
+                      )}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.resetDataHelp',
+                      {
+                        defaultMessage:
+                          'Permanently deletes all discovered knowledge indicators and removes the backing index. The index is automatically recreated with the latest mappings on next use. This is useful when upgrading from an older version with outdated mappings.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiButton
+                data-test-subj="streams-settings-reset-data-button"
+                color="danger"
+                onClick={() => setIsResetModalVisible(true)}
+                isLoading={isResetting}
+              >
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.resetDataButton',
+                  { defaultMessage: 'Reset data' }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
+      {isResetModalVisible && (
+        <EuiConfirmModal
+          aria-labelledby={resetModalTitleId}
+          data-test-subj="streams-settings-reset-data-confirm-modal"
+          title={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.resetConfirmTitle',
+            { defaultMessage: 'Reset knowledge indicators data?' }
+          )}
+          titleProps={{ id: resetModalTitleId }}
+          onCancel={() => setIsResetModalVisible(false)}
+          onConfirm={handleResetData}
+          cancelButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.resetConfirmCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.resetConfirmButton',
+            { defaultMessage: 'Reset data' }
+          )}
+          buttonColor="danger"
+          isLoading={isResetting}
+        >
+          <EuiText size="s">
+            <p>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.resetConfirmBody',
+                {
+                  defaultMessage:
+                    'This will permanently delete all discovered knowledge indicators. The index will be recreated with the latest mappings on next use. This action cannot be undone.',
+                }
+              )}
+            </p>
+          </EuiText>
+        </EuiConfirmModal>
+      )}
 
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">
