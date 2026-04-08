@@ -176,6 +176,7 @@ export interface UsageStats {
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
   'aiAssistant:preferredChatExperience': string;
+  'aiAssistant:securityPreferredChatExperience': string;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:includedDataStreamNamespacesForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;

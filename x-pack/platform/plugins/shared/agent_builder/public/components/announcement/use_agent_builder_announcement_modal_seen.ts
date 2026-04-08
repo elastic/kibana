@@ -93,8 +93,10 @@ export function useAgentBuilderAnnouncementModalSeenState(
 
   useEffect(() => {
     if (!spaceId) {
+      setIsReady(false);
       return;
     }
+    setIsReady(false);
     let cancelled = false;
     void (async () => {
       const seen = await getAnnouncementModalSeenForSpace(userProfile, spaceId);

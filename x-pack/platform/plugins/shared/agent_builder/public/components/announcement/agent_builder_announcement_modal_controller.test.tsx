@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject, of } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
@@ -28,20 +28,23 @@ function buildServices({
   securityChatExperience = AIChatExperience.Agent,
   spaceId = SPACE_ID,
   userProfileEnabled = true,
+  agentBuilderSeenJson,
 }: {
   hideAnnouncements?: boolean;
   announcementSeenInProfile?: boolean;
   securityChatExperience?: AIChatExperience;
   spaceId?: string;
   userProfileEnabled?: boolean;
+  /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
+  agentBuilderSeenJson?: string;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
   const navigateToApp = jest.fn();
   const partialUpdate = jest.fn().mockResolvedValue(undefined);
-  const seenJson = announcementSeenInProfile
-    ? JSON.stringify({ [spaceId]: true })
-    : JSON.stringify({});
+  const seenJson =
+    agentBuilderSeenJson ??
+    (announcementSeenInProfile ? JSON.stringify({ [spaceId]: true }) : JSON.stringify({}));
 
   const userProfile = {
     getEnabled$: () => of(userProfileEnabled),
@@ -78,7 +81,7 @@ function buildServices({
     userProfile,
   };
 
-  return { services, reportEvent, navigateToApp, partialUpdate, userProfile };
+  return { services, reportEvent, navigateToApp, partialUpdate, userProfile, space$ };
 }
 
 function renderController(services: ReturnType<typeof buildServices>['services']) {
@@ -145,6 +148,30 @@ describe('AgentBuilderAnnouncementModalController', () => {
   it('renders the modal when the space is loaded and the modal has not been seen', async () => {
     const { services } = buildServices();
     renderController(services);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
+    });
+  });
+
+  it('shows the modal after switching to a space where the announcement was not dismissed', async () => {
+    const spaceA = 'space-a';
+    const spaceB = 'space-b';
+    const { services, space$ } = buildServices({
+      spaceId: spaceA,
+      agentBuilderSeenJson: JSON.stringify({ [spaceA]: true }),
+    });
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+
+    await act(async () => {
+      space$.next({ id: spaceB, name: spaceB });
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
