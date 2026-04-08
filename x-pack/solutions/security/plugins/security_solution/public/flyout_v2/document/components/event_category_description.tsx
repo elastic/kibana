@@ -6,21 +6,28 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { startCase } from 'lodash';
-import { useDocumentDetailsContext } from '../../shared/context';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { EVENT_CATEGORY_FIELD } from '@kbn/discover-utils';
+import { getEventCategoriesFromData } from '../utils/get_event_categories';
 import { getEcsAllowedValueDescription } from '../utils/event_utils';
-import { getFieldArray } from '../../shared/utils';
 import { EVENT_CATEGORY_DESCRIPTION_TEST_ID } from './test_ids';
+
+export interface EventCategoryDescriptionProps {
+  /**
+   * Document record to render event category descriptions for
+   */
+  hit: DataTableRecord;
+}
 
 /**
  * Displays the category description of an event document.
  */
-export const EventCategoryDescription: React.FC = () => {
-  const { getFieldsData } = useDocumentDetailsContext();
+export const EventCategoryDescription: React.FC<EventCategoryDescriptionProps> = ({ hit }) => {
   const eventCategories = useMemo(
-    () => getFieldArray(getFieldsData('event.category')),
-    [getFieldsData]
+    () => getEventCategoriesFromData(hit).allEventCategories ?? [],
+    [hit]
   );
 
   return (
@@ -34,7 +41,9 @@ export const EventCategoryDescription: React.FC = () => {
             <h5>{startCase(category)}</h5>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText size="s">{getEcsAllowedValueDescription('event.category', category)}</EuiText>
+          <EuiText size="s">
+            {getEcsAllowedValueDescription(EVENT_CATEGORY_FIELD, category)}
+          </EuiText>
         </EuiFlexItem>
       ))}
     </>
