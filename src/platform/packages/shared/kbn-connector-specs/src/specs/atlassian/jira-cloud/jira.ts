@@ -10,11 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../../..';
-import getProjectsWorkflow from './workflows/get_projects.yaml';
-import getResourceWorkflow from './workflows/get_resource.yaml';
-import searchIssuesWithJqlWorkflow from './workflows/search_issues_with_jql.yaml';
-import searchUsersWorkflow from './workflows/search_users.yaml';
-
 const buildBaseUrl = (ctx: ActionContext) =>
   `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
 
@@ -72,11 +67,31 @@ export const JiraConnector: ConnectorSpec = {
   }),
   actions: {
     searchIssuesWithJql: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Search or filter Jira issues using JQL (Jira Query Language). Use when you need to find issues by status, assignee, project, label, or any other criteria. Supports pagination via nextPageToken.',
       input: z.object({
-        jql: z.string(),
-        maxResults: z.number().optional(),
-        nextPageToken: z.string().optional(),
+        jql: z
+          .string()
+          .describe(
+            'JQL query string to filter issues. ' +
+              'Operators: = != ~ (contains) IN NOT IN > >= < <=. Combine with AND/OR. ' +
+              'Date functions: startOfDay(), endOfDay(), startOfWeek(), endOfWeek(), startOfMonth(). ' +
+              'Use ORDER BY to sort, e.g. ORDER BY updated DESC. ' +
+              'Examples: "project = PROJ AND status = \\"In Progress\\"", ' +
+              '"assignee = currentUser() AND priority = High", ' +
+              '"created >= -7d ORDER BY created DESC", ' +
+              '"project = PROJ AND labels = \\"bug\\" AND status != Done". ' +
+              'To filter by user, get accountId from searchUsers and use: assignee = "accountId".'
+          ),
+        maxResults: z
+          .number()
+          .optional()
+          .describe('Maximum number of issues to return per page (default determined by Jira API)'),
+        nextPageToken: z
+          .string()
+          .optional()
+          .describe('Pagination token from a previous response to fetch the next page of results'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -90,9 +105,13 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     getIssue: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Fetch full details of a single Jira issue by its ID or key. Use when you already have the issue key (e.g. PROJ-123) or issue ID and need the complete record including fields, comments, and metadata.',
       input: z.object({
-        issueId: z.string(),
+        issueId: z
+          .string()
+          .describe('Issue key (e.g., PROJ-123) or numeric issue ID (e.g., 10042)'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -104,11 +123,26 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     getProjects: {
-      isTool: false,
+      isTool: true,
+      description:
+        'List or search Jira projects. Use when you need to discover available projects or find a project by name or key. Supports pagination and optional text filtering.',
       input: z.object({
-        maxResults: z.number().optional(),
-        startAt: z.number().optional(),
-        query: z.string().optional(),
+        maxResults: z
+          .number()
+          .optional()
+          .describe('Maximum number of projects to return (default determined by Jira API)'),
+        startAt: z
+          .number()
+          .optional()
+          .describe(
+            'Zero-based index of the first project to return, for pagination (e.g., 0, 20, 40)'
+          ),
+        query: z
+          .string()
+          .optional()
+          .describe(
+            'Text to filter projects by name or key (e.g., "Marketing" or "MKTG"). Leave empty to list all projects.'
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -124,9 +158,13 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     getProject: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Fetch full details of a single Jira project by its ID or key. Use when you already have the project key (e.g. PROJ) or numeric project ID and need the complete project record.',
       input: z.object({
-        projectId: z.string(),
+        projectId: z
+          .string()
+          .describe('Project key (e.g., PROJ) or numeric project ID (e.g., 10000)'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -140,14 +178,42 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
     searchUsers: {
-      isTool: false,
+      isTool: true,
+      description:
+        'Find Jira users by name, username, or email. Use when you need a user accountId (e.g. for JQL assignee filters) or to look up user contact details. At least one search parameter should be provided.',
       input: z.object({
-        query: z.string().optional(),
-        username: z.string().optional(),
-        accountId: z.string().optional(),
-        startAt: z.number().optional(),
-        maxResults: z.number().optional(),
-        property: z.string().optional(),
+        query: z
+          .string()
+          .optional()
+          .describe(
+            'Free-text search string matched against display name, username, or email (e.g., "john.doe" or "John")'
+          ),
+        username: z
+          .string()
+          .optional()
+          .describe("User's username or email address for exact lookup"),
+        accountId: z
+          .string()
+          .optional()
+          .describe(
+            "User's Atlassian account ID for exact lookup (e.g., 5b10ac8d82e05b22cc7d4ef5)"
+          ),
+        startAt: z
+          .number()
+          .optional()
+          .describe(
+            'Zero-based index of the first user to return, for pagination (e.g., 0, 10, 20)'
+          ),
+        maxResults: z
+          .number()
+          .optional()
+          .describe('Maximum number of users to return (default determined by Jira API)'),
+        property: z
+          .string()
+          .optional()
+          .describe(
+            'A query string used to search user properties. Property keys and values must not exceed 100 characters.'
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -166,10 +232,10 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
   },
-  agentBuilderWorkflows: [
-    getProjectsWorkflow,
-    getResourceWorkflow,
-    searchIssuesWithJqlWorkflow,
-    searchUsersWorkflow,
-  ],
+  skill: [
+    'Typical patterns:',
+    '- Discovery: getProjects → getProject (by key) → searchIssuesWithJql (scoped to project)',
+    '- Issue lookup: searchIssuesWithJql → getIssue (by key from results)',
+    '- User-filtered search: searchUsers (to get accountId) → searchIssuesWithJql with assignee = "accountId"',
+  ].join('\n'),
 };

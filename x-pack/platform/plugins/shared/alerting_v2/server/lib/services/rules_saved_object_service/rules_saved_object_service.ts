@@ -249,7 +249,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       aggs: {
         tags: {
           terms: {
-            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.labels`,
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
             size: 10000,
             order: { _key: 'asc' },
           },

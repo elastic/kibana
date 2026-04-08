@@ -22,12 +22,6 @@ import type {
   ListEventsInput,
   FreeBusyInput,
 } from './types';
-import freeBusyWorkflow from './workflows/free_busy.yaml';
-import getEventWorkflow from './workflows/get_event.yaml';
-import listCalendarsWorkflow from './workflows/list_calendars.yaml';
-import listEventsWorkflow from './workflows/list_events.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 // Google Calendar API constants
 const GOOGLE_CALENDAR_API_BASE = 'https://www.googleapis.com/calendar/v3';
 const DEFAULT_MAX_RESULTS = 50;
@@ -61,7 +55,9 @@ export const GoogleCalendar: ConnectorSpec = {
         type: 'oauth_authorization_code',
         overrides: {
           meta: {
-            scope: { disabled: true },
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
           },
         },
         defaults: {
@@ -79,6 +75,8 @@ export const GoogleCalendar: ConnectorSpec = {
   actions: {
     searchEvents: {
       isTool: true,
+      description:
+        'Search for events in Google Calendar by keywords. Matches against event summary, description, location, and attendee names. Results include high-level metadata like title, time, location, and attendees.',
       input: SearchEventsInputSchema,
       handler: async (ctx, input: SearchEventsInput) => {
         const calendarId = encodeURIComponent(input.calendarId || 'primary');
@@ -110,6 +108,8 @@ export const GoogleCalendar: ConnectorSpec = {
 
     getEvent: {
       isTool: true,
+      description:
+        'Retrieve full details of a specific Google Calendar event by its ID. Returns comprehensive metadata including summary, description, location, start/end times, organizer, attendees with response status, recurrence info, conference/hangout links, and attachments.',
       input: GetEventInputSchema,
       handler: async (ctx, input: GetEventInput) => {
         const calendarId = encodeURIComponent(input.calendarId || 'primary');
@@ -130,6 +130,8 @@ export const GoogleCalendar: ConnectorSpec = {
 
     listCalendars: {
       isTool: true,
+      description:
+        'List all calendars accessible to the user. Returns calendar ID, name, description, whether it is the primary calendar, access role, and time zone. Use this to discover available calendars before searching or listing events.',
       input: ListCalendarsInputSchema,
       handler: async (ctx, input: ListCalendarsInput) => {
         const params: Record<string, string> = {};
@@ -153,6 +155,8 @@ export const GoogleCalendar: ConnectorSpec = {
 
     listEvents: {
       isTool: true,
+      description:
+        'List events from a Google Calendar, optionally filtered by time range. Returns events in chronological order with high-level metadata. Use this to browse upcoming or past events without a specific search query.',
       input: ListEventsInputSchema,
       handler: async (ctx, input: ListEventsInput) => {
         const calendarId = encodeURIComponent(input.calendarId || 'primary');
@@ -188,6 +192,8 @@ export const GoogleCalendar: ConnectorSpec = {
 
     freeBusy: {
       isTool: true,
+      description:
+        "Check free/busy availability for one or more people or calendars over a time range. Returns busy time slots for each requested calendar. More token-efficient than listing full events when you only need to know if someone is available. Use a person's email address as their calendar ID.",
       input: FreeBusyInputSchema,
       handler: async (ctx, input: FreeBusyInput) => {
         const body: Record<string, unknown> = {
@@ -211,6 +217,15 @@ export const GoogleCalendar: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    'Use Google Calendar to discover, browse, search, and check availability for calendar events.',
+    '',
+    'Discovery: Call listCalendars first to find available calendars and their IDs.',
+    'Use "primary" as the calendarId for the authenticated user\'s main calendar.',
+    '',
+    'Availability: Prefer freeBusy over listEvents when you only need to know whether someone is free or busy — it is more token-efficient.',
+  ].join('\n'),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.googleCalendar.test.description', {
@@ -242,12 +257,4 @@ export const GoogleCalendar: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [
-    freeBusyWorkflow,
-    getEventWorkflow,
-    listCalendarsWorkflow,
-    listEventsWorkflow,
-    searchWorkflow,
-  ],
 };

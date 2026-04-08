@@ -46,7 +46,12 @@ export function SettingsTab() {
 
   const modelSettingsUrl = useMemo(() => {
     const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
-    return managementLocator?.getRedirectUrl({ sectionId: 'ml', appId: 'model_settings' }) ?? '';
+    return (
+      managementLocator?.getRedirectUrl({
+        sectionId: 'modelManagement',
+        appId: 'model_settings',
+      }) ?? ''
+    );
   }, [share.url.locators]);
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>

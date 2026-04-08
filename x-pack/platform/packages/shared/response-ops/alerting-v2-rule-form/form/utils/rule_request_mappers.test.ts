@@ -22,7 +22,7 @@ describe('rule_request_mappers', () => {
       name: 'Test Rule',
       enabled: true,
       owner: 'test-owner',
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -40,7 +40,7 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(baseFormValues);
 
       expect(result).toEqual({
-        metadata: { name: 'Test Rule', owner: 'test-owner', labels: ['tag1', 'tag2'] },
+        metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1', 'tag2'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
@@ -241,7 +241,7 @@ describe('rule_request_mappers', () => {
           enabled: false,
           description: 'A description',
           owner: 'owner',
-          labels: [],
+          tags: [],
         },
       };
 
@@ -251,7 +251,7 @@ describe('rule_request_mappers', () => {
         name: 'My Rule',
         description: 'A description',
         owner: 'owner',
-        labels: [],
+        tags: [],
       });
       expect(result.metadata).not.toHaveProperty('enabled');
     });
@@ -368,7 +368,7 @@ describe('rule_request_mappers', () => {
       expect(result.metadata).toEqual({
         name: 'Test Rule',
         owner: 'test-owner',
-        labels: ['tag1', 'tag2'],
+        tags: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
     });
@@ -456,7 +456,7 @@ describe('rule_request_mappers', () => {
       expect(result.metadata).toEqual({
         name: 'Test Rule',
         owner: 'test-owner',
-        labels: ['tag1', 'tag2'],
+        tags: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
@@ -483,7 +483,7 @@ describe('rule_request_mappers', () => {
       metadata: {
         name: 'Test Rule',
         owner: 'test-owner',
-        labels: ['tag1'],
+        tags: ['tag1'],
       },
       time_field: '@timestamp',
       schedule: {
@@ -506,7 +506,7 @@ describe('rule_request_mappers', () => {
         name: 'Test Rule',
         enabled: true,
         owner: 'test-owner',
-        labels: ['tag1'],
+        tags: ['tag1'],
       });
       expect(result.stateTransitionAlertDelayMode).toBe('immediate');
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');

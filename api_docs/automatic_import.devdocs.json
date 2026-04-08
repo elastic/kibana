@@ -284,7 +284,7 @@
         "label": "AutomaticImportPluginSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-        "lineNumber": 54,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -306,7 +306,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -329,7 +329,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -351,7 +351,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -373,7 +373,30 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginSetupDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginSetup",
+                "text": "SearchInferenceEndpointsPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -389,7 +412,7 @@
         "label": "AutomaticImportPluginStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-        "lineNumber": 60,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -412,7 +435,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -434,7 +457,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -456,7 +479,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -478,7 +501,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -500,7 +523,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -530,7 +553,7 @@
               " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -552,7 +575,30 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-server.AutomaticImportPluginStartDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginStart",
+                "text": "SearchInferenceEndpointsPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -574,7 +620,7 @@
         "The plugin setup interface"
       ],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-      "lineNumber": 40,
+      "lineNumber": 44,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -596,7 +642,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 42,
+          "lineNumber": 46,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -619,7 +665,7 @@
             " | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 43,
+          "lineNumber": 47,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -637,7 +683,7 @@
             "(isAvailable: boolean) => void"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-          "lineNumber": 44,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -653,7 +699,7 @@
                 "boolean"
               ],
               "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-              "lineNumber": 48,
+              "lineNumber": 52,
               "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
@@ -674,7 +720,7 @@
       "label": "AutomaticImportPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
-      "lineNumber": 52,
+      "lineNumber": 56,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
