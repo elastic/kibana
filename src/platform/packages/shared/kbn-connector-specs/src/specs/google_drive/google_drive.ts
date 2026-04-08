@@ -61,7 +61,9 @@ export const GoogleDriveConnector: ConnectorSpec = {
         type: 'oauth_authorization_code',
         overrides: {
           meta: {
-            scope: { disabled: true },
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
           },
         },
         defaults: {

@@ -3919,6 +3919,10 @@
                 "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
+              },
+              {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
@@ -3985,10 +3989,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "esql",
@@ -10523,6 +10523,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
               },
@@ -10533,10 +10537,6 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -16152,6 +16152,18 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/chat_complete/anonymization/replacements/replacements_routes.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_features.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_connectors.ts"
+              },
+              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
               },
@@ -16194,18 +16206,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_features.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_connectors.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -17731,6 +17731,10 @@
                 "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
@@ -17741,10 +17745,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -19320,6 +19320,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/sync.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/csv_upload.ts"
               },
               {
                 "plugin": "securitySolution",
