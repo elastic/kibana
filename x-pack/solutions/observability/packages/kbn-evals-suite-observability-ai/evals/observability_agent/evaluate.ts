@@ -9,6 +9,7 @@ import {
   evaluate as base,
   createQuantitativeCorrectnessEvaluators,
   createSpanLatencyEvaluator,
+  createToolCallsEvaluator,
   createTrajectoryEvaluator,
   type EvaluationDataset,
   type Example,
@@ -87,6 +88,7 @@ export const evaluate = base.extend<
                     metadata,
                   })
                 : undefined;
+
               return {
                 errors: response.errors,
                 messages: response.messages,
@@ -116,15 +118,7 @@ export const evaluate = base.extend<
                   }),
                 ]
               : []),
-            {
-              name: 'Tool Calls',
-              kind: 'CODE' as const,
-              evaluate: async ({ output: taskOutput }: any) => {
-                const steps = taskOutput?.steps ?? [];
-                const toolCalls = steps.filter((s: any) => s.type === 'tool_call');
-                return { score: toolCalls.length };
-              },
-            },
+            createToolCallsEvaluator({ traceEsClient, log }),
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,
