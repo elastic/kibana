@@ -163,6 +163,9 @@ export const CleanExtraFilesFromModules: Task = {
           '**/bower.json',
           '**/yarn.lock',
 
+          // nested package manager artifacts (e.g. pnpm virtual store leaked into published packages)
+          '**/.pnpm',
+
           // misc
           '**/.*ignore',
           '**/*.log',

@@ -17,11 +17,8 @@ import type {
 } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
 import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
-import {
-  getApmSynthtraceEsClient,
-  getInfraSynthtraceEsClient,
-} from '../../../../common/services/synthtrace';
-import { coreWorkerFixtures } from './core_fixtures';
+import { coreWorkerFixtures } from '@kbn/scout';
+import { getApmSynthtraceEsClient, getInfraSynthtraceEsClient } from './get_synthtrace_client';
 
 interface SynthtraceFixtureEsClient<TFields extends Fields> {
   index: (events: SynthtraceGenerator<TFields>) => Promise<void>;

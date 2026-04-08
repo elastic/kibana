@@ -11,10 +11,11 @@ import { createMetricByFieldLookup, makeUnpackMetric, metricsToApiOptions } from
 import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  otelDatasetFilterDsl,
   SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
-  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
-  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_CONTAINER_CPU_USAGE,
+  SEMCONV_CONTAINER_MEMORY_WORKING_SET,
 } from '../shared/constants';
 
 // --- ECS (Elastic Common Schema) ---
@@ -48,11 +49,7 @@ type ContainerMetricsFieldSemconvDocker =
 
 const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMetricsFieldSemconvDocker> =
   {
-    sourceFilter: {
-      term: {
-        'event.dataset': 'dockerstatsreceiver.otel',
-      },
-    },
+    sourceFilter: otelDatasetFilterDsl('dockerstatsreceiver.otel'),
     groupByField: 'container.id',
     metricsMap: {
       [SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION]: {
@@ -67,26 +64,24 @@ const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMet
   };
 
 // --- SemConv K8s (Kubernetes container metrics) ---
+// Uses generic container metrics always emitted by kubeletstats,
+// regardless of whether k8s resource limits are configured.
 type ContainerMetricsFieldSemconvK8s =
-  | typeof SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION
-  | typeof SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION;
+  | typeof SEMCONV_CONTAINER_CPU_USAGE
+  | typeof SEMCONV_CONTAINER_MEMORY_WORKING_SET;
 
 const containerMetricsQueryConfigSemconvK8s: MetricsQueryOptions<ContainerMetricsFieldSemconvK8s> =
   {
-    sourceFilter: {
-      term: {
-        'event.dataset': 'kubeletstatsreceiver.otel',
-      },
-    },
+    sourceFilter: otelDatasetFilterDsl('kubeletstatsreceiver.otel'),
     groupByField: 'container.id',
     metricsMap: {
-      [SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION]: {
+      [SEMCONV_CONTAINER_CPU_USAGE]: {
         aggregation: 'avg',
-        field: SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
+        field: SEMCONV_CONTAINER_CPU_USAGE,
       },
-      [SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION]: {
+      [SEMCONV_CONTAINER_MEMORY_WORKING_SET]: {
         aggregation: 'avg',
-        field: SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+        field: SEMCONV_CONTAINER_MEMORY_WORKING_SET,
       },
     },
   };
@@ -101,7 +96,7 @@ const metricByFieldSemconvDocker = createMetricByFieldLookup(
 );
 export const unpackMetricSemconvDocker = makeUnpackMetric(metricByFieldSemconvDocker);
 
-const metricByFieldSemconvK8s = createMetricByFieldLookup(
+export const metricByFieldSemconvK8s = createMetricByFieldLookup(
   containerMetricsQueryConfigSemconvK8s.metricsMap
 );
 export const unpackMetricSemconvK8s = makeUnpackMetric(metricByFieldSemconvK8s);

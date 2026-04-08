@@ -13,20 +13,19 @@ import type {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import {
-  EuiBadgeGroup,
   EuiBadge,
+  EuiBadgeGroup,
   EuiButton,
-  EuiLink,
-  EuiIcon,
   EuiHealth,
+  EuiIcon,
+  EuiLink,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-
 import type { ActionConnector } from '../../../common/types/domain';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
@@ -317,6 +316,7 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
+            const isClosed = theCase.status === CaseStatuses.closed;
             return (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
@@ -324,6 +324,7 @@ export const useCasesColumns = ({
                   assignCaseAction(theCase);
                 }}
                 size="s"
+                disabled={isClosed}
               >
                 {i18n.SELECT}
               </EuiButton>

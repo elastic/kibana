@@ -14,7 +14,7 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type {
   UpdatePacksRequestParamsSchema,
@@ -79,10 +79,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
-        const currentPackSO = await savedObjectsClient.get<{ name: string; enabled: boolean }>(
-          packSavedObjectType,
-          request.params.id
-        );
+        let currentPackSO;
+        try {
+          currentPackSO = await savedObjectsClient.get<PackSavedObject>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         if (name) {
           const conflictingEntries = await savedObjectsClient.find<PackSavedObject>({
