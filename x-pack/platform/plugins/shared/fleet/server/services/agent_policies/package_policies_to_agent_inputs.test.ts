@@ -14,6 +14,7 @@ import {
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
 import {
+  getInputId,
   storedPackagePoliciesToAgentInputs,
   storedPackagePolicyToAgentInputs,
 } from './package_policies_to_agent_inputs';
@@ -1349,5 +1350,61 @@ describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () 
     expect(() => storedPackagePolicyToAgentInputs(policy, nonDynamicPackageInfo)).toThrowError(
       '[data_stream.type]: unexpected undefined stream type for non-dynamic package'
     );
+  });
+});
+
+describe('getInputId', () => {
+  it('should use input_id instead of type when input_id is present', () => {
+    const id = getInputId(
+      {
+        type: 'otelcol',
+        input_id: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+
+    expect(id).toBe('filelog_otel-nginx-pkg-policy-123');
+  });
+
+  it('should fall back to type when input_id is not present', () => {
+    const id = getInputId(
+      {
+        type: 'logfile',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+
+    expect(id).toBe('logfile-nginx-pkg-policy-123');
+  });
+
+  it('should produce unique ids for same-type inputs with different input_ids', () => {
+    const id1 = getInputId(
+      {
+        type: 'otelcol',
+        input_id: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+    const id2 = getInputId(
+      {
+        type: 'otelcol',
+        input_id: 'nginx_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      },
+      'pkg-policy-123'
+    );
+
+    expect(id1).not.toBe(id2);
   });
 });

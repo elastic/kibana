@@ -418,6 +418,198 @@ describe('StepConfigurePackage', () => {
   });
 });
 
+describe('StepConfigurePackage with multiple inputs of same type but different ids', () => {
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const mockUpdatePackagePolicy = jest.fn();
+
+  const otelPackageInfo: PackageInfo = {
+    name: 'nginx',
+    title: 'Nginx',
+    version: '1.0.0',
+    release: 'ga',
+    description: 'Nginx integration with OTel inputs',
+    format_version: '',
+    owner: { github: '' },
+    assets: {} as any,
+    policy_templates: [
+      {
+        name: 'nginx',
+        title: 'Nginx logs and metrics',
+        description: 'Collect logs and metrics from Nginx',
+        data_streams: ['access', 'stubstatus'],
+        inputs: [
+          {
+            id: 'filelog_otel',
+            type: 'otelcol',
+            title: 'Collect Nginx access logs via filelog OTel receiver',
+            description: 'Tail Nginx access log files',
+          },
+          {
+            id: 'nginx_otel',
+            type: 'otelcol',
+            title: 'Collect Nginx stub status metrics via OTel receiver',
+            description: 'Scrape Nginx stub_status metrics',
+          },
+        ],
+        multiple: true,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'filelog_otel',
+            vars: [
+              {
+                name: 'log_path',
+                type: 'text',
+                title: 'Log Path',
+                required: true,
+                show_user: true,
+                default: '/var/log/nginx/access.log',
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx access logs',
+            description: 'Collect Nginx access logs',
+            enabled: true,
+          },
+        ],
+        package: 'nginx',
+        path: 'access',
+      },
+      {
+        type: 'metrics',
+        dataset: 'nginx.stubstatus',
+        title: 'Nginx stub status',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'nginx_otel',
+            vars: [
+              {
+                name: 'endpoint',
+                type: 'text',
+                title: 'Stub Status Endpoint',
+                required: true,
+                show_user: true,
+                default: 'http://localhost:8080/stub_status',
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx stub status metrics',
+            description: 'Collect Nginx stub status metrics',
+            enabled: true,
+          },
+        ],
+        package: 'nginx',
+        path: 'stubstatus',
+      },
+    ],
+    latestVersion: '1.0.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+
+  const otelPackagePolicy: NewPackagePolicy = {
+    name: 'nginx-1',
+    description: '',
+    namespace: 'default',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    inputs: [
+      {
+        type: 'otelcol',
+        input_id: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'nginx.access' },
+            vars: {
+              log_path: { value: '/var/log/nginx/access.log', type: 'text' },
+            },
+          },
+        ],
+      },
+      {
+        type: 'otelcol',
+        input_id: 'nginx_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'metrics', dataset: 'nginx.stubstatus' },
+            vars: {
+              endpoint: { value: 'http://localhost:8080/stub_status', type: 'text' },
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockUpdatePackagePolicy.mockClear();
+  });
+
+  it('should render both input panels with their respective titles', async () => {
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, load);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={otelPackageInfo}
+        packagePolicy={otelPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect Nginx access logs via filelog OTel receiver')
+      ).toBeInTheDocument();
+      expect(
+        await renderResult.findByText('Collect Nginx stub status metrics via OTel receiver')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should show each input stream under its correct input panel without mixing', async () => {
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, load);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={otelPackageInfo}
+        packagePolicy={otelPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(async () => {
+      // Both stream titles should be visible
+      expect(await renderResult.findByText('Nginx access logs')).toBeInTheDocument();
+      expect(await renderResult.findByText('Nginx stub status metrics')).toBeInTheDocument();
+    });
+
+    // Each input panel should have exactly one stream toggle
+    const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
+    expect(switches).toHaveLength(2);
+  });
+});
+
 describe('isSingleInputAndStreams behavior', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;

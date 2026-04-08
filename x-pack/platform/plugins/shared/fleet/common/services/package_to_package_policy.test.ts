@@ -93,6 +93,119 @@ describe('Fleet - packageToPackagePolicy', () => {
       ]);
     });
 
+    it('returns distinct inputs when multiple inputs share the same type but have different ids', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              { id: 'filelog_otel', type: 'otelcol', title: 'Logs via filelog' },
+              { id: 'nginx_otel', type: 'otelcol', title: 'Metrics via nginx receiver' },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        type: 'otelcol',
+        input_id: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+      });
+      expect(result[1]).toMatchObject({
+        type: 'otelcol',
+        input_id: 'nginx_otel',
+        policy_template: 'nginx',
+        enabled: true,
+      });
+    });
+
+    it('does not set input_id when registry input has no id', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        policy_templates: [
+          {
+            name: 'test_template',
+            inputs: [{ type: 'logfile' }],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].input_id).toBeUndefined();
+    });
+
+    it('does not match streams that reference by type when inputs have explicit ids', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'nginx.access',
+            path: 'access',
+            streams: [{ input: 'otelcol', title: 'Access logs' }],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            data_streams: ['access'],
+            inputs: [
+              { id: 'filelog_otel', type: 'otelcol', title: 'Logs' },
+              { id: 'nginx_otel', type: 'otelcol', title: 'Metrics' },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+      // Neither input should have matched the stream because
+      // 'otelcol' is the type, not an id
+      expect(result[0].streams).toHaveLength(0);
+      expect(result[1].streams).toHaveLength(0);
+    });
+
+    it('matches streams to inputs by id when inputs have ids', () => {
+      const result = packageToPackagePolicyInputs({
+        ...mockPackage,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'nginx.access',
+            path: 'access',
+            streams: [{ input: 'filelog_otel', title: 'Access logs' }],
+          },
+          {
+            type: 'metrics',
+            dataset: 'nginx.stubstatus',
+            path: 'stubstatus',
+            streams: [{ input: 'nginx_otel', title: 'Stub status metrics' }],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            data_streams: ['access', 'stubstatus'],
+            inputs: [
+              { id: 'filelog_otel', type: 'otelcol', title: 'Logs' },
+              { id: 'nginx_otel', type: 'otelcol', title: 'Metrics' },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].input_id).toBe('filelog_otel');
+      expect(result[0].streams).toHaveLength(1);
+      expect(result[0].streams[0].data_stream.dataset).toBe('nginx.access');
+
+      expect(result[1].input_id).toBe('nginx_otel');
+      expect(result[1].streams).toHaveLength(1);
+      expect(result[1].streams[0].data_stream.dataset).toBe('nginx.stubstatus');
+    });
+
     it('returns inputs with streams for packages with streams', () => {
       expect(
         packageToPackagePolicyInputs({
