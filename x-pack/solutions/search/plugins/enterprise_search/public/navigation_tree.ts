@@ -106,7 +106,19 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   breadcrumbStatus: 'hidden',
-                  children: [{ link: 'ml:anomalyExplorer' }, { link: 'ml:singleMetricViewer' }],
+                  children: [
+                    {
+                      link: 'management:anomaly_detection',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection.manageJobs',
+                        {
+                          defaultMessage: 'Manage jobs',
+                        }
+                      ),
+                    },
+                    { link: 'ml:anomalyExplorer' },
+                    { link: 'ml:singleMetricViewer' },
+                  ],
                   id: 'category-anomaly_detection',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection',
@@ -253,6 +265,7 @@ export const getNavigationTreeDefinition = ({
                         renderAs: 'panelOpener' as const,
                         children: [
                           { link: 'management:rules' as const },
+                          { link: 'management:episodes' as const },
                           { link: 'management:notification_policies' as const },
                         ],
                       },
@@ -289,6 +302,7 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    { link: 'management:overview' },
                     { link: 'management:trained_models' },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
