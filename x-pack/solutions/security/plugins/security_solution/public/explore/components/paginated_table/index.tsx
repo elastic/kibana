@@ -228,7 +228,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <EuiButtonEmpty
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >

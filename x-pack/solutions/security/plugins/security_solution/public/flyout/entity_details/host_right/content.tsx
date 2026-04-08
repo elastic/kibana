@@ -11,6 +11,7 @@ import type { Entity } from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
@@ -18,11 +19,13 @@ import { AssetCriticalityAccordion } from '../../../entity_analytics/components/
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { HostItem } from '../../../../common/search_strategy';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -44,6 +47,7 @@ interface HostPanelContentProps {
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const HostPanelContent = ({
@@ -60,10 +64,12 @@ export const HostPanelContent = ({
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
+  entityStoreEntityId,
 }: HostPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   // Extract hostName from identityFields for components that need a string
   // Priority: identityFields['host.name'] > identityFields[first key]
@@ -91,6 +97,12 @@ export const HostPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
+        <>
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <EuiHorizontalRule />
+        </>
+      )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
           entity={{ name: hostName, type: EntityType.host }}
@@ -106,6 +118,17 @@ export const HostPanelContent = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
       />
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedDataSection
         observedHost={observedHost}
         contextID={contextID}

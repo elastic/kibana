@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Request, Response } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const deleteNotificationPolicyParamsSchema = z.object({
@@ -20,22 +21,28 @@ const deleteNotificationPolicyParamsSchema = z.object({
 });
 
 @injectable()
-export class DeleteNotificationPolicyRoute {
+export class DeleteNotificationPolicyRoute extends BaseAlertingRoute {
   static method = 'delete' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static routeOptions = {
+    summary: 'Delete a notification policy',
+    description: 'Delete a notification policy by identifier.',
+  } as const;
   static validate = {
     request: {
       params: buildRouteValidationWithZod(deleteNotificationPolicyParamsSchema),
     },
   } as const;
 
+  protected readonly routeName = 'delete notification policy';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       z.infer<typeof deleteNotificationPolicyParamsSchema>,
@@ -43,23 +50,16 @@ export class DeleteNotificationPolicyRoute {
       unknown,
       'delete'
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
     private readonly notificationPolicyClient: NotificationPolicyClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      await this.notificationPolicyClient.deleteNotificationPolicy({
-        id: this.request.params.id,
-      });
-      return this.response.noContent();
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  protected async execute() {
+    await this.notificationPolicyClient.deleteNotificationPolicy({
+      id: this.request.params.id,
+    });
+    return this.ctx.response.noContent();
   }
 }

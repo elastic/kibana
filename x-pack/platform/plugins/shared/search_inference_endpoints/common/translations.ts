@@ -167,7 +167,7 @@ export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
 );
 
 export const SETTINGS_TITLE = i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
-  defaultMessage: 'Settings',
+  defaultMessage: 'Model settings',
 });
 
 export const SETTINGS_SAVE_BUTTON = i18n.translate(
@@ -209,6 +209,106 @@ export const SETTINGS_NO_FEATURES_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.noFeatures.description',
   {
     defaultMessage: 'No features have been registered for inference settings in this project.',
+  }
+);
+
+export const DEFAULT_MODEL_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.title',
+  {
+    defaultMessage: 'Default model',
+  }
+);
+
+export const DEFAULT_MODEL_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.description',
+  {
+    defaultMessage:
+      'Choose a default model for all AI features. Individual features can override this with their own model.',
+  }
+);
+
+export const DEFAULT_MODEL_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.label',
+  {
+    defaultMessage: 'Default model',
+  }
+);
+
+export const DEFAULT_MODEL_PLACEHOLDER = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.placeholder',
+  {
+    defaultMessage: 'Select a default model',
+  }
+);
+
+export const DEFAULT_MODEL_NO_DEFAULT_OPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.noDefault',
+  {
+    defaultMessage: 'No default model',
+  }
+);
+
+export const DEFAULT_MODEL_PRECONFIGURED_GROUP = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.preconfiguredGroup',
+  {
+    defaultMessage: 'Pre-configured',
+  }
+);
+
+export const DEFAULT_MODEL_CUSTOM_GROUP = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.customGroup',
+  {
+    defaultMessage: 'Custom connectors',
+  }
+);
+
+export const DISALLOW_OTHER_MODELS_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels',
+  {
+    defaultMessage: 'Only allow the default model to be used.',
+  }
+);
+
+export const DISALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.description',
+  {
+    defaultMessage: 'Model selection is hidden and only the default model will be used.',
+  }
+);
+
+export const ALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
+  {
+    defaultMessage: 'Features can allow users to select other models than the default.',
+  }
+);
+
+export const DEFAULT_MODEL_CONNECTOR_NOT_EXIST_ERROR = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
+  {
+    defaultMessage:
+      'The model previously selected is not available. Please select a different option.',
+  }
+);
+
+export const DEFAULT_MODEL_DISALLOW_NO_DEFAULT_ERROR = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.error.disallowNoDefault',
+  {
+    defaultMessage: 'When disallowing all other models, a default model must be selected.',
+  }
+);
+
+export const DEFAULT_MODEL_SAVE_SUCCESS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess',
+  {
+    defaultMessage: 'Default model settings saved',
+  }
+);
+
+export const DEFAULT_MODEL_SAVE_ERROR = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.saveError',
+  {
+    defaultMessage: 'Failed to save default model settings',
   }
 );
 

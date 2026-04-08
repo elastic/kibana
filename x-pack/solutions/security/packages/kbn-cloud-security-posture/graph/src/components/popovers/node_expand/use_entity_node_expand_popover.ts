@@ -9,22 +9,30 @@ import { useCallback } from 'react';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
-import { getEntityExpandItems, getSourceNamespaceFromNode } from './get_entity_expand_items';
+import {
+  getEntityExpandItems,
+  getSourceFieldsFromNode,
+  fieldForRole,
+} from './get_entity_expand_items';
+import type { EntityFilterActions } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 import {
   emitFilterToggle,
   isFilterActiveForScope,
   emitEntityRelationshipToggle,
   isEntityRelationshipExpandedForScope,
+  isInitialEntityForScope,
 } from '../../filters/filter_store';
+import { RELATED_ENTITY } from '../../../common/constants';
 
 /**
  * Hook to handle the entity node expand popover.
  * This hook is used to show the popover when the user clicks on the expand button of an entity node.
  * The popover contains the actions to show/hide the actions by entity, actions on entity, and related entities.
  *
- * Uses filter event bus for filter state management - emits events via emitFilterToggle().
- * Uses entity relationship event bus for relationship state - emits events via emitEntityRelationshipToggle().
+ * Uses graph entity filter event bus for actor/target filter state.
+ * Uses filter event bus for related events (pinning via RELATED_ENTITY).
+ * Uses entity relationship event bus for relationship state.
  *
  * @param scopeId - The unique identifier for the graph instance (used to scope filter state)
  * @param onOpenEventPreview - Optional callback to open event preview with full node data.
@@ -41,13 +49,33 @@ export const useEntityNodeExpandPopover = (
       const isSingleEntity = docMode === 'single-entity';
       const isGroupedEntities = docMode === 'grouped-entities';
       const isEnriched = isEntityNodeEnriched(node.data);
+      const isInitialEntity = isInitialEntityForScope(scopeId, node.id);
+
+      const sourceFields = getSourceFieldsFromNode(node.data);
+
+      const entityFilterActions: EntityFilterActions = {
+        toggleEntityFilter: (role, action) => {
+          for (const [field, value] of Object.entries(sourceFields ?? {})) {
+            // Flatten string | string[] to string[] so each value gets its own OR'd phrase filter
+            for (const v of ([] as string[]).concat(value)) {
+              emitFilterToggle(scopeId, fieldForRole(field, role), v, action);
+            }
+          }
+        },
+        isEntityFilterActive: (role) =>
+          Object.entries(sourceFields ?? {}).some(([field, value]) =>
+            ([] as string[])
+              .concat(value)
+              .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, role), v))
+          ),
+        toggleRelatedEvents: (action) => emitFilterToggle(scopeId, RELATED_ENTITY, node.id, action),
+        isRelatedEventsActive: () => isFilterActiveForScope(scopeId, RELATED_ENTITY, node.id),
+      };
 
       return getEntityExpandItems({
         nodeId: node.id,
-        sourceNamespace: getSourceNamespaceFromNode(node.data),
+        entityFilterActions,
         onShowEntityDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
-        isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
-        toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
         shouldRender: {
           // Entity relationships only for single-entity mode when full feature set is active
           showEntityRelationships: isSingleEntity && onOpenEventPreview !== undefined,
@@ -60,9 +88,10 @@ export const useEntityNodeExpandPopover = (
             (isSingleEntity || isGroupedEntities) && onOpenEventPreview !== undefined,
         },
         isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, node.id),
+        isInitialEntity,
         toggleEntityRelationships: (action) =>
           emitEntityRelationshipToggle(scopeId, node.id, action),
-        showEntityRelationshipsDisabled: !isEnriched,
+        showEntityRelationshipsDisabled: !isEnriched || isInitialEntity,
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },

@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -19,9 +19,10 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { legendNestedSchema, legendVisibilitySchema, valueDisplaySchema } from './partition_shared';
+import { legendNestedSchema, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -33,7 +34,7 @@ const mosaicStateSharedSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visibility: legendVisibilitySchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
@@ -96,7 +97,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...mosaicStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
@@ -148,7 +149,7 @@ export const mosaicStateSchemaESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...mosaicStateSharedSchema,
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.

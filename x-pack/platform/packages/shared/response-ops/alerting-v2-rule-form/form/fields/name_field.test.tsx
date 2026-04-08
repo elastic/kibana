@@ -11,27 +11,28 @@ import userEvent from '@testing-library/user-event';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClientProvider } from '@kbn/react-query';
 import { NameField } from './name_field';
-import { createFormWrapper, createTestQueryClient, defaultTestFormValues } from '../../test_utils';
+import {
+  createFormWrapper,
+  createTestQueryClient,
+  createMockServices,
+  defaultTestFormValues,
+} from '../../test_utils';
 import type { FormValues } from '../types';
+import { RuleFormProvider } from '../contexts';
 
 describe('NameField', () => {
-  it('renders the default name text when no name is provided', () => {
+  it('renders with a Name label', () => {
     render(<NameField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
   });
 
-  it('renders as an inline editable title', () => {
+  it('renders a text input with placeholder', () => {
     render(<NameField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByTestId('ruleNameInlineEdit')).toBeInTheDocument();
-  });
-
-  it('renders the inline edit read mode button with pencil icon', () => {
-    render(<NameField />, { wrapper: createFormWrapper() });
-
-    // EuiInlineEditTitle renders a button to activate edit mode
-    expect(screen.getByTestId('euiInlineReadModeButton')).toBeInTheDocument();
+    const input = screen.getByTestId('ruleNameInput');
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveAttribute('placeholder', 'Untitled rule');
   });
 
   it('displays initial value from form context', () => {
@@ -44,25 +45,12 @@ describe('NameField', () => {
 
     render(<NameField />, { wrapper: Wrapper });
 
-    expect(screen.getByText('My Test Rule')).toBeInTheDocument();
-  });
-
-  it('enters edit mode when read mode button is clicked', async () => {
-    const user = userEvent.setup();
-    render(<NameField />, { wrapper: createFormWrapper() });
-
-    // Click the inline edit read mode button to enter edit mode
-    const readModeButton = screen.getByTestId('euiInlineReadModeButton');
-    await user.click(readModeButton);
-
-    // Now a text input should be visible in edit mode
-    await waitFor(() => {
-      expect(screen.getByLabelText('Edit rule name')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('ruleNameInput')).toHaveValue('My Test Rule');
   });
 
   it('shows required error when submitted with empty value', async () => {
     const queryClient = createTestQueryClient();
+    const services = createMockServices();
 
     const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({
@@ -72,7 +60,46 @@ describe('NameField', () => {
       return (
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
-            {children}
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
+            <button type="button" onClick={form.handleSubmit(() => {})}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<NameField />, { wrapper: WrapperWithSubmit });
+
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Name is required.')).toBeInTheDocument();
+    });
+  });
+
+  it('shows error when submitted with the default placeholder name', async () => {
+    const queryClient = createTestQueryClient();
+    const services = createMockServices();
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          metadata: { ...defaultTestFormValues.metadata, name: 'Untitled rule' },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+              {children}
+            </RuleFormProvider>
             <button type="button" onClick={form.handleSubmit(() => {})}>
               Submit
             </button>

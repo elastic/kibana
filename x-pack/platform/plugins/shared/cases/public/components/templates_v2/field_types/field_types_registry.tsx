@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import type { z } from '@kbn/zod/v4';
 
-import { FieldType } from './constants';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 import type {
   FieldSchema,
   ConditionRenderProps,
@@ -18,6 +18,7 @@ import { InputText } from './controls/input_text';
 import { SelectBasic } from './controls/select_basic';
 import { Textarea } from './controls/textarea';
 import { InputNumber } from './controls/input_number';
+import { DatePicker } from './controls/date_picker';
 
 // NOTE: this guarantees the control will receive props aligned with the schema plus condition render props
 export type FieldMap = {
@@ -30,4 +31,5 @@ export const controlRegistry: FieldMap = {
   [FieldType.INPUT_NUMBER]: InputNumber,
   [FieldType.SELECT_BASIC]: SelectBasic,
   [FieldType.TEXTAREA]: Textarea,
+  [FieldType.DATE_PICKER]: DatePicker,
 };

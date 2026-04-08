@@ -23,6 +23,7 @@ import type {
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
+  isArtifactGlobal,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
@@ -60,7 +61,13 @@ export const getExceptionsPreImportHandler = (
     const logger = endpointAppContext.createLogger('listsPreImportExtensionPoint');
 
     validateCanEndpointArtifactsBeImported(data, endpointAppContext.experimentalFeatures);
-    provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, logger);
+    const spaceId = getSpaceId(endpointAppContext, request);
+    await provideSpaceAwarenessCompatibilityForOldEndpointExceptions(
+      data,
+      endpointAppContext,
+      spaceId,
+      logger
+    );
 
     if (!endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
       return { data, overwrite };
@@ -131,10 +138,16 @@ export const getExceptionsPreImportHandler = (
         request
       );
       await endpointExceptionValidator.validatePreImport(data);
+
+      if (!(await endpointAppContext.isEndpointExceptionsPerPolicyEnabled())) {
+        // if user hasn't opted in to per policy endpoint exceptions, we're skipping the
+        // per-policy / space awareness magic below.
+        // note: owner space ID is added in provideSpaceAwarenessCompatibilityForOldEndpointExceptions function.
+        return { data, overwrite };
+      }
     }
 
     // --- Below are operations to prepare the imported data ---
-    const spaceId = getSpaceId(endpointAppContext, request);
     for (const item of data.items) {
       if (!(item instanceof Error)) {
         addOwnerSpaceIdTagToItem(item, spaceId);
@@ -202,22 +215,35 @@ const validateCanEndpointArtifactsBeImported = (
  * Exceptions continue to be global only in v9.1, we add the global tag to them here if it is
  * missing
  */
-const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
+const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = async (
   data: PromiseFromStreams,
+  endpointAppContext: EndpointAppContextService,
+  spaceId: string,
   logger: Logger
-): void => {
+): Promise<void> => {
   const adjustedImportItems: PromiseFromStreams['items'] = [];
+
+  const isEndpointExceptionPerPolicyEnabled =
+    await endpointAppContext.isEndpointExceptionsPerPolicyEnabled();
 
   for (const item of data.items) {
     if (
       !(item instanceof Error) &&
       item.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
-      item.namespace_type === 'agnostic' &&
-      !hasArtifactOwnerSpaceId(item)
+      item.namespace_type === 'agnostic'
     ) {
-      item.tags = item.tags ?? [];
-      item.tags.push(GLOBAL_ARTIFACT_TAG);
-      adjustedImportItems.push(item);
+      if (
+        // before per-policy opt-in: every endpoint exception should be global
+        (!isEndpointExceptionPerPolicyEnabled && !isArtifactGlobal(item)) ||
+        // after per-policy opt-in: no space-owner ID means pre 9.1 => let's add the global tag
+        (isEndpointExceptionPerPolicyEnabled && !hasArtifactOwnerSpaceId(item))
+      ) {
+        item.tags = item.tags ?? [];
+        item.tags.push(GLOBAL_ARTIFACT_TAG);
+        addOwnerSpaceIdTagToItem(item, spaceId);
+
+        adjustedImportItems.push(item);
+      }
     }
   }
 

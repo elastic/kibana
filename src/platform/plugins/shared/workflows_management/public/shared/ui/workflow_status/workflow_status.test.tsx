@@ -24,11 +24,11 @@ describe('WorkflowStatus', () => {
     expect(container.firstChild).not.toBeNull();
   });
 
-  it('renders errorFilled icon type when valid is false', () => {
+  it('renders errorFill icon type when valid is false', () => {
     const { container } = render(<WorkflowStatus valid={false} />);
 
     // The icon tip renders an EuiIcon of type errorFilled
-    const iconElement = container.querySelector('[data-euiicon-type="errorFilled"]');
+    const iconElement = container.querySelector('[data-euiicon-type="errorFill"]');
     expect(iconElement).toBeInTheDocument();
   });
 });

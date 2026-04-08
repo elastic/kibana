@@ -9,8 +9,18 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
-import { checkIfEntitiesIndexLookupMode, formatJsonProperty } from './utils';
-import type { EntityId, RelationshipEdge } from './types';
+import {
+  checkIfEntitiesIndexLookupMode,
+  concatJsonObjectPropertyBool,
+  concatJsonObjectPropertyEsqlExpr,
+  concatJsonObjectPropertyString,
+  concatJsonObjectPropertyEsqlExprSafe,
+  JSON_OBJECT_END,
+  JSON_OBJECT_SEPARATOR,
+  JSON_OBJECT_START,
+  concatJsonObjectPropertyEsqlExprAsString,
+} from './utils';
+import type { EntityId, EntityRecord, RelationshipEdge } from './types';
 
 interface BuildRelationshipsEsqlQueryParams {
   indexName: string;
@@ -51,6 +61,7 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME _source_type = entity.type
 | RENAME _source_sub_type = entity.sub_type
 | RENAME _source_host_ip = host.ip
+| RENAME _source_engine_metadata_type = entity.EngineMetadata.Type
 // Lookup target entity metadata
 | EVAL entity.id = _target_id
 | LOOKUP JOIN ${indexName} ON entity.id
@@ -58,26 +69,14 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME _target_type = entity.type
 | RENAME _target_sub_type = entity.sub_type
 | RENAME _target_host_ip = host.ip
+| RENAME _target_engine_metadata_type = entity.EngineMetadata.Type
 // Restore source entity fields
 | RENAME entity.id = _source_id
 | RENAME entity.name = _source_name
 | RENAME entity.type = _source_type
 | RENAME entity.sub_type = _source_sub_type
-| RENAME host.ip = _source_host_ip`;
-
-  // The ecsParentField hint is needed to later query actions done TO this entity
-  // (e.g., to find events where this entity is the target).
-  //
-  // Currently we only query the generic entities index which uses entity.id,
-  // so ecsParentField is always 'entity'.
-  //
-  // When entity-specific indices are added (user, host, service), we would use
-  // generateFieldHintCases similar to actorEntityFieldHint/targetEntityFieldHint to detect:
-  // - user.entity.id -> ecsParentField: 'user'
-  // - host.entity.id -> ecsParentField: 'host'
-  // - service.entity.id -> ecsParentField: 'service'
-  // - entity.id -> ecsParentField: 'entity'
-  const ecsParentFieldValue = 'entity';
+| RENAME host.ip = _source_host_ip
+| RENAME entity.EngineMetadata.Type = _source_engine_metadata_type`;
 
   return `FROM ${indexName}
 ${coalesceStatements}
@@ -86,31 +85,66 @@ ${forkBranches}
 | WHERE _target_id != ""
 ${enrichmentSection}
 // Build enriched actors doc data with entity metadata (from the queried entity)
-| EVAL actorDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
-    "\\"availableInEntityStore\\":true",
-    ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
-    ${formatJsonProperty('name', 'entity.name')},
-    ${formatJsonProperty('type', 'entity.type')},
-    ${formatJsonProperty('sub_type', 'entity.sub_type')},
-    CASE(
-      host.ip IS NOT NULL,
-      CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(host.ip), "\\"", "}"),
-      ""
-    ),
-  "}}")
+| EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprSafe('id', 'entity.id')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
+    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
+      CASE(entity.name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', 'entity.name')}), ""),
+      CASE(entity.type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', 'entity.type')}), ""),
+      CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'entity.sub_type')}), ""),
+      CASE(entity.EngineMetadata.Type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString(
+          'engine_type',
+          'entity.EngineMetadata.Type'
+        )}), ""),
+      CASE(
+        host.ip IS NOT NULL,
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
+          ${JSON_OBJECT_END}),
+        ""
+      ),
+      ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
+        ${concatJsonObjectPropertyEsqlExprAsString('entity.id', 'entity.id')},
+      ${JSON_OBJECT_END},
+    ${JSON_OBJECT_END},
+  ${JSON_OBJECT_END})
 // Build enriched targets doc data with entity metadata
-| EVAL targetDocData = CONCAT("{\\"id\\":\\"", _target_id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
-    "\\"availableInEntityStore\\":", CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false"),
-    ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
-    ${formatJsonProperty('name', '_target_name')},
-    ${formatJsonProperty('type', '_target_type')},
-    ${formatJsonProperty('sub_type', '_target_sub_type')},
+| EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
+    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
+    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
+    ${concatJsonObjectPropertyEsqlExpr(
+      'availableInEntityStore',
+      'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
+    )},
+    CASE(_target_name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString('name', '_target_name')}), ""),
+    CASE(_target_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString('type', '_target_type')}), ""),
+    CASE(_target_sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString('sub_type', '_target_sub_type')}), ""),
     CASE(
       _target_host_ip IS NOT NULL,
-      CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"", "}"),
+      CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+        "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"",
+        ${JSON_OBJECT_END}),
       ""
     ),
-  "}}")
+    CASE(_target_engine_metadata_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString(
+        'engine_type',
+        '_target_engine_metadata_type'
+      )}), ""),
+    ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyEsqlExprAsString('entity.id', '_target_id')},
+    ${JSON_OBJECT_END},
+  ${JSON_OBJECT_END},
+${JSON_OBJECT_END})
 // Group by actor entity, relationship, and target type/subtype (for target grouping)
 // This ensures targets with the same type are grouped together
 | STATS badge = COUNT(*),
@@ -237,6 +271,79 @@ export const fetchEntityRelationships = async ({
     // If the index doesn't exist, return empty result
     if (error.statusCode === 404) {
       logger.debug(`Entities index ${indexName} does not exist, skipping relationship fetch`);
+      return { columns: [], records: [] };
+    }
+    throw error;
+  }
+};
+
+export const fetchEntities = async ({
+  esClient,
+  logger,
+  entityIds,
+  spaceId,
+}: {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  entityIds: EntityId[];
+  spaceId: string;
+}): Promise<EsqlToRecords<EntityRecord>> => {
+  const indexName = getEntitiesLatestIndexName(spaceId);
+
+  logger.trace(`Fetching entities from index [${indexName}] for ${entityIds.length} entities`);
+  const esqlQuery = `FROM ${indexName}
+    | WHERE entity.id IN (${entityIds.map((_, idx) => `?entityId${idx}`).join(',')})
+    | EVAL id = entity.id
+    | EVAL name = entity.name
+    | EVAL type = entity.type
+    | EVAL sub_type = entity.sub_type
+    | EVAL docData = CONCAT(${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyEsqlExprAsString('id', 'entity.id')},
+      ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
+      ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
+        ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
+        CASE(entity.name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString('name', 'entity.name')}), ""),
+        CASE(entity.type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString('type', 'entity.type')}), ""),
+        CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'entity.sub_type')}), ""),
+        CASE(entity.EngineMetadata.Type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString(
+            'engine_type',
+            'entity.EngineMetadata.Type'
+          )}), ""),
+        CASE(
+          host.ip IS NOT NULL,
+          CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+            "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
+            ${JSON_OBJECT_END}),
+          ""
+        ),
+        ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
+          ${concatJsonObjectPropertyEsqlExprAsString('entity.id', 'entity.id')},
+        ${JSON_OBJECT_END},
+      ${JSON_OBJECT_END},
+    ${JSON_OBJECT_END})
+    | KEEP id, name, type, sub_type, docData`;
+  logger.trace(`Entities ES|QL query: ${esqlQuery}`);
+
+  try {
+    const response = await esClient.asCurrentUser.helpers
+      .esql({
+        columnar: false,
+        query: esqlQuery,
+        // @ts-ignore - types are not up to date
+        params: [...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id }))],
+      })
+      .toRecords<EntityRecord>();
+
+    logger.trace(`Fetched [${response.records.length}] entity records`);
+    return response;
+  } catch (error) {
+    // If the index doesn't exist, return empty result
+    if (error.statusCode === 404) {
+      logger.debug(`Entities index ${indexName} does not exist, skipping entities fetch`);
       return { columns: [], records: [] };
     }
     throw error;
