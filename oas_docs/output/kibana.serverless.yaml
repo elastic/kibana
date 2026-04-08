@@ -20163,6 +20163,112 @@ paths:
         <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/entity_analytics/watchlists/{watchlist_id}/csv_upload:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{watchlist_id}/csv_upload</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
+        with a "type" column (user, host, service, or generic) and one or more ECS identity
+        fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
+
+        Matched entities are added to the watchlist and their `entity.attributes.watchlists`
+        field is updated in the entity store.
+
+        Each row will match up to 10,000 entities.
+      operationId: UploadWatchlistCsv
+      parameters:
+        - description: The ID of the watchlist to add entities to
+          example: high-risk-vendors
+          in: path
+          name: watchlist_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              csvUpload:
+                summary: CSV file with user entities
+                value:
+                  file: |
+                    type,user.name
+                    user,john.doe
+                    user,jane.smith
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                CsvUploadResponse:
+                  summary: CSV upload response with mixed results
+                  value:
+                    failed: 1
+                    items:
+                      - matchedEntities: 1
+                        status: success
+                      - error: Invalid entity type
+                        matchedEntities: 0
+                        status: failure
+                      - matchedEntities: 0
+                        status: unmatched
+                    successful: 1
+                    total: 3
+                    unmatched: 1
+              schema:
+                type: object
+                properties:
+                  failed:
+                    description: Number of rows that failed to process
+                    example: 1
+                    type: integer
+                  items:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_WatchlistCsvUploadResponseItem'
+                    type: array
+                  successful:
+                    description: Number of rows that matched at least one entity
+                    example: 1
+                    type: integer
+                  total:
+                    description: Total number of rows processed
+                    example: 3
+                    type: integer
+                  unmatched:
+                    description: Number of rows that matched no entities
+                    example: 1
+                    type: integer
+                required:
+                  - successful
+                  - failed
+                  - total
+                  - unmatched
+                  - items
+          description: Upload successful
+        '413':
+          description: File too large
+      summary: Upload a CSV file to add entities to a watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/entity_analytics/watchlists/list:
     get:
       operationId: ListWatchlists
@@ -45489,737 +45595,10 @@ paths:
           application/json:
             schema:
               anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties:
-                    allow_edit:
-                      items:
-                        type: string
-                      maxItems: 1000
-                      type: array
-                    ca_sha256:
-                      nullable: true
-                      type: string
-                    ca_trusted_fingerprint:
-                      nullable: true
-                      type: string
-                    config_yaml:
-                      nullable: true
-                      type: string
-                    hosts:
-                      items:
-                        format: uri
-                        type: string
-                      maxItems: 10
-                      minItems: 1
-                      type: array
-                    id:
-                      type: string
-                    is_default:
-                      type: boolean
-                    is_default_monitoring:
-                      type: boolean
-                    is_internal:
-                      type: boolean
-                    is_preconfigured:
-                      type: boolean
-                    name:
-                      type: string
-                    preset:
-                      enum:
-                        - balanced
-                        - custom
-                        - throughput
-                        - scale
-                        - latency
-                      type: string
-                    proxy_id:
-                      nullable: true
-                      type: string
-                    secrets:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        ssl:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            key:
-                              anyOf:
-                                - additionalProperties: false
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    id:
-                                      type: string
-                                  required:
-                                    - id
-                                - type: string
-                    shipper:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        compression_level:
-                          nullable: true
-                          type: number
-                        disk_queue_compression_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_enabled:
-                          default: false
-                          nullable: true
-                          type: boolean
-                        disk_queue_encryption_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_max_size:
-                          nullable: true
-                          type: number
-                        disk_queue_path:
-                          nullable: true
-                          type: string
-                        loadbalance:
-                          nullable: true
-                          type: boolean
-                        max_batch_bytes:
-                          nullable: true
-                          type: number
-                        mem_queue_events:
-                          nullable: true
-                          type: number
-                        queue_flush_timeout:
-                          nullable: true
-                          type: number
-                      required:
-                        - disk_queue_path
-                        - disk_queue_max_size
-                        - disk_queue_encryption_enabled
-                        - disk_queue_compression_enabled
-                        - compression_level
-                        - loadbalance
-                        - mem_queue_events
-                        - queue_flush_timeout
-                        - max_batch_bytes
-                    ssl:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        certificate:
-                          type: string
-                        certificate_authorities:
-                          items:
-                            type: string
-                          maxItems: 10
-                          type: array
-                        key:
-                          type: string
-                        verification_mode:
-                          enum:
-                            - full
-                            - none
-                            - certificate
-                            - strict
-                          type: string
-                    type:
-                      enum:
-                        - elasticsearch
-                      type: string
-                    write_to_logs_streams:
-                      nullable: true
-                      type: boolean
-                - additionalProperties: false
-                  type: object
-                  properties:
-                    allow_edit:
-                      items:
-                        type: string
-                      maxItems: 1000
-                      type: array
-                    ca_sha256:
-                      nullable: true
-                      type: string
-                    ca_trusted_fingerprint:
-                      nullable: true
-                      type: string
-                    config_yaml:
-                      nullable: true
-                      type: string
-                    hosts:
-                      items:
-                        format: uri
-                        type: string
-                      maxItems: 10
-                      minItems: 1
-                      type: array
-                    id:
-                      type: string
-                    is_default:
-                      type: boolean
-                    is_default_monitoring:
-                      type: boolean
-                    is_internal:
-                      type: boolean
-                    is_preconfigured:
-                      type: boolean
-                    kibana_api_key:
-                      nullable: true
-                      type: string
-                    kibana_url:
-                      nullable: true
-                      type: string
-                    name:
-                      type: string
-                    preset:
-                      enum:
-                        - balanced
-                        - custom
-                        - throughput
-                        - scale
-                        - latency
-                      type: string
-                    proxy_id:
-                      nullable: true
-                      type: string
-                    secrets:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        service_token:
-                          anyOf:
-                            - additionalProperties: false
-                              type: object
-                              properties:
-                                hash:
-                                  type: string
-                                id:
-                                  type: string
-                              required:
-                                - id
-                            - type: string
-                        ssl:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            key:
-                              anyOf:
-                                - additionalProperties: false
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    id:
-                                      type: string
-                                  required:
-                                    - id
-                                - type: string
-                    service_token:
-                      nullable: true
-                      type: string
-                    shipper:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        compression_level:
-                          nullable: true
-                          type: number
-                        disk_queue_compression_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_enabled:
-                          default: false
-                          nullable: true
-                          type: boolean
-                        disk_queue_encryption_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_max_size:
-                          nullable: true
-                          type: number
-                        disk_queue_path:
-                          nullable: true
-                          type: string
-                        loadbalance:
-                          nullable: true
-                          type: boolean
-                        max_batch_bytes:
-                          nullable: true
-                          type: number
-                        mem_queue_events:
-                          nullable: true
-                          type: number
-                        queue_flush_timeout:
-                          nullable: true
-                          type: number
-                      required:
-                        - disk_queue_path
-                        - disk_queue_max_size
-                        - disk_queue_encryption_enabled
-                        - disk_queue_compression_enabled
-                        - compression_level
-                        - loadbalance
-                        - mem_queue_events
-                        - queue_flush_timeout
-                        - max_batch_bytes
-                    ssl:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        certificate:
-                          type: string
-                        certificate_authorities:
-                          items:
-                            type: string
-                          maxItems: 10
-                          type: array
-                        key:
-                          type: string
-                        verification_mode:
-                          enum:
-                            - full
-                            - none
-                            - certificate
-                            - strict
-                          type: string
-                    sync_integrations:
-                      type: boolean
-                    sync_uninstalled_integrations:
-                      type: boolean
-                    type:
-                      enum:
-                        - remote_elasticsearch
-                      type: string
-                    write_to_logs_streams:
-                      nullable: true
-                      type: boolean
-                - additionalProperties: false
-                  type: object
-                  properties:
-                    allow_edit:
-                      items:
-                        type: string
-                      maxItems: 1000
-                      type: array
-                    ca_sha256:
-                      nullable: true
-                      type: string
-                    ca_trusted_fingerprint:
-                      nullable: true
-                      type: string
-                    config_yaml:
-                      nullable: true
-                      type: string
-                    hosts:
-                      items:
-                        type: string
-                      maxItems: 10
-                      minItems: 1
-                      type: array
-                    id:
-                      type: string
-                    is_default:
-                      type: boolean
-                    is_default_monitoring:
-                      type: boolean
-                    is_internal:
-                      type: boolean
-                    is_preconfigured:
-                      type: boolean
-                    name:
-                      type: string
-                    proxy_id:
-                      nullable: true
-                      type: string
-                    secrets:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        ssl:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            key:
-                              anyOf:
-                                - additionalProperties: false
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    id:
-                                      type: string
-                                  required:
-                                    - id
-                                - type: string
-                    shipper:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        compression_level:
-                          nullable: true
-                          type: number
-                        disk_queue_compression_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_enabled:
-                          default: false
-                          nullable: true
-                          type: boolean
-                        disk_queue_encryption_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_max_size:
-                          nullable: true
-                          type: number
-                        disk_queue_path:
-                          nullable: true
-                          type: string
-                        loadbalance:
-                          nullable: true
-                          type: boolean
-                        max_batch_bytes:
-                          nullable: true
-                          type: number
-                        mem_queue_events:
-                          nullable: true
-                          type: number
-                        queue_flush_timeout:
-                          nullable: true
-                          type: number
-                      required:
-                        - disk_queue_path
-                        - disk_queue_max_size
-                        - disk_queue_encryption_enabled
-                        - disk_queue_compression_enabled
-                        - compression_level
-                        - loadbalance
-                        - mem_queue_events
-                        - queue_flush_timeout
-                        - max_batch_bytes
-                    ssl:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        certificate:
-                          type: string
-                        certificate_authorities:
-                          items:
-                            type: string
-                          maxItems: 10
-                          type: array
-                        key:
-                          type: string
-                        verification_mode:
-                          enum:
-                            - full
-                            - none
-                            - certificate
-                            - strict
-                          type: string
-                    type:
-                      enum:
-                        - logstash
-                      type: string
-                - additionalProperties: false
-                  type: object
-                  properties:
-                    allow_edit:
-                      items:
-                        type: string
-                      maxItems: 1000
-                      type: array
-                    auth_type:
-                      enum:
-                        - none
-                        - user_pass
-                        - ssl
-                        - kerberos
-                      type: string
-                    broker_timeout:
-                      type: number
-                    ca_sha256:
-                      nullable: true
-                      type: string
-                    ca_trusted_fingerprint:
-                      nullable: true
-                      type: string
-                    client_id:
-                      type: string
-                    compression:
-                      enum:
-                        - gzip
-                        - snappy
-                        - lz4
-                        - none
-                      type: string
-                    compression_level:
-                      anyOf:
-                        - items: {}
-                          type: array
-                        - type: boolean
-                        - type: number
-                        - type: object
-                        - type: string
-                      nullable: true
-                      oneOf:
-                        - type: number
-                        - not: {}
-                    config_yaml:
-                      nullable: true
-                      type: string
-                    connection_type:
-                      anyOf:
-                        - items: {}
-                          type: array
-                        - type: boolean
-                        - type: number
-                        - type: object
-                        - type: string
-                      nullable: true
-                      oneOf:
-                        - enum:
-                            - plaintext
-                            - encryption
-                          type: string
-                        - not: {}
-                    hash:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        hash:
-                          type: string
-                        random:
-                          type: boolean
-                    headers:
-                      items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          key:
-                            type: string
-                          value:
-                            type: string
-                        required:
-                          - key
-                          - value
-                      maxItems: 100
-                      type: array
-                    hosts:
-                      items:
-                        type: string
-                      maxItems: 10
-                      minItems: 1
-                      type: array
-                    id:
-                      type: string
-                    is_default:
-                      default: false
-                      type: boolean
-                    is_default_monitoring:
-                      default: false
-                      type: boolean
-                    is_internal:
-                      type: boolean
-                    is_preconfigured:
-                      type: boolean
-                    key:
-                      type: string
-                    name:
-                      type: string
-                    partition:
-                      enum:
-                        - random
-                        - round_robin
-                        - hash
-                      type: string
-                    password:
-                      anyOf:
-                        - items: {}
-                          type: array
-                        - type: boolean
-                        - type: number
-                        - type: object
-                        - type: string
-                      nullable: true
-                      oneOf:
-                        - not: {}
-                        - anyOf:
-                            - items: {}
-                              type: array
-                            - type: boolean
-                            - type: number
-                            - type: object
-                            - type: string
-                          nullable: true
-                          oneOf:
-                            - type: string
-                            - not: {}
-                    proxy_id:
-                      nullable: true
-                      type: string
-                    random:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        group_events:
-                          type: number
-                    required_acks:
-                      enum:
-                        - 1
-                        - 0
-                        - -1
-                      type: integer
-                    round_robin:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        group_events:
-                          type: number
-                    sasl:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        mechanism:
-                          enum:
-                            - PLAIN
-                            - SCRAM-SHA-256
-                            - SCRAM-SHA-512
-                          type: string
-                    secrets:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        password:
-                          anyOf:
-                            - additionalProperties: false
-                              type: object
-                              properties:
-                                hash:
-                                  type: string
-                                id:
-                                  type: string
-                              required:
-                                - id
-                            - type: string
-                        ssl:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            key:
-                              anyOf:
-                                - additionalProperties: false
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    id:
-                                      type: string
-                                  required:
-                                    - id
-                                - type: string
-                          required:
-                            - key
-                    shipper:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        compression_level:
-                          nullable: true
-                          type: number
-                        disk_queue_compression_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_enabled:
-                          default: false
-                          nullable: true
-                          type: boolean
-                        disk_queue_encryption_enabled:
-                          nullable: true
-                          type: boolean
-                        disk_queue_max_size:
-                          nullable: true
-                          type: number
-                        disk_queue_path:
-                          nullable: true
-                          type: string
-                        loadbalance:
-                          nullable: true
-                          type: boolean
-                        max_batch_bytes:
-                          nullable: true
-                          type: number
-                        mem_queue_events:
-                          nullable: true
-                          type: number
-                        queue_flush_timeout:
-                          nullable: true
-                          type: number
-                      required:
-                        - disk_queue_path
-                        - disk_queue_max_size
-                        - disk_queue_encryption_enabled
-                        - disk_queue_compression_enabled
-                        - compression_level
-                        - loadbalance
-                        - mem_queue_events
-                        - queue_flush_timeout
-                        - max_batch_bytes
-                    ssl:
-                      additionalProperties: false
-                      nullable: true
-                      type: object
-                      properties:
-                        certificate:
-                          type: string
-                        certificate_authorities:
-                          items:
-                            type: string
-                          maxItems: 10
-                          type: array
-                        key:
-                          type: string
-                        verification_mode:
-                          enum:
-                            - full
-                            - none
-                            - certificate
-                            - strict
-                          type: string
-                    timeout:
-                      type: number
-                    topic:
-                      type: string
-                    type:
-                      enum:
-                        - kafka
-                      type: string
-                    username:
-                      anyOf:
-                        - items: {}
-                          type: array
-                        - type: boolean
-                        - type: number
-                        - type: object
-                        - type: string
-                      nullable: true
-                      oneOf:
-                        - type: string
-                        - not: {}
-                    version:
-                      type: string
-                  required:
-                    - name
-                    - compression_level
-                    - connection_type
-                    - username
-                    - password
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_elasticsearch'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_remote_elasticsearch'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_logstash'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_kafka'
       responses:
         '200':
           content:
@@ -62287,6 +61666,7 @@ paths:
                     - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
                     type: string
+                  maxItems: 100
                   type: array
                 searchIds:
                   description: Saved search IDs that should be deleted alongside the timelines
@@ -62295,6 +61675,7 @@ paths:
                     - 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   items:
                     type: string
+                  maxItems: 100
                   type: array
               required:
                 - savedObjectIds
@@ -70847,6 +70228,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
         preset:
           enum:
             - balanced
@@ -71063,6 +70447,9 @@ components:
         key:
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         partition:
           enum:
@@ -71295,6 +70682,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
         proxy_id:
           nullable: true
           type: string
@@ -71438,6 +70828,9 @@ components:
           nullable: true
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         preset:
           enum:
@@ -71606,6 +70999,9 @@ components:
         is_preconfigured:
           type: boolean
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         preset:
           enum:
@@ -71823,6 +71219,9 @@ components:
         key:
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         partition:
           enum:
@@ -72055,6 +71454,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
         proxy_id:
           nullable: true
           type: string
@@ -72198,6 +71600,9 @@ components:
           nullable: true
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         preset:
           enum:
@@ -73411,6 +72816,757 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_WiredStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_QueryStreamUpsertRequest'
+    Kibana_HTTP_APIs_update_output_elasticsearch:
+      additionalProperties: false
+      properties:
+        allow_edit:
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        ca_sha256:
+          nullable: true
+          type: string
+        ca_trusted_fingerprint:
+          nullable: true
+          type: string
+        config_yaml:
+          nullable: true
+          type: string
+        hosts:
+          items:
+            format: uri
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
+        preset:
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
+          type: string
+        proxy_id:
+          nullable: true
+          type: string
+        secrets:
+          additionalProperties: false
+          type: object
+          properties:
+            ssl:
+              additionalProperties: false
+              type: object
+              properties:
+                key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+        shipper:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            compression_level:
+              nullable: true
+              type: number
+            disk_queue_compression_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_enabled:
+              default: false
+              nullable: true
+              type: boolean
+            disk_queue_encryption_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_max_size:
+              nullable: true
+              type: number
+            disk_queue_path:
+              nullable: true
+              type: string
+            loadbalance:
+              nullable: true
+              type: boolean
+            max_batch_bytes:
+              nullable: true
+              type: number
+            mem_queue_events:
+              nullable: true
+              type: number
+            queue_flush_timeout:
+              nullable: true
+              type: number
+          required:
+            - disk_queue_path
+            - disk_queue_max_size
+            - disk_queue_encryption_enabled
+            - disk_queue_compression_enabled
+            - compression_level
+            - loadbalance
+            - mem_queue_events
+            - queue_flush_timeout
+            - max_batch_bytes
+        ssl:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            certificate:
+              type: string
+            certificate_authorities:
+              items:
+                type: string
+              maxItems: 10
+              type: array
+            key:
+              type: string
+            verification_mode:
+              enum:
+                - full
+                - none
+                - certificate
+                - strict
+              type: string
+        type:
+          enum:
+            - elasticsearch
+          type: string
+        write_to_logs_streams:
+          nullable: true
+          type: boolean
+      title: update_output_elasticsearch
+      type: object
+    Kibana_HTTP_APIs_update_output_kafka:
+      additionalProperties: false
+      properties:
+        allow_edit:
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        auth_type:
+          enum:
+            - none
+            - user_pass
+            - ssl
+            - kerberos
+          type: string
+        broker_timeout:
+          type: number
+        ca_sha256:
+          nullable: true
+          type: string
+        ca_trusted_fingerprint:
+          nullable: true
+          type: string
+        client_id:
+          type: string
+        compression:
+          enum:
+            - gzip
+            - snappy
+            - lz4
+            - none
+          type: string
+        compression_level:
+          anyOf:
+            - items: {}
+              type: array
+            - type: boolean
+            - type: number
+            - type: object
+            - type: string
+          nullable: true
+          oneOf:
+            - type: number
+            - not: {}
+        config_yaml:
+          nullable: true
+          type: string
+        connection_type:
+          anyOf:
+            - items: {}
+              type: array
+            - type: boolean
+            - type: number
+            - type: object
+            - type: string
+          nullable: true
+          oneOf:
+            - enum:
+                - plaintext
+                - encryption
+              type: string
+            - not: {}
+        hash:
+          additionalProperties: false
+          type: object
+          properties:
+            hash:
+              type: string
+            random:
+              type: boolean
+        headers:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+            required:
+              - key
+              - value
+          maxItems: 100
+          type: array
+        hosts:
+          items:
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+        id:
+          type: string
+        is_default:
+          default: false
+          type: boolean
+        is_default_monitoring:
+          default: false
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        key:
+          type: string
+        name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
+        partition:
+          enum:
+            - random
+            - round_robin
+            - hash
+          type: string
+        password:
+          anyOf:
+            - items: {}
+              type: array
+            - type: boolean
+            - type: number
+            - type: object
+            - type: string
+          nullable: true
+          oneOf:
+            - not: {}
+            - anyOf:
+                - items: {}
+                  type: array
+                - type: boolean
+                - type: number
+                - type: object
+                - type: string
+              nullable: true
+              oneOf:
+                - type: string
+                - not: {}
+        proxy_id:
+          nullable: true
+          type: string
+        random:
+          additionalProperties: false
+          type: object
+          properties:
+            group_events:
+              type: number
+        required_acks:
+          enum:
+            - 1
+            - 0
+            - -1
+          type: integer
+        round_robin:
+          additionalProperties: false
+          type: object
+          properties:
+            group_events:
+              type: number
+        sasl:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            mechanism:
+              enum:
+                - PLAIN
+                - SCRAM-SHA-256
+                - SCRAM-SHA-512
+              type: string
+        secrets:
+          additionalProperties: false
+          type: object
+          properties:
+            password:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    hash:
+                      type: string
+                    id:
+                      type: string
+                  required:
+                    - id
+                - type: string
+            ssl:
+              additionalProperties: false
+              type: object
+              properties:
+                key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+              required:
+                - key
+        shipper:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            compression_level:
+              nullable: true
+              type: number
+            disk_queue_compression_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_enabled:
+              default: false
+              nullable: true
+              type: boolean
+            disk_queue_encryption_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_max_size:
+              nullable: true
+              type: number
+            disk_queue_path:
+              nullable: true
+              type: string
+            loadbalance:
+              nullable: true
+              type: boolean
+            max_batch_bytes:
+              nullable: true
+              type: number
+            mem_queue_events:
+              nullable: true
+              type: number
+            queue_flush_timeout:
+              nullable: true
+              type: number
+          required:
+            - disk_queue_path
+            - disk_queue_max_size
+            - disk_queue_encryption_enabled
+            - disk_queue_compression_enabled
+            - compression_level
+            - loadbalance
+            - mem_queue_events
+            - queue_flush_timeout
+            - max_batch_bytes
+        ssl:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            certificate:
+              type: string
+            certificate_authorities:
+              items:
+                type: string
+              maxItems: 10
+              type: array
+            key:
+              type: string
+            verification_mode:
+              enum:
+                - full
+                - none
+                - certificate
+                - strict
+              type: string
+        timeout:
+          type: number
+        topic:
+          type: string
+        type:
+          enum:
+            - kafka
+          type: string
+        username:
+          anyOf:
+            - items: {}
+              type: array
+            - type: boolean
+            - type: number
+            - type: object
+            - type: string
+          nullable: true
+          oneOf:
+            - type: string
+            - not: {}
+        version:
+          type: string
+      required:
+        - name
+        - compression_level
+        - connection_type
+        - username
+        - password
+      title: update_output_kafka
+      type: object
+    Kibana_HTTP_APIs_update_output_logstash:
+      additionalProperties: false
+      properties:
+        allow_edit:
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        ca_sha256:
+          nullable: true
+          type: string
+        ca_trusted_fingerprint:
+          nullable: true
+          type: string
+        config_yaml:
+          nullable: true
+          type: string
+        hosts:
+          items:
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
+        proxy_id:
+          nullable: true
+          type: string
+        secrets:
+          additionalProperties: false
+          type: object
+          properties:
+            ssl:
+              additionalProperties: false
+              type: object
+              properties:
+                key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+        shipper:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            compression_level:
+              nullable: true
+              type: number
+            disk_queue_compression_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_enabled:
+              default: false
+              nullable: true
+              type: boolean
+            disk_queue_encryption_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_max_size:
+              nullable: true
+              type: number
+            disk_queue_path:
+              nullable: true
+              type: string
+            loadbalance:
+              nullable: true
+              type: boolean
+            max_batch_bytes:
+              nullable: true
+              type: number
+            mem_queue_events:
+              nullable: true
+              type: number
+            queue_flush_timeout:
+              nullable: true
+              type: number
+          required:
+            - disk_queue_path
+            - disk_queue_max_size
+            - disk_queue_encryption_enabled
+            - disk_queue_compression_enabled
+            - compression_level
+            - loadbalance
+            - mem_queue_events
+            - queue_flush_timeout
+            - max_batch_bytes
+        ssl:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            certificate:
+              type: string
+            certificate_authorities:
+              items:
+                type: string
+              maxItems: 10
+              type: array
+            key:
+              type: string
+            verification_mode:
+              enum:
+                - full
+                - none
+                - certificate
+                - strict
+              type: string
+        type:
+          enum:
+            - logstash
+          type: string
+      title: update_output_logstash
+      type: object
+    Kibana_HTTP_APIs_update_output_remote_elasticsearch:
+      additionalProperties: false
+      properties:
+        allow_edit:
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        ca_sha256:
+          nullable: true
+          type: string
+        ca_trusted_fingerprint:
+          nullable: true
+          type: string
+        config_yaml:
+          nullable: true
+          type: string
+        hosts:
+          items:
+            format: uri
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        kibana_api_key:
+          nullable: true
+          type: string
+        kibana_url:
+          nullable: true
+          type: string
+        name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
+        preset:
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
+          type: string
+        proxy_id:
+          nullable: true
+          type: string
+        secrets:
+          additionalProperties: false
+          type: object
+          properties:
+            service_token:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    hash:
+                      type: string
+                    id:
+                      type: string
+                  required:
+                    - id
+                - type: string
+            ssl:
+              additionalProperties: false
+              type: object
+              properties:
+                key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+        service_token:
+          nullable: true
+          type: string
+        shipper:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            compression_level:
+              nullable: true
+              type: number
+            disk_queue_compression_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_enabled:
+              default: false
+              nullable: true
+              type: boolean
+            disk_queue_encryption_enabled:
+              nullable: true
+              type: boolean
+            disk_queue_max_size:
+              nullable: true
+              type: number
+            disk_queue_path:
+              nullable: true
+              type: string
+            loadbalance:
+              nullable: true
+              type: boolean
+            max_batch_bytes:
+              nullable: true
+              type: number
+            mem_queue_events:
+              nullable: true
+              type: number
+            queue_flush_timeout:
+              nullable: true
+              type: number
+          required:
+            - disk_queue_path
+            - disk_queue_max_size
+            - disk_queue_encryption_enabled
+            - disk_queue_compression_enabled
+            - compression_level
+            - loadbalance
+            - mem_queue_events
+            - queue_flush_timeout
+            - max_batch_bytes
+        ssl:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            certificate:
+              type: string
+            certificate_authorities:
+              items:
+                type: string
+              maxItems: 10
+              type: array
+            key:
+              type: string
+            verification_mode:
+              enum:
+                - full
+                - none
+                - certificate
+                - strict
+              type: string
+        sync_integrations:
+          type: boolean
+        sync_uninstalled_integrations:
+          type: boolean
+        type:
+          enum:
+            - remote_elasticsearch
+          type: string
+        write_to_logs_streams:
+          nullable: true
+          type: boolean
+      title: update_output_remote_elasticsearch
+      type: object
     Kibana_HTTP_APIs_WiredStreamUpsertRequest:
       additionalProperties: false
       type: object
@@ -86160,6 +86316,30 @@ components:
             name:
               description: The name of the user.
               type: string
+    Security_Entity_Analytics_API_WatchlistCsvUploadResponseItem:
+      example:
+        matchedEntities: 1
+        status: success
+      type: object
+      properties:
+        error:
+          description: Error message if the row failed to process
+          example: Invalid entity type
+          type: string
+        matchedEntities:
+          description: Number of entities matched for this row
+          example: 1
+          type: integer
+        status:
+          enum:
+            - success
+            - failure
+            - unmatched
+          example: success
+          type: string
+      required:
+        - status
+        - matchedEntities
     Security_Entity_Analytics_API_WatchlistObject:
       example:
         createdAt: '2026-01-28T12:00:00.000Z'
