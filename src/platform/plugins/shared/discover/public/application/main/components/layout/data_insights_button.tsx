@@ -103,8 +103,7 @@ export const DataInsightsButton = () => {
   >(
     () => ({
       id: 'discover_open_esql_query_in_new_tab',
-      description:
-        'Opens an ES|QL query in a new Discover tab within Kibana. Call this when the user asks to open or run a suggested query in Discover.',
+      description: 'Open query in Discover',
       schema: openEsqlQuerySchema,
       handler: async ({ esqlQuery }: { esqlQuery: string }) => {
         dispatch(
