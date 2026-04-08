@@ -26,7 +26,7 @@ import {
   TaskStatus,
 } from '@kbn/streams-schema';
 import pMap from 'p-map';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
@@ -45,8 +45,6 @@ import type { OnboardingConfig } from './onboarding_config_popover';
 import { OnboardingConfigPopover } from './onboarding_config_popover';
 import {
   DISCOVER_INSIGHTS_BUTTON_LABEL,
-  GENERATE_FEATURES_BUTTON_LABEL,
-  GENERATE_QUERIES_BUTTON_LABEL,
   getInsightsCompleteToastTitle,
   INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
   INSIGHTS_SCHEDULING_FAILURE_TITLE,
@@ -304,6 +302,24 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     await bulkScheduleOnboardingTask(streamList, onboardingConfig);
   };
 
+  const onBulkOnboardFeaturesOnly = async () => {
+    const streamList = getActionableStreamNames();
+    setSelectedStreams([]);
+    await bulkScheduleOnboardingTask(streamList, {
+      steps: [OnboardingStep.FeaturesIdentification],
+      connectors: onboardingConfig.connectors,
+    });
+  };
+
+  const onBulkOnboardQueriesOnly = async () => {
+    const streamList = getActionableStreamNames();
+    setSelectedStreams([]);
+    await bulkScheduleOnboardingTask(streamList, {
+      steps: [OnboardingStep.QueriesGeneration],
+      connectors: onboardingConfig.connectors,
+    });
+  };
+
   const onOnboardStreamActionClick = async (streamName: string) => {
     await bulkScheduleOnboardingTask([streamName]);
   };
@@ -312,14 +328,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     cancelOnboardingTask(streamName);
   };
 
-  const { steps: selectedSteps } = onboardingConfig;
-  const dynamicButtonLabel = useMemo(() => {
-    const hasFeatures = selectedSteps.includes(OnboardingStep.FeaturesIdentification);
-    const hasQueries = selectedSteps.includes(OnboardingStep.QueriesGeneration);
-    if (hasFeatures && !hasQueries) return GENERATE_FEATURES_BUTTON_LABEL;
-    if (hasQueries && !hasFeatures) return GENERATE_QUERIES_BUTTON_LABEL;
-    return RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL;
-  }, [selectedSteps]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -337,6 +345,31 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={datePickerStyle}>
             <StreamsAppSearchBar showDatePicker />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <OnboardingConfigPopover
+              config={onboardingConfig}
+              featuresConnectors={featuresConnectors}
+              queriesConnectors={queriesConnectors}
+              onConfigChange={setOnboardingConfig}
+              onRun={onBulkOnboardStreamsClick}
+              onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
+              onRunQueriesOnly={onBulkOnboardQueriesOnly}
+              isRunDisabled={selectedStreams.length === 0}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              
+              color="text"
+              onClick={() => scheduleInsightsTask()}
+              disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
+              isLoading={isSchedulingInsights || isWaitingForInsightsTask}
+              data-test-subj="significant_events_discover_insights_button"
+              size="m"
+            >
+              {DISCOVER_INSIGHTS_BUTTON_LABEL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -361,9 +394,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   iconType="radar"
                   disabled={selectedStreams.length === 0 || onboardingConfig.steps.length === 0}
                   size="xs"
-=======
-                  css={onboardingButtonStyle}
->>>>>>> e0081458af0 (fix(style): min width for onboarding button)
                   data-test-subj="significant_events_onboard_streams_button"
                 >
                   {dynamicButtonLabel}
@@ -413,6 +443,17 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+=======
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
+            {
+              defaultMessage: '{count} streams',
+              values: { count: streamsListFetch.data?.streams.length ?? 0 },
+            }
+          )}
+        </EuiText>
+>>>>>>> 9f0c98ac44f (first commit)
       </EuiFlexItem>
 
       <EuiFlexItem>
