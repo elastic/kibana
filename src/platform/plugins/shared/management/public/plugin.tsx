@@ -22,8 +22,6 @@ import type {
   AppDeepLink,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
-import type { CPSPluginStart } from '@kbn/cps/public/types';
-import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
 import type {
   ConfigSchema,
   ManagementSetup,
@@ -58,8 +56,6 @@ interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  licensing?: LicensingPluginStart;
-  cps?: CPSPluginStart;
 }
 
 export class ManagementPlugin
@@ -214,12 +210,6 @@ export class ManagementPlugin
         };
       });
     }
-
-    plugins.cps?.cpsManager?.registerAppAccess('management', (location: string) =>
-      location.includes('ml/anomaly_detection')
-        ? ProjectRoutingAccess.EDITABLE
-        : ProjectRoutingAccess.DISABLED
-    );
 
     return {
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>

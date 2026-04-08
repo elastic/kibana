@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ProjectRouting } from './project_routing';
+export { ProjectRoutingSelect } from './project_routing';

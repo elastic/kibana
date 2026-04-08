@@ -16,9 +16,7 @@
     "optionalPlugins": [
       "home",
       "serverless",
-      "cloud",
-      "licensing",
-      "cps"
+      "cloud"
     ],
     "runtimePluginDependencies": [
       "fleet"

@@ -8,8 +8,6 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
-import type { Subscription } from 'rxjs';
-import { useMlKibana } from '../../../../contexts/kibana';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -48,10 +46,6 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
-  const {
-    services: { cps },
-  } = useMlKibana();
-
   const newJobCapsService = useNewJobCapsService();
   const [jobCreatorUpdated, setJobCreatorUpdate] = useState(0);
   const jobCreatorUpdate = useCallback(() => {
@@ -101,24 +95,6 @@ export const Wizard: FC<Props> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidator]);
-
-  useEffect(() => {
-    let cpsSubscription: Subscription | undefined;
-
-    if (cps?.cpsManager) {
-      cpsSubscription = cps.cpsManager.getProjectRouting$().subscribe((projectRouting) => {
-        jobCreator.projectRouting = projectRouting ?? null;
-        jobCreatorUpdate();
-      });
-    }
-
-    return () => {
-      if (cpsSubscription) {
-        cpsSubscription.unsubscribe();
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cps, jobCreator]);
 
   useEffect(() => {
     jobValidator.validate(() => {

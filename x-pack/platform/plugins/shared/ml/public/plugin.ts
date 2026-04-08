@@ -319,8 +319,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                   location.includes('ml/aiops') ||
                   location.includes('ml/jobs/new_job/datavisualizer') ||
                   location.includes('ml/datavisualizer/esql') ||
-                  location.includes('ml/data_drift') ||
-                  location.includes('ml/anomaly_detection')
+                  location.includes('ml/data_drift')
                     ? ProjectRoutingAccess.EDITABLE
                     : ProjectRoutingAccess.DISABLED
                 );
