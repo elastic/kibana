@@ -4,6 +4,20 @@ model: claude-opus-4-6
 reasoning: high
 effort: high
 input: full_diff
+exclude:
+  - "api_docs/**"
+  - "config/**"
+  - "dev_docs/**"
+  - "docs/**"
+  - "legacy_rfcs/**"
+  - "licenses/**"
+  - "node_modules/**"
+  - "oas_docs/**"
+  - "packages/**"
+  - "plugins/**"
+  - "scripts/**"
+  - "typings/**"
+  - ".buildkite/**"
 conclusion: neutral
 ---
 
