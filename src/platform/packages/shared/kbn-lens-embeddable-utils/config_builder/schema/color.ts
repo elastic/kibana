@@ -278,19 +278,29 @@ const gradientColorMappingSchema = schema.object(
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );
 
-export const colorMappingSchema = schema.oneOf(
-  [
-    /**
-     * Categorical color mapping: assigns colors from a palette to specific values.
-     */
-    categoricalColorMappingSchema,
-    /**
-     * Gradient color mapping: assigns a gradient of colors to a range of values.
-     */
-    gradientColorMappingSchema,
-  ],
-  { meta: { id: 'colorMapping', title: 'Color Mapping' } }
-);
+export const colorMappingWithDefault = (
+  defaultValue:
+    | ColorMappingCategoricalType
+    | ColorMappingGradientType = DEFAULT_CATEGORICAL_COLOR_MAPPING
+) =>
+  schema.oneOf(
+    [
+      /**
+       * Categorical color mapping: assigns colors from a palette to specific values.
+       */
+      categoricalColorMappingSchema,
+      /**
+       * Gradient color mapping: assigns a gradient of colors to a range of values.
+       */
+      gradientColorMappingSchema,
+    ],
+    {
+      meta: { id: 'colorMapping', title: 'Color Mapping' },
+      defaultValue,
+    }
+  );
+
+export const colorMappingSchema = colorMappingWithDefault();
 
 export const noColorSchema = schema.object(
   { type: schema.literal('none') },
@@ -333,7 +343,6 @@ export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
 
 export const NO_COLOR: NoColorType = { type: 'none' };
 export const AUTO_COLOR: AutoColorType = { type: 'auto' };
-
 
 export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',
