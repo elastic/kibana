@@ -104,14 +104,14 @@ export const buildSourcesDefinitions = (
       kind,
       detail: isIntegration
         ? i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
-          defaultMessage: SOURCES_TYPES.INTEGRATION,
-        })
+            defaultMessage: SOURCES_TYPES.INTEGRATION,
+          })
         : i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
-          defaultMessage: '{type}',
-          values: {
-            type: type ?? SOURCES_TYPES.INDEX,
-          },
-        }),
+            defaultMessage: '{type}',
+            values: {
+              type: type ?? SOURCES_TYPES.INDEX,
+            },
+          }),
       documentation,
       ...(rangeToReplace && { rangeToReplace }),
       ...(filterText && { filterText }),
@@ -246,10 +246,10 @@ export async function additionalSourcesSuggestions(
       ...recommendedQuerySuggestions.map((suggestion) =>
         suggestion.text
           ? {
-            ...suggestion,
-            filterText: prefix,
-            text: prefix + suggestion.text,
-          }
+              ...suggestion,
+              filterText: prefix,
+              text: prefix + suggestion.text,
+            }
           : suggestion
       ),
     ];
