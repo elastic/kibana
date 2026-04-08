@@ -12,18 +12,18 @@ import {
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { RouteDependencies } from '../types';
-import { getHandlerWrapper } from '../wrap_handler';
-import { internalApiPath } from '../../../common/constants';
 import {
   SML_HTTP_ATTACH_ITEMS_MAX,
   SML_HTTP_SEARCH_QUERY_MAX_LENGTH,
   type SmlAttachHttpResponse,
   type SmlAttachHttpResultItem,
   type SmlSearchHttpResponse,
-} from '../../../common/http_api/sml';
+  resolveSmlAttachItems,
+} from '@kbn/sml-plugin/server';
+import type { RouteDependencies } from '../types';
+import { getHandlerWrapper } from '../wrap_handler';
+import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
-import { resolveSmlAttachItems } from '../../services/sml/execute_sml_attach_items';
 import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
 
 /** Max page size for SML HTTP search (separate from default UI size). */

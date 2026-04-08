@@ -8,10 +8,9 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { SmlDocument } from './types';
 
-export const smlIndexName = chatSystemIndex('sml-data');
+export const smlIndexName = '.chat-sml-data';
 
 /**
  * Single source of truth for SML data index field mappings (storage + Elasticsearch).

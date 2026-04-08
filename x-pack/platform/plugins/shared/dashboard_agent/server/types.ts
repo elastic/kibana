@@ -6,10 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { SmlPluginSetup } from '@kbn/sml-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 
 export interface DashboardAgentSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
+  sml: SmlPluginSetup;
 }
 
 export interface DashboardAgentStartDependencies {

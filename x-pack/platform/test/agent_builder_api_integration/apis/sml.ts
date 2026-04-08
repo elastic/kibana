@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-plugin/server';
-import type {
-  SmlAttachHttpResponse,
-  SmlSearchHttpResponse,
-} from '@kbn/agent-builder-plugin/common/http_api/sml';
+import {
+  smlElasticsearchIndexMappings,
+  smlIndexName,
+  type SmlAttachHttpResponse,
+  type SmlSearchHttpResponse,
+} from '@kbn/sml-plugin/server';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { createLlmProxy, type LlmProxy } from '../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../utils/proxy_scenario';

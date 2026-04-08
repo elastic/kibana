@@ -14,6 +14,7 @@ import {
   AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
 } from '@kbn/agent-builder-common/constants';
+import type { SmlPluginStart } from '@kbn/sml-plugin/server';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -38,7 +39,6 @@ import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tool
 import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/runner/model_provider';
-import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
@@ -59,6 +59,7 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private smlPluginStart?: SmlPluginStart;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -128,25 +129,6 @@ export class AgentBuilderPlugin
       },
     });
 
-    // Register SML crawler task definition
-    registerSmlCrawlerTaskDefinition({
-      taskManager: setupDeps.taskManager,
-      getCrawlerDeps: async () => {
-        const [coreStart] = await coreSetup.getStartServices();
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getCrawlerDeps called before service init');
-        }
-        return {
-          smlService: services.sml,
-          elasticsearch: coreStart.elasticsearch,
-          savedObjects: coreStart.savedObjects,
-          uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('services.sml'),
-        };
-      },
-    });
-
     registerFeatures({ features: setupDeps.features });
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
@@ -199,11 +181,10 @@ export class AgentBuilderPlugin
 
     const smlTools = createSmlTools({
       getSmlService: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
+        if (!this.smlPluginStart) {
           throw new Error('SML service not available — plugin has not started');
         }
-        return services.sml;
+        return this.smlPluginStart;
       },
     });
     smlTools.forEach((tool) => {
@@ -254,19 +235,20 @@ export class AgentBuilderPlugin
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
-      sml: {
-        registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
-      },
       topSnippets: this.config.topSnippets,
     };
   }
 
   start(
     coreStart: CoreStart,
-    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
+    { inference, spaces, actions, taskManager, sml }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
+
+    // Store the SML plugin start contract so tools can access it synchronously
+    this.smlPluginStart = sml;
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -279,6 +261,7 @@ export class AgentBuilderPlugin
       featureFlags,
       dataStreams,
       taskManager,
+      sml,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });
@@ -297,17 +280,6 @@ export class AgentBuilderPlugin
       savedObjects,
       trackingService: this.trackingService,
     });
-
-    // Schedule SML crawler tasks for all registered types
-    scheduleSmlCrawlerTasks({
-      taskManager,
-      smlService: startServices.sml,
-      logger: this.logger.get('services.sml'),
-    }).catch((error) => {
-      this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
-    });
-
-    const smlService = startServices.sml;
 
     return {
       agents: {
@@ -340,22 +312,6 @@ export class AgentBuilderPlugin
             get: client.get.bind(client),
             list: client.list.bind(client),
           };
-        },
-      },
-      sml: {
-        indexAttachment: async (params) => {
-          const soClient = savedObjects.getScopedClient(params.request);
-          const spaceId =
-            params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-          return smlService.indexAttachment({
-            originId: params.originId,
-            attachmentType: params.attachmentType,
-            action: params.action,
-            spaces: [spaceId],
-            esClient: elasticsearch.client.asInternalUser,
-            savedObjectsClient: soClient,
-            logger: this.logger.get('services.sml'),
-          });
         },
       },
     };

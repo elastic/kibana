@@ -942,10 +942,10 @@ attach them to a conversation.
 │  └────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────┘
                           │
-                          │ agentBuilder.sml.registerType(...)
+                          │ sml.registerType(...)
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│  agent_builder plugin (server)                               │
+│  sml plugin (server)                                         │
 │                                                              │
 │  ┌──────────────┐    ┌──────────────┐    ┌───────────────┐  │
 │  │ Type Registry │───▶│   Crawler    │───▶│  ES Indices   │  │
@@ -1002,7 +1002,7 @@ Create a file in your plugin (e.g.
 `server/sml_types/my_asset.ts`). You need to implement four things:
 
 ```typescript
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1088,11 +1088,12 @@ export const myAssetSmlType: SmlTypeDefinition = {
 In your plugin's `setup` method:
 
 ```typescript
+import type { SmlPluginSetup } from '@kbn/sml-plugin/server';
 import { myAssetSmlType } from './sml_types/my_asset';
 
 export class MyPlugin implements Plugin {
-  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
-    agentBuilder.sml.registerType(myAssetSmlType);
+  setup(core: CoreSetup, { sml }: { sml: SmlPluginSetup }) {
+    sml.registerType(myAssetSmlType);
   }
 }
 ```
@@ -1156,7 +1157,7 @@ It:
 
 ```typescript
 // Registration (in agent_builder_platform plugin setup):
-setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
+setupDeps.sml.registerType(visualizationSmlType);
 ```
 
 The full implementation is ~130 lines and serves as the reference for new types.

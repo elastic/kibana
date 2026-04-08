@@ -1,0 +1,30 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-http-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/task-manager-plugin",
+    "@kbn/security-plugin-types-server",
+    "@kbn/storage-adapter",
+    "@kbn/agent-builder-common",
+    "@kbn/management-settings-ids",
+    "@kbn/zod",
+  ]
+}

@@ -16,6 +16,7 @@
     "@kbn/agent-builder-common",
     "@kbn/zod",
     "@kbn/agent-builder-plugin",
+    "@kbn/sml-plugin",
     "@kbn/core-lifecycle-server",
     "@kbn/esql-language",
     "@kbn/inference-common",

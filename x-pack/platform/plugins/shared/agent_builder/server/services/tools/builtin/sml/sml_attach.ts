@@ -12,7 +12,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { resolveSmlAttachItems } from '../../../sml/execute_sml_attach_items';
+import { resolveSmlAttachItems } from '@kbn/sml-plugin/server';
 import type { SmlToolsOptions } from './types';
 
 const smlAttachSchema = z.object({

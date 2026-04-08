@@ -8,6 +8,7 @@
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/agent-builder-plugin",
+    "@kbn/sml-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-genai-utils",

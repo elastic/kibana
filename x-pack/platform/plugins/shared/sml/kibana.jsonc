@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sml-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "sml",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "sml"
+    ],
+    "requiredPlugins": [
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "security"
+    ],
+    "extraPublicDirs": []
+  }
+}

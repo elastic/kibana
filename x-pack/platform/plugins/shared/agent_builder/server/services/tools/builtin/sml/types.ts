@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SmlService } from '../../../sml';
+import type { SmlService } from '@kbn/sml-plugin/server';
 
 /**
  * Options for creating SML tools.

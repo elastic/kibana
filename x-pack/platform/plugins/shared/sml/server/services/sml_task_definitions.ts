@@ -66,7 +66,7 @@ export const registerSmlCrawlerTaskDefinition = ({
 }) => {
   taskManager.registerTaskDefinitions({
     [SML_CRAWLER_TASK_TYPE]: {
-      title: 'Agent Builder: SML Crawler',
+      title: 'SML Crawler',
       timeout: '10m',
       maxAttempts: 3,
       priority: TaskPriority.Low,

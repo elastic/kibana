@@ -21,13 +21,13 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import type { SmlPluginStart } from '@kbn/sml-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
-import type { SmlService, SmlServiceSetup } from './sml';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
@@ -43,7 +43,6 @@ export interface InternalSetupServices {
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
   metering: MeteringService;
-  sml: SmlServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -61,7 +60,7 @@ export interface InternalStartServices {
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
-  sml: SmlService;
+  sml: SmlPluginStart;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
 }
@@ -85,6 +84,7 @@ export interface ServicesStartDeps {
   dataStreams: DataStreamsStart;
   // plugin deps
   inference: InferenceServerStart;
+  sml: SmlPluginStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
