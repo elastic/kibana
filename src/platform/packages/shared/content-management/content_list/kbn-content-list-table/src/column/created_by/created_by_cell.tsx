@@ -11,6 +11,7 @@ import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiAvatar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UserAvatarTip } from '@kbn/user-profile-components';
 import { useCreatedByFilterToggle, useUserProfileStoreContext } from '@kbn/content-list-provider';
 
 /** Props for the {@link CreatedByCell} component. */
@@ -97,22 +98,20 @@ export const CreatedByCell = memo(({ createdBy, managed }: CreatedByCellProps) =
   }
 
   return (
-    <EuiToolTip content={user.fullName} position="top">
-      <span
-        css={cellCss}
-        onClick={handleClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        aria-label={i18n.translate(
-          'contentManagement.contentList.table.createdByCell.filterAriaLabel',
-          { defaultMessage: 'Filter by creator: {name}', values: { name: user.fullName } }
-        )}
-        data-test-subj="content-list-createdBy-avatar"
-      >
-        <EuiAvatar name={user.fullName} size="s" />
-      </span>
-    </EuiToolTip>
+    <span
+      css={cellCss}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      aria-label={i18n.translate(
+        'contentManagement.contentList.table.createdByCell.filterAriaLabel',
+        { defaultMessage: 'Filter by creator: {name}', values: { name: user.fullName } }
+      )}
+      data-test-subj="content-list-createdBy-avatar"
+    >
+      <UserAvatarTip {...{ user: user.user, avatar: user.avatar, size: 's' }} />
+    </span>
   );
 });
 

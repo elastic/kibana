@@ -13,20 +13,17 @@ import { useFieldDefinitions, buildSchema } from '../query_model';
 import { useUserProfileStoreContext } from '../services';
 
 /**
- * Resolve unresolved `createdBy:` display values from the query bar.
+ * Fetch profiles for unresolved `createdBy:` display values in the query bar.
  *
- * When a user types `createdBy:jane@example.com` and the profile isn't
- * cached yet, `resolveDisplayToId` returns `undefined` and the filter is
- * silently dropped. This hook extracts raw display values from the
- * query text and calls `userProfileStore.resolveDisplayValues` so
- * profiles are fetched asynchronously. Once resolved, the store updates →
- * field definitions re-memo → model re-derives → the filter applies on
- * the next render.
+ * Delegates to `userProfileStore.resolveDisplayValues` (which calls `suggest`).
+ * Once fetched, the store update triggers a field-definition re-memo and the
+ * model re-derives so the filter applies on the next render.
  *
- * A `pendingRef` set prevents re-requesting the same display values when
- * `fields` changes (e.g. after the store merges new profiles). Without this
- * guard, a value that doesn't resolve exactly (partial match, typo) would
- * trigger an infinite suggest → merge → fields-change → suggest loop.
+ * A `pendingRef` prevents re-requesting the same values across `fields`
+ * changes to avoid an infinite suggest → merge → fields-change loop.
+ *
+ * Client-backed lists strip `suggest`, making this hook a no-op for them;
+ * their profiles are primed from the known item universe instead.
  */
 export const useResolveQueryDisplayValues = (queryText: string): void => {
   const userProfileStore = useUserProfileStoreContext();

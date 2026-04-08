@@ -93,7 +93,7 @@ export type {
   FieldDefinition,
   FlagDefinition,
 } from './src/query_model';
-export { EMPTY_MODEL, toFindItemsFilters } from './src/query_model';
+export { EMPTY_MODEL, toFindItemsFilters, useQueryModel } from './src/query_model';
 
 // Services.
 export { useUserProfileStoreContext } from './src/services';

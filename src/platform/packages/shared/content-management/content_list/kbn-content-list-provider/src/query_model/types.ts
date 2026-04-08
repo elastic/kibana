@@ -44,13 +44,25 @@ export interface ContentListQueryModel {
   filters: Record<string, QueryFilterValue>;
   /** Boolean flags (e.g., `{ starred: true }`). */
   flags: Record<string, boolean>;
+  /**
+   * Field names that had at least one clause with a non-empty value in the
+   * parsed query AST, regardless of whether the value resolved to an ID.
+   *
+   * Unlike `filters` (which only contains fields whose values resolved),
+   * this set captures field-clause *presence*. Used to gate lazy operations
+   * (e.g. profile priming) that must fire before resolution can succeed.
+   */
+  referencedFields: ReadonlySet<string>;
 }
+
+const EMPTY_SET: ReadonlySet<string> = new Set();
 
 /** Empty query model. */
 export const EMPTY_MODEL: ContentListQueryModel = {
   search: '',
   filters: {},
   flags: {},
+  referencedFields: EMPTY_SET,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

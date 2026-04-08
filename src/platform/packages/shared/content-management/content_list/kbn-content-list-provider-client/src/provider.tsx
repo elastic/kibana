@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, type ReactNode } from 'react';
+import React, { useMemo, useRef, useState, type ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
   ContentListCoreConfig,
@@ -16,6 +17,7 @@ import type {
   DataSourceConfig,
   FilterFacetConfig,
   UserProfileEntry,
+  UserProfileStore,
 } from '@kbn/content-list-provider';
 import { ContentListProvider, isPaginationConfig } from '@kbn/content-list-provider';
 import { SAVED_OBJECTS_PER_PAGE_ID } from '@kbn/management-settings-ids';
@@ -28,6 +30,8 @@ import {
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
 } from './strategy';
+import { ProfilePrimer } from './profile_primer';
+import { createPrimingState, type PrimingState } from './prime_relevant_profiles';
 
 /**
  * Compute per-key item counts from the full item set.
@@ -73,6 +77,8 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
    * `uiSettings` is mandatory — used to read `savedObjects:perPage` for the default page size.
    */
   services: ContentListClientServices;
+  /** Called after each successful item fetch. */
+  onFetchSuccess?: DataSourceConfig['onFetchSuccess'];
 };
 
 /**
@@ -109,22 +115,34 @@ export const ContentListClientProvider = ({
   findItems: tableListViewFindItems,
   features: featuresProp = {},
   services,
+  onFetchSuccess,
   ...rest
 }: ContentListClientProviderProps): JSX.Element => {
   const favoritesClient = services?.favorites;
 
-  const { findItems, onInvalidate, getItems } = useMemo(
+  const { findItems, onInvalidate, getItems, getDatasetVersion } = useMemo(
     () => createClientStrategy(tableListViewFindItems, favoritesClient),
     [tableListViewFindItems, favoritesClient]
   );
 
   const dataSource: DataSourceConfig = useMemo(
-    () => ({ findItems, onInvalidate }),
-    [findItems, onInvalidate]
+    () => ({ findItems, onInvalidate, onFetchSuccess }),
+    [findItems, onInvalidate, onFetchSuccess]
   );
 
   const tagsService = services?.tags;
   const userProfilesService = services?.userProfiles;
+
+  // Shared priming state — passed to both the ProfilePrimer component and
+  // `getFacets` so they share dedup / version tracking.
+  const primingStateRef = useRef<PrimingState>(createPrimingState());
+  const primingState = primingStateRef.current;
+
+  // Ref bridge for the `UserProfileStore`. The store lives inside
+  // `ContentListProvider`'s context tree; `ProfilePrimer` (rendered as a
+  // child) writes the store here so `getFacets` (defined before the tree
+  // mounts) can read it.
+  const storeRef = useRef<UserProfileStore | undefined>(undefined);
 
   // Build `FilterFacetConfig<Tag>` for tags when the tags service is available
   // and the feature isn't explicitly disabled or already configured.
@@ -163,8 +181,11 @@ export const ContentListClientProvider = ({
 
   // Build `FilterFacetConfig<UserProfileEntry>` for user profiles when the
   // service is available and the feature isn't explicitly disabled or already
-  // configured. Mirrors the tags pattern: scans the cached item set for unique
-  // UIDs, bulk-resolves any not yet in the profile cache, and returns facets.
+  // configured.
+  //
+  // `getFacets` delegates profile loading to the shared priming routine so
+  // that all trigger sites (ProfilePrimer, popover, avatar) feed the same
+  // `UserProfileStore`. After priming, facet labels are read from the store.
   const userProfilesFeature = useMemo((): ContentListFeatures['userProfiles'] => {
     if (featuresProp.userProfiles === false) {
       return false;
@@ -176,7 +197,6 @@ export const ContentListClientProvider = ({
       return featuresProp.userProfiles;
     }
 
-    const { bulkResolve } = userProfilesService;
     const sentinelKeys = new Set([MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER]);
     const config: FilterFacetConfig<UserProfileEntry> = {
       getFacets: async ({ filters }) => {
@@ -185,6 +205,7 @@ export const ContentListClientProvider = ({
           const { favoriteIds: ids } = await favoritesClient.getFavorites();
           favoriteIds = new Set(ids);
         }
+
         const narrowed = filterItems(getItems(), filters, favoriteIds);
         const userCounts = computeCounts(narrowed, createdByKeys);
         const allKeys = Object.keys(userCounts);
@@ -192,10 +213,24 @@ export const ContentListClientProvider = ({
           return [];
         }
 
-        // Only resolve real UIDs; sentinels get static labels.
+        // Resolve profiles for facet labels via a direct bulkResolve call.
+        // We intentionally avoid reading from `store.resolve()` here because
+        // the store's `resolve` function closes over React state that may be
+        // stale after an async merge (state updates are batched and only
+        // visible after the next render). Using the bulkResolve response
+        // directly guarantees fresh data for facet labels.
+        //
+        // The resolved profiles are also merged into the shared store so
+        // that query resolution (`resolveFuzzyDisplayToIds` via
+        // `store.getAll()`) benefits on the next render cycle.
         const realUids = allKeys.filter((k) => !sentinelKeys.has(k));
-        const profiles = realUids.length > 0 ? await bulkResolve(realUids) : [];
+        const profiles = realUids.length > 0 ? await userProfilesService.bulkResolve(realUids) : [];
         const profilesByUid = new Map(profiles.map((p) => [p.uid, p]));
+
+        const store = storeRef.current;
+        if (store && profiles.length > 0) {
+          store.merge(profiles);
+        }
 
         const facets = allKeys
           .filter((key) => key !== NO_CREATOR_USER_FILTER)
@@ -203,7 +238,10 @@ export const ContentListClientProvider = ({
             if (key === MANAGED_USER_FILTER) {
               return {
                 key,
-                label: 'Managed',
+                label: i18n.translate(
+                  'contentManagement.contentList.table.createdByCell.managedLabel',
+                  { defaultMessage: 'Managed' }
+                ),
                 count: userCounts[key] ?? 0,
                 data: undefined,
               };
@@ -268,6 +306,14 @@ export const ContentListClientProvider = ({
       services={services}
       {...rest}
     >
+      {userProfilesService && (
+        <ProfilePrimer
+          getItems={getItems}
+          getDatasetVersion={getDatasetVersion}
+          primingState={primingState}
+          storeRef={storeRef}
+        />
+      )}
       {children}
     </ContentListProvider>
   );

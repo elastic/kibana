@@ -30,7 +30,7 @@ const makeUserFieldDefinition = (fieldName: string, store: UserProfileStore): Fi
         (u) =>
           u.email.toLowerCase() === lower ||
           u.fullName.toLowerCase() === lower ||
-          u.uid.toLowerCase() === lower
+          u.user.username.toLowerCase() === lower
       )?.uid;
   },
   resolveFuzzyDisplayToIds: (partial: string) => {
@@ -38,7 +38,10 @@ const makeUserFieldDefinition = (fieldName: string, store: UserProfileStore): Fi
     return store
       .getAll()
       .filter(
-        (u) => u.email.toLowerCase().includes(lower) || u.fullName.toLowerCase().includes(lower)
+        (u) =>
+          u.email.toLowerCase().includes(lower) ||
+          u.fullName.toLowerCase().includes(lower) ||
+          u.user.username.toLowerCase().includes(lower)
       )
       .map((u) => u.uid);
   },

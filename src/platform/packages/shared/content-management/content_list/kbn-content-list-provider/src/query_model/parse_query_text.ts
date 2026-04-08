@@ -38,6 +38,25 @@ export const buildSchema = (
   return { strict: false, fields: schemaFields };
 };
 
+/**
+ * Check whether the parsed query AST contains at least one clause for
+ * `fieldName` with a non-empty value. This is a structural check — it does
+ * not attempt to resolve values, so it works even before the profile store
+ * is populated.
+ */
+const hasFieldClause = (query: InstanceType<typeof Query>, fieldName: string): boolean => {
+  const simpleClauses = query.ast.getFieldClauses(fieldName);
+  if (simpleClauses?.some((c) => toStringArray(c.value).some((v) => v.length > 0))) {
+    return true;
+  }
+  const includeOr = query.ast.getOrFieldClause(fieldName, undefined, true, 'eq');
+  if (includeOr && toStringArray(includeOr.value).some((v) => v.length > 0)) {
+    return true;
+  }
+  const excludeOr = query.ast.getOrFieldClause(fieldName, undefined, false, 'eq');
+  return !!excludeOr && toStringArray(excludeOr.value).some((v) => v.length > 0);
+};
+
 /** Resolve a display value to IDs: exact match first, then fuzzy fallback. */
 const resolveDisplayValue = (displayValue: string, field: FieldDefinition): string[] => {
   const exactId = field.resolveDisplayToId(displayValue);
@@ -141,9 +160,13 @@ export const parseQueryText = (
     return { ...EMPTY_MODEL, search: queryText.trim() };
   }
 
-  // Field filters.
+  // Field filters and referenced-field tracking.
   const filters: Record<string, QueryFilterValue> = {};
+  const referencedFields = new Set<string>();
   for (const field of fields) {
+    if (hasFieldClause(query, field.fieldName)) {
+      referencedFields.add(field.fieldName);
+    }
     const filter = extractFieldFilter(query, field);
     if (filter) {
       filters[field.fieldName] = filter;
@@ -163,5 +186,5 @@ export const parseQueryText = (
   const knownFlagNames = new Set(flags.map((f) => f.flagName));
   const search = extractSearchText(query, knownFieldNames, knownFlagNames);
 
-  return { search, filters, flags: parsedFlags };
+  return { search, filters, flags: parsedFlags, referencedFields };
 };

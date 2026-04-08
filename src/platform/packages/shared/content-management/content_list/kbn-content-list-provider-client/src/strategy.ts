@@ -47,6 +47,13 @@ export interface ClientStrategy {
   onInvalidate: () => void;
   /** Returns the full (unfiltered) item set from the most recent server fetch. */
   getItems: () => UserContentCommonSchema[];
+  /**
+   * Monotonic counter that increments each time the cached item universe
+   * changes — either from a new server fetch (search query change) or from
+   * an explicit invalidation. Used by the profile priming routine to avoid
+   * redundant `bulkResolve` calls on a stable dataset.
+   */
+  getDatasetVersion: () => number;
 }
 
 /**
@@ -233,17 +240,44 @@ export const filterItems = (
  *
  * This is applied only to paginated results for performance.
  * Missing `attributes` or `title` are normalized to an empty string so the UI can still render.
+ *
+ * Consumer-specific properties on the raw item (top-level or inside `attributes`)
+ * are forwarded so that per-item callbacks (e.g. `getHref`, action `enabled`
+ * guards) can access them. `title` and `description` are always normalised
+ * from `attributes`; additional attribute keys are spread underneath.
  */
-const transformItem = (item: UserContentCommonSchema): ContentListItem => ({
-  id: item.id,
-  title: item.attributes?.title ?? '',
-  description: item.attributes?.description,
-  type: item.type,
-  updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
-  tags: extractTagIds(item.references),
-  createdBy: item.createdBy,
-  managed: item.managed,
-});
+const transformItem = (item: UserContentCommonSchema): ContentListItem => {
+  // Spread consumer-specific attribute keys (e.g. `timeRestore`) while
+  // letting the explicit `title`/`description` assignments win.
+  const { title: _t, description: _d, ...extraAttributes } = item.attributes ?? {};
+
+  // Spread consumer-specific top-level keys (e.g. `canManageAccessControl`,
+  // `accessMode`) while letting explicit assignments win.
+  const {
+    id: _id,
+    type: _type,
+    updatedAt: _ua,
+    createdAt: _ca,
+    createdBy: _cb,
+    managed: _m,
+    references: _refs,
+    attributes: _attrs,
+    ...extraTopLevel
+  } = item;
+
+  return {
+    ...extraAttributes,
+    ...extraTopLevel,
+    id: item.id,
+    title: item.attributes?.title ?? '',
+    description: item.attributes?.description,
+    type: item.type,
+    updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+    tags: extractTagIds(item.references),
+    createdBy: item.createdBy,
+    managed: item.managed,
+  };
+};
 
 /**
  * Creates a client strategy that wraps a `TableListView`-style `findItems` function.
@@ -266,6 +300,7 @@ export const createClientStrategy = (
 ): ClientStrategy => {
   let cachedItems: UserContentCommonSchema[] = [];
   let lastSearchQuery: string | undefined;
+  let datasetVersion = 0;
 
   const findItemsFn: FindItemsFn = async (params: FindItemsParams): Promise<FindItemsResult> => {
     const { searchQuery, filters, sort, page, signal } = params;
@@ -277,6 +312,7 @@ export const createClientStrategy = (
       }
       cachedItems = result.hits;
       lastSearchQuery = searchQuery;
+      datasetVersion += 1;
     }
 
     let favoriteIds: Set<string> | undefined;
@@ -303,11 +339,13 @@ export const createClientStrategy = (
   const onInvalidate = () => {
     lastSearchQuery = undefined;
     cachedItems = [];
+    datasetVersion += 1;
   };
 
   return {
     findItems: findItemsFn,
     onInvalidate,
     getItems: () => cachedItems,
+    getDatasetVersion: () => datasetVersion,
   };
 };

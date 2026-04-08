@@ -8,7 +8,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAvatar, type Query } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiAvatar,
+  useEuiTheme,
+  type Query,
+} from '@elastic/eui';
 import {
   useContentListConfig,
   useFilterFacets,
@@ -59,6 +66,7 @@ export const UserFieldFilterRenderer = ({
   'data-test-subj': dataTestSubj,
 }: UserFieldFilterRendererProps) => {
   const { supports } = useContentListConfig();
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const userProfileStore = useUserProfileStoreContext();
 
@@ -79,13 +87,15 @@ export const UserFieldFilterRenderer = ({
 
   const options = useMemo(
     (): Array<SelectableFilterOption<UserProfileEntry>> =>
-      (facetsQuery.data ?? []).map(({ key, label, count, data }) => ({
-        key,
-        label,
-        value: data?.email || label || key,
-        count,
-        data,
-      })),
+      (facetsQuery.data ?? [])
+        .map(({ key, label, count, data }) => ({
+          key,
+          label,
+          value: data?.email || label || key,
+          count,
+          data,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
     [facetsQuery.data]
   );
 
@@ -124,6 +134,7 @@ export const UserFieldFilterRenderer = ({
       isLoading={facetsQuery.isLoading}
       emptyMessage={emptyMessage}
       noMatchesMessage={noMatchesMessage}
+      panelMinWidth={euiTheme.base * 22}
       onToggle={setIsPopoverOpen}
       data-test-subj={dataTestSubj}
     />

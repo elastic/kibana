@@ -9,16 +9,34 @@
 
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { UserProfileUserInfo, UserProfileAvatarData } from '@kbn/user-profile-components';
 
 /**
  * A user profile entry for filtering and display.
+ *
+ * Carries the full {@link UserProfileUserInfo} and optional {@link UserProfileAvatarData}
+ * so that consumers (e.g. table cells) can use `UserAvatarTip` from
+ * `@kbn/user-profile-components` without issuing their own per-row fetches.
+ *
+ * The `email` and `fullName` convenience fields exist for query-bar resolution
+ * (display↔ID mapping in {@link FieldDefinition}) and are derived from `user`.
  */
 export interface UserProfileEntry {
   /** Internal user ID. */
   uid: string;
-  /** User's email address (display value in query text). */
+  /** Full Kibana user info (username, email, full_name). */
+  user: UserProfileUserInfo;
+  /** Optional avatar data (image URL, custom initials/color). */
+  avatar?: UserProfileAvatarData;
+  /**
+   * Convenience alias for `user.email ?? ''`.
+   * Used by query-bar display↔ID resolution.
+   */
   email: string;
-  /** User's full display name. */
+  /**
+   * Convenience alias for `user.full_name ?? user.username`.
+   * Used by query-bar display↔ID resolution.
+   */
   fullName: string;
 }
 

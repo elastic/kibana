@@ -106,17 +106,33 @@ const useUserProfileStore = (
     [cache]
   );
 
+  // Track UIDs that are already being fetched so concurrent `ensureLoaded`
+  // calls (e.g. from profile priming and per-page seeding firing in the
+  // same render cycle) don't issue duplicate `bulkResolve` requests.
+  const inflightRef = useRef(new Set<string>());
+
   const ensureLoaded = useCallback(
     async (uids: string[]): Promise<void> => {
       if (!service) {
         return;
       }
-      const missing = uids.filter((uid) => !cacheRef.current.has(uid));
+      const missing = uids.filter(
+        (uid) => !cacheRef.current.has(uid) && !inflightRef.current.has(uid)
+      );
       if (missing.length === 0) {
         return;
       }
-      const resolved = await service.bulkResolve(missing);
-      mergeEntries(resolved);
+      for (const uid of missing) {
+        inflightRef.current.add(uid);
+      }
+      try {
+        const resolved = await service.bulkResolve(missing);
+        mergeEntries(resolved);
+      } finally {
+        for (const uid of missing) {
+          inflightRef.current.delete(uid);
+        }
+      }
     },
     [service, mergeEntries]
   );
@@ -133,6 +149,7 @@ const useUserProfileStore = (
         knownKeys.add(entry.uid.toLowerCase());
         knownKeys.add(entry.email.toLowerCase());
         knownKeys.add(entry.fullName.toLowerCase());
+        knownKeys.add(entry.user.username.toLowerCase());
       }
       const unresolved = displayValues.filter((dv) => !knownKeys.has(dv.toLowerCase()));
       if (unresolved.length === 0) {
