@@ -108,6 +108,7 @@ export const createChildVirtualizerController = ({
   initialPersistedAnchors,
 }: CreateChildVirtualizerControllerOptions): ChildVirtualizerController => {
   const connectedChildren = new Map<string, ConnectedChildState>();
+  const connectionTokens = new Map<string, symbol>();
   const persistedAnchors = new Map<string, number>();
   const initialPersistedCellIds = new Set<string>();
   const stabilizedPersistedCellIds = new Set<string>();
@@ -262,11 +263,15 @@ export const createChildVirtualizerController = ({
       }
     }
 
+    const token = Symbol(cellId);
+    connectionTokens.set(cellId, token);
     let reconnecting = false;
+
+    const isCurrentConnection = () => connectionTokens.get(cellId) === token;
 
     return {
       reportState(patch) {
-        if (reconnecting) return;
+        if (reconnecting || !isCurrentConnection()) return;
         const current = connectedChildren.get(cellId);
         if (current) {
           connectedChildren.set(cellId, { ...current, ...patch });
@@ -277,6 +282,7 @@ export const createChildVirtualizerController = ({
         }
       },
       detachScrollElement() {
+        if (!isCurrentConnection()) return;
         const current = connectedChildren.get(cellId);
         if (!current || current.isDetached) return;
 
@@ -287,6 +293,7 @@ export const createChildVirtualizerController = ({
         notifyListeners();
       },
       reattachScrollElement() {
+        if (!isCurrentConnection()) return;
         const current = connectedChildren.get(cellId);
         if (!current || !current.isDetached) return;
 
@@ -299,6 +306,8 @@ export const createChildVirtualizerController = ({
         });
       },
       disconnect() {
+        if (!isCurrentConnection()) return;
+        connectionTokens.delete(cellId);
         const current = connectedChildren.get(cellId);
         if (current?.scrollAnchorItemIndex != null) {
           persistedAnchors.set(cellId, current.scrollAnchorItemIndex);
