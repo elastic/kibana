@@ -41,9 +41,14 @@ with `[rspack-transition]` comments for easy discovery via `grep -r 'rspack-tran
 - [ ] `packages/kbn-cli-dev-mode/src/optimizer.ts`: Remove the `KBN_USE_RSPACK` conditional, keep only rspack path.
 - [ ] Environment documentation: Remove `KBN_USE_RSPACK` references.
 
+## Performance benchmarks
+
+- [ ] `packages/kbn-perf-lighthouse/src/cli/compare_optimizers_cmd.ts`: Delete the entire file (compare-optimizers command). Remove `compareOptimizersCmd` import and registration from `cli/index.ts`.
+- [ ] `packages/kbn-perf-lighthouse/src/cli/run_cmd.ts`: Remove the `[rspack-transition]` legacy build branch (the `build_kibana_platform_plugins.js --dist` code path).
+
 ## Package rename
 
 - [ ] `packages/kbn-rspack-optimizer/`: Rename to `packages/kbn-optimizer/` (reclaiming the name from the deleted legacy package). Update all imports and `kibana.jsonc` references.
 - [ ] Delete this `LEGACY_REMOVAL_CHECKLIST.md` file (no longer needed).
 
-## Total: ~12 files with deletions, 0 files with structural changes.
+## Total: ~14 files with deletions, 0 files with structural changes.

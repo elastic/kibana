@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/perf-lighthouse",
+  "owner": "@elastic/kibana-tooling",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

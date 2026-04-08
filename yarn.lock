@@ -8074,6 +8074,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/perf-lighthouse@link:packages/kbn-perf-lighthouse":
+  version "0.0.0"
+  uid ""
+
 "@kbn/performance-testing-dataset-extractor@link:packages/kbn-performance-testing-dataset-extractor":
   version "0.0.0"
   uid ""
