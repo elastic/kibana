@@ -209,6 +209,14 @@ jest.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => ({
   interceptMonacoYamlProvider: jest.fn(),
 }));
 
+jest.mock('./hooks/use_agent_builder_integration', () => ({
+  useAgentBuilderIntegration: jest.fn(() => ({
+    openAgentChat: jest.fn(),
+    isAgentBuilderAvailable: false,
+    proposalManager: null,
+  })),
+}));
+
 jest.mock('@kbn/monaco', () => ({
   monaco: {
     editor: {

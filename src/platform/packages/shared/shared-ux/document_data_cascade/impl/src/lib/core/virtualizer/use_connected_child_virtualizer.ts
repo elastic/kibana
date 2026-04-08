@@ -13,6 +13,7 @@ import type { GroupNode } from '../../../store_provider';
 import type {
   ChildConnectionHandle,
   ChildVirtualizerController,
+  ConnectedChildState,
 } from './child_virtualizer_controller';
 import { useCascadeVirtualizer, type CascadeVirtualizerReturnValue } from '.';
 
@@ -100,17 +101,27 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
   const onStateChange = useCallback<
     NonNullable<Parameters<typeof useCascadeVirtualizer>[0]['onStateChange']>
   >(
-    (instance, didRestoreScrollPosition) => {
+    (instance, didRestoreScrollPosition, didStabilize) => {
       if (!isActive || !didRestoreScrollPosition) return;
       const range = instance.range;
-      innerHandle.reportState({
+
+      const patch: Partial<ConnectedChildState> = {
         scrollOffset: instance.scrollOffset ?? 0,
         range: range ? { startIndex: range.startIndex, endIndex: range.endIndex } : null,
         totalSize: instance.getTotalSize(),
         totalItemCount: instance.options.count,
-        scrollAnchorItemIndex:
-          instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null,
-      });
+      };
+
+      // Only persist the scroll anchor after corrections have converged.
+      // Before stabilization the offset is intermediate and would cause the
+      // persisted anchor to capture a wrong position on disconnect/detach.
+      if (didStabilize) {
+        patch.scrollAnchorItemIndex =
+          instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null;
+        patch.hasStabilized = true;
+      }
+
+      innerHandle.reportState(patch);
     },
     [innerHandle, isActive]
   );

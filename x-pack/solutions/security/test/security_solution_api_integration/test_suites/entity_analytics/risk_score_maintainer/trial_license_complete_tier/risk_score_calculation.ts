@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const risk = ecsDoc!.host!.risk!;
 
-          expect(risk.id_field).to.eql('entity_id');
+          expect(risk.id_field).to.eql('entity.id');
           expect(risk.id_value).to.eql(host.expectedEuid);
           expect(risk.score_type).to.eql('base');
           expect(risk.calculation_run_id).to.be.a('string');
