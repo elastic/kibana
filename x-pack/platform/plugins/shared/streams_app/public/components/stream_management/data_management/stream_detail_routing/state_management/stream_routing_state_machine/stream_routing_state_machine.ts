@@ -904,10 +904,7 @@ export const streamRoutingMachine = setup({
                     }),
                     onDone: {
                       target: 'deleted',
-                      actions: [
-                        { type: 'setRefreshing' },
-                        { type: 'refreshDefinition' },
-                      ],
+                      actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
                     },
                     onError: {
                       target: 'changing',

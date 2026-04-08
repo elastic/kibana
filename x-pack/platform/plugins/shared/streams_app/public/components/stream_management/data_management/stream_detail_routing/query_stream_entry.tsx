@@ -225,9 +225,10 @@ export function EditingQueryStreamEntry({
   const isSaving = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: { editing: 'saving' } } })
   );
-  const isDeleting = useStreamsRoutingSelector((state) =>
-    state.matches({ ready: { queryMode: { editing: 'deleting' } } }) ||
-    state.matches({ ready: { queryMode: { editing: 'deleted' } } })
+  const isDeleting = useStreamsRoutingSelector(
+    (state) =>
+      state.matches({ ready: { queryMode: { editing: 'deleting' } } }) ||
+      state.matches({ ready: { queryMode: { editing: 'deleted' } } })
   );
 
   const [isDeleteModalOpen, { on: openDeleteModal, off: closeDeleteModal }] = useBoolean(false);
