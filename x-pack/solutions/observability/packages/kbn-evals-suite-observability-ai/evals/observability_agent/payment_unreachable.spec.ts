@@ -70,6 +70,7 @@ evaluate.describe(
                   'Notes that the failure is instant (very low latency, microseconds) indicating connection refusal rather than a timeout',
                   'Identifies the checkout service as the service experiencing the symptoms (failed transactions) but not the root cause',
                   'Suggests investigating payment service availability, network connectivity, or DNS as next steps',
+                  'Does not incorrectly blame other services (frontend, cart, currency, shipping, product-catalog) as the root cause',
                 ],
                 expectedTools: [
                   'observability.get_service_topology',
