@@ -24,7 +24,7 @@ import {
 /**
  * Creates filter expression for both single and multi-value cases
  * For single values, it creates standard comparison expressions
- * For multi-value arrays, it creates MATCH clauses combined with AND/NOT
+ * For multi-value arrays, it creates MV_CONTAINS or MATCH clauses
  */
 function createFilterExpression(
   field: string,
