@@ -5,11 +5,22 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate } from '../../evaluate';
 import { splunkRules } from '../../datasets/rules/splunk';
 
-evaluate.describe('Splunk SPL Rule Migration', () => {
-  evaluate('translates SPL rules correctly', async ({ evaluateRuleDataset }) => {
+evaluate.describe('Splunk SPL Rule Migration', { tag: tags.stateful.classic }, () => {
+  evaluate('translates SPL rules correctly', async ({ evaluateRuleDataset, log }) => {
+    if (splunkRules.length === 0) {
+      log.warning(
+        'No Splunk rule examples in dataset — skipping evaluation. ' +
+          'Add curated examples to datasets/rules/splunk/splunk_rules.ts'
+      );
+      return;
+    }
+
+    log.info(`Running Splunk SPL rule migration evaluation with ${splunkRules.length} examples`);
+
     await evaluateRuleDataset({
       dataset: {
         name: 'rule-migration: splunk-spl',

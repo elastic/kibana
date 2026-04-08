@@ -5,11 +5,22 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate } from '../../evaluate';
 import { qradarRules } from '../../datasets/rules/qradar';
 
-evaluate.describe('QRadar Rule Migration', () => {
-  evaluate('translates QRadar rules correctly', async ({ evaluateRuleDataset }) => {
+evaluate.describe('QRadar Rule Migration', { tag: tags.stateful.classic }, () => {
+  evaluate('translates QRadar rules correctly', async ({ evaluateRuleDataset, log }) => {
+    if (qradarRules.length === 0) {
+      log.warning(
+        'No QRadar rule examples in dataset — skipping evaluation. ' +
+          'Add curated examples to datasets/rules/qradar/qradar_rules.ts'
+      );
+      return;
+    }
+
+    log.info(`Running QRadar rule migration evaluation with ${qradarRules.length} examples`);
+
     await evaluateRuleDataset({
       dataset: {
         name: 'rule-migration: qradar',
