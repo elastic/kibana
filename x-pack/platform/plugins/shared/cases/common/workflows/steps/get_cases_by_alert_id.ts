@@ -33,7 +33,7 @@ export const getCasesByAlertIdStepCommonDefinition: CommonStepDefinition<
   GetCasesByAlertIdStepOutputSchema
 > = {
   id: GetCasesByAlertIdStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.GET_CASES_BY_ALERT_ID_STEP_LABEL,
   description: i18n.GET_CASES_BY_ALERT_ID_STEP_DESCRIPTION,
   documentation: {
