@@ -9,7 +9,6 @@
 
 import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
-import { Parser, Walker } from '@elastic/esql';
 import {
   getSignatureHelp,
   getHoverItem,
@@ -17,6 +16,7 @@ import {
   inlineSuggest,
   suggest,
   validateQuery,
+  getIndexSourcesFromQuery,
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
@@ -35,19 +35,6 @@ import { buildEsqlTheme } from './lib/theme';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
-};
-
-const getStreamNamesFromQuery = (query: string): string[] => {
-  try {
-    const { root } = Parser.parse(query);
-    const fromCmd = Walker.match(root, { type: 'command', name: 'from' });
-    if (!fromCmd) return [];
-    return Walker.matchAll(fromCmd, { type: 'source', sourceType: 'index' })
-      .map((node) => node.name)
-      .filter((name) => name.length > 0 && !name.includes('*'));
-  } catch {
-    return [];
-  }
 };
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
@@ -220,7 +207,9 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           model.getLineCount()
         );
 
-        const streamNames = getStreamNamesFromQuery(fullText);
+        const streamNames = getIndexSourcesFromQuery(fullText).filter(
+          (name) => !name.includes('*')
+        );
         for (const suggestion of result.suggestions) {
           itemContext.set(suggestion, {
             streamNames,

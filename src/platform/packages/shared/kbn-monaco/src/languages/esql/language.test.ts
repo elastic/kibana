@@ -8,23 +8,36 @@
  */
 
 import type { PartialFieldsMetadataClient } from '@kbn/esql-types';
-import { getHoverItem, suggest } from '@kbn/esql-language';
+import { getHoverItem, suggest, getIndexSourcesFromQuery } from '@kbn/esql-language';
 import { monaco } from '../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from './language';
 
-// Mock the getHoverItem and suggest functions
+// Mock the getHoverItem, suggest, and getIndexSourcesFromQuery functions
 jest.mock('@kbn/esql-language', () => ({
   getHoverItem: jest.fn(),
   suggest: jest.fn(),
+  getIndexSourcesFromQuery: jest.fn(),
 }));
 
 describe('ESQLLang', () => {
   describe('getSuggestionProvider', () => {
     describe('resolveCompletionItem', () => {
       const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
+      const mockGetIndexSourcesFromQuery = getIndexSourcesFromQuery as jest.MockedFunction<
+        typeof getIndexSourcesFromQuery
+      >;
 
       beforeEach(() => {
         mockSuggest.mockResolvedValue([]);
+        // Default: naive extraction of index names from FROM clause
+        mockGetIndexSourcesFromQuery.mockImplementation((query: string) => {
+          const fromMatch = query.match(/FROM\s+([^|]+)/i);
+          if (!fromMatch) return [];
+          return fromMatch[1]
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        });
       });
 
       afterEach(() => {
