@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';

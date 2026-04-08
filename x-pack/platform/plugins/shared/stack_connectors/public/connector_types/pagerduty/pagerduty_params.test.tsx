@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { EventActionOptions, SeverityActionOptions } from '../types';
 import PagerDutyParamsFields from './pagerduty_params';

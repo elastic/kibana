@@ -275,8 +275,6 @@ describe('ServiceNowITSMParamsFields renders', () => {
   });
 
   describe('UI updates', () => {
-    const changeEvent = { target: { value: 'Bug' } };
-
     test('short_description update triggers editAction :D', async () => {
       render(<ServiceNowITSMParamsFields {...defaultProps} />, {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,

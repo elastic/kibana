@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { loadGlobalConnectorExecutionLogAggregations } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import { ConnectorEventLogListTable } from './actions_connectors_event_log_list_table';

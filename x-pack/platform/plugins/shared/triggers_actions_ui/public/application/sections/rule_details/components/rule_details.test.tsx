@@ -39,9 +39,7 @@ const queryClient = new QueryClient({
 
 jest.mock('../../../../common/lib/kibana');
 
-const { getIsExperimentalFeatureEnabled } = jest.requireMock(
-  '../../../../common/get_experimental_features'
-);
+jest.requireMock('../../../../common/get_experimental_features');
 
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
