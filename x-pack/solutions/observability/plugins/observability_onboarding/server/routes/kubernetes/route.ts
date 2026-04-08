@@ -10,6 +10,12 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import {
+  isNoShardsAvailableError,
+  throwHasDataSearchError,
+} from '../../lib/handle_has_data_search_error';
+import { checkPreExistingData } from '../../lib/check_pre_existing_data';
+import { resolveProbe } from './resolve_has_data_probes';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -31,6 +37,9 @@ export interface CreateKubernetesOnboardingFlowRouteResponse {
 
 export interface HasKubernetesDataRouteResponse {
   hasData: boolean;
+  hasLogs?: boolean;
+  hasMetrics?: boolean;
+  hasPreExistingData?: boolean;
 }
 
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
@@ -120,6 +129,9 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
     path: t.type({
       onboardingId: t.string,
     }),
+    query: t.partial({
+      start: t.string,
+    }),
   }),
   security: {
     authz: {
@@ -129,40 +141,107 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   },
   async handler(resources): Promise<HasKubernetesDataRouteResponse> {
     const { onboardingId } = resources.params.path;
+    const { start } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
     try {
-      const result = await elasticsearch.client.asCurrentUser.search({
-        index: ['logs-*', 'metrics-*', 'logs', 'logs.*'],
+      const commonSearchParams = {
         ignore_unavailable: true,
         allow_partial_search_results: true,
-        size: 0,
+        size: 0 as const,
         terminate_after: 1,
-        query: {
-          bool: {
-            filter: termQuery('fields.onboarding_id', onboardingId),
-          },
+      };
+
+      // Classic data streams: use indexed onboarding ID fields (fast inverted-index lookups).
+      const indexedQuery: estypes.QueryDslQueryContainer = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  ...termQuery('fields.onboarding_id', onboardingId),
+                  ...termQuery('resource.attributes.onboarding.id', onboardingId),
+                  ...termQuery('labels.onboarding_id', onboardingId),
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
-      });
-      const { value } = result.hits.total as estypes.SearchTotalHits;
+      };
+
+      const wiredStreamIndices = ['logs.otel*', 'logs.ecs*', 'metrics.otel*', 'metrics.ecs*'];
+
+      // Check if data was already flowing into wired stream indices before
+      // the user started onboarding. If so, time-range detection on those
+      // indices would produce false positives, so we skip it.
+      const hasPreExistingData = start
+        ? await checkPreExistingData(elasticsearch.client.asCurrentUser, wiredStreamIndices, start)
+        : false;
+
+      // Wired streams (logs.otel*, logs.ecs*) use passthrough mapping where
+      // onboarding.id is not indexed, so we cannot filter by it without a
+      // runtime mapping (which times out on large clusters). Instead, fall
+      // back to a time-range-only query when a start time is provided and
+      // no pre-existing data would cause false positives.
+      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined =
+        start && !hasPreExistingData
+          ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
+          : undefined;
+
+      const searches: Array<Promise<estypes.SearchResponse>> = [
+        elasticsearch.client.asCurrentUser.search({
+          index: ['logs-*'],
+          ...commonSearchParams,
+          query: indexedQuery,
+        }),
+        elasticsearch.client.asCurrentUser.search({
+          index: ['metrics-*'],
+          ...commonSearchParams,
+          query: indexedQuery,
+        }),
+      ];
+
+      if (wiredStreamQuery) {
+        searches.push(
+          elasticsearch.client.asCurrentUser.search({
+            index: ['logs.otel*', 'logs.ecs*'],
+            ...commonSearchParams,
+            query: wiredStreamQuery,
+          }),
+          elasticsearch.client.asCurrentUser.search({
+            index: ['metrics.otel*', 'metrics.ecs*'],
+            ...commonSearchParams,
+            query: wiredStreamQuery,
+          })
+        );
+      }
+
+      const results = await Promise.allSettled(searches);
+      const [logsResult, metricsResult, wiredLogsResult, wiredMetricsResult] = results;
+
+      const hasLogs =
+        resolveProbe(logsResult) || (wiredLogsResult ? resolveProbe(wiredLogsResult) : false);
+      const hasMetrics =
+        resolveProbe(metricsResult) ||
+        (wiredMetricsResult ? resolveProbe(wiredMetricsResult) : false);
 
       return {
-        hasData: value > 0,
+        hasData: hasLogs || hasMetrics,
+        hasLogs,
+        hasMetrics,
+        hasPreExistingData: hasPreExistingData || undefined,
       };
     } catch (error) {
-      const errorType = error?.meta?.body?.error?.type;
-      const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
-
-      if (
-        errorType === 'search_phase_execution_exception' &&
-        rootCauseType === 'no_shard_available_action_exception'
-      ) {
+      if (isNoShardsAvailableError(error)) {
         return {
           hasData: false,
+          hasLogs: false,
+          hasMetrics: false,
         };
       }
 
-      throw Boom.internal(`Elasticsearch responses with an error. ${error.message}`);
+      throwHasDataSearchError(error);
     }
   },
 });

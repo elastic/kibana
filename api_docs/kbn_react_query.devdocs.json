@@ -14356,12 +14356,8 @@
                 "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_notification_policy.ts"
               },
               {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
-              },
-              {
-                "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
+                "plugin": "@kbn/alerting-v2-episodes-ui",
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/hooks/use_fetch_related_alert_episodes_query.ts"
               },
               {
                 "plugin": "maintenanceWindows",
@@ -14633,10 +14629,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
               },
               {
@@ -14650,6 +14642,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14774,6 +14770,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.test.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_modal.tsx"
               },
               {
                 "plugin": "@kbn/alerts-ui-shared",
