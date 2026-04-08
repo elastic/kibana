@@ -38,6 +38,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils';
 import { formatRuntime } from '../../lib/format_runtime';
 import { useQueryActivityAppContext } from '../app_context';
 import { notAvailableLabel } from './query_activity_table';
@@ -77,7 +78,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   useEffect(() => {
     if (!query.traceId) return;
     dataViews
-      .get('discover-observability-solution-all-logs')
+      .get(ALL_LOGS_DATA_VIEW_ID)
       .then(() => setDataViewExists(true))
       .catch(() => setDataViewExists(false));
   }, [query.traceId, dataViews]);
@@ -88,7 +89,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
     }
     const discoverParams: DiscoverAppLocatorParams = {
       dataViewSpec: {
-        id: 'discover-observability-solution-all-logs',
+        id: ALL_LOGS_DATA_VIEW_ID,
         name: 'All logs',
         title: 'logs-*',
         timeFieldName: '@timestamp',
