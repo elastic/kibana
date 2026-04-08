@@ -24,13 +24,6 @@ const creationInitializedEvent: AiRuleCreationTelemetryEvent = {
 const appliedToFormEvent: AiRuleCreationTelemetryEvent = {
   eventType: AiRuleCreationEventTypes.AppliedToForm,
   schema: {
-    sessionId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique session ID correlating all events in an AI rule creation session',
-        optional: false,
-      },
-    },
     ruleType: {
       type: 'keyword',
       _meta: {
@@ -38,32 +31,27 @@ const appliedToFormEvent: AiRuleCreationTelemetryEvent = {
         optional: false,
       },
     },
-    threatTechniques: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'MITRE ATT&CK technique ID',
-          optional: false,
-        },
-      },
+    numberOfEdits: {
+      type: 'long',
       _meta: {
-        description: 'MITRE ATT&CK technique IDs included in the rule',
+        description:
+          'How many times AI-generated rule has been applied to the form in this session',
         optional: false,
+      },
+    },
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique session ID, present only during rule creation flow',
+        optional: true,
       },
     },
     durationSinceSessionStartMs: {
       type: 'long',
       _meta: {
-        description: 'Milliseconds elapsed since the AI rule creation session started',
-        optional: false,
-      },
-    },
-    isRegeneration: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether this is a regeneration (not the first apply to form)',
-        optional: false,
+        description:
+          'Milliseconds since the AI rule creation session started, present only during creation',
+        optional: true,
       },
     },
   },
@@ -131,20 +119,6 @@ const ruleEditedEvent: AiRuleCreationTelemetryEvent = {
       type: 'boolean',
       _meta: {
         description: 'Whether the rule is enabled after editing',
-        optional: false,
-      },
-    },
-    threatTechniques: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'MITRE ATT&CK technique ID',
-          optional: false,
-        },
-      },
-      _meta: {
-        description: 'MITRE ATT&CK technique IDs included in the rule after editing',
         optional: false,
       },
     },

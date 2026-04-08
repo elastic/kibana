@@ -21,11 +21,10 @@ export interface ReportCreationInitializedParams {
 }
 
 export interface ReportAppliedToFormParams {
-  sessionId: string;
   ruleType: string;
-  threatTechniques: string[];
-  durationSinceSessionStartMs: number;
-  isRegeneration: boolean;
+  numberOfEdits: number;
+  sessionId?: string;
+  durationSinceSessionStartMs?: number;
 }
 
 export interface ReportRuleCreatedParams {
@@ -39,7 +38,6 @@ export interface ReportRuleCreatedParams {
 export interface ReportRuleEditedParams {
   ruleType: string;
   enabled: boolean;
-  threatTechniques: string[];
 }
 
 export interface ReportRuleCreationErrorParams {

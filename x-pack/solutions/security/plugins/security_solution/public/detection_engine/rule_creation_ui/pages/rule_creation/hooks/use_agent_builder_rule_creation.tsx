@@ -17,7 +17,6 @@ import type {
   RuleCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getStepsData } from '../../../../common/helpers';
-import { extractThreatTechniqueIds } from '../../../../common/telemetry_helpers';
 import { AiRuleCreationEventTypes } from '../../../../../common/lib/telemetry/types';
 import type { FormHook } from '../../../../../shared_imports';
 import type {
@@ -118,14 +117,15 @@ export const useAgentBuilderRuleCreation = ({
       const session = aiRuleCreation.getSession();
       if (session) {
         aiRuleCreation.incrementApplyCount();
-        telemetry.reportEvent(AiRuleCreationEventTypes.AppliedToForm, {
-          sessionId: session.sessionId,
-          ruleType: rule.type,
-          threatTechniques: extractThreatTechniqueIds(rule.threat),
-          durationSinceSessionStartMs: Date.now() - session.startTimestamp,
-          isRegeneration: session.applyCount > 0,
-        });
       }
+      telemetry.reportEvent(AiRuleCreationEventTypes.AppliedToForm, {
+        ruleType: rule.type,
+        numberOfEdits: session ? session.applyCount : 1,
+        ...(session && {
+          sessionId: session.sessionId,
+          durationSinceSessionStartMs: Date.now() - session.startTimestamp,
+        }),
+      });
 
       isAiRuleUpdateRef.current = true;
       aiRuleCreation.activateFormSync();

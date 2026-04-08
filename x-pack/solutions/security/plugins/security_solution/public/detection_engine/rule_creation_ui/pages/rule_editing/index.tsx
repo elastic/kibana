@@ -83,7 +83,6 @@ import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachm
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 import { AiRuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
-import { extractThreatTechniqueIds } from '../../../common/telemetry_helpers';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -431,7 +430,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       telemetry.reportEvent(AiRuleCreationEventTypes.RuleEdited, {
         ruleType: updatedRule.type,
         enabled: updatedRule.enabled,
-        threatTechniques: extractThreatTechniqueIds(updatedRule.threat),
       });
     }
 
