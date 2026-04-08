@@ -30,7 +30,7 @@ export function ObservabilityOnboardingAppRoot({
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
-  const { history, setHeaderActionMenu, theme$ } = appMountParameters;
+  const { history, theme$ } = appMountParameters;
   const services: ObservabilityOnboardingAppServices = {
     ...core,
     ...corePlugins,
