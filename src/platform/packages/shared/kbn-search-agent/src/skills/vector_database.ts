@@ -12,8 +12,7 @@
 export const vectorDatabaseSkill = {
   id: 'vector-database',
   name: 'vector-database',
-  description:
-    'Guide for using Elasticsearch as a vector database for AI applications. Use when a developer wants to store and retrieve embeddings, integrate with LangChain/LlamaIndex, build similarity search, or use Elasticsearch as a vector store for their AI pipeline.',
+  description: 'Guide for using Elasticsearch as a vector database for AI applications. Use when a developer wants to store and retrieve embeddings, integrate with LangChain/LlamaIndex, build similarity search, or use Elasticsearch as a vector store for their AI pipeline.',
   content: `# Elasticsearch as a Vector Database
 
 ## When to Use This Guide
