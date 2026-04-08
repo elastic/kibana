@@ -6,7 +6,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 392
   aiops: 317
   alerting: 8782
-  apm: 16253
+  apm: 15969
   apmSourcesAccess: 766
   automaticImport: 7026
   automaticImportVTwo: 10081
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   searchQueryRules: 2130
   searchSynonyms: 1897
   security: 215
-  securitySolution: 91670
+  securitySolution: 91441
   securitySolutionEss: 19484
   securitySolutionServerless: 31839
   serverless: 1259
@@ -171,11 +171,16 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4375
   sessionView: 379
   share: 379
+  shared-core: 352771
+  shared-misc: 39832
+  shared-packages: 2792089
+  shared-plugins: 10771382
+  shared-solution-packages: 240442
   slo: 19118
   snapshotRestore: 16852
   spaces: 22531
   stackAlerts: 1717
-  stackConnectors: 67443
+  stackConnectors: 67414
   streams: 4477
   streamsApp: 56249
   synthetics: 18251
@@ -193,6 +198,8 @@ pageLoadAssetSize:
   urlForwarding: 1412
   usageCollection: 223
   ux: 2418
+  vendors: 4580341
+  vendors-heavy: 1387221
   visDefaultEditor: 738
   visTypeGauge: 7651
   visTypeHeatmap: 6970
@@ -203,12 +210,12 @@ pageLoadAssetSize:
   visTypeTagcloud: 3117
   visTypeTimelion: 6661
   visTypeTimeseries: 12718
-  visTypeVega: 14834
+  visTypeVega: 14705
   visTypeVislib: 21992
   visTypeXy: 24422
   visualizationListing: 1091
   visualizations: 1147
   watcher: 5484
   workflowsExtensions: 33877
-  workflowsManagement: 19817
+  workflowsManagement: 19647
   workplaceAIApp: 8674

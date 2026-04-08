@@ -15,6 +15,7 @@ import Yaml from 'js-yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import { getSharedChunkNames } from './config/split_chunks';
 
 export interface Limits {
   pageLoadAssetSize?: Record<string, number | undefined>;
@@ -46,8 +47,11 @@ export function validateLimitsForAllBundles(
 ) {
   const limitBundleIds = Object.keys(readLimits(limitsPath).pageLoadAssetSize || {});
 
+  const sharedChunkNames = getSharedChunkNames();
   const missingBundleIds = diff(pluginIds, limitBundleIds);
-  const extraBundleIds = diff(limitBundleIds, pluginIds);
+  const extraBundleIds = diff(limitBundleIds, pluginIds).filter(
+    (id) => !sharedChunkNames.has(id)
+  );
 
   const issues = [];
   if (missingBundleIds.length) {

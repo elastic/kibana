@@ -139,6 +139,80 @@ describe('validateLimitsForAllBundles', () => {
 
     Fs.rmSync(tmpDir, { recursive: true });
   });
+
+  it('tolerates shared chunk entries in limits.yml without flagging as extra', () => {
+    const tmpDir = createTmpDir();
+    const limitsPath = Path.join(tmpDir, 'limits.yml');
+    Fs.writeFileSync(
+      limitsPath,
+      [
+        'pageLoadAssetSize:',
+        '  core: 500000',
+        '  discover: 150000',
+        '  shared-core: 2000000',
+        '  shared-misc: 100000',
+        '  shared-packages: 3000000',
+        '  shared-plugins: 4000000',
+        '  vendors: 5000000',
+        '  vendors-heavy: 6000000',
+        '',
+      ].join('\n')
+    );
+
+    const log = createMockLog();
+    expect(() => {
+      validateLimitsForAllBundles(log as any, ['core', 'discover'], limitsPath);
+    }).not.toThrow();
+    expect(log.success).toHaveBeenCalledWith('limits.yml file valid');
+
+    Fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it('still flags stale plugin IDs as extra even when shared chunks are present', () => {
+    const tmpDir = createTmpDir();
+    const limitsPath = Path.join(tmpDir, 'limits.yml');
+    Fs.writeFileSync(
+      limitsPath,
+      [
+        'pageLoadAssetSize:',
+        '  core: 500000',
+        '  discover: 150000',
+        '  shared-core: 2000000',
+        '  stale_plugin: 100000',
+        '  vendors: 5000000',
+        '',
+      ].join('\n')
+    );
+
+    const log = createMockLog();
+    expect(() => {
+      validateLimitsForAllBundles(log as any, ['core', 'discover'], limitsPath);
+    }).toThrow(/extra: stale_plugin/);
+
+    Fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it('still requires all plugin IDs even when shared chunk entries are present', () => {
+    const tmpDir = createTmpDir();
+    const limitsPath = Path.join(tmpDir, 'limits.yml');
+    Fs.writeFileSync(
+      limitsPath,
+      [
+        'pageLoadAssetSize:',
+        '  core: 500000',
+        '  shared-core: 2000000',
+        '  vendors: 5000000',
+        '',
+      ].join('\n')
+    );
+
+    const log = createMockLog();
+    expect(() => {
+      validateLimitsForAllBundles(log as any, ['core', 'discover'], limitsPath);
+    }).toThrow(/missing: discover/);
+
+    Fs.rmSync(tmpDir, { recursive: true });
+  });
 });
 
 describe('updateBundleLimits', () => {

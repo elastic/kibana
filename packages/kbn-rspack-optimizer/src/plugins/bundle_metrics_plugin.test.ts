@@ -285,4 +285,135 @@ describe('buildMetrics', () => {
     );
     expect(discoverMisc!.value).toBe(1024);
   });
+
+  it('emits page load bundle size metrics for named shared chunks', () => {
+    const metrics = buildMetrics(
+      [
+        {
+          id: 'core',
+          chunkName: 'plugin-core',
+          limit: 500,
+          pageLoadSize: 300,
+          moduleCount: 10,
+          asyncSize: 0,
+          asyncCount: 0,
+          miscSize: 0,
+        },
+        {
+          id: 'shared-core',
+          chunkName: 'shared-core',
+          limit: 2000000,
+          pageLoadSize: 1800000,
+          moduleCount: 450,
+          asyncSize: 0,
+          asyncCount: 0,
+          miscSize: 0,
+        },
+        {
+          id: 'vendors',
+          chunkName: 'vendors',
+          limit: 5000000,
+          pageLoadSize: 4500000,
+          moduleCount: 200,
+          asyncSize: 0,
+          asyncCount: 0,
+          miscSize: 0,
+        },
+      ],
+      { totalSize: 15000, count: 1 },
+      6300300
+    );
+
+    const sharedCoreMetric = metrics.find(
+      (m) => m.group === 'page load bundle size' && m.id === 'shared-core'
+    );
+    expect(sharedCoreMetric).toBeDefined();
+    expect(sharedCoreMetric!.value).toBe(1800000);
+    expect(sharedCoreMetric!.limit).toBe(2000000);
+    expect(sharedCoreMetric!.limitConfigPath).toBe('packages/kbn-rspack-optimizer/limits.yml');
+
+    const vendorsMetric = metrics.find(
+      (m) => m.group === 'page load bundle size' && m.id === 'vendors'
+    );
+    expect(vendorsMetric).toBeDefined();
+    expect(vendorsMetric!.value).toBe(4500000);
+    expect(vendorsMetric!.limit).toBe(5000000);
+  });
+
+  it('named shared chunks get zero async/misc values', () => {
+    const metrics = buildMetrics(
+      [
+        {
+          id: 'shared-plugins',
+          chunkName: 'shared-plugins',
+          limit: 3000000,
+          pageLoadSize: 2500000,
+          moduleCount: 300,
+          asyncSize: 0,
+          asyncCount: 0,
+          miscSize: 0,
+        },
+      ],
+      { totalSize: 0, count: 0 },
+      2500000
+    );
+
+    const asyncSize = metrics.find(
+      (m) => m.group === 'async chunks size' && m.id === 'shared-plugins'
+    );
+    expect(asyncSize!.value).toBe(0);
+
+    const asyncCount = metrics.find(
+      (m) => m.group === 'async chunk count' && m.id === 'shared-plugins'
+    );
+    expect(asyncCount!.value).toBe(0);
+
+    const miscSize = metrics.find(
+      (m) => m.group === 'miscellaneous assets size' && m.id === 'shared-plugins'
+    );
+    expect(miscSize!.value).toBe(0);
+  });
+
+  it('shared chunk entries are interleaved with plugin entries (pre-sorted input)', () => {
+    const metrics = buildMetrics(
+      [
+        {
+          id: 'core',
+          chunkName: 'plugin-core',
+          limit: 500,
+          pageLoadSize: 300,
+          moduleCount: 10,
+          asyncSize: 0,
+          asyncCount: 0,
+          miscSize: 0,
+        },
+        {
+          id: 'discover',
+          chunkName: 'plugin-discover',
+          limit: 160000,
+          pageLoadSize: 145000,
+          moduleCount: 120,
+          asyncSize: 85000,
+          asyncCount: 3,
+          miscSize: 0,
+        },
+        {
+          id: 'shared-core',
+          chunkName: 'shared-core',
+          limit: 2000000,
+          pageLoadSize: 1800000,
+          moduleCount: 450,
+          asyncSize: 0,
+          asyncCount: 0,
+          miscSize: 0,
+        },
+      ],
+      { totalSize: 0, count: 0 },
+      2000000
+    );
+
+    const pageLoadMetrics = metrics.filter((m) => m.group === 'page load bundle size');
+    const ids = pageLoadMetrics.map((m) => m.id);
+    expect(ids).toEqual(['core', 'discover', 'shared-core']);
+  });
 });

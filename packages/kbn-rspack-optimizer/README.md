@@ -89,6 +89,12 @@ Bundle Limits:
   --validate-limits         Validate limits.yml against discovered plugins (no build)
   --limits <path>           Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
 
+limits.yml contains entries for both plugins and named shared chunks (shared-core,
+shared-plugins, shared-packages, vendors, vendors-heavy, shared-misc, etc.).
+Shared chunk entries are managed by --update-limits and tolerated by --validate-limits.
+The set of tracked shared chunks is derived from getSplitChunksCacheGroups() in
+src/config/split_chunks.ts -- no static list to maintain.
+
 Profile Mode (one-time build with bundle analysis):
   --profile                 Full profiling with stats.json + RsDoctor report
   --profile-stats-only      Fast profiling with stats.json only (skips RsDoctor)
@@ -229,6 +235,8 @@ if (result.success) {
 | `validateLimitsForAllBundles` | Validate limits.yml structure against discovered plugins |
 | `updateBundleLimits` | Update limits.yml with current bundle sizes |
 | `DEFAULT_LIMITS_PATH` | Default path to limits.yml |
+| `getSplitChunksCacheGroups` | Cache groups config for splitChunks (single source of truth) |
+| `getSharedChunkNames` | Set of named shared chunk names derived from cache groups |
 
 ## Environment Variables
 

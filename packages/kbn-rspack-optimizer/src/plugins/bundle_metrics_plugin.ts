@@ -38,17 +38,23 @@ export interface PluginMetricsInfo {
  *    bundle (core + plugins) gets a named async chunk via `webpackChunkName`
  *    magic comments in the unified entry (e.g. `plugin-core`, `plugin-discover`,
  *    `plugin-dashboard`). The `kibana` entry chunk is just the rspack runtime
- *    + the Promise.all orchestration shell. Shared/split chunks produced by
- *    `splitChunks` (e.g. `vendors-heavy`, `shared-misc`) are NOT attributed
- *    to any single plugin -- they benefit all consumers and are tracked
- *    separately as aggregate metrics.
+ *    + the Promise.all orchestration shell.
  *
  *    `pageLoadAssetSize` (the limit) tracks the synchronous page-load cost
  *    of each plugin's named chunk -- the size of the chunk the browser must
- *    download and parse as part of the initial page load sequence. Shared
- *    chunks are loaded as prerequisites by the rspack runtime, but they are
- *    tracked separately because they serve multiple consumers and their
- *    cost is amortized.
+ *    download and parse as part of the initial page load sequence.
+ *
+ *    Named shared chunks produced by `splitChunks` (e.g. `shared-core`,
+ *    `shared-plugins`, `vendors`, `vendors-heavy`) are tracked individually
+ *    with their own `pageLoadAssetSize` entries in limits.yml. They are
+ *    identified by matching `chunk.name` against `sharedChunkNames` (derived
+ *    from `getSplitChunksCacheGroups()` in `split_chunks.ts`). This ensures
+ *    the `kibana` entry chunk (name: `'kibana'`) is NOT captured -- it stays
+ *    in the aggregate.
+ *
+ *    Unnamed numeric chunks and the `kibana` entry chunk are lumped into
+ *    aggregate `shared chunks total size` / `shared chunk count` metrics
+ *    (informational, no limits).
  *
  * 2. CORE vs PLUGIN CHUNK NAMING
  *
@@ -103,13 +109,14 @@ export interface PluginMetricsInfo {
  *
  * 9. AGGREGATE SHARED CHUNK AND TOTAL OUTPUT METRICS
  *
- *    New metrics beyond legacy parity. `shared chunks total size` and
- *    `shared chunk count` track all unattributed chunks (splitChunks output),
- *    giving visibility into deduplication efficiency. `total optimizer output
- *    size` sums all emitted JS and catches overall build growth. These are
- *    purely informational (no limits). They do NOT include UI shared deps
- *    (`@kbn/ui-shared-deps-npm`, `@kbn/ui-shared-deps-src`) which are built
- *    by separate tooling with their own metrics tracking.
+ *    `shared chunks total size` and `shared chunk count` track only the
+ *    entry chunk (`kibana`) and unnamed numeric chunks -- truly unattributed
+ *    code. Named shared chunks (e.g. `shared-core`, `vendors`) are tracked
+ *    individually via `page load bundle size` with their own limits.
+ *    `total optimizer output size` sums all emitted JS and catches overall
+ *    build growth. These aggregate metrics are purely informational (no
+ *    limits). They do NOT include UI shared deps (`@kbn/ui-shared-deps-npm`,
+ *    `@kbn/ui-shared-deps-src`) which are built by separate tooling.
  *
  * 10. RSPACK API DIFFERENCES FROM WEBPACK 5
  *
@@ -223,7 +230,11 @@ export function buildMetrics(
 export class BundleMetricsPlugin {
   private readonly chunkNameToInfo: Map<string, PluginMetricsInfo>;
 
-  constructor(private readonly pluginInfos: PluginMetricsInfo[]) {
+  constructor(
+    private readonly pluginInfos: PluginMetricsInfo[],
+    private readonly sharedChunkNames: Set<string>,
+    private readonly sharedChunkLimits?: Map<string, number>
+  ) {
     this.chunkNameToInfo = new Map();
     for (const info of pluginInfos) {
       this.chunkNameToInfo.set(info.chunkName, info);
@@ -251,14 +262,28 @@ export class BundleMetricsPlugin {
 
           let totalSharedSize = 0;
           let sharedChunkCount = 0;
+          const namedSharedData: typeof entryData = [];
 
           for (const chunk of compilation.chunks) {
             const info = chunk.name ? this.chunkNameToInfo.get(chunk.name) : undefined;
 
             if (!info) {
-              // Shared/split chunk -- accumulate aggregate stats
-              totalSharedSize += sumJsFileSize(chunk.files, compilation);
-              sharedChunkCount++;
+              const jsSize = sumJsFileSize(chunk.files, compilation);
+              if (chunk.name && this.sharedChunkNames.has(chunk.name)) {
+                namedSharedData.push({
+                  id: chunk.name,
+                  chunkName: chunk.name,
+                  limit: this.sharedChunkLimits?.get(chunk.name),
+                  pageLoadSize: jsSize,
+                  moduleCount: compilation.chunkGraph.getChunkModules(chunk).length,
+                  asyncSize: 0,
+                  asyncCount: 0,
+                  miscSize: 0,
+                });
+              } else {
+                totalSharedSize += jsSize;
+                sharedChunkCount++;
+              }
               continue;
             }
 
@@ -326,6 +351,9 @@ export class BundleMetricsPlugin {
               miscSize: 0,
             });
           }
+
+          // Merge named shared chunks into the entry data
+          entryData.push(...namedSharedData);
 
           // Sort entries by id for deterministic output
           entryData.sort((a, b) => a.id.localeCompare(b.id));

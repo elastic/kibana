@@ -25,3 +25,5 @@ export {
   getSharedModuleRules,
   getSharedIgnoreWarnings,
 } from './shared_config';
+
+export { getSplitChunksCacheGroups, getSharedChunkNames } from './split_chunks';

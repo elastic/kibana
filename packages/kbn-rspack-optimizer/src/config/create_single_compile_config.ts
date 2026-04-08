@@ -14,7 +14,6 @@ import {
   type Configuration,
   type Compiler,
   type RspackPluginInstance,
-  type Module,
 } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
@@ -38,6 +37,7 @@ import { XPackBannerPlugin } from '../plugins/xpack_banner_plugin';
 import { BundleMetricsPlugin, type PluginMetricsInfo } from '../plugins/bundle_metrics_plugin';
 import { ChunkPreloadManifestPlugin } from '../plugins/chunk_preload_manifest_plugin';
 import { readLimits, DEFAULT_LIMITS_PATH } from '../limits';
+import { getSplitChunksCacheGroups, getSharedChunkNames } from './split_chunks';
 
 /**
  * Filter stats to only include chunks, modules, and assets related to the
@@ -633,145 +633,14 @@ export async function createSingleCompileConfig(
       // across consuming plugins. The global `minSize: 20000` still applies
       // to `vendors`, `vendorsHeavy`, and `default` catch-all groups.
       //
-      // `test` regexes run in Rust; only `name` functions cross the Rust-JS
-      // boundary (~0.3s overhead for ~few-thousand matching modules out of
-      // 50K+ total, confirmed by A/B benchmarks).
-      //
-      // `nameForCondition()` is used instead of `module.resource` because
-      // the `name` callback receives the base Module type, where `resource`
-      // is only available on NormalModule.
-      //
-      // CACHE GROUP PRIORITY ORDER (highest wins):
-      //   35: sharedPlugins    - /plugins/  (all cross-plugin shared code)
-      //   32: corePackages     - /src/core/packages/
-      //   30: sharedPackages   - /packages/(shared|private)/  (platform packages)
-      //   30: vendorsHeavy     - specific heavy node_modules (per-library)
-      //   29: solutionPackages - /solutions/*/packages/
-      //   28: rootPackages     - /packages/kbn-/  (repo root + x-pack/packages)
-      //   20: vendors          - /node_modules/ (minChunks: 3)
-      //  -20: default          - catch-all (minChunks: 3, name: 'shared-misc')
-      //
-      // All groups use category-level static names.  No maxSize — benchmarked
-      // at 500K/1M/6M/10M/20M (global and per-group); all caused regressions.
+      // Cache groups are defined in split_chunks.ts — single source of truth
+      // shared with limits validation and BundleMetricsPlugin.
       splitChunks: {
         chunks: 'async',
         minSize: 20000,
         maxAsyncRequests: 30,
         maxInitialRequests: 30,
-        cacheGroups: {
-          // Disable rspack's built-in defaultVendors group (test: /node_modules/i,
-          // priority: -10). Without this, node_modules shared by fewer than 3
-          // chunks bypass our custom `vendors` group (minChunks: 3) and create
-          // unnecessary small vendor chunks via the hidden default.
-          defaultVendors: false,
-
-          // --- Plugin cache group ---
-          // All cross-plugin shared modules merged into a single 'shared-plugins'
-          // chunk.  Covers all plugin directories:
-          //   - src/platform/plugins/(shared|private)/<name>/
-          //   - x-pack/platform/plugins/(shared|private)/<name>/
-          //   - x-pack/solutions/<solution>/plugins/<name>/
-          sharedPlugins: {
-            test: /[\\/]plugins[\\/]/,
-            name: 'shared-plugins',
-            chunks: 'async' as const,
-            priority: 35,
-            minChunks: 3,
-            minSize: 0,
-            reuseExistingChunk: true,
-          },
-
-          // --- Core packages cache group ---
-          // src/core/packages/ (~122 browser-relevant packages).
-          // All core modules merge into a single 'shared-core' chunk to minimise
-          // HTTP requests under HTTP/1.1.  Kibana deploys as a whole, so
-          // per-subdomain cache isolation adds no value.
-          corePackages: {
-            test: /[\\/]src[\\/]core[\\/]packages[\\/]/,
-            name: 'shared-core',
-            chunks: 'async' as const,
-            priority: 32,
-            minChunks: 3,
-            minSize: 0,
-            reuseExistingChunk: true,
-          },
-
-          // --- Platform packages cache group ---
-          // packages/(shared|private)/ — the most impactful shared packages
-          // (kbn-palettes, shared-ux, kbn-field-types, etc.).
-          // Merged into a single 'shared-packages' chunk.
-          sharedPackages: {
-            test: /[\\/]packages[\\/](?:shared|private)[\\/]/,
-            name: 'shared-packages',
-            chunks: 'async' as const,
-            priority: 30,
-            minChunks: 3,
-            minSize: 0,
-            reuseExistingChunk: true,
-          },
-
-          // --- Solution packages cache group ---
-          // x-pack/solutions/<solution>/packages/ (~47 browser-relevant).
-          // Merged into a single 'shared-solution-packages' chunk.
-          solutionPackages: {
-            test: /[\\/]solutions[\\/][^\\/]+[\\/]packages[\\/]/,
-            name: 'shared-solution-packages',
-            chunks: 'async' as const,
-            priority: 29,
-            minChunks: 3,
-            minSize: 0,
-            reuseExistingChunk: true,
-          },
-
-          // --- Root packages cache group ---
-          // packages/kbn-*/ at repo root + x-pack/packages/kbn-*/.
-          // Currently all ~60 are tooling/server-only so this produces no
-          // chunks, but kept as a safety net for future browser-side packages.
-          rootPackages: {
-            test: /[\\/]packages[\\/]kbn-/,
-            name: 'shared-root-packages',
-            chunks: 'async' as const,
-            priority: 28,
-            minChunks: 3,
-            minSize: 0,
-            reuseExistingChunk: true,
-          },
-
-          // Heavy vendors NOT in ui-shared-deps — split per package for lazy
-          // loading.  Each matched package gets its own chunk so pages only
-          // download the specific heavy vendor they need (e.g., maplibre 2MB+).
-          vendorsHeavy: {
-            test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
-            name: (module: Module) => {
-              const resource = module.nameForCondition?.();
-              if (!resource) return 'vendors-heavy';
-              const match = resource.match(/node_modules[\\/](@[^\\/]+[\\/][^\\/]+|[^\\/]+)/);
-              return match ? `vendors-heavy-${match[1].replace(/[\\/]/g, '-')}` : 'vendors-heavy';
-            },
-            priority: 30,
-            chunks: 'async' as const,
-            minChunks: 3,
-            minSize: 0,
-            reuseExistingChunk: true,
-          },
-          // Shared vendors — all node_modules shared by 3+ chunks,
-          // consolidated into a single 'vendors' chunk with maxSize safety.
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            priority: 20,
-            minChunks: 3,
-            reuseExistingChunk: true,
-          },
-          // Catch-all for shared async code not matched by named groups above.
-          // Static name merges all remaining modules into a single chunk.
-          default: {
-            minChunks: 3,
-            priority: -20,
-            reuseExistingChunk: true,
-            name: 'shared-misc',
-          },
-        },
+        cacheGroups: getSplitChunksCacheGroups(),
       },
       // Runtime is embedded in the main entry bundle (kibana.bundle.js)
       // Async chunks do NOT contain runtime - they use JSONP to register modules
@@ -890,7 +759,16 @@ export async function createSingleCompileConfig(
                   ignoreMetrics: false,
                 })),
             ];
-            return [new BundleMetricsPlugin(metricsInfos)];
+
+            const sharedChunkNames = getSharedChunkNames();
+            const sharedChunkLimits = new Map<string, number>();
+            for (const [id, limit] of Object.entries(limits.pageLoadAssetSize ?? {})) {
+              if (sharedChunkNames.has(id) && limit != null) {
+                sharedChunkLimits.set(id, limit);
+              }
+            }
+
+            return [new BundleMetricsPlugin(metricsInfos, sharedChunkNames, sharedChunkLimits)];
           })()
         : []),
 
