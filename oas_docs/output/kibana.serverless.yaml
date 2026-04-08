@@ -44903,7 +44903,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Check the health status of a Fleet Server instance by its host ID. Returns the server status and name if available.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: post-fleet-health-check
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44916,6 +44916,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postHealthCheckRequestExample:
+                description: Check the health of a Fleet Server instance by its host ID
+                value:
+                  id: fleet-server-host-id-1
             schema:
               additionalProperties: false
               type: object
@@ -44928,6 +44933,18 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postHealthCheckHealthyExample:
+                  description: Fleet Server is online and healthy
+                  value:
+                    host_id: fleet-server-host-id-1
+                    name: fleet-server-1
+                    status: ONLINE
+                postHealthCheckUnreachableExample:
+                  description: Fleet Server host ID exists but the server is not reachable
+                  value:
+                    host_id: fleet-server-host-id-1
+                    status: OFFLINE
               schema:
                 additionalProperties: false
                 type: object
@@ -44940,10 +44957,17 @@ paths:
                     type: string
                 required:
                   - status
-          description: 'OK: A successful request.'
+          description: Successful health check response
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  description: The request body is invalid or missing required fields
+                  value:
+                    error: Bad Request
+                    message: '[request body.id]: expected value of type [string] but got [undefined]'
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44961,10 +44985,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: No Fleet Server host was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Fleet Server host fleet-server-host-id-1 not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44982,7 +45013,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Not found.
+          description: Not Found
       summary: Check Fleet Server health
       tags:
         - Fleet internals
