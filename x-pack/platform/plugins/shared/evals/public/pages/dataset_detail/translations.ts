@@ -223,7 +223,7 @@ export const BACK_TO_DATASETS = i18n.translate('xpack.evals.datasetDetail.backTo
 export const getDatasetNotFoundBody = (datasetId: string) =>
   i18n.translate('xpack.evals.datasetDetail.datasetNotFoundBody', {
     defaultMessage:
-      'The dataset {datasetId} could not be found. It may have been loaded from an external source (e.g. a GCS snapshot) and is not stored in the cluster.',
+      'The dataset {datasetId} could not be found. It may have been deleted or the ID may be incorrect.',
     values: { datasetId },
   });
 

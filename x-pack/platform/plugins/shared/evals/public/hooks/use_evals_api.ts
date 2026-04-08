@@ -128,6 +128,7 @@ export const useDataset = (datasetId: string) => {
       }
       return true;
     },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -310,6 +311,7 @@ export const useEvaluationRun = (runId: string) => {
       }
       return true;
     },
+    refetchOnWindowFocus: false,
   });
 };
 
