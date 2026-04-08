@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/timelines-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-threat-hunting-investigations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/timelines-plugin'
+  title: '@kbn/timelines-plugin'
   description: Moon project for @kbn/timelines-plugin
   channel: ''
   owner: '@elastic/security-threat-hunting-investigations'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/timelines
+  sourceRoot: x-pack/platform/plugins/shared/timelines
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -58,16 +57,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

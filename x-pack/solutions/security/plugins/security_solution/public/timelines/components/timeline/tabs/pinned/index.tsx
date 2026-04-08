@@ -184,6 +184,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       startDate: '',
       sort: timelineQuerySortField,
       timerangeKind: undefined,
+      dateRangeField: experimentalDataView?.getTimeField()?.name ?? '@timestamp',
     });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();

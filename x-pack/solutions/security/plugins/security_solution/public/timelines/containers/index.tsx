@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
@@ -29,8 +29,8 @@ import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
-  TimelineEventsAllStrategyResponse,
   TimelineEdges,
+  TimelineEventsAllStrategyResponse,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../../common/search_strategy';
@@ -106,6 +106,7 @@ export interface UseTimelineEventsProps {
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
   fetchNotes?: boolean;
+  dateRangeField?: string;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -159,6 +160,7 @@ export const useTimelineEventsHandler = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  dateRangeField,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs, TimelineEventsSearchHandler] => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
@@ -395,6 +397,7 @@ export const useTimelineEventsHandler = ({
           timerange: prevRequest?.timerange ?? {},
           runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
           ...deStructureEqlOptions(prevEqlRequest),
+          ...(dateRangeField ? { dateRangeField } : {}),
         };
 
         const timerange =
@@ -408,6 +411,7 @@ export const useTimelineEventsHandler = ({
           runtimeMappings: runtimeMappings ?? {},
           ...timerange,
           ...deStructureEqlOptions(eqlOptions),
+          ...(dateRangeField ? { dateRangeField } : {}),
         };
 
         const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
@@ -462,6 +466,7 @@ export const useTimelineEventsHandler = ({
           sort,
           ...timerange,
           ...(eqlOptions ? eqlOptions : {}),
+          ...(dateRangeField ? { dateRangeField } : {}),
         } as const;
 
         if (activeBatch !== newActiveBatch) {
@@ -490,6 +495,7 @@ export const useTimelineEventsHandler = ({
     sort,
     fields,
     runtimeMappings,
+    dateRangeField,
   ]);
 
   /*
@@ -543,6 +549,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  dateRangeField,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
   const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>(defaultEvents);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
@@ -560,6 +567,7 @@ export const useTimelineEvents = ({
     sort,
     skip,
     timerangeKind,
+    dateRangeField,
   });
 
   useEffect(() => {

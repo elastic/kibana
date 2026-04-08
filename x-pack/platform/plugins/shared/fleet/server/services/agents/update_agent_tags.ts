@@ -12,7 +12,7 @@ import { AgentReassignmentError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
@@ -46,17 +46,21 @@ export async function updateAgentTags(
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
     const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
 
-    const filters = namespaceFilter ? [namespaceFilter] : [];
-    if (options.kuery !== '') {
-      filters.push(options.kuery);
+    const nsAndKuery = buildFilterWithNamespace(
+      namespaceFilter,
+      options.kuery !== '' ? options.kuery : undefined
+    );
+    const filters: string[] = [];
+    if (nsAndKuery) {
+      filters.push(nsAndKuery);
     }
     if (tagsToAdd.length === 1 && tagsToRemove.length === 0) {
-      filters.push(`NOT (tags:${tagsToAdd[0]})`);
+      filters.push(`(NOT (tags:${tagsToAdd[0]}))`);
     } else if (tagsToRemove.length === 1 && tagsToAdd.length === 0) {
-      filters.push(`tags:${tagsToRemove[0]}`);
+      filters.push(`(tags:${tagsToRemove[0]})`);
     }
 
-    const kuery = filters.map((filter) => `(${filter})`).join(' AND ');
+    const kuery = filters.join(' AND ');
     const pitId = await openPointInTime(esClient);
 
     // calculate total count

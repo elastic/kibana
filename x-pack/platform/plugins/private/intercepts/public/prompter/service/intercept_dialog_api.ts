@@ -18,7 +18,7 @@ export interface InterceptSteps extends Pick<EuiTourStepProps, 'title'> {
    * expects a react component that will be rendered in the dialog, and expects a callback to be called with the value
    * of the step when the user is done with the step.
    */
-  content: FC<{ onValue: (value: unknown) => void }>;
+  content: FC<{ onValue: (value: unknown) => void; responseMap: Record<string, unknown> }>;
 }
 
 interface StartingInterceptStep extends InterceptSteps {

@@ -890,6 +890,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       registerUrl: `${ELASTICSEARCH_DOCS}snapshots-read-only-repository.html#read-only-url-repository-settings`,
       restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
       restoreSnapshotApi: `${ELASTICSEARCH_APIS}operation/operation-snapshot-restore`,
+      searchableSnapshot: `${ELASTICSEARCH_DOCS}searchable-snapshots.html`,
       searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
       slmStart: `${ELASTICSEARCH_APIS}operation/operation-slm-start`,
     },

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-connectors-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-connectors-plugin'
+  title: '@kbn/search-connectors-plugin'
   description: Moon project for @kbn/search-connectors-plugin
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/search/plugins/search_connectors
+  sourceRoot: x-pack/solutions/search/plugins/search_connectors
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -36,16 +35,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -80,6 +80,11 @@ export const uploadAllEventsFromPath = async (
 
     readFilesRecursively(eventLogPath, (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
+        if (path.basename(filePath).startsWith('scout-failures-')) {
+          // Won't consider this for upload; the file is NDJSON, but not in the events reporter format
+          return;
+        }
+
         ndjsonFilePaths.push(filePath);
       }
     });

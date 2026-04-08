@@ -50,6 +50,7 @@ export interface TestGroupRunOrderResponse {
       names: string[];
     }>;
     tooLong?: Array<{ config: string; durationMin: number }>;
+    tooLongMin?: number;
     namesWithoutDurations: string[];
   }>;
 }
@@ -169,6 +170,7 @@ export class CiStatsClient {
       queue?: string;
       defaultMin?: number;
       maxMin: number;
+      tooLongMin?: number;
       minimumIsolationMin?: number;
       overheadMin?: number;
       warmupMin?: number;

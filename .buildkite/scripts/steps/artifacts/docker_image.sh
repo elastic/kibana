@@ -15,6 +15,9 @@ else
   KIBANA_IMAGE_TAG="pr-$BUILDKITE_PULL_REQUEST-$GIT_ABBREV_COMMIT"
 fi
 
+echo "--- Clean up cached images"
+clean_cached_images
+
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 

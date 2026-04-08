@@ -15,8 +15,7 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
-import { mockGlobalState } from '../../../../public/common/mock';
-import type { EntityDefinition } from '@kbn/entities-schema';
+import { type EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import { EntityType } from '../../../../common/search_strategy';
 import type {
@@ -29,6 +28,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import { allowedExperimentalValues } from '../../../../common';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
@@ -130,7 +130,7 @@ describe('EntityStoreDataClient', () => {
       getAlertsIndex: jest.fn().mockReturnValue('alerts'),
     } as unknown as AppClient,
     config: {} as EntityStoreConfig,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
+    experimentalFeatures: allowedExperimentalValues,
     taskManager: {} as TaskManagerStartContract,
     security: {
       authz: {

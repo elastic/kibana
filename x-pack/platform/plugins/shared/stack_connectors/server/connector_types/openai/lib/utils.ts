@@ -31,7 +31,7 @@ export const sanitizeRequest = (
     case OpenAiProviderType.OpenAi:
       return openAiSanitizeRequest(url, body, defaultModel!);
     case OpenAiProviderType.AzureAi:
-      return azureAiSanitizeRequest(url, body);
+      return azureAiSanitizeRequest(url, body, defaultModel);
     case OpenAiProviderType.Other:
       return otherOpenAiSanitizeRequest(body);
     default:
@@ -45,13 +45,6 @@ export function getRequestWithStreamOption(
   body: string,
   stream: boolean,
   defaultModel: string
-): string;
-
-export function getRequestWithStreamOption(
-  provider: OpenAiProviderType.AzureAi | OpenAiProviderType.Other,
-  url: string,
-  body: string,
-  stream: boolean
 ): string;
 
 export function getRequestWithStreamOption(
@@ -73,7 +66,7 @@ export function getRequestWithStreamOption(
     case OpenAiProviderType.OpenAi:
       return openAiGetRequestWithStreamOption(url, body, stream, defaultModel!);
     case OpenAiProviderType.AzureAi:
-      return azureAiGetRequestWithStreamOption(url, body, stream);
+      return azureAiGetRequestWithStreamOption(url, body, stream, defaultModel);
     case OpenAiProviderType.Other:
       return otherOpenAiGetRequestWithStreamOption(body, stream, defaultModel);
     default:

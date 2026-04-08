@@ -2,26 +2,23 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
     "@kbn/repo-info",
+    "@kbn/repo-packages",
     "@kbn/es",
     "@kbn/dev-proc-runner",
-    "@kbn/test",
+    "@kbn/kbn-client",
+    "@kbn/test-es-server",
+    "@kbn/test-kibana-server",
+    "@kbn/test-saml-auth",
     "@kbn/es-archiver",
     "@kbn/dev-utils",
     "@kbn/mock-idp-utils",
@@ -32,7 +29,7 @@
     "@kbn/core-http-common",
     "@kbn/axe-config",
     "@kbn/peggy",
-    "@kbn/apm-synthtrace",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/test-docker-servers",
+    "@kbn/test"
   ]
 }

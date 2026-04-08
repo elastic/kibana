@@ -9,10 +9,12 @@
 
 import Path from 'path';
 import * as Fsp from 'fs/promises';
+import { cpus } from 'os';
 
 import * as Peggy from '@kbn/peggy';
-import { asyncForEach } from '@kbn/std';
-import { TransformConfig, withFastAsyncTransform } from '@kbn/babel-transform';
+import { asyncForEachWithLimit } from '@kbn/std';
+import type { TransformConfig } from '@kbn/babel-transform';
+import { withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
@@ -117,7 +119,7 @@ export const BuildPackages: Task = {
     };
 
     await withFastAsyncTransform(transformConfig, async (transform) => {
-      await asyncForEach(packages, async (pkg) => {
+      await asyncForEachWithLimit(packages, cpus().length, async (pkg) => {
         const allPaths = new Set(Array.from(pkgFileMap.getFiles(pkg), (p) => p.abs));
         const pkgDistPath = build.resolvePath(pkg.normalizedRepoRelativeDir);
         const peggyConfigOutputPaths = new Set<string>();

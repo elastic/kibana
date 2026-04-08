@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-objects-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-objects-management-plugin'
+  title: '@kbn/saved-objects-management-plugin'
   description: Moon project for @kbn/saved-objects-management-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/saved_objects_management
+  sourceRoot: src/platform/plugins/shared/saved_objects_management
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -55,16 +54,6 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!public/management_section/objects_table/saved_objects_table_pseudo.tsx'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

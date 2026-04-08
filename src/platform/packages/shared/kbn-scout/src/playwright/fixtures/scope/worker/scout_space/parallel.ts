@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import { UiSettingValues } from '@kbn/kbn-client';
 import { formatTime, isValidUTCDate } from '../../../../utils';
 import { coreWorkerFixtures } from '..';
 import { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';

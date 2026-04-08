@@ -35,8 +35,6 @@ Required when importing a new list that is `list_id` is not specified.
 
       */
   type: ListType.optional(),
-  serializer: z.string().optional(),
-  deserializer: z.string().optional(),
   /**
    * Determines when changes made by the request are made visible to search
    */

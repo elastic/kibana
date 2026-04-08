@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-embeddable-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ux-infra_services-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lens-embeddable-utils'
+  title: '@kbn/lens-embeddable-utils'
   description: Moon project for @kbn/lens-embeddable-utils
   channel: ''
   owner: '@elastic/obs-ux-infra_services-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-lens-embeddable-utils
+  sourceRoot: src/platform/packages/shared/kbn-lens-embeddable-utils
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -41,16 +40,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

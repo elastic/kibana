@@ -50,6 +50,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   constructor({ actionsClient, connectorId, ...props }: CustomChatModelInput) {
     super({
       ...props,
+      model: props.model ?? 'gemini-1.5-flash',
       apiKey: 'asda',
       maxOutputTokens: props.maxTokens ?? 2048,
     });
@@ -65,9 +66,10 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   }
 
   async completionWithRetry(
-    request: GenerateContentRequest,
-    options?: this['ParsedCallOptions']
+    ...args: Parameters<ChatGoogleGenerativeAI['completionWithRetry']>
   ): Promise<GenerateContentResult> {
+    const [request, options] = args;
+    const req = request as GenerateContentRequest;
     return this.caller.callWithOptions({ signal: options?.signal }, async () => {
       try {
         const requestBody = {
@@ -77,8 +79,8 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
             subActionParams: {
               telemetryMetadata: this.telemetryMetadata,
               model: this.#model,
-              messages: request.contents,
-              tools: request.tools,
+              messages: req.contents,
+              tools: req.tools,
               temperature: this.#temperature,
             },
           },

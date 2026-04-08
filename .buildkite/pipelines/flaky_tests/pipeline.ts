@@ -220,7 +220,6 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
-      cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
       },
@@ -230,14 +229,13 @@ for (const testSuite of testSuites) {
 
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
     const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout/configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
+        SCOUT_REPORTER_ENABLED: 'true',
         SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
@@ -249,7 +247,6 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 60,
-      cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
       },
@@ -267,10 +264,17 @@ for (const testSuite of testSuites) {
         );
       }
       const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
+      const diskSizeOverride =
+        {
+          osquery_cypress: 115,
+          security_serverless_osquery: 115,
+          defend_workflows: 120,
+        }[suiteName] || 105;
+
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: expandAgentQueue(agentQueue),
+        agents: expandAgentQueue(agentQueue, diskSizeOverride),
         key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
@@ -278,7 +282,6 @@ for (const testSuite of testSuites) {
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
-        cancel_on_build_failing: true,
         retry: {
           automatic: [{ exit_status: '-1', limit: 3 }],
         },

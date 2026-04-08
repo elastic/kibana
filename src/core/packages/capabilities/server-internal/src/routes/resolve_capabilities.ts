@@ -38,7 +38,8 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
                   return 'Invalid application id';
                 }
               },
-            })
+            }),
+            { maxSize: 500 }
           ),
         }),
       },

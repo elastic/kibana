@@ -12,7 +12,11 @@ import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
-import { filterModulesByScoutCiConfig } from '../tests_discovery/search_configs';
+import { markModulesAffectedStatus } from '../tests_discovery/affected_modules';
+import {
+  filterModulesByScoutCiConfig,
+  getScoutCiExcludedConfigs,
+} from '../tests_discovery/search_configs';
 import {
   collectUniqueTags,
   getServerRunFlagsFromTags,
@@ -78,6 +82,45 @@ const filterModulesByTargetTags = (
             serverRunFlags: getServerRunFlagsFromTags(filteredTags),
           };
         }),
+    }))
+    .filter((module) => module.configs.length > 0);
+};
+
+const CUSTOM_SERVERS_PATH_PATTERN = /\/test\/scout_[^/]+/;
+
+const filterModulesByCustomServerPaths = (
+  modules: ModuleDiscoveryInfo[],
+  includeCustomServers: boolean
+): ModuleDiscoveryInfo[] => {
+  if (includeCustomServers) {
+    return modules;
+  }
+
+  return modules
+    .map((module) => ({
+      ...module,
+      configs: module.configs.filter((config) => {
+        const isCustomServerConfig = CUSTOM_SERVERS_PATH_PATTERN.test(config.path);
+        return !isCustomServerConfig;
+      }),
+    }))
+    .filter((module) => module.configs.length > 0);
+};
+
+const filterModulesByExcludedConfigPaths = (
+  modules: ModuleDiscoveryInfo[],
+  excludedConfigPaths: string[]
+): ModuleDiscoveryInfo[] => {
+  if (excludedConfigPaths.length === 0) {
+    return modules;
+  }
+
+  const excludedSet = new Set(excludedConfigPaths);
+
+  return modules
+    .map((module) => ({
+      ...module,
+      configs: module.configs.filter((config) => !excludedSet.has(config.path)),
     }))
     .filter((module) => module.configs.length > 0);
 };
@@ -163,16 +206,31 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const target = (flagsReader.enum('target', TARGET_TYPES) || 'all') as TargetType;
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
+  const includeCustomServers = flagsReader.boolean('include-custom-servers');
+  const affectedModulesPath = flagsReader.string('affected-modules');
 
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
+
+  // Mark affected status when selective testing is enabled (all modules kept, isAffected set)
+  const modulesAfterAffectedMark = affectedModulesPath
+    ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
+    : modulesWithTests;
+
   // Filter modules by target tags and compute server run flags
-  const filteredModules = filterModulesByTargetTags(modulesWithTests, targetTags);
+  const filteredModulesByTags = filterModulesByTargetTags(modulesAfterAffectedMark, targetTags);
+  const filteredModules = filterModulesByCustomServerPaths(
+    filteredModulesByTags,
+    includeCustomServers
+  );
+  const filteredModulesWithExcludedConfigs = process.env.CI
+    ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
+    : filteredModules;
   // Handle output based on flatten flag
   if (flatten) {
-    handleFlattenedOutput(filteredModules, flagsReader, log);
+    handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   } else {
-    handleNonFlattenedOutput(filteredModules, flagsReader, log);
+    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   }
 };
 
@@ -183,10 +241,12 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * Scout tests, filters them based on deployment target tags, and optionally saves
  * or validates the results.
  *
- * The command supports three deployment targets:
+ * The command supports five deployment targets:
  * - 'all': Finds configs with deployment-agnostic tags
- * - 'mki': Finds configs with serverless-only tags
- * - 'ech': Finds configs with stateful-only tag
+ * - 'local': Finds configs with @local-* tags (local stateful + local serverless)
+ * - 'local-stateful-only': Finds configs with @local-stateful-* tags only
+ * - 'mki': Finds configs with @cloud-serverless-* tags
+ * - 'ech': Finds configs with @cloud-stateful-* tags
  *
  * Output formats:
  * - Standard: Lists modules grouped by plugin/package with their configs and tags
@@ -202,21 +262,39 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   validate against CI configuration, or save filtered results to a file.
 
   Options:
-    --target <target>  Filter configs by deployment target:
-                       - 'all': deployment-agnostic tags (default)
-                       - 'mki': serverless-only tags
-                       - 'ech': stateful-only tags
-    --validate         Validate that all discovered modules are registered in Scout CI config
-    --save             Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
-    --flatten          Output configs in flattened format grouped by mode, group, and scout command
-                       (useful for Cloud test execution)
+    --target <target>         Filter configs by deployment target:
+                              - 'all': deployment-agnostic tags (default)
+                              - 'local': @local-* tags (local stateful + local serverless)
+                              - 'local-stateful-only': @local-stateful-* tags only
+                              - 'mki': @cloud-serverless-* tags
+                              - 'ech': @cloud-stateful-* tags
+    --affected-modules <file>  Path to a JSON file containing affected @kbn/ module IDs
+                              (produced by list_affected). All modules run; affected ones
+                              get "affected" prefix in Buildkite step (selective testing).
+    --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
+    --validate                Validate that all discovered modules are registered in Scout CI config
+    --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
+    --flatten                 Output configs in flattened format grouped by mode, group, and scout command
+                              (useful for Cloud test execution)
 
   Examples:
     # Discover all deployment-agnostic configs
     node scripts/scout discover-playwright-configs
 
-    # Discover serverless-only configs
+    # Discover configs for local targets (@local-*)
+    node scripts/scout discover-playwright-configs --target local
+
+    # Discover only local stateful configs (@local-stateful-*)
+    node scripts/scout discover-playwright-configs --target local-stateful-only
+
+    # Discover cloud serverless configs (@cloud-serverless-*)
     node scripts/scout discover-playwright-configs --target mki
+
+    # Discover cloud stateful configs (@cloud-stateful-*)
+    node scripts/scout discover-playwright-configs --target ech
+
+    # Discover local custom-server configs only
+    node scripts/scout discover-playwright-configs --include-custom-servers
 
     # Validate discovered configs against CI configuration
     node scripts/scout discover-playwright-configs --validate
@@ -226,11 +304,20 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
 
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
+
+    # Selective testing: only configs for affected modules
+    node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --save
   `,
   flags: {
-    string: ['target'],
-    boolean: ['save', 'validate', 'flatten'],
-    default: { target: 'all', save: false, validate: false, flatten: false },
+    string: ['target', 'affected-modules'],
+    boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
+    default: {
+      target: 'all',
+      save: false,
+      validate: false,
+      flatten: false,
+      'include-custom-servers': false,
+    },
   },
   run: ({ flagsReader, log }) => {
     runDiscoverPlaywrightConfigs(flagsReader, log);

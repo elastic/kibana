@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/timelion-grammar'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/timelion-grammar'
+  title: '@kbn/timelion-grammar'
   description: Moon project for @kbn/timelion-grammar
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-timelion-grammar
+  sourceRoot: src/platform/packages/private/kbn-timelion-grammar
 tags:
   - shared-common
   - package

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/transform-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/transform-plugin'
+  title: '@kbn/transform-plugin'
   description: Moon project for @kbn/transform-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/transform
+  sourceRoot: x-pack/platform/plugins/private/transform
 dependsOn:
   - '@kbn/core'
   - '@kbn/features-plugin'
@@ -106,16 +105,6 @@ fileGroups:
     - test/scout/**/*
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

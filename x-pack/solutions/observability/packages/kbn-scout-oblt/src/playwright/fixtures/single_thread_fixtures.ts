@@ -6,16 +6,13 @@
  */
 
 import { test as base, apiTest as apiBase, mergeTests } from '@kbn/scout';
-import type { ApiServicesFixture } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
 import { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './types';
 import { profilingSetupFixture } from './worker/profiling/profiling_setup_fixture';
+import { sloDataFixture } from './worker';
 
-/**
- * Should be used for the test spec files executed seqentially.
- */
-export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
+const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
@@ -30,15 +27,10 @@ export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
     await use(extendedPageObjects);
   },
   apiServices: [
-    async (
-      { apiServices }: { apiServices: ApiServicesFixture },
-      use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
-    ) => {
-      const extendedApiServices = apiServices as ObltApiServicesFixture;
+    async ({ apiServices }, use) => {
       // extend with Observability specific API services
-      // extendedApiServices.<service_name> = getServiceApiHelper(kbnClient);
-
-      await use(extendedApiServices);
+      // apiServices.<service_name> = getServiceApiHelper(kbnClient);
+      await use(apiServices);
     },
     { scope: 'worker' },
   ],
@@ -46,17 +38,18 @@ export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
 
 const apiFixture = apiBase.extend<ObltApiServicesFixture>({
   apiServices: [
-    async (
-      { apiServices }: { apiServices: ApiServicesFixture },
-      use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
-    ) => {
-      const extendedApiServices = apiServices as ObltApiServicesFixture;
+    async ({ apiServices }, use) => {
       // extend with Observability specific API services
-      // extendedApiServices.<service_name> = getServiceApiHelper(kbnClient);
-      await use(extendedApiServices);
+      // apiServices.<service_name> = getServiceApiHelper(kbnClient);
+      await use(apiServices);
     },
     { scope: 'worker' },
   ],
 });
 
 export const apiTest = mergeTests(apiFixture, profilingSetupFixture);
+
+/**
+ * Should be used for the test spec files executed sequentially.
+ */
+export const test = mergeTests(baseFixture, sloDataFixture);

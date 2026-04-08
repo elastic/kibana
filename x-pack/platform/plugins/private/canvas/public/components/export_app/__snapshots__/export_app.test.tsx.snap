@@ -47,7 +47,7 @@ exports[`<ExportApp /> renders as expected 1`] = `
         </RoutingLink>
       </div>
       <div
-        css="unknown styles"
+        className="canvasExport__stageContent"
         data-shared-items-count={3}
       >
         <Insertion
@@ -61,7 +61,6 @@ exports[`<ExportApp /> renders as expected 1`] = `
               "nonce": undefined,
               "registered": Object {},
               "sheet": StyleSheet {
-                "_alreadyInsertedOrderInsensitiveRule": true,
                 "_insertTag": [Function],
                 "before": null,
                 "container": <head>
@@ -70,42 +69,24 @@ exports[`<ExportApp /> renders as expected 1`] = `
                     data-s=""
                   >
                     
-                    .css-1aoydhg-floatTopRight{position:absolute;top:-8px;right:-8px;z-index:1;}
-                  </style>
-                  <style
-                    data-emotion="css"
-                    data-s=""
-                  >
-                    
-                    .css-17hzfsv-ExportApp{}
                   </style>
                 </head>,
-                "ctr": 1,
+                "ctr": 0,
                 "insertionPoint": undefined,
-                "isSpeedy": false,
+                "isSpeedy": true,
                 "key": "css",
                 "nonce": undefined,
                 "prepend": undefined,
-                "tags": Array [
-                  <style
-                    data-emotion="css"
-                    data-s=""
-                  >
-                    
-                    .css-17hzfsv-ExportApp{}
-                  </style>,
-                ],
+                "tags": Array [],
               },
             }
           }
           isStringTag={true}
           serialized={
             Object {
-              "map": undefined,
               "name": "17hzfsv-ExportApp",
               "next": undefined,
               "styles": ";label:ExportApp;",
-              "toString": [Function],
             }
           }
         />
@@ -176,7 +157,7 @@ exports[`<ExportApp /> renders as expected 2`] = `
         </RoutingLink>
       </div>
       <div
-        css="unknown styles"
+        className="canvasExport__stageContent"
         data-shared-items-count={4}
       >
         <Insertion
@@ -190,7 +171,6 @@ exports[`<ExportApp /> renders as expected 2`] = `
               "nonce": undefined,
               "registered": Object {},
               "sheet": StyleSheet {
-                "_alreadyInsertedOrderInsensitiveRule": true,
                 "_insertTag": [Function],
                 "before": null,
                 "container": <head>
@@ -199,42 +179,24 @@ exports[`<ExportApp /> renders as expected 2`] = `
                     data-s=""
                   >
                     
-                    .css-1aoydhg-floatTopRight{position:absolute;top:-8px;right:-8px;z-index:1;}
-                  </style>
-                  <style
-                    data-emotion="css"
-                    data-s=""
-                  >
-                    
-                    .css-17hzfsv-ExportApp{}
                   </style>
                 </head>,
-                "ctr": 1,
+                "ctr": 0,
                 "insertionPoint": undefined,
-                "isSpeedy": false,
+                "isSpeedy": true,
                 "key": "css",
                 "nonce": undefined,
                 "prepend": undefined,
-                "tags": Array [
-                  <style
-                    data-emotion="css"
-                    data-s=""
-                  >
-                    
-                    .css-17hzfsv-ExportApp{}
-                  </style>,
-                ],
+                "tags": Array [],
               },
             }
           }
           isStringTag={true}
           serialized={
             Object {
-              "map": undefined,
               "name": "17hzfsv-ExportApp",
               "next": undefined,
               "styles": ";label:ExportApp;",
-              "toString": [Function],
             }
           }
         />

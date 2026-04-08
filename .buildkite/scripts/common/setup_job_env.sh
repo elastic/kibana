@@ -89,9 +89,6 @@ EOF
 
 # Set up misc keys
 {
-  KIBANA_CI_REPORTER_KEY=$(vault_get kibanamachine-reporter value)
-  export KIBANA_CI_REPORTER_KEY
-
   EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
   export EC_API_KEY
 
@@ -100,24 +97,6 @@ EOF
 
   PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
   export PROJECT_API_DOMAIN
-
-  SYNTHETICS_SERVICE_USERNAME="$(vault_get kibana-ci-synthetics-credentials username)"
-  export SYNTHETICS_SERVICE_USERNAME
-
-  SYNTHETICS_SERVICE_PASSWORD="$(vault_get kibana-ci-synthetics-credentials password)"
-  export SYNTHETICS_SERVICE_PASSWORD
-
-  SYNTHETICS_SERVICE_MANIFEST="$(vault_get kibana-ci-synthetics-credentials manifest)"
-  export SYNTHETICS_SERVICE_MANIFEST
-
-  SYNTHETICS_REMOTE_KIBANA_USERNAME="$(vault_get kibana-ci-synthetics-remote-credentials username)"
-  export SYNTHETICS_REMOTE_KIBANA_USERNAME
-
-  SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(vault_get kibana-ci-synthetics-remote-credentials password)"
-  export SYNTHETICS_REMOTE_KIBANA_PASSWORD
-
-  SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(vault_get kibana-ci-synthetics-remote-credentials url)"}
-  export SYNTHETICS_REMOTE_KIBANA_URL
 
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
@@ -205,6 +184,7 @@ EOF
 if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
   export MOON_REMOTE_CACHE_TOKEN
+  export MOON_CACHE=read
 fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}

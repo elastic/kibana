@@ -19,7 +19,7 @@ import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { type UseEuiTheme, useEuiTheme } from '@elastic/eui';
-import { type CSSInterpolation } from '@emotion/css';
+import { type CSSInterpolation } from '@emotion/serialize';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';

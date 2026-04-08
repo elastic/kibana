@@ -31,8 +31,6 @@ export const CreateListRequestBody = z.object({
   name: ListName,
   description: ListDescription,
   type: ListType,
-  serializer: z.string().optional(),
-  deserializer: z.string().optional(),
   meta: ListMetadata.optional(),
   version: z.number().int().min(1).optional().default(1),
 });

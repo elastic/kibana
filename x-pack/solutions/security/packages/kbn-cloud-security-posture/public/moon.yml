@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cloud-security-posture'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-cloud-security-posture'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cloud-security-posture'
+  title: '@kbn/cloud-security-posture'
   description: Moon project for @kbn/cloud-security-posture
   channel: ''
   owner: '@elastic/kibana-cloud-security-posture'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/public
+  sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/public
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -56,16 +55,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -146,7 +146,7 @@ export function LensEditConfigurationFlyout({
         updateSuggestion?.(previousAttrs);
       }
       if (savedObjectId) {
-        updateByRefInput?.(savedObjectId);
+        updateByRefInput?.(savedObjectId, previousAttrs);
       }
     }
     onCancelCallback?.();
@@ -179,7 +179,7 @@ export function LensEditConfigurationFlyout({
     }
     if (savedObjectId) {
       saveByRef?.(currentAttributes);
-      updateByRefInput?.(savedObjectId);
+      updateByRefInput?.(savedObjectId, currentAttributes);
     }
 
     // check if visualization type changed, if it did, don't pass the previous visualization state

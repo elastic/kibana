@@ -95,10 +95,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateXPackNoticeFile);
 
     await globalRun(Tasks.DeletePackagesFromBuildRoot);
+
     await globalRun(Tasks.UpdateLicenseFile);
     await globalRun(Tasks.RemovePackageJsonDeps);
     await globalRun(Tasks.CleanPackageManagerRelatedFiles);
     await globalRun(Tasks.CleanExtraFilesFromModules);
+
     await globalRun(Tasks.CleanEmptyFolders);
     await globalRun(Tasks.FetchAgentVersionsList);
   }

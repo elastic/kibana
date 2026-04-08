@@ -12,7 +12,10 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import {
+  ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID,
+  ANALYZER_PREVIEW_TEST_ID,
+} from './test_ids';
 import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import * as mock from '../mocks/mock_analyzer_data';
 import {
@@ -69,6 +72,25 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const mockUiSettingsGet = jest.fn();
+const mockApmStartTransaction = jest.fn();
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useKibana: () => ({
+      services: {
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
+        apm: {
+          startTransaction: mockApmStartTransaction,
+        },
+      },
+    }),
+  };
+});
+
 const NO_ANALYZER_MESSAGE =
   'You can only visualize events triggered by hosts configured with the Elastic Defend integration or any sysmon data from winlogbeat. Refer to Visual event analyzer(external, opens in a new tab or window) for more information.';
 
@@ -82,6 +104,31 @@ const renderAnalyzerPreview = (context = mockContextValue) =>
   );
 
 describe('AnalyzerPreviewContainer', () => {
+  beforeEach(() => {
+    mockUiSettingsGet.mockReturnValue(true);
+    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      investigateInTimelineAlertClick: jest.fn(),
+    });
+  });
+
+  it('should render excluded cold/frozen tiers badge when setting is enabled', () => {
+    const { getByTestId } = renderAnalyzerPreview();
+
+    expect(getByTestId(ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID)).toHaveTextContent(
+      'Cold/Frozen tiers off'
+    );
+  });
+
+  it('should render included cold/frozen tiers badge when setting is disabled', () => {
+    mockUiSettingsGet.mockReturnValue(false);
+
+    const { getByTestId } = renderAnalyzerPreview();
+
+    expect(getByTestId(ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID)).toHaveTextContent(
+      'Cold/Frozen tiers on'
+    );
+  });
+
   describe('when newExpandableFlyoutNavigationDisabled is true', () => {
     beforeEach(() => {
       jest.clearAllMocks();

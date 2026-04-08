@@ -4,28 +4,31 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/scout'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/scout'
+  title: '@kbn/scout'
   description: Moon project for @kbn/scout
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-scout
+  sourceRoot: src/platform/packages/shared/kbn-scout
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
   - '@kbn/ci-stats-reporter'
   - '@kbn/repo-info'
+  - '@kbn/repo-packages'
   - '@kbn/es'
   - '@kbn/dev-proc-runner'
-  - '@kbn/test'
+  - '@kbn/kbn-client'
+  - '@kbn/test-es-server'
+  - '@kbn/test-kibana-server'
+  - '@kbn/test-saml-auth'
   - '@kbn/es-archiver'
   - '@kbn/dev-utils'
   - '@kbn/mock-idp-utils'
@@ -36,8 +39,8 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/axe-config'
   - '@kbn/peggy'
-  - '@kbn/apm-synthtrace'
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/test-docker-servers'
+  - '@kbn/test'
 tags:
   - test-helper
   - package
@@ -49,16 +52,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

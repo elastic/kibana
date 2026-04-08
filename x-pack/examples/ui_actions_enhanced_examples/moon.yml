@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ui-actions-enhanced-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-actions-enhanced-examples-plugin'
+  title: '@kbn/ui-actions-enhanced-examples-plugin'
   description: Moon project for @kbn/ui-actions-enhanced-examples-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: x-pack/examples/ui_actions_enhanced_examples
+  sourceRoot: x-pack/examples/ui_actions_enhanced_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-utils-plugin'

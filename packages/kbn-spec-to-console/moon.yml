@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/spec-to-console'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: javascript
 project:
-  name: '@kbn/spec-to-console'
+  title: '@kbn/spec-to-console'
   description: Moon project for @kbn/spec-to-console
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: packages/kbn-spec-to-console
+  sourceRoot: packages/kbn-spec-to-console
 tags:
   - shared-common
   - package
@@ -29,16 +28,6 @@ fileGroups:
     - bin/**/*
     - index.js
     - jest.config.js
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -224,4 +224,85 @@ describe('InterceptDisplayManager', () => {
       })
     );
   });
+
+  it('provides each step content with a responseMap containing only responses from previous steps', async () => {
+    const user = userEvent.setup();
+    const ackProductIntercept = jest.fn();
+
+    const capturedResponseMaps: Record<string, Record<string, unknown>> = {};
+
+    const productIntercept: Intercept = {
+      id: '1',
+      runId: 1,
+      steps: [
+        {
+          id: 'start',
+          title: 'Welcome',
+          content: ({ responseMap }) => {
+            capturedResponseMaps.start = { ...responseMap };
+            return <p>{'Welcome screen'}</p>;
+          },
+        },
+        {
+          id: 'step-1',
+          title: 'Step 1',
+          content: ({ onValue, responseMap }) => {
+            capturedResponseMaps['step-1'] = { ...responseMap };
+            return <button onClick={() => onValue('answer-1')}>{'Submit Step 1'}</button>;
+          },
+        },
+        {
+          id: 'step-2',
+          title: 'Step 2',
+          content: ({ onValue, responseMap }) => {
+            capturedResponseMaps['step-2'] = { ...responseMap };
+            return <button onClick={() => onValue('answer-2')}>{'Submit Step 2'}</button>;
+          },
+        },
+        {
+          id: 'completion',
+          title: 'Thank you',
+          content: ({ responseMap }) => {
+            capturedResponseMaps.completion = { ...responseMap };
+            return <p>{'All done'}</p>;
+          },
+        },
+      ],
+      onProgress: jest.fn(),
+      onFinish: jest.fn(),
+    };
+
+    const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
+
+    render(
+      <InterceptDisplayManagerMemoized
+        ackIntercept={ackProductIntercept}
+        intercept$={intercept$.asObservable()}
+        staticAssetsHelper={staticAssetsHelperMock}
+      />
+    );
+
+    expect(capturedResponseMaps.start).toEqual({});
+
+    await user.click(screen.getByTestId('productInterceptProgressionButton'));
+
+    expect(capturedResponseMaps['step-1']).toEqual({});
+
+    await user.click(screen.getByText('Submit Step 1'));
+
+    await waitFor(() => {
+      expect(capturedResponseMaps['step-2']).toEqual({
+        'step-1': 'answer-1',
+      });
+    });
+
+    await user.click(screen.getByText('Submit Step 2'));
+
+    await waitFor(() => {
+      expect(capturedResponseMaps.completion).toEqual({
+        'step-1': 'answer-1',
+        'step-2': 'answer-2',
+      });
+    });
+  });
 });

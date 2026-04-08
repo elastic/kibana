@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -354,6 +354,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const { resultFields, sortableFields } = useValues(SearchApplicationDocsExplorerLogic);
   const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
 
@@ -422,6 +423,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
                           iconType="eye"
                           onClick={() => setShowAPICallFlyout(true)}
                           isLoading={lastAPICall == null}
+                          buttonRef={buttonRef}
                         >
                           {i18n.translate(
                             'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.appendButtonLabel',
@@ -458,6 +460,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
         {showAPICallFlyout && lastAPICall && (
           <APICallFlyout
             onClose={() => setShowAPICallFlyout(false)}
+            focusButtonRef={buttonRef}
             lastAPICall={lastAPICall}
             searchApplicationName={searchApplicationName}
           />
