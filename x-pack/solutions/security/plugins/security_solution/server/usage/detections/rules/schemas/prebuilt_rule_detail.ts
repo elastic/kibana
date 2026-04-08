@@ -6,9 +6,9 @@
  */
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import type { RuleMetric } from '../types';
+import type { PrebuiltRuleMetric } from '../types';
 
-export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
+export const ruleMetricsSchema: MakeSchemaFrom<PrebuiltRuleMetric> = {
   rule_name: {
     type: 'keyword',
     _meta: { description: 'The name of the detection rule' },
@@ -104,9 +104,5 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
     _meta: {
       description: 'True if Threat match rule has does_not_match condition in threat mappings',
     },
-  },
-  ai_created: {
-    type: 'boolean',
-    _meta: { description: 'True if this rule was created using AI assistance' },
   },
 };
