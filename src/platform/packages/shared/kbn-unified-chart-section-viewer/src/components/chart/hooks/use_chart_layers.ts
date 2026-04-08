@@ -40,11 +40,10 @@ export const useChartLayers = ({
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const fieldTypes = metricItem.fieldTypes;
-    const type = firstNonNullable(fieldTypes);
     const instrument = firstNonNullable(metricItem.metricTypes);
     const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
 
-    if (!type || !instrument) {
+    if (fieldTypes.length === 0 || !instrument) {
       return [];
     }
 
