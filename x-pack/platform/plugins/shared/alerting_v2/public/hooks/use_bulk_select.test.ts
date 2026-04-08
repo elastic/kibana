@@ -106,7 +106,8 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.getBulkParams()).toEqual({
-      filter: '(metadata.name: prod* OR metadata.description: prod* OR metadata.tags: prod* OR grouping.fields: prod*)',
+      filter:
+        '(metadata.name: prod* OR metadata.description: prod* OR metadata.tags: prod* OR grouping.fields: prod*)',
     });
   });
 
