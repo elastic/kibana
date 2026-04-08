@@ -16,7 +16,10 @@ export const mockLoggerProvider = jest.fn(() => ({
 }));
 export const mockBatchLogRecordProcessor = jest.fn();
 export const mockOTLPLogExporter = jest.fn();
+
 export const mockResourceFromAttributes = jest.fn();
+export const mockMergeResource = jest.fn(() => ({ type: 'merged-resource' }));
+export const mockDetectResources = jest.fn(() => ({ merge: mockMergeResource }));
 
 jest.mock('@opentelemetry/sdk-logs', () => ({
   LoggerProvider: mockLoggerProvider,
@@ -28,5 +31,10 @@ jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
 }));
 
 jest.mock('@opentelemetry/resources', () => ({
+  detectResources: mockDetectResources,
   resourceFromAttributes: mockResourceFromAttributes,
+  envDetector: 'envDetector',
+  hostDetector: 'hostDetector',
+  osDetector: 'osDetector',
+  processDetector: 'processDetector',
 }));

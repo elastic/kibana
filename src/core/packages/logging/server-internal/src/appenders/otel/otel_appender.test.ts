@@ -9,8 +9,10 @@
 
 import {
   mockBatchLogRecordProcessor,
+  mockDetectResources,
   mockEmit,
   mockLoggerProvider,
+  mockMergeResource,
   mockOTLPLogExporter,
   mockResourceFromAttributes,
   mockShutdown,
@@ -43,6 +45,8 @@ beforeEach(() => {
   mockBatchLogRecordProcessor.mockClear();
   mockOTLPLogExporter.mockClear();
   mockResourceFromAttributes.mockClear();
+  mockDetectResources.mockClear();
+  mockMergeResource.mockClear();
 });
 
 describe('OtelAppender.configSchema', () => {
@@ -57,6 +61,30 @@ describe('OtelAppender.configSchema', () => {
     });
     expect(result.headers).toEqual({});
     expect(result.attributes).toEqual({});
+  });
+
+  it('accepts an explicit json layout', () => {
+    const result = OtelAppender.configSchema.validate({
+      ...validConfig,
+      layout: { type: 'json' },
+    });
+    expect(result.layout).toEqual({ type: 'json' });
+  });
+
+  it('accepts a pattern layout', () => {
+    const result = OtelAppender.configSchema.validate({
+      ...validConfig,
+      layout: { type: 'pattern', pattern: '[%level] %message' },
+    });
+    expect(result.layout).toEqual({ type: 'pattern', pattern: '[%level] %message' });
+  });
+
+  it('accepts config without layout (layout is optional)', () => {
+    const result = OtelAppender.configSchema.validate({
+      type: 'otel',
+      url: 'http://collector:4318/v1/logs',
+    });
+    expect(result.layout).toBeUndefined();
   });
 
   it('rejects config without url', () => {
@@ -80,22 +108,31 @@ describe('OtelAppender constructor', () => {
     });
   });
 
-  it('creates LoggerProvider with BatchLogRecordProcessor and resource attributes', () => {
-    const mockResource = { type: 'resource' };
+  it('builds resource by merging auto-detected attributes with user-provided ones', () => {
+    const mockResource = { type: 'user-resource' };
+    const mockMergedResource = { type: 'merged-resource' };
     mockResourceFromAttributes.mockReturnValue(mockResource);
+    mockMergeResource.mockReturnValue(mockMergedResource);
 
     new OtelAppender(validConfig);
 
-    expect(mockResourceFromAttributes).toHaveBeenCalledWith(validConfig.attributes);
-    expect(mockBatchLogRecordProcessor).toHaveBeenCalledWith(expect.any(Object));
-    expect(mockLoggerProvider).toHaveBeenCalledWith({
-      processors: [expect.any(Object)],
-      resource: mockResource,
+    expect(mockDetectResources).toHaveBeenCalledWith({
+      detectors: expect.arrayContaining([
+        'envDetector',
+        'hostDetector',
+        'osDetector',
+        'processDetector',
+      ]),
     });
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith(validConfig.attributes);
+    expect(mockMergeResource).toHaveBeenCalledWith(mockResource);
+    expect(mockLoggerProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ resource: mockMergedResource })
+    );
   });
 });
 
-describe('OtelAppender.append()', () => {
+describe('OtelAppender.append() — severity mapping', () => {
   it.each([
     {
       name: 'trace',
@@ -160,8 +197,49 @@ describe('OtelAppender.append()', () => {
 
     expect(mockEmit).not.toHaveBeenCalled();
   });
+});
 
-  it('emits the correct timestamp, body, and base attributes', () => {
+describe('OtelAppender.append() — body', () => {
+  it('defaults to JSON layout when no layout is configured', () => {
+    const appender = new OtelAppender(validConfig);
+
+    appender.append(makeRecord());
+
+    const { body } = mockEmit.mock.calls[0][0];
+    expect(() => JSON.parse(body)).not.toThrow();
+    const parsed = JSON.parse(body);
+    expect(parsed.message).toBe('test message');
+  });
+
+  it('uses the configured pattern layout to format the body', () => {
+    const appender = new OtelAppender({
+      ...validConfig,
+      layout: { type: 'pattern', pattern: '[%level] %logger %message' },
+    });
+
+    appender.append(makeRecord({ level: LogLevel.Warn, context: 'my.plugin' }));
+
+    const { body } = mockEmit.mock.calls[0][0];
+    expect(body).toContain('WARN');
+    expect(body).toContain('my.plugin');
+    expect(body).toContain('test message');
+  });
+
+  it('includes meta fields in the JSON body', () => {
+    const appender = new OtelAppender(validConfig);
+    const meta = { http: { method: 'GET' }, requestId: 'abc' };
+
+    appender.append(makeRecord({ meta }));
+
+    const { body } = mockEmit.mock.calls[0][0];
+    const parsed = JSON.parse(body);
+    expect(parsed.http?.method).toBe('GET');
+    expect(parsed.requestId).toBe('abc');
+  });
+});
+
+describe('OtelAppender.append() — attributes', () => {
+  it('emits the correct timestamp and base attributes', () => {
     const appender = new OtelAppender(validConfig);
     const timestamp = new Date('2024-06-15T12:00:00Z');
     const record = makeRecord({ timestamp, context: 'my.plugin', pid: 9999 });
@@ -171,7 +249,6 @@ describe('OtelAppender.append()', () => {
     expect(mockEmit).toHaveBeenCalledWith(
       expect.objectContaining({
         timestamp,
-        body: 'test message',
         attributes: expect.objectContaining({
           'log.logger': 'my.plugin',
           'process.pid': 9999,
@@ -234,25 +311,10 @@ describe('OtelAppender.append()', () => {
     expect(attributes).not.toHaveProperty('transaction.id');
   });
 
-  it('JSON-serialises meta and includes it as log.meta attribute', () => {
-    const appender = new OtelAppender(validConfig);
-    const meta = { http: { method: 'GET' }, tags: ['api'] };
-
-    appender.append(makeRecord({ meta }));
-
-    expect(mockEmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attributes: expect.objectContaining({
-          'log.meta': JSON.stringify(meta),
-        }),
-      })
-    );
-  });
-
-  it('omits log.meta when meta is not present', () => {
+  it('does not include log.meta as an attribute (meta belongs in the body)', () => {
     const appender = new OtelAppender(validConfig);
 
-    appender.append(makeRecord());
+    appender.append(makeRecord({ meta: { http: { method: 'GET' } } }));
 
     const { attributes } = mockEmit.mock.calls[0][0];
     expect(attributes).not.toHaveProperty('log.meta');

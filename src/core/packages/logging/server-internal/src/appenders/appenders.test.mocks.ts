@@ -27,5 +27,10 @@ jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
   OTLPLogExporter: jest.fn(),
 }));
 jest.mock('@opentelemetry/resources', () => ({
+  detectResources: jest.fn(() => ({ merge: jest.fn() })),
   resourceFromAttributes: jest.fn(),
+  envDetector: 'envDetector',
+  hostDetector: 'hostDetector',
+  osDetector: 'osDetector',
+  processDetector: 'processDetector',
 }));

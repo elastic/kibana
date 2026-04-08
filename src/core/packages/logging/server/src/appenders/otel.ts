@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LayoutConfigType } from '../layout';
+
 /**
  * Configuration of an OpenTelemetry (OTLP) log appender.
  * Ships log records to an OTLP-compatible endpoint over HTTP.
  * @public
  */
 export interface OtelAppenderConfig {
+  /** Discriminator for this appender type. */
   type: 'otel';
   /** OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs */
   url: string;
@@ -20,4 +23,10 @@ export interface OtelAppenderConfig {
   headers: Record<string, string>;
   /** Resource attributes that identify this service in the OTel data model */
   attributes: Record<string, string>;
+  /**
+   * Layout used to format the log record body. Defaults to `json`, which
+   * serialises the full ECS-structured log record. Use `pattern` for a
+   * human-readable string.
+   */
+  layout?: LayoutConfigType;
 }

@@ -8,12 +8,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { DisposableAppender, LogLevel, LogRecord } from '@kbn/logging';
+import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { resourceFromAttributes } from '@opentelemetry/resources';
+import {
+  detectResources,
+  envDetector,
+  hostDetector,
+  osDetector,
+  processDetector,
+  resourceFromAttributes,
+} from '@opentelemetry/resources';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
 import type { OtelAppenderConfig } from '@kbn/core-logging-server';
+import { Layouts } from '../../layouts/layouts';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
@@ -44,8 +52,9 @@ const toSeverityNumber = (level: LogLevel): SeverityNumber | undefined => {
 
 /**
  * Builds the OTel attribute map from a Kibana LogRecord.
- * OTel log attributes must be string | number | boolean or homogeneous arrays
- * of those types, so complex objects are JSON-serialised.
+ * Well-known OTel semantic convention attributes are extracted here so that
+ * OTel-native backends can filter and correlate without parsing the body.
+ * `meta` is intentionally omitted — it is included in the formatted body.
  */
 const toAttributes = (record: LogRecord): Record<string, string | number | boolean> => {
   const attrs: Record<string, string | number | boolean> = {
@@ -71,10 +80,6 @@ const toAttributes = (record: LogRecord): Record<string, string | number | boole
     }
   }
 
-  if (record.meta) {
-    attrs['log.meta'] = JSON.stringify(record.meta);
-  }
-
   return attrs;
 };
 
@@ -90,16 +95,25 @@ export class OtelAppender implements DisposableAppender {
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     attributes: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+    layout: schema.maybe(Layouts.configSchema),
   });
 
   private readonly loggerProvider: LoggerProvider;
   private readonly logger: Logger;
+  private readonly layout: Layout;
 
   constructor(config: OtelAppenderConfig) {
+    this.layout = Layouts.create(config.layout ?? { type: 'json' });
+
     const exporter = new OTLPLogExporter({ url: config.url, headers: config.headers });
+    // Merge auto-detected host/process/OS/env attributes with user-provided ones
+    // so that the resource is consistent with other OTel signals (traces, metrics).
+    const resource = detectResources({
+      detectors: [envDetector, hostDetector, osDetector, processDetector],
+    }).merge(resourceFromAttributes(config.attributes));
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
-      resource: resourceFromAttributes(config.attributes),
+      resource,
     });
     // The scope name 'kibana' identifies this instrumentation library.
     // Individual logger contexts are passed as the 'log.logger' attribute.
@@ -116,7 +130,7 @@ export class OtelAppender implements DisposableAppender {
       timestamp: record.timestamp,
       severityNumber,
       severityText: record.level.id.toUpperCase(),
-      body: record.message,
+      body: this.layout.format(record),
       attributes: toAttributes(record),
     });
   }
