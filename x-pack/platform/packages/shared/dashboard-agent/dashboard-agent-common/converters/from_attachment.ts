@@ -15,7 +15,7 @@ import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils
 import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
-  DashboardAttachment,
+  DashboardAttachmentData,
 } from '../types';
 import { isSection } from '../types';
 
@@ -26,7 +26,7 @@ const LENS_EMBEDDABLE_TYPE = 'lens';
  * Converts an AttachmentPanel to a DashboardPanel.
  * For Lens panels with API format attributes, converts to internal format.
  */
-const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): DashboardPanel => {
+const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
   let configObject = config;
   if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
     const lensAttributes = new LensConfigBuilder().fromAPIFormat(config.attributes);
@@ -37,7 +37,7 @@ const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): Das
   }
   return {
     type,
-    uid,
+    id,
     grid,
     config: configObject,
   };
@@ -50,7 +50,7 @@ type DashboardWidget = DashboardPanel | DashboardSection;
  * Converts an AgentDashboardSection to a DashboardSection.
  */
 const normalizeSection = (section: AgentDashboardSection): DashboardSection => ({
-  uid: section.uid,
+  id: section.id,
   title: section.title,
   collapsed: section.collapsed,
   grid: { y: section.grid.y },
@@ -97,9 +97,15 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
  * Converts a DashboardAttachment to a DashboardState.
  * Uses provided values from the attachment, falling back to defaults for missing fields.
  */
-export const attachmentToDashboardState = ({
-  data: { panels = [], filters, query, pinned_panels, access_control, options, ...rest },
-}: DashboardAttachment): DashboardState => ({
+export const attachmentDataToDashboardState = ({
+  panels = [],
+  filters,
+  query,
+  pinned_panels,
+  access_control,
+  options,
+  ...rest
+}: DashboardAttachmentData): DashboardState => ({
   ...EMPTY_DASHBOARD_STATE,
   ...rest,
   options: {
