@@ -11,6 +11,11 @@ import type {
 } from '../../../../common/types/domain/template/fields';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 
+const isEmpty = (value: unknown): boolean => {
+  if (value === null || value === undefined || value === '' || value === '[]') return true;
+  return false;
+};
+
 const parseCheckboxValue = (value: unknown): string[] => {
   if (typeof value !== 'string' || value === '') return [];
   try {
@@ -45,9 +50,9 @@ const evaluateScalarRule = (current: unknown, rule: ConditionRule): boolean => {
     case 'contains':
       return typeof current === 'string' && current.includes(String(rule.value ?? ''));
     case 'empty':
-      return current === null || current === undefined || current === '';
+      return isEmpty(current);
     case 'not_empty':
-      return current !== null && current !== undefined && current !== '';
+      return !isEmpty(current);
     default:
       return true;
   }

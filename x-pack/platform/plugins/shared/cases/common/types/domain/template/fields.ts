@@ -16,6 +16,7 @@ export const FieldType = {
   DATE_PICKER: 'DATE_PICKER',
   CHECKBOX_GROUP: 'CHECKBOX_GROUP',
   RADIO_GROUP: 'RADIO_GROUP',
+  USER_PICKER: 'USER_PICKER',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -134,6 +135,17 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     .optional(),
 });
 
+export const UserPickerFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.USER_PICKER),
+  metadata: z
+    .object({
+      multiple: z.boolean().optional(),
+      default: z.array(z.object({ uid: z.string(), name: z.string() })).optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
+});
+
 const uniqueStrings = (arr: string[]) => new Set(arr).size === arr.length;
 
 export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
@@ -198,6 +210,7 @@ export const FieldSchema = z.discriminatedUnion('control', [
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
 ]);

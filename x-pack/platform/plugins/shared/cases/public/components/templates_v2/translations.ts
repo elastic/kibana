@@ -130,6 +130,12 @@ export const FIELD_PATTERN_INVALID = i18n.translate(
   }
 );
 
+export const INVALID_USER_PROFILES = (names: string[]) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.invalidUserProfiles', {
+    defaultMessage: 'The following users does not exist and must be removed: {names}',
+    values: { names: names.join(', ') },
+  });
+
 export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
   defaultMessage: 'Enabled',
 });
