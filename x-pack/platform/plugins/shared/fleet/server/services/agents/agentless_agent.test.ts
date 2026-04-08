@@ -188,7 +188,10 @@ describe('Agentless Agent service', () => {
   });
 
   it('should include is_elastic_staff_owned when cloud reports elastic staff owned deployment', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce({
+      id: 'mocked',
+      regional_id: 'mocked',
+    });
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
@@ -202,10 +205,6 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
-        deploymentSecrets: {
-          fleetAppToken: 'fleet-app-token',
-          elasticsearchAppToken: 'es-app-token',
-        },
       },
     } as any);
     jest
@@ -214,12 +213,16 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedFleetServerHostService.get.mockResolvedValue({
-      id: 'mocked-fleet-server-id',
-      host: 'http://fleetserver:8220',
-      active: true,
-      is_default: true,
-      host_urls: ['http://fleetserver:8220'],
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
     } as any);
     mockedListEnrollmentApiKeys.mockResolvedValue({
       items: [
