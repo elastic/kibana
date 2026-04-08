@@ -775,6 +775,75 @@ describe('Actions Plugin', () => {
         });
       });
 
+      describe('detectPreconfiguredConflicts', () => {
+        it('should not modify inMemoryConnectors when there are no conflicts', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockResolvedValue({
+            hits: { hits: [] },
+          });
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(pluginStart.inMemoryConnectors).toHaveLength(1);
+          expect(pluginStart.inMemoryConnectors[0].id).toBe('preconfiguredServerLog');
+        });
+
+        it('should remove conflicting preconfigured connector from inMemoryConnectors and log error', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockResolvedValue({
+            hits: { hits: [{ _id: 'action:preconfiguredServerLog', _source: { type: 'action' } }] },
+          });
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(context.logger.get().error).toHaveBeenCalledWith(
+            expect.stringContaining('preconfiguredServerLog')
+          );
+          const startResult = await pluginStart;
+          expect(
+            startResult.inMemoryConnectors.find((c) => c.id === 'preconfiguredServerLog')
+          ).toBeUndefined();
+        });
+
+        it('should log debug when savedObjects search throws', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockRejectedValue(new Error('SO error'));
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(context.logger.get().debug).toHaveBeenCalledWith(
+            'Failed to check for preconfigured connector conflicts: SO error'
+          );
+        });
+      });
+
       describe('Dynamic connectors', () => {
         let pluginStart: PluginStartContract;
         beforeEach(async () => {
