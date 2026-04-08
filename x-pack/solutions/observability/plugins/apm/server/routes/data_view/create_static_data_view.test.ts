@@ -105,7 +105,7 @@ describe('createStaticDataView', () => {
     await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
       resources: {
-        config: { autoCreateApmDataView: false },
+        config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
       spaceId: 'default',
