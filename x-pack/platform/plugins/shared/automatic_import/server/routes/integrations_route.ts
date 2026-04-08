@@ -266,9 +266,16 @@ const approveIntegrationRoute = (
             const integration = await automaticImportService.getIntegrationById(integrationId);
             const dataStreams = await automaticImportService.getAllDataStreams(integrationId);
 
+            const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            const rawSessionId = request.headers['x-session-id'];
+            const sessionId =
+              typeof rawSessionId === 'string' && UUID_RE.test(rawSessionId)
+                ? rawSessionId
+                : 'unknown';
+
             dataStreams.forEach((ds) => {
               reportTelemetryEvent(AutomaticImportTelemetryEventType.IntegrationInstalled, {
-                sessionId: request.headers['x-session-id'] || 'unknown',
+                sessionId,
                 integrationName: integration.title,
                 version,
                 dataStreamCount: dataStreams.length,

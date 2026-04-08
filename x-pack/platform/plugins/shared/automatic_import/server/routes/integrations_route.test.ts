@@ -72,7 +72,7 @@ describe('approveIntegrationRoute telemetry', () => {
       path: APPROVE_PATH,
       params: { integration_id: integrationId },
       body: { version: '1.0.0', categories: ['security'] },
-      headers: { 'x-session-id': 'sess-abc' },
+      headers: { 'x-session-id': '550e8400-e29b-41d4-a716-446655440000' },
     });
 
   const makeResponse = () => httpServerMock.createResponseFactory();
@@ -98,7 +98,7 @@ describe('approveIntegrationRoute telemetry', () => {
       1,
       AutomaticImportTelemetryEventType.IntegrationInstalled,
       expect.objectContaining({
-        sessionId: 'sess-abc',
+        sessionId: '550e8400-e29b-41d4-a716-446655440000',
         integrationName: 'My Integration',
         version: '1.0.0',
         dataStreamCount: 2,
