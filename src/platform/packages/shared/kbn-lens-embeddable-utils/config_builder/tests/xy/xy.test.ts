@@ -546,7 +546,7 @@ describe('XY', () => {
       validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
     });
 
-    it('should correctly transform top list layout with pixel truncation', () => {
+    it('should correctly transform top list layout', () => {
       validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyStateSchema);
     });
 
