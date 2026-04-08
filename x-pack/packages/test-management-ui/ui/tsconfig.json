@@ -1,15 +1,15 @@
 {
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
     "module": "ES2022",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "outDir": "dist",
-    "rootDir": "src",
+    "outDir": "target/types",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "declaration": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "target/**/*"
+  ]
 }
