@@ -1,0 +1,48 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postHealthCheckRequestExample:
+          description: 'Check the health of a Fleet Server instance by its host ID'
+          value:
+            id: fleet-server-host-id-1
+
+responses:
+  200:
+    description: 'Successful health check response'
+    content:
+      application/json:
+        examples:
+          postHealthCheckHealthyExample:
+            description: 'Fleet Server is online and healthy'
+            value:
+              status: ONLINE
+              name: fleet-server-1
+              host_id: fleet-server-host-id-1
+          postHealthCheckUnreachableExample:
+            description: 'Fleet Server host ID exists but the server is not reachable'
+            value:
+              status: OFFLINE
+              host_id: fleet-server-host-id-1
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          badRequestExample:
+            description: 'The request body is invalid or missing required fields'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: '[request body.id]: expected value of type [string] but got [undefined]'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: 'No Fleet Server host was found with the given ID'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Fleet Server host fleet-server-host-id-1 not found'
