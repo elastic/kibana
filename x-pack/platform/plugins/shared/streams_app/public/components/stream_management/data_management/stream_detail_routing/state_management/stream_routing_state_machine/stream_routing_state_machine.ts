@@ -868,6 +868,7 @@ export const streamRoutingMachine = setup({
                 changing: {
                   on: {
                     'queryStream.update': 'saving',
+                    'queryStream.delete': 'deleting',
                   },
                 },
                 saving: {
@@ -892,6 +893,36 @@ export const streamRoutingMachine = setup({
                     onError: {
                       target: 'changing',
                       actions: [{ type: 'notifyStreamFailure' }],
+                    },
+                  },
+                },
+                deleting: {
+                  invoke: {
+                    src: 'deleteStream',
+                    input: ({ context }) => ({
+                      name: context.editingQueryStreamName!,
+                    }),
+                    onDone: {
+                      target: 'deleted',
+                      actions: [
+                        { type: 'setRefreshing' },
+                        { type: 'refreshDefinition' },
+                      ],
+                    },
+                    onError: {
+                      target: 'changing',
+                    },
+                  },
+                },
+                deleted: {
+                  on: {
+                    'stream.received': {
+                      target: '#queryMode.idle',
+                      actions: [
+                        assign(() => ({ editingQueryStreamName: null })),
+                        { type: 'storeDefinition', params: ({ event }) => event },
+                        { type: 'clearRefreshing' },
+                      ],
                     },
                   },
                 },

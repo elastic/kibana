@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { getEsqlViewName } from '@kbn/streams-schema';
 import { test } from '../../fixtures';
 import {
   createQueryStream,
@@ -19,7 +20,7 @@ import {
 
 const PARENT_STREAM_NAME = 'logs.ecs';
 const QUERY_STREAM_NAME = 'logs.ecs.inline-edit-test';
-const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
+const ESQL_VIEW_NAME = getEsqlViewName(QUERY_STREAM_NAME);
 const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
 test.describe(

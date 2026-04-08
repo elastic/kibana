@@ -212,7 +212,7 @@ export function EditingQueryStreamEntry({
   streamName,
   parentStreamName,
 }: EditingQueryStreamEntryProps) {
-  const { cancelQueryStreamEdit, updateQueryStream } = useStreamRoutingEvents();
+  const { cancelQueryStreamEdit, updateQueryStream, deleteQueryStream } = useStreamRoutingEvents();
   const { executeQuery } = useQueryStreamCreation();
   const {
     dependencies: {
@@ -220,14 +220,14 @@ export function EditingQueryStreamEntry({
         streams: { streamsRepositoryClient },
       },
     },
-    core: {
-      application: { navigateToUrl },
-    },
   } = useKibana();
-  const router = useStreamsAppRouter();
 
   const isSaving = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: { editing: 'saving' } } })
+  );
+  const isDeleting = useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: { editing: 'deleting' } } }) ||
+    state.matches({ ready: { queryMode: { editing: 'deleted' } } })
   );
 
   const [isDeleteModalOpen, { on: openDeleteModal, off: closeDeleteModal }] = useBoolean(false);
@@ -262,17 +262,9 @@ export function EditingQueryStreamEntry({
     [streamName, updateQueryStream]
   );
 
-  const handleDelete = useCallback(async () => {
-    await streamsRepositoryClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-      signal: null,
-      params: { path: { name: streamName } },
-    });
-    navigateToUrl(
-      router.link('/{key}/management/{tab}', {
-        path: { key: parentStreamName, tab: 'partitioning' },
-      })
-    );
-  }, [streamsRepositoryClient, streamName, navigateToUrl, router, parentStreamName]);
+  const handleDelete = useCallback(() => {
+    return deleteQueryStream();
+  }, [deleteQueryStream]);
 
   const suffix = streamName.replace(`${parentStreamName}.`, '');
 
@@ -315,7 +307,7 @@ export function EditingQueryStreamEntry({
         onCancel={cancelQueryStreamEdit}
         onQueryChange={debouncedExecuteQuery}
         isSaving={isSaving}
-        readOnly={isSaving}
+        readOnly={isSaving || isDeleting}
         nameReadOnly
         saveButtonLabel={i18n.translate('xpack.streams.editingQueryStreamEntry.updateButton', {
           defaultMessage: 'Update',

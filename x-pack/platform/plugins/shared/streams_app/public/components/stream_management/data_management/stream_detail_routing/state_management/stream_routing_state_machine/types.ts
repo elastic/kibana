@@ -67,6 +67,7 @@ export type StreamRoutingEvent =
   | { type: 'queryStream.save'; name: string; esqlQuery: string }
   | { type: 'queryStream.edit'; name: string }
   | { type: 'queryStream.cancelEdit' }
+  | { type: 'queryStream.delete' }
   | { type: 'queryStream.update'; name: string; esqlQuery: string }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }

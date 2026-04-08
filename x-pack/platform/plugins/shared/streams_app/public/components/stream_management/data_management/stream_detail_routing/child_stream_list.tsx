@@ -28,6 +28,7 @@ import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import type { DraggableProvided } from '@hello-pangea/dnd';
+import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { NestedView } from '../../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
@@ -112,6 +113,17 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     return snapshot.matches({ ready: 'ingestMode' }) ? 'ingestMode' : 'queryMode';
   });
 
+  const hasActiveQueryModeForm = useStreamsRoutingSelector(
+    (state) =>
+      state.matches({ ready: { queryMode: 'editing' } }) ||
+      state.matches({ ready: { queryMode: 'creating' } })
+  );
+
+  const handleModeChange = useDiscardConfirm(
+    (mode: string) => changeChildStreamsMode(mode as ChildStreamMode),
+    { enabled: hasActiveQueryModeForm }
+  );
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -152,7 +164,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             },
           ]}
           idSelected={idSelected}
-          onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
+          onChange={handleModeChange}
           buttonSize="compressed"
           color="primary"
           data-test-subj="streamsAppChildStreamTypeSelector"

@@ -157,6 +157,18 @@ export const useStreamRoutingEvents = () => {
       updateQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
         service.send({ type: 'queryStream.update', name, esqlQuery });
       },
+      deleteQueryStream: async () => {
+        service.send({ type: 'queryStream.delete' });
+        const snapshot = await waitFor(
+          service,
+          (s) =>
+            s.matches({ ready: { queryMode: 'idle' } }) ||
+            s.matches({ ready: { queryMode: { editing: 'changing' } } })
+        );
+        if (snapshot.matches({ ready: { queryMode: { editing: 'changing' } } })) {
+          throw new Error('Failed to delete stream');
+        }
+      },
     };
   }, [service]);
 };
