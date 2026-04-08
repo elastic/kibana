@@ -35,7 +35,7 @@ describe('Gauge', () => {
       validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
     });
 
-    it('should convert a gauge chart with ESQL dataset', () => {
+    it('should convert a gauge chart with ESQL datasource', () => {
       validateConverter(gaugeESQLAttributes, gaugeStateSchema);
     });
 
