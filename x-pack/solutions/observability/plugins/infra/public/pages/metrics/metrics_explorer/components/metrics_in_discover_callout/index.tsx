@@ -21,7 +21,7 @@ const DOCUMENTATION_URL =
 const buttonLabel = i18n.translate('xpack.infra.metricsExplorer.euiCallout.buttonLabel', {
   defaultMessage: 'View metrics in Discover',
 });
-const calloutTitle = i18n.translate('xpack.infra.metricsExplorer.euiCallout.title', {
+const calloutTitle = i18n.translate('xpack.infra.metricsExplorer.deprecationEuiCallout.title', {
   defaultMessage: 'Deprecated',
 });
 
