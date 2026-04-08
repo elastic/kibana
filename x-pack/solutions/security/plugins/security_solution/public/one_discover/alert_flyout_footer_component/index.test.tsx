@@ -13,10 +13,8 @@ import { AlertFlyoutFooter } from '.';
 import type { StartServices } from '../../types';
 import { SECURITY_FEATURE_ID } from '../../../common/constants';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import {
-  alertFlyoutHistoryKey,
-  discoverFlyoutHistoryKey,
-} from '../../flyout_v2/document/constants/flyout_history';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
 
 const mockDocumentFooter = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -160,7 +158,7 @@ describe('AlertFlyoutFooter', () => {
     expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        historyKey: discoverFlyoutHistoryKey,
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
       })
     );
   });

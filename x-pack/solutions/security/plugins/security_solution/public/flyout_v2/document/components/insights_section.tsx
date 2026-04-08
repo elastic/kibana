@@ -11,7 +11,8 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { alertFlyoutHistoryKey, discoverFlyoutHistoryKey } from '../constants/flyout_history';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../constants/flyout_history';
 import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
@@ -68,7 +69,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
   const history = useHistory();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : discoverFlyoutHistoryKey;
+  const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,

@@ -12,6 +12,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -25,7 +26,7 @@ import { NotesDetails } from '../notes';
 import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { alertFlyoutHistoryKey, discoverFlyoutHistoryKey } from './constants/flyout_history';
+import { alertFlyoutHistoryKey } from './constants/flyout_history';
 
 export interface DocumentFlyoutProps {
   /**
@@ -56,7 +57,7 @@ export const DocumentFlyout = memo(
       [hit]
     );
     const isSecurityApp = useIsInSecurityApp();
-    const historyKey = isSecurityApp ? alertFlyoutHistoryKey : discoverFlyoutHistoryKey;
+    const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
