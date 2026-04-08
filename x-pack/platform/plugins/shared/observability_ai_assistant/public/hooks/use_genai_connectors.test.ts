@@ -10,24 +10,15 @@ import { useGenAIConnectorsWithoutContext } from './use_genai_connectors';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AIConnector } from '@kbn/inference-connectors';
 import { useLoadConnectors } from '@kbn/inference-connectors';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 
-const mockSettingsGet = jest.fn();
 jest.mock('./use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: {},
       notifications: { toasts: {} },
-      settings: {
-        client: {
-          get: mockSettingsGet,
-        },
-      },
+      settings: { client: { get: jest.fn() } },
     },
   }),
 }));
@@ -94,7 +85,6 @@ describe('useGenAIConnectorsWithoutContext', () => {
       refetch: mockRefetch,
       soEntryFound: false,
     });
-    mockSettingsGet.mockReset();
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -110,52 +100,16 @@ describe('useGenAIConnectorsWithoutContext', () => {
     expect(result.current.error).toBeUndefined();
   });
 
-  it('returns first connector as selectedConnector when no default or last used is set', () => {
+  it('returns first connector as selectedConnector when no last used is set', () => {
     (useLocalStorage as jest.Mock).mockImplementation(() => ['', jest.fn()]);
     const { result } = renderUseGenAIHook();
     expect(result.current.selectedConnector).toBe('connector-1');
-  });
-
-  it('returns defaultConnector if isConnectorSelectionRestricted is true', () => {
-    (useLocalStorage as jest.Mock).mockImplementation(() => ['', jest.fn()]);
-    mockSettingsGet.mockImplementation((key: string, fallback?: any) => {
-      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'connector-2';
-      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return true;
-      return fallback;
-    });
-    mockUseLoadConnectors.mockReturnValue({
-      data: [mockAIConnectors[1]],
-      isLoading: false,
-      error: null,
-      refetch: mockRefetch,
-      soEntryFound: false,
-    });
-
-    const { result } = renderUseGenAIHook();
-    expect(result.current.selectedConnector).toBe('connector-2');
-    expect(result.current.connectors).toHaveLength(1);
   });
 
   it('returns selectedConnector from localStorage if exists', () => {
     (useLocalStorage as jest.Mock).mockImplementation(() => ['connector-1', jest.fn()]);
-    mockSettingsGet.mockImplementation((key: string, fallback?: any) => {
-      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'connector-2';
-      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return false;
-      return fallback;
-    });
     const { result } = renderUseGenAIHook();
     expect(result.current.selectedConnector).toBe('connector-1');
-  });
-
-  it('returns defaultConnector if no localStorage entry exists', () => {
-    (useLocalStorage as jest.Mock).mockImplementation(() => ['', jest.fn()]);
-    mockSettingsGet.mockImplementation((key: string, fallback?: any) => {
-      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'connector-2';
-      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return false;
-      return fallback;
-    });
-    const { result } = renderUseGenAIHook();
-    expect(result.current.selectedConnector).toBe('connector-2');
   });
 
   it('handles API error', async () => {
