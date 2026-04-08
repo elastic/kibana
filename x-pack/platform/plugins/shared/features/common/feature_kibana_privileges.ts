@@ -293,6 +293,20 @@ export interface FeatureKibanaPrivileges {
   };
 
   /**
+   * If your feature requires read access to alerts, then specify it here.
+   *
+   * @example
+   * ```ts
+   *  {
+   *    alerts: { read: true }
+   *  }
+   * ```
+   */
+  alerts?: {
+    read?: boolean;
+  };
+
+  /**
    * If your feature requires access to specific saved objects, then specify your access needs here.
    */
   savedObject: {

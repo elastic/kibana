@@ -220,6 +220,7 @@ export function privilegesFactory(
         global: {
           all: [
             actions.login,
+            actions.alerts.read,
             actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
             actions.api.get(ApiOperation.Read, 'features'),
             actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -235,14 +236,15 @@ export function privilegesFactory(
           ],
           read: [
             actions.login,
+            actions.alerts.read,
             actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
             actions.ui.get('globalSettings', 'show'),
             ...readActions,
           ],
         },
         space: {
-          all: [actions.login, ...allActions],
-          read: [actions.login, ...readActions],
+          all: [actions.login, actions.alerts.read, ...allActions],
+          read: [actions.login, actions.alerts.read, ...readActions],
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: KibanaFeature) => {
           // Reserved privileges are intentionally not excluded from registration based on their `hidden` attribute.
