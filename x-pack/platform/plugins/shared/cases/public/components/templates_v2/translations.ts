@@ -136,6 +136,12 @@ export const INVALID_USER_PROFILES = (names: string[]) =>
     values: { names: names.join(', ') },
   });
 
+export const INVALID_USER_PICKER_DEFAULT = (name: string) =>
+  i18n.translate('xpack.cases.templates.fieldValidation.invalidUserPickerDefault', {
+    defaultMessage: 'User "{name}" in default values was not found or has changed.',
+    values: { name },
+  });
+
 export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
   defaultMessage: 'Enabled',
 });
