@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { TIMESTAMP_FIELD } from './query_builder_commons';
+import {
+  LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD,
+  buildLogPaginationCursorProbeEsql,
+  interpretLogPaginationCursorRows,
+  parseLogPaginationCursorRow,
+} from './log_pagination_probe_query_builder';
+
+describe('buildLogPaginationCursorProbeEsql', () => {
+  it('adds sort, cap, inline count, and slice-end row after the probe WHERE', () => {
+    const q = buildLogPaginationCursorProbeEsql({
+      indexPatterns: ['logs-*'],
+      type: 'user',
+      fromDateISO: '2024-01-01T00:00:00.000Z',
+      toDateISO: '2024-01-02T00:00:00.000Z',
+      maxLogsPerPage: 100,
+    });
+    expect(q).toContain(`| SORT ${TIMESTAMP_FIELD} ASC, \`_id\` ASC`);
+    expect(q).toContain('| LIMIT 100');
+    expect(q).toContain(`| INLINE STATS ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} = count(*)`);
+    expect(q).toContain(
+      `| KEEP ${TIMESTAMP_FIELD}, \`_id\`, ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD}`
+    );
+  });
+});
+
+describe('interpretLogPaginationCursorRows', () => {
+  it('treats undefined row as noMoreLogsToProcess', () => {
+    expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ noMoreLogsToProcess: true });
+  });
+
+  it('returns slice end with lastLogsPages false when page is full', () => {
+    const row = {
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      missingLogsToProcess: 100,
+    };
+    expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
+      noMoreLogsToProcess: false,
+      logsPaginationCursor: row.logsPaginationCursor,
+      isLastLogsPage: false,
+    });
+  });
+
+  it('returns lastLogsPages when fewer logs than max remain in the window', () => {
+    const row = {
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      missingLogsToProcess: 3,
+    };
+    expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
+      noMoreLogsToProcess: false,
+      logsPaginationCursor: row.logsPaginationCursor,
+      isLastLogsPage: true,
+    });
+  });
+});
+
+describe('parseLogPaginationCursorRow', () => {
+  it('maps columns to slice end and total log count', () => {
+    const resp: ESQLSearchResponse = {
+      columns: [
+        { name: TIMESTAMP_FIELD, type: 'date' },
+        { name: '_id', type: 'keyword' },
+        { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', 'doc1', 42]],
+    };
+    expect(parseLogPaginationCursorRow(resp)).toEqual({
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'doc1' },
+      missingLogsToProcess: 42,
+    });
+  });
+
+  it('returns undefined when there are no values without requiring total_logs column', () => {
+    const resp: ESQLSearchResponse = {
+      columns: [
+        { name: TIMESTAMP_FIELD, type: 'date' },
+        { name: '_id', type: 'keyword' },
+      ],
+      values: [],
+    };
+    expect(parseLogPaginationCursorRow(resp)).toBeUndefined();
+  });
+});
