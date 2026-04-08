@@ -27,7 +27,7 @@ export interface ProcessingGrokSuggestionsParams {
     name: string;
   };
   body: {
-    connector_id?: string;
+    connector_id: string;
     field_name: string;
     sample_messages: string[];
   };
@@ -48,7 +48,7 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
 export const processingGrokSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    connector_id: z.string().optional(),
+    connector_id: z.string(),
     field_name: z.string(),
     sample_messages: z.array(z.string()),
   }),

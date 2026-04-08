@@ -27,7 +27,6 @@ import {
   getDissectProcessorWithReview,
 } from '@kbn/dissect-heuristics';
 import type { Logger } from '@kbn/logging';
-import { STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import {
   PRIORITIZED_CONTENT_FIELDS,
   getDefaultTextField,
@@ -39,7 +38,6 @@ import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
-import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { reviewGrokFields } from '../processing/grok_suggestions_handler';
 import { reviewDissectFields } from '../processing/dissect_suggestions_handler';
@@ -49,7 +47,7 @@ import type { IPatternExtractionService } from '../../../../lib/pattern_extracti
 export interface SuggestIngestPipelineParams {
   path: { name: string };
   body: {
-    connector_id?: string;
+    connector_id: string;
     documents: FlattenRecord[];
   };
 }
@@ -57,7 +55,7 @@ export interface SuggestIngestPipelineParams {
 export const suggestIngestPipelineSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    connector_id: z.string().optional(),
+    connector_id: z.string(),
     documents: z.array(flattenRecord),
   }),
 }) satisfies z.Schema<SuggestIngestPipelineParams>;
@@ -93,7 +91,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     telemetry,
   }): Promise<SuggestProcessingPipelineResponse> => {
     const log = logger.get('suggestProcessingPipeline');
-    let connectorId: string | undefined;
+    const { connector_id: connectorId } = params.body;
 
     // Wrap entire logic in Observable so errors can be sent as SSE events
     return from(
@@ -107,15 +105,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
 
         const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
           await getScopedClients({ request });
-
-        connectorId =
-          params.body.connector_id ??
-          (await resolveConnectorForFeature({
-            searchInferenceEndpoints: server.searchInferenceEndpoints,
-            featureId: STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
-            featureName: 'processing suggestions',
-            request,
-          }));
 
         log.debug(`Request received (stream=${params.path.name} connectorId=${connectorId})`);
 

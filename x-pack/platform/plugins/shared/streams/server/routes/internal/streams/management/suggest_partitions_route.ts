@@ -12,21 +12,19 @@ import { conditionSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 
 export interface SuggestPartitionsParams {
   path: {
     name: string;
   };
   body: {
-    connector_id?: string;
+    connector_id: string;
     start: number;
     end: number;
     user_prompt?: string;
@@ -38,7 +36,7 @@ export interface SuggestPartitionsParams {
 export const suggestPartitionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    connector_id: z.string().optional(),
+    connector_id: z.string(),
     start: z.number(),
     end: z.number(),
     user_prompt: z.string().max(2000).optional(),
@@ -81,14 +79,7 @@ export const suggestPartitionsRoute = createServerRoute({
         request,
       });
 
-    const connectorId =
-      params.body.connector_id ??
-      (await resolveConnectorForFeature({
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
-        featureId: STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID,
-        featureName: 'partitioning suggestions',
-        request,
-      }));
+    const { connector_id: connectorId } = params.body;
 
     const stream = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(stream)) {
