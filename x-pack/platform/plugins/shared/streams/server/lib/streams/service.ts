@@ -32,8 +32,8 @@ export class StreamsService {
     isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    queryClient: QueryClient;
-    featureClient: FeatureClient;
+    queryClient?: QueryClient;
+    featureClient?: FeatureClient;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;

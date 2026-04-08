@@ -14,15 +14,17 @@ import { workflowKeys } from './query_key_factory';
 
 interface UseFetchWorkflowsParams {
   query: string;
+  isEnabled?: boolean;
 }
 
-export const useFetchWorkflows = ({ query }: UseFetchWorkflowsParams) => {
+export const useFetchWorkflows = ({ query, isEnabled = true }: UseFetchWorkflowsParams) => {
   const workflowsApi = useService(WorkflowsApi);
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<WorkflowListDto, Error>({
     queryKey: workflowKeys.search({ query }),
     queryFn: () => workflowsApi.searchWorkflows({ query, size: 100, page: 1 }),
+    enabled: isEnabled,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
     onError: (error: Error) => {

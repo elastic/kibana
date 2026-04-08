@@ -23,6 +23,7 @@ import type {
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '../../../common';
+import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { initializeLayoutManager } from './layout_manager';
@@ -51,13 +52,13 @@ describe('layout manager', () => {
     grid: { w: 1, h: 1, x: 0, y: 0 },
     type: 'testPanelType',
     config: { title: 'Panel One' },
-    uid: PANEL_ONE_ID,
+    id: PANEL_ONE_ID,
   };
 
   const pinnedControls: DashboardState['pinned_panels'] = [
     {
       ...DEFAULT_PINNED_CONTROL_STATE,
-      uid: 'control1',
+      id: 'control1',
       type: 'options_list_control',
       config: {
         ...DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -67,7 +68,7 @@ describe('layout manager', () => {
     },
     {
       ...DEFAULT_PINNED_CONTROL_STATE,
-      uid: 'control2',
+      id: 'control2',
       type: 'options_list_control',
       config: {
         ...DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -84,12 +85,13 @@ describe('layout manager', () => {
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
     serializeState: () => titleManager.getLatestState(),
+    applySerializedState: jest.fn(),
   };
 
   const section1 = {
     title: 'Section one',
     collapsed: false,
-    uid: 'section1',
+    id: 'section1',
     grid: {
       y: 1,
     },
@@ -106,6 +108,55 @@ describe('layout manager', () => {
     );
     layoutManager.api.registerChildApi(panel1Api);
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
+  });
+
+  test('should apply incoming serialized child state during reset when supported', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    const applySerializedState = jest.fn().mockResolvedValue(undefined);
+
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      applySerializedState,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated title' });
+  });
+
+  test('should ignore child state application when child does not support it', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBeDefined();
   });
 
   test('should append incoming embeddables to existing panels', () => {
@@ -347,7 +398,7 @@ describe('layout manager', () => {
         [
           panel1,
           {
-            uid: 'control3',
+            id: 'control3',
             type: 'options_list_control',
             config: {},
             grid: { x: 0, y: 2, h: 1, w: 1 },
@@ -377,7 +428,7 @@ describe('layout manager', () => {
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: pick(panel1, ['grid', 'type']),
+        [panel1.id]: pick(panel1, ['grid', 'type']),
         // control3 gets removed as a panel
       });
     });
@@ -412,7 +463,7 @@ describe('layout manager', () => {
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: {
+        [panel1.id]: {
           type: 'testPanelType',
           grid: { ...panel1.grid, y: 2 }, // push panel 1 down,
         },
@@ -431,7 +482,7 @@ describe('layout manager', () => {
           panel1,
           {
             ...pinnedControls[1],
-            uid: 'control2',
+            id: 'control2',
             grid: { x: 0, y: 0, w: 12, h: 12 },
             config: { title: 'Control' },
           },

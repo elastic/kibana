@@ -16,6 +16,8 @@ import { RunDetailPage } from './pages/run_detail';
 import { DatasetsListPage } from './pages/datasets_list';
 import { DatasetDetailPage } from './pages/dataset_detail';
 import { RemotesListPage } from './pages/remotes_list';
+import { TracingProjectsListPage } from './pages/tracing_projects_list';
+import { TracingProjectDetailPage } from './pages/tracing_project_detail';
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
@@ -33,6 +35,14 @@ const remotesTabLabel = i18n.translate('xpack.evals.navigation.remotes', {
   defaultMessage: 'Remotes',
 });
 
+const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
+  defaultMessage: 'Tracing',
+});
+
+const ROOT_PATH = '/' as const;
+const DATASETS_PATH = '/datasets' as const;
+const TRACING_PATH = '/tracing' as const;
+const REMOTES_PATH = '/remotes' as const;
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
   defaultMessage: 'Run details',
 });
@@ -68,19 +78,32 @@ const getBreadcrumbs = ({
   pathname: string;
   getHref: (path: string) => string;
 }): ChromeBreadcrumb[] => {
-  const runsHref = getHref('/');
-  const datasetsHref = getHref('/datasets');
-  const remotesHref = getHref('/remotes');
+  const runsHref = getHref(ROOT_PATH);
+  const datasetsHref = getHref(DATASETS_PATH);
+  const tracingHref = getHref(TRACING_PATH);
+  const remotesHref = getHref(REMOTES_PATH);
 
-  if (pathname.startsWith('/datasets/')) {
+  if (pathname.startsWith(`${TRACING_PATH}/`)) {
+    const parts = pathname.split('/').filter(Boolean);
+    if (parts.length >= 2) {
+      const projectName = decodeURIComponent(parts[1]);
+      return [{ text: tracingTabLabel, href: tracingHref }, { text: projectName }];
+    }
+  }
+
+  if (pathname === TRACING_PATH) {
+    return [{ text: tracingTabLabel }];
+  }
+
+  if (pathname.startsWith(`${DATASETS_PATH}/`)) {
     return [{ text: datasetsTabLabel, href: datasetsHref }, { text: datasetDetailBreadcrumbLabel }];
   }
 
-  if (pathname === '/datasets') {
+  if (pathname === DATASETS_PATH) {
     return [{ text: datasetsTabLabel }];
   }
 
-  if (pathname === '/remotes') {
+  if (pathname === REMOTES_PATH) {
     return [{ text: remotesTabLabel, href: remotesHref }];
   }
 
@@ -94,20 +117,24 @@ const getBreadcrumbs = ({
 const EvalsNavigation: React.FC = () => {
   const history = useHistory();
   const { pathname } = useLocation();
-  const isDatasetsSelected = pathname.startsWith('/datasets');
-  const isRemotesSelected = pathname.startsWith('/remotes');
-  const isRunsSelected = !isDatasetsSelected && !isRemotesSelected;
+  const isTracingSelected = pathname.startsWith(TRACING_PATH);
+  const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
+  const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
+  const isRunsSelected = !isTracingSelected && !isDatasetsSelected && !isRemotesSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
       <EuiTabs size="s">
-        <EuiTab isSelected={isRunsSelected} onClick={() => history.push('/')}>
+        <EuiTab isSelected={isRunsSelected} onClick={() => history.push(ROOT_PATH)}>
           {runsTabLabel}
         </EuiTab>
-        <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push('/datasets')}>
+        <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push(DATASETS_PATH)}>
           {datasetsTabLabel}
         </EuiTab>
-        <EuiTab isSelected={isRemotesSelected} onClick={() => history.push('/remotes')}>
+        <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
+          {tracingTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isRemotesSelected} onClick={() => history.push(REMOTES_PATH)}>
           {remotesTabLabel}
         </EuiTab>
       </EuiTabs>
@@ -147,11 +174,13 @@ export const EvalsApp: React.FC<{
         />
         <div style={{ flex: 1, minHeight: 0 }}>
           <Routes>
-            <Route exact path="/" component={RunsListPage} />
-            <Route exact path="/datasets" component={DatasetsListPage} />
+            <Route exact path={ROOT_PATH} component={RunsListPage} />
+            <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
             <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
-            <Route exact path="/remotes" component={RemotesListPage} />
+            <Route exact path={REMOTES_PATH} component={RemotesListPage} />
             <Route path="/runs/:runId" component={RunDetailPage} />
+            <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
+            <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
           </Routes>
         </div>
       </div>

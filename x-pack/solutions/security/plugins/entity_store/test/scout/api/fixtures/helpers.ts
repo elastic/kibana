@@ -87,6 +87,7 @@ export const seedUserEntity = async (
   esClient: EsClient,
   { entityId, namespace, email, timestamp }: SeedUserEntityOptions
 ) => {
+  const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
     index: LATEST_INDEX,
     id: hashEuid(entityId),
@@ -98,12 +99,16 @@ export const seedUserEntity = async (
         name: entityId,
         EngineMetadata: { Type: 'user' },
         namespace,
+        lifecycle: {
+          first_seen: ts,
+          last_seen: ts,
+        },
       },
       user: {
         email,
         name: entityId,
       },
-      '@timestamp': timestamp ?? new Date().toISOString(),
+      '@timestamp': ts,
     },
   });
 };
@@ -205,7 +210,7 @@ export const triggerMaintainerRun = async (
 ) => {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const response = await apiClient.post(
-      ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN(maintainerId),
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId),
       {
         headers,
         responseType: 'json',
@@ -244,7 +249,7 @@ export const forceLogExtraction = async (
   fromDateISO: string,
   toDateISO: string
 ) =>
-  await apiClient.post(ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION(entityType), {
+  await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,
     responseType: 'json',
     body: { fromDateISO, toDateISO },

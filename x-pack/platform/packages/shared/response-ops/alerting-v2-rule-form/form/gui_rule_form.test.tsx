@@ -48,10 +48,6 @@ jest.mock('./field_groups/attachment_runbook_field_group', () => ({
   ),
 }));
 
-jest.mock('../flyout/error_callout', () => ({
-  ErrorCallOut: () => <div data-test-subj="mockErrorCallOut">Error CallOut</div>,
-}));
-
 describe('GuiRuleForm', () => {
   const defaultProps = {
     onSubmit: jest.fn(),
@@ -68,12 +64,6 @@ describe('GuiRuleForm', () => {
       const form = document.getElementById(RULE_FORM_ID);
       expect(form).toBeInTheDocument();
       expect(form?.tagName).toBe('FORM');
-    });
-
-    it('renders ErrorCallOut', () => {
-      render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByTestId('mockErrorCallOut')).toBeInTheDocument();
     });
 
     it('renders ConditionFieldGroup', () => {
@@ -144,7 +134,6 @@ describe('GuiRuleForm', () => {
       const order = Array.from(elements).map((el) => el.getAttribute('data-test-subj'));
 
       expect(order).toEqual([
-        'mockErrorCallOut',
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
@@ -163,7 +152,6 @@ describe('GuiRuleForm', () => {
       const order = Array.from(elements).map((el) => el.getAttribute('data-test-subj'));
 
       expect(order).toEqual([
-        'mockErrorCallOut',
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',

@@ -108,9 +108,10 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/stack-connectors-plugin",
     "@kbn/std",
-    "@kbn/inference-connectors",
     "@kbn/streams-ai",
     "@kbn/cps",
     "@kbn/evals-plugin",
+    "@kbn/shared-ux-ai-components",
+    "@kbn/deeplinks-management",
   ]
 }
