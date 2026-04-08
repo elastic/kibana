@@ -19,6 +19,7 @@ export type {
   SmlCrawler,
   SmlIndexAction,
   SmlIndexAttachmentParams,
+  SmlAttachmentOutput,
 } from './types';
 export {
   createSmlService,

@@ -191,19 +191,19 @@ describe('sml_task_definitions', () => {
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
       expect(mockTaskManager.ensureScheduled).toHaveBeenNthCalledWith(1, {
-        id: 'agent_builder:sml_crawler:visualization',
+        id: 'sml:crawler:visualization',
         taskType: SML_CRAWLER_TASK_TYPE,
         params: { attachmentType: 'visualization' },
         schedule: { interval: '10m' },
-        scope: ['agentBuilder'],
+        scope: ['sml'],
         state: {},
       });
       expect(mockTaskManager.ensureScheduled).toHaveBeenNthCalledWith(2, {
-        id: 'agent_builder:sml_crawler:dashboard',
+        id: 'sml:crawler:dashboard',
         taskType: SML_CRAWLER_TASK_TYPE,
         params: { attachmentType: 'dashboard' },
         schedule: { interval: '10m' },
-        scope: ['agentBuilder'],
+        scope: ['sml'],
         state: {},
       });
     });

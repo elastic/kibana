@@ -23,7 +23,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/security-plugin-types-server",
     "@kbn/storage-adapter",
-    "@kbn/agent-builder-common",
     "@kbn/management-settings-ids",
     "@kbn/zod",
   ]

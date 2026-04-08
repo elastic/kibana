@@ -39,7 +39,7 @@ import type { SmlService } from './types';
  * SML type implementers are responsible for setting correct `permissions`
  * arrays in their `getSmlData` hook (see `SmlTypeDefinition`).
  */
-export const SML_CRAWLER_TASK_TYPE = 'agent_builder:sml_crawler';
+export const SML_CRAWLER_TASK_TYPE = 'sml:crawler';
 
 export interface SmlCrawlerTaskParams {
   attachmentType: string;
@@ -158,7 +158,7 @@ export const scheduleSmlCrawlerTasks = async ({
         taskType: SML_CRAWLER_TASK_TYPE,
         params: { attachmentType: definition.id },
         schedule: { interval },
-        scope: ['agentBuilder'],
+        scope: ['sml'],
         state: {},
       });
       logger.info(

@@ -12,7 +12,25 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+
+/**
+ * Output of the {@link SmlTypeDefinition.toAttachment} hook.
+ *
+ * Describes the minimal shape that SML needs from a resolved attachment.
+ * This is intentionally a standalone type so the SML plugin has no
+ * compile-time dependency on agent-builder packages. Consumers that
+ * already work with `AttachmentInput` from `@kbn/agent-builder-common`
+ * can return those objects directly — they satisfy this shape via
+ * TypeScript structural typing.
+ */
+export interface SmlAttachmentOutput {
+  /** Attachment type identifier (e.g. 'visualization', 'dashboard'). */
+  type: string;
+  /** The attachment payload. */
+  data?: unknown;
+  /** Origin reference (e.g. saved object ID) for by-reference attachments. */
+  origin?: string;
+}
 
 /**
  * A single SML chunk to be indexed.
@@ -95,7 +113,7 @@ export interface SmlTypeDefinition {
   toAttachment: (
     item: SmlDocument,
     context: SmlToAttachmentContext
-  ) => Promise<AttachmentInput<string, unknown> | undefined>;
+  ) => Promise<SmlAttachmentOutput | undefined>;
 
   /**
    * Optional: custom crawl interval for the crawler.

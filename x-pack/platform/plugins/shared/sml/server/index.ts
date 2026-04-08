@@ -35,6 +35,7 @@ export type {
   SmlTypeRegistry,
   SmlIndexer,
   SmlResolvedItemResult,
+  SmlAttachmentOutput,
 } from './services';
 
 export {
