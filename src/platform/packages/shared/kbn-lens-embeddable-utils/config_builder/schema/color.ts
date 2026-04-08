@@ -343,12 +343,12 @@ export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
 
 export const NO_COLOR: NoColorType = { type: 'none' };
 export const AUTO_COLOR: AutoColorType = { type: 'auto' };
-
-export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
+export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = Object.freeze({
   mode: 'categorical',
   palette: 'default',
   mapping: [],
-};
+}) satisfies ColorMappingCategoricalType;
+
 /**
  * Schema for where to apply the color (to value or background).
  */
