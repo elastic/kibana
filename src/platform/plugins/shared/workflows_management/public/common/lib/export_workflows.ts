@@ -12,6 +12,7 @@ import { downloadFileAs } from '@kbn/share-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowApi } from '@kbn/workflows-ui';
 import { extractReferencedWorkflowIds } from './export/extract_workflow_references';
+import { generateWorkflowsZip } from './export/generate_zip_archive';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 const FALLBACK_FILENAME = 'workflow_export';
@@ -56,8 +57,9 @@ export const exportSingleWorkflow = (workflow: WorkflowListItemDto): void => {
 };
 
 /**
- * Exports multiple workflows as a ZIP archive via the server-side export API.
- * For a single exportable workflow, falls back to a direct YAML download.
+ * Exports workflows. For a single workflow, downloads as a `.yml` file.
+ * For multiple workflows, fetches entries from the server and builds
+ * a ZIP archive client-side before triggering the download.
  * Returns the number of exported workflows.
  */
 export const exportWorkflows = async (
@@ -75,7 +77,8 @@ export const exportWorkflows = async (
   }
 
   const ids = exportable.map((w) => w.id);
-  const blob = await api.exportWorkflows({ ids });
+  const { entries, manifest } = await api.exportWorkflows({ ids });
+  const blob = await generateWorkflowsZip(entries, manifest);
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `workflows_export_${timestamp}.zip`;

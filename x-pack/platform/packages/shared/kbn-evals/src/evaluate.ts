@@ -16,7 +16,7 @@ import {
 } from '@kbn/evals-common';
 import { v5 as uuidv5 } from 'uuid';
 import { test as base } from '@kbn/scout';
-import { createEsClientForTesting } from '@kbn/test';
+import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';

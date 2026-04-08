@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -19,13 +19,10 @@ import {
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import {
-  legendVisibilitySchema,
-  validateMultipleMetricsCriteria,
-  valueDisplaySchema,
-} from './partition_shared';
+import { validateMultipleMetricsCriteria, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -49,7 +46,7 @@ export const waffleStateSharedSchema = {
           )
         ),
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visibility: legendVisibilitySchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
@@ -90,7 +87,7 @@ export const waffleStateSchemaNoESQL = schema.object(
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...waffleStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
@@ -133,7 +130,7 @@ export const waffleStateSchemaESQL = schema.object(
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...waffleStateSharedSchema,
     metrics: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),

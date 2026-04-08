@@ -125,7 +125,7 @@ export const useSubscribeToChatEvents = ({
         timeToFirstToken: event.data.time_to_first_token,
       });
     } else if (isPromptRequestEvent(event)) {
-      conversationActions.setPendingPrompt({
+      conversationActions.addPendingPrompt({
         prompt: event.data.prompt,
       });
       // Stop loading when a prompt is requested - the round is now awaiting user input
@@ -136,7 +136,7 @@ export const useSubscribeToChatEvents = ({
       });
       setAgentReasoning(
         i18n.translate('xpack.agentBuilder.chatEvents.compactionStarted', {
-          defaultMessage: 'Compacting conversation context...',
+          defaultMessage: 'Compacting conversation context',
         })
       );
     } else if (isCompactionCompletedEvent(event)) {

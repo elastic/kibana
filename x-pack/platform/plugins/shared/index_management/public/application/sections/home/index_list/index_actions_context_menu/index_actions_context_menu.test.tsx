@@ -16,7 +16,7 @@ import type { AppDependencies } from '../../../../app_context';
 import { IndexActionsContextMenu } from './index_actions_context_menu';
 import type { Index } from '@kbn/index-management-shared-types';
 import { notificationService } from '../../../../services/notification';
-import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
+import { getIndexDetailsLink } from '../../../../services/routing';
 import { type DocCountResult, RequestResultType } from '../index_table/get_doc_count';
 
 // EUI context menus keep inactive panels mounted with `pointer-events: none`,
@@ -26,7 +26,6 @@ const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 jest.mock('../../../../services/routing', () => ({
   ...jest.requireActual('../../../../services/routing'),
   getIndexDetailsLink: jest.fn(() => '/indices/some/stats'),
-  navigateToIndexDetailsPage: jest.fn(),
 }));
 
 jest.mock('../../../../services/notification', () => ({
@@ -395,8 +394,8 @@ describe('IndexActionsContextMenu', () => {
   });
 
   describe('WHEN navigating to index detail pages', () => {
-    describe('AND WHEN clicking Overview/Settings/Mapping', () => {
-      it('SHOULD call navigateToIndexDetailsPage for each navigation', async () => {
+    describe('AND WHEN clicking Overview/Settings/Mapping/Stats', () => {
+      it('SHOULD use history.push with getIndexDetailsLink for each navigation', async () => {
         const props = getBaseProps();
         const historyPush = jest.fn();
         const ctx = getIndexManagementCtx({
@@ -425,32 +424,13 @@ describe('IndexActionsContextMenu', () => {
         const mappingBtn = await within(menu3).findByText(/show index mapping/i);
         await user.click(mappingBtn);
 
-        expect(navigateToIndexDetailsPage).toHaveBeenCalledTimes(3);
-      });
-    });
-
-    describe('AND WHEN clicking Stats', () => {
-      it('SHOULD use history.push with getIndexDetailsLink', async () => {
-        const props = getBaseProps();
-        const historyPush = jest.fn();
-        const ctx = getIndexManagementCtx({
-          history: { push: historyPush } as unknown as AppDependencies['history'],
-        });
-        render(
-          <I18nProvider>
-            <AppContextProvider value={ctx}>
-              <IndexActionsContextMenu {...props} />
-            </AppContextProvider>
-          </I18nProvider>
-        );
-
         await openContextMenu();
-        const menu = await screen.findByTestId('indexContextMenu');
-        const statsBtn = await within(menu).findByText(/show index stats/i);
-
+        const menu4 = await screen.findByTestId('indexContextMenu');
+        const statsBtn = await within(menu4).findByText(/show index stats/i);
         await user.click(statsBtn);
 
-        expect(getIndexDetailsLink).toHaveBeenCalled();
+        expect(getIndexDetailsLink).toHaveBeenCalledTimes(4);
+        expect(historyPush).toHaveBeenCalledTimes(4);
         expect(historyPush).toHaveBeenCalledWith('/indices/some/stats');
       });
     });

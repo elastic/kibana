@@ -19,7 +19,7 @@ export const columnsAfter = async (
   _previousColumns: ESQLColumnData[], // will always be empty for FROM
   query: string,
   additionalFields: IAdditionalFields,
-  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
 ) => {
   const options = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'option');
   const sources = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'source');

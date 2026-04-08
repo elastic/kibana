@@ -173,11 +173,14 @@ const resumeAgentResponse = ({
   modelProvider: ModelProvider;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
-}): AgentResponseEvent => {
-  // resuming / replaying tool events for the pending step
-  const lastStep = pendingAgentResponse.steps[pendingAgentResponse.steps.length - 1];
-  if (isToolCallStep(lastStep) && lastStep.results.length === 0) {
-    const toolCallId = lastStep.tool_call_id;
+}): ConversationRound => {
+  // Replay tool events for all pending steps (those with empty results)
+  const pendingAgentResponse = pendingRound.steps
+    .filter(isToolCallStep)
+    .filter((step) => step.results.length === 0);
+
+  for (const step of pendingSteps) {
+    const toolCallId = step.tool_call_id;
     const toolResults = events
       .filter(isToolResultEvent)
       .filter(({ data }) => data.tool_call_id === toolCallId);
@@ -185,11 +188,8 @@ const resumeAgentResponse = ({
       .filter(isToolProgressEvent)
       .filter(({ data }) => data.tool_call_id === toolCallId);
 
-    lastStep.results = toolResults.flatMap(({ data }) => data.results);
-    lastStep.progression = [
-      ...(lastStep.progression ?? []),
-      ...toolProgressions.map(({ data }) => data),
-    ];
+    step.results = toolResults.flatMap(({ data }) => data.results);
+    step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
   }
 
   const followUp = createAgentResponseEvent({
@@ -224,7 +224,7 @@ const mergeAgentResponses = (
   return {
     ...previous,
     status: next.status,
-    pending_prompt: next.pending_prompt,
+    pending_prompts: next.pending_prompts,
     state: undefined,
     steps: [...previous.steps, ...next.steps],
     trace_id: traceId,
@@ -233,6 +233,18 @@ const mergeAgentResponses = (
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
+  };
+
+  return mergedRound;
+};
+
+const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
+  const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
+  return {
+    ...previous,
+    ...next,
+    message: next.message || previous.message,
+    ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
   };
 };
 
@@ -283,9 +295,9 @@ const createAgentResponseEvent = ({
   };
 
   const lastMessage = messages.length ? messages[messages.length - 1] : undefined;
-  const promptRequest = promptRequestEvents.length ? promptRequestEvents[0] : undefined;
+  const hasPromptRequests = promptRequestEvents.length > 0;
 
-  if (!lastMessage && !promptRequest) {
+  if (!lastMessage && !hasPromptRequests) {
     throw new Error('No response event found in round events');
   }
 
@@ -316,10 +328,10 @@ const createAgentResponseEvent = ({
     timestamp: now,
     type: TimelineEventType.agent_response,
     agent_id: agentId,
-    status: promptRequest
+    status: hasPromptRequests
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
-    pending_prompt: promptRequest ? promptRequest.data.prompt : undefined,
+    pending_prompts: hasPromptRequests ? promptRequestEvents.map((e) => e.data.prompt) : undefined,
     state: undefined,
     steps,
     trace_id: getCurrentTraceId(),
@@ -399,32 +411,35 @@ const buildAgentResponseState = ({
     return undefined;
   }
 
-  const promptRequest = promptRequestEvents[0];
-  const toolCallId = promptRequest.source.tool_call_id;
-  const toolCall = agentResponse.steps
-    .filter(isToolCallStep)
-    .find((step) => step.tool_call_id === toolCallId);
+  const nodes = promptRequestEvents.map((promptRequest) => {
+    const toolCallId = promptRequest.source.tool_call_id;
+    const toolCall = agentResponse.steps
+      .filter(isToolCallStep)
+      .find((step) => step.tool_call_id === toolCallId);
 
-  if (!toolCall) {
-    throw new Error(`Could not find tool call with id ${toolCallId} in agent response steps`);
-  }
+    if (!toolCall) {
+      throw new Error(`Could not find tool call with id ${toolCallId} in agent response steps`);
+    }
 
-  const toolState = stateManager
-    .getToolStateManager({ toolId: toolCall.tool_id, toolCallId })
-    .getState();
+    const toolState = stateManager
+      .getToolStateManager({ toolId: toolCall.tool_id, toolCallId })
+      .getState();
+
+    return {
+      step: 'execute_tool' as const,
+      tool_call_id: toolCallId,
+      tool_id: toolCall.tool_id,
+      tool_params: toolCall.params,
+      tool_state: toolState,
+    };
+  });
 
   const state: RoundState = {
-    version: 1,
+    version: 2,
     agent: {
       current_cycle: finalGraphState.currentCycle ?? 0,
       error_count: finalGraphState.errorCount ?? 0,
-      node: {
-        step: 'execute_tool',
-        tool_call_id: toolCallId,
-        tool_id: toolCall.tool_id,
-        tool_params: toolCall.params,
-        tool_state: toolState,
-      },
+      nodes,
     },
   };
 

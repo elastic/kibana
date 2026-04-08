@@ -279,7 +279,7 @@ export function ChangeDataView({
               <EuiButtonEmpty
                 onClick={onCreate}
                 size="xs"
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 iconSide="left"
                 data-test-subj="dataview-create-new"
               >
@@ -348,6 +348,12 @@ export function ChangeDataView({
               initialFocus={`[id="${searchListInputId}"]`}
               display="block"
               buffer={8}
+              aria-label={i18n.translate(
+                'unifiedSearch.dataViewPicker.changeDataViewPopoverAriaLabel',
+                {
+                  defaultMessage: 'Data view selector',
+                }
+              )}
               css={{ inlineSize: '100%' }}
             >
               <div css={styles.popoverContent}>

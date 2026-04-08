@@ -2384,11 +2384,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         idsToDelete.push(id);
       } catch (error) {
-        result.push({
-          id,
-          success: false,
-          ...fleetErrorToResponseOptions(error),
-        });
+        if (options?.ignoreMissing && error instanceof PackagePolicyNotFoundError) {
+          result.push({
+            id,
+            success: false,
+            statusCode: 404,
+            body: { message: error.message },
+          });
+        } else {
+          result.push({
+            id,
+            success: false,
+            ...fleetErrorToResponseOptions(error),
+          });
+        }
       }
     });
 

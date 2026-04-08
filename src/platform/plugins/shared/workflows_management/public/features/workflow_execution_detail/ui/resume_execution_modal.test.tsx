@@ -8,9 +8,12 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { StepContext } from '@kbn/workflows';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 import type { ResumeExecutionModalProps } from './resume_execution_modal';
 import { ResumeExecutionModal } from './resume_execution_modal';
@@ -163,6 +166,27 @@ describe('ResumeExecutionModal', () => {
         },
       });
       fireEvent.click(screen.getByTestId('editorChangeSyntaxOkSchemaFail'));
+      expect(screen.getByTestId('workflowSubmitResume')).toBeDisabled();
+    });
+
+    it('should disable Resume when a JSON Schema required key is missing even if Zod applies defaults', () => {
+      const rawJsonSchema = {
+        type: 'object',
+        properties: {
+          approved: { type: 'boolean', default: false },
+          optionalMessage: { type: 'string', default: 'whats up' },
+        },
+        required: ['approved'],
+      } satisfies JSONSchema7;
+      const schema = convertJsonSchemaToZod(rawJsonSchema);
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          rawJsonSchema: rawJsonSchema as JsonModelSchemaType,
+          stepContext: {} as Partial<StepContext>,
+        },
+      });
       expect(screen.getByTestId('workflowSubmitResume')).toBeDisabled();
     });
   });

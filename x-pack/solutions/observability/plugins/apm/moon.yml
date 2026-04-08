@@ -128,6 +128,7 @@ dependsOn:
   - '@kbn/saved-search-component'
   - '@kbn/saved-search-plugin'
   - '@kbn/charts-theme'
+  - '@kbn/apm-utils'
   - '@kbn/response-ops-rule-params'
   - '@kbn/core-http-server-utils'
   - '@kbn/key-value-metadata-table'
@@ -168,26 +169,6 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

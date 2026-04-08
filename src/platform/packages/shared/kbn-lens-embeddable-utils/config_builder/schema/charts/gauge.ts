@@ -15,9 +15,10 @@ import {
   metricOperationDefinitionSchema,
 } from '../metric_ops';
 import { colorByValueSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { builderEnums } from '../enums';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
@@ -26,7 +27,7 @@ const gaugeStateSharedOptionsSchema = {
         schema.object(
           {
             type: schema.literal('bullet'),
-            direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
+            orientation: builderEnums.simpleOrientation({
               defaultValue: 'horizontal',
             }),
           },
@@ -55,7 +56,7 @@ const gaugeStateSharedOptionsSchema = {
           }
         ),
       ],
-      { defaultValue: { type: 'bullet', direction: 'horizontal' } }
+      { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
     )
   ),
 };
@@ -112,9 +113,11 @@ const gaugeStateMetricOptionsSchema = {
     )
   ),
   /**
-   * Sub title
+   * Subtitle
    */
-  sub_title: schema.maybe(schema.string({ meta: { description: 'Sub title' } })),
+  subtitle: schema.maybe(
+    schema.string({ meta: { description: 'Subtitle below the gauge value' } })
+  ),
   /**
    * Color configuration
    */
@@ -149,7 +152,7 @@ export const gaugeStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...gaugeStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
@@ -167,7 +170,7 @@ export const gaugeStateSchemaESQL = schema.object(
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...gaugeStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.

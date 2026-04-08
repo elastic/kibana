@@ -8,19 +8,137 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
+import { get } from 'lodash';
 import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 
-import type { IntegrationType } from '../../privilege_monitoring/data_sources';
-
-export type WatchlistEntitiesService = ReturnType<typeof createWatchlistEntitiesService>;
+import type { IntegrationType } from '../entity_sources/infra';
+import type { CorrelationMap } from './types';
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
+/** Maps EUID → current watchlist names from the entity store */
+export type WatchlistsByEuid = Map<string, string[]>;
+
 export type IdentityProvider =
   | { type: 'integration'; name: IntegrationType }
-  | { type: 'index'; field: string };
+  | { type: 'index'; field: string }
+  | { type: 'store'; queryRule: string };
+
+export interface EntityStoreQueryResult {
+  entityIdsByType: EntityStoreEntityIdsByType;
+  watchlistsByEuid: WatchlistsByEuid;
+}
+
+export type IndexSourceQueryResult = EntityStoreQueryResult & {
+  correlationMap: CorrelationMap;
+};
+
+type EntityStoreResultFor<T extends IdentityProvider['type']> = T extends 'index'
+  ? IndexSourceQueryResult
+  : EntityStoreQueryResult;
+
+interface WatchlistEntitiesServiceDeps {
+  esClient: ElasticsearchClient;
+  namespace: string;
+}
+
+export type WatchlistEntitiesService = ReturnType<typeof createWatchlistEntitiesService>;
+export const createWatchlistEntitiesService = ({
+  esClient,
+  namespace,
+}: WatchlistEntitiesServiceDeps) => {
+  async function listEntityStoreEntities<T extends IdentityProvider['type']>(
+    idp: IdentityProvider
+  ): Promise<EntityStoreResultFor<T>> {
+    const isIndexSync = idp.type === 'index';
+
+    const query = (() => {
+      if (idp.type === 'index') {
+        return { exists: { field: idp.field } };
+      }
+      if (idp.type === 'integration') {
+        return { term: { 'entity.namespace': integrationToStoreNamespaceMap[idp.name] } };
+      }
+      if (idp.type === 'store') {
+        return toElasticsearchQuery(fromKueryExpression(idp.queryRule));
+      }
+      throw new Error(`Unsupported identity provider: ${JSON.stringify(idp)}`);
+    })();
+
+    const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
+    const correlationMap: CorrelationMap = new Map();
+    const watchlistsByEuid: WatchlistsByEuid = new Map();
+
+    let searchAfter: SortResults | undefined;
+    let fetchMore = true;
+
+    while (fetchMore) {
+      const response = await esClient.search<EntityStoreEntity>({
+        index: getLatestEntitiesIndexName(namespace),
+        size: 1000,
+        sort: ['_doc'],
+        search_after: searchAfter,
+        query,
+      });
+
+      const hits = response.hits.hits;
+
+      if (hits.length === 0) {
+        fetchMore = false;
+        break;
+      }
+
+      hits.reduce(
+        (acc, hit) => {
+          const record = hit._source;
+          if (!record?.entity?.id) return acc;
+
+          const entityType = getEntityType(record);
+          const euid = record.entity.id;
+
+          acc.entityIdsByType[entityType].push(euid);
+
+          const rawWatchlists = get(record, 'entity.attributes.watchlists');
+          const watchlists = Array.isArray(rawWatchlists)
+            ? rawWatchlists
+            : typeof rawWatchlists === 'string'
+            ? [rawWatchlists]
+            : undefined;
+
+          if (watchlists) {
+            acc.watchlistsByEuid.set(euid, watchlists as string[]);
+          }
+
+          if (!isIndexSync) {
+            return acc;
+          }
+
+          const correlationValue = get(record, idp.field);
+          if (!correlationValue) {
+            return acc;
+          }
+
+          acc.correlationMap.set(String(correlationValue), { euid, entityType });
+          return acc;
+        },
+        { entityIdsByType, correlationMap, watchlistsByEuid }
+      );
+
+      searchAfter = hits[hits.length - 1].sort;
+    }
+
+    const deduped = dedup(entityIdsByType);
+    return (
+      isIndexSync
+        ? { entityIdsByType: deduped, correlationMap, watchlistsByEuid }
+        : { entityIdsByType: deduped, watchlistsByEuid }
+    ) as EntityStoreResultFor<T>;
+  }
+  return { listEntityStoreEntities };
+};
 
 const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => ({
   [EntityType.user]: [],
@@ -44,70 +162,7 @@ const getEntityType = (record: EntityStoreEntity): EntityType => {
   return EntityType[entityType as keyof typeof EntityType];
 };
 
-interface WatchlistEntitiesServiceDeps {
-  esClient: ElasticsearchClient;
-  namespace: string;
-}
-
-export const createWatchlistEntitiesService = ({
-  esClient,
-  namespace,
-}: WatchlistEntitiesServiceDeps) => {
-  const listEntityStoreEntities = async (
-    idp: IdentityProvider
-  ): Promise<EntityStoreEntityIdsByType> => {
-    const query =
-      idp.type === 'integration'
-        ? {
-            term: {
-              'entity.namespace': integrationToStoreNamespaceMap[idp.name],
-            },
-          }
-        : {
-            exists: {
-              field: idp.field,
-            },
-          };
-
-    const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
-
-    let searchAfter: SortResults | undefined;
-    let fetchMore = true;
-
-    while (fetchMore) {
-      const response = await esClient.search<EntityStoreEntity>({
-        index: getLatestEntitiesIndexName(namespace),
-        size: 1000,
-        search_after: searchAfter,
-        query,
-      });
-
-      const hits = response.hits.hits;
-
-      if (hits.length === 0) {
-        fetchMore = false;
-        break; // We've reached the end!
-      }
-
-      for (const hit of hits) {
-        const record = hit._source;
-        if (record?.entity?.id) {
-          const entityType = getEntityType(record);
-          entityIdsByType[entityType].push(record.entity.id);
-        }
-      }
-
-      // Grab the sort cursor from the very last hit to use in the next loop
-      searchAfter = hits[hits.length - 1].sort;
-    }
-
-    return Object.fromEntries(
-      Object.entries(entityIdsByType).map(([entityType, entityIds]) => [
-        entityType,
-        Array.from(new Set(entityIds)),
-      ])
-    ) as EntityStoreEntityIdsByType;
-  };
-
-  return { listEntityStoreEntities };
-};
+const dedup = (entityIdsByType: EntityStoreEntityIdsByType): EntityStoreEntityIdsByType =>
+  Object.fromEntries(
+    Object.entries(entityIdsByType).map(([et, ids]) => [et, Array.from(new Set(ids))])
+  ) as EntityStoreEntityIdsByType;

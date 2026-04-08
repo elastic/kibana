@@ -196,15 +196,17 @@ export const convertGraphEvents = ({
             }
 
             if (isToolPromptAction(action)) {
-              resultEvents.push(
-                createPromptRequestEvent({
-                  prompt: action.prompt,
-                  source: {
-                    type: AgentPromptRequestSourceType.toolCall,
-                    tool_call_id: action.tool_call_id,
-                  },
-                })
-              );
+              for (const { prompt, tool_call_id } of action.prompts) {
+                resultEvents.push(
+                  createPromptRequestEvent({
+                    prompt,
+                    source: {
+                      type: AgentPromptRequestSourceType.toolCall,
+                      tool_call_id,
+                    },
+                  })
+                );
+              }
             }
           }
 

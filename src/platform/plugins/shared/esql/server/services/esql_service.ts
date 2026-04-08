@@ -81,10 +81,14 @@ export class EsqlService {
   /**
    * Get all indices, aliases, and data streams for ES|QL sources autocomplete.
    * @param scope The scope to retrieve indices for (local or all).
+   * @param projectRouting Optional CPS project routing value. When provided it is forwarded
+   *   directly to Elasticsearch as `project_routing` so that index resolution reflects the
+   *   project picker selection or an explicit `SET project_routing` pre-statement.
    * @returns A promise that resolves to an array of ESQL source results.
    */
   public async getAllIndices(
-    scope: 'local' | 'all' | 'remote' = 'local'
+    scope: 'local' | 'all' | 'remote' = 'local',
+    projectRouting?: string
   ): Promise<ESQLSourceResult[]> {
     const { client } = this.options;
 
@@ -98,15 +102,18 @@ export class EsqlService {
     // hidden and not, important for finding timeseries mode
     // mode is not returned for time_series datastreams, we need to find it from the indices
     // which are usually hidden
+    const cpsParams = projectRouting ? { project_routing: projectRouting } : {};
     const [allSources, availableSources] = (await Promise.all([
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'all', // this returns hidden indices too
-      }),
+        ...cpsParams,
+      } as Parameters<typeof client.indices.resolveIndex>[0]),
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'open',
-      }),
+        ...cpsParams,
+      } as Parameters<typeof client.indices.resolveIndex>[0]),
     ])) as [ResolveIndexResponse, ResolveIndexResponse];
 
     const suggestedIndices = this.processSuggestedIndices(availableSources.indices ?? []);

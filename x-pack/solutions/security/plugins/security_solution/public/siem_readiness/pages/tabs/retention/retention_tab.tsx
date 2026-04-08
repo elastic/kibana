@@ -270,7 +270,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           }
         ),
         sortable: (item: RetentionInfoWithStatus) => item?.retentionDays ?? 0,
-        width: '20%',
+        width: '15%',
         render: (retentionPeriod: string | null, item: RetentionInfoWithStatus) => {
           if (!retentionPeriod) {
             return (
@@ -295,6 +295,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.retention.table.column.baselineRetentionFedRAMP',
           {
@@ -345,54 +346,53 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
-        name: i18n.translate('xpack.securitySolution.siemReadiness.retention.table.column.action', {
-          defaultMessage: 'Action',
-        }),
-        width: '10%',
-        render: (item: RetentionInfoWithStatus) => {
-          let href: string;
-          let label: string;
-
-          const isDsl = item.retentionType === 'dsl';
-          const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
-          const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
-
-          if (isDsl || isUnmanagedDataStream) {
-            href = getDataStreamUrl(basePath, item.indexName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
-              { defaultMessage: 'View Data Stream' }
-            );
-          } else if (item.retentionType === 'ilm' && item.policyName) {
-            href = getIlmPoliciesUrl(basePath, item.policyName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
-              { defaultMessage: 'View ILM policies' }
-            );
-          } else if (isUnmanagedIndex) {
-            href = getIndexDetailsUrl(basePath, item.indexName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
-              { defaultMessage: 'View Index' }
-            );
-          } else {
-            return null;
+        field: 'indexName' as const,
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.actions',
+          {
+            defaultMessage: 'Actions',
           }
+        ),
+        actions: [
+          {
+            render: (item: RetentionInfoWithStatus) => {
+              let href: string;
+              let label: string;
 
-          return (
-            <div style={{ textAlign: 'right' }}>
-              <EuiButtonEmpty
-                size="xs"
-                href={href}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {label}
-              </EuiButtonEmpty>
-            </div>
-          );
-        },
+              const isDsl = item.retentionType === 'dsl';
+              const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
+              const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
+
+              if (isDsl || isUnmanagedDataStream) {
+                href = getDataStreamUrl(basePath, item.indexName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
+                  { defaultMessage: 'View Data Stream' }
+                );
+              } else if (item.retentionType === 'ilm' && item.policyName) {
+                href = getIlmPoliciesUrl(basePath, item.policyName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
+                  { defaultMessage: 'View ILM policies' }
+                );
+              } else if (isUnmanagedIndex) {
+                href = getIndexDetailsUrl(basePath, item.indexName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
+                  { defaultMessage: 'View Index' }
+                );
+              } else {
+                return null;
+              }
+
+              return (
+                <EuiButtonEmpty size="s" href={href} target="_blank">
+                  {label}
+                </EuiButtonEmpty>
+              );
+            },
+          },
+        ],
       },
     ],
     [basePath]

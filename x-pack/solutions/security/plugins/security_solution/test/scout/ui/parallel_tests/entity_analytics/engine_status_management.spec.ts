@@ -8,7 +8,8 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/259664
+spaceTest.describe.skip(
   'Entity analytics management page - Engine Status tab',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {

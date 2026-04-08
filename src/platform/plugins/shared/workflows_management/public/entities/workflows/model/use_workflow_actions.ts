@@ -22,7 +22,10 @@ import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
-import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
+import type {
+  WorkflowStepTriggerTab,
+  WorkflowTriggerTab,
+} from '../../../features/run_workflow/ui/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
@@ -283,9 +286,20 @@ export function useWorkflowActions() {
     },
   });
 
-  const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
+  const runIndividualStep = useMutation<
+    RunWorkflowResponseDto,
+    HttpError,
+    RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }
+  >({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: (params: RunStepCommand) => api.testStep(params),
+    mutationFn: (params: RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }) =>
+      api.testStep({
+        workflowYaml: params.workflowYaml,
+        stepId: params.stepId,
+        workflowId: params.workflowId,
+        executionContext: params.executionContext,
+        contextOverride: params.contextOverride,
+      }),
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
       telemetry.reportWorkflowStepTestRunInitiated({
@@ -293,6 +307,7 @@ export function useWorkflowActions() {
         stepId: variables.stepId,
         origin: 'workflow_detail',
         error: undefined,
+        triggerTab: variables.triggerTab,
       });
 
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
@@ -305,6 +320,7 @@ export function useWorkflowActions() {
         stepId: variables.stepId,
         origin: 'workflow_detail',
         error: errorObj,
+        triggerTab: variables.triggerTab,
       });
     },
   });

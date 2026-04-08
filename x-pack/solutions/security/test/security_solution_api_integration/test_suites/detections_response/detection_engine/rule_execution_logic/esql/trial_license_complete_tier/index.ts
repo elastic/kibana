@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ESQL execution logic API', function () {
     loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./esql_suppression'));
+    loadTestFile(require.resolve('./esql_metrics'));
   });
 }

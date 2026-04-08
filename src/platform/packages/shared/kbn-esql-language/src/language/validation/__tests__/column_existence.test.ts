@@ -23,6 +23,14 @@ describe('column existence checks', () => {
     await expectErrors('FROM index | FORK (DROP keywordField) (KEEP keywordField)', []);
   });
 
+  it('makes STATS generated columns available after inline WHERE filters', async () => {
+    const { expectErrors } = await setup();
+    await expectErrors(
+      'FROM index | STATS COUNT() WHERE integerField > 0 | EVAL result = `COUNT() WHERE integerField > 0` + 1',
+      []
+    );
+  });
+
   it('returns a warning instead of an error when unmapped_fields is LOAD or NULLIFY', async () => {
     const { expectErrors } = await setup();
     await expectErrors(

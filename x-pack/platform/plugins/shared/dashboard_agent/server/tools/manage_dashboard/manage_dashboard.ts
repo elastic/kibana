@@ -24,6 +24,7 @@ import {
   resolvePanelsFromAttachments,
   type VisualizationFailure,
 } from './utils';
+import { createVisualizationResolver } from './inline_visualization';
 import { dashboardOperationSchema, executeDashboardOperations } from './operations';
 
 const manageDashboardSchema = z.object({
@@ -52,24 +53,33 @@ This tool executes ordered dashboard operations against a dashboard attachment i
 
 Use operations[] to:
 1. set metadata
-2. upsert markdown
+2. add markdown
 3. add panels from attachments
-4. add / remove sections
-5. remove panels
-6. update panels from attachments (re-resolve panels from updated source attachments)`,
+4. create Lens visualization panels inline from natural language
+5. edit existing Lens visualization panels
+6. update panel layouts without changing content
+7. add / remove sections, including inline section panels during add_section
+8. remove panels`,
     schema: manageDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
-      { logger, attachments, events }
+      { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
+        const currentDashboardData = latestVersion?.data ?? createEmptyDashboardData();
+        const resolveVisualizationConfig = createVisualizationResolver({
+          logger,
+          modelProvider,
+          events,
+          esClient,
+        });
 
-        const operationResult = executeDashboardOperations({
-          dashboardData: latestVersion?.data ?? createEmptyDashboardData(),
+        const operationResult = await executeDashboardOperations({
+          dashboardData: currentDashboardData,
           operations,
           logger,
           resolvePanelsFromAttachments: (attachmentInputs) =>
@@ -78,6 +88,7 @@ Use operations[] to:
               attachments,
               logger,
             }),
+          resolveVisualizationConfig,
         });
 
         const failures: VisualizationFailure[] = operationResult.failures;
@@ -133,23 +144,21 @@ Use operations[] to:
                     panels: updatedDashboardData.panels.map((widget) => {
                       if (isSection(widget)) {
                         return {
-                          uid: widget.uid,
+                          id: widget.id,
                           title: widget.title,
                           collapsed: widget.collapsed,
                           grid: widget.grid,
                           panels: widget.panels.map((panel) => ({
                             type: panel.type,
-                            uid: panel.uid,
+                            id: panel.id,
                             grid: panel.grid,
-                            sourceAttachmentId: panel.sourceAttachmentId,
                           })),
                         };
                       }
                       return {
                         type: widget.type,
-                        uid: widget.uid,
+                        id: widget.id,
                         grid: widget.grid,
-                        sourceAttachmentId: widget.sourceAttachmentId,
                       };
                     }),
                   },

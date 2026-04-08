@@ -66,9 +66,9 @@ dependsOn:
   - '@kbn/product-doc-base-plugin'
   - '@kbn/spaces-utils'
   - '@kbn/usage-collection-plugin'
-  - '@kbn/ai-agent-confirmation-modal'
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/search-inference-endpoints'
   - '@kbn/zod'
 tags:
   - plugin
@@ -84,26 +84,6 @@ fileGroups:
     - public/**/*.json
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -49,7 +49,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
   const button = useMemo(
     () => (
       <EuiFilterButton
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         data-test-subj={getTestId()}
         onClick={() => {
           setIsPopoverOpen((prevState) => !prevState);

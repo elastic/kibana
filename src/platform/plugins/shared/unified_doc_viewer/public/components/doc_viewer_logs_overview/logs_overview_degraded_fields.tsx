@@ -320,7 +320,7 @@ const DatasetQualityLink = React.memo(
         {...datasetQualityLinkProps}
         color="primary"
         data-test-subj="unifiedDocViewLogsOverviewDegradedFieldDatasetLink"
-        iconType="popout"
+        iconType="external"
         target="_blank"
         size="xs"
       >
