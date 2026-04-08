@@ -35,6 +35,7 @@ export class MonitorDetailsPage {
       const item = this.page.locator(`li[title="${title}"]`);
       await expect(item).toBeVisible({ timeout: 10_000 });
       await item.click();
+      await expect(item).toHaveAttribute('aria-checked', 'true', { timeout: 10_000 });
     }
     const applyButton = this.page.testSubj.locator('o11yFieldValueSelectionApplyButton');
     await expect(applyButton).toBeEnabled({ timeout: 10_000 });
