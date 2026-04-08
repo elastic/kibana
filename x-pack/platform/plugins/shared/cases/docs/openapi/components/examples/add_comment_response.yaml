@@ -11,8 +11,10 @@ value:
         username: elastic
         email: null
         full_name: null
+  observables: []
   totalAlerts: 0
   totalEvents: 0
+  total_observables: 0
   id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
   version: WzIzMzgsMV0=
   totalComment: 1
