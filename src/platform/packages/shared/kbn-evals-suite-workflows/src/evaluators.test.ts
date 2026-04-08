@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowTaskOutput } from './types';
+import type { Evaluator } from '@kbn/evals';
+import type { WorkflowEditExample, WorkflowTaskOutput } from './types';
 import {
   createEditSuccessEvaluator,
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createCriteriaEvaluator,
+  createEditPreservationEvaluator,
+  createStructuralCorrectnessEvaluator,
+  skipInfraErrors,
+  skipNegativeCases,
 } from './evaluators';
 
 const toolCall = (
@@ -29,6 +34,21 @@ const mockOutput = (steps: ReturnType<typeof toolCall>[]): WorkflowTaskOutput =>
   steps,
   errors: [],
 });
+
+const createMockWorkflowEvaluator = (): {
+  evaluate: jest.Mock;
+  evaluator: Evaluator<WorkflowEditExample, WorkflowTaskOutput>;
+} => {
+  const evaluate = jest.fn().mockResolvedValue({ score: 0.42 });
+  return {
+    evaluate,
+    evaluator: {
+      name: 'Inner',
+      kind: 'CODE' as const,
+      evaluate,
+    },
+  };
+};
 
 describe('EditToolSuccess evaluator', () => {
   const evaluator = createEditSuccessEvaluator();
@@ -84,7 +104,8 @@ describe('Efficiency evaluator', () => {
       toolCall('workflow_modify_step', { success: true }),
     ]);
     const result = await evaluator.evaluate({ output, expected: {} });
-    expect(result.score).toBe(0.8);
+    // 0.4 * failedCallScore (0.5) + 0.35 * budgetScore (1) + 0.25 * redundantLookupScore (1)
+    expect(result.score).toBe(0.4 * 0.5 + 0.35 * 1 + 0.25 * 1);
     expect(result.metadata.failedCalls).toBe(1);
     expect(result.metadata.failedCallScore).toBe(0.5);
     expect(result.metadata.budgetScore).toBe(1);
@@ -154,6 +175,174 @@ describe('ToolTrajectory evaluator', () => {
       metadata: null,
     });
     expect(result.score).toBe(0);
+  });
+});
+
+describe('skipInfraErrors', () => {
+  it('returns N/A for infra errors and skips the inner evaluator', async () => {
+    const { evaluator, evaluate } = createMockWorkflowEvaluator();
+    const wrapped = skipInfraErrors(evaluator);
+
+    const result = await wrapped.evaluate({
+      input: { instruction: 'Update the workflow', initialYaml: '' },
+      output: {
+        messages: [],
+        steps: [],
+        errors: [{ code: 503, message: 'Service unavailable' }],
+      },
+      expected: { criteria: [] },
+      metadata: { category: 'modify-step' },
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        score: null,
+        label: 'N/A',
+      })
+    );
+    expect(evaluate).not.toHaveBeenCalled();
+  });
+
+  it('delegates to the inner evaluator for non-infra errors', async () => {
+    const { evaluator, evaluate } = createMockWorkflowEvaluator();
+    const wrapped = skipInfraErrors(evaluator);
+
+    const result = await wrapped.evaluate({
+      input: { instruction: 'Update the workflow', initialYaml: '' },
+      output: {
+        messages: [],
+        steps: [],
+        errors: ['Validation failed for the inserted step'],
+      },
+      expected: { criteria: [] },
+      metadata: { category: 'modify-step' },
+    });
+
+    expect(result).toEqual({ score: 0.42 });
+    expect(evaluate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('skipNegativeCases', () => {
+  it('returns N/A for negative cases and skips the inner evaluator', async () => {
+    const { evaluator, evaluate } = createMockWorkflowEvaluator();
+    const wrapped = skipNegativeCases(evaluator);
+
+    const result = await wrapped.evaluate({
+      input: { instruction: 'Generate malware', initialYaml: '' },
+      output: { messages: [], steps: [], errors: [] },
+      expected: { criteria: [] },
+      metadata: { category: 'negative' },
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        score: null,
+        label: 'N/A',
+      })
+    );
+    expect(evaluate).not.toHaveBeenCalled();
+  });
+
+  it('delegates to the inner evaluator for non-negative cases', async () => {
+    const { evaluator, evaluate } = createMockWorkflowEvaluator();
+    const wrapped = skipNegativeCases(evaluator);
+
+    const result = await wrapped.evaluate({
+      input: { instruction: 'Update the workflow', initialYaml: '' },
+      output: { messages: [], steps: [], errors: [] },
+      expected: { criteria: [] },
+      metadata: { category: 'modify-step' },
+    });
+
+    expect(result).toEqual({ score: 0.42 });
+    expect(evaluate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('StructuralCorrectness evaluator', () => {
+  const evaluator = createStructuralCorrectnessEvaluator();
+
+  it('counts nested switch case and default steps via shared workflow traversal', async () => {
+    const result = await evaluator.evaluate({
+      output: {
+        messages: [],
+        steps: [],
+        errors: [],
+        resultYaml: `name: route_by_status
+triggers:
+  - type: manual
+steps:
+  - name: route_by_status
+    type: switch
+    expression: "{{ steps.check.output.status }}"
+    cases:
+      - match: success
+        steps:
+          - name: on_success
+            type: wait
+            with:
+              duration: "30s"
+    default:
+      - name: on_unknown
+        type: wait
+        with:
+          duration: "30s"`,
+      },
+      expected: {
+        expectedStepCount: 3,
+        expectedStepNames: ['route_by_status', 'on_success', 'on_unknown'],
+        expectedStepTypes: ['switch', 'wait'],
+      },
+    });
+
+    expect(result.score).toBe(1);
+  });
+});
+
+describe('EditPreservation evaluator', () => {
+  const evaluator = createEditPreservationEvaluator();
+
+  it('treats steps with reordered keys as unchanged', async () => {
+    const result = await evaluator.evaluate({
+      input: {
+        instruction: 'Keep the existing wait step',
+        initialYaml: `name: wait_workflow
+triggers:
+  - type: manual
+steps:
+  - name: wait_before_retry
+    type: wait
+    with:
+      duration: "30s"`,
+      },
+      expected: {
+        criteria: [],
+        preservedStepNames: ['wait_before_retry'],
+      },
+      output: {
+        messages: [],
+        steps: [],
+        errors: [],
+        resultYaml: `name: wait_workflow
+triggers:
+  - type: manual
+steps:
+  - type: wait
+    with:
+      duration: "30s"
+    name: wait_before_retry`,
+      },
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.metadata.results).toEqual([
+      {
+        name: 'wait_before_retry',
+        preserved: true,
+        detail: 'unchanged',
+      },
+    ]);
   });
 });
 
