@@ -62,16 +62,7 @@ export const AgentSkills: React.FC = () => {
   const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-  const [mutatingSkillId, setMutatingSkillId] = useState<string | null>(null);
-  const { handleAddSkill, handleRemoveSkill } = useSkillsMutation({
-    agent,
-    onMutate: (skillId) => {
-      setMutatingSkillId(skillId);
-    },
-    onSettled: () => {
-      setMutatingSkillId(null);
-    },
-  });
+  const { handleAddSkill, handleRemoveSkill } = useSkillsMutation({ agent });
   const {
     isOpen: isLibraryOpen,
     openFlyout: openLibrary,
@@ -290,7 +281,6 @@ export const AgentSkills: React.FC = () => {
                   isSelected={selectedSkillId === skill.id}
                   onSelect={(s) => setSelectedSkillId(s.id)}
                   onRemove={handleRemoveSkill}
-                  isRemoving={mutatingSkillId === skill.id}
                   isAutoIncluded={enableElasticCapabilities && skill.readonly}
                   canEditAgent={canEditAgent}
                 />
@@ -331,7 +321,6 @@ export const AgentSkills: React.FC = () => {
           allSkills={allSkills}
           activeSkillIdSet={libraryActiveSkillIdSet}
           onToggleSkill={handleToggleSkill}
-          mutatingSkillId={mutatingSkillId}
           enableElasticCapabilities={enableElasticCapabilities}
           builtinSkillIdSet={builtinSkillIdSet}
         />

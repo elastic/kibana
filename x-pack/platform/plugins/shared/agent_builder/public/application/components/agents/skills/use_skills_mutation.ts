@@ -17,15 +17,7 @@ import { labels } from '../../../utils/i18n';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 
-export const useSkillsMutation = ({
-  agent,
-  onMutate,
-  onSettled,
-}: {
-  agent: AgentDefinition | null;
-  onMutate: (skillId: string) => void;
-  onSettled: () => void;
-}) => {
+export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) => {
   const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const { addSuccessToast, addErrorToast } = useToasts();
@@ -79,15 +71,11 @@ export const useSkillsMutation = ({
     const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
     if (currentIds.includes(skill.id)) return;
     const newIds = [...currentIds, skill.id];
-    onMutate(skill.id);
 
     updateSkillsMutation.mutate(newIds, {
       onSuccess: () => {
         onSuccess?.(skill.id);
         addSuccessToast({ title: labels.agentSkills.addSkillSuccessToast(skill.name) });
-      },
-      onSettled: () => {
-        onSettled();
       },
     });
   };
@@ -95,13 +83,9 @@ export const useSkillsMutation = ({
   const handleRemoveSkill = (skill: PublicSkillSummary) => {
     const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
     const newIds = currentIds.filter((id) => id !== skill.id);
-    onMutate(skill.id);
     updateSkillsMutation.mutate(newIds, {
       onSuccess: () => {
         addSuccessToast({ title: labels.agentSkills.removeSkillSuccessToast(skill.name) });
-      },
-      onSettled: () => {
-        onSettled();
       },
     });
   };
