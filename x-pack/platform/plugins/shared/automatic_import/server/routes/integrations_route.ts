@@ -88,7 +88,6 @@ const getAllIntegrationsRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -131,7 +130,7 @@ const getIntegrationByIdRoute = (
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
             statusCode,
-            body: err,
+            body: statusCode === 404 ? 'Integration not found' : undefined,
           });
         }
       })
@@ -218,7 +217,6 @@ const createIntegrationRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -288,7 +286,7 @@ const approveIntegrationRoute = (
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
             statusCode,
-            body: err,
+            body: statusCode === 404 ? 'Integration not found' : undefined,
           });
         }
       })
@@ -342,7 +340,7 @@ const deleteIntegrationRoute = (
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
             statusCode,
-            body: err,
+            body: statusCode === 404 ? 'Integration not found' : undefined,
           });
         }
       })
@@ -394,7 +392,7 @@ const downloadIntegrationRoute = (
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
             statusCode,
-            body: err,
+            body: statusCode === 404 ? 'Integration not found' : undefined,
           });
         }
       })

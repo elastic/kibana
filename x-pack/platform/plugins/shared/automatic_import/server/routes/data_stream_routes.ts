@@ -132,7 +132,6 @@ const uploadSamplesRoute = (
           }
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -173,7 +172,6 @@ const deleteDataStreamRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -222,16 +220,27 @@ const updateDataStreamPipelineRoute = (
         } catch (err) {
           logger.error(`updateDataStreamPipelineRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
-          const message = err instanceof Error ? err.message : String(err);
-          const isBadRequestError =
-            message.includes('Invalid ingest pipeline') ||
-            message.includes('No samples found') ||
-            message.includes('Unexpected token');
+          const rawMessage = err instanceof Error ? err.message : String(err);
 
-          return automaticImportResponse.error({
-            statusCode: isBadRequestError ? 400 : 500,
-            body: message,
-          });
+          if (rawMessage.includes('Invalid ingest pipeline')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Invalid ingest pipeline',
+            });
+          }
+          if (rawMessage.includes('No samples found')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'No samples found for data stream',
+            });
+          }
+          if (rawMessage.includes('Unexpected token')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Invalid JSON in pipeline definition',
+            });
+          }
+          return automaticImportResponse.error({ statusCode: 500 });
         }
       })
     );
@@ -272,13 +281,21 @@ const getDataStreamResultsRoute = (
         } catch (err) {
           logger.error(`getDataStreamResultsRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
-          const message = err instanceof Error ? err.message : String(err);
-          const statusCode =
-            message.includes('has not completed yet') ||
-            message.includes('failed and has no results')
-              ? 400
-              : 500;
-          return automaticImportResponse.error({ statusCode, body: err });
+          const rawMessage = err instanceof Error ? err.message : String(err);
+
+          if (rawMessage.includes('has not completed yet')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Data stream analysis has not completed yet',
+            });
+          }
+          if (rawMessage.includes('failed and has no results')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Data stream analysis failed and has no results',
+            });
+          }
+          return automaticImportResponse.error({ statusCode: 500 });
         }
       })
     );
@@ -330,7 +347,6 @@ const reanalyzeDataStreamRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
