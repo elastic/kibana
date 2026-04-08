@@ -9,18 +9,20 @@
 
 import { useEffect, useRef } from 'react';
 import { Query } from '@elastic/eui';
+import { USER_UID_FIELDS } from '../item';
 import { useFieldDefinitions, buildSchema } from '../query_model';
 import { useUserProfileStoreContext } from '../services';
 
 /**
- * Fetch profiles for unresolved `createdBy:` display values in the query bar.
+ * Fetch profiles for unresolved user-UID display values in the query bar.
  *
- * Delegates to `userProfileStore.resolveDisplayValues` (which calls `suggest`).
- * Once fetched, the store update triggers a field-definition re-memo and the
- * model re-derives so the filter applies on the next render.
+ * Scans all {@link USER_UID_FIELDS} (e.g. `createdBy`) in the parsed query
+ * and delegates to `userProfileStore.resolveDisplayValues` (which calls
+ * `suggest`). Once fetched, the store update triggers a field-definition
+ * re-memo and the model re-derives so the filter applies on the next render.
  *
  * A `pendingRef` prevents re-requesting the same values across `fields`
- * changes to avoid an infinite suggest → merge → fields-change loop.
+ * changes to avoid an infinite suggest -> merge -> fields-change loop.
  *
  * Client-backed lists strip `suggest`, making this hook a no-op for them;
  * their profiles are primed from the known item universe instead.
@@ -45,8 +47,11 @@ export const useResolveQueryDisplayValues = (queryText: string): void => {
     if (!resolveDisplayValues) {
       return;
     }
-    const createdByField = fields.find((f) => f.fieldName === 'createdBy');
-    if (!createdByField) {
+
+    const uidFieldNames = USER_UID_FIELDS.filter((name) =>
+      fields.some((f) => f.fieldName === name)
+    );
+    if (uidFieldNames.length === 0) {
       return;
     }
 
@@ -60,35 +65,32 @@ export const useResolveQueryDisplayValues = (queryText: string): void => {
 
     const displayValues: string[] = [];
 
-    const collectOrValues = (must: boolean) => {
-      const clause = parsed.ast.getOrFieldClause('createdBy', undefined, must, 'eq');
-      if (clause) {
-        const vals = Array.isArray(clause.value) ? clause.value : [clause.value];
-        for (const v of vals) {
-          if (typeof v === 'string' && v.length > 0) {
-            displayValues.push(v);
-          }
+    const collectStringValues = (vals: unknown) => {
+      for (const v of Array.isArray(vals) ? vals : [vals]) {
+        if (typeof v === 'string' && v.length > 0) {
+          displayValues.push(v);
         }
       }
     };
-    collectOrValues(true);
-    collectOrValues(false);
 
-    // Also check simple field clauses (e.g. `createdBy:email` without parens).
-    try {
-      const simpleClauses = parsed.ast.getFieldClauses('createdBy');
-      if (simpleClauses) {
-        for (const clause of simpleClauses) {
-          const vals = Array.isArray(clause.value) ? clause.value : [clause.value];
-          for (const v of vals) {
-            if (typeof v === 'string' && v.length > 0) {
-              displayValues.push(v);
-            }
-          }
+    for (const fieldName of uidFieldNames) {
+      for (const must of [true, false]) {
+        const orClause = parsed.ast.getOrFieldClause(fieldName, undefined, must, 'eq');
+        if (orClause) {
+          collectStringValues(orClause.value);
         }
       }
-    } catch {
-      // Non-fatal.
+
+      try {
+        const simpleClauses = parsed.ast.getFieldClauses(fieldName);
+        if (simpleClauses) {
+          for (const clause of simpleClauses) {
+            collectStringValues(clause.value);
+          }
+        }
+      } catch {
+        // Non-fatal.
+      }
     }
 
     const uniqueValues = [...new Set(displayValues)];

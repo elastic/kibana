@@ -268,20 +268,20 @@ describe('state_reducer', () => {
     });
   });
 
-  describe('CLEAR_FILTERS', () => {
+  describe('RESET_QUERY', () => {
     it('hard-resets queryText to empty string (including free-text)', () => {
       const initialState = createInitialState({
         queryText: 'tag:production my search',
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
 
-      // CLEAR_FILTERS is a hard reset that wipes everything. The
+      // `RESET_QUERY` is a hard reset that wipes everything. The
       // `useContentListFilters().clearFilters` hook preserves free-text
-      // by dispatching SET_QUERY with only the search portion instead.
+      // by dispatching `SET_QUERY` with only the search portion instead.
       expect(newState.queryText).toBe('');
     });
 
@@ -291,7 +291,7 @@ describe('state_reducer', () => {
         queryText: 'test',
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
@@ -305,7 +305,7 @@ describe('state_reducer', () => {
         page: { index: 3, size: 20 },
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
@@ -320,7 +320,7 @@ describe('state_reducer', () => {
         selection: { selectedIds: ['1', '2'] },
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
@@ -489,12 +489,12 @@ describe('state_reducer', () => {
       expect(initialState.queryText).toBe(originalQueryText);
     });
 
-    it('returns a new state object for CLEAR_FILTERS', () => {
+    it('returns a new state object for RESET_QUERY', () => {
       const initialState = createInitialState({
         queryText: 'test',
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);

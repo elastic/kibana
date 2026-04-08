@@ -109,12 +109,24 @@ export interface FindItemsResult {
  */
 export type FindItemsFn = (params: FindItemsParams) => Promise<FindItemsResult>;
 
+/** Default debounce delay (ms) matching the Table List View's fetch debounce. */
+export const DEFAULT_DEBOUNCE_MS = 300;
+
 /**
  * Data source configuration properties.
  */
 export interface DataSourceConfig {
   /** Fetches items from the data source. */
   findItems: FindItemsFn;
+
+  /**
+   * Debounce delay in milliseconds applied to query-parameter changes before
+   * a new `findItems` request is issued.
+   *
+   * Defaults to {@link DEFAULT_DEBOUNCE_MS} (300 ms), matching the Table List
+   * View's built-in fetch debounce. Set to `0` to disable debouncing.
+   */
+  debounceMs?: number;
 
   /**
    * Called automatically before every explicit `refetch()` (e.g. after a

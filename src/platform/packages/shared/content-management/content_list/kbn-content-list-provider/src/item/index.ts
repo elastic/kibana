@@ -8,3 +8,4 @@
  */
 
 export type { ContentListItem, ContentListItemConfig } from './types';
+export { USER_UID_FIELDS } from './types';

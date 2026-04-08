@@ -39,7 +39,7 @@ export const reducer = (
         selection: { ...DEFAULT_SELECTION },
       };
 
-    case CONTENT_LIST_ACTIONS.CLEAR_FILTERS:
+    case CONTENT_LIST_ACTIONS.RESET_QUERY:
       return {
         ...state,
         queryText: '',

@@ -16,8 +16,8 @@ import type { ContentListItem } from '../item';
 export const CONTENT_LIST_ACTIONS = {
   /** Set the query text (source of truth for search, filters, and flags). */
   SET_QUERY: 'SET_QUERY',
-  /** Hard-reset: clear all filters, flags, and search text. */
-  CLEAR_FILTERS: 'CLEAR_FILTERS',
+  /** Hard-reset: clear all query text (search, filters, and flags). */
+  RESET_QUERY: 'RESET_QUERY',
   /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
   /** Set page index. */
@@ -111,9 +111,9 @@ interface SetQueryAction {
   payload: { queryText: string };
 }
 
-/** Hard-reset: clear all filters, flags, and search text. */
-interface ClearFiltersAction {
-  type: typeof CONTENT_LIST_ACTIONS.CLEAR_FILTERS;
+/** Hard-reset: clear all query text (search, filters, and flags). */
+interface ResetQueryAction {
+  type: typeof CONTENT_LIST_ACTIONS.RESET_QUERY;
 }
 
 /** Set sort field and direction. */
@@ -129,7 +129,7 @@ interface SetSortAction {
  */
 export type ContentListAction =
   | SetQueryAction
-  | ClearFiltersAction
+  | ResetQueryAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }

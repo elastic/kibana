@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useQuery } from '@kbn/react-query';
 import type { ContentListClientState, ContentListQueryData } from '../state/types';
+import { USER_UID_FIELDS } from '../item';
 import { useContentListConfig } from '../context';
 import { useUserProfileStoreContext } from '../services';
 import { useQueryModel, toFindItemsFilters } from '../query_model';
+import { DEFAULT_DEBOUNCE_MS } from '../datasource/types';
 import { contentListKeys } from './keys';
 import { useResolveQueryDisplayValues } from './use_resolve_query_display_values';
 
 const DEFAULT_PAGE = { index: 0, size: 20 };
-
-const USER_UID_FIELDS = ['createdBy'] as const;
 
 /**
  * React Query hook for fetching content list items.
@@ -38,14 +39,29 @@ export const useContentListItemsQuery = (
   const model = useQueryModel(clientState.queryText);
   const activeFilters = useMemo(() => toFindItemsFilters(model), [model]);
 
+  // Only free-text search is debounced to avoid a request on every keystroke.
+  // Explicit user actions (starred toggle, tag selection, sort, pagination) are immediate.
+  const debounceMs = dataSource.debounceMs ?? DEFAULT_DEBOUNCE_MS;
+  const [debouncedSearchText, setDebouncedSearchText] = useState(activeFilters.search ?? '');
+  useDebounce(() => setDebouncedSearchText(activeFilters.search ?? ''), debounceMs, [
+    activeFilters.search,
+  ]);
+
   const queryParams = useMemo(
     () => ({
-      searchQuery: activeFilters.search ?? '',
-      filters: activeFilters,
+      searchQuery: debouncedSearchText,
+      filters: { ...activeFilters, search: debouncedSearchText },
       sort: supports.sorting ? clientState.sort : undefined,
       page: supports.pagination ? clientState.page : DEFAULT_PAGE,
     }),
-    [activeFilters, clientState.sort, clientState.page, supports.sorting, supports.pagination]
+    [
+      debouncedSearchText,
+      activeFilters,
+      clientState.sort,
+      clientState.page,
+      supports.sorting,
+      supports.pagination,
+    ]
   );
 
   const query = useQuery({

@@ -8,6 +8,14 @@
  */
 
 /**
+ * {@link ContentListItem} fields that contain user UIDs.
+ *
+ * Used to seed the user-profile cache from fetched items and to resolve
+ * display values typed into the query bar.
+ */
+export const USER_UID_FIELDS = ['createdBy'] as const;
+
+/**
  * Standardized item structure for rendering components (tables, grids, etc.).
  *
  * This is the common interface that all rendering components work with,
