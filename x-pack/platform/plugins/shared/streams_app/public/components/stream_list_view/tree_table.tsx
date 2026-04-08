@@ -461,7 +461,8 @@ export function StreamsTreeTable({
                   )}
                   {isRoot(item.stream.name) &&
                     item.stream.name !== LOGS_ROOT_STREAM_NAME &&
-                    !item.data_stream && (
+                    !item.data_stream &&
+                    !Streams.QueryStream.Definition.is(item.stream) && (
                       <EuiToolTip
                         position="right"
                         content={i18n.translate(
