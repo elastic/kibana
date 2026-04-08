@@ -89,31 +89,15 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   }),
                   isBlocking: true,
                 },
-                {
-                  validator: ({ value, path }) => {
-                    if (value && selectedTaskType !== CHAT_COMPLETION_TASK_TYPE) {
-                      return {
-                        code: 'ERR_FIELD_MISSING',
-                        path,
-                        message: LABELS.CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE,
-                      };
-                    }
-                  },
-                  isBlocking: true,
-                },
               ],
             }}
           >
             {(field) => {
-              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-              const taskTypeError =
-                config.contextWindowLength && selectedTaskType !== CHAT_COMPLETION_TASK_TYPE
-                  ? LABELS.CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE
-                  : undefined;
+              const { isInvalid } = getFieldValidityAndErrorMessage(field);
               return (
                 <EuiFormControlLayout
                   fullWidth
-                  isInvalid={isInvalid || Boolean(taskTypeError)}
+                  isInvalid={isInvalid}
                   clear={{
                     onClick: () => {
                       setFieldValue('config.contextWindowLength', '');
@@ -125,7 +109,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                     fullWidth
                     data-test-subj={'contextWindowLengthNumber'}
                     value={config.contextWindowLength ?? ''}
-                    isInvalid={isInvalid || Boolean(taskTypeError)}
+                    isInvalid={isInvalid}
                     onChange={(e) => {
                       setFieldValue('config.contextWindowLength', e.target.value);
                     }}
@@ -136,7 +120,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           </UseField>
         </EuiFormRow>
       ) : null,
-    [showContextWindow, selectedTaskType, setFieldValue, config.contextWindowLength]
+    [showContextWindow, setFieldValue, config.contextWindowLength]
   );
 
   const temperatureSettings = useMemo(
@@ -223,11 +207,11 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
     [showTemperature, setFieldValue, config.temperature]
   );
 
-  if (!showContextWindow && !showTemperature) return null;
+  if (!contextWindowLengthSettings && !temperatureSettings) return null;
 
   return (
     <>
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="none" />
       {contextWindowLengthSettings}
       {temperatureSettings && contextWindowLengthSettings && <EuiSpacer size="m" />}
       {temperatureSettings}

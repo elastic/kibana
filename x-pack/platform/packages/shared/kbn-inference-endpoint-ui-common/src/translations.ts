@@ -143,13 +143,6 @@ export const GET_PROVIDERS_FAILED = i18n.translate(
   }
 );
 
-export const ENDPOINT_TITLE = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.EndpointTitle',
-  {
-    defaultMessage: 'Inference Endpoint',
-  }
-);
-
 export const ADD_ENDPOINT_TITLE = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.addEndpointTitle',
   {

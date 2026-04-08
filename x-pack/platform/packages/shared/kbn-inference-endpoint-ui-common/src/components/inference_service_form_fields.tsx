@@ -45,6 +45,7 @@ import {
 } from './providers/render_service_provider/service_provider';
 import type { ServiceProviderKeys } from '../constants';
 import {
+  CHAT_COMPLETION_TASK_TYPE,
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
   serviceProviderLinkComponents,
@@ -316,6 +317,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           inferenceId,
           providerConfig: newProviderConfig,
           taskTypeConfig: newTaskTypeConfig,
+          ...(taskType !== CHAT_COMPLETION_TASK_TYPE ? { contextWindowLength: '' } : {}),
         },
         secrets: {
           providerSecrets: newSecrets,
@@ -728,18 +730,17 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             </>
           )}
           <EuiSpacer size="s" />
-          {optionalProviderFormFields.length > 0 ? (
-            <>
-              <MoreOptionsFields
-                optionalProviderFormFields={optionalProviderFormFields}
-                onSetProviderConfigEntry={onSetProviderConfigEntry}
-                isEdit={isEdit}
-              />
-              <EuiHorizontalRule margin="m" />
-            </>
-          ) : null}
+          {optionalProviderFormFields.length > 0 && (
+            <MoreOptionsFields
+              optionalProviderFormFields={optionalProviderFormFields}
+              onSetProviderConfigEntry={onSetProviderConfigEntry}
+              isEdit={isEdit}
+            />
+          )}
           {/* AUTHENTICATION */}
           {authenticationFormFields.length > 0 && (
+            <>
+              <EuiHorizontalRule margin="m" />
               <AuthenticationFormItems
                 isLoading={false}
                 items={authenticationFormFields}
@@ -748,6 +749,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 isPreconfigured={isPreconfigured}
                 reenterSecretsOnEdit={reenterSecretsOnEdit}
               />
+            </>
           )}
           {/* ADDITIONAL OPTIONS */}
           <AdditionalOptionsFields

@@ -18,7 +18,6 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import {
@@ -48,68 +47,63 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
   return (
     <>
       <EuiHorizontalRule margin="m" />
-      <EuiFormRow
-        id="inferenceId"
-        label={
-          <FormattedMessage
-            id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdLabel"
-            defaultMessage="Inference endpoint ID"
-          />
-        }
-        fullWidth
-        helpText={
-          <FormattedMessage
-            id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdHelpLabel"
-            defaultMessage="This ID cannot be changed once created."
-          />
-        }
-      >
-        <UseField path="config.inferenceId">
-          {(field) => {
-            const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-            return (
-              <>
-                <EuiFieldText
-                  isInvalid={isInvalid}
-                  data-test-subj="inference-endpoint-input-field"
-                  fullWidth
-                  disabled={isEdit}
-                  value={config.inferenceId}
-                  onChange={(e) => {
-                    setFieldValue('config.inferenceId', e.target.value);
-                  }}
-                  append={
-                    <EuiCopy
-                      beforeMessage={LABELS.COPY_TOOLTIP}
-                      afterMessage={LABELS.COPIED_TOOLTIP}
-                      textToCopy={config.inferenceId}
-                    >
-                      {(copy) => (
-                        <EuiFormAppend
-                          element="button"
-                          label={
-                            <FormattedMessage
-                              id="xpack.inferenceEndpointUICommon.components.additionalInfo.copyLabel"
-                              defaultMessage="Copy"
-                            />
-                          }
-                          iconRight="copy"
-                          onClick={copy}
-                        />
-                      )}
-                    </EuiCopy>
-                  }
+      <UseField path="config.inferenceId">
+        {(field) => {
+          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+          return (
+            <EuiFormRow
+              id="inferenceId"
+              fullWidth
+              isInvalid={isInvalid}
+              error={errorMessage}
+              label={
+                <FormattedMessage
+                  id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdLabel"
+                  defaultMessage="Inference endpoint ID"
                 />
-                {isInvalid && errorMessage && (
-                  <EuiText size="xs" color="danger">
-                    {errorMessage}
-                  </EuiText>
-                )}
-              </>
-            );
-          }}
-        </UseField>
-      </EuiFormRow>
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdHelpLabel"
+                  defaultMessage="This ID cannot be changed once created."
+                />
+              }
+            >
+              <EuiFieldText
+                isInvalid={isInvalid}
+                data-test-subj="inference-endpoint-input-field"
+                fullWidth
+                disabled={isEdit}
+                value={config.inferenceId}
+                onChange={(e) => {
+                  setFieldValue('config.inferenceId', e.target.value);
+                }}
+                append={
+                  <EuiCopy
+                    beforeMessage={LABELS.COPY_TOOLTIP}
+                    afterMessage={LABELS.COPIED_TOOLTIP}
+                    textToCopy={config.inferenceId}
+                  >
+                    {(copy) => (
+                      <EuiFormAppend
+                        element="button"
+                        label={
+                          <FormattedMessage
+                            id="xpack.inferenceEndpointUICommon.components.additionalInfo.copyLabel"
+                            defaultMessage="Copy"
+                          />
+                        }
+                        iconRight="copy"
+                        onClick={copy}
+                      />
+                    )}
+                  </EuiCopy>
+                }
+              />
+            </EuiFormRow>
+          );
+        }}
+      </UseField>
       <EuiSpacer size="m" />
       <EuiTitle size="xxxs">
         <h5>
