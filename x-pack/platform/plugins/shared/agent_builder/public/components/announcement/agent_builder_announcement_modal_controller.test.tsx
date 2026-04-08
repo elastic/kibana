@@ -15,7 +15,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   HIDE_ANNOUNCEMENTS_ID,
   AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID,
+  SECURITY_AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { AgentBuilderAnnouncementModalController } from './agent_builder_announcement_modal_controller';
 
@@ -24,10 +26,12 @@ const SPACE_ID = 'test-space';
 function buildServices({
   hideAnnouncements = false,
   announcementModalSeen = false,
+  securityChatExperience = AIChatExperience.Agent,
   spaceId = SPACE_ID,
 }: {
   hideAnnouncements?: boolean;
   announcementModalSeen?: boolean;
+  securityChatExperience?: AIChatExperience;
   spaceId?: string;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
@@ -38,9 +42,11 @@ function buildServices({
   const services = {
     settings: {
       client: {
-        get: jest.fn((key: string) =>
-          key === AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID ? announcementModalSeen : undefined
-        ),
+        get: jest.fn((key: string) => {
+          if (key === AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID) return announcementModalSeen;
+          if (key === SECURITY_AI_CHAT_EXPERIENCE_TYPE) return securityChatExperience;
+          return undefined;
+        }),
         get$: jest.fn(),
         set: settingsSet,
       },
@@ -98,6 +104,17 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
+  it('does not render the modal when security chat experience is Classic', async () => {
+    const { services } = buildServices({ securityChatExperience: AIChatExperience.Classic });
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('renders the modal when the space is loaded and the modal has not been seen', async () => {
     const { services } = buildServices();
     renderController(services);
@@ -126,7 +143,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(screen.queryByTestId('agentBuilderAnnouncementContinueButton')).not.toBeInTheDocument();
   });
 
-  it('calls settings.client.set, reports OptOut telemetry, navigates to management, and hides the modal on revert', async () => {
+  it('calls settings.client.set, reports OptOut telemetry, navigates to GenAI settings, and hides the modal on revert', async () => {
     const user = userEvent.setup();
     const { services, reportEvent, navigateToApp, settingsSet } = buildServices();
     renderController(services);

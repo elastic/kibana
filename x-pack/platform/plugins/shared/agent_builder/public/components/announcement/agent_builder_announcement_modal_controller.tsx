@@ -33,9 +33,14 @@ export function AgentBuilderAnnouncementModalController() {
   const space = useObservable(activeSpace$);
   const announcementSeen =
     services.settings?.client.get<boolean>(AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID) ?? true;
+  const securityChatExperience =
+    services.settings?.client.get<AIChatExperience>(SECURITY_AI_CHAT_EXPERIENCE_TYPE) ??
+    AIChatExperience.Agent;
   const [isDismissed, setIsDismissed] = useState(false);
 
   if (!space) return null;
+  // Only show the announcement for security users in Agent mode — not globally for all agent users.
+  if (securityChatExperience !== AIChatExperience.Agent) return null;
   if (hideAnnouncements || announcementSeen || isDismissed) return null;
 
   return (
@@ -54,12 +59,10 @@ export function AgentBuilderAnnouncementModalController() {
         services.settings?.client
           .set(AGENT_BUILDER_ANNOUNCEMENT_MODAL_SEEN_ID, true)
           .catch(() => {});
-        services.settings?.client
-          .set(SECURITY_AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
-          .catch(() => {});
         services.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptOut, {
           source: 'agent_builder_nav_control',
         });
+        services.application.navigateToApp('management', { path: '/ai/genAiSettings' });
         setIsDismissed(true);
       }}
     />
