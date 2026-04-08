@@ -44,6 +44,7 @@ export function createStreamsSourceEnricher(
         const isWired = Streams.WiredStream.Definition.is(stream);
 
         const streamUrl = app.getUrlForApp('streams', {
+          absolute: true,
           path: `/${stream.name}/management/overview`,
         });
 
