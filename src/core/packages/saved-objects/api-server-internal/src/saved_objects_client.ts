@@ -237,18 +237,18 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /** {@inheritDoc SavedObjectsClientContract.changeOwnership} */
-  async changeOwnership(
+  changeOwnership(
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeOwnershipOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
-    return await this._repository.changeOwnership(objects, options);
+    return this._repository.changeOwnership(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.changeAccessMode} */
-  async changeAccessMode(
+  changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
-    return await this._repository.changeAccessMode(objects, options);
+    return this._repository.changeAccessMode(objects, options);
   }
 }
