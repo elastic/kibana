@@ -97,5 +97,4 @@ describe('user_details_left useTabs', () => {
       expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
     ]);
   });
-
 });
