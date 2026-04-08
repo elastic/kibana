@@ -18,6 +18,7 @@ import {
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
   getTimelineApiService,
+  getWorkflowApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -83,6 +84,11 @@ export const spaceTest = securityParallelFixtures.extend<
         scoutSpace,
       });
       extendedApiServices.timeline = getTimelineApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+      });
+      extendedApiServices.workflow = getWorkflowApiService({
         kbnClient,
         log,
         scoutSpace,
