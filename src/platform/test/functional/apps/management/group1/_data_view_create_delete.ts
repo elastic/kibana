@@ -115,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.be('without-timefield');
         });
         await testSubjects.missingOrFail('currentIndexPatternTimeField');
+        await PageObjects.settings.clickKibanaIndexPatterns();
       });
     });
 
