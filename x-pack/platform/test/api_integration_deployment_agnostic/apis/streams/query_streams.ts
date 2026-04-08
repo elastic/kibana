@@ -136,6 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should reject child query stream that does not reference parent stream', async () => {
         const childName = `${PARENT_STREAM_NAME}.errors`;
         const childViewName = getEsqlViewName(childName);
+        const parentViewName = getEsqlViewName(PARENT_STREAM_NAME);
 
         // Try to create a child query stream that references a different source
         const response = (await putStream(
@@ -150,7 +151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(response.message).to.contain('must reference its parent stream');
         // Parent is a wired stream, so it should be referenced by ES|QL view name
-        expect(response.message).to.contain(PARENT_STREAM_NAME);
+        expect(response.message).to.contain(parentViewName);
       });
 
       it('should accept child query stream that correctly references parent wired stream', async () => {
@@ -183,6 +184,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should reject query stream without FROM clause', async () => {
         const childName = `${PARENT_STREAM_NAME}.info`;
         const childViewName = getEsqlViewName(childName);
+        const parentViewName = getEsqlViewName(PARENT_STREAM_NAME);
 
         // Try to create a child query stream without a FROM clause
         const response = (await putStream(
@@ -194,7 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(response.message).to.contain('must have a FROM clause');
         // Parent is a wired stream, so it should be referenced by ES|QL view name
-        expect(response.message).to.contain(PARENT_STREAM_NAME);
+        expect(response.message).to.contain(parentViewName);
       });
 
       it('should allow root-level query stream without parent view reference', async () => {
@@ -249,8 +251,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )) as unknown as { message: string };
 
         expect(response.message).to.contain('must reference its parent stream');
-        // Parent is a query stream, referenced by friendly name
-        expect(response.message).to.contain(intermediateChildName);
+        // Parent is a query stream, so it should be referenced by view name
+        expect(response.message).to.contain(intermediateViewName);
 
         // Clean up intermediate stream
         await deleteStream(apiClient, intermediateChildName);
