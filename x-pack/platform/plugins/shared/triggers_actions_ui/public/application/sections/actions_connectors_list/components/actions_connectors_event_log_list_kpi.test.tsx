@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import { loadGlobalConnectorExecutionKPIAggregations } from '../../../lib/action_connector_api/load_execution_kpi_aggregations';
 import { ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -46,7 +45,7 @@ describe('actions_connectors_event_log_list_kpi', () => {
   });
 
   it('renders correctly', async () => {
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorEventLogListKPI
         dateStart="now-24h"
         dateEnd="now"
@@ -54,60 +53,49 @@ describe('actions_connectors_event_log_list_kpi', () => {
       />
     );
 
+    // Initially shows placeholder values
     expect(
-      wrapper
-        .find('[data-test-subj="connectorEventLogKpi-successOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
+      within(screen.getByTestId('connectorEventLogKpi-successOutcome')).getByText('--')
+    ).toBeInTheDocument();
     expect(
-      wrapper
-        .find('[data-test-subj="connectorEventLogKpi-warningOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
+      within(screen.getByTestId('connectorEventLogKpi-warningOutcome')).getByText('--')
+    ).toBeInTheDocument();
     expect(
-      wrapper
-        .find('[data-test-subj="connectorEventLogKpi-failureOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
+      within(screen.getByTestId('connectorEventLogKpi-failureOutcome')).getByText('--')
+    ).toBeInTheDocument();
 
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Wait for the load to resolve
+    await waitFor(() => {
+      expect(loadGlobalConnectorExecutionKPIAggregations).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: undefined,
+          outcomeFilter: undefined,
+        })
+      );
     });
 
-    expect(loadGlobalConnectorExecutionKPIAggregations).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: undefined,
-        outcomeFilter: undefined,
-      })
-    );
-
+    // After load, shows actual values
+    await waitFor(() => {
+      expect(
+        within(screen.getByTestId('connectorEventLogKpi-successOutcome')).getByText(
+          `${mockKpiResponse.success}`
+        )
+      ).toBeInTheDocument();
+    });
     expect(
-      wrapper
-        .find('[data-test-subj="connectorEventLogKpi-successOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual(`${mockKpiResponse.success}`);
+      within(screen.getByTestId('connectorEventLogKpi-warningOutcome')).getByText(
+        `${mockKpiResponse.warning}`
+      )
+    ).toBeInTheDocument();
     expect(
-      wrapper
-        .find('[data-test-subj="connectorEventLogKpi-warningOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual(`${mockKpiResponse.warning}`);
-    expect(
-      wrapper
-        .find('[data-test-subj="connectorEventLogKpi-failureOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual(`${mockKpiResponse.failure}`);
+      within(screen.getByTestId('connectorEventLogKpi-failureOutcome')).getByText(
+        `${mockKpiResponse.failure}`
+      )
+    ).toBeInTheDocument();
   });
 
   it('calls KPI API with filters', async () => {
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorEventLogListKPI
         dateStart="now-24h"
         dateEnd="now"
@@ -117,17 +105,14 @@ describe('actions_connectors_event_log_list_kpi', () => {
       />
     );
 
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Wait for the load to resolve
+    await waitFor(() => {
+      expect(loadGlobalExecutionKPIAggregationsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'test',
+          outcomeFilter: ['status: 123', 'test:456'],
+        })
+      );
     });
-
-    expect(loadGlobalExecutionKPIAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: 'test',
-        outcomeFilter: ['status: 123', 'test:456'],
-      })
-    );
   });
 });

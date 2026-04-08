@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ResilientConnectorFields from './resilient_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -30,7 +29,7 @@ describe('ResilientActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <ResilientConnectorFields
           readOnly={false}
@@ -40,10 +39,10 @@ describe('ResilientActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="config.apiUrl-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="config.orgId-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.apiKeyId-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.apiKeySecret-input"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('config.apiUrl-input')).toBeInTheDocument();
+    expect(screen.getByTestId('config.orgId-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.apiKeyId-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.apiKeySecret-input')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -75,7 +74,7 @@ describe('ResilientActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <ResilientConnectorFields
             readOnly={false}
@@ -86,10 +85,10 @@ describe('ResilientActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       });
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
           data: {
             actionTypeId: '.resilient',

@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EventLogListStatusFilter } from './event_log_list_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 
@@ -27,45 +28,63 @@ describe('event_log_list_status_filter', () => {
   });
 
   it('renders correctly', () => {
-    const wrapper = mountWithIntl(
-      <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
+    const { container } = render(
+      <I18nProvider>
+        <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
+      </I18nProvider>
     );
 
-    expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
-    expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
+    // No filter select items shown before popover is opened
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    // The filter button is rendered
+    expect(screen.getByRole('button')).toBeInTheDocument();
 
-    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('0');
+    const badge = container.querySelector('.euiNotificationBadge');
+    expect(badge?.textContent).toEqual('0');
   });
 
-  it('can open the popover correctly', () => {
-    const wrapper = mountWithIntl(
-      <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
+  it('can open the popover correctly', async () => {
+    const { container, rerender } = render(
+      <I18nProvider>
+        <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
+      </I18nProvider>
     );
 
-    wrapper.find(EuiFilterButton).find('button').simulate('click');
+    // Open the popover by clicking the filter button
+    await userEvent.click(screen.getByRole('button'));
 
-    const statusItems = wrapper.find(EuiFilterSelectItem);
+    // EUI popovers render in a portal (outside `container`), so use screen queries
+    const statusItems = screen.getAllByRole('option');
     expect(statusItems.length).toEqual(4);
 
-    statusItems.at(0).simulate('click');
+    await userEvent.click(statusItems[0]);
     expect(onChangeMock).toHaveBeenCalledWith(['success']);
 
-    wrapper.setProps({
-      selectedOptions: ['success'],
-    });
+    rerender(
+      <I18nProvider>
+        <EventLogListStatusFilter selectedOptions={['success']} onChange={onChangeMock} />
+      </I18nProvider>
+    );
 
-    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('1');
+    const badge1 = container.querySelector('.euiNotificationBadge');
+    expect(badge1?.textContent).toEqual('1');
 
-    statusItems.at(1).simulate('click');
+    await userEvent.click(statusItems[1]);
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
 
-    wrapper.setProps({
-      selectedOptions: ['success', 'failure'],
-    });
+    rerender(
+      <I18nProvider>
+        <EventLogListStatusFilter
+          selectedOptions={['success', 'failure']}
+          onChange={onChangeMock}
+        />
+      </I18nProvider>
+    );
 
-    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('2');
+    const badge2 = container.querySelector('.euiNotificationBadge');
+    expect(badge2?.textContent).toEqual('2');
 
-    statusItems.at(0).simulate('click');
+    await userEvent.click(statusItems[0]);
     expect(onChangeMock).toHaveBeenCalledWith(['failure']);
   });
 });

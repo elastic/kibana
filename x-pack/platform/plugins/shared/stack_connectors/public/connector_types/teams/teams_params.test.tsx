@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import TeamsParamsFields from './teams_params';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
@@ -16,7 +17,7 @@ describe('TeamsParamsFields renders', () => {
       message: 'test message',
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <TeamsParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -24,8 +25,8 @@ describe('TeamsParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').first().prop('value')).toStrictEqual(
+    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
+    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toStrictEqual(
       'test message'
     );
   });
@@ -36,7 +37,7 @@ describe('TeamsParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <TeamsParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -45,13 +46,20 @@ describe('TeamsParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toEqual(
+      'not the default message'
+    );
 
-    wrapper.setProps({
-      useDefaultMessage: true,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <TeamsParamsFields
+        actionParams={actionParams}
+        errors={{ message: [] }}
+        editAction={editAction}
+        useDefaultMessage={true}
+        defaultMessage={'Some different default message'}
+        index={0}
+      />
+    );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
@@ -62,7 +70,7 @@ describe('TeamsParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <TeamsParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -71,13 +79,20 @@ describe('TeamsParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect((screen.getByTestId('messageTextArea') as HTMLTextAreaElement).value).toEqual(
+      'not the default message'
+    );
 
-    wrapper.setProps({
-      useDefaultMessage: false,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <TeamsParamsFields
+        actionParams={actionParams}
+        errors={{ message: [] }}
+        editAction={editAction}
+        useDefaultMessage={false}
+        defaultMessage={'Some different default message'}
+        index={0}
+      />
+    );
 
     expect(editAction).not.toHaveBeenCalled();
   });

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { loadGlobalConnectorExecutionLogAggregations } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import { ConnectorEventLogListTable } from './actions_connectors_event_log_list_table';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -59,7 +59,7 @@ describe('actions_connectors_event_log_list_table', () => {
   });
 
   it('renders correctly', async () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <ConnectorEventLogListTable
         refreshToken={0}
         initialPageSize={50}
@@ -69,48 +69,38 @@ describe('actions_connectors_event_log_list_table', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="connectorEventLogListProgressBar"]')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="connectorEventLogListDatePicker"]')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="connectorEventLogListKpi"]')).toBeTruthy();
-
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Wait for the load to resolve and the API to be called
+    await waitFor(() => {
+      expect(loadGlobalConnectorExecutionLogAggregations).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: '',
+          namespaces: undefined,
+          outcomeFilter: [],
+          page: 0,
+          perPage: 50,
+          sort: [],
+        })
+      );
     });
 
-    expect(loadGlobalConnectorExecutionLogAggregations).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: '',
-        namespaces: undefined,
-        outcomeFilter: [],
-        page: 0,
-        perPage: 50,
-        sort: [],
-      })
-    );
+    // After load, check data grid cell content
+    await waitFor(() => {
+      const statusCells = document.querySelectorAll(
+        '[data-gridcell-column-id="status"] .euiDataGridRowCell__content'
+      );
+      expect(statusCells[0]?.textContent).toEqual('succeeded');
+    });
 
-    expect(wrapper.find('[data-test-subj="connectorEventLogListProgressBar"]')).toEqual({});
-    expect(
-      wrapper
-        .find('[data-gridcell-column-id="timestamp"] .euiDataGridRowCell__content')
-        .first()
-        .text()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-gridcell-column-id="status"] .euiDataGridRowCell__content').first().text()
-    ).toEqual('succeeded');
-    expect(
-      wrapper
-        .find('[data-gridcell-column-id="connector_name"] .euiDataGridRowCell__content')
-        .first()
-        .text()
-    ).toEqual('test connector');
-    expect(
-      wrapper
-        .find('[data-gridcell-column-id="message"] .euiDataGridRowCell__content')
-        .first()
-        .text()
-    ).toEqual('action executed: .server-log:86020b10-9b3b-11ed-8422-2f5a388a317d: test');
+    const connectorNameCells = document.querySelectorAll(
+      '[data-gridcell-column-id="connector_name"] .euiDataGridRowCell__content'
+    );
+    expect(connectorNameCells[0]?.textContent).toEqual('test connector');
+
+    const messageCells = document.querySelectorAll(
+      '[data-gridcell-column-id="message"] .euiDataGridRowCell__content'
+    );
+    expect(messageCells[0]?.textContent).toEqual(
+      'action executed: .server-log:86020b10-9b3b-11ed-8422-2f5a388a317d: test'
+    );
   });
 });

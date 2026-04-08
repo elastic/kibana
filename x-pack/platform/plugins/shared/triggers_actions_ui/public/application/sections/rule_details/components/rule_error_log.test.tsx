@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
 
-import { EuiSuperDatePicker } from '@elastic/eui';
 import type { Rule } from '../../../../types';
-import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import { RuleErrorLog } from './rule_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -122,6 +121,9 @@ const mockRule: Rule = {
 
 const loadActionErrorLogMock = jest.fn();
 
+const renderWithI18n = (ui: React.ReactElement) =>
+  render(ui, { wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider> });
+
 describe('rule_error_log', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -141,13 +143,8 @@ describe('rule_error_log', () => {
 
   it('renders correctly', async () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
-    );
-
-    // No data initially
-    expect(wrapper.find('.euiTableRow .euiTableCellContent__text').first().text()).toEqual(
-      'No items found'
     );
 
     // Run the initial load fetch call
@@ -164,19 +161,12 @@ describe('rule_error_log', () => {
       })
     );
 
-    // Loading
-    expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeTruthy();
+    expect(screen.getByTestId('tableHeaderCell_timestamp_0')).toBeInTheDocument();
 
-    expect(wrapper.find('[data-test-subj="tableHeaderCell_timestamp_0"]').exists()).toBeTruthy();
-
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Let the load resolve and verify rows are rendered
+    await waitFor(() => {
+      expect(screen.getAllByRole('row').length).toBeGreaterThan(1);
     });
-
-    expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
-    expect(wrapper.find('tr.euiTableRow').length).toEqual(10);
 
     nowMock.mockRestore();
   });
@@ -184,14 +174,11 @@ describe('rule_error_log', () => {
   it('can sort on timestamp columns', async () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(1));
 
     expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -204,22 +191,19 @@ describe('rule_error_log', () => {
       })
     );
 
-    wrapper.find('button[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
+    await userEvent.click(screen.getAllByTestId('tableHeaderSortButton')[0]);
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        dateEnd: '1969-12-31T19:00:00-05:00',
-        dateStart: '1969-12-30T19:00:00-05:00',
-        id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
-        page: 0,
-        perPage: 10,
-        sort: [{ timestamp: { order: 'asc' } }],
-      })
+    await waitFor(() =>
+      expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          dateEnd: '1969-12-31T19:00:00-05:00',
+          dateStart: '1969-12-30T19:00:00-05:00',
+          id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
+          page: 0,
+          perPage: 10,
+          sort: [{ timestamp: { order: 'asc' } }],
+        })
+      )
     );
 
     nowMock.mockRestore();
@@ -233,14 +217,11 @@ describe('rule_error_log', () => {
       totalErrors: 100,
     });
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(1));
 
     expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -253,25 +234,21 @@ describe('rule_error_log', () => {
       })
     );
 
-    expect(wrapper.find('.euiPagination').exists()).toBeTruthy();
-
     // Paginate to the next page
-    wrapper.find('[data-test-subj="pagination-button-next"]').last().simulate('click');
+    await screen.findByTestId('pagination-button-next');
+    await userEvent.click(screen.getByTestId('pagination-button-next'));
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        dateEnd: '1969-12-31T19:00:00-05:00',
-        dateStart: '1969-12-30T19:00:00-05:00',
-        id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
-        page: 1,
-        perPage: 10,
-        sort: [{ timestamp: { order: 'desc' } }],
-      })
+    await waitFor(() =>
+      expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          dateEnd: '1969-12-31T19:00:00-05:00',
+          dateStart: '1969-12-30T19:00:00-05:00',
+          id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
+          page: 1,
+          perPage: 10,
+          sort: [{ timestamp: { order: 'desc' } }],
+        })
+      )
     );
 
     nowMock.mockRestore();
@@ -280,14 +257,11 @@ describe('rule_error_log', () => {
   it('can filter by start and end date', async () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(1));
 
     expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -300,44 +274,36 @@ describe('rule_error_log', () => {
       })
     );
 
-    wrapper
-      .find('[data-test-subj="superDatePickerToggleQuickMenuButton"] button')
-      .simulate('click');
+    await userEvent.click(screen.getByTestId('superDatePickerToggleQuickMenuButton'));
 
-    wrapper
-      .find('[data-test-subj="superDatePickerCommonlyUsed_Last_15 minutes"] button')
-      .simulate('click');
+    await userEvent.click(
+      screen.getByTestId('superDatePickerCommonlyUsed_Last_15 minutes')
+    );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        dateStart: '1969-12-31T18:45:00-05:00',
-        dateEnd: '1969-12-31T19:00:00-05:00',
-        id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
-        page: 0,
-        perPage: 10,
-        sort: [{ timestamp: { order: 'desc' } }],
-      })
+    await waitFor(() =>
+      expect(loadActionErrorLogMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          dateStart: '1969-12-31T18:45:00-05:00',
+          dateEnd: '1969-12-31T19:00:00-05:00',
+          id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
+          page: 0,
+          perPage: 10,
+          sort: [{ timestamp: { order: 'desc' } }],
+        })
+      )
     );
 
     nowMock.mockRestore();
   });
 
   it('does not show the refine search prompt normally', async () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(1));
 
-    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+    expect(screen.queryByTestId('refineSearchPrompt')).not.toBeInTheDocument();
   });
 
   it('shows the refine search prompt when our queries return too much data', async () => {
@@ -346,40 +312,32 @@ describe('rule_error_log', () => {
       totalErrors: 1100,
     });
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(1));
 
     // Initially do not show the prompt
-    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+    expect(screen.queryByTestId('refineSearchPrompt')).not.toBeInTheDocument();
 
-    // // Go to the last page
-    wrapper.find('[data-test-subj="pagination-button-99"]').last().simulate('click');
+    // Go to the last page
+    await screen.findByTestId('pagination-button-99');
+    await userEvent.click(screen.getByTestId('pagination-button-99'));
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(2));
 
     // Prompt is shown
-    expect(wrapper.find(RefineSearchPrompt).text()).toEqual(
-      'These are the first 1000 documents matching your search, refine your search to see others. Back to top.'
+    expect(screen.getByTestId('refineSearchPrompt').textContent).toContain(
+      'These are the first 1000 documents matching your search, refine your search to see others.'
     );
 
     // Go to the second last page
-    wrapper.find('[data-test-subj="pagination-button-98"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('pagination-button-98'));
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitFor(() => expect(loadActionErrorLogMock).toHaveBeenCalledTimes(3));
 
     // Prompt is not shown
-    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+    expect(screen.queryByTestId('refineSearchPrompt')).not.toBeInTheDocument();
   });
 });

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { EventActionOptions, SeverityActionOptions } from '../types';
 import PagerDutyParamsFields from './pagerduty_params';
 
@@ -29,7 +30,7 @@ describe('PagerDutyParamsFields renders', () => {
       ],
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
@@ -44,31 +45,28 @@ describe('PagerDutyParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
+    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+    expect((screen.getByTestId('severitySelect') as HTMLSelectElement).value).toStrictEqual(
       'critical'
     );
-    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').first().prop('value')).toStrictEqual(
-      'test'
-    );
-    expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="customDetailsJsonEditor"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="linksList"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="pagerDutyAddLinkButton"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('dedupKeyInput')).toBeInTheDocument();
+    expect((screen.getByTestId('dedupKeyInput') as HTMLInputElement).value).toStrictEqual('test');
+    expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('timestampInput')).toBeInTheDocument();
+    expect(screen.getByTestId('componentInput')).toBeInTheDocument();
+    expect(screen.getByTestId('groupInput')).toBeInTheDocument();
+    expect(screen.getByTestId('sourceInput')).toBeInTheDocument();
+    expect(screen.getByTestId('summaryInput')).toBeInTheDocument();
+    expect(screen.getByTestId('dedupKeyAddVariableButton')).toBeInTheDocument();
+    expect(screen.getAllByTestId('customDetailsJsonEditor').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('linksList')).toBeInTheDocument();
+    expect(screen.getByTestId('pagerDutyAddLinkButton')).toBeInTheDocument();
   });
 
   test('params select fields do not auto set values eventActionSelect', () => {
     const actionParams = {};
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
@@ -76,10 +74,8 @@ describe('PagerDutyParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="eventActionSelect"]').first().prop('value')
-    ).toStrictEqual(undefined);
+    expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
+    expect((screen.getByTestId('eventActionSelect') as HTMLSelectElement).value).toStrictEqual('');
   });
 
   test('params select fields do not auto set values severitySelect', () => {
@@ -88,7 +84,7 @@ describe('PagerDutyParamsFields renders', () => {
       dedupKey: 'test',
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
@@ -96,10 +92,8 @@ describe('PagerDutyParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
-      undefined
-    );
+    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+    expect((screen.getByTestId('severitySelect') as HTMLSelectElement).value).toStrictEqual('');
   });
 
   test('only eventActionSelect is available as a payload params for PagerDuty Resolve event', () => {
@@ -108,7 +102,7 @@ describe('PagerDutyParamsFields renders', () => {
       dedupKey: 'test',
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
@@ -116,19 +110,16 @@ describe('PagerDutyParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').first().prop('value')).toStrictEqual(
-      'test'
+    expect(screen.getByTestId('dedupKeyInput')).toBeInTheDocument();
+    expect((screen.getByTestId('dedupKeyInput') as HTMLInputElement).value).toStrictEqual('test');
+    expect(screen.getByTestId('eventActionSelect')).toBeInTheDocument();
+    expect((screen.getByTestId('eventActionSelect') as HTMLSelectElement).value).toStrictEqual(
+      'resolve'
     );
-    expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="eventActionSelect"]').first().prop('value')
-    ).toStrictEqual('resolve');
-    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeFalsy();
+    expect(screen.queryByTestId('timestampInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('componentInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('groupInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sourceInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('summaryInput')).not.toBeInTheDocument();
   });
 });

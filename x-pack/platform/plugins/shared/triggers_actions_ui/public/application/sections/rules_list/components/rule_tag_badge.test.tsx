@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { RuleTagBadge } from './rule_tag_badge';
 
 const onClickMock = jest.fn();
@@ -22,17 +22,15 @@ describe('RuleTagBadge', () => {
   });
 
   it('renders the initial badge count correctly', () => {
-    const wrapper = mountWithIntl(
+    render(
       <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(wrapper.find('[data-test-subj="ruleTagBadge"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadge"]').first().text()).toEqual(
-      `${tags.length}`
-    );
+    expect(screen.getByTestId('ruleTagBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadge').textContent).toEqual(`${tags.length}`);
   });
 
-  it('can open and close the popover', () => {
+  it('can open and close the popover', async () => {
     const { rerender, baseElement } = render(
       <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
@@ -41,7 +39,7 @@ describe('RuleTagBadge', () => {
     expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBe(null);
     expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBe(null);
 
-    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    await userEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
     expect(onClickMock).toHaveBeenCalledTimes(1);
 
     rerender(
@@ -52,15 +50,15 @@ describe('RuleTagBadge', () => {
     expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBeTruthy();
     expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBeTruthy();
 
-    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    await userEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
     expect(onClickMock).toHaveBeenCalledTimes(2);
   });
 
   it('shows all the tags without clicking when passing "spread" props with "true"', () => {
-    const wrapper = mountWithIntl(<RuleTagBadge tags={tags} tagsOutPopover={true} />);
-    expect(wrapper.find('[data-test-subj="tagsOutPopover"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-a"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-b"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-c"]').exists()).toBeTruthy();
+    render(<RuleTagBadge tags={tags} tagsOutPopover={true} />);
+    expect(screen.getByTestId('tagsOutPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-a')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-b')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-c')).toBeInTheDocument();
   });
 });

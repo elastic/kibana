@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
 import TorqActionConnectorFields from './torq_connectors';
 
 const EMPTY_FUNC = () => {};
@@ -28,7 +27,7 @@ describe('TorqActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <TorqActionConnectorFields
           readOnly={false}
@@ -38,10 +37,8 @@ describe('TorqActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    await waitForComponentToUpdate();
-
-    expect(wrapper.find('[data-test-subj="torqUrlText"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="torqTokenInput"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('torqUrlText')).toBeInTheDocument();
+    expect(screen.getByTestId('torqTokenInput')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -63,7 +60,7 @@ describe('TorqActionConnectorFields renders', () => {
     });
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TorqActionConnectorFields
             readOnly={false}
@@ -74,7 +71,7 @@ describe('TorqActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -98,7 +95,7 @@ describe('TorqActionConnectorFields renders', () => {
         ...actionConnector,
         config: { webhookIntegrationUrl: 'https://hooks.eu.torq.io/v1/webhooks/fjdksla' },
       };
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TorqActionConnectorFields
             readOnly={false}
@@ -109,7 +106,7 @@ describe('TorqActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -136,7 +133,7 @@ describe('TorqActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TorqActionConnectorFields
             readOnly={false}
@@ -147,7 +144,7 @@ describe('TorqActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -164,7 +161,7 @@ describe('TorqActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TorqActionConnectorFields
             readOnly={false}
@@ -175,7 +172,7 @@ describe('TorqActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -192,7 +189,7 @@ describe('TorqActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TorqActionConnectorFields
             readOnly={false}
@@ -203,7 +200,7 @@ describe('TorqActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({

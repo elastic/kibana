@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 import { XmattersSeverityOptions } from '../types';
 import XmattersParamsFields from './xmatters_params';
 
@@ -19,6 +19,7 @@ describe('XmattersParamsFields renders', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
+
   test('all params fields is rendered', () => {
     const actionParams = {
       alertActionGroupName: 'Small t-shirt',
@@ -30,7 +31,7 @@ describe('XmattersParamsFields renders', () => {
       tags: 'test1, test2',
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <XmattersParamsFields
         actionParams={actionParams}
         errors={{
@@ -51,13 +52,11 @@ describe('XmattersParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="tagsInput"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
 
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
-      'high'
-    );
-    expect(wrapper.find('[data-test-subj="tagsInput"]').first().prop('value')).toStrictEqual(
+    expect((screen.getByTestId('severitySelect') as HTMLSelectElement).value).toStrictEqual('high');
+    expect((screen.getByTestId('tagsInput') as HTMLInputElement).value).toStrictEqual(
       'test1, test2'
     );
   });
@@ -66,7 +65,7 @@ describe('XmattersParamsFields renders', () => {
     const actionParams = {};
     const editAction = jest.fn();
 
-    mountWithIntl(
+    render(
       <XmattersParamsFields
         actionParams={actionParams}
         errors={{
