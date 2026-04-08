@@ -77,6 +77,39 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
 }
 
 /**
+ * SAML IdP metadata for UIAM (OAuth → SAML browser flow).
+ *
+ * UIAM only accepts a **single** `SingleSignOnService` with **HTTP-Redirect** binding
+ * (`SamlIdentityProviderMetadataParser`). The general {@link createMockIdpMetadata} includes
+ * both POST and Redirect SSO endpoints, which UIAM rejects.
+ *
+ * @param kibanaUrl Fully qualified URL where Kibana is hosted (including base path)
+ */
+export async function createMockIdpMetadataForUiam(kibanaUrl: string) {
+  const signingKey = await readFile(KBN_CERT_PATH);
+  const cert = new X509Certificate(signingKey);
+  const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+  <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+    entityID="${MOCK_IDP_ENTITY_ID}">
+    <md:IDPSSODescriptor WantAuthnRequestsSigned="false"
+      protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+      <md:KeyDescriptor use="signing">
+        <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+          <ds:X509Data>
+            <ds:X509Certificate>${cert.raw.toString('base64')}</ds:X509Certificate>
+          </ds:X509Data>
+        </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
+    </md:IDPSSODescriptor>
+  </md:EntityDescriptor>
+  `;
+}
+
+/**
  * Creates a SAML response that can be passed directly to the Kibana ACS endpoint to authenticate a user.
  *
  * @example Create a SAML response.

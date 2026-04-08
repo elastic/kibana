@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, mkdtemp } from 'fs/promises';
+import { tmpdir } from 'os';
 import { fetch } from 'undici';
 import { join } from 'path';
 import {
@@ -25,6 +26,7 @@ import {
   MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
+  createMockIdpMetadataForUiam,
 } from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
@@ -302,11 +304,11 @@ if (process.env.UIAM_OAUTH === 'true') {
       '--env',
       `uiam.oauth.base_url=https://localhost:${
         +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
-      }/uiam/api`,
+      }`,
       '--env',
       `UIAM_OAUTH_BASE_URL=https://localhost:${
         +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
-      }/uiam/api`,
+      }`,
 
       '--env',
       'uiam.tokens.refresh.grace_period=PT3S',
@@ -319,13 +321,34 @@ if (process.env.UIAM_OAUTH === 'true') {
 }
 
 /**
+ * UIAM external (OAuth) container needs a filesystem path to IdP metadata XML.
+ * Override with `MOCK_IDP_KIBANA_URL`.
+ */
+async function extraDockerParamsForUiamOauthContainer(): Promise<string[]> {
+  const kibanaUrl = process.env.MOCK_IDP_KIBANA_URL ?? 'http://localhost:5601';
+  const metadataDir = await mkdtemp(join(tmpdir(), 'uiam-mock-idp-metadata-'));
+  const metadataPath = join(metadataDir, 'metadata.xml');
+  await writeFile(metadataPath, await createMockIdpMetadataForUiam(kibanaUrl), 'utf8');
+  return [
+    '--volume',
+    `${metadataPath}:/tmp/mock-idp-metadata.xml:z`,
+    '--env',
+    'uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml',
+  ];
+}
+
+/**
  * Run a single UIAM-related container.
  */
 export async function runUiamContainer(
   log: ToolingLog,
   container: ArrayElement<typeof UIAM_CONTAINERS>
 ) {
+  const extraParams =
+    container.name === 'uiam-oauth' ? await extraDockerParamsForUiamOauthContainer() : [];
+
   const dockerCommand = SHARED_DOCKER_PARAMS.concat(
+    extraParams,
     container.params,
     ['--name', container.name],
     container.image,
