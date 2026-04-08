@@ -87,16 +87,25 @@ export const collectSampleDocuments = async ({
     })
   );
 
-  for (const { hits, criterion } of samplingFilterResults) {
+  const unmatchedFilters: string[] = [];
+  for (const { hits, criterion, filter } of samplingFilterResults) {
     const hit = hits[0];
     if (!hit) {
-      log.debug(`  [${criterion.id}] no matching document found`);
+      unmatchedFilters.push(`[${criterion.id}] filter: ${JSON.stringify(filter)}`);
       continue;
     }
     const app = hit.fields ? getAppNameFromFields(hit.fields) : undefined;
     const logLevel = hit.fields?.['log.level']?.[0] ?? 'unknown';
     log.debug(
       `  [${criterion.id}] matched doc ${hit._id} (app=${app ?? 'n/a'}, level=${logLevel})`
+    );
+  }
+
+  if (unmatchedFilters.length > 0) {
+    throw new Error(
+      `sampling_filters returned no documents for ${unmatchedFilters.length} filter(s) on a predefined dataset. ` +
+        `This indicates a mismatch between the criteria filters and the snapshot data:\n` +
+        unmatchedFilters.map((f) => `  ${f}`).join('\n')
     );
   }
 
