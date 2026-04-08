@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   buildEpisodesQuery,
   type EpisodesFilterState,
-} from '@kbn/alerting-v2-episodes-ui/utils/build_episodes_esql_query';
+} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { buildDeactivatedGroupHashesQuery } from '@kbn/alerting-v2-episodes-ui/utils/queries/build_deactivated_group_hashes_query';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';

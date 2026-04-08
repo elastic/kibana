@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 
-import { ALERT_ACTIONS_DATA_STREAM } from './constants';
+import { ALERT_ACTIONS_DATA_STREAM } from '../../constants';
 
 /**
  * Builds an ES|QL query that returns all group hashes where the most recent

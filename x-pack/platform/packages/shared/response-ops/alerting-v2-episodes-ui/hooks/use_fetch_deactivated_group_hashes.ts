@@ -36,7 +36,7 @@ export const useFetchDeactivatedGroupHashes = ({
         abortSignal: signal,
         noCache: true,
       });
-      return result.rows.map((row) => row.group_hash as string);
+      return result.map((row) => row.group_hash as string);
     },
     enabled,
     keepPreviousData: true,
