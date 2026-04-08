@@ -188,7 +188,7 @@ const KEY_CODES = {
 export class QueryStringInput extends PureComponent<QueryStringInputProps, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
-    iconType: 'search',
+    iconType: 'magnify',
     isClearable: true,
   };
 
