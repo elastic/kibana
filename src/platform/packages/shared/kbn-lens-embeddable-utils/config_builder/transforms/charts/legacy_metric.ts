@@ -50,6 +50,7 @@ import {
   isColorByValueAbsolute,
 } from '../coloring';
 import { isEsqlTableTypeDataSource } from '../../utils';
+import { stripUndefined } from './utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
 
@@ -63,13 +64,14 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     size: layer.metric.size,
     titlePosition: layer.metric.labels?.alignment,
     textAlign: layer.metric.values?.alignment,
-    ...(layer.metric.apply_color_to && layer.metric.color
-      ? {
+    ...(layer.metric.apply_color_to
+      ? stripUndefined({
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
-          palette: !isAutoColor(layer.metric.color)
-            ? fromColorByValueAPIToLensState(layer.metric.color)
-            : undefined,
-        }
+          palette:
+            layer.metric.color && !isAutoColor(layer.metric.color)
+              ? fromColorByValueAPIToLensState(layer.metric.color)
+              : undefined,
+        })
       : { colorMode: 'None' }),
   };
 }
