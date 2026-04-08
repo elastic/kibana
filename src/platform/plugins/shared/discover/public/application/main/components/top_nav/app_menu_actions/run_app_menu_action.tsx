@@ -36,8 +36,9 @@ import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
+let currentReturnFocus: (() => void) | undefined;
 
-function cleanup(returnFocus?: () => void) {
+function cleanup() {
   if (!isOpen) {
     return;
   }
@@ -46,7 +47,8 @@ function cleanup(returnFocus?: () => void) {
   document.body.removeChild(container);
   isOpen = false;
 
-  returnFocus?.();
+  currentReturnFocus?.();
+  currentReturnFocus = undefined;
 }
 
 export async function runAppMenuAction({
@@ -63,11 +65,12 @@ export async function runAppMenuAction({
   services: DiscoverServices;
   returnFocus?: () => void;
 }) {
-  cleanup(returnFocus);
+  cleanup();
+  currentReturnFocus = returnFocus;
 
   const onFinishAction = () => {
     if (isOpen) {
-      cleanup(returnFocus);
+      cleanup();
     } else {
       returnFocus?.();
     }
