@@ -13,7 +13,8 @@ import { dataControlSchema } from './control_schema';
 
 export const rangeValueSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
 
-export const rangeSliderControlSchema = dataControlSchema.extends({
+export const rangeSliderControlSchema = schema.object({
+  ...dataControlSchema.getPropSchemas(),
   value: schema.maybe(rangeValueSchema),
   step: schema.number({ defaultValue: DEFAULT_RANGE_SLIDER_STATE.step, min: 0 }),
 });

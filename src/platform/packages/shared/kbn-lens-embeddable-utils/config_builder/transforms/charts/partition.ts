@@ -25,8 +25,8 @@ import type {
 import { type LensAttributes } from '../../types';
 import type { DataSourceStateLayer } from '../utils';
 import {
-  buildDatasetStateESQL,
-  buildDatasetStateNoESQL,
+  buildDataSourceStateESQL,
+  buildDataSourceStateNoESQL,
   buildDatasourceStates,
   generateLayer,
   isFormBasedLayer,
@@ -44,7 +44,7 @@ import {
   stripUndefined,
 } from './utils';
 import { legendSizeCompat } from './legend_sizes';
-import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataset } from '../../utils';
+import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataSource } from '../../utils';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -89,7 +89,7 @@ function isAPIPartitionLayer(layer: unknown): layer is PartitionState {
 }
 
 function isESQLPartitionLayer(layer: PartitionState): layer is PartitionStateESQL {
-  return isEsqlTableTypeDataset(layer.dataset);
+  return isEsqlTableTypeDataSource(layer.data_source);
 }
 
 function isAPIPieChartLayer(layer: PartitionState): layer is PieState {
@@ -486,22 +486,22 @@ function fromLensStateToAPIDataset(
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[]
-): Pick<PartitionState, 'dataset'> {
+): Pick<PartitionState, 'data_source'> {
   const layerId = visualization.layers[0].layerId;
 
   if (layer) {
     if (isTextBasedLayer(layer)) {
-      return { dataset: buildDatasetStateESQL(layer) as PartitionStateESQL['dataset'] };
+      return { data_source: buildDataSourceStateESQL(layer) as PartitionStateESQL['data_source'] };
     }
     if (isFormBasedLayer(layer)) {
       return {
-        dataset: buildDatasetStateNoESQL(
+        data_source: buildDataSourceStateNoESQL(
           layer,
           layerId,
           adHocDataViews,
           references,
           adhocReferences
-        ) as PartitionState['dataset'],
+        ) as PartitionState['data_source'],
       };
     }
   }
@@ -543,7 +543,7 @@ function getUniqueIds(array: string[]): string[] {
   return Array.from(new Set(array));
 }
 
-// Helper function to overcome the failure of partition chart migrations (found in integration dataset)
+// Helper function to overcome the failure of partition chart migrations (found in integration data_source)
 function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
   if ('groups' in vizLayer && Array.isArray(vizLayer.groups)) {
     return getUniqueIds(vizLayer.groups);
@@ -551,7 +551,7 @@ function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): stri
   return getUniqueIds(vizLayer.primaryGroups ?? []);
 }
 
-// Helper function to overcome the failure of partition chart migrations (found in integration dataset)
+// Helper function to overcome the failure of partition chart migrations (found in integration data_source)
 function getMetrics(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
   if ('metric' in vizLayer && typeof vizLayer.metric === 'string') {
     return [vizLayer.metric];
