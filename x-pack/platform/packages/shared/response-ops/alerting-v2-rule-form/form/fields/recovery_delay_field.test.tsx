@@ -71,12 +71,12 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByTestId('recoveryTransitionTimeframeNumberInput')).toBeInTheDocument();
   });
 
-  it('switches to breaches mode when Breaches button is clicked', () => {
+  it('switches to breaches mode when Recoveries button is clicked', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
-    fireEvent.click(screen.getByText('Breaches'));
+    fireEvent.click(screen.getByText('Recoveries'));
 
     expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
     expect(screen.queryByTestId('recoveryDelayImmediateDescription')).not.toBeInTheDocument();

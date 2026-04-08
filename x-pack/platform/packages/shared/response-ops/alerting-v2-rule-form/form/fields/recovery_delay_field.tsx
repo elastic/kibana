@@ -33,7 +33,7 @@ const MODE_OPTIONS = [
   {
     id: MODE_OPTION_IDS.breaches,
     label: i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.delayModeBreaches', {
-      defaultMessage: 'Breaches',
+      defaultMessage: 'Recoveries',
     }),
   },
   {
