@@ -56,10 +56,15 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
-    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
+    const onlyRunQuickChecks = await areChangesSkippable(
+      [/^renovate\.json$/, /^\.buildkite\/pipelines\/pull_request\/renovate\.yml/],
+      REQUIRED_PATHS
+    );
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
-      console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      console.warn(
+        'Isolated changes to renovate.json or .buildkite/pipelines/pull_request/renovate.yml. Skipping main PR pipeline.'
+      );
       emitPipeline(pipeline);
       return;
     }
@@ -77,12 +82,19 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         'true',
       ]);
     }
-
-    if (prHasFIPSLabel()) {
+    if (
+      prHasFIPSLabel() ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/fips\/verify_fips_enabled\.yml/]))
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
     }
 
-    if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
+    if (
+      await doAnyChangesMatch([
+        /^src\/platform\/packages\/private\/kbn-handlebars/,
+        /^\.buildkite\/pipelines\/pull_request\/kbn_handlebars\.yml/,
+      ])
+    ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml', cancelable)
       );
@@ -96,6 +108,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
+        /^\.buildkite\/pipelines\/pull_request\/response_ops\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -104,7 +117,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/platform\/plugins\/shared\/cases/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/cases/,
+        /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -117,6 +133,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
+        /^\.buildkite\/pipelines\/pull_request\/apm_cypress\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -125,7 +142,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/profiling/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/solutions\/observability\/plugins\/profiling/,
+        /^\.buildkite\/pipelines\/pull_request\/profiling_cypress\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
@@ -135,6 +155,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       (await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -150,6 +171,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/bedrock/,
         /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/gemini/,
         /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
+        /^\.buildkite\/pipelines\/pull_request\/ai_infra_gen_ai\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
     ) {
@@ -159,10 +181,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:build-cloud-image') &&
-      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
-      !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
-      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+      (GITHUB_PR_LABELS.includes('ci:build-cloud-image') &&
+        !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
+        !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
+        !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')) ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/build_cloud_image\.yml/]))
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/build_cloud_image.yml', cancelable)
@@ -170,10 +193,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:build-cloud-fips-image') &&
-      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
-      !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
-      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+      (GITHUB_PR_LABELS.includes('ci:build-cloud-fips-image') &&
+        !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
+        !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
+        !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')) ||
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/build_cloud_fips_image\.yml/,
+      ]))
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/build_cloud_fips_image.yml', cancelable)
@@ -183,12 +209,16 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     if (
       GITHUB_PR_LABELS.includes('ci:deploy-cloud') ||
       GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
-      GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+      GITHUB_PR_LABELS.includes('ci:cloud-redeploy') ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/deploy_cloud\.yml/]))
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml', cancelable));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
+    if (
+      GITHUB_PR_LABELS.includes('ci:build-docker-fips') ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/fips\.yml/]))
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml', cancelable));
     }
 
@@ -197,23 +227,35 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc')
+      GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc') ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/deploy_project\.yml/]))
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', cancelable)
       );
-    } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
+    } else if (
+      GITHUB_PR_LABELS.includes('ci:build-serverless-image') ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/build_project\.yml/]))
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml', cancelable));
     }
 
     if (
-      (await doAnyChangesMatch([/.*stor(ies|y).*/])) ||
+      (await doAnyChangesMatch([
+        /.*stor(ies|y).*/,
+        /^\.buildkite\/pipelines\/pull_request\/storybooks\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:build-storybooks')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
+    if (
+      GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer') ||
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/webpack_bundle_analyzer\.yml/,
+      ]))
+    ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml', cancelable)
       );
@@ -226,6 +268,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /\.devdocs\.json$/,
         /\.mdx$/,
         /^dev_docs\/.*(png|gif|jpg|jpeg|webp)$/,
+        /^\.buildkite\/pipelines\/pull_request\/check_next_docs\.yml/,
       ])) &&
         process.env.GITHUB_PR_TARGET_BRANCH === 'main') ||
       GITHUB_PR_LABELS.includes('ci:build-next-docs')
@@ -236,6 +279,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -256,6 +302,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/defend_workflows\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -293,6 +340,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/automatic_import\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -392,6 +445,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/explore\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -458,6 +512,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/investigations\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -475,6 +530,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml/,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
         ALL_UI_TEST_SUITES) &&
@@ -494,6 +550,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cloud_security_posture\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -509,7 +566,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     if (
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals') ||
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts') ||
-      ALL_UI_TEST_SUITES
+      ALL_UI_TEST_SUITES ||
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/gen_ai_evals\.yml/,
+      ]))
     ) {
       pipeline.push(
         getPipeline(
@@ -523,6 +583,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -542,6 +603,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
+        /^\.buildkite\/pipelines\/pull_request\/prompt_changes\.yml/,
       ])
     ) {
       pipeline.push(
@@ -555,6 +617,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
         /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
         /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
+        /^\.buildkite\/pipelines\/pull_request\/check_saved_objects\.yml/,
       ])
     ) {
       pipeline.push(
@@ -562,11 +625,17 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
+    if (
+      GITHUB_PR_LABELS.includes('ci:bench-jest') ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/jest_bench\.yml/]))
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
+    if (
+      GITHUB_PR_LABELS.includes('ci:bench-ftr') ||
+      (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/ftr_bench\.yml/]))
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml', cancelable));
     }
 
