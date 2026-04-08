@@ -25,6 +25,7 @@ import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 // ---- Management routes ----
 const EntityAnalyticsManagementWrapper = () => (
@@ -122,12 +123,26 @@ const EntityAnalyticsPrivilegedUserMonitoringWrapper = () => (
 );
 
 const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(() => {
+  const isEntityStoreV2Enabled = useIsExperimentalFeatureEnabled('entityAnalyticsEntityStoreV2');
+
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH}
         exact
-        component={EntityAnalyticsPrivilegedUserMonitoringWrapper}
+        render={({ location }) =>
+          isEntityStoreV2Enabled ? (
+            <Redirect
+              to={{
+                ...location,
+                pathname: ENTITY_ANALYTICS_MANAGEMENT_PATH,
+                search: location.search,
+              }}
+            />
+          ) : (
+            <EntityAnalyticsPrivilegedUserMonitoringWrapper />
+          )
+        }
       />
       <Route component={NotFoundPage} />
     </Routes>

@@ -21,8 +21,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });
 
-    it('should not show page title if there is no trusted app', async () => {
-      await testSubjects.missingOrFail('header-page-title');
+    it('should show empty state if there is no trusted app', async () => {
+      await testSubjects.existOrFail('trustedAppsListPage-emptyState');
     });
 
     it('should be able to add a new trusted app and remove it', async () => {
@@ -49,8 +49,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('trustedAppsListPage-deleteModal-submitButton');
       // We only expect one trusted app to have been visible
       await testSubjects.missingOrFail('trustedAppsListPage-card');
-      // Header has gone because there is no trusted app
-      await testSubjects.missingOrFail('header-page-title');
+      // Empty state is shown because there is no trusted app
+      await testSubjects.existOrFail('trustedAppsListPage-emptyState');
     });
   });
 };
