@@ -851,9 +851,7 @@ describe('AuthenticationService', () => {
             error: { code: -32001, message: 'Unauthorized' },
           }),
           headers: {
-            'WWW-Authenticate': expect.stringContaining(
-              'Bearer resource_metadata="'
-            ),
+            'WWW-Authenticate': expect.stringContaining('Bearer resource_metadata="'),
             'Content-Type': 'application/json',
           },
         });
