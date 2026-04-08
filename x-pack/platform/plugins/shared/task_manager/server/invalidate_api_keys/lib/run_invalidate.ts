@@ -24,13 +24,19 @@ interface RunInvalidateOpts {
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
   invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
+  missingApiKeyRetries?: Record<string, number>;
   removalDelay: string;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
   savedObjectTypesToQuery: SavedObjectTypesToQuery[];
 }
 
-export async function runInvalidate(opts: RunInvalidateOpts) {
+export interface RunInvalidateResult {
+  totalInvalidated: number;
+  missingApiKeyRetries: Record<string, number>;
+}
+
+export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalidateResult> {
   const {
     encryptedSavedObjectsClient,
     invalidateApiKeyFn,
@@ -40,14 +46,13 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
     savedObjectsClient,
     savedObjectType,
   } = opts;
+  const missingApiKeyRetries = { ...(opts.missingApiKeyRetries ?? {}) };
 
   let hasMoreApiKeysPendingInvalidation = true;
   let totalInvalidated = 0;
   const excludedSOIds = new Set<string>();
 
   do {
-    // Query for PAGE_SIZE api keys to invalidate at a time. At the end of each iteration,
-    // we should have deleted the deletable keys and added keys still in use to the excluded list
     const filter = getFindFilter({
       removalDelay,
       excludedSOIds: [...excludedSOIds],
@@ -79,6 +84,7 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
         invalidateApiKeyFn,
         invalidateUiamApiKeyFn,
         logger,
+        missingApiKeyRetries,
         savedObjectsClient,
         savedObjectType,
       });
@@ -87,5 +93,5 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
     hasMoreApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
   } while (hasMoreApiKeysPendingInvalidation);
 
-  return totalInvalidated;
+  return { totalInvalidated, missingApiKeyRetries };
 }

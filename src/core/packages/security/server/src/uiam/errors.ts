@@ -9,7 +9,14 @@
 
 import type { InvalidateAPIKeyResult } from '../authentication/api_keys/api_keys';
 
+const UIAM_API_KEY_MISSING_CODE = '0x28D520';
 const UIAM_API_KEY_REVOKED_CODE = '0xD38358';
+
+/**
+ * Checks whether the UIAM invalidation response indicates the API key no longer exists.
+ */
+export const isMissingApiKey = (response: InvalidateAPIKeyResult | null): boolean =>
+  response?.error_details?.some((d) => d.code === UIAM_API_KEY_MISSING_CODE) ?? false;
 
 /**
  * Checks whether the UIAM invalidation response indicates the API key was already revoked.

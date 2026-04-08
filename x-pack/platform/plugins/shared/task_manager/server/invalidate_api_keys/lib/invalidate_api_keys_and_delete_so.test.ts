@@ -18,14 +18,14 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
   });
 
   test('should succeed when there are no api keys to invalidate', async () => {
-    const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+    const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
       apiKeyIdsToInvalidate: [],
       invalidateApiKeyFn,
       logger,
       savedObjectsClient: internalSavedObjectsRepository,
       savedObjectType: 'api_key_pending_invalidation',
     });
-    expect(total).toEqual(0);
+    expect(result).toEqual(0);
     expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "0"`);
   });
 
@@ -35,7 +35,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       previously_invalidated_api_keys: [],
       error_count: 0,
     });
-    const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+    const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
       apiKeyIdsToInvalidate: [
         { id: '1', apiKeyId: 'abcd====!' },
         { id: '2', apiKeyId: 'xyz!==!' },
@@ -59,7 +59,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       'api_key_to_invalidate',
       '2'
     );
-    expect(total).toEqual(2);
+    expect(result).toEqual(2);
     expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "2"`);
   });
 
@@ -69,7 +69,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       previously_invalidated_api_keys: [],
       error_count: 1,
     });
-    const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+    const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
       apiKeyIdsToInvalidate: [
         { id: '1', apiKeyId: 'abcd====!' },
         { id: '2', apiKeyId: 'xyz!==!' },
@@ -84,12 +84,12 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
     });
     expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(`Failed to invalidate API Keys [count=\"2\"]`);
-    expect(total).toEqual(0);
+    expect(result).toEqual(0);
     expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "0"`);
   });
 
   test('should handle null security plugin', async () => {
-    const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+    const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
       apiKeyIdsToInvalidate: [
         { id: '1', apiKeyId: 'abcd====!' },
         { id: '2', apiKeyId: 'xyz!==!' },
@@ -110,13 +110,13 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       'api_key_pending_invalidation',
       '2'
     );
-    expect(total).toEqual(2);
+    expect(result).toEqual(2);
     expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "2"`);
   });
 
   test('should handle null result from invalidateAsInternalUser', async () => {
     invalidateApiKeyFn.mockResolvedValueOnce(null);
-    const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+    const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
       apiKeyIdsToInvalidate: [
         { id: '1', apiKeyId: 'abcd====!' },
         { id: '2', apiKeyId: 'xyz!==!' },
@@ -140,7 +140,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       'api_key_to_invalidate',
       '2'
     );
-    expect(total).toEqual(2);
+    expect(result).toEqual(2);
     expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "2"`);
   });
 
@@ -158,7 +158,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         error_count: 0,
       });
 
-      const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate: [],
         uiamApiKeysToInvalidate: [
           { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
@@ -173,7 +173,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         'api_key_pending_invalidation',
         'so_1'
       );
-      expect(total).toEqual(1);
+      expect(result).toEqual(1);
     });
 
     test('should delete SO and warn when UIAM returns APIKEY_REVOKED (0xD38358)', async () => {
@@ -184,7 +184,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         error_details: [{ type: 'exception', code: '0xD38358', reason: 'APIKEY_REVOKED' }],
       });
 
-      const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate: [],
         uiamApiKeysToInvalidate: [
           { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
@@ -196,13 +196,101 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('UIAM APIKey is already invalidated or missing')
+        expect.stringContaining('UIAM APIKey is already revoked')
       );
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         'api_key_pending_invalidation',
         'so_1'
       );
-      expect(total).toEqual(1);
+      expect(result).toEqual(1);
+    });
+
+    test('should NOT delete SO when UIAM returns APIKEY_MISSING and retry count is below threshold', async () => {
+      const missingApiKeyRetries: Record<string, number> = {};
+      invalidateUiamApiKeyFn.mockResolvedValueOnce({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+        error_details: [{ type: 'exception', code: '0x28D520', reason: 'APIKEY_MISSING' }],
+      });
+
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+        apiKeyIdsToInvalidate: [],
+        uiamApiKeysToInvalidate: [
+          { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
+        ],
+        invalidateUiamApiKeyFn,
+        logger,
+        missingApiKeyRetries,
+        savedObjectsClient: internalSavedObjectsRepository,
+        savedObjectType: 'api_key_pending_invalidation',
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('UIAM APIKey not found, will retry (1/5)')
+      );
+      expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
+      expect(result).toEqual(0);
+      expect(missingApiKeyRetries.so_1).toEqual(1);
+    });
+
+    test('should delete SO after APIKEY_MISSING reaches the retry threshold', async () => {
+      const missingApiKeyRetries: Record<string, number> = { so_1: 4 };
+      invalidateUiamApiKeyFn.mockResolvedValueOnce({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+        error_details: [{ type: 'exception', code: '0x28D520', reason: 'APIKEY_MISSING' }],
+      });
+
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+        apiKeyIdsToInvalidate: [],
+        uiamApiKeysToInvalidate: [
+          { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
+        ],
+        invalidateUiamApiKeyFn,
+        logger,
+        missingApiKeyRetries,
+        savedObjectsClient: internalSavedObjectsRepository,
+        savedObjectType: 'api_key_pending_invalidation',
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('UIAM APIKey not found after 5 attempts')
+      );
+      expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
+        'api_key_pending_invalidation',
+        'so_1'
+      );
+      expect(result).toEqual(1);
+      expect(missingApiKeyRetries).not.toHaveProperty('so_1');
+    });
+
+    test('should clean up retry entry when SO is successfully deleted', async () => {
+      const missingApiKeyRetries: Record<string, number> = { so_1: 2 };
+      invalidateUiamApiKeyFn.mockResolvedValueOnce({
+        invalidated_api_keys: ['uiam_key_1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+
+      await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+        apiKeyIdsToInvalidate: [],
+        uiamApiKeysToInvalidate: [
+          { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
+        ],
+        invalidateUiamApiKeyFn,
+        logger,
+        missingApiKeyRetries,
+        savedObjectsClient: internalSavedObjectsRepository,
+        savedObjectType: 'api_key_pending_invalidation',
+      });
+
+      expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
+        'api_key_pending_invalidation',
+        'so_1'
+      );
+      expect(missingApiKeyRetries).not.toHaveProperty('so_1');
     });
 
     test('should NOT delete SO when UIAM returns an unknown error', async () => {
@@ -213,7 +301,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         error_details: [{ type: 'exception', reason: 'Internal Server Error' }],
       });
 
-      const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate: [],
         uiamApiKeysToInvalidate: [
           { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
@@ -228,11 +316,11 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         expect.stringContaining('Failed to invalidate UIAM APIKey')
       );
       expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
-      expect(total).toEqual(0);
+      expect(result).toEqual(0);
     });
 
     test('should delete SO when UIAM security is disabled', async () => {
-      const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate: [],
         uiamApiKeysToInvalidate: [
           { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
@@ -246,7 +334,7 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
         'api_key_pending_invalidation',
         'so_1'
       );
-      expect(total).toEqual(1);
+      expect(result).toEqual(1);
     });
   });
 });

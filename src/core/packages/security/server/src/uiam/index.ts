@@ -8,4 +8,4 @@
  */
 
 export { isUiamCredential } from './utils';
-export { isRevokedApiKey } from './errors';
+export { isMissingApiKey, isRevokedApiKey } from './errors';

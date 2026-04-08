@@ -8,7 +8,7 @@
  */
 
 import type { InvalidateAPIKeyResult } from '../authentication/api_keys/api_keys';
-import { isRevokedApiKey } from './errors';
+import { isMissingApiKey, isRevokedApiKey } from './errors';
 
 const createResult = (errorCode?: string): InvalidateAPIKeyResult => ({
   invalidated_api_keys: [],
@@ -17,6 +17,24 @@ const createResult = (errorCode?: string): InvalidateAPIKeyResult => ({
   ...(errorCode
     ? { error_details: [{ type: 'exception', code: errorCode, reason: 'some error' }] }
     : {}),
+});
+
+describe('isMissingApiKey', () => {
+  it('returns true when error code is 0x28D520 (APIKEY_MISSING)', () => {
+    expect(isMissingApiKey(createResult('0x28D520'))).toBe(true);
+  });
+
+  it('returns false for a different error code', () => {
+    expect(isMissingApiKey(createResult('0xD38358'))).toBe(false);
+  });
+
+  it('returns false when there are no error details', () => {
+    expect(isMissingApiKey(createResult())).toBe(false);
+  });
+
+  it('returns false for generic exception type', () => {
+    expect(isMissingApiKey(createResult('exception'))).toBe(false);
+  });
 });
 
 describe('isRevokedApiKey', () => {
