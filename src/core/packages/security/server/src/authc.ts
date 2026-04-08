@@ -25,15 +25,16 @@ export interface CoreAuthenticationService {
    */
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
   /**
-   * Associate an {@link AuthenticatedUser} with the provided request so that
-   * subsequent calls to {@link getCurrentUser} return it. Intended for fake
-   * requests (e.g. Task Manager background execution) where the normal HTTP
-   * authentication flow does not run.
+   * Bind a user profile to a fake request so that
+   * {@link getCurrentUser} returns an {@link AuthenticatedUser} whose
+   * `profile_uid` matches the provided value. Intended for background
+   * execution contexts (e.g. Task Manager, alerting) where only the
+   * originating user's profile ID is available.
    *
-   * @param request The (fake) request to bind the user to.
-   * @param user The authenticated user to associate with the request.
+   * @param request The (fake) request to enrich.
+   * @param userProfileId The user profile UID to associate.
    */
-  setCurrentUser(request: KibanaRequest, user: AuthenticatedUser): void;
+  enrichRequestWithUserProfile(request: KibanaRequest, userProfileId: string): void;
   /**
    * Retrieve the redacted session ID for the provided request.
    * Returns a redacted form of the session ID (e.g. last N characters).

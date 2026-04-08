@@ -57,14 +57,14 @@ describe('buildSecurityApi', () => {
     });
   });
 
-  describe('authc.setCurrentUser', () => {
+  describe('authc.enrichRequestWithUserProfile', () => {
     it('properly delegates to the service', () => {
       const request = httpServerMock.createKibanaRequest();
-      const user = securityMock.createMockAuthenticatedUser();
-      api.authc.setCurrentUser(request, user);
+      const profileId = 'u_profile123';
+      api.authc.enrichRequestWithUserProfile(request, profileId);
 
-      expect(authc.setCurrentUser).toHaveBeenCalledTimes(1);
-      expect(authc.setCurrentUser).toHaveBeenCalledWith(request, user);
+      expect(authc.enrichRequestWithUserProfile).toHaveBeenCalledTimes(1);
+      expect(authc.enrichRequestWithUserProfile).toHaveBeenCalledWith(request, profileId);
     });
   });
 

@@ -35,8 +35,8 @@ export const buildSecurityApi = ({
       getCurrentUser: (request) => {
         return getAuthc().getCurrentUser(request);
       },
-      setCurrentUser: (request, user) => {
-        getAuthc().setCurrentUser(request, user);
+      enrichRequestWithUserProfile: (request, userProfileId) => {
+        getAuthc().enrichRequestWithUserProfile(request, userProfileId);
       },
       getRedactedSessionId: async (request) => {
         const sid = await getSession().getSID(request);

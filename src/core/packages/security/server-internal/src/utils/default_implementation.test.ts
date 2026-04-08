@@ -24,9 +24,11 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
-  describe('authc.setCurrentUser', () => {
+  describe('authc.enrichRequestWithUserProfile', () => {
     it('is a no-op', () => {
-      expect(() => implementation.authc.setCurrentUser({} as any, {} as any)).not.toThrow();
+      expect(() =>
+        implementation.authc.enrichRequestWithUserProfile({} as any, 'u_profile123')
+      ).not.toThrow();
     });
   });
 

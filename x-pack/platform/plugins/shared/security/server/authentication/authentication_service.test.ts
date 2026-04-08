@@ -762,6 +762,38 @@ describe('AuthenticationService', () => {
         expect(mockAuthGet).toHaveBeenCalledWith(mockRequest);
       });
     });
+
+    describe('enrichRequestWithUserProfile()', () => {
+      it('sets a minimal user with the given profile_uid on the request', () => {
+        const startContract = service.start(mockStartAuthenticationParams);
+        const mockRequest = httpServerMock.createKibanaRequest();
+        const profileId = 'u_test_profile_123';
+
+        startContract.enrichRequestWithUserProfile(mockRequest, profileId);
+
+        const user = startContract.getCurrentUser(mockRequest);
+        expect(user).not.toBeNull();
+        expect(user!.profile_uid).toBe(profileId);
+        expect(user!.authentication_realm.name).toBe('background_task');
+        expect(user!.authentication_provider.name).toBe('background_task');
+      });
+
+      it('overrides any existing auth state for the request', () => {
+        const startContract = service.start(mockStartAuthenticationParams);
+        const mockRequest = httpServerMock.createKibanaRequest();
+
+        const existingUser = mockAuthenticatedUser({ profile_uid: 'u_original' });
+        const mockAuthGet = mockStartAuthenticationParams.http.auth.get as jest.Mock;
+        mockAuthGet.mockReturnValue({ state: existingUser });
+
+        expect(startContract.getCurrentUser(mockRequest)!.profile_uid).toBe('u_original');
+
+        startContract.enrichRequestWithUserProfile(mockRequest, 'u_enriched');
+
+        const user = startContract.getCurrentUser(mockRequest);
+        expect(user!.profile_uid).toBe('u_enriched');
+      });
+    });
   });
 
   describe('onPreResponse handler', () => {

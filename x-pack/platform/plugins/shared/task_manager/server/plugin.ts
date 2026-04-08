@@ -22,7 +22,6 @@ import type {
   CoreStart,
   KibanaRequest,
 } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -450,19 +449,7 @@ export class TaskManagerPlugin
       });
 
       const enrichFakeRequest = (request: KibanaRequest, userProfileId: string) => {
-        const minimalUser: AuthenticatedUser = {
-          username: '',
-          roles: [],
-          enabled: true,
-          metadata: { _reserved: false },
-          authentication_realm: { name: 'task_manager', type: 'task_manager' },
-          lookup_realm: { name: 'task_manager', type: 'task_manager' },
-          authentication_type: '',
-          authentication_provider: { type: 'task_manager', name: 'task_manager' },
-          elastic_cloud_user: false,
-          profile_uid: userProfileId,
-        };
-        security.authc.setCurrentUser(request, minimalUser);
+        security.authc.enrichRequestWithUserProfile(request, userProfileId);
       };
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({

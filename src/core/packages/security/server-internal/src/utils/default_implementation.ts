@@ -16,7 +16,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
   return {
     authc: {
       getCurrentUser: () => null,
-      setCurrentUser: () => {},
+      enrichRequestWithUserProfile: () => {},
       getRedactedSessionId: () => Promise.resolve(undefined),
       apiKeys: {
         areAPIKeysEnabled: () => Promise.resolve(false),

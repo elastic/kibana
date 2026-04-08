@@ -39,7 +39,7 @@ const createStartMock = (): SecurityStartMock => {
   const mock = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
-      setCurrentUser: jest.fn(),
+      enrichRequestWithUserProfile: jest.fn(),
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
@@ -69,7 +69,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
   const mock = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
-      setCurrentUser: jest.fn(),
+      enrichRequestWithUserProfile: jest.fn(),
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),

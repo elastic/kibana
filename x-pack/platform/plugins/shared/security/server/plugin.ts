@@ -482,7 +482,7 @@ export class SecurityPlugin
     return Object.freeze<SecurityPluginStart>({
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
-        setCurrentUser: this.authenticationStart.setCurrentUser,
+        enrichRequestWithUserProfile: this.authenticationStart.enrichRequestWithUserProfile,
         apiKeys: publicApiKeys,
       },
       authz: {

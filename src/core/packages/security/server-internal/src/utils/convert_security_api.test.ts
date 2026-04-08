@@ -16,7 +16,7 @@ describe('convertSecurityApi', () => {
     const source: CoreSecurityDelegateContract = {
       authc: {
         getCurrentUser: jest.fn(),
-        setCurrentUser: jest.fn(),
+        enrichRequestWithUserProfile: jest.fn(),
         getRedactedSessionId: jest.fn(),
         apiKeys: {
           areAPIKeysEnabled: jest.fn(),

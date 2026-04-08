@@ -97,7 +97,6 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  setCurrentUser: (request: KibanaRequest, user: AuthenticatedUser) => void;
 }
 
 export class AuthenticationService {
@@ -443,6 +442,22 @@ export class AuthenticationService {
       fakeRequestUsers.set(request, user);
     };
 
+    const enrichRequestWithUserProfile = (request: KibanaRequest, userProfileId: string) => {
+      const minimalUser: AuthenticatedUser = {
+        username: '',
+        roles: [],
+        enabled: true,
+        metadata: { _reserved: false },
+        authentication_realm: { name: 'background_task', type: 'background_task' },
+        lookup_realm: { name: 'background_task', type: 'background_task' },
+        authentication_type: '',
+        authentication_provider: { type: 'background_task', name: 'background_task' },
+        elastic_cloud_user: false,
+        profile_uid: userProfileId,
+      };
+      setCurrentUser(request, minimalUser);
+    };
+
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
       audit,
@@ -545,11 +560,7 @@ export class AuthenticationService {
        */
       getCurrentUser,
 
-      /**
-       * Associates an authenticated user with a request so that {@link getCurrentUser}
-       * returns it. Intended for fake requests where the normal auth flow does not run.
-       */
-      setCurrentUser,
+      enrichRequestWithUserProfile,
     };
   }
 }
