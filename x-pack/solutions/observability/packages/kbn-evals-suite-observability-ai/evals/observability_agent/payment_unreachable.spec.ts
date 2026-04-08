@@ -38,7 +38,7 @@ evaluate.describe(
       );
     });
 
-    evaluate('investigates payment unreachable invsetigation', async ({ evaluateDataset }) => {
+    evaluate('investigates payment unreachable investigation', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
           name: 'observability agent: payment-unreachable investigation',
