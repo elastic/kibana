@@ -238,6 +238,31 @@ const STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM: Record<string, number> = {
   'logs.otel.child': 1,
 };
 
+/** Demo document count, ingestion (dps), and storage (bytes) for list cells + sorting. */
+export interface StreamsListDummyStreamMetrics {
+  documents: number;
+  ingestionRateDps: number;
+  storageBytes: number;
+}
+
+export const STREAMS_LIST_DUMMY_STREAM_METRICS: Record<string, StreamsListDummyStreamMetrics> = {
+  [LOGS_ECS_STREAM_NAME]: {
+    documents: 1_250_000,
+    ingestionRateDps: 420.5,
+    storageBytes: 250 * 1024 ** 3,
+  },
+  'logs.otel.child': {
+    documents: 88_200,
+    ingestionRateDps: 12.3,
+    storageBytes: 420 * 1024 ** 2,
+  },
+  'logs-synth-default': {
+    documents: 502_000,
+    ingestionRateDps: 98.7,
+    storageBytes: 3_758_096_384, // 3.5 GiB (1024-based)
+  },
+};
+
 // =============================================================================
 // end STREAMS_LIST_DUMMY
 // =============================================================================
@@ -269,14 +294,16 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     type = 'query';
   }
 
+  const dummyMetrics = STREAMS_LIST_DUMMY_STREAM_METRICS[node.stream.name];
+
   return {
     stream: node.stream,
     effective_lifecycle: node.effective_lifecycle,
     data_stream: node.data_stream,
     nameSortKey,
-    documentsCount: 0,
-    ingestionRate: 0,
-    storageBytes: 0,
+    documentsCount: dummyMetrics?.documents ?? 0,
+    ingestionRate: dummyMetrics?.ingestionRateDps ?? 0,
+    storageBytes: dummyMetrics?.storageBytes ?? 0,
     suggestionsCount: STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM[node.stream.name] ?? 0,
     retentionMs,
     type,

@@ -27,27 +27,74 @@ import {
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
 
+/** STREAMS_LIST_DUMMY — ES|QL-shaped response so the real bar chart renders without a query. */
+function buildSyntheticDummyDocumentsHistogramResponse({
+  start,
+  end,
+  numBuckets,
+  totalDocs,
+}: {
+  start: number;
+  end: number;
+  numBuckets: number;
+  totalDocs: number;
+}): ESQLSearchResponse {
+  const safeBuckets = Math.max(1, numBuckets);
+  const span = end - start;
+  const basePerBucket = Math.floor(totalDocs / safeBuckets);
+  let remainder = totalDocs % safeBuckets;
+  const columns: ESQLSearchResponse['columns'] = [
+    { name: '@timestamp', type: 'date' },
+    { name: 'doc_count', type: 'long' },
+  ];
+  const values: ESQLSearchResponse['values'] = [];
+  for (let i = 0; i < safeBuckets; i++) {
+    const bucketStart = start + Math.floor((span * i) / safeBuckets);
+    const count = basePerBucket + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder -= 1;
+    values.push([bucketStart, count]);
+  }
+  return { columns, values };
+}
+
 export function DocumentsColumn({
   indexPattern,
   histogramQueryFetch,
   timeState,
   numDataPoints,
+  dummyDocumentCount,
 }: {
   indexPattern: string;
   histogramQueryFetch: Promise<UnparsedEsqlResponse>;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
+  /** STREAMS_LIST_DUMMY — skip ES|QL and draw bars from synthetic buckets summing to this total. */
+  dummyDocumentCount?: number;
 }) {
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
-  const histogramQueryResult = useAsync(() => histogramQueryFetch, [histogramQueryFetch]);
+  const histogramQueryResult = useAsync(
+    () =>
+      dummyDocumentCount !== undefined
+        ? Promise.resolve(
+            buildSyntheticDummyDocumentsHistogramResponse({
+              start: timeState.start,
+              end: timeState.end,
+              numBuckets: numDataPoints,
+              totalDocs: dummyDocumentCount,
+            }) as unknown as UnparsedEsqlResponse
+          )
+        : histogramQueryFetch,
+    [dummyDocumentCount, histogramQueryFetch, numDataPoints, timeState.end, timeState.start]
+  );
 
   const allTimeseries = React.useMemo(
     () =>

@@ -48,6 +48,7 @@ import {
   filterStreamsByQuery,
   filterCollapsedStreamRows,
   getLegacyLogsStatus,
+  STREAMS_LIST_DUMMY_STREAM_METRICS,
 } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
@@ -166,38 +167,54 @@ export function StreamsTreeTable({
   );
 
   const ingestionByStream = React.useMemo(() => {
-    if (!dataStreamStatsFetch.value) return {} as Record<string, number>;
-    const now = Date.now();
-    return dataStreamStatsFetch.value.reduce((acc, stat) => {
-      if (stat.totalDocs && stat.creationDate) {
-        const ageSeconds = Math.max(1, (now - stat.creationDate) / 1000);
-        acc[stat.name] = stat.totalDocs / ageSeconds;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    const fromApi =
+      dataStreamStatsFetch.value?.reduce((acc, stat) => {
+        if (stat.totalDocs && stat.creationDate) {
+          const ageSeconds = Math.max(1, (Date.now() - stat.creationDate) / 1000);
+          acc[stat.name] = stat.totalDocs / ageSeconds;
+        }
+        return acc;
+      }, {} as Record<string, number>) ?? {};
+    const merged = { ...fromApi };
+    for (const [name, metrics] of Object.entries(STREAMS_LIST_DUMMY_STREAM_METRICS)) {
+      merged[name] = metrics.ingestionRateDps;
+    }
+    return merged;
   }, [dataStreamStatsFetch.value]);
 
   const storageByStream = React.useMemo(() => {
-    if (!dataStreamStatsFetch.value) return {} as Record<string, number>;
-    return dataStreamStatsFetch.value.reduce((acc, stat) => {
-      if (stat.sizeBytes !== undefined && stat.sizeBytes !== null) {
-        acc[stat.name] = stat.sizeBytes;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    const fromApi =
+      dataStreamStatsFetch.value?.reduce((acc, stat) => {
+        if (stat.sizeBytes !== undefined && stat.sizeBytes !== null) {
+          acc[stat.name] = stat.sizeBytes;
+        }
+        return acc;
+      }, {} as Record<string, number>) ?? {};
+    const merged = { ...fromApi };
+    for (const [name, metrics] of Object.entries(STREAMS_LIST_DUMMY_STREAM_METRICS)) {
+      merged[name] = metrics.storageBytes;
+    }
+    return merged;
   }, [dataStreamStatsFetch.value]);
 
-  const statsLoaded = !!dataStreamStatsFetch.value;
+  const statsLoaded =
+    !!dataStreamStatsFetch.value || Object.keys(STREAMS_LIST_DUMMY_STREAM_METRICS).length > 0;
 
   const docsByStream = React.useMemo(() => {
-    if (!totalDocsResult.value) {
-      return {} as Record<string, number>;
+    const fromApi =
+      totalDocsResult.value?.reduce((acc, { stream, count }) => {
+        acc[stream] = count;
+        return acc;
+      }, {} as Record<string, number>) ?? {};
+    const merged = { ...fromApi };
+    for (const [name, metrics] of Object.entries(STREAMS_LIST_DUMMY_STREAM_METRICS)) {
+      merged[name] = metrics.documents;
     }
-    return totalDocsResult.value.reduce((acc, { stream, count }) => {
-      acc[stream] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    return merged;
   }, [totalDocsResult.value]);
+
+  const streamHasDummyMetrics = (streamName: string) =>
+    Object.hasOwn(STREAMS_LIST_DUMMY_STREAM_METRICS, streamName);
 
   const failedByStream = React.useMemo(() => {
     if (!failedDocsResult.value) {
@@ -242,7 +259,8 @@ export function StreamsTreeTable({
     return qualities;
   }, [docsByStream, degradedByStream, failedByStream]);
 
-  const docCountsLoaded = !!totalDocsResult.value;
+  const docCountsLoaded =
+    !!totalDocsResult.value || Object.keys(STREAMS_LIST_DUMMY_STREAM_METRICS).length > 0;
   const qualityLoaded =
     !!totalDocsResult.value && !!degradedDocsResult.value && !!failedDocsResult.value;
 
@@ -688,15 +706,21 @@ export function StreamsTreeTable({
           sortable: docCountsLoaded ? (row: TableRow) => docsByStream[row.stream.name] ?? 0 : false,
           align: 'right',
           dataType: 'number',
-          render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
+          render: (_: unknown, item: TableRow) => {
+            const dummyDocs = STREAMS_LIST_DUMMY_STREAM_METRICS[item.stream.name]?.documents;
+            if (!item.data_stream && dummyDocs === undefined) {
+              return null;
+            }
+            return (
               <DocumentsColumn
                 indexPattern={item.stream.name}
                 histogramQueryFetch={getStreamHistogram(item.stream.name)}
                 timeState={timeState}
                 numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
+                dummyDocumentCount={dummyDocs}
               />
-            ) : null,
+            );
+          },
         },
         {
           field: 'ingestionRate',
@@ -714,7 +738,7 @@ export function StreamsTreeTable({
                   ? Math.round(ingestionByStream[item.stream.name] * 10) / 10
                   : undefined
               }
-              isLoading={dataStreamStatsFetch.loading}
+              isLoading={dataStreamStatsFetch.loading && !streamHasDummyMetrics(item.stream.name)}
             />
           ),
         },
@@ -728,7 +752,7 @@ export function StreamsTreeTable({
           render: (_: unknown, item: TableRow) => (
             <StorageColumn
               storageBytes={storageByStream[item.stream.name]}
-              isLoading={dataStreamStatsFetch.loading}
+              isLoading={dataStreamStatsFetch.loading && !streamHasDummyMetrics(item.stream.name)}
             />
           ),
         },
