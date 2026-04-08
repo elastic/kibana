@@ -577,22 +577,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             {...inputs.additionalYamlConfigInput.formRowProps}
             fullWidth
           >
-<<<<<<< migrate-js-yaml-to-yaml--elastic-fleet
-            <YamlCodeEditorWithPlaceholder
-              value={inputs.additionalYamlConfigInput.value}
-              onChange={(value) => {
-                if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
-                  inputs.presetInput.setValue('custom');
-                }
-=======
             <div data-test-subj="settingsOutputsFlyout.yamlConfigInput">
               <YamlCodeEditorWithPlaceholder
                 value={inputs.additionalYamlConfigInput.value}
                 onChange={(value) => {
-                  if (outputYmlIncludesReservedPerformanceKey(value, load)) {
+                  if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
                     inputs.presetInput.setValue('custom');
                   }
->>>>>>> main
 
                   inputs.additionalYamlConfigInput.setValue(value);
                 }}
