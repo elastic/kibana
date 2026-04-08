@@ -166,6 +166,84 @@ describe('streamSmlType', () => {
       expect(mockStorageClient.search).toHaveBeenCalledTimes(2);
     });
 
+    it('continues past pages consisting entirely of filtered group documents', async () => {
+      const groupOnlyPage = Array.from({ length: 1000 }, (_, i) => ({
+        _id: `group-${i}`,
+        _source: {
+          name: `group-${i}`,
+          type: 'wired',
+          description: '',
+          updated_at: '2025-01-01T00:00:00Z',
+          group: {},
+        },
+        sort: [`group-${i}`],
+      }));
+
+      const validPage = [
+        {
+          _id: 'logs.nginx',
+          _source: {
+            name: 'logs.nginx',
+            type: 'wired',
+            description: 'Nginx',
+            updated_at: '2025-01-02T00:00:00Z',
+          },
+          sort: ['logs.nginx'],
+        },
+      ];
+
+      mockStorageClient.search
+        .mockResolvedValueOnce({ hits: { hits: groupOnlyPage } })
+        .mockResolvedValueOnce({ hits: { hits: validPage } });
+
+      const items = await collectPages(smlType.list(createContext() as never));
+
+      expect(mockStorageClient.search).toHaveBeenCalledTimes(2);
+      expect(items).toHaveLength(1);
+      expect(items[0].id).toBe('logs.nginx');
+    });
+
+    it('handles multiple consecutive pages of only group documents before valid items', async () => {
+      const makeGroupPage = (prefix: string) =>
+        Array.from({ length: 1000 }, (_, i) => ({
+          _id: `${prefix}-${i}`,
+          _source: {
+            name: `${prefix}-${i}`,
+            type: 'wired',
+            description: '',
+            updated_at: '2025-01-01T00:00:00Z',
+            group: {},
+          },
+          sort: [`${prefix}-${i}`],
+        }));
+
+      mockStorageClient.search
+        .mockResolvedValueOnce({ hits: { hits: makeGroupPage('g1') } })
+        .mockResolvedValueOnce({ hits: { hits: makeGroupPage('g2') } })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'metrics.cpu',
+                _source: {
+                  name: 'metrics.cpu',
+                  type: 'classic',
+                  description: 'CPU metrics',
+                  updated_at: '2025-01-03T00:00:00Z',
+                },
+                sort: ['metrics.cpu'],
+              },
+            ],
+          },
+        });
+
+      const items = await collectPages(smlType.list(createContext() as never));
+
+      expect(mockStorageClient.search).toHaveBeenCalledTimes(3);
+      expect(items).toHaveLength(1);
+      expect(items[0].id).toBe('metrics.cpu');
+    });
+
     it('returns empty when no streams exist', async () => {
       mockStorageClient.search.mockResolvedValueOnce({
         hits: { hits: [] },

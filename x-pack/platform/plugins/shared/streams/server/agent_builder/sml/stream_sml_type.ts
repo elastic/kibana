@@ -45,19 +45,21 @@ export const createStreamSmlType = ({
         ...(searchAfter ? { search_after: searchAfter } : {}),
       });
 
+      if (response.hits.hits.length === 0) {
+        break;
+      }
+
       const hits = response.hits.hits
         .filter(hasSource)
         .filter(({ _source }) => !('group' in _source));
 
-      if (hits.length === 0) {
-        break;
+      if (hits.length > 0) {
+        yield hits.map(({ _source }) => ({
+          id: _source.name,
+          updatedAt: _source.updated_at ?? new Date().toISOString(),
+          spaces: ['*'],
+        }));
       }
-
-      yield hits.map(({ _source }) => ({
-        id: _source.name,
-        updatedAt: _source.updated_at ?? new Date().toISOString(),
-        spaces: ['*'],
-      }));
 
       const lastHit = response.hits.hits[response.hits.hits.length - 1];
       searchAfter = lastHit.sort as string[] | undefined;
