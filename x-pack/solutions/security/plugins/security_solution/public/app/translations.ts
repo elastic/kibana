@@ -58,6 +58,10 @@ export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
 
+export const LAUNCHPAD = i18n.translate('xpack.securitySolution.navigation.launchpad', {
+  defaultMessage: 'Launchpad',
+});
+
 export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
   defaultMessage: 'Get started',
 });
