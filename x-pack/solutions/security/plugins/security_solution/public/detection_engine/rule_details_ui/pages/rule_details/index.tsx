@@ -118,6 +118,7 @@ import {
 } from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
@@ -156,6 +157,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -283,7 +285,12 @@ export const RuleDetailsPage = connector(
         hasIndexMaintenance,
       },
     ] = useUserData();
-    const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+    const {
+      rules: { edit: canEditRules },
+      enableDisable: { edit: canEnableDisableRules },
+      customHighlightedFields: { edit: canEditCustomHighlightedFields },
+      investigationGuide: { edit: canEditInvestigationGuides },
+    } = useUserPrivileges().rulesPrivileges;
     const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
@@ -346,6 +353,9 @@ export const RuleDetailsPage = connector(
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+    const newExecutionResultsTableEnabled = useIsExperimentalFeatureEnabled(
+      'newExecutionResultsTableEnabled'
+    );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
     const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
@@ -596,6 +606,12 @@ export const RuleDetailsPage = connector(
       confirmRuleDuplication,
     } = useBulkDuplicateExceptionsConfirmation();
 
+    const deprecationCallout = useDeprecatedRuleDetailsCallout({
+      rule,
+      confirmDeletion,
+      showBulkDuplicateExceptionsConfirmation: showBulkDuplicateConfirmation,
+    });
+
     const {
       isManualRuleRunConfirmationVisible,
       showManualRuleRunConfirmation,
@@ -640,12 +656,16 @@ export const RuleDetailsPage = connector(
 
     const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
 
+    const isRuleEditButtonEnabled =
+      canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
+
     return (
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
         {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
+        {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
             onCancel={cancelRuleDuplication}
@@ -702,7 +722,7 @@ export const RuleDetailsPage = connector(
                             rule,
                             hasMlPermissions,
                             hasActionsPrivileges,
-                            canEditRules
+                            canEnableDisableRules
                           )}
                         >
                           <EuiFlexGroup>
@@ -712,7 +732,7 @@ export const RuleDetailsPage = connector(
                                 !rule ||
                                 !isExistingRule ||
                                 !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                                !canEditRules ||
+                                !canEnableDisableRules ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               enabled={isRuleEnabled}
@@ -736,14 +756,14 @@ export const RuleDetailsPage = connector(
                               ruleId={ruleId}
                               disabled={
                                 !isExistingRule ||
-                                !canEditRules ||
+                                !isRuleEditButtonEnabled ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               disabledReason={explainLackOfPermission(
                                 rule,
                                 hasMlPermissions,
                                 hasActionsPrivileges,
-                                canEditRules
+                                isRuleEditButtonEnabled
                               )}
                             />
                           </EuiFlexItem>
@@ -928,13 +948,20 @@ export const RuleDetailsPage = connector(
                       path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}
                     >
                       <>
-                        <ExecutionLogTable
-                          ruleId={ruleId}
-                          selectAlertsTab={navigateToAlertsTab}
-                          analytics={analytics}
-                          i18n={i18nStart}
-                          theme={theme}
-                        />
+                        {newExecutionResultsTableEnabled ? (
+                          <ExecutionResultsTable
+                            ruleId={ruleId}
+                            navigateToAlertsTab={navigateToAlertsTab}
+                          />
+                        ) : (
+                          <ExecutionLogTable
+                            ruleId={ruleId}
+                            selectAlertsTab={navigateToAlertsTab}
+                            analytics={analytics}
+                            i18n={i18nStart}
+                            theme={theme}
+                          />
+                        )}
                         <EuiSpacer size="xl" />
                         <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
                         <EuiSpacer size="xl" />

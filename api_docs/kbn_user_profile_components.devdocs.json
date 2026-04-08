@@ -1173,7 +1173,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"data-test-subj\" | \"errorMessage\" | \"height\" | \"singleSelection\" | \"emptyMessage\" | \"noMatchesMessage\" | \"loadingMessage\">"
+          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"emptyMessage\" | \"noMatchesMessage\" | \"loadingMessage\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "lineNumber": 35,
@@ -1730,7 +1730,7 @@
           },
           " extends Omit<",
           "EuiToolTipProps",
-          ", \"content\" | \"title\">"
+          ", \"title\" | \"content\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
         "lineNumber": 20,

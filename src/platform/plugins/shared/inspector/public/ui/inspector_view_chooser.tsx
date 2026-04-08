@@ -67,7 +67,7 @@ export class InspectorViewChooser extends Component<Props, State> {
     return (
       <EuiButtonEmpty
         size="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"

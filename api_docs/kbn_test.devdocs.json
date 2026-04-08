@@ -2647,7 +2647,7 @@
               "(role: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 219,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2663,7 +2663,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 219,
+                "lineNumber": 222,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2691,7 +2691,7 @@
               " | undefined) => Promise<{ Cookie: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 233,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2707,7 +2707,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 233,
+                "lineNumber": 236,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2731,7 +2731,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 233,
+                "lineNumber": 236,
                 "columnNumber": 48,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2759,7 +2759,7 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 242,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2775,7 +2775,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 242,
+                "lineNumber": 245,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2799,7 +2799,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 242,
+                "lineNumber": 245,
                 "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2819,7 +2819,7 @@
               "(role: string) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 252,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2835,7 +2835,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 252,
+                "lineNumber": 255,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2857,7 +2857,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 257,
+            "lineNumber": 260,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2873,7 +2873,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 257,
+                "lineNumber": 260,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2893,7 +2893,7 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 263,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3451,6 +3451,55 @@
             "path": "src/platform/packages/shared/kbn-test/src/mocha/xml.ts",
             "lineNumber": 25,
             "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.executeJestValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "executeJestValidation",
+        "description": [
+          "\nResolves scoped Jest targets from the validation contract and executes the\nrequired config runs, including downstream expansion when requested."
+        ],
+        "signature": [
+          "({ baseContext, log, passthroughArgs, procRunner, onConfigResult, }: ",
+          "ExecuteJestValidationOptions",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.JestValidationResult",
+            "text": "JestValidationResult"
+          },
+          " | null>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 449,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.executeJestValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  baseContext,\n  log,\n  passthroughArgs = [],\n  procRunner,\n  onConfigResult,\n}",
+            "description": [],
+            "signature": [
+              "ExecuteJestValidationOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 449,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4146,6 +4195,80 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.planJestContractRuns",
+        "type": "Function",
+        "tags": [],
+        "label": "planJestContractRuns",
+        "description": [
+          "Builds per-config Jest run plans from changed files and the selected test mode."
+        ],
+        "signature": [
+          "({ entries, testMode, }: { entries: ",
+          "JestChangedFileEntry",
+          "[]; testMode: JestContractTestMode; }) => ",
+          "JestContractRunPlan",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 313,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.planJestContractRuns.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  entries,\n  testMode,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 316,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.planJestContractRuns.$1.entries",
+                "type": "Array",
+                "tags": [],
+                "label": "entries",
+                "description": [],
+                "signature": [
+                  "JestChangedFileEntry",
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+                "lineNumber": 317,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.planJestContractRuns.$1.testMode",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "testMode",
+                "description": [],
+                "signature": [
+                  "\"related\" | \"affected\""
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+                "lineNumber": 318,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.readConfigFile",
         "type": "Function",
         "tags": [],
@@ -4512,6 +4635,27 @@
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_all.ts",
         "lineNumber": 50,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestContract",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestContract",
+        "description": [
+          "Runs the validation-contract-aware `scripts/jest` CLI entrypoint."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 613,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -6973,6 +7117,158 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.JestConfigResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "JestConfigResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.config",
+            "type": "string",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.passed",
+            "type": "boolean",
+            "tags": [],
+            "label": "passed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.testCount",
+            "type": "number",
+            "tags": [],
+            "label": "testCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.failureOutput",
+            "type": "string",
+            "tags": [],
+            "label": "failureOutput",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestConfigResult.command",
+            "type": "string",
+            "tags": [],
+            "label": "command",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JestValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "JestValidationResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestValidationResult.configCount",
+            "type": "number",
+            "tags": [],
+            "label": "configCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestValidationResult.testCount",
+            "type": "number",
+            "tags": [],
+            "label": "testCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.KbnClientOptions",
         "type": "Interface",
         "tags": [],
@@ -8088,6 +8384,37 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JEST_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "JEST_LABEL",
+        "description": [],
+        "signature": [
+          "\"jest\""
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JEST_LOG_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "JEST_LOG_PREFIX",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

@@ -10,10 +10,25 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import PagerDutyActionConnectorFields from './pagerduty_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('PagerDutyActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -64,7 +79,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         secrets: {
           routingKey: 'test',
         },
-        id: 'test',
+        id: 'pagerduty',
         actionTypeId: '.pagerduty',
         name: 'pagerduty',
         config: {
@@ -83,24 +98,24 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          secrets: {
-            routingKey: 'test',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            secrets: {
+              routingKey: 'test',
+            },
+            id: 'pagerduty',
+            actionTypeId: '.pagerduty',
+            name: 'pagerduty',
+            config: {
+              apiUrl: 'http://test.com',
+            },
+            isDeprecated: false,
           },
-          id: 'test',
-          actionTypeId: '.pagerduty',
-          name: 'pagerduty',
-          config: {
-            apiUrl: 'http://test.com',
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -109,7 +124,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         secrets: {
           routingKey: 'test',
         },
-        id: 'test',
+        id: 'pagerduty',
         actionTypeId: '.pagerduty',
         name: 'pagerduty',
         config: {
@@ -128,21 +143,21 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          secrets: {
-            routingKey: 'test',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            secrets: {
+              routingKey: 'test',
+            },
+            id: 'pagerduty',
+            actionTypeId: '.pagerduty',
+            name: 'pagerduty',
+            isDeprecated: false,
           },
-          id: 'test',
-          actionTypeId: '.pagerduty',
-          name: 'pagerduty',
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -170,13 +185,13 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
@@ -204,13 +219,13 @@ describe('PagerDutyActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
   });

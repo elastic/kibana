@@ -137,6 +137,7 @@ describe('Workflow routes', () => {
           query: 'search',
         },
       });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -152,15 +153,47 @@ describe('Workflow routes', () => {
           tags: ['a'],
           query: 'search',
         },
-        'default-space'
+        'default-space',
+        { includeExecutionHistory: false }
       );
       expect(response.ok).toHaveBeenCalledWith({ body: list });
+    });
+
+    it('should include execution history when user has readExecution privilege', async () => {
+      const list = { workflows: [], total: 0 };
+      mockApi.getWorkflows.mockResolvedValue(list);
+      const request = httpServerMock.createKibanaRequest({ query: {} });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readExecution]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflows).toHaveBeenCalledWith(expect.any(Object), 'default-space', {
+        includeExecutionHistory: true,
+      });
+    });
+
+    it('should return forbidden when user lacks read privilege', async () => {
+      const request = httpServerMock.createKibanaRequest({ query: {} });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.readExecution]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockApi.getWorkflows).not.toHaveBeenCalled();
     });
 
     it('should delegate errors to handleRouteError', async () => {
       const err = new Error('boom');
       mockApi.getWorkflows.mockRejectedValue(err);
       const request = httpServerMock.createKibanaRequest({ query: {} });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -604,13 +637,46 @@ describe('Workflow routes', () => {
       const stats = { total: 3 };
       mockApi.getWorkflowStats.mockResolvedValue(stats);
       const request = httpServerMock.createKibanaRequest();
+      (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space');
+      expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
+        includeExecutionStats: false,
+      });
       expect(response.ok).toHaveBeenCalledWith({ body: stats });
+    });
+
+    it('should return forbidden when user lacks read privilege', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      (request as any).authzResult = { [WorkflowsManagementApiActions.readExecution]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockApi.getWorkflowStats).not.toHaveBeenCalled();
+    });
+
+    it('should include execution stats when user has readExecution privilege', async () => {
+      const stats = { total: 3 };
+      mockApi.getWorkflowStats.mockResolvedValue(stats);
+      const request = httpServerMock.createKibanaRequest();
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readExecution]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
+        includeExecutionStats: true,
+      });
     });
   });
 

@@ -28,7 +28,11 @@ export type {
   RangeSelectContext,
   ValueClickContext,
 } from './ui_actions/triggers';
-export type { EmbeddableEditorState, EmbeddablePackageState } from './state_transfer';
+export type {
+  EmbeddableEditorState,
+  EmbeddableEditorBreadcrumb,
+  EmbeddablePackageState,
+} from './state_transfer';
 export type { EmbeddableSetup, EmbeddableStart } from './types';
 
 export {
