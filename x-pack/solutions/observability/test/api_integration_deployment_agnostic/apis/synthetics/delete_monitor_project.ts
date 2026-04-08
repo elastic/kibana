@@ -66,15 +66,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('only allows 500 requests at a time', async () => {
       const project = 'test-brower-suite';
-      const monitors = [];
-      for (let i = 0; i < 550; i++) {
-        monitors.push({
-          ...projectMonitors.monitors[0],
-          id: `test-id-${i}`,
-          name: `test-name-${i}`,
-        });
-      }
-      const monitorsToDelete = monitors.map((monitor) => monitor.id);
+      // Create only 2 real monitors — the 500-item limit is a request body validation,
+      // so we don't need hundreds of monitors to trigger it.
+      const monitors = [
+        { ...projectMonitors.monitors[0], id: 'test-id-0', name: 'test-name-0' },
+        { ...projectMonitors.monitors[0], id: 'test-id-1', name: 'test-name-1' },
+      ];
+      const realMonitorIds = monitors.map((m) => m.id);
+      // Build a delete payload with 501 IDs (2 real + 499 fake) to exceed the 500 limit
+      const fakeIds = Array.from({ length: 499 }, (_, i) => `fake-id-${i}`);
+      const oversizedDeletePayload = [...realMonitorIds, ...fakeIds];
 
       try {
         await supertest
@@ -83,16 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitors.slice(0, 250) })
-          .expect(200);
-
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitors.slice(250, 251) })
+          .send({ monitors })
           .expect(200);
 
         const savedObjectsResponse = await supertest
@@ -104,7 +96,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
         const { total } = savedObjectsResponse.body;
-        expect(total).to.eql(251);
+        expect(total).to.eql(2);
 
         const response = await supertest
           .delete(
@@ -112,10 +104,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: monitorsToDelete })
+          .send({ monitors: oversizedDeletePayload })
           .expect(400);
         expect(response.body.message).to.eql(
-          '[request body.monitors]: array size is [550], but cannot be greater than [500]'
+          '[request body.monitors]: array size is [501], but cannot be greater than [500]'
         );
       } finally {
         try {
@@ -128,21 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             )
             .set(editorUser.apiKeyHeader)
             .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(0, 250) });
-        } catch (e) {
-          // best-effort cleanup
-        }
-        try {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(250, 251) });
+            .send({ monitors: realMonitorIds });
         } catch (e) {
           // best-effort cleanup
         }

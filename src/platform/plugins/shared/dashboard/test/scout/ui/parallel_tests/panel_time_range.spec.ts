@@ -19,7 +19,6 @@ import {
 const DASHBOARD_NAME_PREFIX = 'Panel time range';
 
 const createDashboard = async (pageObjects: PageObjects, dashboardName: string) => {
-  await pageObjects.dashboard.goto();
   await pageObjects.dashboard.openNewDashboard();
   await pageObjects.dashboard.saveDashboard(dashboardName);
 };

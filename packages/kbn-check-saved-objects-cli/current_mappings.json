@@ -2849,6 +2849,9 @@
       "name": {
         "type": "keyword"
       },
+      "otel_exporter_config_yaml": {
+        "type": "text"
+      },
       "output_id": {
         "index": false,
         "type": "keyword"
