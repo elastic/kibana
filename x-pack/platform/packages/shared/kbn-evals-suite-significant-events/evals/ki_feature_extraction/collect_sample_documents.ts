@@ -90,7 +90,7 @@ export const collectSampleDocuments = async ({
   for (const { hits, criterion } of samplingFilterResults) {
     const hit = hits[0];
     if (!hit) {
-      log.warning(`  [${criterion.id}] no matching document found`);
+      log.debug(`  [${criterion.id}] no matching document found`);
       continue;
     }
     const app = hit.fields ? getAppNameFromFields(hit.fields) : undefined;
