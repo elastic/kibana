@@ -54,6 +54,8 @@ export interface InteractiveModeContext {
   stepRefs: StepActorRef[];
   // Initial step refs from persisted definition (for change detection)
   initialStepRefs: StepActorRef[];
+  /** Processing steps from the last loaded stream definition; used to restore after dismissing a suggestion */
+  persistedProcessingSteps: StreamlangDSL['steps'];
   // Parent machine ref for communication
   parentRef: InteractiveModeParentRef;
   // Privileges for this stream
@@ -72,6 +74,11 @@ export interface InteractiveModeContext {
   grokCollection: GrokCollection;
   // Error message from failed pipeline suggestion task
   suggestionError?: string;
+  /**
+   * True after the user clicks generate/regenerate this session. Used to avoid
+   * surfacing background suggestion tasks on a cold page load.
+   */
+  pipelineSuggestionInitiatedThisSession: boolean;
 }
 
 export interface InteractiveModeInput {

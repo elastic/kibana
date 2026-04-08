@@ -24,7 +24,7 @@ import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import type { FlattenRecord } from '@kbn/streams-schema';
+import { Streams, type FlattenRecord } from '@kbn/streams-schema';
 import { validationErrorTypeLabels } from '@kbn/streamlang';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
@@ -320,6 +320,13 @@ export const StepsEditor = React.memo(() => {
     definition: { stream },
   } = useStreamDetail();
 
+  const savedDefinitionHasProcessingPipeline = useMemo(() => {
+    if (!Streams.ingest.all.Definition.is(stream)) {
+      return false;
+    }
+    return stream.ingest.processing.steps.length > 0;
+  }, [stream]);
+
   const canUsePipelineSuggestions = aiFeatures && aiFeatures.enabled && hasValidMessageFields;
   const canUsePipelineSuggestionsPending =
     aiFeatures !== null && (aiFeatures.loading || (aiFeatures.enabled && isLoadingSamples));
@@ -333,7 +340,7 @@ export const StepsEditor = React.memo(() => {
           onCancel={() => {
             cancelSuggestion();
           }}
-          showBackgroundMessage={true}
+          showBackgroundMessage={!savedDefinitionHasProcessingPipeline}
         />
       );
     }

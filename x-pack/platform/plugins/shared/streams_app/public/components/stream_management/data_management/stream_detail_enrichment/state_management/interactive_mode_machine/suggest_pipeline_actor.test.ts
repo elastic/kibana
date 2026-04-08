@@ -404,10 +404,9 @@ describe('interactive mode pipeline suggestion polling', () => {
     actor.stop();
   });
 
-  it('stores error in context when loading existing suggestion returns failed', async () => {
+  it('discards failed task on cold load without surfacing an error callout', async () => {
     jest.useFakeTimers();
 
-    // loadExistingSuggestion returns failed (task had failed before page load)
     const loadExistingSuggestionMock = jest.fn(async () => ({
       type: 'failed' as const,
       error: 'LLM connection failed during background processing',
@@ -443,15 +442,10 @@ describe('interactive mode pipeline suggestion polling', () => {
     const actor = createActor(testMachine, { input });
     actor.start();
 
-    // Machine should start in loadingExistingSuggestion, then go to suggestionFailed when failed
-    await waitForMatch(actor, 'pipelineSuggestion.suggestionFailed');
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
 
     expect(loadExistingSuggestionMock).toHaveBeenCalledTimes(1);
-
-    // Error should be stored in context for display in the UI
-    expect(actor.getSnapshot().context.suggestionError).toBe(
-      'LLM connection failed during background processing'
-    );
+    expect(actor.getSnapshot().context.suggestionError).toBeUndefined();
 
     actor.stop();
   });

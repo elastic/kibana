@@ -436,6 +436,9 @@ export const interactiveModeMachine = setup({
       suggestionPollingDeadline: () => Date.now() + PIPELINE_SUGGESTION_MAX_POLLING_TIME_MS,
     }),
     clearSuggestionPollingDeadline: assign({ suggestionPollingDeadline: undefined }),
+    setPipelineSuggestionInitiatedThisSession: assign({
+      pipelineSuggestionInitiatedThisSession: true,
+    }),
   },
   guards: {
     hasStagedChanges: ({ context }) => {
@@ -487,6 +490,7 @@ export const interactiveModeMachine = setup({
     return {
       stepRefs,
       initialStepRefs: stepRefs,
+      persistedProcessingSteps: input.dsl.steps,
       parentRef: input.parentRef,
       privileges: input.privileges,
       simulationMode: input.simulationMode,
@@ -495,6 +499,7 @@ export const interactiveModeMachine = setup({
       suggestionPollingDeadline: undefined,
       grokCollection: input.grokCollection,
       suggestionError: undefined,
+      pipelineSuggestionInitiatedThisSession: false,
     };
   },
   type: 'parallel',
@@ -541,58 +546,43 @@ export const interactiveModeMachine = setup({
             }),
             onDone: [
               {
-                // Only show suggestion if stream has no initial steps (not already configured)
-                guard: ({ context, event }) =>
-                  event.output.type === 'completed' && context.initialStepRefs.length === 0,
-                target: 'completed',
-                actions: enqueueActions(({ event, enqueue }) => {
-                  // Type guard is satisfied by the guard above, but TypeScript needs help
-                  const output = event.output as { type: 'completed'; pipeline: StreamlangDSL };
-                  enqueue({
-                    type: 'storeSuggestedPipeline',
-                    params: { pipeline: output.pipeline },
-                  });
-                  enqueue({
-                    type: 'overwriteSteps',
-                    params: { steps: output.pipeline.steps },
-                  });
-                }),
-              },
-              {
-                // Only continue polling if stream has no initial steps
-                guard: ({ context, event }) =>
-                  event.output.type === 'in_progress' && context.initialStepRefs.length === 0,
-                target: 'waitingForCompletion',
-                actions: [{ type: 'setSuggestionPollingDeadline' }],
-              },
-              {
-                // Handle pre-existing failed task: show warning callout in UI
-                guard: ({ context, event }) =>
-                  event.output.type === 'failed' && context.initialStepRefs.length === 0,
-                target: 'suggestionFailed',
+                // Background completed suggestion on cold load: clear server task, do not show UI
+                guard: ({ event }) => event.output.type === 'completed',
+                target: 'idle',
                 actions: [
                   {
-                    type: 'storeSuggestionError',
-                    params: ({ event }) => {
-                      const output = event.output as { type: 'failed'; error: string };
-                      return { error: output.error };
-                    },
+                    type: 'acknowledgeSuggestionTask',
+                    params: ({ context }) => ({ streamName: context.streamName }),
                   },
                 ],
               },
               {
-                // Handle pre-existing failed task when stream already has steps: just go to idle
-                guard: ({ event }) => event.output.type === 'failed',
+                // Background run in flight on cold load: stay out of polling / loading UI
+                guard: ({ event }) => event.output.type === 'in_progress',
                 target: 'idle',
               },
               {
-                // Handle completed task that produced no suggestions
-                guard: ({ context, event }) =>
-                  event.output.type === 'no_suggestions' && context.initialStepRefs.length === 0,
-                target: 'noSuggestionsFound',
+                guard: ({ event }) => event.output.type === 'failed',
+                target: 'idle',
+                actions: [
+                  {
+                    type: 'deleteSuggestionTask',
+                    params: ({ context }) => ({ streamName: context.streamName }),
+                  },
+                ],
               },
               {
-                // For 'none', 'being_canceled', or when stream already has steps - go to idle
+                guard: ({ event }) => event.output.type === 'no_suggestions',
+                target: 'idle',
+                actions: [
+                  {
+                    type: 'acknowledgeSuggestionTask',
+                    params: ({ context }) => ({ streamName: context.streamName }),
+                  },
+                ],
+              },
+              {
+                // For 'none', 'being_canceled' — go to idle
                 target: 'idle',
               },
             ],
@@ -611,7 +601,10 @@ export const interactiveModeMachine = setup({
           },
         },
         submittingSuggestionTask: {
-          entry: [{ type: 'setSuggestionPollingDeadline' }],
+          entry: [
+            { type: 'setPipelineSuggestionInitiatedThisSession' },
+            { type: 'setSuggestionPollingDeadline' },
+          ],
           invoke: {
             id: 'schedulePipelineSuggestionTaskActor',
             src: 'schedulePipelineSuggestionTask',
@@ -660,7 +653,7 @@ export const interactiveModeMachine = setup({
                 guard: ({ context, event }) => {
                   const output = event.output;
                   return (
-                    context.initialStepRefs.length === 0 &&
+                    context.pipelineSuggestionInitiatedThisSession &&
                     output.status === TaskStatus.Completed &&
                     output.pipeline != null
                   );
@@ -677,18 +670,24 @@ export const interactiveModeMachine = setup({
                 }),
               },
               {
-                guard: ({ event }) =>
-                  event.output.status === TaskStatus.Completed && event.output.pipeline == null,
+                guard: ({ context, event }) =>
+                  context.pipelineSuggestionInitiatedThisSession &&
+                  event.output.status === TaskStatus.Completed &&
+                  event.output.pipeline == null,
                 target: 'noSuggestionsFound',
                 actions: [{ type: 'clearSuggestionPollingDeadline' }],
               },
               {
-                guard: ({ event }) => event.output.status === TaskStatus.Acknowledged,
+                guard: ({ context, event }) =>
+                  context.pipelineSuggestionInitiatedThisSession &&
+                  event.output.status === TaskStatus.Acknowledged,
                 target: 'noSuggestionsFound',
                 actions: [{ type: 'clearSuggestionPollingDeadline' }],
               },
               {
-                guard: ({ event }) => event.output.status === TaskStatus.Failed,
+                guard: ({ context, event }) =>
+                  context.pipelineSuggestionInitiatedThisSession &&
+                  event.output.status === TaskStatus.Failed,
                 target: 'suggestionFailed',
                 actions: [
                   { type: 'clearSuggestionPollingDeadline' },
@@ -704,10 +703,11 @@ export const interactiveModeMachine = setup({
                 ],
               },
               {
-                guard: ({ event }) =>
-                  event.output.status === TaskStatus.InProgress ||
-                  event.output.status === TaskStatus.NotStarted ||
-                  event.output.status === TaskStatus.Stale,
+                guard: ({ context, event }) =>
+                  context.pipelineSuggestionInitiatedThisSession &&
+                  (event.output.status === TaskStatus.InProgress ||
+                    event.output.status === TaskStatus.NotStarted ||
+                    event.output.status === TaskStatus.Stale),
                 target: 'waitingForCompletion',
               },
               {
@@ -817,7 +817,7 @@ export const interactiveModeMachine = setup({
                 { type: 'clearSuggestion' },
                 {
                   type: 'overwriteSteps',
-                  params: () => ({ steps: [] }),
+                  params: ({ context }) => ({ steps: context.persistedProcessingSteps }),
                 },
                 { type: 'syncToDSL' },
                 { type: 'sendStepsToSimulator' },
