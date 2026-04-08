@@ -277,33 +277,8 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
     );
   } else {
     projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
-    projectConfig.tasks = projectConfig.tasks || {};
-    projectConfig.tasks[MOON_CONST.TASK_NAME_JEST] = {
-      command: 'node',
-      args: [
-        '--no-experimental-require-module',
-        '$workspaceRoot/scripts/jest',
-        '--config',
-        `$projectRoot/${jestConfigName}`,
-      ],
-      options: {
-        runFromWorkspaceRoot: true,
-      },
-      inputs: ['@group(src)'],
-    };
-    projectConfig.tasks[MOON_CONST.TASK_NAME_JEST_CI] = {
-      command: 'node',
-      args: [
-        '--no-experimental-require-module',
-        '$workspaceRoot/scripts/jest',
-        '--config',
-        `$projectRoot/${jestConfigName}`,
-      ],
-      options: {
-        runFromWorkspaceRoot: true,
-      },
-      inputs: ['@group(src)'],
-    };
+
+    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
   }
 }
 
