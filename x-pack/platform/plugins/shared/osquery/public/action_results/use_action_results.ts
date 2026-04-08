@@ -15,6 +15,7 @@ import { API_VERSIONS, ACTION_RESPONSES_INDEX } from '../../common/constants';
 import { getAgentIdFromFields } from '../../common/utils/agent_fields';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { getPollingInterval } from '../common/get_polling_interval';
 
 export interface ActionResultsArgs {
   edges: ResultEdges;
@@ -179,7 +180,7 @@ export const useActionResults = ({
         },
         inspect: { dsl: [], response: [] },
       },
-      refetchInterval: isLive ? 5000 : false,
+      refetchInterval: isLive ? getPollingInterval(startDate) : false,
       keepPreviousData: true,
       enabled: isScheduled ? !!scheduleId : !!actionId && !!agentIds?.length,
       onSuccess: () => setErrorToast(),

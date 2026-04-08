@@ -14,6 +14,7 @@ import type { ResultEdges, Direction, ResultsStrategyResponse } from '../../comm
 import { API_VERSIONS } from '../../common/constants';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { getPollingInterval } from '../common/get_polling_interval';
 
 interface ResultsArgs {
   edges: ResultEdges;
@@ -120,7 +121,7 @@ export const useAllResults = ({
         ).sort(),
       }),
       keepPreviousData: true,
-      refetchInterval: isLive ? 5000 : false,
+      refetchInterval: isLive ? getPollingInterval(startDate) : false,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
