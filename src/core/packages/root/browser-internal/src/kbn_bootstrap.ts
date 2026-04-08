@@ -34,9 +34,11 @@ export async function __kbnBootstrap__() {
   await Promise.all([
     // eslint-disable-next-line no-console
     apmSystem.setup().catch(console.warn),
-    i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
-      i18nError = error;
-    }),
+    i18n
+      .load(injectedMetadata.i18n.translationsUrl, { debug: injectedMetadata.i18n.debugMode })
+      .catch((error) => {
+        i18nError = error;
+      }),
   ]);
 
   const isDomStorageDisabled = () => {

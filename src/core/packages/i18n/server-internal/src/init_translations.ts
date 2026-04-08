@@ -9,9 +9,18 @@
 
 import { i18n, i18nLoader } from '@kbn/i18n';
 
-export const initTranslations = async (locale: string, translationFiles: string[]) => {
+interface InitTranslationsParams {
+  locale: string;
+  translationFiles: string[];
+  debug?: boolean;
+}
+export const initTranslations = async ({
+  locale,
+  translationFiles,
+  debug,
+}: InitTranslationsParams) => {
   i18nLoader.registerTranslationFiles(translationFiles);
   const translations = await i18nLoader.getTranslationsByLocale(locale);
   translations.locale = locale;
-  i18n.init(translations);
+  i18n.init(translations, { debug });
 };
