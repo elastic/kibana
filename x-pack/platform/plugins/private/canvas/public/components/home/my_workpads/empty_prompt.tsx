@@ -17,7 +17,7 @@ export const HomeEmptyPrompt = () => (
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
         <EuiEmptyPrompt
           color="subdued"
-          iconType="importAction"
+          iconType="download"
           title={<h2>{strings.getEmptyPromptTitle()}</h2>}
           titleSize="m"
           body={

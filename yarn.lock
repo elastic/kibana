@@ -2382,10 +2382,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.11.0.tgz#27abb0d3a86879f7629f0aef24342bf3359ec3d4"
   integrity sha512-P+1njt18ong32ucBiXI3+c0/sKjoX3ffsArcHhmsJW5y9+rvdzZ9rtgWLtRhhtJnpiBI0fyDabEff/ISCU7tZg==
 
-"@elastic/esql@1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.7.0.tgz#a3f7179edd21497b336baaf0643265f8d85835c3"
-  integrity sha512-ip04TzYpwKx9BzAaXHgPo6VkmmPeWx5nbP8Dl3XYEH37+YrpXSN/KltpCW/6iHYV6EOsdVBzNgHxVc99PksgEQ==
+"@elastic/esql@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.7.1.tgz#b1c12f06cff2e2284735a9bb5e89d09bf864fc80"
+  integrity sha512-yQbLa+y6cHN9VVFapruHXvcb4h5DV+/FS+gRReQQ0ilgkBp2j9a7l6pVOuixrjnfDo+s6WK5a/i/JFRxZ6rsIA==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -2589,10 +2589,10 @@
     "@elastic/react-search-ui-views" "1.24.1"
     "@elastic/search-ui" "1.24.1"
 
-"@elastic/request-converter@9.3.0":
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.3.0.tgz#8efb90d859ad74fb46b5c65623115b77d88b5a12"
-  integrity sha512-4v2a6R3r9Ts0udmnj4NG44bv++kmDe9m8BNljJO2oGFCFf2EwEnxQfj5lK7K3y5FhOsI31hfH91w5tInoX/6dA==
+"@elastic/request-converter@9.4.0":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.4.0.tgz#afa14b1c18550b20210a56d593be5660247fae10"
+  integrity sha512-pl9UVMFKuOleeH6Mwm8IIaacZgbtx8m/EslhiXPFXAkf1NUOxoECIHpSjyD5tp+HppRXxdU6zEySQ9nFgN25OA==
   dependencies:
     base64url "^3.0.1"
     commander "^12.1.0"
@@ -4719,6 +4719,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-fixture@link:x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
   version "0.0.0"
   uid ""
@@ -4867,15 +4871,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-shared-transforms@link:src/platform/packages/shared/as-code/shared-transforms":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
 
 "@kbn/automatic-import-plugin@link:x-pack/platform/plugins/shared/automatic_import":
-  version "0.0.0"
-  uid ""
-
-"@kbn/automatic-import-v2-plugin@link:x-pack/platform/plugins/shared/automatic_import_v2":
   version "0.0.0"
   uid ""
 
@@ -6359,10 +6363,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-catalog-plugin@link:x-pack/platform/plugins/shared/data_catalog":
-  version "0.0.0"
-  uid ""
-
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
@@ -6392,10 +6392,6 @@
   uid ""
 
 "@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
-  version "0.0.0"
-  uid ""
-
-"@kbn/data-sources-plugin@link:x-pack/platform/plugins/shared/data_sources":
   version "0.0.0"
   uid ""
 
@@ -6464,10 +6460,6 @@
   uid ""
 
 "@kbn/deeplinks-analytics@link:src/platform/packages/shared/deeplinks/analytics":
-  version "0.0.0"
-  uid ""
-
-"@kbn/deeplinks-data-sources@link:src/platform/packages/shared/deeplinks/data_sources":
   version "0.0.0"
   uid ""
 
@@ -8171,6 +8163,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/query-activity-plugin@link:x-pack/platform/plugins/shared/query_activity":
+  version "0.0.0"
+  uid ""
+
 "@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
   version "0.0.0"
   uid ""
@@ -8356,6 +8352,10 @@
   uid ""
 
 "@kbn/response-ops-alerts-table@link:x-pack/platform/packages/shared/response-ops/alerts-table":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-detections-close-reason@link:x-pack/platform/packages/shared/response-ops/detections-close-reason":
   version "0.0.0"
   uid ""
 
@@ -8616,10 +8616,6 @@
   uid ""
 
 "@kbn/search-index-documents@link:x-pack/platform/packages/shared/kbn-search-index-documents":
-  version "0.0.0"
-  uid ""
-
-"@kbn/search-indices@link:x-pack/solutions/search/plugins/search_indices":
   version "0.0.0"
   uid ""
 
@@ -11970,12 +11966,12 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@playwright/test@1.58.2":
-  version "1.58.2"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.58.2.tgz#b0ad585d2e950d690ef52424967a42f40c6d2cbd"
-  integrity sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==
+"@playwright/test@1.59.1":
+  version "1.59.1"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.59.1.tgz#5c4d38eac84a61527af466602ae20277685a02d6"
+  integrity sha512-PG6q63nQg5c9rIi4/Z5lR5IVF7yU5MqmKaPOe0HSc0O2cX1fPi96sUQu5j7eo4gKCkB2AnNGoWt7y4/Xx3Kcqg==
   dependencies:
-    playwright "1.58.2"
+    playwright "1.59.1"
 
 "@pmmmwh/react-refresh-webpack-plugin@0.6.1":
   version "0.6.1"
@@ -15887,9 +15883,9 @@
   integrity sha512-CJDxIgE5I0FH+ttq/Fxy6nRpxP70+e2O048EPe85J2use3XKdatVM7dDVvFNjQudd9B49NPoZ+8PG49zj4Er8Q==
 
 "@xmldom/xmldom@^0.8.10":
-  version "0.8.10"
-  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.10.tgz#a1337ca426aa61cef9fe15b5b28e340a72f6fa99"
-  integrity sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==
+  version "0.8.12"
+  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.12.tgz#cf488a5435fa06c7374ad1449c69cea0f823624b"
+  integrity sha512-9k/gHF6n/pAi/9tqr3m3aqkuiNosYTurLLUtc7xQ9sxB/wm7WPygCv8GYa6mS0fLJEHhqMC1ATYhz++U/lRHqg==
 
 "@xobotyi/scrollbar-width@^1.9.5":
   version "1.9.5"
@@ -20155,10 +20151,10 @@ diff-sequences@^29.6.3:
   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-29.6.3.tgz#4deaf894d11407c51efc8418012f9e70b84ea921"
   integrity sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==
 
-diff@8.0.3, diff@^8.0.2:
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-8.0.3.tgz#c7da3d9e0e8c283bb548681f8d7174653720c2d5"
-  integrity sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==
+diff@8.0.4, diff@^8.0.2:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-8.0.4.tgz#4f5baf3188b9b2431117b962eb20ba330fadf696"
+  integrity sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==
 
 diff@^5.0.0, diff@^5.1.0, diff@^5.2.0:
   version "5.2.2"
@@ -22999,10 +22995,10 @@ handle-thing@^2.0.0:
   resolved "https://registry.yarnpkg.com/handle-thing/-/handle-thing-2.0.0.tgz#0e039695ff50c93fc288557d696f3c1dc6776754"
   integrity sha512-d4sze1JNC454Wdo2fkuyzCr6aHcbL6PGGuFAz0Li/NcOm1tCHGnWDRmJP85dh9IhQErTc2svWFEX5xHIOo//kQ==
 
-handlebars@4.7.8, handlebars@^4.7.6, handlebars@^4.7.8:
-  version "4.7.8"
-  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.7.8.tgz#41c42c18b1be2365439188c77c6afae71c0cd9e9"
-  integrity sha512-vafaFqs8MZkRrSX7sFVUdo3ap/eNiLnb4IakshzvP56X5Nr1iGKAIqdX6tMlm6HcNRIkr6AxO5jFEoJzzpT8aQ==
+handlebars@4.7.9, handlebars@^4.7.6, handlebars@^4.7.8:
+  version "4.7.9"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.7.9.tgz#6f139082ab58dc4e5a0e51efe7db5ae890d56a0f"
+  integrity sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==
   dependencies:
     minimist "^1.2.5"
     neo-async "^2.6.2"
@@ -27684,10 +27680,10 @@ node-fetch@^3.3.2:
     fetch-blob "^3.1.4"
     formdata-polyfill "^4.0.10"
 
-node-forge@1.3.3, node-forge@^1, node-forge@^1.2.1:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.3.tgz#0ad80f6333b3a0045e827ac20b7f735f93716751"
-  integrity sha512-rLvcdSyRCyouf6jcOIPe/BgwG/d7hKjzMKOas33/pHEr6gbq18IK9zV7DiPvzsz0oBJPme6qr6H6kGZuI9/DZg==
+node-forge@1.4.0, node-forge@^1, node-forge@^1.2.1:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.4.0.tgz#1c7b7d8bdc2d078739f58287d589d903a11b2fc2"
+  integrity sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==
 
 node-gyp-build-optional-packages@5.0.7:
   version "5.0.7"
@@ -29118,17 +29114,17 @@ platform@^1.3.0:
   resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.5.tgz#fb6958c696e07e2918d2eeda0f0bc9448d733444"
   integrity sha512-TuvHS8AOIZNAlE77WUDiR4rySV/VMptyMfcfeoMgs4P8apaZM3JrnbzBiixKUv+XR6i+BXrQh8WAnjaSPFO65Q==
 
-playwright-core@1.58.2:
-  version "1.58.2"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.58.2.tgz#ac5f5b4b10d29bcf934415f0b8d133b34b0dcb13"
-  integrity sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==
+playwright-core@1.59.1:
+  version "1.59.1"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.59.1.tgz#d8a2b28bcb8f2bd08ef3df93b02ae83c813244b2"
+  integrity sha512-HBV/RJg81z5BiiZ9yPzIiClYV/QMsDCKUyogwH9p3MCP6IYjUFu/MActgYAvK0oWyV9NlwM3GLBjADyWgydVyg==
 
-playwright@1.58.2:
-  version "1.58.2"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.58.2.tgz#afe547164539b0bcfcb79957394a7a3fa8683cfd"
-  integrity sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==
+playwright@1.59.1:
+  version "1.59.1"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.59.1.tgz#f7b0ca61637ae25264cec370df671bbe1f368a4a"
+  integrity sha512-C8oWjPR3F81yljW9o5OxcWzfh6avkVwDD2VYdwIGqTkl+OGFISgypqzfu7dOe4QNLL2aqcWBmI3PMtLIK233lw==
   dependencies:
-    playwright-core "1.58.2"
+    playwright-core "1.59.1"
   optionalDependencies:
     fsevents "2.3.2"
 

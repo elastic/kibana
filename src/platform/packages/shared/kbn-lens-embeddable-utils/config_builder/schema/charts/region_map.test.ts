@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { RegionMapState } from './region_map';
 import { regionMapStateSchema } from './region_map';
@@ -22,9 +23,9 @@ interface RegionMapTermsRegionBaseConfig {
 describe('Region Map Schema', () => {
   const baseRegionMapConfig: Omit<RegionMapWithoutDefaultsConfig, 'metric' | 'region'> = {
     type: 'region_map',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   };
 
@@ -180,12 +181,11 @@ describe('Region Map Schema', () => {
     it('throw when using term buckets operation in an esql configuration', () => {
       const input: RegionMapWithoutDefaultsConfig = {
         type: 'region_map',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'count',
         },
         region: {
@@ -228,16 +228,14 @@ describe('Region Map Schema', () => {
         type: 'region_map',
         title: 'Region map',
         description: 'Top 10 countries by average bytes',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'avg_bytes',
         },
         region: {
-          operation: 'value',
           column: 'location',
           ems: {
             boundaries: 'world_countries',

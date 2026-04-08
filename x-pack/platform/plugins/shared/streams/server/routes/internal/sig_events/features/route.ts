@@ -22,6 +22,8 @@ import {
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
 
+export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
+
 const dateFromString = z.string().transform((input) => new Date(input));
 
 export const upsertFeatureRoute = createServerRoute({
@@ -262,8 +264,6 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
-export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
-
 export const featuresStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
@@ -295,7 +295,7 @@ export const featuresStatusRoute = createServerRoute({
     const { name } = params.path;
     await streamsClient.ensureStream(name);
 
-    return await taskClient.getStatus<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+    return taskClient.getStatus<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
       getFeaturesIdentificationTaskId(name)
     );
   },
