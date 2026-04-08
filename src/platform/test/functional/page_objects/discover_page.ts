@@ -1078,9 +1078,31 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async getCascadeLayoutRowIds() {
-    const rootRows = await this.find.allByCssSelector('[data-row-type="root"]');
-    return await Promise.all(rootRows.map(async (row) => (await row.getAttribute('id')) ?? ''));
+  public async getCascadeLayoutVisibleRowIds() {
+    const container = await this.testSubjects.find('dataCascadeScrollContainer');
+    const ids = await this.browser.execute(
+      `
+      const container = arguments[0];
+      const containerRect = container.getBoundingClientRect();
+      const rows = container.querySelectorAll('[data-row-type="root"]');
+      const visibleIds = [];
+      for (let i = 0; i < rows.length; i++) {
+        const rowRect = rows[i].getBoundingClientRect();
+        if (rowRect.top >= containerRect.bottom) break;
+        if (rowRect.bottom > containerRect.top) {
+          visibleIds.push(rows[i].id || '');
+        }
+      }
+      return visibleIds;
+      `,
+      container._webElement
+    );
+
+    if (!Array.isArray(ids)) {
+      throw new Error(`Expected cascade row ids to be an array but got ${typeof ids}`);
+    }
+
+    return ids as string[];
   }
 
   public async isCascadeLayoutRowExpanded(rowId: string) {

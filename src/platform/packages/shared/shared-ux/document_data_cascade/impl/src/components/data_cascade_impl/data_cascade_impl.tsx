@@ -165,6 +165,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     initialPersistedAnchors,
   });
 
+  const isVirtualizerStable = virtualizerInstance.current.isStable;
+
   // Calculate activeStickyIndex directly from the virtualizer's current range.
   // This ensures the value is always current and never stale from intermediate memoization.
   const activeStickyIndex = calculateActiveStickyIndex(
@@ -210,14 +212,16 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const cascadeTreeGridRenderer = useCallback(
     (containerSize: EuiAutoSize) => {
+      const isLoading =
+        containerSize.height === 0 || containerSize.width === 0 || !isVirtualizerStable;
+
       return (
         <React.Fragment>
           <div
             css={css([
               styles.cascadeLoadingContainer,
               {
-                visibility:
-                  containerSize.height === 0 || containerSize.width === 0 ? 'visible' : 'hidden',
+                visibility: isLoading ? 'visible' : 'hidden',
               },
             ])}
           >
@@ -228,8 +232,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             css={css([
               styles.cascadeTreeGridBlock,
               {
-                visibility:
-                  containerSize.height === 0 || containerSize.width === 0 ? 'hidden' : 'visible',
+                visibility: isLoading ? 'hidden' : 'visible',
               },
             ])}
             style={containerSize}
@@ -279,6 +282,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
       rows,
       virtualCascadeRowRenderer,
       activeStickyIndex,
+      isVirtualizerStable,
     ]
   );
 
