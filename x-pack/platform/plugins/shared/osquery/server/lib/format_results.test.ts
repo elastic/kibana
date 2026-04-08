@@ -103,17 +103,14 @@ describe('format_results', () => {
   });
 
   describe('createCsvFormatter', () => {
-    it('writes metadata as comment lines', () => {
+    it('returns null from opening (data comes first for spreadsheet compat)', () => {
       const formatter = createCsvFormatter();
-      const opening = formatter.opening(metadata);
-      expect(opening).toContain('# Action ID: test-action-123');
-      expect(opening).toContain('# Query: SELECT pid, name FROM processes');
-      expect(opening).toContain('# Exported By: analyst@elastic.co');
-      expect(opening).toContain('# Total Results: 42');
+      expect(formatter.opening(metadata)).toBeNull();
     });
 
     it('writes header row on first data row', () => {
       const formatter = createCsvFormatter();
+      formatter.opening(metadata);
       const row = formatter.row(record1, true);
       const lines = row.split('\n').filter(Boolean);
       expect(lines[0]).toBe('osquery.pid,osquery.name,agent.name');
@@ -122,9 +119,25 @@ describe('format_results', () => {
 
     it('writes data without header on subsequent rows', () => {
       const formatter = createCsvFormatter();
+      formatter.opening(metadata);
       formatter.row(record1, true); // sets columns
       const row = formatter.row(record2, false);
       expect(row).toBe('5678,elastic-agent,host-2\n');
+    });
+
+    it('writes metadata as key-value rows in closing block after empty separator', () => {
+      const formatter = createCsvFormatter();
+      formatter.opening(metadata);
+      const closing = formatter.closing();
+      expect(closing).not.toBeNull();
+      const lines = closing!.split('\n');
+      // First line is empty (separator)
+      expect(lines[0]).toBe('');
+      expect(lines[1]).toBe('_export.action_id,test-action-123');
+      expect(lines[2]).toBe('_export.query,SELECT pid name FROM processes');
+      expect(lines[3]).toBe('_export.timestamp,2024-01-01T00:00:00.000Z');
+      expect(lines[4]).toBe('_export.exported_by,analyst@elastic.co');
+      expect(lines[5]).toBe('_export.total_results,42');
     });
 
     it('escapes fields with commas', () => {

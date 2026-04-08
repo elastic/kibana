@@ -13,6 +13,11 @@ import { API_VERSIONS } from '../../common/constants';
 
 export type ExportFormat = 'ndjson' | 'json' | 'csv';
 
+export interface ExportFiltersParam {
+  kuery?: string;
+  esFilters?: string;
+}
+
 interface UseExportResultsOptions {
   actionId: string;
   isLive: boolean;
@@ -30,7 +35,7 @@ export const useExportResults = ({
   const [isExporting, setIsExporting] = useState(false);
 
   const exportResults = useCallback(
-    async (format: ExportFormat) => {
+    async (format: ExportFormat, filters?: ExportFiltersParam) => {
       setIsExporting(true);
       let loadingToastId: string | undefined;
 
@@ -50,10 +55,16 @@ export const useExportResults = ({
           }),
         }).id;
 
+        const body =
+          filters?.kuery || filters?.esFilters
+            ? { kuery: filters.kuery, esFilters: filters.esFilters }
+            : undefined;
+
         const response = await http.fetch(path, {
           method: 'POST',
           version: API_VERSIONS.public.v1,
           query: { format },
+          body: body ? JSON.stringify(body) : undefined,
           asResponse: true,
           rawResponse: true,
         });

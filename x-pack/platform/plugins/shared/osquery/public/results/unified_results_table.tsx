@@ -49,6 +49,8 @@ import {
   PaginationLimitToastContent,
   euiProgressCss,
 } from './results_table_shared';
+import { ExportResultsButton } from './export_results_button';
+import { useExportFiltersContext } from './export_filters_context';
 
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
@@ -236,6 +238,16 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     scheduleId,
     executionCount,
   });
+
+  // Publish active filters to context so the kebab menu can access them for export
+  const exportFiltersCtx = useExportFiltersContext();
+  useEffect(() => {
+    exportFiltersCtx?.setFilters(actionId, {
+      kuery: userKuery,
+      activeFilters,
+      filteredTotal: allResultsData?.total,
+    });
+  }, [exportFiltersCtx, actionId, userKuery, activeFilters, allResultsData?.total]);
 
   // Register missing columns as runtime fields on the data view so that
   // UnifiedDataTable can resolve their field type tokens (icons in column headers).
@@ -537,6 +549,21 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     ]
   );
 
+  const exportButton = useMemo(
+    () => (
+      <ExportResultsButton
+        actionId={actionId}
+        isLive={!scheduleId}
+        scheduleId={scheduleId}
+        executionCount={executionCount}
+        kuery={userKuery}
+        activeFilters={activeFilters}
+        filteredTotal={allResultsData?.total}
+      />
+    ),
+    [actionId, scheduleId, executionCount, userKuery, activeFilters, allResultsData?.total]
+  );
+
   if (isLoading || isDataViewLoading) {
     return <EuiSkeletonText lines={5} />;
   }
@@ -624,6 +651,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   controlColumnIds={CONTROL_COLUMN_IDS}
                   onFilter={handleFilterForGrid}
                   gridStyleOverride={gridStyleOverride}
+                  externalAdditionalControls={exportButton}
                 />
               </CellActionsProvider>
             </div>

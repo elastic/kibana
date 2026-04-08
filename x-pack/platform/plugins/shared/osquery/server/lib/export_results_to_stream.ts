@@ -17,6 +17,34 @@ import type { ResultFormatter, ExportMetadata } from './format_results';
 const EXPORT_PAGE_SIZE = 100;
 const MAX_EXPORT_RESULTS = 500_000;
 
+/**
+ * Deduplicates osquery multi-field sub-fields (.text, .number) from a flattened record.
+ * ES returns both `osquery.pid` (text) and `osquery.pid.number` (long) for the same value.
+ * For exports, we keep the `.number` variant (typed) when it exists and drop `.text`,
+ * matching the deduplication logic in UnifiedResultsTable.
+ */
+function deduplicateFields(record: Record<string, unknown>): Record<string, unknown> {
+  const keys = Object.keys(record);
+  const result: Record<string, unknown> = {};
+
+  for (const key of keys) {
+    // Skip .text sub-fields — the parent field has the same value
+    if (key.endsWith('.text')) {
+      const parent = key.slice(0, -5);
+      if (parent in record) continue;
+    }
+
+    // Skip parent osquery.* fields when a .number sub-field exists (prefer typed value)
+    if (key.startsWith('osquery.') && !key.endsWith('.number') && !key.endsWith('.text')) {
+      if (`${key}.number` in record) continue;
+    }
+
+    result[key] = record[key];
+  }
+
+  return result;
+}
+
 export interface ExportResultsToStreamOptions {
   esClient: ElasticsearchClient;
   index: string;
@@ -113,7 +141,7 @@ export async function exportResultsToStream({
         // Process first page
         for (const hit of firstPage.hits.hits) {
           if (abortController.signal.aborted) break;
-          const flattened = flattenOsqueryHit(hit);
+          const flattened = deduplicateFields(flattenOsqueryHit(hit));
           stream.write(formatter.row(flattened, isFirstRow));
           isFirstRow = false;
         }

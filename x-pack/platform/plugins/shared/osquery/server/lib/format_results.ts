@@ -81,22 +81,18 @@ function escapeCsvField(value: unknown): string {
 
 export function createCsvFormatter(): ResultFormatter {
   let columns: string[] | null = null;
+  let storedMetadata: ExportMetadata | null = null;
 
   return {
     contentType: 'text/csv',
     fileExtension: 'csv',
     opening(metadata) {
-      const lines = [
-        `# Action ID: ${metadata.action_id}`,
-        metadata.query ? `# Query: ${metadata.query.replace(/\n/g, ' ')}` : null,
-        `# Exported: ${metadata.timestamp}`,
-        `# Exported By: ${metadata.exported_by}`,
-        metadata.total_results != null ? `# Total Results: ${metadata.total_results}` : null,
-      ]
-        .filter(Boolean)
-        .join('\n');
+      // Store metadata for the closing block — data comes first so row 1 is the
+      // header and spreadsheet auto-detection, filters, and CSV parsers work
+      // without manual range selection.
+      storedMetadata = metadata;
 
-      return lines + '\n';
+      return null;
     },
     row(record, isFirst) {
       if (isFirst || !columns) {
@@ -110,7 +106,21 @@ export function createCsvFormatter(): ResultFormatter {
       return columns.map((col) => escapeCsvField(record[col])).join(',') + '\n';
     },
     closing() {
-      return null;
+      if (!storedMetadata) return null;
+
+      const rows = [
+        ['_export.action_id', storedMetadata.action_id],
+        ...(storedMetadata.query
+          ? [['_export.query', storedMetadata.query.replace(/\n/g, ' ')]]
+          : []),
+        ['_export.timestamp', storedMetadata.timestamp],
+        ['_export.exported_by', storedMetadata.exported_by],
+        ...(storedMetadata.total_results != null
+          ? [['_export.total_results', String(storedMetadata.total_results)]]
+          : []),
+      ];
+
+      return '\n' + rows.map((r) => r.map(escapeCsvField).join(',')).join('\n') + '\n';
     },
   };
 }
