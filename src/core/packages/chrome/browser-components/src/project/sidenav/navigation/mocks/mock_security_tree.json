@@ -1212,6 +1212,40 @@
           ]
         },
         {
+          "id": "node-model-management",
+          "path": "stack_management.node-model-management",
+          "title": "Model Management",
+          "children": [
+            {
+              "id": "management:elastic_inference_service",
+              "href": "/jom/app/management/modelManagement/elastic_inference_service",
+              "path": "stack_management.node-model-management.management:elastic_inference_service",
+              "title": "Elastic Inference",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:inference_endpoints",
+              "href": "/jom/app/management/modelManagement/inference_endpoints",
+              "path": "stack_management.node-model-management.management:inference_endpoints",
+              "title": "External Inference",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:model_settings",
+              "href": "/jom/app/management/modelManagement/model_settings",
+              "path": "stack_management.node-model-management.management:model_settings",
+              "title": "Feature Settings",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
           "title": "AI",
           "id": "node-3",
           "path": "stack_management.node-3",

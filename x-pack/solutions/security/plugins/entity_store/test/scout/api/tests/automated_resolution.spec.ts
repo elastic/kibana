@@ -8,14 +8,17 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { hashEuid } from '../../../../common/domain/euid';
 import {
+  clearEntityStoreIndices,
   seedUserEntity,
   waitForResolution,
   assertNotResolved,
@@ -24,12 +27,17 @@ import {
 
 apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
 
     await kbnClient.uiSettings.update({
@@ -41,18 +49,21 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       ignore_unavailable: true,
     });
 
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect([200, 201]).toContain(installResponse.statusCode);
 
-    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
+    const initResponse = await apiClient.post(
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+      {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: {},
+      }
+    );
     expect([200, 201]).toContain(initResponse.statusCode);
   });
 
@@ -66,13 +77,14 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
     });
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(
@@ -85,11 +97,11 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
       await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entraEntity, oktaEntity);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${oktaEntity}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${oktaEntity}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -117,12 +129,12 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
       await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, oktaEntity, adEntity);
       await waitForResolution(esClient, entraEntity, adEntity);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -145,11 +157,11 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: entityB, namespace: 'github', email });
       await seedUserEntity(esClient, { entityId: entityA, namespace: 'slack', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entityB, entityA);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityA}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityA}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -171,7 +183,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: aliasEntity, namespace: 'entra_id', email });
 
       // Manually link first
-      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: targetEntity, entity_ids: [aliasEntity] },
@@ -181,11 +193,11 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       // Seed 3rd entity with the same email
       await seedUserEntity(esClient, { entityId: newEntity, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, newEntity, targetEntity);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${targetEntity}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetEntity}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -217,7 +229,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
         email: emailA,
       });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entityA2, entityA1);
 
       // Second batch — email B (naturally gets a later timestamp since time has passed)
@@ -228,12 +240,12 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
         email: emailB,
       });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entityB2, entityB1);
 
       // Verify both groups exist independently
       const groupA = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityA1}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityA1}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
       expect(groupA.statusCode).toBe(200);
@@ -241,7 +253,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       expect(groupA.body.target.entity.id).toBe(entityA1);
 
       const groupB = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityB1}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityB1}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
       expect(groupB.statusCode).toBe(200);
@@ -276,7 +288,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
         email: sharedEmail,
       });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
 
       // B+A should be resolved (AD wins as target)
       await waitForResolution(esClient, singleA, singleB);
@@ -286,7 +298,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
 
       // Verify group: only singleA and singleB, not multi-value entity
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${singleB}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${singleB}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
       expect(groupResponse.statusCode).toBe(200);
@@ -313,21 +325,21 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: e3, namespace: 'slack', email });
 
       // Pre-link into two separate targets (creating ambiguity)
-      const link1 = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const link1 = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: t1, entity_ids: [e1] },
       });
       expect(link1.statusCode).toBe(200);
 
-      const link2 = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const link2 = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: t2, entity_ids: [e2] },
       });
       expect(link2.statusCode).toBe(200);
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
 
       // E3 should stay unresolved because the bucket is ambiguous (2 existing targets)
       await assertNotResolved(esClient, e3);
@@ -346,7 +358,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: entityB, namespace: 'okta', email });
 
       // Manually link A → B (B is target)
-      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: entityB, entity_ids: [entityA] },
@@ -356,7 +368,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       // Seed C (unresolved, same email)
       await seedUserEntity(esClient, { entityId: entityC, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
 
       // C should resolve to B (existing target in the group)
       await waitForResolution(esClient, entityC, entityB);
@@ -365,7 +377,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await waitForResolution(esClient, entityA, entityB);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityB}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityB}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -375,6 +387,60 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
 
       const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
       expect(aliasIds).toStrictEqual(expect.arrayContaining([entityA, entityC]));
+    }
+  );
+
+  apiTest(
+    'Manually unlinked entity not re-resolved after new activity updates timestamp',
+    async ({ apiClient, esClient }) => {
+      const email = 'test9-unlink@co.com';
+      const entityA = 'test9-a';
+      const entityB = 'test9-b';
+
+      // Seed entities with current timestamps (default) so they pass
+      // any watermark advanced by previous tests
+      await seedUserEntity(esClient, {
+        entityId: entityA,
+        namespace: 'entra_id',
+        email,
+      });
+      await seedUserEntity(esClient, {
+        entityId: entityB,
+        namespace: 'okta',
+        email,
+      });
+
+      // Auto-resolve: maintainer links A → B (okta wins as target)
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entityA, entityB);
+
+      // Manual unlink: analyst removes A from B's group
+      const unlinkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entity_ids: [entityA] },
+      });
+      expect(unlinkResponse.statusCode).toBe(200);
+      expect(unlinkResponse.body.unlinked).toContain(entityA);
+
+      // Simulate new activity: update A's last_seen to a future timestamp.
+      // With the first_seen watermark fix, this should NOT cause re-entry
+      // because first_seen is immutable and stays behind the watermark.
+      const futureTimestamp = new Date(Date.now() + 3600_000).toISOString();
+      await esClient.update({
+        index: LATEST_INDEX,
+        id: hashEuid(entityA),
+        refresh: 'wait_for',
+        doc: {
+          entity: { lifecycle: { last_seen: futureTimestamp } },
+        },
+      });
+
+      // Run maintainer again — A should NOT be re-linked
+      await triggerMaintainerRun(apiClient, internalHeaders);
+
+      // A should stay unresolved (first_seen is behind watermark, so not collected)
+      await assertNotResolved(esClient, entityA);
     }
   );
 });

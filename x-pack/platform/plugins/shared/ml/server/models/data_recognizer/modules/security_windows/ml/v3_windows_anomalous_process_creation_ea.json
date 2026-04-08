@@ -21,7 +21,8 @@
       "process.name",
       "user.name",
       "user.id",
-      "event.module"
+      "event.module",
+      "process.parent.name"
     ]
   },
   "allow_lazy_open": true,

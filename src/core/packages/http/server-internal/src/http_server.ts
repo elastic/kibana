@@ -17,6 +17,7 @@ import type { Duration } from 'moment';
 import type { Observable, Subscription } from 'rxjs';
 import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
+import { addSpanLabels, addTransactionLabels } from '@kbn/apm-utils';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -76,7 +77,7 @@ function startEluMeasurement<T>(
   path: string,
   log: Logger,
   eluMonitorOptions: IHttpEluMonitorConfig | undefined
-): (httpSpan?: OTelSpan) => void {
+): () => void {
   if (!eluMonitorOptions?.enabled) {
     return identity;
   }
@@ -84,20 +85,22 @@ function startEluMeasurement<T>(
   const startUtilization = performance.eventLoopUtilization();
   const start = performance.now();
 
-  return function stopEluMeasurement(httpSpan?: OTelSpan) {
+  return function stopEluMeasurement() {
     const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
-    apm.currentTransaction?.addLabels(
+    addTransactionLabels(
       {
         event_loop_utilization: utilization,
         event_loop_active: active,
       },
-      false
+      {
+        isString: false,
+        otelAttributes: {
+          'nodejs.eventloop.utilization': utilization,
+          'nodejs.eventloop.active': active,
+        },
+      }
     );
-    httpSpan?.setAttributes({
-      'nodejs.eventloop.utilization': utilization,
-      'nodejs.eventloop.active': active,
-    });
 
     const duration = performance.now() - start;
 
@@ -601,11 +604,11 @@ export class HttpServer {
       }
 
       if (isBoom(request.response)) {
-        stop(app.httpSpan);
+        stop();
         app.otelSubSpan?.end();
       } else {
         request.response.events.once('finish', () => {
-          stop(app.httpSpan);
+          stop();
           app.otelSubSpan?.end();
         });
       }
@@ -635,18 +638,17 @@ export class HttpServer {
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
         const labels = executionContext.getAsLabels();
-        apm.addLabels(labels);
         const { name, id, page } = labels;
-        trace.getActiveSpan()?.setAttributes(
-          omitBy(
+        addSpanLabels(labels, {
+          otelAttributes: omitBy(
             {
               'kibana.execution_context.name': name,
               'kibana.execution_context.id': id,
               'kibana.execution_context.page': page,
             },
             isNil
-          ) as Record<string, string>
-        );
+          ) as Record<string, string>,
+        });
       }
 
       executionContext?.setRequestId(requestId);

@@ -43,10 +43,14 @@ export interface ExecuteToolAction {
   tool_results: ToolCallResult[];
 }
 
-export interface ToolPromptAction {
-  type: AgentActionType.ToolPrompt;
+export interface ToolPromptEntry {
   tool_call_id: string;
   prompt: PromptRequest;
+}
+
+export interface ToolPromptAction {
+  type: AgentActionType.ToolPrompt;
+  prompts: ToolPromptEntry[];
 }
 
 export interface HandoverAction {
@@ -136,11 +140,10 @@ export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAct
   };
 }
 
-export function toolPromptAction(toolCallId: string, prompt: PromptRequest): ToolPromptAction {
+export function toolPromptAction(prompts: ToolPromptEntry[]): ToolPromptAction {
   return {
     type: AgentActionType.ToolPrompt,
-    tool_call_id: toolCallId,
-    prompt,
+    prompts,
   };
 }
 

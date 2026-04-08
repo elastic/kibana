@@ -85,13 +85,11 @@ export interface ICommandMethods<TContext = ICommandContext> {
 
 export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
-  subquerySupport?: boolean; // Optional property to indicate if the command supports subqueries (ONLY FROM). This is temporary and we will remove it when subqueries in FROM move to Technical Preview.
   viewsSupport?: boolean; // Optional property to indicate if the command suggests/validates ES|QL views (ONLY FROM). This is temporary and we will remove it when views in FROM move to Preview.
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
   hidden?: boolean; // Optional property to indicate if the command should be hidden in UI
-  limitByHidden?: boolean; // Temporary flag to hide LIMIT BY autocomplete without hiding LIMIT itself
   types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability

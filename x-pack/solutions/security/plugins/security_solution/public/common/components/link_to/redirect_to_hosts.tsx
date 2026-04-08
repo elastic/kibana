@@ -5,20 +5,40 @@
  * 2.0.
  */
 
-import type { HostsTableType } from '../../../explore/hosts/store/model';
+import { HostsTableType } from '../../../explore/hosts/store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
+import { mergeEntityResolutionIntoUrlState } from './entity_resolution_query_params';
 
-export const getHostsUrl = (search?: string) => `${HOSTS_PATH}${appendSearch(search)}`;
+export const getHostsUrl = (urlStateQuery?: string) =>
+  `${HOSTS_PATH}${appendSearch(urlStateQuery)}`;
 
-export const getTabsOnHostsUrl = (tabName: HostsTableType, search?: string) =>
-  `/${tabName}${appendSearch(search)}`;
+export const getTabsOnHostsUrl = (tabName: HostsTableType, urlStateQuery?: string) =>
+  `/${tabName}${appendSearch(urlStateQuery)}`;
 
-export const getHostDetailsUrl = (detailName: string, search?: string) =>
-  `/name/${encodeURIComponent(detailName)}${appendSearch(search)}`;
+const DEFAULT_HOST_TAB = HostsTableType.events;
 
+export const getHostDetailsUrl = (
+  detailName: string,
+  urlStateQuery?: string,
+  entityId?: string,
+  identityFields?: Record<string, string>
+) => getTabsOnHostDetailsUrl(detailName, DEFAULT_HOST_TAB, urlStateQuery, entityId, identityFields);
+
+/** Parameter order matches getTabsOnUsersDetailsUrl (urlStateQuery, entityId, identityFields). */
 export const getTabsOnHostDetailsUrl = (
   detailName: string,
   tabName: HostsTableType,
-  search?: string
-) => `/name/${encodeURIComponent(detailName)}/${tabName}${appendSearch(search)}`;
+  urlStateQuery?: string,
+  entityId?: string,
+  identityFields?: Record<string, string>
+) => {
+  const base = `/name/${encodeURIComponent(detailName)}/${tabName}`;
+  const query = mergeEntityResolutionIntoUrlState(urlStateQuery, {
+    entityId,
+    identityFields,
+    displayName: detailName,
+    entityType: 'host',
+  });
+  return query === '' ? base : `${base}${query}`;
+};

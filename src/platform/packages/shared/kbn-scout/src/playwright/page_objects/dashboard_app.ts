@@ -923,6 +923,7 @@ export class DashboardApp {
   /** Clicks the "Save and return" button in the legacy Visualize editor. */
   async clickVisualizeSaveAndReturn() {
     await this.visualizeSaveAndReturnButton.click();
+    await expect(this.visualizeSaveAndReturnButton).toBeHidden();
   }
 
   /** Navigates to a dashboard by clicking its title link on the listing page. */

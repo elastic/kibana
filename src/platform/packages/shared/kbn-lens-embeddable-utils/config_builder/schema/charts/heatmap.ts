@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { colorByValueSchema } from '../color';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
@@ -21,16 +21,19 @@ import {
   axisTitleSchemaProps,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendSizeSchema, mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
-import { positionSchema } from '../alignments';
+import {
+  baseLegendVisibilitySchema,
+  legendSizeSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+  xScaleSchema,
+} from './shared';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Show the legend' } })),
+  visibility: baseLegendVisibilitySchema,
   size: legendSizeSchema,
-  position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
 
 const labelsSchemaProps = {
@@ -64,7 +67,7 @@ const heatmapSharedStateSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axis: schema.maybe(
+  axes: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
@@ -73,6 +76,7 @@ const heatmapSharedStateSchema = {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(schema.object(labelsSchemaProps)),
               sort: schema.maybe(heatmapSortPredicateSchema),
+              scale: xScaleSchema,
             },
             {
               meta: {
@@ -147,7 +151,7 @@ export const heatmapStateSchemaNoESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateSchemaProps,
     ...dslOnlyPanelInfoSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
       heatmapStateMetricOptionsSchemaProps
     ),
@@ -159,7 +163,7 @@ export const heatmapStateSchemaESQL = schema.object(
   {
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }

@@ -8,7 +8,12 @@
 import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
-import { applyFieldEvaluations, getFieldValue, getSourceMatchSpec } from './field_evaluations';
+import {
+  applyFieldEvaluations,
+  getFieldEvaluationsFromDefinition,
+  getFieldValue,
+  getSourceMatchSpec,
+} from './field_evaluations';
 
 describe('getFieldValue', () => {
   it('should return string value when doc has flat field', () => {
@@ -208,6 +213,97 @@ describe('applyFieldEvaluations', () => {
       'entity.namespace': 'unknown',
     });
   });
+
+  const nonIdpLocalDoc = {
+    user: { name: 'alice' },
+    host: { id: 'host-1' },
+    event: { module: 'winlogbeat', kind: 'event', category: 'process' },
+  };
+
+  it('should set entity.namespace to local from condition whenClause when non-IDP document matches', () => {
+    expect(applyFieldEvaluations(nonIdpLocalDoc, userEvaluations)).toEqual({
+      'entity.namespace': USER_ENTITY_NAMESPACE.Local,
+    });
+  });
+
+  it('should not override mapped namespace when IDP post-agg filter matches', () => {
+    const idpLikeDoc = {
+      user: { name: 'alice' },
+      host: { id: 'host-1' },
+      event: { module: 'okta', kind: 'asset' },
+    };
+    expect(applyFieldEvaluations(idpLikeDoc, userEvaluations)).toEqual({
+      'entity.namespace': 'okta',
+    });
+  });
+});
+
+describe('shared entity.source field evaluation', () => {
+  const hostSourceEvaluation = getEntityDefinitionWithoutId('host').fieldEvaluations ?? [];
+
+  it('should prefer event.module over event.dataset and data_stream.dataset', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          event: { module: 'aws', dataset: 'cloudtrail' },
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'aws',
+    });
+  });
+
+  it('should fall back from event.dataset to data_stream.dataset and then null', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          event: { dataset: 'cloudtrail' },
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'cloudtrail',
+    });
+
+    expect(
+      applyFieldEvaluations(
+        {
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'logs-endpoint.alerts',
+    });
+
+    expect(applyFieldEvaluations({}, hostSourceEvaluation)).toEqual({
+      'entity.source': null,
+    });
+  });
+});
+
+describe('getFieldEvaluationsFromDefinition', () => {
+  it('should include shared field evaluations for single-field identities', () => {
+    const serviceDefinition = getEntityDefinitionWithoutId('service');
+
+    expect(getFieldEvaluationsFromDefinition(serviceDefinition)).toEqual(
+      serviceDefinition.fieldEvaluations
+    );
+  });
+
+  it('should include both shared and identity field evaluations for calculated identities', () => {
+    const userDefinition = getEntityDefinitionWithoutId('user');
+
+    expect(getFieldEvaluationsFromDefinition(userDefinition)).toHaveLength(
+      (userDefinition.fieldEvaluations?.length ?? 0) +
+        ('fieldEvaluations' in userDefinition.identityField
+          ? userDefinition.identityField.fieldEvaluations?.length ?? 0
+          : 0)
+    );
+  });
 });
 
 describe('getSourceMatchSpec', () => {
@@ -281,5 +377,19 @@ describe('getSourceMatchSpec', () => {
         userEval
       )
     ).toEqual({ type: 'values', values: ['azure', 'entityanalytics_entra_id'] });
+  });
+
+  it('should return condition spec when a condition whenClause wins', () => {
+    const nonIdpLocalDoc = {
+      user: { name: 'alice' },
+      host: { id: 'host-1' },
+      event: { module: 'winlogbeat', kind: 'event', category: 'process' },
+    };
+    expect(getSourceMatchSpec(nonIdpLocalDoc, userEval)).toEqual({
+      type: 'condition',
+      condition: expect.objectContaining({
+        and: expect.any(Array),
+      }),
+    });
   });
 });

@@ -7,15 +7,17 @@
 
 import { useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
+  getResolutionGroupTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
 } from '../shared/components/left_panel/left_panel_header';
+import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
@@ -48,31 +50,58 @@ export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTab
 
 export const useTabs = ({
   isRiskScoreExist,
-  name,
+  hostName,
+  entityId,
   scopeId,
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
+  entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   return useMemo(() => {
-    const isRiskScoreTabAvailable = isRiskScoreExist && name;
+    const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: name, entityType: EntityType.host, scopeId })]
+      ? [
+          getRiskInputTab({
+            entityName: hostName ?? '',
+            entityType: EntityType.host,
+            scopeId,
+            entityId: entityStoreEntityId,
+          }),
+        ]
       : [];
 
     // Determine if the Insights tab should be included
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
-        ? [getInsightsInputTab({ name, fieldName: EntityIdentifierFields.hostName, scopeId })]
+        ? [
+            getInsightsInputTab({
+              field: 'host.name',
+              value: hostName,
+              entityId,
+              scopeId,
+              entityType: EntityType.host,
+            }),
+          ]
         : [];
 
-    return [...riskScoreTab, ...insightsTab];
+    const graphViewTab = entityStoreEntityId
+      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
+      : [];
+
+    const resolutionTab = entityStoreEntityId
+      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.host })]
+      : [];
+
+    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
-    name,
+    hostName,
+    entityId,
     scopeId,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    entityStoreEntityId,
   ]);
 };

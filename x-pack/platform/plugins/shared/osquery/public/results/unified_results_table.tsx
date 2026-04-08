@@ -67,7 +67,9 @@ const resultsTableContainerCss = {
 
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
-  minHeight: 200,
+  '.euiDataGrid__controls': {
+    paddingLeft: '8px',
+  },
 };
 
 const gridStyleOverride = {
@@ -325,6 +327,14 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     []
   );
 
+  // Remount the grid on fullscreen exit to reset internal EuiDataGrid column widths that persist from the wider viewport.
+  const [gridKey, setGridKey] = useState(0);
+  const handleFullScreenChange = useCallback((isFullScreen: boolean) => {
+    if (!isFullScreen) {
+      setGridKey((k) => k + 1);
+    }
+  }, []);
+
   // Auto-compute visible columns from result data when user hasn't set them manually.
   // Deduplicates osquery.* fields by their short name (second segment) — e.g.
   // osquery.description and osquery.description.text both map to "description",
@@ -579,6 +589,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                 getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
               >
                 <UnifiedDataTable
+                  key={gridKey}
                   ariaLabelledBy="osquery-results"
                   dataView={dataView}
                   columns={visibleColumns}
@@ -595,6 +606,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   settings={mergedGridSettings}
                   showTimeCol={false}
                   showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+                  onFullScreenChange={handleFullScreenChange}
                   canDragAndDropColumns
                   isSortEnabled
                   isPaginationEnabled={false}

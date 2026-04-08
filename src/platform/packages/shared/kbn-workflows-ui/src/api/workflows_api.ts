@@ -34,6 +34,7 @@ import type {
   BulkCreateWorkflowsParams,
   BulkCreateWorkflowsResponse,
   ExportWorkflowsParams,
+  ExportWorkflowsResponse,
   GetAggsParams,
   GetExecutionLogsParams,
   GetExecutionParams,
@@ -144,7 +145,7 @@ export class WorkflowApi {
     });
   }
 
-  async exportWorkflows({ ids }: ExportWorkflowsParams): Promise<Blob> {
+  async exportWorkflows({ ids }: ExportWorkflowsParams): Promise<ExportWorkflowsResponse> {
     return this.http.post(`${BASE}/export`, {
       body: JSON.stringify({ ids }),
       version: API_VERSION,
