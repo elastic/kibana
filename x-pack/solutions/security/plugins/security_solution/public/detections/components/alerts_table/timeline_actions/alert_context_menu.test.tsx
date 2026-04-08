@@ -353,6 +353,7 @@ describe('Alert table context menu', () => {
     });
 
     test('it shows the document workflow panel when run workflow action is clicked', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       mockUseRunDocumentWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: mockDocumentWorkflowMenuItem,
         runDocumentWorkflowPanel: mockDocumentWorkflowPanel,
@@ -364,8 +365,8 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
-      await userEvent.click(wrapper.getByTestId(runDocumentWorkflowActionButton));
+      await user.click(wrapper.getByTestId(actionMenuButton));
+      await user.click(wrapper.getByTestId(runDocumentWorkflowActionButton));
 
       await waitFor(() => {
         expect(wrapper.getByTestId(documentWorkflowPanelContent)).toBeInTheDocument();
