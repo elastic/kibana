@@ -39,7 +39,7 @@ function createFilterExpression(
     const operator = operation === 'is_not_null' ? 'is not null' : 'is null';
     return { expression: `${fieldName} ${operator}` };
   }
-  // Handle multi-value arrays with MATCH operator
+  // Handle multi-value arrays with MV_CONTAINS or MATCH
   if (Array.isArray(value)) {
     const fieldName = sanitazeESQLInput(field);
     if (!fieldName) {
