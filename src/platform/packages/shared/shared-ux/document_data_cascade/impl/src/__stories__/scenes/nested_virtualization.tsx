@@ -23,7 +23,6 @@ import {
   EuiStat,
   EuiDataGrid,
   EuiPanel,
-  EuiSkeletonText,
   useEuiTheme,
   type HorizontalAlignment,
   type EuiDataGridColumn,
@@ -43,7 +42,6 @@ import {
   type LeafNode,
   type ChildVirtualizerController,
   useConnectedChildVirtualizer,
-  useChildVirtualizerActivation,
 } from '../../..';
 import type { MockGroupData } from '../../__fixtures__/types';
 
@@ -94,7 +92,6 @@ const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody(
     cellId,
     rowIndex,
     // The hook requires Row<G>[] but only uses rows.length for child virtualizers
-    // (enableStickyGroupHeader is always false). Leaf data satisfies this at runtime.
     rows: visibleRows as unknown as ChildVirtualizerRows,
     estimatedRowHeight: 34,
     overscan: 10,
@@ -181,11 +178,6 @@ const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody(
   );
 });
 
-/**
- * Leaf cell content that uses stagger gating via `useChildVirtualizerActivation`
- * to defer mounting expensive grid content until the controller's activation
- * loop reaches this row. Renders a skeleton placeholder when inactive.
- */
 const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
   data,
   cellId,
@@ -193,12 +185,6 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
   virtualizerController,
   columns,
 }: CascadeLeafCellContentProps) {
-  const isActive = useChildVirtualizerActivation({
-    controller: virtualizerController,
-    cellId,
-    rowIndex,
-  });
-
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
   const renderCellValue = useCallback<
@@ -225,14 +211,6 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
     ),
     [data, virtualizerController, cellId, rowIndex]
   );
-
-  if (!isActive) {
-    return (
-      <EuiPanel paddingSize="s">
-        <EuiSkeletonText lines={3} size="s" />
-      </EuiPanel>
-    );
-  }
 
   return (
     <EuiPanel paddingSize="none">
