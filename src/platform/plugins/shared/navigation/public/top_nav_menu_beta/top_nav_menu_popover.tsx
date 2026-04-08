@@ -81,7 +81,6 @@ export const TopNavMenuPopover = ({
         defaultMessage: 'App menu',
       })}
     >
-    >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
