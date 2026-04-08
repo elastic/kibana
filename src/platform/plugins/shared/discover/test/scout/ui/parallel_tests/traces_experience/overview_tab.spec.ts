@@ -146,8 +146,8 @@ spaceTest.describe(
         await spaceTest.step(
           'logs count reflects only this trace — not all logs in the index',
           async () => {
-            await expect(flyout.logs.totalDocuments).toBeVisible({ timeout: 30_000 });
-            await expect(flyout.logs.totalDocuments).toContainText('2');
+            await expect(flyout.logs.totalDocuments).toBeVisible();
+            await expect(flyout.logs.totalDocuments).toHaveText('2');
           }
         );
       }
