@@ -70,6 +70,8 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/search-inference-endpoints'
   - '@kbn/zod'
+  - '@kbn/inference-connectors'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod
