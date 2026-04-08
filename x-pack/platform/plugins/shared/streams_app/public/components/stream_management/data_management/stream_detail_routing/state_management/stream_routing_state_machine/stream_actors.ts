@@ -62,7 +62,7 @@ export function createForkStreamActor({
   forkSuccessNotifier,
   telemetryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
-  forkSuccessNotifier: (streamName: string) => void;
+  forkSuccessNotifier?: (streamName: string) => void;
   telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
@@ -85,7 +85,7 @@ export function createForkStreamActor({
       }
     );
 
-    forkSuccessNotifier(input.destination);
+    forkSuccessNotifier?.(input.destination);
     telemetryClient.trackChildStreamCreated({
       name: input.destination,
     });

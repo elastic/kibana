@@ -19,7 +19,7 @@ import type { RoutingSamplesContext } from './routing_samples_state_machine';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
 export interface StreamRoutingServiceDependencies {
-  forkSuccessNotifier: (streamName: string) => void;
+  forkSuccessNotifier?: (streamName: string) => void;
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
   timeState$: TimefilterHook['timeState$'];

@@ -37,8 +37,6 @@ export const ClassicStreamPartitioning = ({
 
   const { timeState$ } = useTimefilter();
 
-  const forkSuccessNotifier = () => {};
-
   return (
     <StreamRoutingContextProvider
       definition={definition}
@@ -47,7 +45,6 @@ export const ClassicStreamPartitioning = ({
       data={data}
       timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
-      forkSuccessNotifier={forkSuccessNotifier}
       telemetryClient={telemetryClient}
     >
       <ClassicStreamPartitioningImpl />
