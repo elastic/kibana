@@ -87,18 +87,13 @@ Debugging:
 Bundle Limits:
   --update-limits           Build in dist mode and update limits.yml (always full build)
   --validate-limits         Validate limits.yml against discovered plugins (no build)
-  --limits <path>           Override limits.yml path
+  --limits <path>           Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
 
 Profile Mode (one-time build with bundle analysis):
   --profile                 Full profiling with stats.json + RsDoctor report
   --profile-stats-only      Fast profiling with stats.json only (skips RsDoctor)
   --profile-focus <ids>     Comma-separated plugin IDs for focused stats.json with module detail
                             Note: --watch is ignored in profile mode
-
-Output Options:
-  --verbose                 Verbose output (includes debug messages)
-  --quiet                   Quiet output (errors only)
-  --help, -h                Show help message
 ```
 
 #### `--profile-focus` (focused profiling)
@@ -113,9 +108,10 @@ node scripts/build_rspack_bundles.js --profile --profile-focus=dashboard
 node scripts/build_rspack_bundles.js --profile-stats-only --profile-focus=dashboard,data,discover
 ```
 
-Chunks are matched by their `webpackChunkName` prefix (`plugin-<id>`). The focused stats include:
-- Chunks belonging to the specified plugins
-- All modules within those chunks
+Chunks are included if their name exactly matches `plugin-<id>`, or if they are shared chunks containing modules from the focused plugin's source directory. The focused stats include:
+- Chunks belonging to the specified plugins (exact name match)
+- Shared chunks containing modules originating from a focused plugin's directory
+- All modules within matched chunks (deduplicated)
 - Assets referenced by those chunks
 
 Without `--profile-focus`, stats are generated with minimal detail (no module info) to avoid the JS string length limit.
@@ -229,12 +225,18 @@ if (result.success) {
 | `createExternalPluginConfig` | Generate RSPack config for external plugins |
 | `getExternals` | Shared dependency externals mapping |
 | `discoverPlugins` | Scan directories for Kibana plugins |
+| `readLimits` | Read and parse limits.yml |
+| `validateLimitsForAllBundles` | Validate limits.yml structure against discovered plugins |
+| `updateBundleLimits` | Update limits.yml with current bundle sizes |
+| `DEFAULT_LIMITS_PATH` | Default path to limits.yml |
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
 | `KBN_USE_RSPACK=true` | Use RSPack optimizer in dev mode instead of webpack |
+| `KBN_HMR=false` | Disable HMR (RSPack only, alternative to `--no-hmr`) |
+| `KBN_HMR_PORT=5678` | Override the HMR SSE server port (RSPack only, default: 5678) |
 
 ## Migration from @kbn/optimizer
 

@@ -890,7 +890,7 @@ export async function createSingleCompileConfig(
                   ignoreMetrics: false,
                 })),
             ];
-            return [new BundleMetricsPlugin(metricsInfos, limitsPath)];
+            return [new BundleMetricsPlugin(metricsInfos)];
           })()
         : []),
 

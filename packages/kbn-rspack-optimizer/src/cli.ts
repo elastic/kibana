@@ -87,10 +87,20 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --validate-limits to have no value');
       }
 
+      const modes = [
+        validateLimits && '--validate-limits',
+        (profile || profileStatsOnly) && (profile ? '--profile' : '--profile-stats-only'),
+        updateLimits && '--update-limits',
+      ].filter(Boolean);
+
+      if (modes.length > 1) {
+        throw createFlagError(`${modes.join(' and ')} cannot be used together`);
+      }
+
       const limitsPath =
         typeof flags.limits === 'string' && flags.limits.length > 0
           ? Path.resolve(flags.limits)
-          : DEFAULT_LIMITS_PATH;
+          : options.defaultLimitsPath ?? DEFAULT_LIMITS_PATH;
 
       // --validate-limits: quick check, no build needed
       if (validateLimits) {
@@ -127,6 +137,10 @@ export function runRspackCli(options: CliOptions = {}): void {
       }
 
       const startTime = Date.now();
+
+      if (updateLimits && !dist) {
+        log.info('--update-limits implies --dist (full production build)');
+      }
 
       const effectiveDist = updateLimits || dist;
       const effectiveExamples = updateLimits ? false : examples;
@@ -245,8 +259,8 @@ export function runRspackCli(options: CliOptions = {}): void {
           # Validate limits.yml (CI check, no build)
           node scripts/build_rspack_bundles.js --validate-limits
 
-          # Update limits.yml from a full dist build
-          node scripts/build_rspack_bundles.js --dist --update-limits
+          # Update limits.yml (always runs a full dist build)
+          node scripts/build_rspack_bundles.js --update-limits
         `,
       },
     }
@@ -272,11 +286,23 @@ function runProfileWorker(
     log.info(`Starting RSPack profiler${statsOnly ? ' (stats only)' : ''}...`);
     log.write('');
 
-    // Forward args to worker, excluding --profile flags (worker handles them via env)
+    // Forward args to worker, stripping flags the worker doesn't understand
+    const stripFromWorker = new Set([
+      '--profile',
+      '--profile-stats-only',
+      '--update-limits',
+      '--validate-limits',
+      '--watch',
+      '-w',
+      '--no-hmr',
+      '--no-inspect-workers',
+    ]);
     const rawArgs = process.argv.slice(2);
-    const workerArgs = rawArgs.filter(
-      (arg) => arg !== '--profile' && arg !== '--profile-stats-only'
-    );
+    const workerArgs: string[] = [];
+    for (let i = 0; i < rawArgs.length; i++) {
+      if (stripFromWorker.has(rawArgs[i])) continue;
+      workerArgs.push(rawArgs[i]);
+    }
 
     let child: ChildProcess | undefined;
 

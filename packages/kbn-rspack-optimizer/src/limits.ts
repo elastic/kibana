@@ -66,7 +66,7 @@ export function validateLimitsForAllBundles(
 
         To automatically update the limits file locally run:
 
-          node scripts/build_rspack_bundles --dist --update-limits
+          node scripts/build_rspack_bundles --update-limits
 
         To validate your changes locally run:
 
@@ -88,7 +88,7 @@ export function validateLimitsForAllBundles(
 
         Please sort the keys alphabetically or, to automatically update the limits file locally run:
 
-          node scripts/build_rspack_bundles --dist --update-limits
+          node scripts/build_rspack_bundles --update-limits
 
         To validate your changes locally run:
 

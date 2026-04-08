@@ -53,7 +53,7 @@ run(
           // [rspack-transition] TODO: Once the legacy optimizer is removed,
           // delete the conditional and keep only the rspack command.
           const updateCommand = metric.limitConfigPath?.includes('kbn-rspack-optimizer')
-            ? `node scripts/build_rspack_bundles --dist --update-limits`
+            ? `node scripts/build_rspack_bundles --update-limits`
             : `node scripts/build_kibana_platform_plugins --focus ${metric.id} --update-limits`;
 
           overLimit.push(

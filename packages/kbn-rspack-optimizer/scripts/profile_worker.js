@@ -38,10 +38,10 @@ var repoRoot = Path.resolve(__dirname, '../../..');
 // Check if stats-only mode (skip RsDoctor)
 var statsOnly = process.env.RSPACK_PROFILE_STATS_ONLY === 'true';
 
-// Parse command line arguments (same as main CLI, minus --profile and --watch)
+// Parse command line arguments (same as main CLI, minus --profile and --profile-stats-only)
 var args = getopts(process.argv.slice(2), {
   boolean: ['dist', 'examples', 'test-plugins', 'no-cache', 'verbose', 'quiet'],
-  string: ['themes', 'output-root', 'profile-focus'],
+  string: ['themes', 'output-root', 'profile-focus', 'limits'],
   default: {
     dist: false,
     examples: false,
@@ -59,12 +59,21 @@ var log = new ToolingLog({
 });
 
 // Parse themes
+var VALID_THEMES = ['borealislight', 'borealisdark'];
 function parseThemes(themesArg) {
   if (!themesArg || themesArg === '*') {
-    return ['borealislight', 'borealisdark'];
+    return VALID_THEMES;
   }
-  return themesArg.split(',').map(function (s) {
+  var themes = themesArg.split(',').map(function (s) {
     return s.trim();
+  });
+  themes.forEach(function (theme) {
+    if (!VALID_THEMES.includes(theme)) {
+      log.warning('Unknown theme "' + theme + '", valid themes are: ' + VALID_THEMES.join(', '));
+    }
+  });
+  return themes.filter(function (t) {
+    return VALID_THEMES.includes(t);
   });
 }
 
@@ -122,6 +131,7 @@ async function main() {
   var profileFocus = args['profile-focus']
     ? args['profile-focus'].split(',').map(function (s) { return s.trim(); })
     : undefined;
+  var limitsPath = args.limits ? Path.resolve(args.limits) : undefined;
   var themes = parseThemes(args.themes);
   var bundlesDir = Path.join(outputRoot, 'target/public/bundles');
 
@@ -152,6 +162,7 @@ async function main() {
       profile: true,
       profileStatsOnly: statsOnly,
       profileFocus: profileFocus,
+      limitsPath: limitsPath,
     });
 
     var duration = ((Date.now() - startTime) / 1000).toFixed(2);

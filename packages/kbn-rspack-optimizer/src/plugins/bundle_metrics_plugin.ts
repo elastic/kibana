@@ -223,10 +223,7 @@ export function buildMetrics(
 export class BundleMetricsPlugin {
   private readonly chunkNameToInfo: Map<string, PluginMetricsInfo>;
 
-  constructor(
-    private readonly pluginInfos: PluginMetricsInfo[],
-    private readonly limitsPath: string
-  ) {
+  constructor(private readonly pluginInfos: PluginMetricsInfo[]) {
     this.chunkNameToInfo = new Map();
     for (const info of pluginInfos) {
       this.chunkNameToInfo.set(info.chunkName, info);
