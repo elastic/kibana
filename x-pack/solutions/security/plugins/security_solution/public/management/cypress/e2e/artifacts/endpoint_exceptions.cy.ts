@@ -49,36 +49,36 @@ describe(
           });
         };
 
-        it('should display Endpoint Exceptions in Administration page', () => {
+        it('should display Artifacts in Administration page', () => {
           loginWithReadAccess();
 
           cy.visit(APP_MANAGE_PATH);
-          cy.getByTestSubj('pageContainer').contains('Endpoint exceptions');
+          cy.getByTestSubj('pageContainer').contains('Artifacts');
         });
 
         it('should be able to navigate to Endpoint Exceptions from Administration page', () => {
           loginWithReadAccess();
           cy.visit(APP_MANAGE_PATH);
-          cy.getByTestSubj('pageContainer').contains('Endpoint exceptions').click();
+          cy.getByTestSubj('pageContainer').contains('Artifacts').click();
 
           cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
         });
 
-        it('should display Endpoint Exceptions in Manage side panel', () => {
+        it('should display Artifacts in Manage side panel', () => {
           loginWithReadAccess();
 
           cy.visit(APP_PATH);
 
-          essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
-          cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).should('exist');
+          essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ARTIFACTS);
+          cy.get(essSecurityHeaders.ARTIFACTS).should('exist');
         });
 
         it('should be able to navigate to Endpoint Exceptions from Manage side panel', () => {
           loginWithReadAccess();
           cy.visit(APP_PATH);
 
-          essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
-          cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).click();
+          essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ARTIFACTS);
+          cy.get(essSecurityHeaders.ARTIFACTS).click();
 
           cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
         });
@@ -87,17 +87,15 @@ describe(
       });
 
       describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
-        it('should display Endpoint Exceptions in Assets side panel ', () => {
+        it('should display Artifacts in Assets side panel ', () => {
           // testing with t3_analyst with WRITE access, as we don't support custom roles on serverless yet
           login(ROLE.t3_analyst);
 
           cy.visit(APP_PATH);
 
           serverlessSecurityHeaders.showMoreItems();
-          serverlessSecurityHeaders.openNavigationPanelFor(
-            serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
-          );
-          cy.get(serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS).should('exist');
+          serverlessSecurityHeaders.openNavigationPanelFor(serverlessSecurityHeaders.ARTIFACTS);
+          cy.get(serverlessSecurityHeaders.ARTIFACTS).should('exist');
         });
 
         // todo: add 'should NOT' test case when custom roles are available on serverless

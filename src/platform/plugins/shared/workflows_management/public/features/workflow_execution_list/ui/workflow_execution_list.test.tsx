@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 import { TestWrapper } from '../../../shared/test_utils';
 
-// Mock the WorkflowExecutionListItem to simplify testing
 jest.mock('./workflow_execution_list_item', () => ({
   WorkflowExecutionListItem: ({
     status,
@@ -37,7 +36,6 @@ jest.mock('./workflow_execution_list_item', () => ({
   ),
 }));
 
-// Mock the ExecutionListFilters to keep tests focused
 jest.mock('./workflow_execution_list_filters', () => ({
   ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
 }));
@@ -95,6 +93,9 @@ describe('WorkflowExecutionList', () => {
     onExecutionClick: jest.fn(),
     selectedId: null,
     setPaginationObserver: jest.fn(),
+    canCancel: true,
+    isCancelInProgress: false,
+    onConfirmCancel: jest.fn().mockResolvedValue(undefined),
   };
 
   const renderComponent = (overrides: Partial<WorkflowExecutionListProps> = {}) => {
@@ -180,16 +181,13 @@ describe('WorkflowExecutionList', () => {
   describe('loading more indicator', () => {
     it('shows loading spinner when loading more items', () => {
       const { container } = renderComponent({ isLoadingMore: true });
-      // The loading more spinner is shown after the items
       const items = screen.getAllByTestId('workflowExecutionListItem');
       expect(items).toHaveLength(2);
-      // The spinner should be present somewhere in the container
       expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
 
     it('does not show loading more spinner when not loading more', () => {
       renderComponent({ isLoadingMore: false });
-      // Execution items should be present
       const items = screen.getAllByTestId('workflowExecutionListItem');
       expect(items).toHaveLength(2);
     });
@@ -206,8 +204,70 @@ describe('WorkflowExecutionList', () => {
     it('calls setPaginationObserver for the last execution item', () => {
       const setPaginationObserver = jest.fn();
       renderComponent({ setPaginationObserver });
-      // The ref callback should have been called during rendering
       expect(setPaginationObserver).toHaveBeenCalled();
+    });
+  });
+
+  describe('footer cancel non-terminal', () => {
+    it('hides footer cancel when all loaded executions are terminal', () => {
+      renderComponent();
+      expect(screen.queryByTestId('workflowExecutionListFooter')).not.toBeInTheDocument();
+    });
+
+    it('enables footer cancel when a non-terminal execution is loaded', () => {
+      const withRunning: WorkflowExecutionListDto = {
+        ...mockExecutions,
+        results: [
+          {
+            id: 'exec-running',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            isTestRun: false,
+            startedAt: '2024-01-01T12:00:00Z',
+            finishedAt: '2024-01-01T12:00:00Z',
+            error: null,
+            duration: 1000,
+            workflowId: 'wf-1',
+            workflowName: 'Test Workflow',
+            executedBy: 'user1',
+            triggeredBy: 'manual',
+          },
+        ],
+        total: 1,
+      };
+      renderComponent({ executions: withRunning });
+      expect(screen.getByTestId('workflowExecutionListFooter')).toBeInTheDocument();
+      expect(screen.getByTestId('cancelAllActiveExecutionsButton')).not.toBeDisabled();
+    });
+
+    it('opens confirm modal and calls onConfirmCancel when confirmed', async () => {
+      const onConfirmCancel = jest.fn().mockResolvedValue(undefined);
+      const withRunning: WorkflowExecutionListDto = {
+        ...mockExecutions,
+        results: [
+          {
+            id: 'exec-running',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            isTestRun: false,
+            startedAt: '2024-01-01T12:00:00Z',
+            finishedAt: '2024-01-01T12:00:00Z',
+            error: null,
+            duration: 1000,
+            workflowId: 'wf-1',
+            workflowName: 'Test Workflow',
+            executedBy: 'user1',
+            triggeredBy: 'manual',
+          },
+        ],
+        total: 1,
+      };
+      renderComponent({ executions: withRunning, onConfirmCancel });
+      fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
+      const modal = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
+      expect(modal).toBeInTheDocument();
+      fireEvent.click(within(modal).getByRole('button', { name: 'Cancel all' }));
+      await waitFor(() => expect(onConfirmCancel).toHaveBeenCalled());
     });
   });
 });
