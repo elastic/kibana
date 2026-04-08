@@ -26,7 +26,7 @@ import {
   esqlColumnWithFormatSchema,
 } from '../metric_ops';
 import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   layerSettingsSchema,
@@ -404,7 +404,7 @@ function validateMetrics(metrics: (PrimaryMetricType | SecondaryMetricType)[]) {
   }
 }
 
-const primaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
+export const primaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
   ...metricStatePrimaryMetricOptionsSchema,
   ...metricStateBackgroundChartSchemaNoESQL,
 });
@@ -418,7 +418,7 @@ export const metricStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     styling: schema.maybe(metricStylingSchema),
     /**
      * Primary value configuration, must define operation.
@@ -460,7 +460,7 @@ export const esqlMetricState = schema.object(
     type: schema.literal('metric'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     styling: schema.maybe(metricStylingSchema),
     /**
      * Primary value configuration, must define operation.
