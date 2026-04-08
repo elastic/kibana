@@ -212,6 +212,14 @@ describe('AutomaticImportService Integration Tests', () => {
       const approvedData: IntegrationAttributes = {
         ...integration,
         status: TASK_STATUSES.approved,
+        changelog: [
+          {
+            version: '1.0.0',
+            changes: [
+              { description: 'Initial release of Test Integration', type: 'enhancement', link: '' },
+            ],
+          },
+        ],
       };
       await savedObjectService.updateIntegration(approvedData, '1.0.0');
 
@@ -228,11 +236,12 @@ describe('AutomaticImportService Integration Tests', () => {
 
       // Version should be bumped and a changelog entry added
       expect(afterDelete.metadata.version).toBe('1.1.0');
-      expect(afterDelete.changelog).toHaveLength(1);
+      expect(afterDelete.changelog).toHaveLength(2);
       expect(afterDelete.changelog![0]).toEqual({
         version: '1.1.0',
         changes: [{ description: 'Updated Test Integration', type: 'enhancement', link: '' }],
       });
+      expect(afterDelete.changelog![1].version).toBe('1.0.0');
     });
 
     it('should bump version and add changelog entry when resetting approved integration', async () => {
