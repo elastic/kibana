@@ -33,8 +33,9 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
-const columnsMatchInOrder = (a: ESQLColumn[], b: ESQLColumn[]) =>
-  a.length === b.length && a.every((col, i) => col.name === b[i]?.name);
+const columnsMatchInOrder = (a: ESQLColumn[], b: ESQLColumn[]) => {
+  return a.length === b.length && a.every((col, i) => col.name === b[i]?.name);
+};
 
 /**
  * `values` rows align to `valueColumns`. When `displayColumns` differs (e.g. `all_columns`
@@ -55,9 +56,11 @@ export const expandEsqlValuesToDisplayColumns = ({
 
   return values.map((row) => {
     const byName: Record<string, unknown> = {};
+
     valueColumns.forEach((col, i) => {
       byName[col.name] = row[i];
     });
+
     return displayColumns.map((col) =>
       Object.prototype.hasOwnProperty.call(byName, col.name) ? byName[col.name]! : null
     );
