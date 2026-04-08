@@ -72,10 +72,7 @@ export const App = () => {
       <div className="sidebar">
         <h2>Test Management</h2>
         <nav className="sidebar-nav">
-          <a
-            className={page === 'dashboard' ? 'active' : ''}
-            onClick={() => setPage('dashboard')}
-          >
+          <a className={page === 'dashboard' ? 'active' : ''} onClick={() => setPage('dashboard')}>
             Dashboard
           </a>
           <a className={page === 'configs' ? 'active' : ''} onClick={() => setPage('configs')}>
@@ -93,9 +90,7 @@ export const App = () => {
                 background: connected ? '#017d73' : '#bd271e',
               }}
             />
-            <span style={{ color: '#98a2b3' }}>
-              {connected ? 'Connected' : 'Disconnected'}
-            </span>
+            <span style={{ color: '#98a2b3' }}>{connected ? 'Connected' : 'Disconnected'}</span>
           </div>
         </div>
       </div>

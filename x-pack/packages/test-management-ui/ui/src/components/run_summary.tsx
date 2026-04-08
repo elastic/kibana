@@ -162,15 +162,11 @@ const CountRow = ({ label, counts }: { label: string; counts: CountBreakdown }) 
   <div className="summary-count-row">
     <span className="summary-count-label">{label}</span>
     <span className="summary-count-values">
-      {counts.failed > 0 && (
-        <span className="summary-count-failed">{counts.failed} failed</span>
-      )}
+      {counts.failed > 0 && <span className="summary-count-failed">{counts.failed} failed</span>}
       {counts.skipped > 0 && (
         <span className="summary-count-skipped">{counts.skipped} skipped</span>
       )}
-      {counts.passed > 0 && (
-        <span className="summary-count-passed">{counts.passed} passed</span>
-      )}
+      {counts.passed > 0 && <span className="summary-count-passed">{counts.passed} passed</span>}
       <span className="summary-count-total">{counts.total} total</span>
     </span>
   </div>
@@ -187,33 +183,40 @@ const FileResultRow = ({ result }: { result: TestFileResult }) => {
         className={`summary-file-row ${hasCases ? 'summary-file-expandable' : ''}`}
         onClick={hasCases ? () => setOpen(!open) : undefined}
       >
-        <span className={`summary-file-icon ${result.passed ? 'summary-file-pass' : 'summary-file-fail'}`}>
+        <span
+          className={`summary-file-icon ${
+            result.passed ? 'summary-file-pass' : 'summary-file-fail'
+          }`}
+        >
           {result.passed ? '✓' : '✕'}
         </span>
         <span className="summary-file-path mono">{result.file}</span>
-        {result.duration && (
-          <span className="summary-file-duration">{result.duration}</span>
-        )}
+        {result.duration && <span className="summary-file-duration">{result.duration}</span>}
         {hasCases && (
-          <span className="summary-file-toggle">{open ? '▾' : '▸'} {result.testCases.length}</span>
+          <span className="summary-file-toggle">
+            {open ? '▾' : '▸'} {result.testCases.length}
+          </span>
         )}
       </div>
       {open && hasCases && (
         <div className="summary-test-cases">
-          {failedCases.length > 0 && failedCases.map((tc, j) => (
-            <div key={`f${j}`} className="summary-test-case summary-test-case-fail">
-              <span className="summary-tc-icon">✕</span>
-              <span className="summary-tc-name">{tc.name}</span>
-              {tc.duration && <span className="summary-tc-duration">{tc.duration}</span>}
-            </div>
-          ))}
-          {result.testCases.filter((tc) => tc.passed).map((tc, j) => (
-            <div key={`p${j}`} className="summary-test-case">
-              <span className="summary-tc-icon summary-tc-pass">✓</span>
-              <span className="summary-tc-name">{tc.name}</span>
-              {tc.duration && <span className="summary-tc-duration">{tc.duration}</span>}
-            </div>
-          ))}
+          {failedCases.length > 0 &&
+            failedCases.map((tc, j) => (
+              <div key={`f${j}`} className="summary-test-case summary-test-case-fail">
+                <span className="summary-tc-icon">✕</span>
+                <span className="summary-tc-name">{tc.name}</span>
+                {tc.duration && <span className="summary-tc-duration">{tc.duration}</span>}
+              </div>
+            ))}
+          {result.testCases
+            .filter((tc) => tc.passed)
+            .map((tc, j) => (
+              <div key={`p${j}`} className="summary-test-case">
+                <span className="summary-tc-icon summary-tc-pass">✓</span>
+                <span className="summary-tc-name">{tc.name}</span>
+                {tc.duration && <span className="summary-tc-duration">{tc.duration}</span>}
+              </div>
+            ))}
         </div>
       )}
     </div>
@@ -223,8 +226,7 @@ const FileResultRow = ({ result }: { result: TestFileResult }) => {
 const JestSummaryView = ({ summary, run }: { summary: JestSummary; run: TestRunResult | null }) => {
   const hasCounts = summary.suites || summary.tests;
   const overallPassed =
-    run?.status === 'passed' ||
-    (summary.suites?.failed === 0 && summary.tests?.failed === 0);
+    run?.status === 'passed' || (summary.suites?.failed === 0 && summary.tests?.failed === 0);
   const overallFailed =
     run?.status === 'failed' ||
     (summary.suites?.failed ?? 0) > 0 ||
@@ -237,7 +239,13 @@ const JestSummaryView = ({ summary, run }: { summary: JestSummary; run: TestRunR
     <div className="run-summary">
       {hasCounts && (
         <div
-          className={`summary-banner ${overallFailed ? 'summary-banner-fail' : overallPassed ? 'summary-banner-pass' : 'summary-banner-neutral'}`}
+          className={`summary-banner ${
+            overallFailed
+              ? 'summary-banner-fail'
+              : overallPassed
+              ? 'summary-banner-pass'
+              : 'summary-banner-neutral'
+          }`}
         >
           <span className="summary-banner-icon">
             {overallFailed ? '✕' : overallPassed ? '✓' : '●'}
@@ -289,9 +297,7 @@ const JestSummaryView = ({ summary, run }: { summary: JestSummary; run: TestRunR
               <div key={i} className="summary-slow-row">
                 <span className="summary-slow-duration">{st.duration}</span>
                 <span className="summary-slow-name">{st.name}</span>
-                {st.file && (
-                  <span className="mono text-muted text-small">{st.file}</span>
-                )}
+                {st.file && <span className="mono text-muted text-small">{st.file}</span>}
               </div>
             ))}
           </div>
@@ -317,7 +323,13 @@ const GenericSummaryView = ({ run, lines }: { run: TestRunResult | null; lines: 
     <div className="run-summary">
       {run && (
         <div
-          className={`summary-banner ${run.status === 'failed' ? 'summary-banner-fail' : run.status === 'passed' ? 'summary-banner-pass' : 'summary-banner-neutral'}`}
+          className={`summary-banner ${
+            run.status === 'failed'
+              ? 'summary-banner-fail'
+              : run.status === 'passed'
+              ? 'summary-banner-pass'
+              : 'summary-banner-neutral'
+          }`}
         >
           <span className="summary-banner-icon">
             {run.status === 'failed' ? '✕' : run.status === 'passed' ? '✓' : '●'}
@@ -346,8 +358,7 @@ const GenericSummaryView = ({ run, lines }: { run: TestRunResult | null; lines: 
               <span className="summary-count-label">Duration</span>
               <span>
                 {(
-                  (new Date(run.finishedAt).getTime() -
-                    new Date(run.startedAt).getTime()) /
+                  (new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime()) /
                   1000
                 ).toFixed(1)}
                 s
@@ -361,9 +372,7 @@ const GenericSummaryView = ({ run, lines }: { run: TestRunResult | null; lines: 
                 {failCount > 0 && (
                   <span className="summary-count-failed">{failCount} failures</span>
                 )}
-                {passCount > 0 && (
-                  <span className="summary-count-passed">{passCount} passes</span>
-                )}
+                {passCount > 0 && <span className="summary-count-passed">{passCount} passes</span>}
                 <span className="summary-count-total">{lines.length} total lines</span>
               </span>
             </div>
@@ -371,8 +380,7 @@ const GenericSummaryView = ({ run, lines }: { run: TestRunResult | null; lines: 
         </div>
       )}
 
-      {(!run ||
-        (run.status !== 'running' && run.status !== 'starting' && !run.finishedAt)) && (
+      {(!run || (run.status !== 'running' && run.status !== 'starting' && !run.finishedAt)) && (
         <div className="summary-empty">
           {run?.status === 'running' || run?.status === 'starting'
             ? 'Test run in progress — summary will appear when finished.'

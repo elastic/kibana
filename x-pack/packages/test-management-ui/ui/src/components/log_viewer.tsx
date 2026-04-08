@@ -28,8 +28,7 @@ export const LogViewer = ({ lines = [], autoScroll = true }: LogViewerProps) => 
       {lines.length === 0 && <span className="text-muted">Waiting for output...</span>}
       {lines.map((line, i) => {
         const clean = stripAnsi(line.data ?? '');
-        const cls =
-          line.type === 'error' ? 'error' : clean.includes('PASS') ? 'success' : '';
+        const cls = line.type === 'error' ? 'error' : clean.includes('PASS') ? 'success' : '';
         return (
           <div key={i} className={cls}>
             {clean}

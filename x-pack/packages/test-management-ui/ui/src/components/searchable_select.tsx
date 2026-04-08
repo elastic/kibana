@@ -64,11 +64,7 @@ export const SearchableSelect = ({
 
   return (
     <div ref={containerRef} className="searchable-select">
-      <button
-        className="searchable-select-trigger"
-        onClick={() => setOpen(!open)}
-        type="button"
-      >
+      <button className="searchable-select-trigger" onClick={() => setOpen(!open)} type="button">
         <span className="searchable-select-value">{selectedLabel}</span>
         <span className="searchable-select-arrow">{open ? '▲' : '▼'}</span>
       </button>
@@ -106,7 +102,10 @@ export const SearchableSelect = ({
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="searchable-select-option" style={{ color: '#98a2b3', fontStyle: 'italic' }}>
+              <div
+                className="searchable-select-option"
+                style={{ color: '#98a2b3', fontStyle: 'italic' }}
+              >
                 No matches
               </div>
             )}

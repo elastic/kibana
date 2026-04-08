@@ -83,8 +83,7 @@ export const ConfigCard = ({
   const [logTab, setLogTab] = useState<'summary' | 'run' | 'elasticsearch' | 'kibana'>('summary');
 
   const latestRun = runs.length > 0 ? runs[0] : null;
-  const isActive =
-    latestRun?.status === 'running' || latestRun?.status === 'starting';
+  const isActive = latestRun?.status === 'running' || latestRun?.status === 'starting';
   const needsServers = NEEDS_SERVERS.has(config.type);
 
   const runLines: LogLine[] = latestRun
@@ -92,10 +91,7 @@ export const ConfigCard = ({
         ...latestRun.output.map((d): LogLine => ({ data: d, type: 'output' })),
         ...latestRun.errorOutput.map((d): LogLine => ({ data: d, type: 'error' })),
         ...events
-          .filter(
-            (e) =>
-              e.runId === latestRun.id && (e.type === 'output' || e.type === 'error')
-          )
+          .filter((e) => e.runId === latestRun.id && (e.type === 'output' || e.type === 'error'))
           .map((e): LogLine => ({ data: e.data ?? '', type: e.type as 'output' | 'error' })),
       ]
     : [];
@@ -162,8 +158,12 @@ export const ConfigCard = ({
             </strong>
             {latestRun && <StatusBadge status={latestRun.status} />}
             {config.testCount !== undefined && (
-              <span className={`test-count-badge ${config.testCount === 0 ? 'test-count-empty' : ''}`}>
-                {config.testCount === 0 ? 'No test files' : `${config.testCount} file${config.testCount === 1 ? '' : 's'}`}
+              <span
+                className={`test-count-badge ${config.testCount === 0 ? 'test-count-empty' : ''}`}
+              >
+                {config.testCount === 0
+                  ? 'No test files'
+                  : `${config.testCount} file${config.testCount === 1 ? '' : 's'}`}
               </span>
             )}
           </div>
@@ -200,7 +200,9 @@ export const ConfigCard = ({
         <div className="progress-section">
           <div className="progress-bar-track">
             <div
-              className={`progress-bar-fill ${progress.testsFailed > 0 ? 'progress-bar-has-failures' : ''}`}
+              className={`progress-bar-fill ${
+                progress.testsFailed > 0 ? 'progress-bar-has-failures' : ''
+              }`}
               style={{ width: `${progress.pct}%` }}
             />
           </div>
@@ -294,11 +296,7 @@ export const ConfigCard = ({
               ) : (
                 <LogViewer
                   lines={
-                    logTab === 'run'
-                      ? runLines
-                      : logTab === 'elasticsearch'
-                        ? esOutput
-                        : kbnOutput
+                    logTab === 'run' ? runLines : logTab === 'elasticsearch' ? esOutput : kbnOutput
                   }
                 />
               )}

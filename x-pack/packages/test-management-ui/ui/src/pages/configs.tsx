@@ -65,8 +65,8 @@ export const ConfigsPage = ({
 }: ConfigsPageProps) => {
   const [search, setSearch] = useState(() => readParam('q', ''));
   const [typeFilter, setTypeFilter] = useState(() => readParam('type', 'all'));
-  const [teamFilter, setTeamFilter] = useState(
-    () => readParam('team', localStorage.getItem('testmgmt:teamFilter') ?? 'all')
+  const [teamFilter, setTeamFilter] = useState(() =>
+    readParam('team', localStorage.getItem('testmgmt:teamFilter') ?? 'all')
   );
   const [statusFilter, setStatusFilter] = useState(() => readParam('status', 'all'));
   const [moduleFilter, setModuleFilter] = useState<'all' | 'plugin' | 'package'>(
@@ -147,7 +147,13 @@ export const ConfigsPage = ({
   );
 
   const typeCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: 0, jest: 0, 'jest-integration': 0, scout: 0, ftr: 0 };
+    const counts: Record<string, number> = {
+      all: 0,
+      jest: 0,
+      'jest-integration': 0,
+      scout: 0,
+      ftr: 0,
+    };
     for (const c of baseFiltered) {
       counts.all++;
       counts[c.type] = (counts[c.type] ?? 0) + 1;
@@ -241,10 +247,7 @@ export const ConfigsPage = ({
   );
 
   const activeRunIds = useMemo(
-    () =>
-      runs
-        .filter((r) => r.status === 'running' || r.status === 'starting')
-        .map((r) => r.id),
+    () => runs.filter((r) => r.status === 'running' || r.status === 'starting').map((r) => r.id),
     [runs]
   );
 
@@ -289,7 +292,8 @@ export const ConfigsPage = ({
         <div className="loading-container">
           <div className="loading-spinner" />
           <div className="text-muted" style={{ marginTop: 16 }}>
-            Discovering test configs{configs?.discoveryPhase ? ` — ${configs.discoveryPhase}...` : '...'}
+            Discovering test configs
+            {configs?.discoveryPhase ? ` — ${configs.discoveryPhase}...` : '...'}
           </div>
         </div>
       </div>
@@ -309,26 +313,27 @@ export const ConfigsPage = ({
               </span>
             </div>
           )}
-          <button
-            className="btn btn-secondary"
-            onClick={() => api.post('/api/configs/refresh')}
-          >
+          <button className="btn btn-secondary" onClick={() => api.post('/api/configs/refresh')}>
             Refresh
           </button>
         </div>
       </div>
 
       <div className="type-tabs">
-        {([
-          { value: 'all', label: 'All' },
-          { value: 'jest', label: 'Jest' },
-          { value: 'jest-integration', label: 'Jest Integration' },
-          { value: 'scout', label: 'Scout' },
-          { value: 'ftr', label: 'FTR' },
-        ] as const).map((tab) => (
+        {(
+          [
+            { value: 'all', label: 'All' },
+            { value: 'jest', label: 'Jest' },
+            { value: 'jest-integration', label: 'Jest Integration' },
+            { value: 'scout', label: 'Scout' },
+            { value: 'ftr', label: 'FTR' },
+          ] as const
+        ).map((tab) => (
           <button
             key={tab.value}
-            className={`type-tab type-tab-${tab.value}${typeFilter === tab.value ? ' type-tab-active' : ''}`}
+            className={`type-tab type-tab-${tab.value}${
+              typeFilter === tab.value ? ' type-tab-active' : ''
+            }`}
             onClick={() => setTypeFilter(tab.value)}
           >
             {tab.label}
@@ -362,13 +367,17 @@ export const ConfigsPage = ({
           All
         </button>
         <button
-          className={`quick-filter quick-filter-plugin ${moduleFilter === 'plugin' ? 'quick-filter-active' : ''}`}
+          className={`quick-filter quick-filter-plugin ${
+            moduleFilter === 'plugin' ? 'quick-filter-active' : ''
+          }`}
           onClick={() => setModuleFilter(moduleFilter === 'plugin' ? 'all' : 'plugin')}
         >
           Plugins <span className="quick-filter-count">{moduleCounts.plugin}</span>
         </button>
         <button
-          className={`quick-filter quick-filter-package ${moduleFilter === 'package' ? 'quick-filter-active' : ''}`}
+          className={`quick-filter quick-filter-package ${
+            moduleFilter === 'package' ? 'quick-filter-active' : ''
+          }`}
           onClick={() => setModuleFilter(moduleFilter === 'package' ? 'all' : 'package')}
         >
           Packages <span className="quick-filter-count">{moduleCounts.package}</span>
@@ -386,7 +395,9 @@ export const ConfigsPage = ({
             </button>
             {statusCounts.running > 0 && (
               <button
-                className={`quick-filter quick-filter-running ${statusFilter === 'running' ? 'quick-filter-active' : ''}`}
+                className={`quick-filter quick-filter-running ${
+                  statusFilter === 'running' ? 'quick-filter-active' : ''
+                }`}
                 onClick={() => setStatusFilter(statusFilter === 'running' ? 'all' : 'running')}
               >
                 Running <span className="quick-filter-count">{statusCounts.running}</span>
@@ -394,7 +405,9 @@ export const ConfigsPage = ({
             )}
             {statusCounts.passed > 0 && (
               <button
-                className={`quick-filter quick-filter-passed ${statusFilter === 'passed' ? 'quick-filter-active' : ''}`}
+                className={`quick-filter quick-filter-passed ${
+                  statusFilter === 'passed' ? 'quick-filter-active' : ''
+                }`}
                 onClick={() => setStatusFilter(statusFilter === 'passed' ? 'all' : 'passed')}
               >
                 Passed <span className="quick-filter-count">{statusCounts.passed}</span>
@@ -402,7 +415,9 @@ export const ConfigsPage = ({
             )}
             {statusCounts.failed > 0 && (
               <button
-                className={`quick-filter quick-filter-failed ${statusFilter === 'failed' ? 'quick-filter-active' : ''}`}
+                className={`quick-filter quick-filter-failed ${
+                  statusFilter === 'failed' ? 'quick-filter-active' : ''
+                }`}
                 onClick={() => setStatusFilter(statusFilter === 'failed' ? 'all' : 'failed')}
               >
                 Failed <span className="quick-filter-count">{statusCounts.failed}</span>
@@ -410,7 +425,9 @@ export const ConfigsPage = ({
             )}
             {statusCounts.stopped > 0 && (
               <button
-                className={`quick-filter quick-filter-stopped ${statusFilter === 'stopped' ? 'quick-filter-active' : ''}`}
+                className={`quick-filter quick-filter-stopped ${
+                  statusFilter === 'stopped' ? 'quick-filter-active' : ''
+                }`}
                 onClick={() => setStatusFilter(statusFilter === 'stopped' ? 'all' : 'stopped')}
               >
                 Stopped <span className="quick-filter-count">{statusCounts.stopped}</span>
@@ -423,7 +440,9 @@ export const ConfigsPage = ({
           <>
             <span className="quick-filter-separator" />
             <button
-              className={`quick-filter quick-filter-empty ${hideEmpty ? 'quick-filter-active' : ''}`}
+              className={`quick-filter quick-filter-empty ${
+                hideEmpty ? 'quick-filter-active' : ''
+              }`}
               onClick={() => setHideEmpty(!hideEmpty)}
             >
               Hide empty <span className="quick-filter-count">{emptyCount}</span>

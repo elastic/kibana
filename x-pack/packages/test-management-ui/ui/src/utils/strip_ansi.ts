@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-const ANSI_RE =
-  /[\u001b\u009b][\[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><~]/g;
+const ANSI_RE = /[\u001b\u009b][\[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><~]/g;
 
 export const stripAnsi = (text: string): string => text.replace(ANSI_RE, '');
