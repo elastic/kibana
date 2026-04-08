@@ -98,7 +98,9 @@ export async function getRuleExecutor(
 
   if (!isEmpty(errors)) {
     logger.warn(
-      `alertWithPersistence completed with ${errors.length} error(s) (${createdAlerts.length} alerts created): ${JSON.stringify(errors)}`
+      `alertWithPersistence completed with ${errors.length} error(s) (${
+        createdAlerts.length
+      } alerts created): ${JSON.stringify(errors)}`
     );
   }
 
@@ -108,7 +110,9 @@ export async function getRuleExecutor(
     if (docId) {
       originalDocumentIds.push(docId);
     } else {
-      logger.warn(`Alert "${alert._id}" has no mapped original document ID; skipping dedup entry — this may cause duplicate alerts on the next run`);
+      logger.warn(
+        `Alert "${alert._id}" has no mapped original document ID; skipping dedup entry — this may cause duplicate alerts on the next run`
+      );
     }
   }
 

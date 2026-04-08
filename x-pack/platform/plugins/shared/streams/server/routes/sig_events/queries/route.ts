@@ -243,7 +243,15 @@ const bulkQueriesRoute = createServerRoute({
           continue;
         }
         typedOperations.push({
-          index: { id, title, description, esql, severity_score, evidence, type: deriveQueryType(esql.query) },
+          index: {
+            id,
+            title,
+            description,
+            esql,
+            severity_score,
+            evidence,
+            type: deriveQueryType(esql.query),
+          },
         });
       } else if ('delete' in operation) {
         typedOperations.push(operation);

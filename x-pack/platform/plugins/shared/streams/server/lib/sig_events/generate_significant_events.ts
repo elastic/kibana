@@ -62,8 +62,7 @@ export async function generateSignificantEventDefinitions(
       title: query.title,
       description: query.description,
       esql: {
-        query:
-          query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
+        query: query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
       },
       severity_score: query.severity_score,
       evidence: query.evidence,

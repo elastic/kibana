@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Streams } from '@kbn/streams-schema';
@@ -178,8 +173,7 @@ export function KnowledgeIndicatorActionsCell({
     if (knowledgeIndicator.kind !== 'query') return [];
 
     const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
-    const isPromoteDisabled =
-      isActionInProgress || knowledgeIndicator.rule.backed || isStats;
+    const isPromoteDisabled = isActionInProgress || knowledgeIndicator.rule.backed || isStats;
 
     return [
       <EuiContextMenuItem
@@ -209,7 +203,7 @@ export function KnowledgeIndicatorActionsCell({
         }}
       >
         {KI_ACTION_DELETE_LABEL}
-      </EuiContextMenuItem>
+      </EuiContextMenuItem>,
     ];
   }, [isActionInProgress, knowledgeIndicator, onDeleteRequest, promoteAction, withActionLoading]);
 
@@ -318,6 +312,3 @@ const KI_PROMOTE_ACTION_ERROR_TOAST_TITLE = i18n.translate(
     defaultMessage: 'Failed to promote knowledge indicator',
   }
 );
-
-
-

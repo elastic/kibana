@@ -87,7 +87,9 @@ export class QueryService {
                 featureFilter = JSON.parse(featureFilterJson) as Condition;
               } catch (parseError) {
                 this.logger.warn(
-                  `Failed to parse featureFilter JSON during migration for stream "${migrated[STREAM_NAME]}": ${parseError instanceof Error ? parseError.message : String(parseError)}`
+                  `Failed to parse featureFilter JSON during migration for stream "${
+                    migrated[STREAM_NAME]
+                  }": ${parseError instanceof Error ? parseError.message : String(parseError)}`
                 );
                 featureFilter = undefined;
               }
@@ -128,7 +130,11 @@ export class QueryService {
             } catch (metadataError) {
               metadataFailed = true;
               this.logger.warn(
-                `ensureMetadata failed during migration for stream "${migrated[STREAM_NAME]}", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${metadataError instanceof Error ? metadataError.message : String(metadataError)}. Forcing rule_backed=false to prevent orphaned rule state.`
+                `ensureMetadata failed during migration for stream "${
+                  migrated[STREAM_NAME]
+                }", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${
+                  metadataError instanceof Error ? metadataError.message : String(metadataError)
+                }. Forcing rule_backed=false to prevent orphaned rule state.`
               );
             }
           }

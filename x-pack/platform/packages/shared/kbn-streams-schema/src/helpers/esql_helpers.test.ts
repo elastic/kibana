@@ -74,15 +74,11 @@ describe('extractStatsGroupColumns', () => {
   it('extracts numeric group-by columns from BY clause', () => {
     const query =
       'FROM logs | STATS error_count = COUNT(*) BY http.response.status_code, service.name | WHERE error_count > 10';
-    expect(extractStatsGroupColumns(query)).toEqual([
-      'http.response.status_code',
-      'service.name',
-    ]);
+    expect(extractStatsGroupColumns(query)).toEqual(['http.response.status_code', 'service.name']);
   });
 
   it('returns sorted column names', () => {
-    const query =
-      'FROM logs | STATS c = COUNT(*) BY zone, app, bucket = BUCKET(@timestamp, 5m)';
+    const query = 'FROM logs | STATS c = COUNT(*) BY zone, app, bucket = BUCKET(@timestamp, 5m)';
     expect(extractStatsGroupColumns(query)).toEqual(['app', 'bucket', 'zone']);
   });
 
@@ -182,7 +178,9 @@ describe('deriveQueryType', () => {
 
 describe('getStatsQueryHints', () => {
   it('warns about missing temporal bucketing', () => {
-    const hints = getStatsQueryHints('FROM logs | STATS c = COUNT(*) BY service.name | WHERE c > 10');
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS c = COUNT(*) BY service.name | WHERE c > 10'
+    );
     expect(hints).toEqual(
       expect.arrayContaining([expect.stringContaining('no temporal bucketing')])
     );
@@ -192,9 +190,7 @@ describe('getStatsQueryHints', () => {
     const hints = getStatsQueryHints(
       'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m)'
     );
-    expect(hints).toEqual(
-      expect.arrayContaining([expect.stringContaining('No threshold filter')])
-    );
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('No threshold filter')]));
   });
 
   it('returns no hints for well-formed STATS queries', () => {
@@ -208,9 +204,7 @@ describe('getStatsQueryHints', () => {
     const hints = getStatsQueryHints(
       'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | WHERE c > 10 | SORT c | LIMIT 100'
     );
-    expect(hints).toEqual(
-      expect.arrayContaining([expect.stringContaining('SORT, LIMIT')])
-    );
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('SORT, LIMIT')]));
   });
 
   it('warns about EVAL in non-STATS queries', () => {
@@ -228,9 +222,7 @@ describe('getStatsQueryHints', () => {
     const hints = getStatsQueryHints(
       'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE error_rate != 0'
     );
-    expect(hints).toEqual(
-      expect.arrayContaining([expect.stringContaining('sample-size floor')])
-    );
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('sample-size floor')]));
   });
 
   it('does not warn about sample-size floor when total > N guard is present', () => {
@@ -246,18 +238,14 @@ describe('getStatsQueryHints', () => {
     const hints = getStatsQueryHints(
       'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
     );
-    expect(hints).toEqual(
-      expect.arrayContaining([expect.stringContaining('IS NOT NULL')])
-    );
+    expect(hints).toEqual(expect.arrayContaining([expect.stringContaining('IS NOT NULL')]));
   });
 
   it('does not note IS NOT NULL when denominator already filters', () => {
     const hints = getStatsQueryHints(
       'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
     );
-    expect(hints).not.toEqual(
-      expect.arrayContaining([expect.stringContaining('IS NOT NULL')])
-    );
+    expect(hints).not.toEqual(expect.arrayContaining([expect.stringContaining('IS NOT NULL')]));
   });
 });
 
@@ -272,9 +260,7 @@ describe('extractBucketColumnName', () => {
 
   it('extracts custom alias names', () => {
     expect(
-      extractBucketColumnName(
-        'FROM logs | STATS c = COUNT(*) BY ts = BUCKET(@timestamp, 1h)'
-      )
+      extractBucketColumnName('FROM logs | STATS c = COUNT(*) BY ts = BUCKET(@timestamp, 1h)')
     ).toBe('ts');
   });
 
@@ -287,9 +273,7 @@ describe('extractBucketColumnName', () => {
   });
 
   it('returns null for STATS without BUCKET', () => {
-    expect(
-      extractBucketColumnName('FROM logs | STATS c = COUNT(*) BY service.name')
-    ).toBeNull();
+    expect(extractBucketColumnName('FROM logs | STATS c = COUNT(*) BY service.name')).toBeNull();
   });
 
   it('returns null for match queries', () => {

@@ -1015,10 +1015,12 @@ export class StreamsClient {
     ];
 
     if (this.dependencies.queryClient) {
-      ops.push(this.dependencies.queryClient.syncQueries(
-        definition,
-        queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
-      ));
+      ops.push(
+        this.dependencies.queryClient.syncQueries(
+          definition,
+          queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
+        )
+      );
     }
 
     await Promise.all(ops);
