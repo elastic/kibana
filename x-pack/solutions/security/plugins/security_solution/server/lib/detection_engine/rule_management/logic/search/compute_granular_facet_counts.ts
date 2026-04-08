@@ -119,14 +119,13 @@ export const computeGranularFacetCounts = async ({
   ruleIds: string[] | undefined;
   categories: GranularRulesFacetCategory[];
 }): Promise<FacetCounts> => {
-  const unique = [...new Set(categories)];
-  if (unique.length === 0) {
+  if (categories.length === 0) {
     return {};
   }
 
   const aggregations: Record<string, AggregationsAggregationContainer> = {};
-  for (const c of unique) {
-    aggregations[`facet_${c}`] = facetAggForCategory(c);
+  for (const category of categories) {
+    aggregations[`facet_${category}`] = facetAggForCategory(category);
   }
 
   const enrichedFilter = enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds));
@@ -137,10 +136,10 @@ export const computeGranularFacetCounts = async ({
   });
 
   const counts: FacetCounts = {};
-  for (const c of unique) {
-    const aggResult = raw[`facet_${c}`];
+  for (const category of categories) {
+    const aggResult = raw[`facet_${category}`];
     if (aggResult?.buckets) {
-      counts[c] = bucketsToFacetMap(aggResult.buckets);
+      counts[category] = bucketsToFacetMap(aggResult.buckets);
     }
   }
 

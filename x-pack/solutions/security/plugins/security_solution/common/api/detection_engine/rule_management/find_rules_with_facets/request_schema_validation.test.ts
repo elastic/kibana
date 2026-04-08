@@ -134,8 +134,28 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   it('rejects unsupported search.mode', () => {
     const errors = validateFindRulesWithFacetsRequestBody({
       ...emptyBody,
-      search: { term: 'x', mode: 'vector' } as FindRulesWithFacetsRequestBodyInput['search'],
+      search: {
+        term: 'x',
+        mode: 'vector',
+      } as unknown as FindRulesWithFacetsRequestBodyInput['search'],
     });
     expect(errors).toContain('unsupported search.mode "vector"');
+  });
+
+  it('rejects duplicate entries in aggregations.counts', () => {
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...emptyBody,
+      aggregations: { counts: ['tags', 'severity', 'tags'] },
+    });
+    expect(errors).toContain('aggregations.counts must not contain duplicate facet categories');
+  });
+
+  it('accepts aggregations.counts with distinct categories', () => {
+    expect(
+      validateFindRulesWithFacetsRequestBody({
+        ...emptyBody,
+        aggregations: { counts: ['tags', 'severity'] },
+      })
+    ).toEqual([]);
   });
 });

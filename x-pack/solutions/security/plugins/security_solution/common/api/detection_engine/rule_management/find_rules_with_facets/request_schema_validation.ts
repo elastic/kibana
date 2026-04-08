@@ -62,6 +62,19 @@ const validateSortTokens = (sort: string[] | undefined): string[] => {
   return errors;
 };
 
+const validateAggregationsCountsUnique = (
+  aggregations: FindRulesWithFacetsRequestBodyInput['aggregations']
+): string[] => {
+  const counts = aggregations?.counts;
+  if (counts == null || counts.length === 0) {
+    return [];
+  }
+  if (new Set(counts).size !== counts.length) {
+    return ['aggregations.counts must not contain duplicate facet categories'];
+  }
+  return [];
+};
+
 /**
  * Additional validation for internal `_find_with_facets` beyond generated Zod (gaps parity, KQL parse, sort fields).
  */
@@ -79,6 +92,7 @@ export const validateFindRulesWithFacetsRequestBody = (
 
   errors.push(...validateFindRulesWithFacetsKqlFilter(body.filter));
   errors.push(...validateSortTokens(body.sort as string[] | undefined));
+  errors.push(...validateAggregationsCountsUnique(body.aggregations));
 
   const searchMode = body.search?.mode;
   if (searchMode != null && searchMode !== 'legacy') {
