@@ -10,7 +10,9 @@ import type {
   ConversationRound,
   ToolCallStep,
   AgentResponseEvent,
+  ReasoningStep,
 } from '@kbn/agent-builder-common';
+import { isReasoningStep } from '@kbn/agent-builder-common';
 import type { ResearchAgentAction } from '../default/actions';
 import { toolCallAction, executeToolAction } from '../default/actions';
 import { groupToolCallSteps } from './to_langchain_messages';
@@ -28,9 +30,12 @@ export const roundToActions = ({
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];
   const groups = groupToolCallSteps(round.steps);
+  const reasoningSteps = round.steps.filter(isReasoningStep);
 
   for (const group of groups) {
     const { completed, pending } = partitionGroupByCompletion(group);
+    const groupId = group[0].tool_call_group_id;
+    const groupMessage = getGroupReasoning(reasoningSteps, groupId);
 
     if (completed.length > 0) {
       actions.push(
@@ -39,7 +44,9 @@ export const roundToActions = ({
             toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
             toolCallId: step.tool_call_id,
             args: step.params,
-          }))
+            reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
+          })),
+          groupMessage
         )
       );
       actions.push(
@@ -60,13 +67,40 @@ export const roundToActions = ({
             toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
             toolCallId: step.tool_call_id,
             args: step.params,
-          }))
+            reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
+          })),
+          groupMessage
         )
       );
     }
   }
 
   return actions;
+};
+
+const getGroupReasoning = (
+  reasoningSteps: ReasoningStep[],
+  groupId: string | undefined
+): string | undefined => {
+  if (!groupId) {
+    return undefined;
+  }
+  const text = reasoningSteps
+    .filter((s) => s.tool_call_group_id === groupId && !s.tool_call_id)
+    .map((s) => s.reasoning)
+    .join('\n');
+  return text || undefined;
+};
+
+const getStepReasoning = (
+  reasoningSteps: ReasoningStep[],
+  toolCallId: string
+): string | undefined => {
+  const text = reasoningSteps
+    .filter((s) => s.tool_call_id === toolCallId)
+    .map((s) => s.reasoning)
+    .join('\n');
+  return text || undefined;
 };
 
 const partitionGroupByCompletion = (
