@@ -64,10 +64,10 @@ describe('objectUnion', () => {
     it.each([
       { type: 'A', str: 'test', bool: true, extra: {} },
       { type: 'B', num: 123, bool: false, extra: {} },
-      { type: 'A', str: 'test', bool: 'true' },
-      { type: 'B', num: 123, bool: 'false' },
+      { type: 'A', str: 'test', bool: 'string' },
+      { type: 'B', num: 123, bool: 'string' },
     ])('should invalidate extended union for %j', (input) => {
-      expect(() => typeAB.validate(input)).toThrowErrorMatchingSnapshot();
+      expect(() => typeABPlus.validate(input)).toThrowErrorMatchingSnapshot();
     });
   });
 
