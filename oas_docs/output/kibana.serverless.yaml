@@ -2821,6 +2821,12 @@ paths:
                   agent_id: elastic-ai-agent
                   connector_id: my-connector-id
                   input: What is Elasticsearch?
+              converseRequestInferenceExample:
+                description: Example using inference_id (mutually exclusive with connector_id)
+                value:
+                  agent_id: elastic-ai-agent
+                  inference_id: my-inference-endpoint-id
+                  input: What is Elasticsearch?
             schema:
               additionalProperties: false
               type: object
@@ -2913,10 +2919,15 @@ paths:
                           - tool_ids
                       type: array
                 connector_id:
-                  description: Optional connector ID for the agent to use for external integrations.
+                  description: Optional connector ID for the agent to use for model routing. Mutually exclusive with `inference_id`; omit or use only one.
+                  nullable: true
                   type: string
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
+                  type: string
+                inference_id:
+                  description: Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.
+                  nullable: true
                   type: string
                 input:
                   description: The user input message to send to the agent.
@@ -3190,6 +3201,12 @@ paths:
                   agent_id: elastic-ai-agent
                   conversation_id: c250305b-1929-4248-b568-b9e3f065fda5
                   input: Hello
+              converseAsyncRequestInferenceExample:
+                description: Example using inference_id (mutually exclusive with connector_id)
+                value:
+                  agent_id: elastic-ai-agent
+                  inference_id: my-inference-endpoint-id
+                  input: Hello
             schema:
               additionalProperties: false
               type: object
@@ -3282,10 +3299,15 @@ paths:
                           - tool_ids
                       type: array
                 connector_id:
-                  description: Optional connector ID for the agent to use for external integrations.
+                  description: Optional connector ID for the agent to use for model routing. Mutually exclusive with `inference_id`; omit or use only one.
+                  nullable: true
                   type: string
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
+                  type: string
+                inference_id:
+                  description: Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.
+                  nullable: true
                   type: string
                 input:
                   description: The user input message to send to the agent.
