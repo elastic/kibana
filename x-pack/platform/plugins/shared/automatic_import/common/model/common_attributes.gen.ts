@@ -79,7 +79,7 @@ export const Integration = z
     /**
      * The data streams of the integration
      */
-    dataStreams: z.array(DataStream).max(50).optional(),
+    dataStreams: z.array(DataStream).max(10).optional(),
     /**
      * The logo of the integration
      */

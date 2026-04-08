@@ -22,7 +22,7 @@ components:
             dataStreams:
               type: array
               description: The data streams of the integration
-              maxItems: 50
+              maxItems: 10
               items:
                 $ref: "#/components/schemas/DataStream"
             logo:
