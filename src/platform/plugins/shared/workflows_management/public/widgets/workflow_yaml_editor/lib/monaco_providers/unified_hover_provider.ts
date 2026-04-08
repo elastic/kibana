@@ -61,6 +61,20 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     position: monaco.Position,
     cancellationToken: monaco.CancellationToken
   ): Promise<monaco.languages.Hover | null> {
+    const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+    const deprecatedStepMarkersNearby = markers.filter(
+      (marker) =>
+        marker.source === 'deprecated-step-validation' &&
+        marker.startLineNumber === position.lineNumber &&
+        ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
+          Math.abs(marker.startColumn - position.column) <= 3 ||
+          Math.abs(marker.endColumn - position.column) <= 3)
+    );
+
+    if (deprecatedStepMarkersNearby.length > 0) {
+      return null;
+    }
+
     const customHover = await this.provideCustomHover(model, position);
     if (customHover) {
       return customHover;

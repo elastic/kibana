@@ -77,6 +77,7 @@ jest.mock('../utils', () => ({
 }));
 
 const { evaluateExpression } = jest.requireMock('../template_expression/evaluate_expression');
+const { getInterceptedHover } = jest.requireMock('../hover/get_intercepted_hover');
 
 const createMockModel = (content: string = '  message: "{{ steps.search.output.hits }}"') =>
   ({
@@ -484,6 +485,35 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       );
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('deprecated step hover deduplication', () => {
+    it('should not fall through to intercepted schema hover when a deprecated-step marker is nearby', async () => {
+      jest.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([
+        {
+          owner: 'custom-yaml-validation',
+          source: 'deprecated-step-validation',
+          startLineNumber: 1,
+          startColumn: 10,
+          endLineNumber: 1,
+          endColumn: 35,
+          message: 'deprecated',
+          severity: monaco.MarkerSeverity.Warning,
+        },
+      ] as monaco.editor.IMarker[]);
+      getInterceptedHover.mockResolvedValue({
+        contents: [{ value: 'schema hover' }],
+      });
+
+      const result = await provider.provideHover(
+        createMockModel('type: kibana.createCaseDefaultSpace'),
+        createMockPosition(1, 15),
+        {} as monaco.CancellationToken
+      );
+
+      expect(result).toBeNull();
+      expect(getInterceptedHover).not.toHaveBeenCalled();
     });
   });
 
