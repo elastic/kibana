@@ -698,6 +698,12 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async openSaveSplitMenu() {
+    if (
+      !(await this.testSubjects.exists('dashboardQuickSaveMenuItem-secondary-button')) &&
+      (await this.testSubjects.exists('app-menu-overflow-button'))
+    ) {
+      await this.testSubjects.click('app-menu-overflow-button');
+    }
     await this.testSubjects.click('dashboardQuickSaveMenuItem-secondary-button');
   }
 

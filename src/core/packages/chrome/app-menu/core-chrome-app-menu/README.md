@@ -4,7 +4,33 @@
 
 ## Usage
 
-- Declarative (preferred):
+- Declarative, with context (preferred):
+
+This requires the component to be rendered within the Chrome context.
+
+The context is available automatically when:
+- The component is rendered via core's rendering service (`rendering.addContext`)
+- The component is inside a `KibanaRootContextProvider`
+- The component tree is wrapped with `ChromeServiceProvider` from `@kbn/core-chrome-browser-context`
+- The component tree is wrapped with `chrome.withProvider(children)`
+
+```tsx
+import React from 'react';
+import { RegisterAppMenu } from '@kbn/core-chrome-browser-hooks';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+
+
+interface Props {
+  config: AppMenuConfig;
+}
+
+
+const Example = ({ config }: Props) => {
+  return <RegisterAppMenu config={config} />;
+};
+```
+
+- Declarative:
 
 ```tsx
 import React, { useEffect } from 'react';

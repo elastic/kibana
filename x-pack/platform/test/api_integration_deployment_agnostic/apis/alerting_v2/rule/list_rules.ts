@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { RoleCredentials } from '../../../services';
 
-const RULE_API_PATH = '/internal/alerting/v2/rule';
+const RULE_API_PATH = '/api/alerting/v2/rules';
 const RULE_SO_TYPE = 'alerting_rule';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -221,14 +221,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(searchResponse.body.items[0].metadata.name).to.be('Limit120');
       });
 
-      it('should search rules by name and labels', async () => {
+      it('should search rules by name and tags', async () => {
         const nameMatch = await createRule(roleAuthc, 'cpu threshold');
         expect(nameMatch.status).to.be(200);
 
-        const labelMatch = await createRule(roleAuthc, 'network threshold', {
-          metadata: { name: 'network threshold', labels: ['prod'] },
+        const tagMatch = await createRule(roleAuthc, 'network threshold', {
+          metadata: { name: 'network threshold', tags: ['prod'] },
         });
-        expect(labelMatch.status).to.be(200);
+        expect(tagMatch.status).to.be(200);
 
         const responseByName = await supertestWithoutAuth
           .get(RULE_API_PATH)
@@ -240,34 +240,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(responseByName.body.items.length).to.be(1);
         expect(responseByName.body.items[0].metadata.name).to.be('cpu threshold');
 
-        const responseByLabel = await supertestWithoutAuth
+        const responseByTag = await supertestWithoutAuth
           .get(RULE_API_PATH)
           .query({ search: 'prod' })
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader());
 
-        expect(responseByLabel.status).to.be(200);
-        expect(responseByLabel.body.items.length).to.be(1);
+        expect(responseByTag.status).to.be(200);
+        expect(responseByTag.body.items.length).to.be(1);
         expect(
-          responseByLabel.body.items.map(
-            (item: { metadata: { name: string } }) => item.metadata.name
-          )
+          responseByTag.body.items.map((item: { metadata: { name: string } }) => item.metadata.name)
         ).to.contain('network threshold');
       });
 
       it('should compose search with pagination', async () => {
         const response1 = await createRule(roleAuthc, 'prod rule 1', {
-          metadata: { name: 'prod rule 1', labels: ['prod'] },
+          metadata: { name: 'prod rule 1', tags: ['prod'] },
         });
         expect(response1.status).to.be(200);
 
         const response2 = await createRule(roleAuthc, 'prod rule 2', {
-          metadata: { name: 'prod rule 2', labels: ['prod'] },
+          metadata: { name: 'prod rule 2', tags: ['prod'] },
         });
         expect(response2.status).to.be(200);
 
         const response3 = await createRule(roleAuthc, 'dev rule 1', {
-          metadata: { name: 'dev rule 1', labels: ['dev'] },
+          metadata: { name: 'dev rule 1', tags: ['dev'] },
         });
         expect(response3.status).to.be(200);
 
