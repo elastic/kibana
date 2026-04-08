@@ -20,7 +20,7 @@ export interface ChromeNextHeaderConfig {
    * Can be the app name (e.g. "Discover") or a viewed object
    * (e.g. a saved dashboard name). Single-line, truncated by Chrome if too long.
    */
-  title: string;
+  title?: string;
 
   /**
    * Badges inline next to the title. Chrome shows 1–2 as-is; for 3+, first badge plus "+N" popover

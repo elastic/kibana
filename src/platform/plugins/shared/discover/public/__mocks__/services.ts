@@ -331,6 +331,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
       getEmbeddableTransformsEnabled: jest.fn(() => true),
+      getIsNextChrome: jest.fn(() => false),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),

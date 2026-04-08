@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
@@ -39,6 +39,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const isNextChrome = services.discoverFeatureFlags.getIsNextChrome();
 
   const {
     shouldCollapseAppMenu,
@@ -47,6 +48,15 @@ export const TabsView = (props: SingleTabViewProps) => {
     getAdditionalTabMenuItems,
     topNavMenuItems,
   } = useAppMenuData({ currentDataView });
+
+  useEffect(() => {
+    if (isNextChrome && topNavMenuItems) {
+      services.chrome.next.header.set({ appMenu: topNavMenuItems });
+      return () => {
+        services.chrome.next.header.set(undefined);
+      };
+    }
+  }, [isNextChrome, topNavMenuItems, services.chrome.next.header]);
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -100,7 +110,9 @@ export const TabsView = (props: SingleTabViewProps) => {
             getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
             appendRight={
-              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+              !isNextChrome ? (
+                <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+              ) : undefined
             }
           />
         </div>
