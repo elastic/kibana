@@ -4,19 +4,7 @@ set -euo pipefail
 
 echo --- Reconcile PR labels
 
-# Derive the previous patch version from NEW_VERSION
-# e.g., 9.2.5 -> 9.2.4
-MAJOR=$(echo "$NEW_VERSION" | cut -d. -f1)
-MINOR=$(echo "$NEW_VERSION" | cut -d. -f2)
-PATCH=$(echo "$NEW_VERSION" | cut -d. -f3)
-
-if [ "$PATCH" -le 0 ]; then
-  echo "Patch version is 0, nothing to reconcile"
-  exit 0
-fi
-
-OLD_PATCH=$((PATCH - 1))
-OLD_VERSION="${MAJOR}.${MINOR}.${OLD_PATCH}"
+OLD_VERSION=$(buildkite-agent meta-data get "OLD_VERSION")
 
 echo "Reconciling labels from v${OLD_VERSION} to v${NEW_VERSION}"
 
