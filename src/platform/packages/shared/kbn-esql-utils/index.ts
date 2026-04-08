@@ -21,6 +21,7 @@ export {
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
+  buildMetricsInfoQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -43,6 +44,7 @@ export {
   fixESQLQueryWithVariables,
   replaceESQLQueryIndexPattern,
   getCategorizeColumns,
+  getSparklineColumns,
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,
@@ -72,4 +74,4 @@ export {
   type ESQLStatsQueryMeta,
 } from './src';
 
-export { ENABLE_ESQL } from './constants';
+export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

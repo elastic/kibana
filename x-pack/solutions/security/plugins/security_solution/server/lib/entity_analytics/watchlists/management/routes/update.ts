@@ -70,7 +70,8 @@ export const updateWatchlistRoute = (
               statusCode: error.statusCode,
             });
           }
-        }
+        },
+        'platinum'
       )
     );
 };

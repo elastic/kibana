@@ -20,14 +20,14 @@ const SCHEMA_URI = `inmemory://schemas/test-step-json-manual-editor-schema`;
 
 export interface StepExecuteManualFormProps {
   value: string;
-  onChange: (value: string) => void;
+  setValue: (value: string) => void;
   errors: string | null;
   warnings: string | null;
   contextJsonSchema?: z.core.JSONSchema.BaseSchema;
 }
 
 export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
-  ({ value, onChange, errors, warnings, contextJsonSchema }) => {
+  ({ value, setValue, errors, warnings, contextJsonSchema }) => {
     // Hook Monaco on mount to register the schema for validation + suggestions
     const mountedOnce = useRef(false);
     const handleMount = useCallback(
@@ -58,19 +58,39 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        css={css`
+          min-height: 0;
+        `}
+      >
         {(errors || warnings) && (
           <EuiFlexItem grow={false}>
             <InputValidationCallout errors={errors} warnings={warnings} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+          `}
+        >
           <EuiFormRow
             label={i18n.translate('workflows.testStepModal.inputDataLabel', {
               defaultMessage: 'Input Data',
             })}
             fullWidth
             css={css`
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              min-height: 0;
+              .euiFormRow__fieldWrapper {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+              }
               .euiFormRow__labelWrapper {
                 padding-left: 0;
               }
@@ -79,12 +99,10 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
             <CodeEditor
               languageId="json"
               value={value}
+              width="100%"
+              height="100%"
               editorDidMount={handleMount}
-              onChange={onChange}
-              fitToContent={{
-                minLines: 5,
-                maxLines: 15,
-              }}
+              onChange={setValue}
               dataTestSubj="workflow-event-manual-json-editor"
               overflowWidgetsContainerZIndexOverride={6001}
               options={{

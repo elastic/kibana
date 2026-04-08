@@ -5,27 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
-import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
-import { RelatedAlertsBySession } from './related_alerts_by_session';
-import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
-import { RelatedCases } from './related_cases';
-import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import React, { useCallback, useMemo } from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
-import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
-import { SuppressedAlerts } from './suppressed_alerts';
-import { RelatedAttacks } from './related_attacks';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
-import { useShowRelatedAttacks } from '../../shared/hooks/use_show_related_attacks';
+import { CorrelationsDetails as CorrelationsDetailsV2 } from '../../../../flyout_v2/correlations';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 
@@ -33,96 +19,28 @@ export const CORRELATIONS_TAB_ID = 'correlations';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, searchHit } =
-    useDocumentDetailsContext();
+  const { scopeId, isRulePreview, searchHit } = useDocumentDetailsContext();
+  const { openPreviewPanel } = useExpandableFlyoutApi();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const onShowAlert = useCallback(
+    (id: string, indexName: string) =>
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: { id, indexName, scopeId, isPreviewMode: true, banner: ALERT_PREVIEW_BANNER },
+      }),
+    [openPreviewPanel, scopeId]
+  );
 
-  const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
-    getFieldsData,
-    searchHit,
-    eventId,
-    isRulePreview,
-  });
-  const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
-    eventId,
-    getFieldsData,
-  });
-  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
-  const showCases = useShowRelatedCases({ getFieldsData });
-  const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
-    getFieldsData,
-  });
-  const { show: showRelatedAttacks, attackIds } = useShowRelatedAttacks({ getFieldsData });
-
-  const canShowAtLeastOneInsight =
-    showAlertsByAncestry ||
-    showSameSourceAlerts ||
-    showAlertsBySession ||
-    showRelatedAttacks ||
-    showCases ||
-    showSuppressedAlerts;
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj={CORRELATIONS_DETAILS_TEST_ID} color="transparent">
-      {canShowAtLeastOneInsight ? (
-        <EuiFlexGroup gutterSize="l" direction="column">
-          {showSuppressedAlerts && (
-            <EuiFlexItem>
-              <SuppressedAlerts
-                alertSuppressionCount={alertSuppressionCount}
-                dataAsNestedObject={dataAsNestedObject}
-                showInvestigateInTimeline={!isRulePreview}
-              />
-            </EuiFlexItem>
-          )}
-          {showCases && (
-            <EuiFlexItem>
-              <RelatedCases eventId={eventId} />
-            </EuiFlexItem>
-          )}
-          {showSameSourceAlerts && (
-            <EuiFlexItem>
-              <RelatedAlertsBySameSourceEvent
-                originalEventId={originalEventId}
-                scopeId={scopeId}
-                eventId={eventId}
-              />
-            </EuiFlexItem>
-          )}
-          {showAlertsBySession && entityId && (
-            <EuiFlexItem>
-              <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
-            </EuiFlexItem>
-          )}
-          {showAlertsByAncestry && (
-            <EuiFlexItem>
-              <RelatedAlertsByAncestry
-                indices={securityDefaultPatterns}
-                scopeId={scopeId}
-                documentId={documentId}
-              />
-            </EuiFlexItem>
-          )}
-          {showRelatedAttacks && (
-            <EuiFlexItem>
-              <RelatedAttacks attackIds={attackIds} scopeId={scopeId} eventId={eventId} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ) : (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.noDataDescription"
-          defaultMessage="No correlations data available."
-        />
-      )}
-    </EuiPanel>
+    <CorrelationsDetailsV2
+      hit={hit}
+      scopeId={scopeId}
+      isRulePreview={isRulePreview}
+      onShowAlert={onShowAlert}
+      hidePreviewLink={false}
+    />
   );
 };
 

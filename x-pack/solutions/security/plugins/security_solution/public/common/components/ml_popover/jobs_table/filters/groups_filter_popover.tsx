@@ -57,7 +57,7 @@ export const GroupsFilterPopoverComponent = ({
       button={
         <EuiFilterButton
           data-test-subj={'groups-filter-popover-button'}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
           isSelected={isGroupPopoverOpen}
           numFilters={uniqueGroups.length}
@@ -84,7 +84,7 @@ export const GroupsFilterPopoverComponent = ({
       {uniqueGroups.length === 0 && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>
-            <EuiIcon type="minusInCircle" />
+            <EuiIcon type="minusCircle" />
             <EuiSpacer size="xs" />
             <p>{i18n.NO_GROUPS_AVAILABLE}</p>
           </EuiFlexItem>

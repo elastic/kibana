@@ -43,7 +43,7 @@ export const GroupingLicenseCtaPopover = React.memo<GroupingLicenseCtaPopoverPro
       () => (
         <EuiButton
           color="text"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           data-test-subj="logsOverviewGroupingCtaPopoverButton"
           onClick={togglePopover}

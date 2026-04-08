@@ -22,17 +22,6 @@ export const AI_VALUE_DASHBOARD = i18n.translate('xpack.securitySolution.navigat
   defaultMessage: 'Value report',
 });
 
-export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.navigation.entityRiskScore',
-  {
-    defaultMessage: 'Entity risk score',
-  }
-);
-
-export const ENTITY_STORE = i18n.translate('xpack.securitySolution.navigation.entityStore', {
-  defaultMessage: 'Entity store',
-});
-
 export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
   defaultMessage: 'Notes',
 });
@@ -65,15 +54,12 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_WATCHLISTS = i18n.translate(
-  'xpack.securitySolution.navigation.watchlists',
-  {
-    defaultMessage: 'Watchlists Management',
-  }
-);
-
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
+});
+
+export const LAUNCHPAD = i18n.translate('xpack.securitySolution.navigation.launchpad', {
+  defaultMessage: 'Launchpad',
 });
 
 export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
@@ -209,6 +195,10 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
+export const ARTIFACTS = i18n.translate('xpack.securitySolution.navigation.artifacts', {
+  defaultMessage: 'Artifacts',
+});
+
 export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
   'xpack.securitySolution.navigation.responseActionsHistory',
   {
@@ -230,13 +220,6 @@ export const PROTECTION_UPDATES = i18n.translate(
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
-
-export const AI_RULE_CREATE = i18n.translate(
-  'xpack.securitySolution.navigation.aiRuleCreationTitle',
-  {
-    defaultMessage: 'AI rule creation',
-  }
-);
 
 export const DE_SPACE_RULES_HEALTH = i18n.translate(
   'xpack.securitySolution.navigation.spaceRulesHealthTitle',

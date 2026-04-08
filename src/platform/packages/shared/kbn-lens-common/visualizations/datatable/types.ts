@@ -87,7 +87,7 @@ export interface ColumnState {
   palette?: PaletteOutput<CustomPaletteParams>;
   // Categorical color mapping configuration
   colorMapping?: ColorMapping.Config;
-  colorMode?: 'none' | 'cell' | 'text';
+  colorMode?: 'none' | 'cell' | 'text' | 'badge';
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;

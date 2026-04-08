@@ -303,7 +303,7 @@ export const RuleActionsConnectorsBody = ({
   const connectorFilterButton = useMemo(() => {
     const button = (
       <EuiFilterButton
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         badgeColor="accent"
         hasActiveFilters={selectedConnectorType !== 'all'}
         numActiveFilters={selectedConnectorType !== 'all' ? 1 : undefined}
@@ -351,7 +351,7 @@ export const RuleActionsConnectorsBody = ({
         <EuiEmptyPrompt
           data-test-subj="ruleActionsConnectorsModalEmpty"
           color="subdued"
-          iconType="search"
+          iconType="magnify"
           title={<h2>{ACTION_TYPE_MODAL_EMPTY_TITLE}</h2>}
           body={
             <EuiText>

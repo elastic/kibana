@@ -100,6 +100,11 @@ jest.mock('@elastic/eui', () => {
 
 jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
+jest.mock('../../../../../../flyout/shared/components/flyout_link', () => ({
+  FlyoutLink: ({ children, value }: { children?: React.ReactNode; value: string }) => (
+    <>{children ?? value}</>
+  ),
+}));
 
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();

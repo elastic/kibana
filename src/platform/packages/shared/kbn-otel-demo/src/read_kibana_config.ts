@@ -14,13 +14,13 @@ import yaml from 'js-yaml';
 import { pickBy, identity } from 'lodash';
 import { resolve } from 'path';
 
-interface ElasticsearchConfig {
+export interface ElasticsearchConfig {
   hosts: string;
   username: string;
   password: string;
 }
 
-interface KibanaServerConfig {
+export interface KibanaServerConfig {
   host: string;
   port: number;
   basePath: string;
@@ -31,7 +31,7 @@ interface KibanaCredentials {
   password: string;
 }
 
-interface KibanaConfig {
+export interface KibanaConfig {
   elasticsearch: ElasticsearchConfig;
   server: KibanaServerConfig;
   kibanaCredentials: KibanaCredentials;

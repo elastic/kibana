@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 
 export interface TemplateFlyoutFooterProps {
   isFirstStep: boolean;

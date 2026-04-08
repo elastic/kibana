@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { createEsDocuments } from '../create_test_data';
 
 export default function monitoringAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const es = getService('es');
 
   describe('monitoring', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -142,6 +145,63 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
 
       getResponse.body.monitoring.run.history.forEach((history: any) => {
         expect(history.duration).to.be.a('number');
+      });
+    });
+
+    describe('last run framework metrics', () => {
+      const esTestIndexTool = new ESTestIndexTool(es, retry);
+      const RULE_INTERVAL_SECONDS = 6;
+      const RULE_INTERVALS_TO_WRITE = 5;
+      const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
+      const ES_GROUPS_TO_WRITE = 3;
+
+      afterEach(async () => {
+        await esTestIndexTool.destroy();
+      });
+
+      it('persists total_search_duration_ms on the rule after successful rule tun', async () => {
+        await esTestIndexTool.destroy();
+        await esTestIndexTool.setup();
+
+        const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
+        const endDate = new Date(endDateMillis).toISOString();
+
+        await createEsDocuments(
+          es,
+          esTestIndexTool,
+          endDate,
+          RULE_INTERVALS_TO_WRITE,
+          RULE_INTERVAL_MILLIS,
+          ES_GROUPS_TO_WRITE
+        );
+
+        const createResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.cancellableRule',
+              schedule: { interval: '1h' },
+              params: {
+                doLongSearch: false,
+                doLongPostProcessing: false,
+              },
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
+
+        await waitForExecutionCount(1, createResponse.body.id);
+
+        const getResponse = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`)
+          .expect(200);
+
+        const totalSearchMs =
+          getResponse.body.monitoring.run.last_run.metrics.total_search_duration_ms;
+
+        expect(totalSearchMs).to.be.greaterThan(0);
       });
     });
   });

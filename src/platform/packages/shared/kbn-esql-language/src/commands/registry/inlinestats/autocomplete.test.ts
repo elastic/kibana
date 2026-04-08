@@ -79,14 +79,14 @@ describe('INLINE STATS Multi-token Autocomplete', () => {
       previousCommandFields,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
     const statsResult = statsColumnsAfter(
       statsCommand,
       previousCommandFields,
       statsQueryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(inlineStatsResult).toEqual<ESQLColumnData[]>([

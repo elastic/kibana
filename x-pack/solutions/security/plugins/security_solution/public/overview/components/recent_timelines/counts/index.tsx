@@ -52,10 +52,10 @@ export const RecentTimelineCounts = React.memo<{
     <div>
       <IconWithCount
         count={getPinnedEventCount(timeline)}
-        icon="pinFilled"
+        icon="pinFill"
         tooltip={i18n.PINNED_EVENTS}
       />
-      <IconWithCount count={getNotesCount(timeline)} icon="editorComment" tooltip={i18n.NOTES} />
+      <IconWithCount count={getNotesCount(timeline)} icon="comment" tooltip={i18n.NOTES} />
     </div>
   );
 });
