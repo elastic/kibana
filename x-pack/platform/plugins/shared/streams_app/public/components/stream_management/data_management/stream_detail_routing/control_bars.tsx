@@ -26,6 +26,7 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
+import type { Streams } from '@kbn/streams-schema';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 import {
   buildRoutingForkRequestPayload,
@@ -149,7 +150,10 @@ export const EditRoutingRuleControls = ({
 
   const onViewCodeClick = () => {
     const routingPayload = routing.map(routingConverter.toAPIDefinition);
-    const body = buildRoutingSaveRequestPayload(definition, routingPayload);
+    const body = buildRoutingSaveRequestPayload(
+      definition as Streams.WiredStream.GetResponse,
+      routingPayload
+    );
 
     setRequestPreviewCodeContent(
       buildRequestPreviewCodeContent({

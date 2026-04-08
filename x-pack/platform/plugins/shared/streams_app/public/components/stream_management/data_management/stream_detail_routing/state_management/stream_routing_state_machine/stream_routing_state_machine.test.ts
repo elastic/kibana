@@ -124,7 +124,7 @@ const classicDefinition = {
   effective_lifecycle: { type: 'dlm', data_retention: '30d' },
   effective_failure_store: { enabled: false },
   effective_settings: {},
-} as unknown as Streams.WiredStream.GetResponse;
+} as unknown as Streams.ClassicStream.GetResponse;
 
 describe('classic stream partitioning', () => {
   const createClassicActor = () => {
@@ -216,8 +216,8 @@ describe('getRuntimeMappings classic stream guard', () => {
     const result = buildDocumentCountProbabilitySearchParams({
       condition: { field: 'service.name', eq: 'my-service' },
       definition: classicDefinition,
-      start: '2026-01-01T00:00:00.000Z',
-      end: '2026-01-02T00:00:00.000Z',
+      start: Date.parse('2026-01-01T00:00:00.000Z'),
+      end: Date.parse('2026-01-02T00:00:00.000Z'),
       docCount: 1000,
     });
 
@@ -242,8 +242,8 @@ describe('getRuntimeMappings classic stream guard', () => {
     const result = buildDocumentCountProbabilitySearchParams({
       condition: { field: 'service.name', eq: 'my-service' },
       definition: wiredDefinition,
-      start: '2026-01-01T00:00:00.000Z',
-      end: '2026-01-02T00:00:00.000Z',
+      start: Date.parse('2026-01-01T00:00:00.000Z'),
+      end: Date.parse('2026-01-02T00:00:00.000Z'),
       docCount: 1000,
     });
 

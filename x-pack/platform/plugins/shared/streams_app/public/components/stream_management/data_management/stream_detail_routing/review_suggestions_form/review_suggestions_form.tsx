@@ -51,7 +51,7 @@ export interface ReviewSuggestionsFormProps
   > {
   suggestions: PartitionSuggestion[];
   onRegenerate: (connectorId: string, userPrompt?: string) => void;
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
   aiFeatures: AIFeatures;
   onBulkAccept: () => void;
 }

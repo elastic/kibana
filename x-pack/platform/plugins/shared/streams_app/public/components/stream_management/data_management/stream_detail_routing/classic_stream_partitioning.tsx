@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiResizableContainer } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { ChildStreamList } from './child_stream_list';
@@ -37,16 +37,11 @@ export const ClassicStreamPartitioning = ({
 
   const { timeState$ } = useTimefilter();
 
-  // No-op for classic — ingest fork success notifications are wired-only
-  const forkSuccessNotifier = useMemo(() => () => {}, []);
-
-  // Safe: classic streams only use queryMode, which never accesses wired-only fields.
-  // Runtime guards (isClassicStream, getRuntimeMappings) prevent wired property access.
-  const routingDefinition = definition as unknown as Streams.WiredStream.GetResponse;
+  const forkSuccessNotifier = () => {};
 
   return (
     <StreamRoutingContextProvider
-      definition={routingDefinition}
+      definition={definition}
       refreshDefinition={refreshDefinition}
       core={core}
       data={data}

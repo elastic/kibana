@@ -161,7 +161,10 @@ export function StreamDetailRoutingImpl() {
 
   const onBottomBarViewCodeClick = () => {
     const routingPayload = routing.map(routingConverter.toAPIDefinition);
-    const body = buildRoutingSaveRequestPayload(definition, routingPayload);
+    const body = buildRoutingSaveRequestPayload(
+      definition as Streams.WiredStream.GetResponse,
+      routingPayload
+    );
 
     openRequestPreviewFlyout({
       method: 'PUT',

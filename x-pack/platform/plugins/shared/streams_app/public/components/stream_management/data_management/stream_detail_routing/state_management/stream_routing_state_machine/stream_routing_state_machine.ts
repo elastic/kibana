@@ -87,7 +87,7 @@ export const streamRoutingMachine = setup({
       routing: context.initialRouting,
       isConditionEditorValid: true,
     })),
-    setupRouting: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => {
+    setupRouting: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => {
       const routing = Streams.WiredStream.Definition.is(params.definition.stream)
         ? params.definition.stream.ingest.wired.routing.map(routingConverter.toUIDefinition)
         : [];
@@ -101,7 +101,7 @@ export const streamRoutingMachine = setup({
     storeCurrentRuleId: assign((_, params: { id: StreamRoutingContext['currentRuleId'] }) => ({
       currentRuleId: params.id,
     })),
-    storeDefinition: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => ({
+    storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
     storeSuggestedRuleId: assign((_, params: { id: StreamRoutingContext['suggestedRuleId'] }) => ({
@@ -244,7 +244,6 @@ export const streamRoutingMachine = setup({
         },
         'stream.received': [
           {
-            // Classic streams must stay in queryMode after a definition refresh
             guard: 'isClassicStream',
             actions: [
               { type: 'storeDefinition', params: ({ event }) => event },
@@ -460,7 +459,7 @@ export const streamRoutingMachine = setup({
                       const currentRoutingRule = selectCurrentRule(context);
 
                       return {
-                        definition: context.definition,
+                        definition: context.definition as Streams.WiredStream.GetResponse,
                         where: currentRoutingRule.where,
                         destination: currentRoutingRule.destination,
                         status: currentRoutingRule.status,
@@ -553,7 +552,7 @@ export const streamRoutingMachine = setup({
                     id: 'upsertStreamActor',
                     src: 'upsertStream',
                     input: ({ context }) => ({
-                      definition: context.definition,
+                      definition: context.definition as Streams.WiredStream.GetResponse,
                       routing: context.routing.map(routingConverter.toAPIDefinition),
                     }),
                     onDone: {
@@ -602,7 +601,7 @@ export const streamRoutingMachine = setup({
                     id: 'upsertStreamActor',
                     src: 'upsertStream',
                     input: ({ context }) => ({
-                      definition: context.definition,
+                      definition: context.definition as Streams.WiredStream.GetResponse,
                       routing: context.routing.map(routingConverter.toAPIDefinition),
                     }),
                     onDone: {
@@ -650,7 +649,7 @@ export const streamRoutingMachine = setup({
                       }
 
                       return {
-                        definition: context.definition,
+                        definition: context.definition as Streams.WiredStream.GetResponse,
                         destination: routingRule.destination,
                         where: routingRule.where,
                         status: 'enabled',
@@ -694,7 +693,7 @@ export const streamRoutingMachine = setup({
                       const item = bulkFork!.items[nextIdx];
 
                       return {
-                        definition: context.definition,
+                        definition: context.definition as Streams.WiredStream.GetResponse,
                         destination: item.name,
                         where: item.condition,
                         status: 'enabled',

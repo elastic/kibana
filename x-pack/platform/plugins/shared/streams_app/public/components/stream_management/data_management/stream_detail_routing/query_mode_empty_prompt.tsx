@@ -80,7 +80,7 @@ export const QueryModeEmptyPrompt = () => {
 };
 
 const titleText = i18n.translate('xpack.streams.queryModeEmptyPrompt.title', {
-  defaultMessage: 'Create a virtual sub-set of your data',
+  defaultMessage: 'Create a virtual subset of your data',
 });
 
 const descriptionText = i18n.translate('xpack.streams.queryModeEmptyPrompt.description', {

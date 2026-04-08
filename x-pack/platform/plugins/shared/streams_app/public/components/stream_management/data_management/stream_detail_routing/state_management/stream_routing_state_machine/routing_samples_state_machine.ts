@@ -35,13 +35,13 @@ export type DocumentMatchFilterOptions = 'matched' | 'unmatched';
 
 export interface RoutingSamplesInput {
   condition?: Condition;
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
   documentMatchFilter: DocumentMatchFilterOptions;
 }
 
 export interface RoutingSamplesContext {
   condition?: Condition;
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
   documents: SampleDocument[];
   documentsError?: Error;
   approximateMatchRatio?: number | null;
@@ -487,7 +487,7 @@ const getAbsoluteTimestamps = (data: DataPublicPluginStart) => {
  * ingest in the painless condition checks.
  */
 function getRuntimeMappings(
-  definition: Streams.WiredStream.GetResponse,
+  definition: Streams.ingest.all.GetResponse,
   condition?: Condition
 ): MappingRuntimeFields {
   if (!condition) return {};
@@ -496,9 +496,11 @@ function getRuntimeMappings(
     return {};
   }
 
+  const wiredDefinition = definition as Streams.WiredStream.GetResponse;
+
   const mappedFields = Object.keys({
-    ...definition.inherited_fields,
-    ...definition.stream.ingest.wired.fields,
+    ...wiredDefinition.inherited_fields,
+    ...wiredDefinition.stream.ingest.wired.fields,
   });
 
   return Object.fromEntries(

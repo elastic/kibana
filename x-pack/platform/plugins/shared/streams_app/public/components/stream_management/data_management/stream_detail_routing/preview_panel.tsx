@@ -306,7 +306,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
           <EuiFlexItem grow={false}>
             <DocumentMatchFilterControls
               onFilterChange={setDocumentMatchFilter}
-              matchedDocumentPercentage={approximateMatchRatio}
+              matchedDocumentRatio={approximateMatchRatio}
               isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
             />
           </EuiFlexItem>
