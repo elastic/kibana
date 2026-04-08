@@ -193,9 +193,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                   ...(samlRequestInfo?.requestId
                     ? { authnRequestId: samlRequestInfo.requestId }
                     : {}),
-                  ...(samlRequestInfo?.issuer
-                    ? { spEntityId: samlRequestInfo.issuer }
-                    : {}),
+                  ...(samlRequestInfo?.issuer ? { spEntityId: samlRequestInfo.issuer } : {}),
                   ...serverlessOptions,
                 }),
                 ...(samlRequestInfo?.acsUrl ? { acsUrl: samlRequestInfo.acsUrl } : {}),
