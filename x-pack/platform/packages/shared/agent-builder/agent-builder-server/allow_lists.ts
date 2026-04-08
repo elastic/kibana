@@ -34,6 +34,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
+  `${internalNamespaces.observability}.get_apm_correlations`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,

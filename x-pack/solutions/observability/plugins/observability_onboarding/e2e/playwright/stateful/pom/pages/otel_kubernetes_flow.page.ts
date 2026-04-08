@@ -12,12 +12,16 @@ export class OtelKubernetesFlowPage {
   context: BrowserContext;
 
   private readonly exploreLogsButton: Locator;
+  private readonly dataReceivedIndicator: Locator;
 
   constructor(page: Page, context: BrowserContext) {
     this.page = page;
     this.context = context;
 
     this.exploreLogsButton = this.page.getByText('Explore logs');
+    this.dataReceivedIndicator = this.page
+      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
+      .getByText('We are monitoring your cluster');
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -80,6 +84,13 @@ export class OtelKubernetesFlowPage {
     } else {
       throw new Error('Service inventory URL not found');
     }
+  }
+
+  public async assertDataReceivedIndicator(): Promise<void> {
+    await expect(
+      this.dataReceivedIndicator,
+      'Data received indicator should be visible'
+    ).toBeVisible({ timeout: 5 * 60_000 });
   }
 
   public async assertLogsExplorationButtonVisible() {

@@ -523,7 +523,7 @@ export function RuleConditionChart({
     return (
       <div style={{ maxHeight: 180, minHeight: 180 }}>
         <EuiEmptyPrompt
-          iconType="visArea"
+          iconType="chartArea"
           titleSize="xxs"
           data-test-subj="thresholdRuleNoChartData"
           body={

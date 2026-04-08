@@ -27,6 +27,7 @@ import {
   getRulesFeature,
   getRulesV2Feature,
   getRulesV3Feature,
+  getRulesV4Feature,
   getAlertsFeature,
 } from '@kbn/security-solution-features/product_features';
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
@@ -37,6 +38,7 @@ import {
   rulesSavedObjects,
   rulesV2SavedObjects,
   rulesV3SavedObjects,
+  rulesV4SavedObjects,
   securityExceptionsSavedObjects,
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
@@ -95,6 +97,10 @@ export class ProductFeaturesService {
       getRulesV3Feature({
         ...securityFeatureParams,
         savedObjects: [...rulesV3SavedObjects, ...securityExceptionsSavedObjects],
+      }),
+      getRulesV4Feature({
+        ...securityFeatureParams,
+        savedObjects: [...rulesV4SavedObjects, ...securityExceptionsSavedObjects],
       }),
     ]);
     this.productFeaturesRegistry.create('alerts', [getAlertsFeature()]);

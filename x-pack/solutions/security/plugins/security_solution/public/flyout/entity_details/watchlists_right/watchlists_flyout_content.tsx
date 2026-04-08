@@ -16,6 +16,7 @@ import { WatchlistsFlyoutHeader } from './watchlists_flyout_header';
 export interface WatchlistsFlyoutContentProps {
   title: string;
   watchlist: CreateWatchlistRequestBodyInput;
+  watchlistId?: string;
   isEditMode: boolean;
   isNameInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
@@ -30,6 +31,7 @@ export interface WatchlistsFlyoutContentProps {
 export const WatchlistsFlyoutContent = ({
   title,
   watchlist,
+  watchlistId,
   isEditMode,
   isNameInvalid,
   onFieldChange,
@@ -44,6 +46,7 @@ export const WatchlistsFlyoutContent = ({
       <FlyoutBody>
         <WatchlistForm
           watchlist={watchlist}
+          watchlistId={watchlistId}
           isEditMode={isEditMode}
           onFieldChange={onFieldChange}
           isNameInvalid={isNameInvalid}

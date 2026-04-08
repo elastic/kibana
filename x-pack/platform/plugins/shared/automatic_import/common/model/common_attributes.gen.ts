@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { NonEmptyString } from './primitive.gen';
+import { SafeIdentifier, NonEmptyString } from './primitive.gen';
 
 /**
  * The input type object with its settings.
@@ -51,7 +51,7 @@ export const DataStream = z.object({
   /**
    * The ID of the data stream
    */
-  dataStreamId: NonEmptyString,
+  dataStreamId: SafeIdentifier,
   /**
    * The title of the data stream
    */
@@ -75,11 +75,11 @@ export const Integration = z
     /**
      * The ID of the integration
      */
-    integrationId: NonEmptyString,
+    integrationId: SafeIdentifier,
     /**
      * The data streams of the integration
      */
-    dataStreams: z.array(DataStream).max(50).optional(),
+    dataStreams: z.array(DataStream).max(10).optional(),
     /**
      * The logo of the integration
      */
