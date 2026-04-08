@@ -37,6 +37,11 @@ export function useBreadcrumbs(
       href: '/',
     };
 
+    const episodesListBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('episodes_list'),
+      href: '/',
+    };
+
     let breadcrumbs: ChromeBreadcrumb[];
 
     switch (page) {
@@ -76,6 +81,18 @@ export function useBreadcrumbs(
           rootBreadcrumb,
           notificationPoliciesListBreadcrumb,
           getAlertingV2Breadcrumb('notification_policy_edit'),
+        ];
+        break;
+      case 'episodes_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('episodes_list') }];
+        break;
+      case 'episode_details':
+        breadcrumbs = [
+          rootBreadcrumb,
+          episodesListBreadcrumb,
+          getAlertingV2Breadcrumb('episode_details', {
+            ruleName: options.ruleName ?? '',
+          }),
         ];
         break;
       default:

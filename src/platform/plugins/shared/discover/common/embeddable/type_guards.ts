@@ -22,7 +22,7 @@ import type {
 export function isDiscoverSessionEmbeddableByReferenceState(
   state: DiscoverSessionEmbeddableState
 ): state is DiscoverSessionEmbeddableByReferenceState {
-  return 'discover_session_id' in state;
+  return 'ref_id' in state;
 }
 
 export function isSearchEmbeddableByValueState(
