@@ -8,6 +8,7 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { StreamsRepositoryClient } from '../api';
 
@@ -53,7 +54,10 @@ export function createStreamsSourceEnricher(
           description: stream.description || undefined,
           links: [
             {
-              label: 'View in Streams',
+              label: i18n.translate('xpack.streams.esqlSourceEnricher.viewStreamDetailsLabel', {
+                defaultMessage: 'View {streamName} details',
+                values: { streamName: stream.name },
+              }),
               url: streamUrl,
             },
           ],
