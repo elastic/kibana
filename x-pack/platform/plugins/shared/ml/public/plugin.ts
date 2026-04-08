@@ -312,7 +312,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
               if (this.enabledFeatures.ad) {
                 if (pluginsSetup.cases) {
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                  registerCasesAttachments(
+                    pluginsSetup.cases,
+                    coreStart,
+                    pluginStart,
+                    pluginsSetup.usageCollection
+                  );
                 }
 
                 pluginStart.cps?.cpsManager?.registerAppAccess('ml', (location: string) =>
