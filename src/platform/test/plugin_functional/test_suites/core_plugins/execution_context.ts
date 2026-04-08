@@ -13,9 +13,6 @@ import '@kbn/core-provider-plugin/types';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   describe('execution context', function () {
-    // FIPS mode enables security which prevents the plugin app from loading, leaving
-    // window._coreProvider uninitialized and causing all tests in this suite to fail
-    this.tags('skipFIPS');
     describe('passed for a client-side operation', () => {
       const PageObjects = getPageObjects(['common']);
       const browser = getService('browser');
