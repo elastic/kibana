@@ -9,7 +9,7 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { COMMON_HEADERS, DATA_VIEW_PATH, SERVICE_KEY } from '../../fixtures/constants';
+import { COMMON_HEADERS, DATA_VIEW_PATH } from '../../fixtures/constants';
 
 apiTest.describe(
   'POST api/data_views/data_view/{id}/runtime_field - create errors (data view api)',
@@ -29,39 +29,28 @@ apiTest.describe(
       createdIds = [];
     });
 
-    apiTest('returns an error when runtime field object is not provided', async ({ apiClient }) => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const createResponse = await apiClient.post(DATA_VIEW_PATH, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          [SERVICE_KEY]: {
-            title,
+    apiTest(
+      'returns an error when runtime field object is not provided',
+      async ({ apiClient, apiServices }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const { data: dataView } = await apiServices.dataViews.create({ title });
+        createdIds.push(dataView.id);
+
+        const response = await apiClient.post(`${DATA_VIEW_PATH}/${dataView.id}/runtime_field`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
           },
-        },
-      });
+          responseType: 'json',
+          body: {},
+        });
 
-      expect(createResponse).toHaveStatusCode(200);
-      const id = createResponse.body[SERVICE_KEY].id;
-      createdIds.push(id);
-
-      const response = await apiClient.post(`${DATA_VIEW_PATH}/${id}/runtime_field`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {},
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.statusCode).toBe(400);
-      expect(response.body.message).toBe(
-        '[request body.name]: expected value of type [string] but got [undefined]'
-      );
-    });
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+          '[request body.name]: expected value of type [string] but got [undefined]'
+        );
+      }
+    );
   }
 );

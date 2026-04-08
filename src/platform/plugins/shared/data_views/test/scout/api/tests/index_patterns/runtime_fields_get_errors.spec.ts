@@ -13,7 +13,6 @@ import {
   COMMON_HEADERS,
   ES_ARCHIVE_BASIC_INDEX,
   DATA_VIEW_PATH_LEGACY,
-  SERVICE_KEY_LEGACY,
   ID_OVER_MAX_LENGTH,
 } from '../../fixtures/constants';
 
@@ -21,30 +20,17 @@ apiTest.describe(
   'GET api/index_patterns/index_pattern/{id}/runtime_field/{name} - get errors (legacy index pattern api)',
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
     let viewerApiCredentials: RoleApiCredentials;
     let indexPatternId: string;
 
-    apiTest.beforeAll(async ({ esArchiver, requestAuth, apiClient }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+    apiTest.beforeAll(async ({ esArchiver, requestAuth, apiServices }) => {
       viewerApiCredentials = await requestAuth.getApiKeyForViewer();
       await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
 
-      const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          [SERVICE_KEY_LEGACY]: {
-            title: '*asic_index',
-          },
-        },
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: '*asic_index',
       });
-
-      expect(createResponse).toHaveStatusCode(200);
-      indexPatternId = createResponse.body[SERVICE_KEY_LEGACY].id;
+      indexPatternId = dataView.id;
     });
 
     apiTest.afterAll(async ({ apiServices }) => {

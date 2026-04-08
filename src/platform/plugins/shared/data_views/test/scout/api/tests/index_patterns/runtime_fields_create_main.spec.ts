@@ -35,77 +35,17 @@ apiTest.describe(
       createdIds = [];
     });
 
-    apiTest('can create a new runtime field', async ({ apiClient }) => {
+    apiTest('can create a new runtime field', async ({ apiClient, apiServices }) => {
       const title = `basic_index-${Date.now()}-${Math.random()}*`;
-      const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          override: true,
-          [SERVICE_KEY_LEGACY]: {
-            title,
-          },
-        },
+      const { data: dataView } = await apiServices.dataViews.create({
+        title,
+        override: true,
       });
+      createdIds.push(dataView.id);
 
-      expect(createResponse).toHaveStatusCode(200);
-      const id = createResponse.body[SERVICE_KEY_LEGACY].id;
-      createdIds.push(id);
-
-      const response = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          name: 'runtimeBar',
-          runtimeField: {
-            type: 'long',
-            script: {
-              source: "emit(doc['field_name'].value)",
-            },
-          },
-        },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body[SERVICE_KEY_LEGACY]).toBeDefined();
-      expect(response.body.field).toBeDefined();
-
-      const field = response.body.field;
-      expect(field.name).toBe('runtimeBar');
-      expect(field.runtimeField.type).toBe('long');
-      expect(field.runtimeField.script.source).toBe("emit(doc['field_name'].value)");
-      expect(field.scripted).toBe(false);
-    });
-
-    apiTest(
-      'newly created runtime field is available in the index pattern object',
-      async ({ apiClient }) => {
-        const title = `basic_index-${Date.now()}-${Math.random()}`;
-        const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: {
-            override: true,
-            [SERVICE_KEY_LEGACY]: {
-              title,
-            },
-          },
-        });
-
-        expect(createResponse).toHaveStatusCode(200);
-        const id = createResponse.body[SERVICE_KEY_LEGACY].id;
-        createdIds.push(id);
-
-        const rtResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`, {
+      const response = await apiClient.post(
+        `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/runtime_field`,
+        {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
@@ -120,29 +60,66 @@ apiTest.describe(
               },
             },
           },
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body[SERVICE_KEY_LEGACY]).toBeDefined();
+      expect(response.body.field).toBeDefined();
+
+      const field = response.body.field;
+      expect(field.name).toBe('runtimeBar');
+      expect(field.runtimeField.type).toBe('long');
+      expect(field.runtimeField.script.source).toBe("emit(doc['field_name'].value)");
+      expect(field.scripted).toBe(false);
+    });
+
+    apiTest(
+      'newly created runtime field is available in the index pattern object',
+      async ({ apiClient, apiServices }) => {
+        const title = `basic_index-${Date.now()}-${Math.random()}`;
+        const { data: dataView } = await apiServices.dataViews.create({
+          title,
+          override: true,
         });
+        createdIds.push(dataView.id);
+
+        const rtResponse = await apiClient.post(
+          `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/runtime_field`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: {
+              name: 'runtimeBar',
+              runtimeField: {
+                type: 'long',
+                script: {
+                  source: "emit(doc['field_name'].value)",
+                },
+              },
+            },
+          }
+        );
 
         expect(rtResponse).toHaveStatusCode(200);
 
-        const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-        });
+        const { data: retrievedDataView } = await apiServices.dataViews.get(dataView.id);
+        expect(retrievedDataView).toBeDefined();
 
-        expect(getResponse).toHaveStatusCode(200);
-        expect(getResponse.body[SERVICE_KEY_LEGACY]).toBeDefined();
+        const fields = retrievedDataView.fields;
+        expect(fields).toBeDefined();
 
-        const field = getResponse.body[SERVICE_KEY_LEGACY].fields.runtimeBar;
+        const field = fields!.runtimeBar;
         expect(field.name).toBe('runtimeBar');
         expect(field.runtimeField.type).toBe('long');
         expect(field.runtimeField.script.source).toBe("emit(doc['field_name'].value)");
         expect(field.scripted).toBe(false);
 
         const duplicateResponse = await apiClient.post(
-          `${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`,
+          `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/runtime_field`,
           {
             headers: {
               ...COMMON_HEADERS,
@@ -165,66 +142,60 @@ apiTest.describe(
       }
     );
 
-    apiTest('prevents field name collisions', async ({ apiClient }) => {
+    apiTest('prevents field name collisions', async ({ apiClient, apiServices }) => {
       const title = `basic-${Date.now()}-${Math.random()}*`;
-      const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          override: true,
-          [SERVICE_KEY_LEGACY]: {
-            title,
-          },
-        },
+      const { data: dataView } = await apiServices.dataViews.create({
+        title,
+        override: true,
       });
+      createdIds.push(dataView.id);
 
-      expect(createResponse).toHaveStatusCode(200);
-      const id = createResponse.body[SERVICE_KEY_LEGACY].id;
-      createdIds.push(id);
-
-      const response1 = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          name: 'runtimeBar',
-          runtimeField: {
-            type: 'long',
-            script: {
-              source: "emit(doc['field_name'].value)",
+      const response1 = await apiClient.post(
+        `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/runtime_field`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            name: 'runtimeBar',
+            runtimeField: {
+              type: 'long',
+              script: {
+                source: "emit(doc['field_name'].value)",
+              },
             },
           },
-        },
-      });
+        }
+      );
 
       expect(response1).toHaveStatusCode(200);
 
-      const response2 = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          name: 'runtimeBar',
-          runtimeField: {
-            type: 'long',
-            script: {
-              source: "emit(doc['field_name'].value)",
+      const response2 = await apiClient.post(
+        `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/runtime_field`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            name: 'runtimeBar',
+            runtimeField: {
+              type: 'long',
+              script: {
+                source: "emit(doc['field_name'].value)",
+              },
             },
           },
-        },
-      });
+        }
+      );
 
       expect(response2).toHaveStatusCode(400);
 
       const compositeResponse1 = await apiClient.post(
-        `${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`,
+        `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/runtime_field`,
         {
           headers: {
             ...COMMON_HEADERS,
@@ -250,7 +221,7 @@ apiTest.describe(
       expect(compositeResponse1).toHaveStatusCode(200);
 
       const compositeResponse2 = await apiClient.post(
-        `${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`,
+        `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/runtime_field`,
         {
           headers: {
             ...COMMON_HEADERS,

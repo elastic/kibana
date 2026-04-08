@@ -13,7 +13,6 @@ import {
   COMMON_HEADERS,
   ES_ARCHIVE_BASIC_INDEX,
   DATA_VIEW_PATH,
-  SERVICE_KEY,
   ID_OVER_MAX_LENGTH,
 } from '../../fixtures/constants';
 
@@ -21,30 +20,17 @@ apiTest.describe(
   'GET api/data_views/data_view/{id}/runtime_field/{name} - get errors (data view api)',
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
     let viewerApiCredentials: RoleApiCredentials;
     let dataViewId: string;
 
-    apiTest.beforeAll(async ({ esArchiver, requestAuth, apiClient }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+    apiTest.beforeAll(async ({ esArchiver, requestAuth, apiServices }) => {
       viewerApiCredentials = await requestAuth.getApiKeyForViewer();
       await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
 
-      const createResponse = await apiClient.post(DATA_VIEW_PATH, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          [SERVICE_KEY]: {
-            title: '*asic_index',
-          },
-        },
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: '*asic_index',
       });
-
-      expect(createResponse).toHaveStatusCode(200);
-      dataViewId = createResponse.body[SERVICE_KEY].id;
+      dataViewId = dataView.id;
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
