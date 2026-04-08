@@ -63,6 +63,7 @@ import {
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import { MoreOptionsFields } from './more_options_fields';
 import { AdditionalOptionsFields } from './additional_options_fields';
+import { InferenceEndpointIdField } from './inference_endpoint_id_field';
 import { AuthenticationFormItems } from './configuration/authentication_form_items';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import {
@@ -738,8 +739,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             </>
           ) : null}
           {/* AUTHENTICATION */}
-          {authenticationFormFields.length > 0 ? (
-            <>
+          {authenticationFormFields.length > 0 && (
               <AuthenticationFormItems
                 isLoading={false}
                 items={authenticationFormFields}
@@ -748,16 +748,19 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 isPreconfigured={isPreconfigured}
                 reenterSecretsOnEdit={reenterSecretsOnEdit}
               />
-              <EuiHorizontalRule margin="m" />
-            </>
-          ) : null}
+          )}
           {/* ADDITIONAL OPTIONS */}
           <AdditionalOptionsFields
             config={config}
             selectedTaskType={selectedTaskType}
-            isEdit={isEdit}
             allowContextWindowLength={allowContextWindowLength}
             allowTemperature={allowTemperature}
+          />
+          {/* INFERENCE ENDPOINT ID & API REFERENCE */}
+          <InferenceEndpointIdField
+            config={config}
+            selectedTaskType={selectedTaskType}
+            isEdit={isEdit}
           />
           {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField
