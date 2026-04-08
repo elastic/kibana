@@ -91,7 +91,7 @@ describe('getApmSourceFieldLink', () => {
     expect(
       getApmSourceFieldLink({
         ...baseArgs,
-        apmLocator: undefined,
+        apmLocator: mockLocator,
         serviceName: ALL_VALUE,
         field: APM_SOURCE_FIELDS.SERVICE_NAME,
         value: ALL_VALUE,
