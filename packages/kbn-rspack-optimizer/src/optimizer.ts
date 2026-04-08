@@ -11,6 +11,7 @@ import * as Rx from 'rxjs';
 import { fork, type ChildProcess } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ThemeTag } from './types';
+import { getInspectExecArgv } from './utils/inspect';
 
 export type OptimizerPhase = 'initializing' | 'running' | 'success' | 'issue' | 'error' | 'idle';
 
@@ -25,6 +26,8 @@ export interface RspackOptimizerOptions {
   hmr?: boolean;
   /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
   basePath?: string;
+  /** Forward --inspect flags to the worker process (default: true) */
+  inspectWorkers?: boolean;
   log: ToolingLog;
 }
 
@@ -80,7 +83,10 @@ export class RspackOptimizer {
       // This is exactly how @kbn/optimizer does it (see observe_worker.ts)
       this.worker = fork(workerPath, [], {
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-        execArgv: ['--require=@kbn/babel-register/install'],
+        execArgv: [
+          '--require=@kbn/babel-register/install',
+          ...getInspectExecArgv(this.options.inspectWorkers ?? true),
+        ],
         env: {
           ...process.env,
         },

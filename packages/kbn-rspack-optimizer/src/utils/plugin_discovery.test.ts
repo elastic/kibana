@@ -112,4 +112,5 @@ describe('plugin_discovery', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
   });
+
 });

@@ -25,13 +25,13 @@ export interface BuildOptions {
   examples?: boolean;
   testPlugins?: boolean;
   themeTags?: ThemeTag[];
-  plugins?: string[];
-  filter?: string[];
   log?: ToolingLog;
   /** Enable profiling - writes stats.json and RsDoctor report */
   profile?: boolean;
   /** Skip RsDoctor, only generate stats.json (faster) */
   profileStatsOnly?: boolean;
+  /** Comma-separated plugin IDs for focused stats.json with module-level detail (requires profile) */
+  profileFocus?: string[];
   /** Enable Hot Module Replacement in watch mode (undefined = auto-detect) */
   hmr?: boolean;
   /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
@@ -73,8 +73,6 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     examples = false,
     testPlugins = false,
     themeTags = ['borealislight', 'borealisdark'],
-    plugins: targetPlugins,
-    filter,
     log,
     profile = false,
     profileStatsOnly = false,
@@ -112,11 +110,10 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       examples,
       testPlugins,
       themeTags,
-      plugins: targetPlugins,
-      filter,
       log,
       profile,
       profileStatsOnly,
+      profileFocus: options.profileFocus,
       hmr,
       hmrPort,
       limitsPath: options.limitsPath,

@@ -21,6 +21,7 @@ import {
   DEFAULT_LIMITS_PATH,
 } from './limits';
 import { discoverPlugins } from './utils/plugin_discovery';
+import { getInspectExecArgv } from './utils/inspect';
 
 export interface CliOptions {
   defaultLimitsPath?: string;
@@ -67,6 +68,15 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --profile-stats-only to have no value');
       }
 
+      const profileFocus =
+        typeof flags['profile-focus'] === 'string' && flags['profile-focus'].length > 0
+          ? flags['profile-focus'].split(',').map((s: string) => s.trim())
+          : undefined;
+
+      if (profileFocus && !profile && !profileStatsOnly) {
+        throw createFlagError('--profile-focus requires --profile or --profile-stats-only');
+      }
+
       const updateLimits = flags['update-limits'] ?? false;
       if (typeof updateLimits !== 'boolean') {
         throw createFlagError('expected --update-limits to have no value');
@@ -97,16 +107,6 @@ export function runRspackCli(options: CliOptions = {}): void {
         return;
       }
 
-      const filter =
-        typeof flags.filter === 'string' && flags.filter.length > 0
-          ? flags.filter.split(',').map((s: string) => s.trim())
-          : undefined;
-
-      const plugins =
-        typeof flags.plugins === 'string' && flags.plugins.length > 0
-          ? flags.plugins.split(',').map((s: string) => s.trim())
-          : undefined;
-
       const themes = parseThemes(log, typeof flags.themes === 'string' ? flags.themes : undefined);
 
       const outputRoot =
@@ -114,24 +114,23 @@ export function runRspackCli(options: CliOptions = {}): void {
           ? Path.resolve(flags['output-root'])
           : REPO_ROOT;
 
+      const inspectWorkers = flags['inspect-workers'] as boolean;
+
       // When profiling, spawn a special worker that doesn't use require-in-the-middle
       // This allows RsDoctor to work (envinfo conflicts with require-in-the-middle)
       if (profile || profileStatsOnly) {
         if (watch) {
           log.info('Note: --watch is ignored in profile mode (profile builds are always one-time)');
         }
-        await runProfileWorker(log, addCleanupTask, profileStatsOnly);
+        await runProfileWorker(log, addCleanupTask, profileStatsOnly, inspectWorkers);
         return;
       }
 
       const startTime = Date.now();
 
-      // --update-limits forces a full dist build, ignoring --plugins/--filter
       const effectiveDist = updateLimits || dist;
       const effectiveExamples = updateLimits ? false : examples;
       const effectiveTestPlugins = updateLimits ? false : testPlugins;
-      const effectivePlugins = updateLimits ? undefined : plugins;
-      const effectiveFilter = updateLimits ? undefined : filter;
 
       log.info('Building with RSPack unified compilation...');
 
@@ -144,8 +143,6 @@ export function runRspackCli(options: CliOptions = {}): void {
         examples: effectiveExamples,
         testPlugins: effectiveTestPlugins,
         themeTags: themes,
-        filter: effectiveFilter,
-        plugins: effectivePlugins,
         log,
         profile: false,
         hmr: hmr ? undefined : false,
@@ -182,11 +179,11 @@ export function runRspackCli(options: CliOptions = {}): void {
           'profile-stats-only',
           'update-limits',
           'validate-limits',
+          'inspect-workers',
         ],
-        string: ['filter', 'themes', 'output-root', 'plugins', 'limits'],
+        string: ['themes', 'output-root', 'limits', 'profile-focus'],
         alias: {
           w: 'watch',
-          p: 'plugins',
         },
         default: {
           watch: false,
@@ -197,34 +194,37 @@ export function runRspackCli(options: CliOptions = {}): void {
           hmr: true,
           profile: false,
           'profile-stats-only': false,
+          'inspect-workers': true,
         },
         help: `
           Build Options:
-            --watch, -w           Enable watch mode for development
-            --dist                Build for distribution (minified, no source maps)
-            --examples            Include example plugins
-            --test-plugins        Include test plugins
-            --filter <ids>        Comma-separated plugin IDs to exclude
-            --plugins, -p <ids>   Build only these plugins (for external plugins)
-            --themes <tags>       Comma-separated theme tags to build (default: all)
-            --output-root <dir>   Output root directory (default: repo root)
-            --no-cache            Disable filesystem caching
-            --no-hmr              Disable Hot Module Replacement in watch mode
+            --watch, -w               Enable watch mode for development
+            --dist                    Build for distribution (minified, no source maps)
+            --examples                Include example plugins
+            --test-plugins            Include test plugins
+            --themes <tags>           Comma-separated theme tags to build (default: all)
+            --output-root <dir>       Output root directory (default: repo root)
+            --no-cache                Disable filesystem caching
+            --no-hmr                  Disable Hot Module Replacement in watch mode
+
+          Debugging:
+            --no-inspect-workers      Don't forward --inspect to worker processes (default: forward)
 
           Bundle Limits:
-            --update-limits       Build in dist mode and update limits.yml (always full build)
-            --validate-limits     Validate limits.yml against discovered plugins (no build)
-            --limits <path>       Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
+            --update-limits           Build in dist mode and update limits.yml (always full build)
+            --validate-limits         Validate limits.yml against discovered plugins (no build)
+            --limits <path>           Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
 
           Profile Mode (one-time build with bundle analysis):
-            --profile             Full profiling with stats.json + RsDoctor report
-            --profile-stats-only  Fast profiling with stats.json only (skips RsDoctor)
-                                  Note: --watch is ignored in profile mode
+            --profile                 Full profiling with stats.json + RsDoctor report
+            --profile-stats-only      Fast profiling with stats.json only (skips RsDoctor)
+            --profile-focus <ids>     Comma-separated plugin IDs for focused stats.json with module detail
+                                      Note: --watch is ignored in profile mode
 
           Environment Variables:
-            KBN_USE_RSPACK=true   Use RSPack optimizer instead of webpack
-            KBN_HMR=false         Disable HMR (RSPack only, alternative to --no-hmr)
-            KBN_HMR_PORT=5678     Override the HMR SSE server port (RSPack only, default: 5678)
+            KBN_USE_RSPACK=true       Use RSPack optimizer instead of webpack
+            KBN_HMR=false             Disable HMR (RSPack only, alternative to --no-hmr)
+            KBN_HMR_PORT=5678         Override the HMR SSE server port (RSPack only, default: 5678)
         `,
         examples: `
           # Full production build
@@ -262,7 +262,8 @@ export function runRspackCli(options: CliOptions = {}): void {
 function runProfileWorker(
   log: ToolingLog,
   addCleanupTask: (task: () => void) => void,
-  statsOnly: boolean = false
+  statsOnly: boolean = false,
+  inspectWorkers: boolean = true
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const workerPath = Path.resolve(__dirname, '../scripts/profile_worker.js');
@@ -281,13 +282,13 @@ function runProfileWorker(
 
     child = fork(workerPath, workerArgs, {
       stdio: 'inherit',
-      // Increase memory for profiling - stats generation needs significant heap
-      execArgv: ['--max-old-space-size=8192'],
+      execArgv: [
+        '--max-old-space-size=8192',
+        ...getInspectExecArgv(inspectWorkers),
+      ],
       env: {
         ...process.env,
-        // Ensure APM doesn't interfere
         ELASTIC_APM_ACTIVE: 'false',
-        // Pass stats-only mode to worker
         RSPACK_PROFILE_STATS_ONLY: statsOnly ? 'true' : 'false',
       },
     });

@@ -72,25 +72,64 @@ KBN_USE_RSPACK=true yarn start
 
 ```
 Build Options:
-  --watch, -w           Enable watch mode for development
-  --dist                Build for distribution (minified, no source maps)
-  --examples            Include example plugins
-  --test-plugins        Include test plugins
-  --filter <ids>        Comma-separated plugin IDs to exclude
-  --plugins, -p <ids>   Build only these plugins (for external plugins)
-  --themes <tags>       Comma-separated theme tags to build (default: all)
-  --output-root <dir>   Output root directory (default: repo root)
-  --no-cache            Disable filesystem caching
+  --watch, -w               Enable watch mode for development
+  --dist                    Build for distribution (minified, no source maps)
+  --examples                Include example plugins
+  --test-plugins            Include test plugins
+  --themes <tags>           Comma-separated theme tags to build (default: all)
+  --output-root <dir>       Output root directory (default: repo root)
+  --no-cache                Disable filesystem caching
+  --no-hmr                  Disable Hot Module Replacement in watch mode
+
+Debugging:
+  --no-inspect-workers      Don't forward --inspect to worker processes (default: forward)
+
+Bundle Limits:
+  --update-limits           Build in dist mode and update limits.yml (always full build)
+  --validate-limits         Validate limits.yml against discovered plugins (no build)
+  --limits <path>           Override limits.yml path
 
 Profile Mode (one-time build with bundle analysis):
-  --profile             Full profiling with stats.json + RsDoctor report
-  --profile-stats-only  Fast profiling with stats.json only (skips RsDoctor)
-                        Note: --watch is ignored in profile mode
+  --profile                 Full profiling with stats.json + RsDoctor report
+  --profile-stats-only      Fast profiling with stats.json only (skips RsDoctor)
+  --profile-focus <ids>     Comma-separated plugin IDs for focused stats.json with module detail
+                            Note: --watch is ignored in profile mode
 
 Output Options:
-  --verbose             Verbose output (includes debug messages)
-  --quiet               Quiet output (errors only)
-  --help, -h            Show help message
+  --verbose                 Verbose output (includes debug messages)
+  --quiet                   Quiet output (errors only)
+  --help, -h                Show help message
+```
+
+#### `--profile-focus` (focused profiling)
+
+When profiling, the full stats for 200+ plugins can exceed memory limits if module-level detail is enabled. The `--profile-focus` flag runs a **full build** (all plugins are compiled, output is complete and working) but generates a **focused `stats.json`** scoped to specific plugins with full module-level detail:
+
+```bash
+# Profile only the dashboard plugin and its chunks
+node scripts/build_rspack_bundles.js --profile --profile-focus=dashboard
+
+# Profile multiple plugins
+node scripts/build_rspack_bundles.js --profile-stats-only --profile-focus=dashboard,data,discover
+```
+
+Chunks are matched by their `webpackChunkName` prefix (`plugin-<id>`). The focused stats include:
+- Chunks belonging to the specified plugins
+- All modules within those chunks
+- Assets referenced by those chunks
+
+Without `--profile-focus`, stats are generated with minimal detail (no module info) to avoid the JS string length limit.
+
+#### `--inspect-workers`
+
+By default, when the parent Node.js process is started with `--inspect` or `--inspect-brk`, the optimizer forwards the inspect flag to worker processes with an auto-incremented port. Use `--no-inspect-workers` to disable this:
+
+```bash
+# Workers will be inspectable at port 9230, 9231, etc.
+node --inspect scripts/build_rspack_bundles.js
+
+# Disable worker inspection
+node --inspect scripts/build_rspack_bundles.js --no-inspect-workers
 ```
 
 ### Profiling
@@ -147,13 +186,17 @@ When building with `--dist`:
 
 ## External Plugin Builds
 
-Third-party plugins can be built against Kibana's shared dependencies using `createExternalPluginConfig`:
+Third-party plugins are built using `kbn-plugin-helpers`, which uses a separate RSPack configuration (`createExternalPluginConfig`) that is independent of the unified internal build:
 
 ```bash
-node /path/to/kibana/scripts/build_rspack_bundles.js \
-  --plugins=my_custom_plugin \
-  --dist
+# Build an external plugin with RSPack
+KBN_USE_RSPACK=true node /path/to/kibana/scripts/plugin_helpers build
+
+# Or programmatically
+import { createExternalPluginConfig } from '@kbn/rspack-optimizer';
 ```
+
+External plugins do **not** use the unified `build_rspack_bundles.js` script — they have their own standalone compilation config that links against Kibana's shared dependencies (DLL bundles).
 
 ## Programmatic API
 

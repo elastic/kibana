@@ -41,7 +41,7 @@ var statsOnly = process.env.RSPACK_PROFILE_STATS_ONLY === 'true';
 // Parse command line arguments (same as main CLI, minus --profile and --watch)
 var args = getopts(process.argv.slice(2), {
   boolean: ['dist', 'examples', 'test-plugins', 'no-cache', 'verbose', 'quiet'],
-  string: ['filter', 'themes', 'output-root', 'plugins'],
+  string: ['themes', 'output-root', 'profile-focus'],
   default: {
     dist: false,
     examples: false,
@@ -119,8 +119,9 @@ function getBundleSummary(bundlesDir) {
 async function main() {
   var dist = args.dist;
   var outputRoot = args['output-root'] ? Path.resolve(args['output-root']) : repoRoot;
-  var filter = args.filter ? args.filter.split(',').map(function (s) { return s.trim(); }) : undefined;
-  var plugins = args.plugins ? args.plugins.split(',').map(function (s) { return s.trim(); }) : undefined;
+  var profileFocus = args['profile-focus']
+    ? args['profile-focus'].split(',').map(function (s) { return s.trim(); })
+    : undefined;
   var themes = parseThemes(args.themes);
   var bundlesDir = Path.join(outputRoot, 'target/public/bundles');
 
@@ -142,17 +143,15 @@ async function main() {
       repoRoot: repoRoot,
       outputRoot: outputRoot,
       dist: dist,
-      watch: false, // Profile mode is always a one-time build
+      watch: false,
       cache: !args['no-cache'],
       examples: args.examples,
       testPlugins: args['test-plugins'],
       themeTags: themes,
-      filter: filter,
-      plugins: plugins,
       log: log,
-      // Enable profiling (stats.json always, RsDoctor if not stats-only)
       profile: true,
       profileStatsOnly: statsOnly,
+      profileFocus: profileFocus,
     });
 
     var duration = ((Date.now() - startTime) / 1000).toFixed(2);

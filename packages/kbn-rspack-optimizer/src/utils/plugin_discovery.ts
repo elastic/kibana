@@ -19,8 +19,6 @@ export interface DiscoverPluginsOptions {
   repoRoot: string;
   examples?: boolean;
   testPlugins?: boolean;
-  focus?: string[];
-  filter?: string[];
 }
 
 const isDefaultPlugin = getPluginPackagesFilter();
@@ -82,17 +80,7 @@ export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<
     }
   }
 
-  let result = plugins;
-
-  if (options.focus?.length) {
-    result = result.filter((p) => options.focus!.includes(p.id));
-  }
-
-  if (options.filter?.length) {
-    result = result.filter((p) => !options.filter!.includes(p.id));
-  }
-
-  return result;
+  return plugins;
 }
 
 /**
