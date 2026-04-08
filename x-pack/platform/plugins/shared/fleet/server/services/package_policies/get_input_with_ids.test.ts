@@ -91,7 +91,7 @@ describe('getInputsWithIds', () => {
     expect(inputs[0].streams[1].id).toBe('existing-input-id-2');
   });
 
-  it('should use input_id instead of type when generating IDs for inputs with input_id', () => {
+  it('should use name instead of type when generating IDs for inputs with name', () => {
     const inputs = getInputsWithIds(
       {
         name: 'test-policy',
@@ -102,7 +102,7 @@ describe('getInputsWithIds', () => {
         inputs: [
           {
             type: 'otelcol',
-            input_id: 'filelog_otel',
+            name: 'filelog_otel',
             policy_template: 'nginx',
             enabled: true,
             streams: [
@@ -114,7 +114,7 @@ describe('getInputsWithIds', () => {
           },
           {
             type: 'otelcol',
-            input_id: 'nginx_otel',
+            name: 'nginx_otel',
             policy_template: 'nginx',
             enabled: true,
             streams: [
@@ -142,7 +142,7 @@ describe('getInputsWithIds', () => {
     expect(inputs[1].streams[0].id).toBe('nginx_otel-nginx.stubstatus-policy123');
   });
 
-  it('should fall back to type when input_id is not present', () => {
+  it('should fall back to type when name is not present', () => {
     const inputs = getInputsWithIds(
       {
         name: 'test-policy',

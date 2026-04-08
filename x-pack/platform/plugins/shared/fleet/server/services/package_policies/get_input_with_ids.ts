@@ -7,7 +7,7 @@
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '../../types';
 import { getInputId } from '../agent_policies/package_policies_to_agent_inputs';
-import { getPolicyInputEffectiveId } from '../../../common/services';
+import { getInputEffectiveName } from '../../../common/services';
 
 /**
  * Populate the ids for inputs and streams of a package policy if they are not already set
@@ -34,8 +34,8 @@ export function getInputsWithIds(
         id: stream?.id
           ? stream.id
           : packagePolicyId
-          ? `${getPolicyInputEffectiveId(input)}-${stream.data_stream.dataset}-${packagePolicyId}`
-          : `${getPolicyInputEffectiveId(input)}-${stream.data_stream.dataset}`,
+          ? `${getInputEffectiveName(input)}-${stream.data_stream.dataset}-${packagePolicyId}`
+          : `${getInputEffectiveName(input)}-${stream.data_stream.dataset}`,
       })),
     };
   });

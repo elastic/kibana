@@ -29,8 +29,7 @@ import {
   doesPackageHaveIntegrations,
   getNormalizedInputs,
   getNormalizedDataStreams,
-  getRegistryInputEffectiveId,
-  getPolicyInputEffectiveId,
+  getInputEffectiveName,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset } from './is_valid_namespace';
@@ -371,8 +370,8 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const effectiveId = getRegistryInputEffectiveId(input);
-      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${effectiveId}` : effectiveId;
+      const effectiveName = getInputEffectiveName(input);
+      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${effectiveName}` : effectiveName;
 
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
@@ -385,10 +384,10 @@ export const validatePackagePolicy = (
   >((reqVarDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const effectiveId = getRegistryInputEffectiveId(input);
+      const effectiveName = getInputEffectiveName(input);
       const requiredVarDefKey = hasIntegrations
-        ? `${policyTemplate.name}-${effectiveId}`
-        : effectiveId;
+        ? `${policyTemplate.name}-${effectiveName}`
+        : effectiveName;
 
       if ((input.vars || []).length) {
         reqVarDefs[requiredVarDefKey] = input.required_vars;
@@ -434,8 +433,8 @@ export const validatePackagePolicy = (
     if (!input.vars && !input.streams) {
       return;
     }
-    const effectiveId = getPolicyInputEffectiveId(input);
-    const inputKey = hasIntegrations ? `${input.policy_template}-${effectiveId}` : effectiveId;
+    const effectiveName = getInputEffectiveName(input);
+    const inputKey = hasIntegrations ? `${input.policy_template}-${effectiveName}` : effectiveName;
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       required_vars: undefined,

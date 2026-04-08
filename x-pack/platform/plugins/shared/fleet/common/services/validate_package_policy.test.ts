@@ -682,14 +682,14 @@ describe('Fleet - validatePackagePolicy()', () => {
           data_streams: ['access', 'stubstatus'],
           inputs: [
             {
-              id: 'filelog_otel',
+              name: 'filelog_otel',
               type: 'otelcol',
               title: 'Logs via filelog',
               description: 'Collect logs',
               vars: [{ name: 'log_path', type: 'text', required: true }],
             },
             {
-              id: 'nginx_otel',
+              name: 'nginx_otel',
               type: 'otelcol',
               title: 'Metrics via nginx receiver',
               description: 'Collect metrics',
@@ -720,7 +720,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       ] as any,
     };
 
-    it('validates each input independently using input_id as key', () => {
+    it('validates each input independently using name as key', () => {
       const packagePolicy: NewPackagePolicy = {
         name: 'nginx-1',
         namespace: 'default',
@@ -729,7 +729,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         inputs: [
           {
             type: 'otelcol',
-            input_id: 'filelog_otel',
+            name: 'filelog_otel',
             policy_template: 'nginx',
             enabled: true,
             vars: { log_path: { value: '/var/log/nginx/access.log' } },
@@ -742,7 +742,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
           {
             type: 'otelcol',
-            input_id: 'nginx_otel',
+            name: 'nginx_otel',
             policy_template: 'nginx',
             enabled: true,
             vars: { endpoint: { value: undefined } },
@@ -759,7 +759,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, load);
 
       // The first input (filelog_otel) has a valid var, so no error
-      // Single policy template packages use just the effectiveId as key (no template prefix)
+      // Single policy template packages use just the effectiveName as key (no template prefix)
       expect(result.inputs?.filelog_otel?.vars?.log_path).toBeNull();
       // The second input (nginx_otel) has an empty required var, so it should error
       expect(result.inputs?.nginx_otel?.vars?.endpoint).not.toBeNull();

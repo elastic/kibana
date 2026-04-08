@@ -37,7 +37,7 @@ import { appContextService } from '../app_context';
 import { FleetError, PackagePolicyValidationError } from '../../errors';
 import {
   packagePolicyInputAllowsUndefinedDataStreamType,
-  getPolicyInputEffectiveId,
+  getInputEffectiveName,
 } from '../../../common/services';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
@@ -55,9 +55,9 @@ export function getInputId(
 
   return useSimplifiedId
     ? packagePolicyId || 'default'
-    : `${getPolicyInputEffectiveId(input)}${
-        input.policy_template ? `-${input.policy_template}` : ''
-      }${packagePolicyId ? `-${packagePolicyId}` : ''}`;
+    : `${getInputEffectiveName(input)}${input.policy_template ? `-${input.policy_template}` : ''}${
+        packagePolicyId ? `-${packagePolicyId}` : ''
+      }`;
 }
 
 export const storedPackagePolicyToAgentInputs = (

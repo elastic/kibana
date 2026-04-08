@@ -528,7 +528,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
     inputs: [
       {
         type: 'otelcol',
-        input_id: 'filelog_otel',
+        name: 'filelog_otel',
         policy_template: 'nginx',
         enabled: true,
         streams: [
@@ -543,7 +543,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
       },
       {
         type: 'otelcol',
-        input_id: 'nginx_otel',
+        name: 'nginx_otel',
         policy_template: 'nginx',
         enabled: true,
         streams: [

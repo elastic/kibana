@@ -61,8 +61,8 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 
 export interface NewPackagePolicyInput {
   id?: string;
-  /** The registry input's `id` field, when set. Used to disambiguate multiple inputs of the same `type` within a policy template. Falls back to `type` when absent. */
-  input_id?: string;
+  /** The registry input's `name` field, when set. Used to disambiguate multiple inputs of the same `type` within a policy template. Falls back to `type` when absent. */
+  name?: string;
   type: string;
   policy_template?: string;
   enabled: boolean;

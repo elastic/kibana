@@ -52,8 +52,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   hasMultipleEnabledPolicyTemplates,
-  getRegistryInputEffectiveId,
-  getPolicyInputEffectiveId,
+  getInputEffectiveName,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -2621,10 +2620,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
       if (newPP) {
         const inputs = newPolicy.inputs.map((input) => {
-          const effectiveId = getPolicyInputEffectiveId(input);
+          const effectiveName = getInputEffectiveName(input);
           const defaultInput = newPP.inputs.find(
             (i) =>
-              getPolicyInputEffectiveId(i) === effectiveId &&
+              getInputEffectiveName(i) === effectiveName &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
           return {
@@ -3872,9 +3871,7 @@ function enforceFrozenInputs(
   const resultInputs = [...newInputs];
 
   for (const input of resultInputs) {
-    const oldInput = oldInputs.find(
-      (i) => getPolicyInputEffectiveId(i) === getPolicyInputEffectiveId(input)
-    );
+    const oldInput = oldInputs.find((i) => getInputEffectiveName(i) === getInputEffectiveName(input));
     if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
       input.vars = _enforceFrozenVars(oldInput.vars, input.vars, force);
@@ -3997,12 +3994,12 @@ export function updatePackageInputs(
       // Ignore any inputs removed from this policy template in the new package version.
       // Match by id ?? type on both sides so that inputs with explicit ids are correctly
       // retained or pruned when the new package version changes its input list.
-      const policyInputEffectiveId = getPolicyInputEffectiveId(input);
+      const policyInputEffectiveId = getInputEffectiveName(input);
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
         ? policyTemplate.input === input.type
         : policyTemplate.inputs?.some(
             (policyTemplateInput) =>
-              getRegistryInputEffectiveId(policyTemplateInput) === policyInputEffectiveId
+              getInputEffectiveName(policyTemplateInput) === policyInputEffectiveId
           ) ?? false;
       return policyTemplateStillIncludesInput;
     }),
@@ -4013,12 +4010,12 @@ export function updatePackageInputs(
 
     if (update.policy_template) {
       // If the updated value defines a policy template, try to find an original input
-      // with the same policy template value. Match by input_id ?? type on both sides
+      // with the same policy template value. Match by name ?? type on both sides
       // so that inputs with explicit ids are correctly matched during upgrade.
-      const updateEffectiveId = getPolicyInputEffectiveId(update);
+      const updateEffectiveId = getInputEffectiveName(update);
       const matchingInput = inputs.find(
         (i) =>
-          getPolicyInputEffectiveId(i) === updateEffectiveId &&
+          getInputEffectiveName(i) === updateEffectiveId &&
           i.policy_template === update.policy_template
       );
 
@@ -4028,15 +4025,11 @@ export function updatePackageInputs(
       // was reliably defined on package policy inputs.
       originalInput =
         matchingInput ||
-        inputs.find(
-          (i) => getPolicyInputEffectiveId(i) === updateEffectiveId && !i.policy_template
-        );
+        inputs.find((i) => getInputEffectiveName(i) === updateEffectiveId && !i.policy_template);
     } else {
       // For inputs that don't specify a policy template, just grab the first input
       // that matches its effective id
-      originalInput = inputs.find(
-        (i) => getPolicyInputEffectiveId(i) === getPolicyInputEffectiveId(update)
-      );
+      originalInput = inputs.find((i) => getInputEffectiveName(i) === getInputEffectiveName(update));
     }
 
     // If there's no corresponding input on the original package policy, just
@@ -4223,14 +4216,14 @@ export function preconfigurePackageInputs(
   for (const preconfiguredInput of preconfiguredInputs) {
     // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
     // policy template, so we only match on `type` in that case.
-    const preconfiguredEffectiveId = getPolicyInputEffectiveId(preconfiguredInput);
+    const preconfiguredEffectiveId = getInputEffectiveName(preconfiguredInput);
     let originalInput = preconfiguredInput.policy_template
       ? inputs.find(
           (i) =>
-            getPolicyInputEffectiveId(i) === preconfiguredEffectiveId &&
+            getInputEffectiveName(i) === preconfiguredEffectiveId &&
             i.policy_template === preconfiguredInput.policy_template
         )
-      : inputs.find((i) => getPolicyInputEffectiveId(i) === preconfiguredEffectiveId);
+      : inputs.find((i) => getInputEffectiveName(i) === preconfiguredEffectiveId);
 
     // If the input do not exist skip
     if (originalInput === undefined) {
@@ -4313,7 +4306,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
   if (inputs) {
     for (const input of inputs) {
       const oldInput = oldPackagePolicy.inputs.find(
-        (i) => getPolicyInputEffectiveId(i) === getPolicyInputEffectiveId(input)
+        (i) => getInputEffectiveName(i) === getInputEffectiveName(input)
       );
       if (oldInput) {
         for (const stream of input.streams || []) {

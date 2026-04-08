@@ -1354,11 +1354,11 @@ describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () 
 });
 
 describe('getInputId', () => {
-  it('should use input_id instead of type when input_id is present', () => {
+  it('should use name instead of type when name is present', () => {
     const id = getInputId(
       {
         type: 'otelcol',
-        input_id: 'filelog_otel',
+        name: 'filelog_otel',
         policy_template: 'nginx',
         enabled: true,
         streams: [],
@@ -1369,7 +1369,7 @@ describe('getInputId', () => {
     expect(id).toBe('filelog_otel-nginx-pkg-policy-123');
   });
 
-  it('should fall back to type when input_id is not present', () => {
+  it('should fall back to type when name is not present', () => {
     const id = getInputId(
       {
         type: 'logfile',
@@ -1383,11 +1383,11 @@ describe('getInputId', () => {
     expect(id).toBe('logfile-nginx-pkg-policy-123');
   });
 
-  it('should produce unique ids for same-type inputs with different input_ids', () => {
+  it('should produce unique ids for same-type inputs with different names', () => {
     const id1 = getInputId(
       {
         type: 'otelcol',
-        input_id: 'filelog_otel',
+        name: 'filelog_otel',
         policy_template: 'nginx',
         enabled: true,
         streams: [],
@@ -1397,7 +1397,7 @@ describe('getInputId', () => {
     const id2 = getInputId(
       {
         type: 'otelcol',
-        input_id: 'nginx_otel',
+        name: 'nginx_otel',
         policy_template: 'nginx',
         enabled: true,
         streams: [],

@@ -308,7 +308,7 @@ export type RegistryPolicyTemplate =
   | RegistryPolicyInputOnlyTemplate;
 
 export enum RegistryInputKeys {
-  id = 'id',
+  name = 'name',
   type = 'type',
   title = 'title',
   description = 'description',
@@ -329,8 +329,8 @@ export enum RegistryInputKeys {
 export type RegistryInputGroup = 'logs' | 'metrics';
 
 export interface RegistryInput {
-  /** Optional unique identifier within the policy template. When present, used as the discriminator for stream matching and keying instead of `type`. */
-  [RegistryInputKeys.id]?: string;
+  /** Optional unique name within the policy template. When present, used as the discriminator for stream matching and keying instead of `type`. */
+  [RegistryInputKeys.name]?: string;
   [RegistryInputKeys.type]: string;
   [RegistryInputKeys.title]: string;
   [RegistryInputKeys.description]: string;

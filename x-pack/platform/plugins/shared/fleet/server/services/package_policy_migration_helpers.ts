@@ -13,7 +13,7 @@ import type {
   InputsOverride,
 } from '../../common/types';
 import type { NewPackagePolicy } from '../types';
-import { varsReducer, getPolicyInputEffectiveId } from '../../common/services';
+import { varsReducer, getInputEffectiveName } from '../../common/services';
 
 /**
  * Finds an input in `inputs` matching `type`, preferring a match on `policyTemplate`. Falls back
@@ -25,10 +25,10 @@ export function findInputForMigration(
   idOrType: string,
   policyTemplate: string | undefined
 ): NewPackagePolicyInput | undefined {
-  // Match by effective id (input_id when set, otherwise type). An input that has an
-  // explicit input_id must be referenced by that id -- matching by type alone is
+  // Match by effective id (name when set, otherwise type). An input that has an
+  // explicit name must be referenced by that name -- matching by type alone is
   // ambiguous when multiple inputs share the same type (e.g., two otelcol inputs).
-  const matches = (i: NewPackagePolicyInput) => getPolicyInputEffectiveId(i) === idOrType;
+  const matches = (i: NewPackagePolicyInput) => getInputEffectiveName(i) === idOrType;
 
   if (policyTemplate) {
     return (

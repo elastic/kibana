@@ -18,7 +18,7 @@ describe('findInputForMigration', () => {
     ...overrides,
   });
 
-  it('finds input by type when no input_id is set', () => {
+  it('finds input by type when no name is set', () => {
     const inputs = [
       makeInput({ type: 'logfile', policy_template: 'nginx' }),
       makeInput({ type: 'httpjson', policy_template: 'nginx' }),
@@ -28,58 +28,58 @@ describe('findInputForMigration', () => {
     expect(result?.type).toBe('httpjson');
   });
 
-  it('finds input by input_id when searching by id value', () => {
+  it('finds input by name when searching by id value', () => {
     const inputs = [
       makeInput({
         type: 'otelcol',
-        input_id: 'filelog_otel',
+        name: 'filelog_otel',
         policy_template: 'nginx',
       }),
       makeInput({
         type: 'otelcol',
-        input_id: 'nginx_otel',
+        name: 'nginx_otel',
         policy_template: 'nginx',
       }),
     ];
 
     const result = findInputForMigration(inputs, 'filelog_otel', 'nginx');
-    expect(result?.input_id).toBe('filelog_otel');
+    expect(result?.name).toBe('filelog_otel');
   });
 
   it('does not match the wrong input when multiple inputs share the same type', () => {
     const inputs = [
       makeInput({
         type: 'otelcol',
-        input_id: 'filelog_otel',
+        name: 'filelog_otel',
         policy_template: 'nginx',
       }),
       makeInput({
         type: 'otelcol',
-        input_id: 'nginx_otel',
+        name: 'nginx_otel',
         policy_template: 'nginx',
       }),
     ];
 
     const result = findInputForMigration(inputs, 'nginx_otel', 'nginx');
-    expect(result?.input_id).toBe('nginx_otel');
+    expect(result?.name).toBe('nginx_otel');
   });
 
-  it('does not match by type when inputs have explicit input_ids', () => {
+  it('does not match by type when inputs have explicit names', () => {
     const inputs = [
       makeInput({
         type: 'otelcol',
-        input_id: 'filelog_otel',
+        name: 'filelog_otel',
         policy_template: 'nginx',
       }),
       makeInput({
         type: 'otelcol',
-        input_id: 'nginx_otel',
+        name: 'nginx_otel',
         policy_template: 'nginx',
       }),
     ];
 
     // Searching by type 'otelcol' is ambiguous when both inputs
-    // have explicit input_ids -- should not match either
+    // have explicit names -- should not match either
     const result = findInputForMigration(inputs, 'otelcol', 'nginx');
     expect(result).toBeUndefined();
   });
