@@ -8,6 +8,8 @@
  */
 
 import type { Type } from '@kbn/config-schema';
+import type { ObjectType, Props, TypeOptions } from '@kbn/config-schema/src/types';
+import type { ObjectUnionType } from './charts/utils/object_union';
 import { objectUnion } from './charts/utils/object_union';
 import type { MetricState } from './charts/metric';
 import { metricStateSchema } from './charts/metric';
@@ -80,6 +82,21 @@ export type LensApiState =
   | WaffleState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
+
+/**
+ * Extends `lensApiStateSchema` with extra props and options.
+ *
+ * This type will be be union of all `LensApiState` intersected with the new props.
+ */
+export function extendLensApiStateSchema<T extends Props>(
+  props: T,
+  options?: TypeOptions<LensApiState & T>
+): Type<LensApiState & T> {
+  // these types are a bit of a hack mainly due to the tsc compiler limit
+  // but baseSchema can extend with any props correctly and return the correct `Type` wrapper
+  const baseSchema = _lensApiStateSchema as ObjectUnionType<[ObjectType<any>], LensApiState & T>;
+  return baseSchema.extends(props, options as any).toType();
+}
 
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';

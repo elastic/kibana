@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import {
@@ -23,6 +24,7 @@ import {
   ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
+import { extendLensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema';
 import { isByRefLensConfig } from '../common/transforms/utils';
 import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
@@ -78,15 +80,11 @@ const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
 });
 
 const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.object(
-    {
-      attributes: lensApiStateSchema,
-      ...getSharedPanelSchema(getDrilldownsSchema),
-    },
-    {
-      meta: BY_VALUE_SCHEMA_META,
-    }
-  );
+  extendLensApiStateSchema(getSharedPanelSchema(getDrilldownsSchema), {
+    meta: BY_VALUE_SCHEMA_META,
+  });
+
+export type FlattenedLensByValuePanelSchema = TypeOf<ReturnType<typeof getLensByValuePanelSchema>>;
 
 const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   schema.object(
