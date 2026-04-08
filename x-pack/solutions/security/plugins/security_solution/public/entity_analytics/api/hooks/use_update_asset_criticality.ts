@@ -15,6 +15,12 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
+const ASSET_CRITICALITY_UPDATE_ERROR = i18n.translate(
+  'xpack.securitySolution.entityDetails.entityPanel.assetCriticalityError',
+  {
+    defaultMessage: 'Unable to update asset criticality',
+  }
+);
 export const useUpdateAssetCriticality = (
   entityType: 'user' | 'host' | 'service',
   { onSuccess }: { onSuccess: () => void }
@@ -29,29 +35,30 @@ export const useUpdateAssetCriticality = (
       const updatedAssetCriticality = updatedRecord.asset?.criticality ?? null;
 
       if (!entityIdToUpdate) {
-        addError(new Error('Entity ID is undefined.'), {
-          title: i18n.translate(
-            'xpack.securitySolution.entityDetails.entityPanel.assetCriticalityError',
-            {
-              defaultMessage: 'Unable to update asset criticality',
-            }
-          ),
-        });
+        addError(new Error('Entity ID is undefined.'), { title: ASSET_CRITICALITY_UPDATE_ERROR });
         return;
       }
 
-      await bulkUpdateEntities(http, {
-        entityType,
-        body: {
-          entity: { id: entityIdToUpdate },
-          asset: {
-            criticality: updatedAssetCriticality,
+      try {
+        await bulkUpdateEntities(http, {
+          entityType,
+          body: {
+            entity: { id: entityIdToUpdate },
+            asset: {
+              criticality: updatedAssetCriticality,
+            },
           },
-        },
-        force: true,
-      });
-      applyEntityStoreSearchCachePatch(queryClient, entityType, updatedRecord as EntityStoreRecord);
-      onSuccess();
+          force: true,
+        });
+        applyEntityStoreSearchCachePatch(
+          queryClient,
+          entityType,
+          updatedRecord as EntityStoreRecord
+        );
+        onSuccess();
+      } catch (error) {
+        addError(error, { title: ASSET_CRITICALITY_UPDATE_ERROR });
+      }
     },
     [addError, http, queryClient, entityType, onSuccess]
   );
