@@ -152,7 +152,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
                     data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
                     listItems={dimensionListItems}
                     flush
-                    gutterSize="none"
                     wrapText={false}
                     maxWidth={false}
                     css={css`

@@ -49,7 +49,6 @@ export function AlertEpisodeResolveActionButton({
   return (
     <EuiListGroupItem
       label={label}
-      size="s"
       iconType={iconType}
       onClick={handleClick}
       isDisabled={!groupHash}

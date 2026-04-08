@@ -82,8 +82,6 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
         <EuiListGroup
           flush={true}
           bordered={true}
-          gutterSize="m"
-          size="xs"
           style={{
             marginTop: '0.5rem',
             paddingTop: '0.5rem',

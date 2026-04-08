@@ -85,7 +85,7 @@ const useExpandButtonPopover = () => {
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
     >
-      <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
+      <EuiListGroup color="primary" bordered={false} flush={true}>
         <PopoverListItem
           iconType="chartTagCloud"
           label="Explore related entities"

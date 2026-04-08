@@ -26,7 +26,6 @@ export function Group({ group }: { group: MenuItemGroup }) {
       group.items.map((item) => ({
         // default values for an item
         key: item.id,
-        size: 's',
         toolTipText: item.description,
         toolTipProps: {
           position: 'right',
@@ -72,8 +71,6 @@ export function Group({ group }: { group: MenuItemGroup }) {
       </EuiTitle>
       <EuiListGroup
         aria-labelledby={titleId}
-        size="s"
-        gutterSize="none"
         maxWidth={false}
         flush
         listItems={listItems}

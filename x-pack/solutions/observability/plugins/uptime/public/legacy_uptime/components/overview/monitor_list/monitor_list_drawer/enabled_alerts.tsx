@@ -42,7 +42,6 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
 
   (monitorAlerts ?? []).forEach((alert, ind) => {
     listItems.push({
-      size: 's',
       label: alert.name,
       href: getUrlForAlert(alert.id, basePath),
       'data-test-subj': 'uptimeMonitorListDrawerAlert' + ind,

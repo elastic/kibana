@@ -372,7 +372,6 @@ const SolutionSideNavPanelItem: React.FC<SolutionSideNavPanelItemProps> = React.
         label={<ItemLabel item={item} />}
         wrapText
         className={panelLinkClassNames}
-        size="s"
         data-test-subj={`solutionSideNavPanelLink-${id}`}
         href={href}
         iconType={iconType}

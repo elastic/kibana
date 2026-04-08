@@ -24,11 +24,11 @@ import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 const getJobTypeList = () => (
   <>
     <EuiListGroup flush>
-      <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" size="xs" />
+      <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" />
 
-      <EuiListGroupItem iconType="regressionJob" label="Regression" size="xs" />
+      <EuiListGroupItem iconType="regressionJob" label="Regression" />
 
-      <EuiListGroupItem iconType="classificationJob" label="Classification" size="xs" />
+      <EuiListGroupItem iconType="classificationJob" label="Classification" />
     </EuiListGroup>
   </>
 );

@@ -69,7 +69,7 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
           closePopover={() => togglePopover(null)}
           anchorPosition="downRight"
         >
-          <EuiListGroup gutterSize="none">
+          <EuiListGroup>
             <LegendActionItem
               label={UX_LABELS.dataQualityPopup.copy}
               onClick={onCopyDataStreamName}

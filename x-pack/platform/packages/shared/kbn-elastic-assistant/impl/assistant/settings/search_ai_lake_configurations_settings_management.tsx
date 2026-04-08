@@ -177,7 +177,6 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
                 onClick={onClick}
                 data-test-subj={`settingsPageTab-${id}`}
                 isActive={isSelected}
-                size="s"
               />
             ))}
           </EuiListGroup>

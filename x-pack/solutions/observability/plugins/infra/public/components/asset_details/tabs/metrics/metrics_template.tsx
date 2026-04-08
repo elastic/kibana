@@ -155,7 +155,6 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
                   key={sectionId}
                   onClick={() => onQuickAccessItemClick(sectionId)}
                   color="text"
-                  size="s"
                   className={cx({
                     [css`
                       text-decoration: underline;
