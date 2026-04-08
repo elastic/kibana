@@ -23,7 +23,7 @@ interface NodeMetric {
 interface NodeMetrics {
   doc_count: number;
   cpu?: NodeMetric;
-  load: NodeMetric;
+  load?: NodeMetric;
   uptime?: NodeMetric;
   iowait?: NodeMetric;
   rx?: RuntimeField;

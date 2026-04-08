@@ -27,11 +27,16 @@ const queryTopNodesForSchema = async (
   return convertESResponseToTopNodesResponse(response);
 };
 
+const SORTABLE_METRIC_KEYS = new Set(['cpu', 'iowait', 'load', 'uptime', 'rx', 'tx']);
+
+type SeriesEntry = TopNodesResponse['series'][number];
+type SortableMetricKey = 'cpu' | 'iowait' | 'load' | 'uptime' | 'rx' | 'tx';
+
 export const mergeTopNodesResponses = (
   responses: TopNodesResponse[],
-  size: number
+  options: Pick<TopNodesRequest, 'size' | 'sort' | 'sortDirection'>
 ): TopNodesResponse => {
-  const hostMap = new Map<string, TopNodesResponse['series'][number]>();
+  const hostMap = new Map<string, SeriesEntry>();
 
   for (const { series } of responses) {
     for (const entry of series) {
@@ -42,7 +47,25 @@ export const mergeTopNodesResponses = (
   }
 
   const merged = Array.from(hostMap.values());
-  return { series: merged.slice(0, size) };
+  const direction = options.sortDirection === 'desc' ? -1 : 1;
+
+  if (options.sort === 'name') {
+    merged.sort((a, b) => direction * (a.name ?? '').localeCompare(b.name ?? ''));
+  } else {
+    const sortKey: SortableMetricKey = SORTABLE_METRIC_KEYS.has(options.sort ?? '')
+      ? (options.sort as SortableMetricKey)
+      : 'load';
+    merged.sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      return direction * (aVal - bVal);
+    });
+  }
+
+  return { series: merged.slice(0, options.size) };
 };
 
 export const queryTopNodes = async (
@@ -55,9 +78,18 @@ export const queryTopNodes = async (
     return queryTopNodesForSchema(options, client, source, schemas[0]);
   }
 
-  const responses = await Promise.all(
+  const results = await Promise.allSettled(
     schemas.map((schema) => queryTopNodesForSchema(options, client, source, schema))
   );
 
-  return mergeTopNodesResponses(responses, options.size);
+  const successfulResponses = results
+    .filter((r): r is PromiseFulfilledResult<TopNodesResponse> => r.status === 'fulfilled')
+    .map((r) => r.value);
+
+  if (successfulResponses.length === 0) {
+    const firstRejected = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+    throw firstRejected?.reason ?? new Error('All schema queries failed');
+  }
+
+  return mergeTopNodesResponses(successfulResponses, options);
 };

@@ -86,6 +86,41 @@ describe('convertESResponseToTopNodesResponse', () => {
     });
   });
 
+  it('handles response with all metrics missing (including load)', () => {
+    const node: NodeBucket = {
+      key: 'empty-host',
+      doc_count: 0,
+      metadata: {
+        top: [
+          {
+            sort: ['2024-01-01T00:00:00.000Z'],
+            metrics: {
+              'host.name': 'empty-host',
+              'host.os.platform': null,
+              'cloud.provider': null,
+            },
+          },
+        ],
+      },
+      timeseries: { buckets: [] },
+    };
+
+    const response = {
+      aggregations: { nodes: { buckets: [node] } },
+    } as unknown as InfraDatabaseSearchResponse<{}, ESResponseForTopNodes>;
+
+    const result = convertESResponseToTopNodesResponse(response);
+    expect(result.series[0]).toMatchObject({
+      id: 'empty-host',
+      cpu: null,
+      load: null,
+      uptime: null,
+      iowait: null,
+      rx: null,
+      tx: null,
+    });
+  });
+
   it('handles timeseries buckets with missing optional metrics', () => {
     const node = makeNodeBucket({
       key: 'otel-host',

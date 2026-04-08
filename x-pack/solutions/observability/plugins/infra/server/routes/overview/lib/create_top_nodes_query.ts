@@ -11,18 +11,11 @@ import type { MetricsSourceConfiguration } from '../../../../common/metrics_sour
 import type { TopNodesRequest } from '../../../../common/http_api/overview_api';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
-const createEcsNodeFilter = () => ({
-  match_phrase: { 'event.module': 'system' },
-});
-
-const createSemconvNodeFilter = () => {
+const getNodeFilter = (schema: DataSchemaFormat) => {
   const inventoryModel = findInventoryModel('host');
-  const filters = inventoryModel.nodeFilter?.({ schema: 'semconv' }) ?? [];
+  const filters = inventoryModel.nodeFilter?.({ schema }) ?? [];
   return filters[0] ?? { match_all: {} };
 };
-
-const getNodeFilter = (schema: DataSchemaFormat) =>
-  schema === 'ecs' ? createEcsNodeFilter() : createSemconvNodeFilter();
 
 const getEcsAggs = (options: TopNodesRequest) => ({
   uptime: {
@@ -220,11 +213,16 @@ export const createTopNodesQuery = (
     rx: 'rx>bytes',
     tx: 'tx>bytes',
   };
+  const SEMCONV_UNSUPPORTED_SORTS = new Set(['uptime', 'iowait', 'rx', 'tx']);
   const sortByHost = options.sort && options.sort === 'name';
 
   const defaultSortField = isEcs ? 'uptime' : 'load';
-  const metricsSortField = options.sort
-    ? nestedSearchFields[options.sort] || options.sort
+  const effectiveSort =
+    !isEcs && options.sort && SEMCONV_UNSUPPORTED_SORTS.has(options.sort)
+      ? undefined
+      : options.sort;
+  const metricsSortField = effectiveSort
+    ? nestedSearchFields[effectiveSort] || effectiveSort
     : defaultSortField;
   const sortField = sortByHost ? '_key' : metricsSortField;
   const sortDirection = options.sortDirection ?? 'asc';

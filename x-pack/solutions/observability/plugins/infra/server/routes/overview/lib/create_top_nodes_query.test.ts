@@ -22,12 +22,17 @@ const source = {
 
 describe('createTopNodesQuery', () => {
   describe('ECS schema', () => {
-    it('uses event.module: system filter', () => {
+    it('uses the inventory model node filter for ECS', () => {
       const query = createTopNodesQuery(baseOptions, source, 'ecs');
       const filters = query.query.bool.filter;
-      expect(filters).toEqual(
-        expect.arrayContaining([{ match_phrase: { 'event.module': 'system' } }])
+      const systemFilter = filters.find(
+        (f: Record<string, unknown>) =>
+          'bool' in f &&
+          (f as { bool: { should: Array<{ term: Record<string, string> }> } }).bool.should?.some(
+            (clause) => clause.term?.['event.module'] === 'system'
+          )
       );
+      expect(systemFilter).toBeDefined();
     });
 
     it('includes runtime_mappings for rx/tx', () => {
@@ -56,9 +61,14 @@ describe('createTopNodesQuery', () => {
     it('defaults to ECS when no schema is provided', () => {
       const query = createTopNodesQuery(baseOptions, source);
       const filters = query.query.bool.filter;
-      expect(filters).toEqual(
-        expect.arrayContaining([{ match_phrase: { 'event.module': 'system' } }])
+      const systemFilter = filters.find(
+        (f: Record<string, unknown>) =>
+          'bool' in f &&
+          (f as { bool: { should: Array<{ term: Record<string, string> }> } }).bool.should?.some(
+            (clause) => clause.term?.['event.module'] === 'system'
+          )
       );
+      expect(systemFilter).toBeDefined();
     });
   });
 
@@ -132,6 +142,21 @@ describe('createTopNodesQuery', () => {
     it('uses custom sort field', () => {
       const opts = { ...baseOptions, sort: 'cpu', sortDirection: 'desc' };
       const query = createTopNodesQuery(opts, source, 'ecs');
+      expect(query.aggs.nodes.terms.order).toEqual({ cpu: 'desc' });
+    });
+
+    it.each(['uptime', 'iowait', 'rx', 'tx'])(
+      'falls back to load for semconv when sort is %s',
+      (sort) => {
+        const opts = { ...baseOptions, sort };
+        const query = createTopNodesQuery(opts, source, 'semconv');
+        expect(query.aggs.nodes.terms.order).toEqual({ load: 'asc' });
+      }
+    );
+
+    it('allows cpu sort for semconv', () => {
+      const opts = { ...baseOptions, sort: 'cpu', sortDirection: 'desc' };
+      const query = createTopNodesQuery(opts, source, 'semconv');
       expect(query.aggs.nodes.terms.order).toEqual({ cpu: 'desc' });
     });
   });
