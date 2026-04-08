@@ -101,6 +101,26 @@ export function registerCasesSteps(
     import('./simple_steps').then((m) => m.setCategoryStepDefinition)
   );
 
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getCasesByAlertIdStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getAllAttachmentsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.updateObservableStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.deleteObservableStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.getCasesStepDefinition)
+  );
+
   // Leaving this in for now. We need to get support for reflective value lookup first.
   // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
 }
