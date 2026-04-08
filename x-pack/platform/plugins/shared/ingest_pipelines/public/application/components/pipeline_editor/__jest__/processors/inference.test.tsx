@@ -5,36 +5,15 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const INFERENCE_TYPE = 'inference';
 
 describe('Processor: Inference', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    // disable all react-beautiful-dnd development warnings
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-    // enable all react-beautiful-dnd development warnings
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
-  });
-
-<<<<<<< HEAD
-  beforeEach(async () => {
-    onUpdate = jest.fn();
-
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-=======
   const getToggleInput = () => screen.getByTestId('toggleInferenceInputMappingMode');
 
   const expectToggleOn = () => {
@@ -56,69 +35,12 @@ describe('Processor: Inference', () => {
       onUpdate = jest.fn();
 
       renderProcessorEditor(httpSetup, {
->>>>>>> f9bbce16860e ([Ingest pipelines] Include input_output in inference processor (#260517))
         value: {
           processors: [],
         },
         onFlyoutOpen: jest.fn(),
         onUpdate,
       });
-<<<<<<< HEAD
-    });
-
-    const { component, actions } = testBed;
-
-    component.update();
-
-    // Open flyout to add new processor
-    actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await actions.addProcessorType(INFERENCE_TYPE);
-  });
-
-  test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
-    // Click submit button with only the type defined
-    await saveNewProcessor();
-
-    // Expect form error as "field" is a required parameter
-    expect(form.getErrorsMessages()).toEqual([
-      'A deployment, an inference, or a model ID value is required.',
-    ]);
-  });
-
-  test('accepts inference config and field maps that contains escaped characters', async () => {
-    const {
-      actions: { saveNewProcessor },
-      find,
-      form,
-      component,
-    } = testBed;
-
-    form.setInputValue('inferenceModelId.input', 'test_inference_processor');
-
-    await act(async () => {
-      find('inferenceConfig').simulate('change', {
-        jsonContent: '{"inf_conf_1":"""aaa"bbb""", "inf_conf_2": "aaa(bbb"}',
-      });
-
-      // advance timers to allow the form to validate
-      jest.advanceTimersByTime(0);
-    });
-    component.update();
-
-    await act(async () => {
-      find('fieldMap').simulate('change', {
-        jsonContent: '{"field_map_1":"""aaa"bbb""", "field_map_2": "aaa(bbb"}',
-      });
-
-      // advance timers to allow the form to validate
-      jest.advanceTimersByTime(0);
-=======
 
       fireEvent.click(screen.getByTestId('addProcessorButton'));
       fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
@@ -299,23 +221,8 @@ describe('Processor: Inference', () => {
       jest.clearAllMocks();
       ({ httpSetup } = setupEnvironment());
       onUpdate = jest.fn();
->>>>>>> f9bbce16860e ([Ingest pipelines] Include input_output in inference processor (#260517))
     });
-    component.update();
 
-<<<<<<< HEAD
-    // Save the field
-    await saveNewProcessor();
-
-    const processors = getProcessorValue(onUpdate, INFERENCE_TYPE);
-
-    expect(processors[0][INFERENCE_TYPE]).toEqual({
-      model_id: 'test_inference_processor',
-      // eslint-disable-next-line prettier/prettier
-      inference_config: { inf_conf_1: 'aaa\"bbb', inf_conf_2: 'aaa(bbb' },
-      // eslint-disable-next-line prettier/prettier
-      field_map: { field_map_1: 'aaa\"bbb', field_map_2: 'aaa(bbb' },
-=======
     test('defaults to input/output mode for a saved processor with neither input_output nor target_field/field_map', async () => {
       renderProcessorEditor(httpSetup, {
         value: {
@@ -463,7 +370,6 @@ describe('Processor: Inference', () => {
         field_map: { source: 'some_field' },
       });
       expect('input_output' in processors[0][INFERENCE_TYPE]).toBe(false);
->>>>>>> f9bbce16860e ([Ingest pipelines] Include input_output in inference processor (#260517))
     });
   });
 });
