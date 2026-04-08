@@ -40,6 +40,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
+import { SkillReferencedContentFieldArray } from './skill_referenced_content_field_array';
 import type { SkillFormData } from './skill_form_validation';
 
 export enum SkillFormMode {
@@ -152,6 +153,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
         description: skill.description,
         content: skill.content,
         tool_ids: skill.tool_ids ?? [],
+        referenced_content: skill.referenced_content ?? [],
       });
     }
   }, [skill, reset]);
@@ -183,6 +185,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           description: data.description,
           content: data.content,
           tool_ids: data.tool_ids,
+          referenced_content: data.referenced_content,
         });
       } else if (mode === SkillFormMode.Edit) {
         await (onSave as (d: UpdateSkillPayload) => Promise<unknown>)({
@@ -190,6 +193,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           description: data.description,
           content: data.content,
           tool_ids: data.tool_ids,
+          referenced_content: data.referenced_content,
         });
       }
       reset(data, { keepDirty: false });
@@ -393,6 +397,18 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     </EuiFormRow>
                   )}
                 />
+              </FormSection>
+
+              <EuiHorizontalRule />
+
+              {/* Section: Additional referenced files */}
+              <FormSection
+                id="skill-referenced-content-section-title"
+                icon="documents"
+                title={labels.skills.referencedContentLabel}
+                description={labels.skills.referencedFileSection.description}
+              >
+                <SkillReferencedContentFieldArray control={control} readOnly={isViewMode} />
               </FormSection>
 
               <EuiHorizontalRule />

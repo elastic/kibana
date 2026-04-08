@@ -69,7 +69,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-123',
+        ref_id: 'session-123',
         selected_tab_id: undefined,
         overrides: {},
       });
@@ -177,12 +177,12 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('toStoredSearchEmbeddable', () => {
-    it('dispatches to by-reference transform when state has discover_session_id', () => {
+    it('dispatches to by-reference transform when state has ref_id', () => {
       const apiState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-456',
+        ref_id: 'session-456',
         selected_tab_id: undefined,
         overrides: {},
       };
@@ -325,7 +325,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Saved Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-123',
+        ref_id: 'session-123',
         selected_tab_id: undefined,
         overrides: {},
       });
@@ -358,7 +358,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Saved Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-xyz',
+        ref_id: 'session-xyz',
         selected_tab_id: 'tab-active',
         overrides: {
           sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -399,7 +399,7 @@ describe('search embeddable transform utils', () => {
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-picked' },
       ];
       const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
-      expect(result.discover_session_id).toBe('session-picked');
+      expect(result.ref_id).toBe('session-picked');
     });
 
     it('uses savedObjectId on state when present so a saved search reference is not required', () => {
@@ -408,7 +408,7 @@ describe('search embeddable transform utils', () => {
         savedObjectId: 'session-without-ref-array',
       };
       const result = fromStoredSearchEmbeddableByRef(storedSearch, []);
-      expect(result.discover_session_id).toBe('session-without-ref-array');
+      expect(result.ref_id).toBe('session-without-ref-array');
     });
 
     it('prefers savedObjectId on state over the matching saved search reference', () => {
@@ -424,7 +424,7 @@ describe('search embeddable transform utils', () => {
         },
       ];
       const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
-      expect(result.discover_session_id).toBe('id-from-state');
+      expect(result.ref_id).toBe('id-from-state');
     });
   });
 
@@ -434,7 +434,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-456',
+        ref_id: 'session-456',
         selected_tab_id: 'tab-1',
         overrides: {},
       };
