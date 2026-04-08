@@ -176,9 +176,7 @@ describe('ThresholdVisualization', () => {
 
     await screen.findByTestId('errorCallout');
 
-    expect(screen.getByTestId('errorCallout').textContent).toBe(
-      `Cannot load alert visualization`
-    );
+    expect(screen.getByTestId('errorCallout').textContent).toBe(`Cannot load alert visualization`);
   });
 
   test('renders no data message when visualization results are empty', async () => {

@@ -6,7 +6,7 @@
  */
 
 import { copyToClipboard } from '@elastic/eui';
- import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';

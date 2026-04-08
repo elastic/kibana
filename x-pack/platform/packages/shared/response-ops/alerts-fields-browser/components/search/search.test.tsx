@@ -38,9 +38,7 @@ describe('Search', () => {
   test('it invokes onSearchInputChange when the user types in the search field', async () => {
     const onSearchInputChange = jest.fn();
 
-    render(
-      <Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />
-    );
+    render(<Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />);
 
     await userEvent.type(screen.getByRole('searchbox'), 'timestamp');
 
