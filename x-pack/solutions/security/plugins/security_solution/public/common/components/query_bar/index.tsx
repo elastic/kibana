@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import type { PropsWithChildren, FC } from 'react';
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -151,19 +151,22 @@ export const QueryBar = memo<QueryBarComponentProps>(
       return filterQuery;
     }, [filterQuery, isEsql]);
 
+    const indexPatternRef = useRef(indexPattern);
+    indexPatternRef.current = indexPattern;
+
     useEffect(() => {
       let dv: DataView;
       let cancelled = false;
-      if (isDataView(indexPattern)) {
-        setDataView(indexPattern);
+      if (isDataView(indexPatternRef.current)) {
+        setDataView(indexPatternRef.current);
         setIsCreatingDataView(false);
-      } else if (!isEsql && !isEmpty(indexPattern.title)) {
+      } else if (!isEsql && !isEmpty(indexPatternRef.current.title)) {
         const createDataView = async () => {
           setIsCreatingDataView(true);
           try {
             dv = await data.dataViews.create({
-              id: indexPattern.title,
-              title: indexPattern.title,
+              id: indexPatternRef.current.title,
+              title: indexPatternRef.current.title,
             });
             if (!cancelled) {
               setDataView(dv);
@@ -185,7 +188,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, isEsql, preventCacheClearOnUnmount]);
+    }, [data.dataViews, indexPattern.title, isEsql, preventCacheClearOnUnmount]);
 
     const searchBarFilters = useMemo(() => {
       if (!dataView?.id || isEsql) {
