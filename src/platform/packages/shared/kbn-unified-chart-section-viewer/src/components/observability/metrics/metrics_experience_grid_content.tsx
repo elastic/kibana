@@ -11,7 +11,6 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -105,50 +104,14 @@ export const MetricsExperienceGridContent = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          direction="row"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              justifyContent="spaceBetween"
-              alignItems="center"
-              responsive={false}
-              gutterSize="s"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                      values: { count: filteredFieldsCount },
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('metricsExperience.grid.technicalPreview.label', {
-                defaultMessage: 'Technical preview',
-              })}
-              tooltipContent={i18n.translate('metricsExperience.grid.technicalPreview.tooltip', {
-                defaultMessage:
-                  'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-              })}
-              tooltipPosition="left"
-              title={i18n.translate('metricsExperience.grid.technicalPreview.title', {
-                defaultMessage: 'Technical preview',
-              })}
-              size="s"
-              data-test-subj="metricsExperienceTechnicalPreviewBadge"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s">
+          <strong>
+            {i18n.translate('metricsExperience.grid.metricsCount.label', {
+              defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+              values: { count: filteredFieldsCount },
+            })}
+          </strong>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow>
         {isDiscoverLoading && <MetricsGridLoadingProgress />}
