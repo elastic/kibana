@@ -10,6 +10,9 @@
 import { parse as parseYaml } from 'yaml';
 import type { DefaultEvaluators, Evaluator, Example } from '@kbn/evals';
 import { getToolCallSteps, createTrajectoryEvaluator } from '@kbn/evals';
+import { stableStringify } from '@kbn/std';
+import { collectAllSteps } from '@kbn/workflows';
+import type { Step, WorkflowYaml } from '@kbn/workflows';
 import type {
   WorkflowEditExample,
   WorkflowCreateExample,
@@ -302,34 +305,15 @@ export function createRejectionEvaluator() {
   };
 }
 
-interface ParsedStep {
-  name?: string;
-  type?: string;
-  [key: string]: unknown;
-}
-
-const collectSteps = (steps: unknown[]): ParsedStep[] => {
-  const result: ParsedStep[] = [];
-  for (const step of steps) {
-    if (typeof step !== 'object' || step === null) continue;
-    const s = step as Record<string, unknown>;
-    result.push(s as ParsedStep);
-    if (Array.isArray(s.then)) result.push(...collectSteps(s.then));
-    if (Array.isArray(s.else)) result.push(...collectSteps(s.else));
-    if (Array.isArray(s.do)) result.push(...collectSteps(s.do));
-    if (Array.isArray(s.steps)) result.push(...collectSteps(s.steps));
-  }
-  return result;
-};
-
-const parseWorkflowYaml = (
-  yaml: string
-): { steps: ParsedStep[]; parsed: Record<string, unknown> } | undefined => {
+const parseWorkflowYaml = (yaml: string): { steps: Step[] } | undefined => {
   try {
-    const parsed = parseYaml(yaml) as Record<string, unknown>;
-    if (!parsed || typeof parsed !== 'object') return undefined;
-    const rawSteps = Array.isArray(parsed.steps) ? parsed.steps : [];
-    return { steps: collectSteps(rawSteps), parsed };
+    const parsed = parseYaml(yaml);
+    if (typeof parsed !== 'object' || parsed === null) {
+      return undefined;
+    }
+    const workflow = parsed as Partial<WorkflowYaml>;
+    const rawSteps = Array.isArray(workflow.steps) ? (workflow.steps as WorkflowYaml['steps']) : [];
+    return { steps: collectAllSteps(rawSteps) };
   } catch {
     return undefined;
   }
@@ -483,8 +467,8 @@ export function createEditPreservationEvaluator() {
           continue;
         }
 
-        const originalJson = JSON.stringify(originalStep);
-        const resultJson = JSON.stringify(resultStep);
+        const originalJson = stableStringify(originalStep);
+        const resultJson = stableStringify(resultStep);
         const match = originalJson === resultJson;
         results.push({
           name,

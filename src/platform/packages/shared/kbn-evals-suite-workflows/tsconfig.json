@@ -11,6 +11,8 @@
     "@kbn/scout",
     "@kbn/agent-builder-common",
     "@kbn/tooling-log",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/std",
+    "@kbn/workflows"
   ]
 }
