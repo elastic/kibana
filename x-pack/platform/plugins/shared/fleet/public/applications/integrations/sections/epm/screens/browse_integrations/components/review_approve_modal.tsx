@@ -38,7 +38,7 @@ import semverValid from 'semver/functions/valid';
 import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
 
 import type {
-  AIV2Telemetry,
+  AutomaticImportTelemetry,
   DataStreamResponse,
   DataStreamResultsFlyoutComponent,
 } from './manage_integrations_table';
@@ -153,7 +153,7 @@ export const ReviewApproveModal: React.FC<{
   onApproveAndDeploy,
   DataStreamResultsFlyoutComponent,
 }) => {
-  const { automaticImportVTwo } = useStartServices();
+  const { automaticImport } = useStartServices();
   const [isLoadingReviewDetails, setIsLoadingReviewDetails] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
@@ -229,12 +229,12 @@ export const ReviewApproveModal: React.FC<{
   }, [isApproving, onClose]);
 
   const handleCancelClick = useCallback(() => {
-    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-      'aiv2_approve_modal_cancel_clicked',
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_approve_modal_cancel_clicked',
       {}
     );
     closeModal();
-  }, [automaticImportVTwo, closeModal]);
+  }, [automaticImport, closeModal]);
 
   const normalizedVersion = reviewVersion.trim();
   const isVersionValid = Boolean(semverValid(normalizedVersion));
@@ -275,8 +275,8 @@ export const ReviewApproveModal: React.FC<{
       return;
     }
 
-    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-      'aiv2_approve_modal_approve_clicked',
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_approve_modal_approve_clicked',
       {}
     );
     setIsApproving(true);
@@ -296,7 +296,7 @@ export const ReviewApproveModal: React.FC<{
       setIsApproving(false);
     }
   }, [
-    automaticImportVTwo,
+    automaticImport,
     integrationId,
     onApproveAndDeploy,
     onClose,

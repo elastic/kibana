@@ -13,11 +13,10 @@ import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
-import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
-import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
+import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
@@ -25,6 +24,7 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
@@ -117,13 +117,24 @@ export const UserPanelContent = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.user}
       />
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedDataSection
         identityFields={identityFields}
         userName={userName}
         observedUser={observedUser}
         contextID={contextID}
         scopeId={scopeId}
-        queryId={OBSERVED_USER_QUERY_ID}
+        queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
     </FlyoutBody>
