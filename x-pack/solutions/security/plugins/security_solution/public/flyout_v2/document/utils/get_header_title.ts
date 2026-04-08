@@ -6,7 +6,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
+import { EVENT_CATEGORY_FIELD, getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_NAME, EVENT_KIND } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
@@ -106,7 +106,7 @@ export const getDocumentTitle = (hit: DataTableRecord): string => {
     return getAlertTitle(ruleName);
   }
 
-  const eventCategory = getFieldValue(hit, 'event.category') as string | undefined;
+  const eventCategory = getFieldValue(hit, EVENT_CATEGORY_FIELD) as string | undefined;
   return getEventTitle(
     eventKind,
     eventCategory,
