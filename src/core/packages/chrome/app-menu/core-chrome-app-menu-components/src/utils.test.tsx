@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  createReturnFocus,
   getDisplayedItemsAllowedAmount,
   getShouldOverflow,
   getAppMenuItems,
@@ -21,6 +22,37 @@ import { APP_MENU_ITEM_LIMIT } from './constants';
 import type { AppMenuPopoverItem } from './types';
 
 describe('utils', () => {
+  describe('createReturnFocus', () => {
+    let triggerElement: HTMLButtonElement;
+    let overflowButton: HTMLButtonElement;
+
+    beforeEach(() => {
+      triggerElement = document.createElement('button');
+      overflowButton = document.createElement('button');
+      overflowButton.setAttribute('data-test-subj', 'app-menu-overflow-button');
+    });
+
+    afterEach(() => {
+      triggerElement.remove();
+      overflowButton.remove();
+    });
+
+    it('focuses the trigger element when it is still in the DOM', () => {
+      document.body.appendChild(triggerElement);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(triggerElement);
+    });
+
+    it('focuses the overflow button when the trigger element has been removed from the DOM', () => {
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      document.body.appendChild(overflowButton);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+  });
+
   describe('getDisplayedItemsAllowedAmount', () => {
     it('should return full limit when no action items', () => {
       const result = getDisplayedItemsAllowedAmount({});
