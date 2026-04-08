@@ -121,7 +121,7 @@ export const useAllResults = ({
         ).sort(),
       }),
       keepPreviousData: true,
-      refetchInterval: isLive ? getPollingInterval(startDate) : false,
+      refetchInterval: isLive ? () => getPollingInterval(startDate) : false,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {

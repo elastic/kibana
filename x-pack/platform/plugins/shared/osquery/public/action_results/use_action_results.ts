@@ -180,7 +180,7 @@ export const useActionResults = ({
         },
         inspect: { dsl: [], response: [] },
       },
-      refetchInterval: isLive ? getPollingInterval(startDate) : false,
+      refetchInterval: isLive ? () => getPollingInterval(startDate) : false,
       keepPreviousData: true,
       enabled: isScheduled ? !!scheduleId : !!actionId && !!agentIds?.length,
       onSuccess: () => setErrorToast(),

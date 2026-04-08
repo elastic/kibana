@@ -47,4 +47,48 @@ describe('getPollingInterval', () => {
     const startDate = new Date(now.getTime() - 90 * 60_000).toISOString(); // 90 min ago
     expect(getPollingInterval(startDate)).toBe(300000);
   });
+
+  describe('boundary values', () => {
+    it('should return 5s at exactly 2 minutes minus 1ms', () => {
+      const now = new Date();
+      jest.setSystemTime(now);
+      const startDate = new Date(now.getTime() - 2 * 60_000 + 1).toISOString();
+      expect(getPollingInterval(startDate)).toBe(5000);
+    });
+
+    it('should return 15s at exactly 2 minutes', () => {
+      const now = new Date();
+      jest.setSystemTime(now);
+      const startDate = new Date(now.getTime() - 2 * 60_000).toISOString();
+      expect(getPollingInterval(startDate)).toBe(15000);
+    });
+
+    it('should return 15s at exactly 10 minutes minus 1ms', () => {
+      const now = new Date();
+      jest.setSystemTime(now);
+      const startDate = new Date(now.getTime() - 10 * 60_000 + 1).toISOString();
+      expect(getPollingInterval(startDate)).toBe(15000);
+    });
+
+    it('should return 60s at exactly 10 minutes', () => {
+      const now = new Date();
+      jest.setSystemTime(now);
+      const startDate = new Date(now.getTime() - 10 * 60_000).toISOString();
+      expect(getPollingInterval(startDate)).toBe(60000);
+    });
+
+    it('should return 60s at exactly 60 minutes minus 1ms', () => {
+      const now = new Date();
+      jest.setSystemTime(now);
+      const startDate = new Date(now.getTime() - 60 * 60_000 + 1).toISOString();
+      expect(getPollingInterval(startDate)).toBe(60000);
+    });
+
+    it('should return 5 minutes at exactly 60 minutes', () => {
+      const now = new Date();
+      jest.setSystemTime(now);
+      const startDate = new Date(now.getTime() - 60 * 60_000).toISOString();
+      expect(getPollingInterval(startDate)).toBe(300000);
+    });
+  });
 });
