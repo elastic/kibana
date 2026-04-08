@@ -17,9 +17,11 @@ import { AIAssistantType } from '../common/ai_assistant_type';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+  PREFERRED_SECURITY_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { chatExperienceSetting } from './src/settings/chat_experience_setting';
+import { securityChatExperienceSetting } from './src/settings/security_chat_experience_setting';
 import { AIAssistantManagementSelectionPlugin } from './plugin';
 
 describe('plugin', () => {
@@ -84,14 +86,14 @@ describe('plugin', () => {
   };
 
   describe('stateful', () => {
-    it('registers both AI assistant type and chat experience settings', async () => {
+    it('registers AI assistant type, chat experience, and security chat experience settings', async () => {
       const plugin = createPlugin({
         preferredAIAssistantType: AIAssistantType.Observability,
         preferredChatExperience: AIChatExperience.Classic,
       });
       const { coreSetup } = setupPlugin(plugin);
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(2);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(3);
 
       // First call: AI Assistant Type setting
       expect(coreSetup.uiSettings.register).toHaveBeenNthCalledWith(1, {
@@ -112,6 +114,14 @@ describe('plugin', () => {
       expect(chatExperienceSettingDef.getValue).toBeDefined();
       expect(typeof chatExperienceSettingDef.getValue).toBe('function');
       expect(chatExperienceSettingDef).not.toHaveProperty('value');
+
+      // Third call: Security-scoped chat experience (defaults to Agent)
+      expect(coreSetup.uiSettings.register).toHaveBeenNthCalledWith(3, {
+        [PREFERRED_SECURITY_CHAT_EXPERIENCE_SETTING_KEY]: {
+          ...securityChatExperienceSetting,
+          value: AIChatExperience.Agent,
+        },
+      });
     });
 
     describe('chat experience getValue()', () => {
@@ -133,7 +143,7 @@ describe('plugin', () => {
 
       it.each([
         { solution: 'es', expected: AIChatExperience.Agent },
-        { solution: 'oblt', expected: AIChatExperience.Agent },
+        { solution: 'oblt', expected: AIChatExperience.Classic },
         { solution: 'security', expected: AIChatExperience.Classic },
         { solution: 'classic', expected: AIChatExperience.Classic },
       ])(
