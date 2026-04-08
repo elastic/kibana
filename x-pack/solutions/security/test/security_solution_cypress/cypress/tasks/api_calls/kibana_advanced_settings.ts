@@ -32,6 +32,10 @@ export const setPreferredChatExperienceToAgent = () => {
   setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'agent');
 };
 
+export const setPreferredChatExperienceToClassic = () => {
+  setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'classic');
+};
+
 export const setExtendedRuleExecutionLoggingMinLevel = (level: string) => {
   setKibanaSetting(EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING, level);
 };
