@@ -110,6 +110,7 @@ function convertDataLayerToAPI(
     if (breakdown_by && !isAPIColumnOfBucketType(breakdown_by)) {
       throw new Error('Breakdown by axis must be a bucket operation');
     }
+
     const y =
       visualization.accessors
         ?.map((accessor) => {
