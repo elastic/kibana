@@ -708,7 +708,7 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'multi-service-error-monitoring',
-            text: 'Should generate error detection queries scoped to individual services using resource.attributes.app, covering at least checkout, cart, and payment (evidence: entity and dependency features for these services are provided in the input)',
+            text: 'Should generate error detection queries targeting multiple services (e.g., checkout, cart, payment) either by scoping with resource.attributes.app or by filtering on service-specific log patterns in body.text',
             score: 3,
           },
           {
