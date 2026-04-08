@@ -7,11 +7,9 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { TraceWaterfall } from './components/trace_waterfall';
-import { AddToDatasetFlyout } from './components/add_to_dataset_flyout';
 import type {
   AddToDatasetFlyoutOpenOptions,
   EvalsPublicSetup,
@@ -50,24 +48,40 @@ export class EvalsPublicPlugin
   }
 
   start(core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
-    const openAddToDatasetFlyout = (options: AddToDatasetFlyoutOpenOptions) => {
-      const overlayRef = core.overlays.openFlyout(
-        toMountPoint(
-          <AddToDatasetFlyout
-            coreStart={core}
-            options={options}
-            onClose={() => overlayRef.close()}
-          />,
-          core
-        ),
-        {
-          ownFocus: true,
-          size: 'm',
-          resizable: true,
-          minWidth: 480,
-          maxWidth: 920,
-        }
+    const LazyTraceWaterfall = React.lazy(async () => {
+      const mod = await import('./components/trace_waterfall');
+      return { default: mod.TraceWaterfall };
+    });
+
+    const TraceWaterfall: EvalsPublicStart['TraceWaterfall'] = ({ traceId }) => {
+      return (
+        <Suspense fallback={null}>
+          <LazyTraceWaterfall traceId={traceId} />
+        </Suspense>
       );
+    };
+
+    const openAddToDatasetFlyout = (options: AddToDatasetFlyoutOpenOptions) => {
+      void (async () => {
+        const { AddToDatasetFlyout } = await import('./components/add_to_dataset_flyout');
+        const overlayRef = core.overlays.openFlyout(
+          toMountPoint(
+            <AddToDatasetFlyout
+              coreStart={core}
+              options={options}
+              onClose={() => overlayRef.close()}
+            />,
+            core
+          ),
+          {
+            ownFocus: true,
+            size: 'm',
+            resizable: true,
+            minWidth: 480,
+            maxWidth: 920,
+          }
+        );
+      })();
     };
 
     return { TraceWaterfall, openAddToDatasetFlyout };
