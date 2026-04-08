@@ -108,9 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // wait for the dropdown to get disabled
         await retry.waitFor('no time field', async () => {
           const timeFieldInput = await PageObjects.settings.getTimeFieldNameField();
-          return (
-            (await timeFieldInput.getAttribute('value')) === PageObjects.settings.noTimeFieldOption
-          );
+          return !(await timeFieldInput.getAttribute('value'));
         });
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         await retry.try(async () => {
