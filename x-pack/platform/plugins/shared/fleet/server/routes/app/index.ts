@@ -168,7 +168,8 @@ export const GenerateServiceTokenResponseSchema = schema.object({
 
 export const registerRoutes = (
   router: FleetAuthzRouter,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  isServerless?: boolean
 ) => {
   router.versioned
     .get({
@@ -266,38 +267,40 @@ export const registerRoutes = (
       getAgentPoliciesSpacesHandler
     );
 
-  router.versioned
-    .post({
-      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+  if (!isServerless) {
+    router.versioned
+      .post({
+        path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
         },
-      },
-      summary: `Create a service token`,
-      options: {
-        tags: ['oas-tag:Fleet service tokens'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: GenerateServiceTokenRequestSchema,
-          response: {
-            200: {
-              description: 'OK: A successful request.',
-              body: () => GenerateServiceTokenResponseSchema,
-            },
-            400: {
-              description: 'A bad request.',
-              body: genericErrorResponse,
+        summary: `Create a service token`,
+        options: {
+          tags: ['oas-tag:Fleet service tokens'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GenerateServiceTokenRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => GenerateServiceTokenResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
             },
           },
         },
-      },
-      generateServiceTokenHandler
-    );
+        generateServiceTokenHandler
+      );
+  }
 };
 const getTelemetryUsageHandler: FleetRequestHandler = async (context, request, response) => {
   const fetchUsage = appContextService.getFetchUsage();
