@@ -423,13 +423,15 @@ evaluate.describe(
                 criteria: [
                   'A new workflow was created with the name "Incident Response".',
                   'The workflow has a manual trigger.',
-                  'There is a step that creates a case (using kibana.createCase, kibana.createCaseDefaultSpace, or kibana.request) with title "Security Incident" and severity "high".',
+                  'There is a step that creates a case (using cases.createCase, kibana.createCase, kibana.createCaseDefaultSpace, or kibana.request) with title "Security Incident" and severity "high".',
                   'There is a step that adds a comment to the created case.',
                   'The comment step references the case ID from the case creation step output.',
-                  'There is a step that retrieves the case with include_comments.',
+                  'There is a step that retrieves the case with include_comments (for example using cases.getCase or kibana.request).',
                 ],
                 expectedStepTypes: [
                   'kibana.createCase|cases.createCase|kibana.createCaseDefaultSpace',
+                  'cases.addComment',
+                  'cases.getCase',
                 ],
                 expectedStepCount: { min: 2, max: 4 },
                 expectedMaxToolCalls: 8,
@@ -466,7 +468,7 @@ evaluate.describe(
                     'There is a step that searches the ".alerts-security.alerts-default" Elasticsearch index.',
                     'The search uses a term query on severity "critical".',
                     'There is a foreach loop iterating over the search hits.',
-                    'Inside the loop, a step creates a case for each alert (using kibana.createCase, kibana.createCaseDefaultSpace, or kibana.request).',
+                    'Inside the loop, a step creates a case for each alert (using cases.createCase, kibana.createCase, kibana.createCaseDefaultSpace, or kibana.request).',
                     'The case title is derived from the alert data.',
                   ],
                   expectedStepTypes: [
