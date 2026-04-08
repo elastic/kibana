@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
@@ -92,7 +93,27 @@ export async function createOrUpdateStaticDataView({
   });
 }
 
-// only create data view if it doesn't exist or was changed
+const expectedFieldFormats = {
+  [TRANSACTION_ID]: {
+    id: 'url',
+    params: {
+      urlTemplate: 'apm/link-to/transaction/{{value}}',
+      labelTemplate: '{{value}}',
+    },
+  },
+  [TRANSACTION_DURATION]: {
+    id: 'duration',
+    params: {
+      inputFormat: 'microseconds',
+      outputFormat: 'asMilliseconds',
+      showSuffix: true,
+      useShortSuffix: true,
+      outputPrecision: 2,
+      includeSpaceWithSuffix: true,
+    },
+  },
+};
+
 async function getShouldCreateOrUpdate({
   dataViewService,
   apmDataViewIndexPattern,
@@ -104,9 +125,16 @@ async function getShouldCreateOrUpdate({
 }) {
   try {
     const existingDataView = await dataViewService.get(dataViewId);
-    return existingDataView.getIndexPattern() !== apmDataViewIndexPattern;
+
+    if (existingDataView.getIndexPattern() !== apmDataViewIndexPattern) return true;
+
+    // Only update data view if the field formats are different
+    // This is specific for existing data views that still contain old field formats
+    if (!isEqual(existingDataView.fieldFormatMap, expectedFieldFormats)) return true;
+
+    return false;
   } catch (e) {
-    // ignore exception if the data view (saved object) is not found
+    // Ignore exception if the data view (saved object) is not found
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       return true;
     }
@@ -131,27 +159,7 @@ function createAndSaveStaticDataView({
       name: 'APM',
       title: apmDataViewIndexPattern,
       timeFieldName: '@timestamp',
-
-      fieldFormats: {
-        [TRANSACTION_ID]: {
-          id: 'url',
-          params: {
-            urlTemplate: 'apm/link-to/transaction/{{value}}',
-            labelTemplate: '{{value}}',
-          },
-        },
-        [TRANSACTION_DURATION]: {
-          id: 'duration',
-          params: {
-            inputFormat: 'microseconds',
-            outputFormat: 'asMilliseconds',
-            showSuffix: true,
-            useShortSuffix: true,
-            outputPrecision: 2,
-            includeSpaceWithSuffix: true,
-          },
-        },
-      },
+      fieldFormats: expectedFieldFormats,
     },
     true
   );
