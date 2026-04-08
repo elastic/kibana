@@ -8,40 +8,46 @@
  */
 
 import { getStepId } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { inferZodType } from '../../../../common/lib/zod';
 
-export function getVariablesSchema(workflowExecutionGraph: WorkflowGraph, stepName: string) {
-  const stepId = getStepId(stepName);
-  const stepNode = workflowExecutionGraph.getStepNode(stepId);
+const EMPTY_VARIABLES_SCHEMA = z.object({}).optional();
 
-  if (!stepNode) {
-    return z.object({}).optional();
+export function getVariablesSchema(
+  workflowExecutionGraph: WorkflowGraph,
+  stepName: string,
+  precomputedPredecessors?: GraphNodeUnion[]
+) {
+  let predecessors: GraphNodeUnion[];
+
+  if (precomputedPredecessors) {
+    predecessors = precomputedPredecessors;
+  } else {
+    const stepId = getStepId(stepName);
+    const stepNode = workflowExecutionGraph.getStepNode(stepId);
+    if (!stepNode) {
+      return EMPTY_VARIABLES_SCHEMA;
+    }
+    predecessors = workflowExecutionGraph.getAllPredecessors(stepNode.id);
   }
 
-  const predecessors = workflowExecutionGraph.getAllPredecessors(stepNode.id);
   const dataSetSteps = predecessors.filter((node) => node.stepType === 'data.set');
 
   if (dataSetSteps.length === 0) {
-    return z.object({}).optional();
+    return EMPTY_VARIABLES_SCHEMA;
   }
 
-  let variablesSchema = z.object({});
+  const allFields: Record<string, z.ZodTypeAny> = {};
 
   for (const node of dataSetSteps) {
     if (node.type === 'data.set' && node.configuration.with) {
       const withConfig = node.configuration.with as Record<string, unknown>;
-      const stepSchema: Record<string, z.ZodTypeAny> = {};
-
       for (const key of Object.keys(withConfig)) {
-        const value = withConfig[key];
-        stepSchema[key] = inferZodType(value);
+        allFields[key] = inferZodType(withConfig[key]);
       }
-
-      variablesSchema = variablesSchema.extend(stepSchema);
     }
   }
 
-  return variablesSchema.optional();
+  return z.object(allFields).optional();
 }
