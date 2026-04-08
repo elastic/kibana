@@ -12,8 +12,7 @@
 export const semanticSearchSkill = {
   id: 'semantic-search',
   name: 'semantic-search',
-  description:
-    'Guide for building semantic/vector search with Elasticsearch. Use when a developer wants meaning-based search, similarity matching, or natural language queries that go beyond keyword matching.',
+  description: 'Guide for building semantic/vector search with Elasticsearch. Use when a developer wants meaning-based search, similarity matching, or natural language queries that go beyond keyword matching.',
   content: `# Semantic Search Guide
 
 Guide developers through building semantic/vector search with Elasticsearch. Use this guide when they need meaning-based search, similarity matching, or natural language queries that go beyond keyword matching.
