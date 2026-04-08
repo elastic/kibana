@@ -225,6 +225,84 @@ describe('AutomaticImportService Integration Tests', () => {
       // Integration should now be completed, not approved
       const afterDelete = await savedObjectService.getIntegration(integrationId);
       expect(afterDelete.status).toBe(TASK_STATUSES.completed);
+
+      // Version should be bumped and a changelog entry added
+      expect(afterDelete.metadata.version).toBe('1.1.0');
+      expect(afterDelete.changelog).toHaveLength(1);
+      expect(afterDelete.changelog![0]).toEqual({
+        version: '1.1.0',
+        changes: [{ description: 'Updated Test Integration', type: 'enhancement', link: '' }],
+      });
+    });
+
+    it('should bump version and add changelog entry when resetting approved integration', async () => {
+      const savedObjectService = (
+        automaticImportService as unknown as {
+          savedObjectService: AutomaticImportSavedObjectService;
+        }
+      ).savedObjectService;
+
+      const integrationId = 'itest-reset-changelog';
+
+      await savedObjectService.insertIntegration(
+        { ...mockIntegrationParams, integrationId },
+        mockAuthenticatedUser
+      );
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId: 'itest-reset-cl-ds-1',
+          jobInfo: {
+            jobId: 'job-cl1',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.completed,
+          },
+        },
+        mockAuthenticatedUser
+      );
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId: 'itest-reset-cl-ds-2',
+          jobInfo: {
+            jobId: 'job-cl2',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.completed,
+          },
+        },
+        mockAuthenticatedUser
+      );
+
+      // Approve at version 2.0.0 with an existing changelog entry
+      const integration = await savedObjectService.getIntegration(integrationId);
+      const approvedData: IntegrationAttributes = {
+        ...integration,
+        status: TASK_STATUSES.approved,
+        changelog: [
+          {
+            version: '2.0.0',
+            changes: [
+              { description: 'Initial release of Test Integration', type: 'enhancement', link: '' },
+            ],
+          },
+        ],
+      };
+      await savedObjectService.updateIntegration(approvedData, '2.0.0');
+
+      // Delete a data stream — should bump to 2.0.1 and prepend changelog entry
+      await automaticImportService.deleteDataStream(integrationId, 'itest-reset-cl-ds-1');
+
+      const afterDelete = await savedObjectService.getIntegration(integrationId);
+      expect(afterDelete.status).toBe(TASK_STATUSES.completed);
+      expect(afterDelete.metadata.version).toBe('2.1.0');
+      expect(afterDelete.changelog).toHaveLength(2);
+      expect(afterDelete.changelog![0]).toEqual({
+        version: '2.1.0',
+        changes: [{ description: 'Updated Test Integration', type: 'enhancement', link: '' }],
+      });
+      expect(afterDelete.changelog![1].version).toBe('2.0.0');
     });
 
     it('should not change status of a non-approved integration on data stream deletion', async () => {
@@ -264,9 +342,10 @@ describe('AutomaticImportService Integration Tests', () => {
       // Delete the data stream
       await automaticImportService.deleteDataStream(integrationId, 'itest-no-reset-ds-1');
 
-      // Status should remain unchanged
+      // Status should remain unchanged and no changelog entry added
       const afterDelete = await savedObjectService.getIntegration(integrationId);
       expect(afterDelete.status).toBe(statusBeforeDelete);
+      expect(afterDelete.changelog).toBeUndefined();
     });
   });
 });
