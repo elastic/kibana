@@ -19,6 +19,7 @@ import {
 } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const legacyMetricStateMetricOptionsSchema = {
   /**
@@ -109,7 +110,7 @@ const esqlLegacyMetricState = schema.object(
   { meta: { id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' } }
 );
 
-export const legacyMetricStateSchema = schema.oneOf(
+export const legacyMetricStateSchema = objectUnion(
   [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],
   {
     meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },

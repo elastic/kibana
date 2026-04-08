@@ -32,6 +32,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 const treemapSharedStateSchema = {
@@ -200,7 +201,7 @@ export const treemapStateSchemaESQL = schema.object(
   }
 );
 
-export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
+export const treemapStateSchema = objectUnion([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
     id: 'treemapChart',
     title: 'Treemap Chart',

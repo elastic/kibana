@@ -17,6 +17,7 @@ import {
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const regionMapStateRegionOptionsSchema = {
   ems: schema.maybe(
@@ -64,7 +65,7 @@ export const regionMapStateSchemaESQL = schema.object(
   { meta: { id: 'regionMapESQL', title: 'Region Map (ES|QL)' } }
 );
 
-export const regionMapStateSchema = schema.oneOf(
+export const regionMapStateSchema = objectUnion(
   [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],
   { meta: { id: 'regionMapChart', title: 'Region Map' } }
 );

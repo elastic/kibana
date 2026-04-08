@@ -19,6 +19,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const tagcloudStateTagsByOptionsSchema = {
   /**
@@ -111,7 +112,7 @@ export const tagcloudStateSchemaESQL = schema.object(
   { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
 );
 
-export const tagcloudStateSchema = schema.oneOf(
+export const tagcloudStateSchema = objectUnion(
   [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
   {
     meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },

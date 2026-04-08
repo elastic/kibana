@@ -26,6 +26,7 @@ import {
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
 
 /**
  * Datatable supports an additional "badge" mode (render colored values as badges),
@@ -490,7 +491,7 @@ export const datatableStateSchemaESQL = schema.object(
   }
 );
 
-export const datatableStateSchema = schema.oneOf(
+export const datatableStateSchema = objectUnion(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
     meta: {

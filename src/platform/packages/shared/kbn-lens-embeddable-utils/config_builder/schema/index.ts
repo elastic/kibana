@@ -8,7 +8,7 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { objectUnion } from './charts/utils/object_union';
 import type { MetricState } from './charts/metric';
 import { metricStateSchema } from './charts/metric';
 import type { LegacyMetricState } from './charts/legacy_metric';
@@ -47,20 +47,20 @@ import { pieStateSchema } from './charts/pie';
  *  - Defining the `LensApiState` type from the schema types
  *  - Exporting this value as `Type<LensApiState>`
  */
-export const _lensApiStateSchema: any = schema.oneOf(
+export const _lensApiStateSchema: any = objectUnion(
   [
-    metricStateSchema,
-    legacyMetricStateSchema,
-    xyStateSchema,
-    gaugeStateSchema,
-    heatmapStateSchema,
-    tagcloudStateSchema,
-    regionMapStateSchema,
-    datatableStateSchema,
-    pieStateSchema,
-    mosaicStateSchema,
-    treemapStateSchema,
-    waffleStateSchema,
+    ...metricStateSchema.getUnionTypes(),
+    ...legacyMetricStateSchema.getUnionTypes(),
+    ...xyStateSchema.getUnionTypes(),
+    ...gaugeStateSchema.getUnionTypes(),
+    ...heatmapStateSchema.getUnionTypes(),
+    ...tagcloudStateSchema.getUnionTypes(),
+    ...regionMapStateSchema.getUnionTypes(),
+    ...datatableStateSchema.getUnionTypes(),
+    ...pieStateSchema.getUnionTypes(),
+    ...mosaicStateSchema.getUnionTypes(),
+    ...treemapStateSchema.getUnionTypes(),
+    ...waffleStateSchema.getUnionTypes(),
   ],
   { meta: { id: 'lensApiState', title: 'Visualizations' } }
 );

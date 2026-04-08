@@ -26,6 +26,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 
 /**
  * Shared visualization options for partition charts including legend and value display
@@ -161,7 +162,7 @@ export const waffleStateSchemaESQL = schema.object(
 /**
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
-export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
+export const waffleStateSchema = objectUnion([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
   meta: {
     id: 'waffleChart',
     title: 'Waffle Chart',

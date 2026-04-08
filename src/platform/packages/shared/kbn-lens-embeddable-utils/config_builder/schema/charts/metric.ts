@@ -44,6 +44,7 @@ import {
   placementSchema,
 } from '../alignments';
 import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
 
 const compareToSchemaShared = schema.object(
   {
@@ -486,7 +487,7 @@ export const esqlMetricState = schema.object(
   }
 );
 
-export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
+export const metricStateSchema = objectUnion([metricStateSchemaNoESQL, esqlMetricState], {
   meta: { id: 'metricChart', title: 'Metric Chart' },
   validate: ({ metrics, breakdown_by }) => {
     const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
