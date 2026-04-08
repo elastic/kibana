@@ -8,7 +8,7 @@
 import type { RootSchema } from '@kbn/core/public';
 
 export enum AiRuleCreationEventTypes {
-  SessionStarted = 'AI Rule Creation Session Started',
+  CreationInitialized = 'AI Rule Creation Initialized',
   AppliedToForm = 'AI Rule Applied to Form',
   RuleCreated = 'AI Rule Created',
   RuleEdited = 'AI Rule Edited',
@@ -16,7 +16,7 @@ export enum AiRuleCreationEventTypes {
   SessionAbandoned = 'AI Rule Creation Abandoned',
 }
 
-export interface ReportSessionStartedParams {
+export interface ReportCreationInitializedParams {
   sessionId: string;
 }
 
@@ -55,7 +55,7 @@ export interface ReportSessionAbandonedParams {
 }
 
 export interface AiRuleCreationTelemetryEventsMap {
-  [AiRuleCreationEventTypes.SessionStarted]: ReportSessionStartedParams;
+  [AiRuleCreationEventTypes.CreationInitialized]: ReportCreationInitializedParams;
   [AiRuleCreationEventTypes.AppliedToForm]: ReportAppliedToFormParams;
   [AiRuleCreationEventTypes.RuleCreated]: ReportRuleCreatedParams;
   [AiRuleCreationEventTypes.RuleEdited]: ReportRuleEditedParams;

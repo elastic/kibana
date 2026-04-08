@@ -134,7 +134,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     closePopover();
 
     const session = aiRuleCreation.startSession();
-    telemetry.reportEvent(AiRuleCreationEventTypes.SessionStarted, {
+    telemetry.reportEvent(AiRuleCreationEventTypes.CreationInitialized, {
       sessionId: session.sessionId,
     });
 

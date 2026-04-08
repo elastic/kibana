@@ -8,8 +8,8 @@
 import type { AiRuleCreationTelemetryEvent } from './types';
 import { AiRuleCreationEventTypes } from './types';
 
-const sessionStartedEvent: AiRuleCreationTelemetryEvent = {
-  eventType: AiRuleCreationEventTypes.SessionStarted,
+const creationInitializedEvent: AiRuleCreationTelemetryEvent = {
+  eventType: AiRuleCreationEventTypes.CreationInitialized,
   schema: {
     sessionId: {
       type: 'keyword',
@@ -206,7 +206,7 @@ const sessionAbandonedEvent: AiRuleCreationTelemetryEvent = {
 };
 
 export const aiRuleCreationTelemetryEvents = [
-  sessionStartedEvent,
+  creationInitializedEvent,
   appliedToFormEvent,
   ruleCreatedEvent,
   ruleEditedEvent,
