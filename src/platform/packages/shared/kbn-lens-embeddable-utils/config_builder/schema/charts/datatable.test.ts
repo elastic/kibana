@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { DatatableState } from './datatable';
 import { datatableStateSchema } from './datatable';
@@ -16,9 +17,9 @@ type DatatableWithoutDefaultsConfig = Omit<DatatableState, 'sampling' | 'ignore_
 describe('Datatable Schema', () => {
   const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
     type: 'data_table',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   };
 
@@ -67,14 +68,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -107,14 +108,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -152,14 +153,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -197,14 +198,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -243,19 +244,19 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
           {
             operation: 'terms',
             fields: ['product'],
-            size: 3,
+            limit: 3,
           },
         ],
         sort_by: {
@@ -286,7 +287,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
       };
@@ -330,7 +331,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -450,7 +451,7 @@ describe('Datatable Schema', () => {
     it('throws when using term buckets operation in an esql configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -464,7 +465,7 @@ describe('Datatable Schema', () => {
             field: 'bytes',
           },
         ],
-        rows: [{ operation: 'terms', fields: ['geo.dest'], size: 10 }],
+        rows: [{ operation: 'terms', fields: ['geo.dest'], limit: 10 }],
       };
 
       expect(() => datatableStateSchema.validate(input)).toThrow();
@@ -473,7 +474,7 @@ describe('Datatable Schema', () => {
     it('throws when esql datatable has no metrics and no rows', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'metrics' | 'rows'> = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -487,14 +488,13 @@ describe('Datatable Schema', () => {
     it('throws on empty metrics array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metrics: [],
         rows: [
           {
-            operation: 'value',
             column: 'location',
           },
         ],
@@ -506,13 +506,12 @@ describe('Datatable Schema', () => {
     it('throws on empty rows array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metrics: [
           {
-            operation: 'value',
             column: 'bytes',
           },
         ],
@@ -546,14 +545,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -590,14 +589,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -635,19 +634,19 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -709,7 +708,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
             alignment: 'right',
             width: 100,
             apply_color_to: 'value',
@@ -735,7 +734,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -754,7 +753,7 @@ describe('Datatable Schema', () => {
         type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table full configuration',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -767,7 +766,6 @@ describe('Datatable Schema', () => {
         },
         metrics: [
           {
-            operation: 'value',
             column: 'avg_bytes',
             alignment: 'left',
             apply_color_to: 'badge',
@@ -785,7 +783,6 @@ describe('Datatable Schema', () => {
             },
           },
           {
-            operation: 'value',
             column: 'median_bytes',
             alignment: 'center',
             apply_color_to: 'value',
@@ -805,7 +802,6 @@ describe('Datatable Schema', () => {
         ],
         rows: [
           {
-            operation: 'value',
             column: 'location',
             alignment: 'right',
             apply_color_to: 'value',
@@ -829,7 +825,6 @@ describe('Datatable Schema', () => {
         ],
         split_metrics_by: [
           {
-            operation: 'value',
             column: 'api',
           },
         ],
@@ -844,13 +839,12 @@ describe('Datatable Schema', () => {
         type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table without metrics',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         rows: [
           {
-            operation: 'value',
             column: 'location',
             alignment: 'right',
             apply_color_to: 'value',

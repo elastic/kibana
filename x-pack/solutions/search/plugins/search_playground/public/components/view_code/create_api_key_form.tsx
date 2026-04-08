@@ -133,7 +133,7 @@ export const CreateApiKeyForm = () => {
 
           <EuiButtonEmpty
             iconSide="left"
-            iconType="popout"
+            iconType="external"
             href={managementApiKeysLinks}
             target="_blank"
           >

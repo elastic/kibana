@@ -74,8 +74,7 @@ describe('WorkflowsPlugin', () => {
     });
 
     it('should register the workflows app when workflows UI is enabled', () => {
-      // First call: WORKFLOWS_UI_SETTING_ID -> true, second call: WORKFLOWS_AI_AGENT_SETTING_ID -> false
-      coreSetup.uiSettings.get.mockReturnValueOnce(true).mockReturnValueOnce(false);
+      coreSetup.uiSettings.get.mockReturnValueOnce(true);
 
       const result = plugin.setup(coreSetup, setupDeps as any);
 
