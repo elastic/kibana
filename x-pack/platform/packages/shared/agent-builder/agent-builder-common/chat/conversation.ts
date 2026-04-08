@@ -151,6 +151,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
+  tool_call_group_id?: string;
 }
 
 export type ReasoningStep = ConversationRoundStepMixin<
@@ -207,8 +211,8 @@ export interface ConversationRound {
   status: ConversationRoundStatus;
   /** persisted state to resume interrupted states */
   state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt request*/
-  pending_prompt?: PromptRequest;
+  /** if status is awaiting_prompt, contains the current prompt requests */
+  pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
