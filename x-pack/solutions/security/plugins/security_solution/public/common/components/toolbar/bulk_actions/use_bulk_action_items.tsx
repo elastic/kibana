@@ -39,8 +39,8 @@ export interface BulkActionsProps {
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
-  data: TimelineItem[];
-  closePopover: () => void;
+  data?: TimelineItem[];
+  closePopover?: () => void;
 }
 
 export const useBulkActionItems = ({
