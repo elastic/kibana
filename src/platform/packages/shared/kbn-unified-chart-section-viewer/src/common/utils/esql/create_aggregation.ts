@@ -32,13 +32,30 @@ function getCastFunctionForType(fieldType: ES_FIELD_TYPES | undefined): string |
 }
 
 /**
+ * When multiple field types are present, resolves them to a single cast
+ * expression if compatible, or signals incompatibility.
+ */
+function applyCastIfNeeded(
+  types: ES_FIELD_TYPES[],
+  field: ESQLAstExpression
+): { field: ESQLAstExpression; incompatible: boolean } {
+  if (types.length <= 1) return { field, incompatible: false };
+
+  const resolvedType = resolveConflictingFieldTypes(types);
+  if (resolvedType) {
+    const castFn = getCastFunctionForType(resolvedType);
+    if (castFn) {
+      return { field: synth.exp`${synth.kwd(castFn)}(${field})`, incompatible: false };
+    }
+  }
+  return { field, incompatible: new Set(types).size > 1 };
+}
+
+/**
  * Builds an ES|QL aggregation expression AST node using `synth.exp` template
  * literals. Accepts any expression node -- a resolved column (`synth.col`) or
  * an unresolved placeholder (`synth.dpar`) -- and wraps it in the correct
  * aggregation function based on the field type and instrument.
- *
- * When multiple field types are present (from fieldTypes array), applies casting
- * to resolve the ambiguity if the types are compatible.
  */
 function buildAggregationNode(
   types: ES_FIELD_TYPES[],
@@ -46,39 +63,15 @@ function buildAggregationNode(
   field: ESQLAstExpression,
   customFunction?: string
 ): ESQLAstExpression | undefined {
+  const { field: resolvedField, incompatible } = applyCastIfNeeded(types, field);
+  if (incompatible) return undefined;
+
   const primaryType = types[0];
-
-  // If we have multiple types, resolve and apply casting if needed
-  let castedField = field;
-  if (types.length > 1) {
-    const resolvedType = resolveConflictingFieldTypes(types);
-    if (resolvedType) {
-      const castFunction = getCastFunctionForType(resolvedType);
-      if (castFunction) {
-        castedField = synth.exp`${synth.kwd(castFunction)}(${field})`;
-      }
-    } else if (new Set(types).size > 1) {
-      // Incompatible types (e.g., keyword + double) — return undefined
-      // so callers can gracefully produce a no-op instead of a broken query.
-      // When resolvedType is undefined but all types are the same (duplicates),
-      // no cast is needed and we proceed normally.
-      return undefined;
-    }
-  }
-
-  if (customFunction) {
-    return synth.exp`${synth.kwd(customFunction)}(${castedField})`;
-  }
-  if (isLegacyHistogram(primaryType, instrument)) {
-    return synth.exp`PERCENTILE(TO_TDIGEST(${castedField}), ${95})`;
-  }
-  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') {
-    return synth.exp`PERCENTILE(${castedField}, ${95})`;
-  }
-  if (instrument === 'counter') {
-    return synth.exp`SUM(RATE(${castedField}))`;
-  }
-  return synth.exp`AVG(${castedField})`;
+  if (customFunction) return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
+  if (isLegacyHistogram(primaryType, instrument)) return synth.exp`PERCENTILE(TO_TDIGEST(${resolvedField}), ${95})`;
+  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') return synth.exp`PERCENTILE(${resolvedField}, ${95})`;
+  if (instrument === 'counter') return synth.exp`SUM(RATE(${resolvedField}))`;
+  return synth.exp`AVG(${resolvedField})`;
 }
 
 /**
