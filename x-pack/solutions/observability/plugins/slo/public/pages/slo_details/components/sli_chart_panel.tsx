@@ -27,7 +27,7 @@ import type {
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useFetchApmTracesIndex } from '../../../hooks/use_fetch_apm_indices';
+import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import type { ChartData } from '../../../typings/slo';
@@ -86,14 +86,16 @@ export function SliChartPanel({
   const hasNoData = observedValue === undefined || observedValue < 0;
 
   const isApm = isApmIndicatorType(slo.indicator);
-  const hasApmReadCapabilities = !!capabilities.apm.show;
+  const hasApmReadCapabilities = !!capabilities.apm?.show;
   const isRemote = !!slo.remote;
   const canNavigateToApm = isApm && hasApmReadCapabilities && !isRemote;
 
   const apmUrl = isApm ? convertSliApmParamsToApmAppDeeplinkUrl(slo, timeRange) : undefined;
   const apmLink = apmUrl ? basePath.prepend(apmUrl) : undefined;
 
-  const { data: tracesIndex } = useFetchApmTracesIndex({ enabled: isApm });
+  const {
+    data: { traces: tracesIndex },
+  } = useFetchApmIndex({ enabled: isApm });
 
   const discoverLink = (() => {
     if (!isApm || !tracesIndex) return undefined;

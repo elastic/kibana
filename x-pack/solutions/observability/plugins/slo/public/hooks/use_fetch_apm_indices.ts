@@ -9,10 +9,13 @@ import { useQuery } from '@kbn/react-query';
 
 import { useKibana } from './use_kibana';
 
-type ApmIndex = string;
+interface ApmIndices {
+  metric: string;
+  traces: string;
+}
 
 export interface UseFetchApmIndex {
-  data: ApmIndex;
+  data: ApmIndices;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
@@ -22,54 +25,35 @@ function splitCommaSeparatedIndexPatterns(pattern: string | undefined): string[]
   return pattern ? pattern.split(',') : [];
 }
 
-export function useFetchApmIndex(): UseFetchApmIndex {
+const EMPTY_INDICES: ApmIndices = { metric: '', traces: '' };
+
+export function useFetchApmIndex({ enabled = true }: { enabled?: boolean } = {}): UseFetchApmIndex {
   const { apmSourcesAccess } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchApmIndices'],
     queryFn: async ({ signal }) => {
-      try {
-        const response = await apmSourcesAccess.getApmIndices({ signal });
+      const { metric, transaction, span } = await apmSourcesAccess.getApmIndices({ signal });
 
-        return response.metric ?? '';
-      } catch (error) {
-        // ignore error
-      }
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  return {
-    data: isInitialLoading ? '' : data ?? '',
-    isLoading: isInitialLoading || isLoading || isRefetching,
-    isSuccess,
-    isError,
-  };
-}
-
-export function useFetchApmTracesIndex({
-  enabled = true,
-}: { enabled?: boolean } = {}): UseFetchApmIndex {
-  const { apmSourcesAccess } = useKibana().services;
-
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: ['fetchApmTracesIndices'],
-    queryFn: async ({ signal }) => {
-      const { transaction, span } = await apmSourcesAccess.getApmIndices({ signal });
-      const allIndices = [
+      // deduplicate and join the transaction and span index patterns
+      const tracesIndices = [
         ...new Set([
           ...splitCommaSeparatedIndexPatterns(transaction),
           ...splitCommaSeparatedIndexPatterns(span),
         ]),
-      ];
-      return allIndices.join(',');
+      ].join(',');
+
+      return {
+        metric,
+        traces: tracesIndices,
+      };
     },
     refetchOnWindowFocus: false,
     enabled,
   });
 
   return {
-    data: isInitialLoading ? '' : data ?? '',
+    data: isInitialLoading ? EMPTY_INDICES : data ?? EMPTY_INDICES,
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,
