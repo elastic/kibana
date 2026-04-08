@@ -65,29 +65,12 @@ export const createNavigationTree = ({
       {
         link: 'workflows',
       },
-      showAlertingV2
-        ? {
-            id: 'alerting',
-            renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessObservability.nav.alerts', {
-              defaultMessage: 'Alerts',
-            }),
-            icon: 'warning',
-            children: [
-              {
-                link: 'observability-overview:alerts',
-              },
-              {
-                link: 'observability-overview:alerts_v2',
-              },
-            ],
-          }
-        : {
-            link: 'observability-overview:alerts',
-            icon: 'warning',
-            getIsActive: ({ pathNameSerialized, prepend }) =>
-              pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
-          },
+      {
+        link: 'observability-overview:alerts',
+        icon: 'warning',
+        getIsActive: ({ pathNameSerialized, prepend }) =>
+          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
+      },
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
@@ -305,6 +288,15 @@ export const createNavigationTree = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  link: 'management:anomaly_detection',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.anomaly_detection.manage_jobs',
+                    {
+                      defaultMessage: 'Manage jobs',
+                    }
+                  ),
+                },
+                {
                   link: 'ml:anomalyExplorer',
                 },
                 {
@@ -508,6 +500,7 @@ export const createNavigationTree = ({
               breadcrumbStatus: 'hidden',
               children: [
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },
+                { link: 'management:episodes', breadcrumbStatus: 'hidden' },
                 { link: 'management:notification_policies', breadcrumbStatus: 'hidden' },
               ],
             },

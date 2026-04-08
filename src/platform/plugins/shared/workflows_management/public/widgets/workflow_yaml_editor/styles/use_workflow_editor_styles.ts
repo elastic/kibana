@@ -206,6 +206,14 @@ const editorStyleMap = {
         backgroundColor: 'transparent',
       },
     }),
+  agentBuilderSectionCss: (euiThemeContext: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      top: euiThemeContext.euiTheme.size.xxs,
+      right: euiThemeContext.euiTheme.size.m,
+      zIndex: 10,
+    }),
+  hiddenButtonCss: css({ display: 'none' }),
 };
 
 export const useWorkflowEditorStyles = () => {
