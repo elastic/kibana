@@ -10,6 +10,7 @@ import {
   flattenRecord,
   isEnabledFailureStore,
   namedFieldDefinitionConfigSchema,
+  STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
 import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { z } from '@kbn/zod/v4';
@@ -37,6 +38,7 @@ import {
   processingDissectSuggestionsSchema,
 } from './dissect_suggestions_handler';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import type { FailureStoreSamplesResponse } from './failure_store_samples_handler';
 import { getFailureStoreSamples } from './failure_store_samples_handler';
 import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
@@ -128,10 +130,20 @@ export const processingGrokSuggestionRoute = createServerRoute({
         request,
       });
 
+    const connectorId =
+      params.body.connector_id ??
+      (await resolveConnectorForFeature({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
+        featureName: 'processing suggestions',
+        request,
+      }));
+
     // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingGrokSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,
@@ -192,10 +204,20 @@ export const processingDissectSuggestionRoute = createServerRoute({
         request,
       });
 
+    const connectorId =
+      params.body.connector_id ??
+      (await resolveConnectorForFeature({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
+        featureName: 'processing suggestions',
+        request,
+      }));
+
     // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingDissectSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,

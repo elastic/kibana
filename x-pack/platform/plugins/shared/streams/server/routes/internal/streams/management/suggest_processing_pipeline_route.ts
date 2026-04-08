@@ -27,6 +27,7 @@ import {
   getDissectProcessorWithReview,
 } from '@kbn/dissect-heuristics';
 import type { Logger } from '@kbn/logging';
+import { STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import {
   PRIORITIZED_CONTENT_FIELDS,
   getDefaultTextField,
@@ -38,6 +39,7 @@ import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
+import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { reviewGrokFields } from '../processing/grok_suggestions_handler';
 import { reviewDissectFields } from '../processing/dissect_suggestions_handler';
@@ -47,7 +49,7 @@ import type { IPatternExtractionService } from '../../../../lib/pattern_extracti
 export interface SuggestIngestPipelineParams {
   path: { name: string };
   body: {
-    connector_id: string;
+    connector_id?: string;
     documents: FlattenRecord[];
   };
 }
@@ -55,7 +57,7 @@ export interface SuggestIngestPipelineParams {
 export const suggestIngestPipelineSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    connector_id: z.string(),
+    connector_id: z.string().optional(),
     documents: z.array(flattenRecord),
   }),
 }) satisfies z.Schema<SuggestIngestPipelineParams>;
@@ -91,9 +93,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     telemetry,
   }): Promise<SuggestProcessingPipelineResponse> => {
     const log = logger.get('suggestProcessingPipeline');
-    log.debug(
-      `Request received (stream=${params.path.name} connectorId=${params.body.connector_id})`
-    );
+    let connectorId: string | undefined;
 
     // Wrap entire logic in Observable so errors can be sent as SSE events
     return from(
@@ -107,6 +107,17 @@ export const suggestProcessingPipelineRoute = createServerRoute({
 
         const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
           await getScopedClients({ request });
+
+        connectorId =
+          params.body.connector_id ??
+          (await resolveConnectorForFeature({
+            searchInferenceEndpoints: server.searchInferenceEndpoints,
+            featureId: STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
+            featureName: 'processing suggestions',
+            request,
+          }));
+
+        log.debug(`Request received (stream=${params.path.name} connectorId=${connectorId})`);
 
         const stream = await streamsClient.getStream(params.path.name);
         if (!Streams.ingest.all.Definition.is(stream)) {
@@ -134,7 +145,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           > = [];
 
           log.debug(
-            `Scheduling parallel grok + dissect extraction (stream=${stream.name} messages=${messages.length} fieldName=${fieldName} connectorId=${params.body.connector_id})`
+            `Scheduling parallel grok + dissect extraction (stream=${stream.name} messages=${messages.length} fieldName=${fieldName} connectorId=${connectorId})`
           );
 
           candidatePromises.push(
@@ -142,7 +153,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               messages,
               fieldName,
               streamName: stream.name,
-              connectorId: params.body.connector_id,
+              connectorId,
               documents: params.body.documents,
               patternExtractionService,
               inferenceClient,
@@ -159,7 +170,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               messages,
               fieldName,
               streamName: stream.name,
-              connectorId: params.body.connector_id,
+              connectorId,
               documents: params.body.documents,
               patternExtractionService,
               inferenceClient,
@@ -185,13 +196,13 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               const { reason } = result;
               if (isNoLLMSuggestionsError(reason)) {
                 log.debug(
-                  `No LLM suggestions available (stream=${stream.name} connectorId=${params.body.connector_id})`
+                  `No LLM suggestions available (stream=${stream.name} connectorId=${connectorId})`
                 );
               } else {
                 const meta = formatInferenceErrorMeta(reason);
                 log.error(
                   `Candidate failed (stream=${stream.name}` +
-                    ` connectorId=${params.body.connector_id}${meta}): ${getErrorMessage(reason)}`
+                    ` connectorId=${connectorId}${meta}): ${getErrorMessage(reason)}`
                 );
               }
             }
@@ -216,7 +227,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
 
         const result = await suggestProcessingPipeline({
           definition: stream,
-          inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
+          inferenceClient: inferenceClient.bindTo({ connectorId }),
           parsingProcessor,
           maxSteps,
           signal: abortController.signal,
@@ -237,11 +248,11 @@ export const suggestProcessingPipelineRoute = createServerRoute({
 
         const durationMs = Date.now() - startTime;
         log.debug(
-          `Processing pipeline generated (stream=${stream.name} connectorId=${
-            params.body.connector_id
-          } durationMs=${durationMs} steps=${result.metadata.stepsUsed} hasPipeline=${
-            result.pipeline !== null
-          })`
+          `Processing pipeline generated (stream=${
+            stream.name
+          } connectorId=${connectorId} durationMs=${durationMs} steps=${
+            result.metadata.stepsUsed
+          } hasPipeline=${result.pipeline !== null})`
         );
 
         telemetry.trackProcessingPipelineSuggested({
@@ -262,7 +273,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
       catchError((error) => {
         if (isNoLLMSuggestionsError(error)) {
           log.debug(
-            `No LLM suggestions available for pipeline generation (stream=${params.path.name} connectorId=${params.body.connector_id})`
+            `No LLM suggestions available for pipeline generation (stream=${params.path.name} connectorId=${connectorId})`
           );
           // Return null pipeline instead of error - frontend will handle this gracefully
           return [
@@ -275,9 +286,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         const errorMessage = getErrorMessage(error) || 'Failed to generate pipeline suggestion';
         log.error(
           `Failed to generate pipeline suggestion (stream=${params.path.name}` +
-            ` connectorId=${params.body.connector_id}${formatInferenceErrorMeta(
-              error
-            )}): ${errorMessage}`
+            ` connectorId=${connectorId}${formatInferenceErrorMeta(error)}): ${errorMessage}`
         );
         if (isSSEError(error) && error.status) {
           throw createSSERequestError(errorMessage, error.status);

@@ -27,7 +27,7 @@ export interface ProcessingGrokSuggestionsParams {
     name: string;
   };
   body: {
-    connector_id: string;
+    connector_id?: string;
     field_name: string;
     sample_messages: string[];
   };
@@ -35,6 +35,7 @@ export interface ProcessingGrokSuggestionsParams {
 
 export interface ProcessingGrokSuggestionsHandlerDeps {
   params: ProcessingGrokSuggestionsParams;
+  connectorId: string;
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
@@ -47,7 +48,7 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
 export const processingGrokSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    connector_id: z.string(),
+    connector_id: z.string().optional(),
     field_name: z.string(),
     sample_messages: z.array(z.string()),
   }),
@@ -59,6 +60,7 @@ type FieldReviewResults = ToolCallsOfToolOptions<
 
 export const handleProcessingGrokSuggestions = async ({
   params,
+  connectorId,
   inferenceClient,
   streamsClient,
   fieldsMetadataClient,
@@ -67,7 +69,6 @@ export const handleProcessingGrokSuggestions = async ({
   logger,
 }: ProcessingGrokSuggestionsHandlerDeps): Promise<GrokProcessor | null> => {
   const { name: streamName } = params.path;
-  const { connector_id: connectorId } = params.body;
 
   logger.debug(
     `Starting extraction (stream=${streamName} messages=${params.body.sample_messages.length} connectorId=${connectorId})`
