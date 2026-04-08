@@ -39,24 +39,7 @@ import type { DiscoverServices } from '../../../../../build_services';
 const container = document.createElement('div');
 let isOpen = false;
 
-function restoreFocus(anchorElement?: HTMLElement, parentTestId?: string) {
-  const overflowButton = document.querySelector(
-    '[data-test-subj="app-menu-overflow-button"]'
-  ) as HTMLElement;
-
-  if (parentTestId) {
-    const parentButton = document.querySelector(
-      `[data-test-subj="${parentTestId}"]`
-    ) as HTMLElement;
-    (parentButton || overflowButton)?.focus();
-  } else if (anchorElement && document.body.contains(anchorElement)) {
-    anchorElement.focus();
-  } else {
-    overflowButton?.focus();
-  }
-}
-
-function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
+function cleanup(returnFocus?: () => void) {
   if (!isOpen) {
     return;
   }
@@ -65,14 +48,14 @@ function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
   document.body.removeChild(container);
   isOpen = false;
 
-  restoreFocus(anchorElement, parentTestId);
+  returnFocus?.();
 }
 
 export async function runAppMenuAction({
   appMenuItem,
   anchorElement,
   services,
-  parentTestId,
+  returnFocus,
 }: {
   appMenuItem:
     | DiscoverAppMenuItemType
@@ -81,23 +64,23 @@ export async function runAppMenuAction({
     | DiscoverAppMenuPopoverItem;
   anchorElement: HTMLElement;
   services: DiscoverServices;
-  parentTestId?: string;
+  returnFocus?: () => void;
 }) {
-  cleanup(anchorElement, parentTestId);
+  cleanup(returnFocus);
 
   const onFinishAction = () => {
-    cleanup(anchorElement, parentTestId);
-    // If cleanup didn't run (no React element), still restore focus
-    if (!isOpen) {
-      restoreFocus(anchorElement, parentTestId);
+    if (isOpen) {
+      cleanup(returnFocus);
+    } else {
+      returnFocus?.();
     }
   };
 
   const params: DiscoverAppMenuRunActionParams = {
     triggerElement: anchorElement,
+    returnFocus: returnFocus ?? (() => {}),
     context: {
       onFinishAction,
-      parentTestId,
     },
   };
 
@@ -145,11 +128,9 @@ type DiscoverAppMenuItem =
 export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
   appMenuItem,
   services,
-  parentTestId,
 }: {
   appMenuItem: T;
   services: DiscoverServices;
-  parentTestId?: string;
 }): EnhancedAppMenuItem<T> {
   const enhancedRun = appMenuItem.run
     ? (params?: AppMenuRunActionParams) => {
@@ -158,7 +139,7 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
             appMenuItem,
             anchorElement: params.triggerElement,
             services,
-            parentTestId,
+            returnFocus: params.returnFocus,
           });
         }
       }
@@ -171,7 +152,6 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
             enhanceAppMenuItemWithRunAction({
               appMenuItem: nestedItem,
               services,
-              parentTestId: appMenuItem.testId || 'app-menu-overflow-button',
             })
         )
       : undefined;
