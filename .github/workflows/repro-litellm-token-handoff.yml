@@ -35,7 +35,6 @@ jobs:
     permissions:
       issues: read
       contents: read
-      id-token: write
       pull-requests: write
     steps:
       - name: Checkout repository
@@ -48,9 +47,7 @@ jobs:
         with:
           show_full_output: true
           anthropic_api_key: ${{ needs.mint-token.outputs.api_key }}
-          # We pass the bot ID so that comments are posted as Claude bot rather than Github Actions bot
-          # https://github.com/anthropics/claude-code-action/issues/759
-          bot_id: '209825114'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: >-
             /review REPO: ${{ github.repository }} PR_NUMBER: ${{ github.event.pull_request.number }}
             Review the changed files for correctness, security, reliability, testing, and maintainability issues.
