@@ -470,9 +470,9 @@ function buildXYLayerAPI(
             visLayer,
             datasourceLayer,
             adHocDataViews,
+            resolveAxisId,
             references,
-            adhocReferences,
-            resolveAxisId
+            adhocReferences
           )
         );
       }
