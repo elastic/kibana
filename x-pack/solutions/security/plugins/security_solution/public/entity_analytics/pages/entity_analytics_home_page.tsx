@@ -66,6 +66,7 @@ export const EntityAnalyticsHomePage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const leadGenerationEnabled = useIsExperimentalFeatureEnabled('leadGenerationEnabled');
   const leadDetailsEnabled = useIsExperimentalFeatureEnabled('leadGenerationDetailsEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
 
@@ -74,10 +75,11 @@ export const EntityAnalyticsHomePage = () => {
     totalCount,
     isLoading: isLeadsLoading,
     isGenerating,
+    hasGenerated,
     generate,
     isScheduled,
     toggleSchedule,
-  } = useHuntingLeads();
+  } = useHuntingLeads(leadGenerationEnabled);
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -184,21 +186,24 @@ export const EntityAnalyticsHomePage = () => {
           <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsHomePageLoader" />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="l">
-            <EuiFlexItem>
-              <TopThreatHuntingLeads
-                leads={leads}
-                totalCount={totalCount}
-                isLoading={isLeadsLoading}
-                isGenerating={isGenerating}
-                onSeeAll={handleOpenFlyout}
-                onLeadClick={handleOpenLeadInChat}
-                onHuntInChat={handleHuntInChat}
-                onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
-                onGenerate={generate}
-                isScheduled={isScheduled}
-                onToggleSchedule={toggleSchedule}
-              />
-            </EuiFlexItem>
+            {leadGenerationEnabled && (
+              <EuiFlexItem>
+                <TopThreatHuntingLeads
+                  leads={leads}
+                  totalCount={totalCount}
+                  isLoading={isLeadsLoading}
+                  isGenerating={isGenerating}
+                  hasGenerated={hasGenerated}
+                  onSeeAll={handleOpenFlyout}
+                  onLeadClick={handleOpenLeadInChat}
+                  onHuntInChat={handleHuntInChat}
+                  onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
+                  onGenerate={generate}
+                  isScheduled={isScheduled}
+                  onToggleSchedule={toggleSchedule}
+                />
+              </EuiFlexItem>
+            )}
 
             <EuiFlexItem>
               <EuiFlexGroup
@@ -232,7 +237,7 @@ export const EntityAnalyticsHomePage = () => {
         )}
       </SecuritySolutionPageWrapper>
 
-      {isFlyoutOpen && (
+      {leadGenerationEnabled && isFlyoutOpen && (
         <ThreatHuntingLeadsFlyout
           onClose={handleCloseFlyout}
           onSelectLead={handleOpenLeadInChat}
@@ -240,7 +245,7 @@ export const EntityAnalyticsHomePage = () => {
         />
       )}
 
-      {provenanceLead && (
+      {leadGenerationEnabled && provenanceLead && (
         <LeadProvenanceFlyout
           lead={provenanceLead}
           onClose={handleCloseProvenance}
