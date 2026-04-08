@@ -190,15 +190,13 @@ export const connectorExecuteResponseSchema = schema.object({
   ),
 });
 
-export const connectorAuthStatusResponseSchema = schema.object({
-  results: schema.recordOf(
-    schema.string(),
-    schema.object({
-      user_auth_status: schema.oneOf([
-        schema.literal('connected'),
-        schema.literal('not_connected'),
-        schema.literal('not_applicable'),
-      ]),
-    })
-  ),
-});
+export const connectorAuthStatusResponseSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    user_auth_status: schema.oneOf([
+      schema.literal('connected'),
+      schema.literal('not_connected'),
+      schema.literal('not_applicable'),
+    ]),
+  })
+);

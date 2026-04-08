@@ -12,11 +12,9 @@ import { transformConnectorAuthStatusResponse } from './transform_connector_auth
 describe('transformConnectorAuthStatusResponse', () => {
   test('maps snake_case user_auth_status to camelCase userAuthStatus for all status values', () => {
     const result = transformConnectorAuthStatusResponse({
-      results: {
-        a: { user_auth_status: 'connected' },
-        b: { user_auth_status: 'not_connected' },
-        c: { user_auth_status: 'not_applicable' },
-      },
+      a: { user_auth_status: 'connected' },
+      b: { user_auth_status: 'not_connected' },
+      c: { user_auth_status: 'not_applicable' },
     });
 
     expect(result).toEqual({

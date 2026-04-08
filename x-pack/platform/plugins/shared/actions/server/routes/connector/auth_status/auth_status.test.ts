@@ -43,10 +43,8 @@ describe('connectorAuthStatusRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "results": Object {
-            "connector-1": Object {
-              "user_auth_status": "connected",
-            },
+          "connector-1": Object {
+            "user_auth_status": "connected",
           },
         },
       }
@@ -56,9 +54,7 @@ describe('connectorAuthStatusRoute', () => {
 
     expect(res.ok).toHaveBeenCalledWith({
       body: {
-        results: {
-          'connector-1': { user_auth_status: 'connected' },
-        },
+        'connector-1': { user_auth_status: 'connected' },
       },
     });
   });

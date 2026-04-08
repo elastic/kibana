@@ -9,16 +9,16 @@
 
 import type { ConnectorAuthStatusMap, ConnectorUserAuthStatus } from '../../types';
 
-export interface ConnectorAuthStatusApiResponse {
-  results: Record<string, { user_auth_status: ConnectorUserAuthStatus }>;
-}
+export type ConnectorAuthStatusApiResponse = Record<
+  string,
+  { user_auth_status: ConnectorUserAuthStatus }
+>;
 
 export const transformConnectorAuthStatusResponse = (
   response: ConnectorAuthStatusApiResponse
 ): ConnectorAuthStatusMap => {
-  const { results } = response;
   return Object.fromEntries(
-    Object.entries(results).map(([connectorId, { user_auth_status: userAuthStatus }]) => [
+    Object.entries(response).map(([connectorId, { user_auth_status: userAuthStatus }]) => [
       connectorId,
       { userAuthStatus },
     ])

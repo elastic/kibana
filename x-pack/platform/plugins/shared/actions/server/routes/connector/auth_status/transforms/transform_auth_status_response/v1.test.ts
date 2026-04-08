@@ -9,7 +9,7 @@ import { transformAuthStatusResponseV1 } from './v1';
 
 describe('transformAuthStatusResponseV1', () => {
   test('transforms empty result', () => {
-    expect(transformAuthStatusResponseV1({})).toEqual({ results: {} });
+    expect(transformAuthStatusResponseV1({})).toEqual({});
   });
 
   test('transforms mixed statuses to snake_case user_auth_status', () => {
@@ -20,11 +20,9 @@ describe('transformAuthStatusResponseV1', () => {
         c: { userAuthStatus: 'not_applicable' },
       })
     ).toEqual({
-      results: {
-        a: { user_auth_status: 'connected' },
-        b: { user_auth_status: 'not_connected' },
-        c: { user_auth_status: 'not_applicable' },
-      },
+      a: { user_auth_status: 'connected' },
+      b: { user_auth_status: 'not_connected' },
+      c: { user_auth_status: 'not_applicable' },
     });
   });
 
@@ -33,7 +31,7 @@ describe('transformAuthStatusResponseV1', () => {
       'connector-1': { userAuthStatus: 'not_applicable' as const },
       'other-id': { userAuthStatus: 'connected' as const },
     };
-    const { results } = transformAuthStatusResponseV1(input);
-    expect(Object.keys(results).sort()).toEqual(['connector-1', 'other-id']);
+    const body = transformAuthStatusResponseV1(input);
+    expect(Object.keys(body).sort()).toEqual(['connector-1', 'other-id']);
   });
 });

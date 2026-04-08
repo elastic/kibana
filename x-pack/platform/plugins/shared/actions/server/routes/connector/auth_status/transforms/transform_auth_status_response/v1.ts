@@ -11,9 +11,9 @@ import type { GetAuthStatusResult } from '../../../../../application/connector/m
 export const transformAuthStatusResponseV1 = (
   result: GetAuthStatusResult
 ): ConnectorAuthStatusResponseV1 => {
-  const results: ConnectorAuthStatusResponseV1['results'] = {};
+  const body: ConnectorAuthStatusResponseV1 = {};
   for (const [id, { userAuthStatus }] of Object.entries(result)) {
-    results[id] = { user_auth_status: userAuthStatus };
+    body[id] = { user_auth_status: userAuthStatus };
   }
-  return { results };
+  return body;
 };

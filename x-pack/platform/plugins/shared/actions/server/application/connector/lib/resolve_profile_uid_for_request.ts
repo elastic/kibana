@@ -10,7 +10,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 export async function resolveProfileUidForRequest({
   request,
   getCurrentUser,
-  getCurrentUserProfileUid,
   getCurrentUserProfileIdFromAPIKey,
 }: {
   request: KibanaRequest;
@@ -19,9 +18,5 @@ export async function resolveProfileUidForRequest({
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }): Promise<string | undefined> {
   const currentUser = await getCurrentUser?.(request);
-  return (
-    currentUser?.profile_uid ??
-    (await getCurrentUserProfileUid?.(request)) ??
-    (await getCurrentUserProfileIdFromAPIKey?.(request))
-  );
+  return currentUser?.profile_uid ?? (await getCurrentUserProfileIdFromAPIKey?.(request));
 }

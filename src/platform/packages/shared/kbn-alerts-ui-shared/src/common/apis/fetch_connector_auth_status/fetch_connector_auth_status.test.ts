@@ -17,10 +17,8 @@ beforeEach(() => jest.resetAllMocks());
 describe('fetchConnectorAuthStatus', () => {
   test('calls POST auth_status API and transforms the response', async () => {
     http.post.mockResolvedValueOnce({
-      results: {
-        'connector-1': { user_auth_status: 'connected' },
-        'connector-2': { user_auth_status: 'not_connected' },
-      },
+      'connector-1': { user_auth_status: 'connected' },
+      'connector-2': { user_auth_status: 'not_connected' },
     });
 
     const result = await fetchConnectorAuthStatus({ http });
