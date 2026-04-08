@@ -59,11 +59,8 @@ import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer'
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
-<<<<<<< HEAD
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
-=======
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
->>>>>>> 61fe4d00bfc930dfa3a959cbc31c377db8f14aca
 import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
