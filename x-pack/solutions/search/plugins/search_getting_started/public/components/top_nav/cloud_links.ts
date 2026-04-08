@@ -5,9 +5,9 @@
  * 2.0.
  */
 const cloudDeployment = 'https://cloud.elastic.co/';
-export enum cloudLinks {
-  cloudHome = `${cloudDeployment}home`,
-  cloudUsage = `${cloudDeployment}billing/usage`,
-  cloudOrganizationMembers = `${cloudDeployment}account/members`,
-  cloudManageSubscription = `${cloudDeployment}billing/overview`,
-}
+export const cloudLinks = {
+  cloudHome: `${cloudDeployment}home`,
+  cloudUsage: `${cloudDeployment}billing/usage`,
+  cloudOrganizationMembers: `${cloudDeployment}account/members`,
+  cloudManageSubscription: `${cloudDeployment}billing/overview`,
+};

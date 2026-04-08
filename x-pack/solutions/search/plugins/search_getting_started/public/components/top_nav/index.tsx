@@ -21,7 +21,7 @@ import { TopNavLinks } from './top_nav_links';
 import { AskExpert } from './ask_expert';
 import { ManageSubscription } from './manage_subscription';
 import { WelcomeMessage } from './welcome';
-import { cloudLinks } from './links';
+import { cloudLinks } from './cloud_links';
 
 interface TopNavLinkItem {
   buttonLabel: string;

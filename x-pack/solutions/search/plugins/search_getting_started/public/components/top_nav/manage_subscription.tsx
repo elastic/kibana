@@ -8,7 +8,7 @@
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { cloudLinks } from './links';
+import { cloudLinks } from './cloud_links';
 
 export const ManageSubscription = () => {
   return (
