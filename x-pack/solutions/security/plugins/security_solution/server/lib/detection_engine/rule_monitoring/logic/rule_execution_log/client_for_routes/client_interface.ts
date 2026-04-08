@@ -6,62 +6,22 @@
  */
 
 import type {
-  GetRuleExecutionEventsResponse,
-  LogLevel,
   ReadRuleExecutionResultsRequestBody,
   ReadRuleExecutionResultsResponse,
-  RuleExecutionEventType,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { SortOrder } from '../../../../../../../common/api/detection_engine';
 
 /**
  * Used from route handlers to fetch and manage various information about the rule execution:
  *   - execution summary of a rule containing such data as the last status and metrics
- *   - execution events such as recent failures and status changes
  */
 export interface IRuleExecutionLogForRoutes {
-  /**
-   * Fetches plain execution events of a given rule from Event Log. This includes debug, info, and
-   * error messages that executor functions write during a rule execution to the log.
-   */
-  getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
-
   /**
    * Fetches rule execution results for a given rule ID.
    */
   getUnifiedExecutionResults(
     args: GetUnifiedExecutionResultsArgs
   ): Promise<ReadRuleExecutionResultsResponse>;
-}
-
-export interface GetExecutionEventsArgs {
-  /** Saved object id of the rule (`rule.id`). */
-  ruleId: RuleObjectId;
-
-  /** Include events of matching the search term. If omitted, all events will be included. */
-  searchTerm?: string;
-
-  /** Include events of the specified types. If omitted, all types of events will be included. */
-  eventTypes?: RuleExecutionEventType[];
-
-  /** Include events having these log levels. If omitted, events of all levels will be included. */
-  logLevels?: LogLevel[];
-
-  /** Include events recorded starting from the specified moment. If omitted, all events will be included. */
-  dateStart?: string;
-
-  /** Include events recorded till the specified moment. If omitted, all events will be included. */
-  dateEnd?: string;
-
-  /** What order to sort by (e.g. `asc` or `desc`). */
-  sortOrder: SortOrder;
-
-  /** Current page to fetch. */
-  page: number;
-
-  /** Number of results to fetch per page. */
-  perPage: number;
 }
 
 export interface GetUnifiedExecutionResultsArgs {

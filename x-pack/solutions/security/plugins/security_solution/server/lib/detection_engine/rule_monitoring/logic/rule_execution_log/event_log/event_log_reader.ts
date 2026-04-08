@@ -5,42 +5,22 @@
  * 2.0.
  */
 
-import type { IEventLogClient, IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type {
-  GetRuleExecutionEventsResponse,
   ReadRuleExecutionResultsResponse,
-  RuleExecutionEvent,
   UnifiedExecutionResultSortField,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import {
-  LogLevel,
-  LogLevelEnum,
-  RuleExecutionEventType,
-  RuleExecutionEventTypeEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
-import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
-
-import { invariant } from '../../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-import { kqlAnd, kqlOr } from '../../utils/kql';
 
-import type {
-  GetExecutionEventsArgs,
-  GetUnifiedExecutionResultsArgs,
-} from '../client_for_routes/client_interface';
+import type { GetUnifiedExecutionResultsArgs } from '../client_for_routes/client_interface';
 
-import {
-  RULE_EXECUTION_LOG_PROVIDER,
-  RULE_SAVED_OBJECT_TYPE,
-} from '../../event_log/event_log_constants';
-import * as f from '../../event_log/event_log_fields';
+import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
 import { constructUnifiedExecutionEventKqlFilter } from './construct_unified_execution_event_kql_filter';
 import { mapEventToUnifiedResult } from './map_event_to_unified_result';
 
 export interface IEventLogReader {
-  getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
   getUnifiedExecutionResults(
     args: GetUnifiedExecutionResultsArgs
   ): Promise<ReadRuleExecutionResultsResponse>;
@@ -48,52 +28,6 @@ export interface IEventLogReader {
 
 export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader => {
   return {
-    async getExecutionEvents(
-      args: GetExecutionEventsArgs
-    ): Promise<GetRuleExecutionEventsResponse> {
-      const {
-        ruleId,
-        searchTerm,
-        eventTypes,
-        logLevels,
-        dateStart,
-        dateEnd,
-        sortOrder,
-        page,
-        perPage,
-      } = args;
-      const soType = RULE_SAVED_OBJECT_TYPE;
-      const soIds = [ruleId];
-
-      const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
-        return eventLog.findEventsBySavedObjectIds(soType, soIds, {
-          // TODO: include Framework events
-          filter: buildEventLogKqlFilter({
-            searchTerm,
-            eventTypes,
-            logLevels,
-            dateStart,
-            dateEnd,
-          }),
-          sort: [
-            { sort_field: f.TIMESTAMP, sort_order: sortOrder },
-            { sort_field: f.EVENT_SEQUENCE, sort_order: sortOrder },
-          ],
-          page,
-          per_page: perPage,
-        });
-      });
-
-      return {
-        events: findResult.data.map((event) => normalizeEvent(event)),
-        pagination: {
-          page: findResult.page,
-          per_page: findResult.per_page,
-          total: findResult.total,
-        },
-      };
-    },
-
     async getUnifiedExecutionResults(
       args: GetUnifiedExecutionResultsArgs
     ): Promise<ReadRuleExecutionResultsResponse> {
@@ -121,127 +55,6 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       };
     },
   };
-};
-
-const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {
-  invariant(rawEvent, 'Event not found');
-
-  const timestamp = normalizeEventTimestamp(rawEvent);
-  const sequence = normalizeEventSequence(rawEvent);
-  const level = normalizeLogLevel(rawEvent);
-  const type = normalizeEventType(rawEvent);
-  const executionId = normalizeExecutionId(rawEvent);
-  const message = rawEvent.message || '';
-  const details = normalizeEventDetails(rawEvent, type);
-
-  return { timestamp, sequence, level, type, message, details, execution_id: executionId };
-};
-
-type RawEvent = NonNullable<IValidatedEvent>;
-
-const normalizeEventTimestamp = (event: RawEvent): string => {
-  invariant(event['@timestamp'], 'Required "@timestamp" field is not found');
-  return event['@timestamp'];
-};
-
-const normalizeEventSequence = (event: RawEvent): number => {
-  const value = event.event?.sequence;
-  if (typeof value === 'number') {
-    return value;
-  }
-  if (typeof value === 'string') {
-    return Number(value);
-  }
-  return 0;
-};
-
-const normalizeLogLevel = (event: RawEvent): LogLevel => {
-  const value = event.log?.level;
-  if (!value) {
-    return LogLevelEnum.debug;
-  }
-
-  const result = LogLevel.safeParse(value);
-  return result.success ? result.data : LogLevelEnum.trace;
-};
-
-const normalizeEventType = (event: RawEvent): RuleExecutionEventType => {
-  const value = event.event?.action;
-  invariant(value, 'Required "event.action" field is not found');
-
-  const result = RuleExecutionEventType.safeParse(value);
-  return result.success ? result.data : RuleExecutionEventTypeEnum.message;
-};
-
-const normalizeEventDetails = (
-  event: RawEvent,
-  type: RuleExecutionEventType
-): Record<string, unknown> | undefined => {
-  if (type === RuleExecutionEventTypeEnum['status-change']) {
-    invariant(
-      event.kibana?.alert?.rule?.execution?.status,
-      'Required "kibana.alert.rule.execution.status" field is not found'
-    );
-    return { status: event.kibana.alert.rule.execution.status };
-  }
-
-  if (type === RuleExecutionEventTypeEnum['execution-metrics']) {
-    invariant(
-      event.kibana?.alert?.rule?.execution?.metrics,
-      'Required "kibana.alert.rule.execution.metrics" field is not found'
-    );
-    return { metrics: event.kibana.alert.rule.execution.metrics };
-  }
-};
-
-const normalizeExecutionId = (event: RawEvent): string => {
-  invariant(
-    event.kibana?.alert?.rule?.execution?.uuid,
-    'Required "kibana.alert.rule.execution.uuid" field is not found'
-  );
-
-  return event.kibana.alert.rule.execution.uuid;
-};
-
-const buildEventLogKqlFilter = ({
-  searchTerm,
-  eventTypes,
-  logLevels,
-  dateStart,
-  dateEnd,
-}: Pick<
-  GetExecutionEventsArgs,
-  'searchTerm' | 'eventTypes' | 'logLevels' | 'dateStart' | 'dateEnd'
->) => {
-  const filters = [`${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`];
-
-  if (searchTerm?.length) {
-    filters.push(`${f.MESSAGE}:${prepareKQLStringParam(searchTerm)}`);
-  }
-
-  if (eventTypes?.length) {
-    filters.push(`${f.EVENT_ACTION}:(${kqlOr(eventTypes)})`);
-  }
-
-  if (logLevels?.length) {
-    filters.push(`${f.LOG_LEVEL}:(${kqlOr(logLevels)})`);
-  }
-
-  const dateRangeFilter: string[] = [];
-
-  if (dateStart) {
-    dateRangeFilter.push(`${f.TIMESTAMP} >= ${prepareKQLStringParam(dateStart)}`);
-  }
-
-  if (dateEnd) {
-    dateRangeFilter.push(`${f.TIMESTAMP} <= ${prepareKQLStringParam(dateEnd)}`);
-  }
-
-  if (dateRangeFilter.length) {
-    filters.push(kqlAnd(dateRangeFilter));
-  }
-
-  return kqlAnd(filters);
 };
 
 const mapUnifiedSortField = (sortField: UnifiedExecutionResultSortField): string => {
