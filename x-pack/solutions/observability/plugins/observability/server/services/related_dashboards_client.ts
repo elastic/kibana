@@ -13,7 +13,7 @@ import type {
   ScanDashboardsResult,
   DashboardReadResponseBody,
 } from '@kbn/dashboard-plugin/server';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -75,12 +75,12 @@ export class RelatedDashboardsClient {
     SuggestedDashboardsValidPanelType,
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panel: DashboardPanel) => {
+    [LENS_EMBEDDABLE_TYPE]: (panel: DashboardPanel) => {
       let references = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.references
         : undefined;
-      if (!references && panel.uid) {
-        references = this.referencedPanelManager.getByUid(panel.uid)?.references;
+      if (!references && panel.id) {
+        references = this.referencedPanelManager.getByUid(panel.id)?.references;
       }
       if (references?.length) {
         return new Set(
@@ -94,12 +94,12 @@ export class RelatedDashboardsClient {
     SuggestedDashboardsValidPanelType,
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panel: DashboardPanel) => {
+    [LENS_EMBEDDABLE_TYPE]: (panel: DashboardPanel) => {
       let state: unknown = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.state
         : undefined;
-      if (!state && panel.uid) {
-        state = this.referencedPanelManager.getByUid(panel.uid)?.state;
+      if (!state && panel.id) {
+        state = this.referencedPanelManager.getByUid(panel.id)?.state;
       }
       if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();

@@ -17,7 +17,6 @@ export const PLUGIN_ID = 'lens';
 export const APP_ID = PLUGIN_ID;
 export const DOC_TYPE = 'lens';
 export const LENS_APP_NAME = APP_ID;
-export const LENS_EMBEDDABLE_TYPE = DOC_TYPE;
 export const LENS_DASHBOARD_APP_TYPE = 'lens-dashboard-app';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
