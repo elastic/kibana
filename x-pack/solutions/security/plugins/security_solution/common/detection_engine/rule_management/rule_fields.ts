@@ -23,3 +23,9 @@ export const PARAMS_TYPE_FIELD = 'alert.attributes.params.type';
 export const PARAMS_IMMUTABLE_FIELD = 'alert.attributes.params.immutable';
 export const LAST_RUN_OUTCOME_FIELD = 'alert.attributes.lastRun.outcome';
 export const IS_CUSTOMIZED_FIELD = 'alert.attributes.params.ruleSource.isCustomized';
+
+/**
+ * Highest-priority gap fill status on the rule (indexed under `mapped_params` for KQL filtering).
+ */
+export const HIGHEST_PRIORITY_GAP_FILL_STATUS_FIELD =
+  'alert.attributes.mapped_params.highest_priority_gap_fill_status';

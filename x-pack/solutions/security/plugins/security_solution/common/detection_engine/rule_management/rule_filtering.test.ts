@@ -180,4 +180,15 @@ describe('convertRulesFilterToKQL', () => {
 
     expect(kql).toBe('alert.attributes.params.type: ("query" OR "eql")');
   });
+
+  it('adds KQL for gapFillStatuses using mapped_params highest-priority gap fill field', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      gapFillStatuses: ['unfilled', 'filled'],
+    });
+
+    expect(kql).toBe(
+      '(alert.attributes.mapped_params.highest_priority_gap_fill_status: "unfilled" OR alert.attributes.mapped_params.highest_priority_gap_fill_status: "filled")'
+    );
+  });
 });

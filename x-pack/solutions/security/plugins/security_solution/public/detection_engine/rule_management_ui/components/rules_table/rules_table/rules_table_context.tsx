@@ -253,13 +253,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       filter: structuredKql,
       sort: `${sortingOptions.field}:${sortingOptions.order}`,
       pagination,
-      schedulerId: activeSchedulerId,
       ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
-      ...(filterOptions.gapFillStatuses?.length
-        ? { gapFillStatuses: filterOptions.gapFillStatuses }
-        : {}),
     };
-  }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
+  }, [filterOptions, sortingOptions, pagination]);
 
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
     setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));

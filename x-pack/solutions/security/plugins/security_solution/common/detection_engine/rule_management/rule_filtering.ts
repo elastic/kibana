@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
 import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
+  HIGHEST_PRIORITY_GAP_FILL_STATUS_FIELD,
   IS_CUSTOMIZED_FIELD,
   LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
@@ -38,6 +40,7 @@ interface RulesFilterOptions {
   customizationStatus: RuleCustomizationStatus;
   ruleIds: string[];
   includeRuleTypes?: Type[];
+  gapFillStatuses?: GapFillStatus[];
 }
 
 /**
@@ -71,6 +74,7 @@ export function convertRulesFilterToKQL({
   ruleExecutionStatus,
   customizationStatus,
   includeRuleTypes = [],
+  gapFillStatuses,
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
@@ -114,6 +118,14 @@ export function convertRulesFilterToKQL({
     kql.push(KQL_FILTER_CUSTOMIZED_RULES);
   } else if (customizationStatus === RuleCustomizationStatus.NOT_CUSTOMIZED) {
     kql.push(KQL_FILTER_NOT_CUSTOMIZED_RULES);
+  }
+
+  if (gapFillStatuses?.length) {
+    kql.push(
+      `(${gapFillStatuses
+        .map((s) => `${HIGHEST_PRIORITY_GAP_FILL_STATUS_FIELD}: ${prepareKQLStringParam(s)}`)
+        .join(' OR ')})`
+    );
   }
 
   return kql.join(' AND ');

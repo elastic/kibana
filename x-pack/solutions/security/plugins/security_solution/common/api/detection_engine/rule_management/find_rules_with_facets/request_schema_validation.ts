@@ -75,9 +75,6 @@ const validateAggregationsCountsUnique = (
   return [];
 };
 
-/**
- * Additional validation for internal `_find_with_facets` beyond generated Zod (gaps parity, KQL parse, sort fields).
- */
 export const validateFindRulesWithFacetsRequestBody = (
   body: FindRulesWithFacetsRequestBodyInput
 ): string[] => {

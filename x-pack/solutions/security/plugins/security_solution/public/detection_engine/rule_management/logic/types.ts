@@ -133,8 +133,6 @@ export interface FetchRulesWithFacetsProps {
   aggregations?: FindRulesWithFacetsAggregations;
   cursor?: string;
   signal?: AbortSignal;
-  schedulerId?: string;
-  gapFillStatuses?: GapFillStatus[];
 }
 
 export type FetchRulesWithFacetsResponse = FindRulesWithFacetsResponse;

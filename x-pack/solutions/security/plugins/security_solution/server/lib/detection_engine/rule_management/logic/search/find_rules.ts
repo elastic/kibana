@@ -30,7 +30,6 @@ export interface FindRuleOptions {
   sortOrder: SortOrder | undefined;
   page: Page | undefined;
   perPage: PerPage | undefined;
-  /** When set, saved-objects `find` uses `search_after` instead of offset pagination. */
   searchAfter?: SortResults;
   pit?: SavedObjectsPitParams;
   hasReference?: HasReferences | undefined;

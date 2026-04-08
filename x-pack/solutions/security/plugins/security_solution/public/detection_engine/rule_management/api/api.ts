@@ -244,25 +244,15 @@ export const fetchRulesWithFacets = async ({
     perPage: 20,
   },
   signal,
-  schedulerId,
   aggregations,
   cursor,
-  gapFillStatuses,
 }: FetchRulesWithFacetsProps): Promise<FetchRulesWithFacetsResponse> => {
-  const shouldApplyDefaultGapsRange = Boolean(gapFillStatuses?.length);
-  const defaultGapsRange = shouldApplyDefaultGapsRange ? getGapRange(defaultRangeValue) : undefined;
-
   const body = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort: [sort],
-    ...(gapFillStatuses?.length ? { gap_fill_statuses: gapFillStatuses } : {}),
-    ...(defaultGapsRange
-      ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
-      : {}),
     ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
     ...(search != null ? { search } : {}),
-    ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
     ...(aggregations != null ? { aggregations } : {}),
     ...(cursor ? { cursor } : {}),
   };

@@ -21,7 +21,6 @@ import {
   FindRulesWithFacetsAggregations,
   FacetCounts,
 } from '../granular_rules_contract.gen';
-import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
@@ -29,17 +28,22 @@ export type FindRulesWithFacetsRequestBody = z.infer<typeof FindRulesWithFacetsR
 export const FindRulesWithFacetsRequestBody = z
   .object({
     /**
-     * Subset of rule fields to return (same semantics as classic `_find`).
+     * Subset of rule fields to return.
      */
     fields: z.array(z.string()).optional(),
     /**
      * KQL filter using saved-object field paths, typically prefixed with `alert.attributes.`
-     * (same semantics as classic `_find`). The `FindRulesWithFacetsKqlFilterField` schema
-     * lists common **first segments** after `alert.attributes.`; use dotted paths for nested
-     * fields (e.g. `alert.attributes.schedule.interval`, `alert.attributes.mapped_params.severity`).
+     * See `FindRulesWithFacetsKqlFilterField`.
      */
     filter: z.string().optional(),
+    /**
+     * Aggregation-related options. See `FindRulesWithFacetsAggregations`.
+     */
     aggregations: FindRulesWithFacetsAggregations.optional(),
+    /**
+     * Optional free-text search combined with the KQL `filter`.
+     * See `GranularRulesSearch`.
+     */
     search: GranularRulesSearch.optional(),
     /**
      * Sort criteria as `field:order` tokens (e.g. `name:asc`). Comma-separated or repeated per element.
@@ -57,16 +61,6 @@ export const FindRulesWithFacetsRequestBody = z
      * Opaque cursor from a previous response's `next_cursor`.
      */
     cursor: z.string().optional(),
-    /**
-     * Gaps range start (must be used with other gap parameters; same rules as classic `_find`).
-     */
-    gaps_range_start: z.string().optional(),
-    /**
-     * Gaps range end
-     */
-    gaps_range_end: z.string().optional(),
-    gap_fill_statuses: z.array(GapFillStatus).optional(),
-    gap_auto_fill_scheduler_id: z.string().optional(),
   })
   .strict();
 export type FindRulesWithFacetsRequestBodyInput = z.input<typeof FindRulesWithFacetsRequestBody>;

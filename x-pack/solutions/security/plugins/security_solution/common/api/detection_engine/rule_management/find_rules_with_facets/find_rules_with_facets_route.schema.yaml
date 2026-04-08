@@ -104,15 +104,3 @@ components:
         cursor:
           type: string
           description: Opaque cursor from a previous response's `next_cursor`.
-        gaps_range_start:
-          type: string
-          description: Gaps range start (must be used with other gap parameters; same rules as classic `_find`).
-        gaps_range_end:
-          type: string
-          description: Gaps range end
-        gap_fill_statuses:
-          type: array
-          items:
-            $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
-        gap_auto_fill_scheduler_id:
-          type: string

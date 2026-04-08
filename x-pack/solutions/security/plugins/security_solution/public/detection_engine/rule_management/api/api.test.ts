@@ -511,7 +511,7 @@ describe('Detections Rules API', () => {
       fetchMock.mockResolvedValue(rulesMock);
     });
 
-    test('uses _find_with_facets with sort tokens, API version, and default facet counts', async () => {
+    test('uses _find_with_facets with sort tokens and API version', async () => {
       await fetchRulesWithFacets({});
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules/_find_with_facets',
@@ -522,9 +522,6 @@ describe('Detections Rules API', () => {
             page: 1,
             per_page: 20,
             sort: ['enabled:desc'],
-            aggregations: {
-              counts: ['tags', 'enabled', 'type', 'customization_status', 'execution_status'],
-            },
           }),
         })
       );
@@ -547,18 +544,21 @@ describe('Detections Rules API', () => {
             sort: ['name:asc'],
             filter: 'alert.attributes.params.immutable: false',
             search: { term: 'hello', mode: 'legacy' },
-            aggregations: {
-              counts: ['tags', 'enabled', 'type', 'customization_status', 'execution_status'],
-            },
           }),
         })
       );
     });
 
-    test('omits aggregations when includeCountsCategories is empty', async () => {
-      await fetchRulesWithFacets({ includeCountsCategories: [] });
+    test('includes aggregations when provided', async () => {
+      await fetchRulesWithFacets({
+        aggregations: { counts: ['tags', 'enabled'] },
+      });
       const [, options] = fetchMock.mock.calls[0];
-      expect(JSON.parse(options.body as string)).not.toHaveProperty('aggregations');
+      expect(JSON.parse(options.body as string)).toEqual(
+        expect.objectContaining({
+          aggregations: { counts: ['tags', 'enabled'] },
+        })
+      );
     });
 
     test('passes cursor in the body when provided', async () => {

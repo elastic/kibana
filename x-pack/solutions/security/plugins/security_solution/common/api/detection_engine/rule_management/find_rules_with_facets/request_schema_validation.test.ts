@@ -87,14 +87,6 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
     ).toEqual([]);
   });
 
-  it('rejects partial gap parameters (parity with classic _find)', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
-      ...emptyBody,
-      gaps_range_start: '2024-01-01',
-    });
-    expect(errors.some((e) => e.includes('gap'))).toBe(true);
-  });
-
   it('rejects search.term over max length', () => {
     const errors = validateFindRulesWithFacetsRequestBody({
       ...emptyBody,

@@ -9,12 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
-import {
-  DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
-  MAX_RULES_WITH_GAPS_TO_FETCH,
-  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
-} from '../../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../../../common/constants';
 import type {
   FacetCounts,
   FindRulesWithFacetsResponse,
@@ -26,7 +21,6 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
-import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
 import { buildGranularRulesKql } from '../../../logic/search/build_granular_rules_kql';
 import { parseGranularSort } from '../../../logic/search/parse_granular_sort';
 import { computeGranularFacetCounts } from '../../../logic/search/compute_granular_facet_counts';
@@ -85,54 +79,11 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
           if (!cursorResult.ok) {
             return siemResponse.error({ statusCode: 400, body: cursorResult.error });
           }
+
           const { searchAfter, pit } = cursorResult;
 
           let ruleIds: string[] | undefined;
           let warnings: WarningSchema[] | undefined;
-          const gapFillStatuses = (reqBody.gap_fill_statuses ?? []) as GapFillStatus[];
-
-          if (gapFillStatuses.length > 0 && reqBody.gaps_range_start && reqBody.gaps_range_end) {
-            const { ruleIds: gapRuleIds, truncated } = await getGapFilteredRuleIds({
-              rulesClient,
-              gapRange: {
-                start: reqBody.gaps_range_start,
-                end: reqBody.gaps_range_end,
-              },
-              gapFillStatuses,
-              maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
-              filter: combinedKql,
-              sortField,
-              sortOrder,
-              schedulerId: reqBody.gap_auto_fill_scheduler_id,
-            });
-
-            if (truncated) {
-              warnings = [
-                {
-                  type: MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
-                  message: `Only the first ${MAX_RULES_WITH_GAPS_TO_FETCH} rules with gaps in the selected time range are returned. Additional rules with gaps are not included in this response.`,
-                  actionPath: '',
-                },
-              ];
-            }
-
-            if (gapRuleIds.length === 0) {
-              const emptyBody: FindRulesWithFacetsResponse = {
-                ...transformFindAlerts(
-                  {
-                    data: [],
-                    page: reqBody.page,
-                    perPage: reqBody.per_page,
-                    total: 0,
-                  },
-                  warnings
-                ),
-              };
-              return response.ok({ body: emptyBody });
-            }
-
-            ruleIds = gapRuleIds;
-          }
 
           const includeCounts = reqBody.aggregations?.counts ?? [];
 

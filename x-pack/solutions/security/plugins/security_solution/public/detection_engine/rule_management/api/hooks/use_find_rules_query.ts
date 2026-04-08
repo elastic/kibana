@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
@@ -24,8 +23,6 @@ export interface FindRulesQueryArgs {
   search?: GranularRulesSearch;
   sort?: string;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  schedulerId?: string;
-  gapFillStatuses?: GapFillStatus[];
   aggregations?: FindRulesWithFacetsAggregations;
 }
 
@@ -64,8 +61,6 @@ export const useFindRulesQuery = (
         filter: queryArgs.filter,
         sort: queryArgs.sort,
         pagination: queryArgs.pagination,
-        schedulerId: queryArgs.schedulerId,
-        gapFillStatuses: queryArgs.gapFillStatuses,
         search: queryArgs.search,
         aggregations: queryArgs.aggregations,
       });
