@@ -76,5 +76,4 @@ describe('HostPanelHeader', () => {
     expect(getByTestId('host-panel-header-observed-badge-loading')).toBeInTheDocument();
     expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
   });
-
 });

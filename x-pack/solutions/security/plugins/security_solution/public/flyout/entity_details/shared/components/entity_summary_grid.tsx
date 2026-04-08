@@ -234,4 +234,3 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
   );
 });
 WatchlistsCell.displayName = 'WatchlistsCell';
-
