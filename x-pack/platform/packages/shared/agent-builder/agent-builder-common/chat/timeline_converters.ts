@@ -54,7 +54,7 @@ export const roundsToTimelineEvents = (
       agent_id: agentId,
       status: round.status,
       state: round.state,
-      pending_prompt: round.pending_prompt,
+      pending_prompts: round.pending_prompts,
       steps: round.steps,
       response: round.response,
       started_at: round.started_at,
@@ -87,7 +87,7 @@ export const timelineEventsToRounds = (events: TimelineEvent[]): ConversationRou
         id: event.id,
         status: event.status,
         state: event.state,
-        pending_prompt: event.pending_prompt,
+        pending_prompts: event.pending_prompts,
         input: {
           message: pendingUserMessage?.message ?? '',
           attachments: pendingUserMessage?.attachments,
@@ -172,7 +172,7 @@ export const agentResponseEventToRound = (
     id: agentResponse.id,
     status: agentResponse.status,
     state: agentResponse.state,
-    pending_prompt: agentResponse.pending_prompt,
+    pending_prompts: agentResponse.pending_prompts,
     input: {
       message: userMessage?.message ?? '',
       attachments: userMessage?.attachments,
