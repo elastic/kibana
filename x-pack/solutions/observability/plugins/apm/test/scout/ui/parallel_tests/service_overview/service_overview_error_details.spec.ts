@@ -29,7 +29,9 @@ test.describe(
       });
 
       await test.step('Click View errors link and wait for navigation', async () => {
-        await page.getByRole('link', { name: 'View errors' }).click();
+        const viewErrorsLink = serviceDetailsPage.overviewTab.getViewErrorsLink();
+        await viewErrorsLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await viewErrorsLink.click();
       });
 
       await test.step('Verify navigated to errors page', async () => {
@@ -102,7 +104,9 @@ test.describe(
       });
 
       await test.step('Click View errors link and wait for navigation', async () => {
-        await page.getByRole('link', { name: 'View errors' }).click();
+        const viewErrorsLink = serviceDetailsPage.overviewTab.getViewErrorsLink();
+        await viewErrorsLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await viewErrorsLink.click();
       });
 
       await test.step('Verify navigated to errors page', async () => {
