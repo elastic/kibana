@@ -44,7 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/256809
-  describe.skip('Ingest Pipelines', function () {
+  describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
