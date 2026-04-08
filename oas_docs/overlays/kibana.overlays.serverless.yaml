@@ -64,6 +64,47 @@ actions:
         description: Workflows documentation
         url: https://www.elastic.co/docs/explore-analyze/workflows
       x-displayName: 'Workflows'
+# Mark APM source maps as not supported in Serverless
+  - target: "$.paths['/api/apm/sourcemaps'].get"
+    description: Add note that source maps are not supported in Serverless
+    update:
+      description: |
+        > **Not supported in Elastic Cloud Serverless.** RUM (Real User Monitoring) and source maps are not available in Serverless deployments.
+
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/sourcemaps</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
+  - target: "$.paths['/api/apm/sourcemaps'].post"
+    description: Add note that source maps are not supported in Serverless
+    update:
+      description: |
+        > **Not supported in Elastic Cloud Serverless.** RUM (Real User Monitoring) and source maps are not available in Serverless deployments.
+
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/sourcemaps</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.
+        The maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
+  - target: "$.paths['/api/apm/sourcemaps/{id}'].delete"
+    description: Add note that source maps are not supported in Serverless
+    update:
+      description: |
+        > **Not supported in Elastic Cloud Serverless.** RUM (Real User Monitoring) and source maps are not available in Serverless deployments.
+
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/sourcemaps/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
