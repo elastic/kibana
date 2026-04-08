@@ -21,15 +21,29 @@ import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 import { parseDurationInSeconds } from '../stream_management/data_management/stream_detail_lifecycle/helpers/helpers';
 
-const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
+const SORTABLE_FIELDS = [
+  'nameSortKey',
+  'retentionMs',
+  'documentsCount',
+  'dataQuality',
+  'ingestionRate',
+  'storageBytes',
+  'suggestionsCount',
+] as const;
 
 export type SortableField = (typeof SORTABLE_FIELDS)[number];
+
+export type StreamType = 'wired' | 'root' | 'classic' | 'query';
 
 export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic';
+  ingestionRate: number;
+  storageBytes: number;
+  suggestionsCount: number;
+  type: StreamType;
+  isDraft: boolean;
   children?: EnrichedStream[];
 }
 
@@ -38,6 +52,9 @@ export type TableRow = EnrichedStream & {
   rootNameSortKey: string;
   rootDocumentsCount: number;
   rootRetentionMs: number;
+  rootIngestionRate: number;
+  rootStorageBytes: number;
+  rootSuggestionsCount: number;
   dataQuality: QualityIndicators;
 };
 export interface StreamTree extends ListStreamDetail {
@@ -107,9 +124,27 @@ export function buildStreamRows(
   qualityByStream: Record<string, QualityIndicators>
 ): TableRow[] {
   const isAscending = sortDirection === 'asc';
+  const getSortValue = (node: EnrichedStream): string | number | undefined => {
+    switch (sortField) {
+      case 'nameSortKey':
+        return node.nameSortKey;
+      case 'retentionMs':
+        return node.retentionMs;
+      case 'documentsCount':
+        return node.documentsCount;
+      case 'ingestionRate':
+        return node.ingestionRate;
+      case 'storageBytes':
+        return node.storageBytes;
+      case 'suggestionsCount':
+        return node.suggestionsCount;
+      default:
+        return undefined;
+    }
+  };
   const compare = (a: EnrichedStream, b: EnrichedStream): number => {
-    const av = a[sortField];
-    const bv = b[sortField];
+    const av = getSortValue(a);
+    const bv = getSortValue(b);
     if (typeof av === 'string' && typeof bv === 'string') {
       return isAscending ? av.localeCompare(bv) : bv.localeCompare(av);
     }
@@ -123,7 +158,15 @@ export function buildStreamRows(
   const pushNode = (
     node: EnrichedStream,
     level: number,
-    rootMeta: Pick<TableRow, 'rootNameSortKey' | 'rootDocumentsCount' | 'rootRetentionMs'>
+    rootMeta: Pick<
+      TableRow,
+      | 'rootNameSortKey'
+      | 'rootDocumentsCount'
+      | 'rootRetentionMs'
+      | 'rootIngestionRate'
+      | 'rootStorageBytes'
+      | 'rootSuggestionsCount'
+    >
   ) => {
     result.push({
       ...node,
@@ -141,6 +184,9 @@ export function buildStreamRows(
       rootNameSortKey: root.nameSortKey,
       rootDocumentsCount: root.documentsCount,
       rootRetentionMs: root.retentionMs,
+      rootIngestionRate: root.ingestionRate,
+      rootStorageBytes: root.storageBytes,
+      rootSuggestionsCount: root.suggestionsCount,
     } as const;
     pushNode(root, 0, rootMeta);
   });
@@ -173,6 +219,36 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
   return trees;
 }
 
+// =============================================================================
+// STREAMS LIST — DUMMY / DEMO DATA ONLY
+// -----------------------------------------------------------------------------
+// Hardcoded row presentation for local UI work. Search: STREAMS_LIST_DUMMY
+// Remove this block when real query/draft/suggestion APIs drive the table.
+// =============================================================================
+
+/** Stream names forced to `type: 'query'` for list UI (badge, filters, hidden quality/retention). */
+const STREAMS_LIST_DUMMY_QUERY_STREAM_NAMES = new Set<string>([LOGS_ECS_STREAM_NAME]);
+
+/** Stream names shown with Draft badge + `isDraft` row flags. */
+const STREAMS_LIST_DUMMY_DRAFT_STREAM_NAMES = new Set<string>(['logs.otel.child']);
+
+/** Demo suggestion counts by stream name (table Suggestions column). */
+const STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM: Record<string, number> = {
+  'logs-synth-default': 2,
+  'logs.otel.child': 1,
+};
+
+// =============================================================================
+// end STREAMS_LIST_DUMMY
+// =============================================================================
+
+const getStreamType = (stream: ListStreamDetail['stream']): StreamType => {
+  if (Streams.QueryStream.Definition.is(stream)) return 'query';
+  if (Streams.ClassicStream.Definition.is(stream)) return 'classic';
+  if (isRootStreamDefinition(stream)) return 'root';
+  return 'wired';
+};
+
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
   let retentionMs = 0;
   const lc = node.effective_lifecycle!;
@@ -188,6 +264,10 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`
       : node.stream.name;
   const children = 'children' in node ? node.children.map(enrichStream) : undefined;
+  let type = getStreamType(node.stream);
+  if (STREAMS_LIST_DUMMY_QUERY_STREAM_NAMES.has(node.stream.name)) {
+    type = 'query';
+  }
 
   return {
     stream: node.stream,
@@ -195,12 +275,12 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     data_stream: node.data_stream,
     nameSortKey,
     documentsCount: 0,
+    ingestionRate: 0,
+    storageBytes: 0,
+    suggestionsCount: STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM[node.stream.name] ?? 0,
     retentionMs,
-    type: Streams.ClassicStream.Definition.is(node.stream)
-      ? 'classic'
-      : isRootStreamDefinition(node.stream)
-      ? 'root'
-      : 'wired',
+    type,
+    isDraft: STREAMS_LIST_DUMMY_DRAFT_STREAM_NAMES.has(node.stream.name),
     ...(children && { children }),
   };
 };

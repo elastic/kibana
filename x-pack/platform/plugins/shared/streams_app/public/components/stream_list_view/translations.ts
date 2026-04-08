@@ -92,3 +92,40 @@ export const NO_RETENTION_LABEL = i18n.translate(
   'xpack.streams.streamsRetentionColumn.noDataAriaLabel',
   { defaultMessage: 'No retention policy configured' }
 );
+
+export const INGESTION_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.ingestionColumnHeader',
+  { defaultMessage: 'Ingestion' }
+);
+
+export const STORAGE_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.storageColumnHeader',
+  { defaultMessage: 'Storage' }
+);
+
+export const SUGGESTIONS_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.suggestionsColumnHeader',
+  { defaultMessage: 'Suggestions' }
+);
+
+export const DEGRADED_QUALITY_FILTER = i18n.translate(
+  'xpack.streams.streamsTreeTable.degradedQualityFilter',
+  { defaultMessage: 'Degraded quality' }
+);
+
+export const POOR_QUALITY_FILTER = i18n.translate(
+  'xpack.streams.streamsTreeTable.poorQualityFilter',
+  { defaultMessage: 'Poor quality' }
+);
+
+export const TYPE_FILTER = i18n.translate('xpack.streams.streamsTreeTable.typeFilter', {
+  defaultMessage: 'Type',
+});
+
+export const QUERY_BADGE_LABEL = i18n.translate('xpack.streams.streamsTreeTable.queryBadgeLabel', {
+  defaultMessage: 'Query',
+});
+
+export const DRAFT_BADGE_LABEL = i18n.translate('xpack.streams.streamsTreeTable.draftBadgeLabel', {
+  defaultMessage: 'Draft',
+});
