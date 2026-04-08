@@ -7,6 +7,7 @@
 import path from 'node:path';
 import type { Type, TypeOf, ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { toSlugIdentifier } from '@kbn/std';
 import { mlAnomalyDetectionAlertParamsSchemaV1 } from './anomaly_detection';
 import { anomalyDetectionJobsHealthRuleParamsSchemaV1 } from './anomaly_detection_jobs_health';
 import { anomalyParamsSchemaV1 } from './apm_anomaly';
@@ -44,12 +45,6 @@ import { uptimeMonitorStatusRuleParamsSchemaV1 } from './uptime_monitor_status';
 import { uptimeTLSRuleParamsSchemaV1 } from './uptime_tls';
 
 export const RULE_TYPE_ID = 'rule_type_id';
-
-const toSchemaId = (ruleTypeId: string) =>
-  ruleTypeId
-    .replace(/[^a-zA-Z0-9]/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
 
 const ruleParamsSchemasWithRuleTypeId: Record<string, Type<unknown>> = {
   monitoring_ccr_read_exceptions: ccrReadExceptionsParamsSchemaV1,
@@ -106,6 +101,12 @@ export const ruleParamsSchemasForCreate = (
   baseFields: Record<string, Type<unknown>>
 ): Array<ObjectType<any>> => {
   return Object.entries(ruleParamsSchemasWithRuleTypeId).map(([ruleTypeId, paramsSchema]) => {
+    const described = paramsSchema.getSchema().describe();
+    const rawTitle = (described.metas as Array<Record<string, unknown>> | undefined)?.[0]?.title as
+      | string
+      | undefined;
+    const title = rawTitle?.replace(/ Rule Params$/, '');
+
     return schema.object(
       {
         ...baseFields,
@@ -114,7 +115,8 @@ export const ruleParamsSchemasForCreate = (
       },
       {
         meta: {
-          id: `${toSchemaId(ruleTypeId)}-create-rule-body-alerting`,
+          id: `${toSlugIdentifier(ruleTypeId)}-create-rule-body-alerting`,
+          ...(title ? { title } : {}),
         },
       }
     );

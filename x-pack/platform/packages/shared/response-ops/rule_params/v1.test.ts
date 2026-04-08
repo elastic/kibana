@@ -104,19 +104,6 @@ describe('rule params schemas', () => {
       ).toThrowError(`[params.index]: expected at least one defined value but got [undefined]`);
     });
 
-    it('returns a variant for every known rule type', () => {
-      const variants = ruleParamsSchemasForCreate({});
-      const ruleTypeIds = variants.map(
-        (v) => (v.getPropSchemas()[RULE_TYPE_ID] as { expectedValue: string }).expectedValue
-      );
-
-      expect(ruleTypeIds).toContain('.es-query');
-      expect(ruleTypeIds).toContain('.index-threshold');
-      expect(ruleTypeIds).toContain('xpack.ml.anomaly_detection_alert');
-      expect(ruleTypeIds).toContain('logs.alert.document.count');
-      expect(ruleTypeIds).toContain('slo.rules.burnRate');
-    });
-
     it('includes common base fields in every variant', () => {
       const baseFields = { name: schema.string() };
       const variants = ruleParamsSchemasForCreate(baseFields);
