@@ -308,15 +308,6 @@ const classicTabSchema = schema.allOf([
         description: 'List of filters to apply to the data in the tab.',
       },
     }),
-    non_highlighting_filters: schema.maybe(
-      schema.arrayOf(asCodeFilterSchema, {
-        maxSize: 100,
-        meta: {
-          description:
-            'List of filters applied to the query but excluded from highlighting in results.',
-        },
-      })
-    ),
     data_source: dataViewSchema,
     view_mode: viewModeSchema,
   }),

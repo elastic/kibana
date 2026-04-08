@@ -203,10 +203,7 @@ export function fromStoredTab(
     density: density ?? DataGridDensity.COMPACT,
   };
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
-  const { index, query, filter, nonHighlightingFilters } = injectReferences(
-    searchSourceValues,
-    references
-  );
+  const { index, query, filter } = injectReferences(searchSourceValues, references);
   return isOfAggregateQueryType(query)
     ? { ...apiTab, query }
     : {
@@ -215,9 +212,6 @@ export function fromStoredTab(
         ...(rowsPerPage && { rows_per_page: rowsPerPage }),
         query,
         filters: fromStoredFilters(filter) ?? [],
-        ...(nonHighlightingFilters?.length && {
-          non_highlighting_filters: fromStoredFilters(nonHighlightingFilters) ?? [],
-        }),
         data_source: fromStoredDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
       };
@@ -231,10 +225,6 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
   const searchSourceValues: SerializedSearchSourceFields = {
     query: apiTab.query,
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
-    ...('non_highlighting_filters' in apiTab &&
-      apiTab.non_highlighting_filters?.length && {
-        nonHighlightingFilters: toStoredFilters(apiTab.non_highlighting_filters),
-      }),
     ...('data_source' in apiTab && { index: toStoredDataView(apiTab.data_source) }),
   };
   const [searchSourceFields, references] = extractReferences(searchSourceValues);

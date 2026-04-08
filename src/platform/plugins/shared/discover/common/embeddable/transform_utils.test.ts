@@ -977,18 +977,7 @@ describe('search embeddable transform utils', () => {
           searchSourceJSON: JSON.stringify({
             query: { language: 'kuery', query: '' },
             index: 'data-view-1',
-            filter: [
-              {
-                meta: { index: 'data-view-1', alias: null, negate: false, disabled: false },
-                query: { match_phrase: { 'log.level': 'error' } },
-              },
-            ],
-            nonHighlightingFilters: [
-              {
-                meta: { index: 'data-view-1', alias: null, negate: false, disabled: false },
-                query: { match_phrase: { 'trace.id': 'abc123' } },
-              },
-            ],
+            filter: [],
           }),
         },
       };
@@ -1014,10 +1003,6 @@ describe('search embeddable transform utils', () => {
         id: 'data-view-1',
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-      expect('filters' in result && result.filters).toHaveLength(1);
-      expect('non_highlighting_filters' in result && result.non_highlighting_filters).toHaveLength(
-        1
-      );
     });
   });
 
@@ -1032,18 +1017,7 @@ describe('search embeddable transform utils', () => {
         header_row_height: 'auto',
         row_height: 'auto',
         query: { language: 'kuery', query: '' },
-        filters: [
-          {
-            type: ASCODE_FILTER_TYPE.CONDITION,
-            condition: {
-              field: 'log.level',
-              operator: ASCODE_FILTER_OPERATOR.IS,
-              value: 'error',
-            },
-            disabled: false,
-            negate: false,
-          },
-        ],
+        filters: [],
         rows_per_page: 100,
         sample_size: 500,
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
@@ -1065,77 +1039,7 @@ describe('search embeddable transform utils', () => {
       expect(searchSource.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
       expect(searchSource.index).toBeUndefined();
       expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
-      expect(searchSource.filter).toHaveLength(1);
-      expect(searchSource.nonHighlightingFilters).toBeUndefined();
-    });
-
-    it('serializes non_highlighting_filters into nonHighlightingFilters in searchSourceJSON', () => {
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
-        column_order: [],
-        sort: [],
-        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-        density: DataGridDensity.COMPACT,
-        header_row_height: 3,
-        row_height: 3,
-        query: { language: 'kuery', query: '' },
-        filters: [],
-        non_highlighting_filters: [
-          {
-            type: ASCODE_FILTER_TYPE.CONDITION,
-            condition: {
-              field: 'trace.id',
-              operator: ASCODE_FILTER_OPERATOR.IS,
-              value: 'abc123',
-            },
-            disabled: false,
-            negate: false,
-          },
-        ],
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
-      };
-      const { state } = toStoredTab(apiTab);
-      const searchSource = JSON.parse(state.kibanaSavedObjectMeta.searchSourceJSON);
-      expect(searchSource.nonHighlightingFilters).toHaveLength(1);
-    });
-
-    it('round-trips filters and non_highlighting_filters through toStoredTab → fromStoredTab', () => {
-      const references: SavedObjectReference[] = [
-        { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
-      ];
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
-        column_order: [],
-        sort: [],
-        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-        density: DataGridDensity.COMPACT,
-        header_row_height: 3,
-        row_height: 3,
-        query: { language: 'kuery', query: '' },
-        filters: [
-          {
-            type: ASCODE_FILTER_TYPE.CONDITION,
-            condition: { field: 'log.level', operator: ASCODE_FILTER_OPERATOR.IS, value: 'error' },
-            disabled: false,
-            negate: false,
-          },
-        ],
-        non_highlighting_filters: [
-          {
-            type: ASCODE_FILTER_TYPE.CONDITION,
-            condition: { field: 'trace.id', operator: ASCODE_FILTER_OPERATOR.IS, value: 'abc123' },
-            disabled: false,
-            negate: false,
-          },
-        ],
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'dv-1' },
-      };
-
-      const { state } = toStoredTab(apiTab);
-      const result = fromStoredTab(state, references);
-
-      expect('filters' in result && result.filters).toHaveLength(1);
-      expect('non_highlighting_filters' in result && result.non_highlighting_filters).toHaveLength(
-        1
-      );
+      expect(searchSource.filter).toEqual([]);
     });
 
     it('converts API tab with index-pattern data_source (no refs) when inline', () => {
