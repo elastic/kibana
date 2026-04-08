@@ -46,20 +46,18 @@ function buildAggregationNode(
   field: ESQLAstExpression,
   customFunction?: string
 ): ESQLAstExpression | undefined {
-  // Normalize to array for consistent handling
-  const fieldTypesArray = Array.isArray(types) ? types : [types];
-  const primaryType = fieldTypesArray[0];
+  const primaryType = types[0];
 
   // If we have multiple types, resolve and apply casting if needed
   let castedField = field;
-  if (fieldTypesArray.length > 1) {
-    const resolvedType = resolveConflictingFieldTypes(fieldTypesArray);
+  if (types.length > 1) {
+    const resolvedType = resolveConflictingFieldTypes(types);
     if (resolvedType) {
       const castFunction = getCastFunctionForType(resolvedType);
       if (castFunction) {
         castedField = synth.exp`${synth.kwd(castFunction)}(${field})`;
       }
-    } else if (new Set(fieldTypesArray).size > 1) {
+    } else if (new Set(types).size > 1) {
       // Incompatible types (e.g., keyword + double) — return undefined
       // so callers can gracefully produce a no-op instead of a broken query.
       // When resolvedType is undefined but all types are the same (duplicates),
