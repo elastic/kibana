@@ -7,21 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
-import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
+import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerGetConfigRoute(
-  { router }: RouteDependencies,
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
-) {
+export function registerDisableAllWorkflowsRoute({ router, api }: RouteDependencies) {
   router.versioned
-    .get({
-      path: '/internal/workflows/config',
+    .post({
+      path: '/internal/workflows/disable_all_workflows',
       access: 'internal',
-      security: WORKFLOW_READ_SECURITY,
+      security: WORKFLOW_UPDATE_SECURITY,
     })
     .addVersion(
       {
@@ -29,11 +25,9 @@ export function registerGetConfigRoute(
         validate: false,
       },
       withLicenseCheck(async (_context, _request, response) => {
-        const engine = await getWorkflowExecutionEngine();
+        const result = await api.disableAllWorkflows();
         return response.ok({
-          body: {
-            eventDrivenExecutionEnabled: engine.isEventDrivenExecutionEnabled(),
-          },
+          body: result,
         });
       })
     );
