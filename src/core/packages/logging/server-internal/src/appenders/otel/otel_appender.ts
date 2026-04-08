@@ -8,7 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
+import type { DisposableAppender, LogLevel, LogRecord } from '@kbn/logging';
+import { ROOT_CONTEXT, TraceFlags, trace, type Context } from '@opentelemetry/api';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import {
@@ -21,7 +22,6 @@ import {
 } from '@opentelemetry/resources';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
 import type { OtelAppenderConfig } from '@kbn/core-logging-server';
-import { Layouts } from '../../layouts/layouts';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
@@ -51,24 +51,42 @@ const toSeverityNumber = (level: LogLevel): SeverityNumber | undefined => {
 };
 
 /**
+ * Builds an OTel Context from a Kibana LogRecord's trace identifiers so that
+ * the OTLP exporter can set the top-level `trace_id` / `span_id` fields on
+ * the log record, enabling trace ↔ log correlation in OTel-native backends.
+ * Returns `undefined` when the record has no trace context.
+ */
+const toTraceContext = (record: LogRecord): Context | undefined => {
+  if (!record.traceId || !record.spanId) {
+    return undefined;
+  }
+  return trace.setSpanContext(ROOT_CONTEXT, {
+    traceId: record.traceId,
+    spanId: record.spanId,
+    // Kibana only propagates IDs for sampled traces.
+    traceFlags: TraceFlags.SAMPLED,
+    isRemote: false,
+  });
+};
+
+/**
  * Builds the OTel attribute map from a Kibana LogRecord.
- * Well-known OTel semantic convention attributes are extracted here so that
- * OTel-native backends can filter and correlate without parsing the body.
- * `meta` is intentionally omitted — it is included in the formatted body.
+ *
+ * Per the OTel Logs spec:
+ * - `body` carries the message text; structured context lives here in `attributes`.
+ * - Process identity (pid, hostname, OS) is captured at the resource level by
+ *   the resource detectors, so it is omitted here to avoid duplication.
+ * - Trace correlation (`trace_id`, `span_id`) is passed via the OTel `context`
+ *   on the log record, which maps to the top-level OTLP fields; it is omitted
+ *   here for the same reason.
  */
 const toAttributes = (record: LogRecord): Record<string, string | number | boolean> => {
   const attrs: Record<string, string | number | boolean> = {
     'log.logger': record.context,
-    'process.pid': record.pid,
   };
 
-  if (record.traceId) {
-    attrs['trace.id'] = record.traceId;
-  }
-  if (record.spanId) {
-    attrs['span.id'] = record.spanId;
-  }
   if (record.transactionId) {
+    // APM transaction ID — no standard OTel field exists for this.
     attrs['transaction.id'] = record.transactionId;
   }
 
@@ -78,6 +96,12 @@ const toAttributes = (record: LogRecord): Record<string, string | number | boole
     if (record.error.stack) {
       attrs['exception.stacktrace'] = record.error.stack;
     }
+  }
+
+  if (record.meta) {
+    // OTel log attributes must be scalar; complex meta is JSON-encoded so that
+    // structured context is not silently discarded.
+    attrs['log.meta'] = JSON.stringify(record.meta);
   }
 
   return attrs;
@@ -95,16 +119,12 @@ export class OtelAppender implements DisposableAppender {
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     attributes: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
-    layout: schema.maybe(Layouts.configSchema),
   });
 
   private readonly loggerProvider: LoggerProvider;
   private readonly logger: Logger;
-  private readonly layout: Layout;
 
   constructor(config: OtelAppenderConfig) {
-    this.layout = Layouts.create(config.layout ?? { type: 'json' });
-
     const exporter = new OTLPLogExporter({ url: config.url, headers: config.headers });
     // Merge auto-detected host/process/OS/env attributes with user-provided ones
     // so that the resource is consistent with other OTel signals (traces, metrics).
@@ -130,7 +150,10 @@ export class OtelAppender implements DisposableAppender {
       timestamp: record.timestamp,
       severityNumber,
       severityText: record.level.id.toUpperCase(),
-      body: this.layout.format(record),
+      // body = the human-readable message, as per the OTel Logs spec.
+      // Structured context lives in attributes; meta is JSON-encoded there.
+      body: record.message,
+      context: toTraceContext(record),
       attributes: toAttributes(record),
     });
   }

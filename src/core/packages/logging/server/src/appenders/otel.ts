@@ -7,11 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LayoutConfigType } from '../layout';
-
 /**
  * Configuration of an OpenTelemetry (OTLP) log appender.
  * Ships log records to an OTLP-compatible endpoint over HTTP.
+ *
+ * @example
+ * ```yaml
+ * logging:
+ *   appenders:
+ *     otel:
+ *       type: otel
+ *       url: https://collector:4318/v1/logs
+ *       headers:
+ *         Authorization: "ApiKey <base64>"
+ *       attributes:
+ *         # Use bracket notation to prevent Kibana from splitting dotted keys:
+ *         "[service.name]": my-kibana
+ *         "[deployment.environment]": production
+ * ```
  * @public
  */
 export interface OtelAppenderConfig {
@@ -21,12 +34,11 @@ export interface OtelAppenderConfig {
   url: string;
   /** Optional HTTP headers, e.g. for authentication */
   headers: Record<string, string>;
-  /** Resource attributes that identify this service in the OTel data model */
-  attributes: Record<string, string>;
   /**
-   * Layout used to format the log record body. Defaults to `json`, which
-   * serialises the full ECS-structured log record. Use `pattern` for a
-   * human-readable string.
+   * Additional resource attributes merged on top of the auto-detected host,
+   * process and OS attributes. Because Kibana expands dotted YAML keys into
+   * nested objects, wrap dotted attribute names in `[brackets]`:
+   * `"[service.name]": my-kibana`
    */
-  layout?: LayoutConfigType;
+  attributes: Record<string, string>;
 }

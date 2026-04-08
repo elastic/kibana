@@ -38,3 +38,11 @@ jest.mock('@opentelemetry/resources', () => ({
   osDetector: 'osDetector',
   processDetector: 'processDetector',
 }));
+
+jest.mock('@opentelemetry/api', () => ({
+  ROOT_CONTEXT: 'root-context',
+  TraceFlags: { SAMPLED: 1 },
+  trace: {
+    setSpanContext: jest.fn((_ctx, spanCtx) => ({ spanContext: spanCtx })),
+  },
+}));

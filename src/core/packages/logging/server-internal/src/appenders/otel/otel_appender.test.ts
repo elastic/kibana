@@ -18,6 +18,7 @@ import {
   mockShutdown,
 } from './otel_appender.test.mocks';
 
+import { trace } from '@opentelemetry/api';
 import { LogLevel } from '@kbn/logging';
 import { SeverityNumber } from '@opentelemetry/api-logs';
 import { OtelAppender } from './otel_appender';
@@ -47,6 +48,7 @@ beforeEach(() => {
   mockResourceFromAttributes.mockClear();
   mockDetectResources.mockClear();
   mockMergeResource.mockClear();
+  jest.mocked(trace.setSpanContext).mockClear();
 });
 
 describe('OtelAppender.configSchema', () => {
@@ -61,30 +63,6 @@ describe('OtelAppender.configSchema', () => {
     });
     expect(result.headers).toEqual({});
     expect(result.attributes).toEqual({});
-  });
-
-  it('accepts an explicit json layout', () => {
-    const result = OtelAppender.configSchema.validate({
-      ...validConfig,
-      layout: { type: 'json' },
-    });
-    expect(result.layout).toEqual({ type: 'json' });
-  });
-
-  it('accepts a pattern layout', () => {
-    const result = OtelAppender.configSchema.validate({
-      ...validConfig,
-      layout: { type: 'pattern', pattern: '[%level] %message' },
-    });
-    expect(result.layout).toEqual({ type: 'pattern', pattern: '[%level] %message' });
-  });
-
-  it('accepts config without layout (layout is optional)', () => {
-    const result = OtelAppender.configSchema.validate({
-      type: 'otel',
-      url: 'http://collector:4318/v1/logs',
-    });
-    expect(result.layout).toBeUndefined();
   });
 
   it('rejects config without url', () => {
@@ -174,15 +152,10 @@ describe('OtelAppender.append() — severity mapping', () => {
     'maps log level $name to severityNumber $severityNumber and severityText $severityText',
     ({ level, severityNumber, severityText }) => {
       const appender = new OtelAppender(validConfig);
-      const record = makeRecord({ level });
-
-      appender.append(record);
+      appender.append(makeRecord({ level }));
 
       expect(mockEmit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          severityNumber,
-          severityText,
-        })
+        expect.objectContaining({ severityNumber, severityText })
       );
     }
   );
@@ -192,7 +165,6 @@ describe('OtelAppender.append() — severity mapping', () => {
     ['all', LogLevel.All],
   ])('silently drops records with filter-only level %s', (_name, level) => {
     const appender = new OtelAppender(validConfig);
-
     appender.append(makeRecord({ level }));
 
     expect(mockEmit).not.toHaveBeenCalled();
@@ -200,67 +172,72 @@ describe('OtelAppender.append() — severity mapping', () => {
 });
 
 describe('OtelAppender.append() — body', () => {
-  it('defaults to JSON layout when no layout is configured', () => {
+  it('uses record.message as the body (plain text, not a JSON blob)', () => {
     const appender = new OtelAppender(validConfig);
+    appender.append(makeRecord({ message: 'hello world' }));
 
+    expect(mockEmit).toHaveBeenCalledWith(expect.objectContaining({ body: 'hello world' }));
+  });
+});
+
+describe('OtelAppender.append() — trace context', () => {
+  it('passes trace context via OTel context API when traceId and spanId are present', () => {
+    const appender = new OtelAppender(validConfig);
+    appender.append(makeRecord({ traceId: 'abc123', spanId: 'def456' }));
+
+    expect(trace.setSpanContext).toHaveBeenCalledWith('root-context', {
+      traceId: 'abc123',
+      spanId: 'def456',
+      traceFlags: 1, // TraceFlags.SAMPLED
+      isRemote: false,
+    });
+    const emittedContext = mockEmit.mock.calls[0][0].context;
+    expect(emittedContext).toBeDefined();
+  });
+
+  it('omits context when the record has no trace identifiers', () => {
+    const appender = new OtelAppender(validConfig);
     appender.append(makeRecord());
 
-    const { body } = mockEmit.mock.calls[0][0];
-    expect(() => JSON.parse(body)).not.toThrow();
-    const parsed = JSON.parse(body);
-    expect(parsed.message).toBe('test message');
+    expect(trace.setSpanContext).not.toHaveBeenCalled();
+    expect(mockEmit.mock.calls[0][0].context).toBeUndefined();
   });
 
-  it('uses the configured pattern layout to format the body', () => {
-    const appender = new OtelAppender({
-      ...validConfig,
-      layout: { type: 'pattern', pattern: '[%level] %logger %message' },
-    });
-
-    appender.append(makeRecord({ level: LogLevel.Warn, context: 'my.plugin' }));
-
-    const { body } = mockEmit.mock.calls[0][0];
-    expect(body).toContain('WARN');
-    expect(body).toContain('my.plugin');
-    expect(body).toContain('test message');
-  });
-
-  it('includes meta fields in the JSON body', () => {
+  it('does not include trace.id or span.id in log record attributes', () => {
     const appender = new OtelAppender(validConfig);
-    const meta = { http: { method: 'GET' }, requestId: 'abc' };
+    appender.append(makeRecord({ traceId: 'abc123', spanId: 'def456' }));
 
-    appender.append(makeRecord({ meta }));
-
-    const { body } = mockEmit.mock.calls[0][0];
-    const parsed = JSON.parse(body);
-    expect(parsed.http?.method).toBe('GET');
-    expect(parsed.requestId).toBe('abc');
+    const { attributes } = mockEmit.mock.calls[0][0];
+    expect(attributes).not.toHaveProperty('trace.id');
+    expect(attributes).not.toHaveProperty('span.id');
   });
 });
 
 describe('OtelAppender.append() — attributes', () => {
-  it('emits the correct timestamp and base attributes', () => {
+  it('emits the correct timestamp and log.logger attribute', () => {
     const appender = new OtelAppender(validConfig);
     const timestamp = new Date('2024-06-15T12:00:00Z');
-    const record = makeRecord({ timestamp, context: 'my.plugin', pid: 9999 });
-
-    appender.append(record);
+    appender.append(makeRecord({ timestamp, context: 'my.plugin' }));
 
     expect(mockEmit).toHaveBeenCalledWith(
       expect.objectContaining({
         timestamp,
-        attributes: expect.objectContaining({
-          'log.logger': 'my.plugin',
-          'process.pid': 9999,
-        }),
+        attributes: expect.objectContaining({ 'log.logger': 'my.plugin' }),
       })
     );
   });
 
-  it('maps error to exception semantic convention attributes', () => {
+  it('does not include process.pid in log record attributes (it lives in the resource)', () => {
+    const appender = new OtelAppender(validConfig);
+    appender.append(makeRecord({ pid: 9999 }));
+
+    const { attributes } = mockEmit.mock.calls[0][0];
+    expect(attributes).not.toHaveProperty('process.pid');
+  });
+
+  it('maps error to OTel exception semantic convention attributes', () => {
     const appender = new OtelAppender(validConfig);
     const error = new Error('something went wrong');
-
     appender.append(makeRecord({ error }));
 
     expect(mockEmit).toHaveBeenCalledWith(
@@ -276,7 +253,6 @@ describe('OtelAppender.append() — attributes', () => {
 
   it('omits exception attributes when no error is present', () => {
     const appender = new OtelAppender(validConfig);
-
     appender.append(makeRecord());
 
     const { attributes } = mockEmit.mock.calls[0][0];
@@ -285,36 +261,32 @@ describe('OtelAppender.append() — attributes', () => {
     expect(attributes).not.toHaveProperty('exception.stacktrace');
   });
 
-  it('includes traceId and spanId as attributes when present', () => {
+  it('includes transactionId as transaction.id attribute', () => {
     const appender = new OtelAppender(validConfig);
-
-    appender.append(makeRecord({ traceId: 'trace-abc', spanId: 'span-xyz' }));
+    appender.append(makeRecord({ transactionId: 'txn-123' }));
 
     expect(mockEmit).toHaveBeenCalledWith(
       expect.objectContaining({
-        attributes: expect.objectContaining({
-          'trace.id': 'trace-abc',
-          'span.id': 'span-xyz',
-        }),
+        attributes: expect.objectContaining({ 'transaction.id': 'txn-123' }),
       })
     );
   });
 
-  it('omits trace attributes when not present', () => {
+  it('JSON-serialises meta and includes it as log.meta attribute', () => {
     const appender = new OtelAppender(validConfig);
+    const meta = { http: { method: 'GET' }, tags: ['api'] };
+    appender.append(makeRecord({ meta }));
 
-    appender.append(makeRecord());
-
-    const { attributes } = mockEmit.mock.calls[0][0];
-    expect(attributes).not.toHaveProperty('trace.id');
-    expect(attributes).not.toHaveProperty('span.id');
-    expect(attributes).not.toHaveProperty('transaction.id');
+    expect(mockEmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: expect.objectContaining({ 'log.meta': JSON.stringify(meta) }),
+      })
+    );
   });
 
-  it('does not include log.meta as an attribute (meta belongs in the body)', () => {
+  it('omits log.meta when meta is not present', () => {
     const appender = new OtelAppender(validConfig);
-
-    appender.append(makeRecord({ meta: { http: { method: 'GET' } } }));
+    appender.append(makeRecord());
 
     const { attributes } = mockEmit.mock.calls[0][0];
     expect(attributes).not.toHaveProperty('log.meta');
@@ -325,7 +297,6 @@ describe('OtelAppender.dispose()', () => {
   it('shuts down the logger provider', async () => {
     mockShutdown.mockResolvedValue(undefined);
     const appender = new OtelAppender(validConfig);
-
     await appender.dispose();
 
     expect(mockShutdown).toHaveBeenCalledTimes(1);
