@@ -8,7 +8,12 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import type { ObjectType, Props, TypeOptions } from '@kbn/config-schema/src/types';
+import type {
+  ObjectResultType,
+  ObjectType,
+  Props,
+  TypeOptions,
+} from '@kbn/config-schema/src/types';
 import type { ObjectUnionType } from './charts/utils/object_union';
 import { objectUnion } from './charts/utils/object_union';
 import type { MetricState } from './charts/metric';
@@ -91,7 +96,7 @@ export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 export function extendLensApiStateSchema<T extends Props>(
   props: T,
   options?: TypeOptions<LensApiState & T>
-): Type<LensApiState & T> {
+): Type<LensApiState & ObjectResultType<T>> {
   // these types are a bit of a hack mainly due to the tsc compiler limit
   // but baseSchema can extend with any props correctly and return the correct `Type` wrapper
   const baseSchema = _lensApiStateSchema as ObjectUnionType<[ObjectType<any>], LensApiState & T>;
