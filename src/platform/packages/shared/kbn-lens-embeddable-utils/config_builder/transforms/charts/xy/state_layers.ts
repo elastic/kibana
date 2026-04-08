@@ -38,7 +38,7 @@ import {
 } from './helpers';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
-import { fromColorMappingAPIToLensState } from '../../coloring';
+import { fromColorMappingAPIToLensState, isAutoColor } from '../../coloring';
 import { processMetricColumnsWithReferences } from '../utils';
 
 const X_ACCESSOR = 'x';
@@ -87,12 +87,13 @@ function buildDataLayer(config: XYState, layer: DataLayerType, i: number): XYDat
     const anchor = config.axis?.[axisId]?.anchor ?? (axisId === 'secondary_y' ? 'end' : 'start');
     const axisMode = anchor === 'end' ? 'right' : 'left';
     return {
-      ...(yMetric.color?.color ? { color: yMetric.color?.color } : {}),
+      ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
     };
   });
   const meaningFulYConfig = yConfig.filter((y) => Object.values(y).length > 1);
+
   return {
     layerId: getIdForLayer(layer, i),
     accessors: yConfig.map(({ forAccessor }) => forAccessor),
@@ -133,7 +134,9 @@ function buildByValueAnnotationLayer(
             endTimestamp: String(annotation.interval.to),
           },
           outside: annotation.fill === 'outside',
-          color: annotation.color?.color,
+          ...(annotation.color && !isAutoColor(annotation.color)
+            ? { color: annotation.color.color }
+            : {}),
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         };
@@ -146,7 +149,9 @@ function buildByValueAnnotationLayer(
             type: 'point_in_time',
             timestamp: String(annotation.timestamp),
           },
-          color: annotation.color?.color,
+          ...(annotation.color && !isAutoColor(annotation.color)
+            ? { color: annotation.color.color }
+            : {}),
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
           ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
@@ -166,7 +171,9 @@ function buildByValueAnnotationLayer(
           language: toLensStateFilterLanguage(annotation.query.language),
         },
         label: annotation.label ?? 'Event',
-        color: annotation.color?.color,
+        ...(annotation.color && !isAutoColor(annotation.color)
+          ? { color: annotation.color.color }
+          : {}),
         ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
@@ -199,7 +206,7 @@ function buildReferenceLineLayer(
       lineStyle: threshold.stroke_dash,
       textVisibility: threshold.text?.visible,
       fill: threshold.fill,
-      color: threshold.color?.color,
+      ...(threshold.color && !isAutoColor(threshold.color) ? { color: threshold.color.color } : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, index),
     };

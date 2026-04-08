@@ -42,7 +42,13 @@ import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/consta
 import type { DataSourceType } from '../../../schema/data_source';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataSource } from '../../../utils';
-import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
+import {
+  AUTO_COLOR,
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
+  fromColorMappingLensStateToAPI,
+  fromStaticColorLensStateToAPI,
+} from '../../coloring';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
@@ -81,6 +87,10 @@ function convertDataLayerToAPI(
   | Omit<DataLayerTypeESQL, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const yAccessorModesMap = getYAccessorAxisModeMap(visualization, (accessor) => accessor);
+  const defaultColorMapping =
+    visualization.seriesType === 'line'
+      ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      : DEFAULT_CATEGORICAL_COLOR_MAPPING;
 
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
@@ -100,7 +110,6 @@ function convertDataLayerToAPI(
     if (breakdown_by && !isAPIColumnOfBucketType(breakdown_by)) {
       throw new Error('Breakdown by axis must be a bucket operation');
     }
-
     const y =
       visualization.accessors
         ?.map((accessor) => {
@@ -116,13 +125,9 @@ function convertDataLayerToAPI(
 
           return {
             ...apiOperation,
-            ...(visualization.colorMapping
-              ? {}
-              : yConfig?.color
-              ? {
-                  color: fromStaticColorLensStateToAPI(yConfig.color),
-                }
-              : {}),
+            color: breakdown_by
+              ? undefined // if there is a breakdown, the color is applied to the breakdown
+              : fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR,
             axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
           };
         })
@@ -134,7 +139,9 @@ function convertDataLayerToAPI(
       visualization.xAccessor &&
       layer.columnOrder[0] === visualization.splitAccessors[0]; // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
 
-    const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+    const color =
+      fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+      defaultColorMapping;
     return {
       ...generateApiLayer(layer),
       ...(x ? { x } : {}),
@@ -145,7 +152,7 @@ function convertDataLayerToAPI(
               ...breakdown_by,
               ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
               ...(aggregate_first ? { aggregate_first: true } : {}),
-              ...(color ? { color } : {}),
+              color,
             },
           }
         : {}),
@@ -159,15 +166,17 @@ function convertDataLayerToAPI(
       ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
       : undefined;
   const y = visualization.accessors?.map((accessor) => {
-    const { color } = yConfigMap.get(accessor) || {};
+    const { color: yColor } = yConfigMap.get(accessor) || {};
     return {
       ...getValueApiColumn(accessor, layer),
-      ...(color ? { color: fromStaticColorLensStateToAPI(color) } : {}),
+      color: breakdown_by ? undefined : fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR,
       axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
     };
   });
 
-  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+  const color =
+    fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+    defaultColorMapping;
   return {
     ...generateApiLayer(layer),
     ...(x ? { x } : {}),
@@ -176,7 +185,7 @@ function convertDataLayerToAPI(
       ? {
           breakdown_by: {
             ...breakdown_by,
-            ...(color ? { color } : {}),
+            color,
             ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
           },
         }
@@ -271,7 +280,7 @@ function convertReferenceLinesDecorationsToAPIFormat(
     return resolveAxisId(yConfig.axisMode);
   };
   return stripUndefined({
-    color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
+    color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
     icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
@@ -487,7 +496,7 @@ export function buildAPIAnnotationsLayer(
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
-          color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
           ...(annotation.icon ? { icon: annotation.icon } : {}),
@@ -509,7 +518,7 @@ export function buildAPIAnnotationsLayer(
             from: annotation.key.timestamp,
             to: annotation.key.endTimestamp,
           },
-          color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           fill: annotation.outside ? 'outside' : 'inside',
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...(annotation.label ? { label: annotation.label } : {}),
@@ -519,7 +528,7 @@ export function buildAPIAnnotationsLayer(
       return {
         type: 'point',
         timestamp: annotation.key.timestamp,
-        color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+        color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
         ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
         ...(annotation.textVisibility != null
           ? {
