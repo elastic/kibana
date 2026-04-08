@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture, RequestAuthFixture, RoleApiCredentials } from '@kbn/scout';
+import type { RequestAuthFixture, RoleApiCredentials } from '@kbn/scout';
 import { apiTest as base } from '@kbn/scout';
-
-import {
-  getSpacesSetupApiService,
-  type SpacesSetupApiService,
-} from '../services/spaces_setup_api_service';
 
 export interface SpacesRequestAuthFixture extends RequestAuthFixture {
   /**
@@ -21,46 +16,29 @@ export interface SpacesRequestAuthFixture extends RequestAuthFixture {
   getSavedObjectsManagementApiKey: () => Promise<RoleApiCredentials>;
 }
 
-export interface SpacesApiServicesFixture extends ApiServicesFixture {
-  /** Plugin-local helper for space create/delete in test setup and teardown. */
-  spaces: SpacesSetupApiService;
-}
-
-export interface SpacesApiFixtures {
+export const apiTest = base.extend<{
   requestAuth: SpacesRequestAuthFixture;
-  apiServices: SpacesApiServicesFixture;
-}
-
-export const apiTest = base.extend<{}, SpacesApiFixtures>({
-  requestAuth: [
-    async ({ requestAuth }, use) => {
-      const getSavedObjectsManagementApiKey = async (): Promise<RoleApiCredentials> => {
-        return await requestAuth.getApiKeyForCustomRole({
-          elasticsearch: {
-            cluster: [],
-            indices: [],
-          },
-          kibana: [
-            {
-              base: [],
-              feature: {
-                savedObjectsManagement: ['all'],
-              },
-              spaces: ['*'],
+}>({
+  requestAuth: async ({ requestAuth }, use) => {
+    const getSavedObjectsManagementApiKey = async (): Promise<RoleApiCredentials> => {
+      return await requestAuth.getApiKeyForCustomRole({
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: {
+              savedObjectsManagement: ['all'],
             },
-          ],
-        });
-      };
+            spaces: ['*'],
+          },
+        ],
+      });
+    };
 
-      await use({ ...requestAuth, getSavedObjectsManagementApiKey });
-    },
-    { scope: 'worker' },
-  ],
-
-  apiServices: [
-    async ({ apiServices, kbnClient, log }, use) => {
-      await use({ ...apiServices, spaces: getSpacesSetupApiService(log, kbnClient) });
-    },
-    { scope: 'worker' },
-  ],
+    const extended: SpacesRequestAuthFixture = { ...requestAuth, getSavedObjectsManagementApiKey };
+    await use(extended);
+  },
 });

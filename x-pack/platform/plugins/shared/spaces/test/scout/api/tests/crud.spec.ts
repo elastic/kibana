@@ -63,7 +63,7 @@ apiTest.describe(
     );
 
     apiTest('should allow us to get a space', async ({ apiClient, apiServices }) => {
-      await apiServices.spaces.create('space_to_get_1');
+      await apiServices.spaces.create({ id: 'space_to_get_1' });
       createdSpaceIds.push('space_to_get_1');
 
       const { body } = await apiClient.get('api/spaces/space/space_to_get_1', {
@@ -90,7 +90,7 @@ apiTest.describe(
     });
 
     apiTest('should allow us to update a space', async ({ apiClient, apiServices }) => {
-      await apiServices.spaces.create('space_to_update');
+      await apiServices.spaces.create({ id: 'space_to_update' });
       createdSpaceIds.push('space_to_update');
 
       const updateResponse = await apiClient.put('api/spaces/space/space_to_update', {
@@ -134,7 +134,7 @@ apiTest.describe(
     );
 
     apiTest('should allow us to delete a space', async ({ apiClient, apiServices }) => {
-      await apiServices.spaces.create('space_to_delete');
+      await apiServices.spaces.create({ id: 'space_to_delete' });
 
       const response = await apiClient.delete('api/spaces/space/space_to_delete', {
         headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
