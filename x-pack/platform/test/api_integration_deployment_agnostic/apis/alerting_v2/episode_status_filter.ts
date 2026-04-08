@@ -10,7 +10,6 @@ import {
   buildEpisodesQuery,
   type EpisodesFilterState,
 } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import { buildDeactivatedGroupHashesQuery } from '@kbn/alerting-v2-episodes-ui/utils/queries/build_deactivated_group_hashes_query';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 import { createAlertEvent, indexAlertEvents } from './fixtures';
@@ -113,13 +112,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
     });
 
-    async function fetchDeactivatedGroupHashes(): Promise<string[]> {
-      const query = buildDeactivatedGroupHashesQuery();
-      const result = await esClient.esql.query({ query });
-      const groupHashCol = result.columns?.findIndex((c) => c.name === 'group_hash') ?? 0;
-      return (result.values ?? []).map((row) => row[groupHashCol] as string);
-    }
-
     async function fetchEpisodesWithFilter(
       filterState: EpisodesFilterState
     ): Promise<Array<Record<string, unknown>>> {
@@ -139,21 +131,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     }
 
-    it('should return deactivated group hashes for resolved episodes', async () => {
-      const deactivated = await fetchDeactivatedGroupHashes();
-      expect(deactivated).to.contain(GROUP_1);
-      expect(deactivated).to.contain(GROUP_4);
-      expect(deactivated).not.to.contain(GROUP_2);
-      expect(deactivated).not.to.contain(GROUP_3);
-      expect(deactivated).not.to.contain(GROUP_5);
-    });
-
     it('should exclude deactivated episodes when filtering by active', async () => {
-      const deactivated = await fetchDeactivatedGroupHashes();
-      const episodes = await fetchEpisodesWithFilter({
-        status: 'active',
-        deactivatedGroupHashes: deactivated,
-      });
+      const episodes = await fetchEpisodesWithFilter({ status: 'active' });
 
       const groupHashes = episodes.map((e) => e.group_hash);
       expect(groupHashes).to.contain(GROUP_2);
@@ -161,11 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should include deactivated episodes when filtering by inactive', async () => {
-      const deactivated = await fetchDeactivatedGroupHashes();
-      const episodes = await fetchEpisodesWithFilter({
-        status: 'inactive',
-        deactivatedGroupHashes: deactivated,
-      });
+      const episodes = await fetchEpisodesWithFilter({ status: 'inactive' });
 
       const groupHashes = episodes.map((e) => e.group_hash);
       expect(groupHashes).to.contain(GROUP_3);
@@ -174,11 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should exclude deactivated episodes when filtering by pending', async () => {
-      const deactivated = await fetchDeactivatedGroupHashes();
-      const episodes = await fetchEpisodesWithFilter({
-        status: 'pending',
-        deactivatedGroupHashes: deactivated,
-      });
+      const episodes = await fetchEpisodesWithFilter({ status: 'pending' });
 
       const groupHashes = episodes.map((e) => e.group_hash);
       expect(groupHashes).not.to.contain(GROUP_4);
@@ -186,23 +157,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should return recovering episodes unaffected by deactivation', async () => {
-      const deactivated = await fetchDeactivatedGroupHashes();
-      const episodes = await fetchEpisodesWithFilter({
-        status: 'recovering',
-        deactivatedGroupHashes: deactivated,
-      });
+      const episodes = await fetchEpisodesWithFilter({ status: 'recovering' });
 
       const groupHashes = episodes.map((e) => e.group_hash);
       expect(groupHashes).to.contain(GROUP_5);
     });
 
     it('should combine status and rule filters with deactivation', async () => {
-      const deactivated = await fetchDeactivatedGroupHashes();
-
       const activeRuleA = await fetchEpisodesWithFilter({
         status: 'active',
         ruleId: RULE_A,
-        deactivatedGroupHashes: deactivated,
       });
       const activeRuleAHashes = activeRuleA.map((e) => e.group_hash);
       expect(activeRuleAHashes).to.contain(GROUP_2);
@@ -212,7 +176,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const inactiveRuleB = await fetchEpisodesWithFilter({
         status: 'inactive',
         ruleId: RULE_B,
-        deactivatedGroupHashes: deactivated,
       });
       const inactiveRuleBHashes = inactiveRuleB.map((e) => e.group_hash);
       expect(inactiveRuleBHashes).to.contain(GROUP_3);
