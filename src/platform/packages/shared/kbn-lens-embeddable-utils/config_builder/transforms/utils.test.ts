@@ -10,11 +10,11 @@
 import {
   buildDatasourceStates,
   buildReferences,
-  getDatasetIndex,
+  getDataSourceIndex,
   addLayerColumn,
   getDefaultReferences,
   operationFromColumn,
-  buildDatasetState,
+  buildDataSourceState,
   isSingleLayer,
   generateLayer,
   filtersAndQueryToLensState,
@@ -27,6 +27,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
@@ -56,9 +57,9 @@ test('build references correctly builds references', () => {
 
 describe('getDatasetIndex', () => {
   test('returns index if provided', () => {
-    const result = getDatasetIndex({
-      type: 'index',
-      index: 'test',
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test',
       time_field: '@timestamp',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -70,7 +71,7 @@ describe('getDatasetIndex', () => {
   });
 
   test('extracts index from esql query', () => {
-    const result = getDatasetIndex({
+    const result = getDataSourceIndex({
       type: 'esql',
       query: 'from test_index | limit 10',
     });
@@ -84,7 +85,7 @@ describe('getDatasetIndex', () => {
   });
 
   test('returns undefined if no query or iundex provided', () => {
-    const result = getDatasetIndex({
+    const result = getDataSourceIndex({
       type: 'table',
       table: {
         columns: [],
@@ -236,7 +237,7 @@ describe('buildDatasourceStates', () => {
       {
         type: 'metric',
         title: 'test',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'from test | limit 10',
         },
@@ -361,8 +362,8 @@ describe('operationFromColumn', () => {
   });
 });
 
-describe('buildDatasetState', () => {
-  test('builds esql dataset state', () => {
+describe('buildDataSourceState', () => {
+  test('builds esql data_source state', () => {
     const textBasedLayer = {
       index: 'my-index',
       query: { esql: 'from my-index | limit 10' },
@@ -370,7 +371,7 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(
+    const result = buildDataSourceState(
       textBasedLayer,
       'layer_0',
       {},
@@ -391,30 +392,30 @@ describe('buildDatasetState', () => {
     `);
   });
 
-  test('builds dataView dataset state', () => {
+  test('builds dataView data_source state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
+    const result = buildDataSourceState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "id": "my-dataview-id",
-        "type": "dataView",
+        "ref_id": "my-dataview-id",
+        "type": "data_view_reference",
       }
     `);
   });
 
-  test('builds index dataset state', () => {
+  test('builds index data_source state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-adhoc-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(
+    const result = buildDataSourceState(
       formBasedLayer,
       'layer_1',
       {
@@ -435,9 +436,9 @@ describe('buildDatasetState', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-adhoc-dataview-id",
+        "index_pattern": "my-adhoc-dataview-id",
         "time_field": "@timestamp",
-        "type": "index",
+        "type": "data_view_spec",
       }
     `);
   });
@@ -511,7 +512,7 @@ describe('filtersAndQueryToLensState', () => {
     const apiState: LensApiState = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
       },
@@ -564,7 +565,7 @@ describe('filtersAndQueryToLensState', () => {
     const apiState: LensApiState = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
       },
@@ -596,7 +597,7 @@ describe('filtersAndQueryToLensState', () => {
     const apiState: LensApiState = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
       },
