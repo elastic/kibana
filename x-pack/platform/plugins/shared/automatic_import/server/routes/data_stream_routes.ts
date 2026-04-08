@@ -32,7 +32,8 @@ const isSecurityExceptionError = (err: unknown): boolean => {
 
   return (
     elasticsearchError.meta?.body?.error?.type === 'security_exception' ||
-    err.message.includes('security_exception')
+    err.message.includes('security_exception') ||
+    err.message.includes('is unauthorized for user')
   );
 };
 
@@ -226,6 +227,13 @@ const updateDataStreamPipelineRoute = (
         } catch (err) {
           logger.error(`updateDataStreamPipelineRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
+
+          if (isSecurityExceptionError(err)) {
+            return automaticImportResponse.error({
+              statusCode: 403,
+              body: 'Missing required Elasticsearch privileges. This action requires the manage_ingest_pipelines and manage_index_templates cluster privileges.',
+            });
+          }
           const rawMessage = err instanceof Error ? err.message : String(err);
 
           if (rawMessage.includes('Invalid ingest pipeline')) {
