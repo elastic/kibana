@@ -43,7 +43,7 @@ interface OwnProps {
   onActionFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
   customRefetch?: Refetch;
-  data?: TimelineItem[];
+  data: TimelineItem[];
 }
 
 export type StatefulAlertBulkActionsProps = OwnProps & PropsFromRedux;

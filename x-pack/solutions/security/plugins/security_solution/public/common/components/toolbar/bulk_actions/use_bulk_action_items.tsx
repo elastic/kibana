@@ -39,8 +39,8 @@ export interface BulkActionsProps {
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
-  data?: TimelineItem[];
-  closePopover?: () => void;
+  data: TimelineItem[];
+  closePopover: () => void;
 }
 
 export const useBulkActionItems = ({
@@ -186,10 +186,9 @@ export const useBulkActionItems = ({
       });
   }, [data, eventIds]);
 
-  const noopClosePopover = useCallback(() => {}, []);
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
     documents: workflowDocuments,
-    closePopover: closePopover ?? noopClosePopover,
+    closePopover,
   });
 
   const items = useMemo(() => {
@@ -245,12 +244,11 @@ export const useBulkActionItems = ({
         }, [])
       : [];
 
-    return [...actionItems, ...(data ? runWorkflowMenuItem : []), ...additionalItems];
+    return [...actionItems, ...additionalItems, ...runWorkflowMenuItem];
   }, [
     showAlertStatusActions,
     hasAlertsUpdate,
     customBulkActions,
-    data,
     runWorkflowMenuItem,
     currentStatus,
     closePopover,
@@ -273,9 +271,9 @@ export const useBulkActionItems = ({
             }),
           };
         }),
-        ...(data ? runDocumentWorkflowPanel : []),
+        ...runDocumentWorkflowPanel,
       ] as EuiContextMenuPanelDescriptor[],
-    [alertClosingReasonPanels, data, runDocumentWorkflowPanel]
+    [alertClosingReasonPanels, runDocumentWorkflowPanel]
   );
 
   return useMemo(() => ({ items, panels }), [items, panels]);
