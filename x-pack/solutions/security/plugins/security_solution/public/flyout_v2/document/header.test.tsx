@@ -23,12 +23,11 @@ jest.mock('../../common/lib/kibana', () => ({
 }));
 
 jest.mock('./components/title', () => ({
-  Title: ({ hit, titleHref }: { hit: DataTableRecord; titleHref?: string }) => (
+  Title: ({ hit }: { hit: DataTableRecord }) => (
     <div
       data-test-subj="mockHeaderTitle"
       data-hit-id={hit.id}
       data-event-kind={String(hit.flattened['event.kind'] ?? '')}
-      data-title-href={titleHref ?? ''}
     />
   ),
 }));
@@ -144,19 +143,18 @@ describe('<DocumentHeader />', () => {
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
-  it('should resolve and pass titleHref for alerts with a rule id', () => {
+  it('should pass alert documents to the header title', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 
-    expect(getByTestId('mockHeaderTitle')).toHaveAttribute(
-      'data-title-href',
-      'https://example.com/rule/test-rule-id'
-    );
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-hit-id', '1');
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
-  it('should not pass titleHref when there is no rule id', () => {
+  it('should pass non-alert documents to the header title', () => {
     const { getByTestId } = renderHeader({ hit: eventHit });
 
-    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-title-href', '');
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-hit-id', '1');
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'event');
   });
 
   it('should render the alert summary blocks for alerts', () => {

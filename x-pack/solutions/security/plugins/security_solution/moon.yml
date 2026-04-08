@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/timelines-plugin'
   - '@kbn/es-query'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/utility-types'
   - '@kbn/securitysolution-list-utils'
   - '@kbn/securitysolution-io-ts-list-types'
@@ -291,6 +292,7 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/core-overlays-browser'
 tags:
   - plugin
   - prod

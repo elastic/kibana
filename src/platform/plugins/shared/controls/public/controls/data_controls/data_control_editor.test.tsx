@@ -71,7 +71,7 @@ const mockRegisteredTriggerActions: CreateControlTypeAction[] = [
     id: 'supremeControl',
     type: 'supremeControl',
     order: 100, // force it first despite alphabetical ordering
-    getIconType: () => 'starFilled',
+    getIconType: () => 'starFill',
     getDisplayName: () => 'Supreme leader',
     isCompatible: () => Promise.resolve(true),
     execute: jest.fn().mockReturnValue({

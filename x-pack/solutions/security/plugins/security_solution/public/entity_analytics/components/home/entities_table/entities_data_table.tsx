@@ -186,7 +186,7 @@ export const EntitiesDataTable = ({
     (doc?: DataTableRecord | undefined) => {
       if (doc) {
         setExpandedDoc(doc);
-        const { entityType, entityName } = getEntityFields(doc);
+        const { entityType, entityName, entityId } = getEntityFields(doc);
         if (!entityType || !entityName) return;
 
         const panelKey = EntityPanelKeyByType[entityType];
@@ -197,6 +197,7 @@ export const EntitiesDataTable = ({
           id: panelKey,
           params: {
             [panelParam]: entityName,
+            entityId,
             contextID: ENTITY_ANALYTICS_TABLE_ID,
             scopeId: ENTITY_ANALYTICS_TABLE_ID,
           },
