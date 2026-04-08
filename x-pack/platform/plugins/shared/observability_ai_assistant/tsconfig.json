@@ -66,6 +66,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/zod",
     "@kbn/shared-ux-ai-components"
+    "@kbn/search-inference-endpoints",
   ],
   "exclude": ["target/**/*"]
 }

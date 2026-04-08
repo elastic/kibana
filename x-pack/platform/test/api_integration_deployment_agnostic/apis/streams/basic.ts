@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
-import { Streams, emptyAssets } from '@kbn/streams-schema';
+import {
+  LOGS_ECS_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  Streams,
+  emptyAssets,
+} from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
@@ -36,6 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   let viewerApiClient: StreamsSupertestRepositoryClient;
   const config = getService('config');
+  const retry = getService('retry');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
@@ -68,6 +74,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         indexTemplates: indexTemplateResponse.index_templates.map((template) => template.name),
       };
     });
+  }
+
+  /** ES assets installed for wired roots (see getComponentTemplateName / getIndexTemplateName). */
+  const WIRED_ROOT_ELASTICSEARCH_ASSETS = [
+    `${LOGS_OTEL_STREAM_NAME}@stream.layer`,
+    `${LOGS_ECS_STREAM_NAME}@stream.layer`,
+    `${LOGS_OTEL_STREAM_NAME}@stream`,
+    `${LOGS_ECS_STREAM_NAME}@stream`,
+  ];
+
+  function resourcesExcludingWiredRootAssets(r: Resources): Resources {
+    const exclude = new Set(WIRED_ROOT_ELASTICSEARCH_ASSETS);
+    return {
+      indices: r.indices,
+      componentTemplates: r.componentTemplates.filter((name) => !exclude.has(name)),
+      indexTemplates: r.indexTemplates.filter((name) => !exclude.has(name)),
+    };
   }
 
   describe('Basic functionality', () => {
@@ -116,16 +139,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         resources = await getResources();
       });
 
-      it('is not enabled', async () => {
-        const wiredStatus = await getWiredStatus();
-        expect(wiredStatus.logs).to.eql(false);
-        expect(wiredStatus['logs.otel']).to.eql(false);
-        expect(wiredStatus['logs.ecs']).to.eql(false);
+      it('is enabled by default', async () => {
+        // Wired roots may be enabled asynchronously after Kibana starts; poll until status settles.
+        await retry.tryForTime(
+          120_000,
+          async () => {
+            const wiredStatus = await getWiredStatus();
+            expect(wiredStatus.logs).to.eql(false);
+            expect(wiredStatus['logs.otel']).to.eql(true);
+            expect(wiredStatus['logs.ecs']).to.eql(true);
+          },
+          undefined,
+          500
+        );
       });
 
       describe('after enabling', () => {
         before(async () => {
-          await enableStreams(apiClient);
+          // need to disable and enable streams to ensure the views setting is picked up
+          await retry.tryForTime(
+            120_000,
+            async () => {
+              await disableStreams(apiClient);
+            },
+            undefined,
+            500
+          );
+          await retry.tryForTime(
+            120_000,
+            async () => {
+              await enableStreams(apiClient);
+            },
+            undefined,
+            500
+          );
         });
 
         it('reports enabled status', async () => {
@@ -145,17 +192,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (!isServerless) {
           it('creates ES|QL views for wired root streams', async () => {
             if (!viewsApiAvailable) return;
-            for (const streamName of ['logs.otel', 'logs.ecs']) {
-              const response = await esClient.transport.request<{
-                views: Array<{ name: string; query: string }>;
-              }>({
-                method: 'GET',
-                path: `/_query/view/%24.${streamName}`,
-              });
-              expect(response.views).to.have.length(1);
-              expect(response.views[0].name).to.eql(`$.${streamName}`);
-              expect(response.views[0].query).to.eql(`FROM ${streamName}`);
-            }
+            await retry.tryForTime(
+              120_000,
+              async () => {
+                for (const streamName of ['logs.otel', 'logs.ecs']) {
+                  const response = await esClient.transport.request<{
+                    views: Array<{ name: string; query: string }>;
+                  }>({
+                    method: 'GET',
+                    path: `/_query/view/%24.${streamName}`,
+                  });
+                  expect(response.views).to.have.length(1);
+                  expect(response.views[0].name).to.eql(`$.${streamName}`);
+                  expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+                }
+              },
+              undefined,
+              500
+            );
           });
         }
 
@@ -203,7 +257,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
         }
 
-        it('is enabled', async () => {
+        it('disables streams', async () => {
           await disableStreams(apiClient);
         });
 
@@ -213,7 +267,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           it('cleans up all the resources', async () => {
-            expect(await getResources()).to.eql(resources);
+            const afterDisable = await getResources();
+            // Wired roots are on by default, so the initial snapshot includes their index and
+            // component templates; disableStreams removes them. Everything else should match.
+            expect(resourcesExcludingWiredRootAssets(afterDisable)).to.eql(
+              resourcesExcludingWiredRootAssets(resources)
+            );
+            const templateNames = [
+              ...afterDisable.componentTemplates,
+              ...afterDisable.indexTemplates,
+            ];
+            for (const name of WIRED_ROOT_ELASTICSEARCH_ASSETS) {
+              expect(templateNames.includes(name)).to.eql(false);
+            }
           });
 
           it('returns a 404 for logs', async () => {
