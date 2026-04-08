@@ -104,6 +104,7 @@
     "@kbn/react-query",
     "@kbn/timerange",
     "@kbn/inference-common",
+    "@kbn/inference-connectors",
     "@kbn/esql",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/stack-connectors-plugin",
