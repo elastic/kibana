@@ -18,6 +18,17 @@ jest.mock('../../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
+  () => ({
+    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+  })
+);
+
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 (useAppToasts as jest.Mock).mockReturnValue({
@@ -81,5 +92,46 @@ describe('useBulkActionItems', () => {
         (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
       )
     ).toBeUndefined();
+  });
+
+  describe('workflow actions', () => {
+    it('should include workflow menu items when useRunDocumentWorkflowPanel returns items', () => {
+      const mockMenuItem = {
+        key: 'run-document-workflow-action',
+        'data-test-subj': 'run-document-workflow-action',
+        name: 'Run workflow',
+        panel: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID',
+      };
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [mockMenuItem],
+        runDocumentWorkflowPanel: [{ id: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID' }],
+      });
+
+      const { result } = renderUseBulkActionItems({
+        data: [{ _id: 'mockEventId', _index: 'test-index', data: [], ecs: { _id: 'mockEventId' } }],
+      });
+
+      expect(
+        result.current.items.find(
+          (item) => item['data-test-subj'] === 'run-document-workflow-action'
+        )
+      ).not.toBeUndefined();
+      expect(result.current.panels.length).toBeGreaterThan(0);
+    });
+
+    it('should not include workflow menu items when useRunDocumentWorkflowPanel returns empty', () => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const { result } = renderUseBulkActionItems();
+
+      expect(
+        result.current.items.find(
+          (item) => item['data-test-subj'] === 'run-document-workflow-action'
+        )
+      ).toBeUndefined();
+    });
   });
 });
