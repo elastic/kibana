@@ -677,22 +677,18 @@ describe('Search service', () => {
           .mockResolvedValueOnce(true) // includeFrozen (changed)
           .mockResolvedValueOnce(10); // maxConcurrentShardRequests (changed)
 
-        // simulate time passing beyond the refresh interval
-        currentTime = initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS;
+        // simulate time passing beyond the refresh interval (30 seconds)
+        currentTime = initialTime + 30_000;
 
-        const initSpy = jest.spyOn(plugin as any, 'initializeSearchSettingsCache');
-
-        (plugin as any).maybeRefreshSearchSettings();
+        (plugin as any).searchSettingsCache.maybeRefresh();
 
         await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(initSpy).toHaveBeenCalled();
+        expect(mockGlobalClient.get).toHaveBeenCalled();
 
         const settings = plugin.getSearchSettings();
         expect(settings.includeFrozen).toBe(true);
         expect(settings.maxConcurrentShardRequests).toBe(10);
-
-        initSpy.mockRestore();
       } finally {
         (Date.now as jest.Mock).mockRestore();
       }
@@ -719,18 +715,14 @@ describe('Search service', () => {
       try {
         mockGlobalClient.get.mockClear();
 
-        // some time passes, but less than the refresh interval
-        currentTime = initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS - 1000;
+        // some time passes, but less than the refresh interval (30 seconds)
+        currentTime = initialTime + 29_000;
 
-        const initSpy = jest.spyOn(plugin as any, 'initializeSearchSettingsCache');
-
-        (plugin as any).maybeRefreshSearchSettings();
+        (plugin as any).searchSettingsCache.maybeRefresh();
 
         await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(initSpy).not.toHaveBeenCalled();
-
-        initSpy.mockRestore();
+        expect(mockGlobalClient.get).not.toHaveBeenCalled();
       } finally {
         (Date.now as jest.Mock).mockRestore();
       }
@@ -754,15 +746,10 @@ describe('Search service', () => {
       expect(settingsBeforeStop.includeFrozen).toBe(false);
       expect(settingsBeforeStop.maxConcurrentShardRequests).toBe(5);
 
-      // Verify cache state is not null before stop
-      expect((plugin as any).searchSettingsCache).not.toBeNull();
-      expect((plugin as any).lastRefreshTime).toBeGreaterThan(0);
+      // Verify cache instance exists before stop
+      expect((plugin as any).searchSettingsCache).toBeDefined();
 
       plugin.stop();
-
-      // Verify cache state is cleared
-      expect((plugin as any).searchSettingsCache).toBeNull();
-      expect((plugin as any).lastRefreshTime).toBe(0);
 
       // Verify getSearchSettings returns defaults after stop
       const settingsAfterStop = plugin.getSearchSettings();

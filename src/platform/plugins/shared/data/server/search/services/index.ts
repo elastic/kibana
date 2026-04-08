@@ -8,3 +8,4 @@
  */
 
 export { CachedUiSettingsClient } from './cached_ui_settings_client';
+export { SearchSettingsCache } from './search_settings_cache';

@@ -45,6 +45,7 @@ import type {
 } from './types';
 
 import { AggsService } from './aggs';
+import { SearchSettingsCache } from './services';
 
 import { registerSearchRoute, registerSessionRoutes } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
@@ -86,7 +87,6 @@ import {
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
 } from '../../common/search';
-import { UI_SETTINGS } from '../../common';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
   getShardDelayBucketAgg,
@@ -126,11 +126,6 @@ export interface SearchRouteDependencies {
   globalConfig$: Observable<SharedGlobalConfig>;
 }
 
-const searchSettingsDefaults = {
-  includeFrozen: false, // Deprecated setting, use false as default
-  maxConcurrentShardRequests: 0, // use Elasticsearch default by setting to 0
-};
-
 export class SearchService {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
@@ -140,15 +135,7 @@ export class SearchService {
   private searchAsInternalUser!: ISearchStrategy;
   private rollupsEnabled: boolean = false;
   private readonly isServerless: boolean;
-
-  private searchSettingsCache: {
-    includeFrozen: boolean;
-    maxConcurrentShardRequests: number;
-  } | null = null;
-  private lastRefreshTime: number = 0;
-  private readonly MIN_SETTINGS_REFRESH_INTERVAL_MS = 30_000;
-  private uiSettings?: CoreStart['uiSettings'];
-  private savedObjects?: CoreStart['savedObjects'];
+  private searchSettingsCache: SearchSettingsCache;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -160,6 +147,7 @@ export class SearchService {
       initializerContext.config.get(),
       initializerContext.env.packageInfo.version
     );
+    this.searchSettingsCache = new SearchSettingsCache(logger);
   }
 
   public setup(
@@ -290,13 +278,10 @@ export class SearchService {
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
-    this.uiSettings = uiSettings;
-    this.savedObjects = savedObjects;
-
     this.sessionService.start(core, {});
 
     // Initialize settings cache at startup
-    this.initializeSearchSettingsCache(uiSettings, savedObjects).catch((error) => {
+    this.searchSettingsCache.start(uiSettings, savedObjects).catch((error) => {
       this.logger.error('Failed to initialize search settings cache on startup', error);
     });
 
@@ -350,72 +335,13 @@ export class SearchService {
   }
 
   public stop() {
-    this.searchSettingsCache = null;
-    this.lastRefreshTime = 0;
-    this.uiSettings = undefined;
-    this.savedObjects = undefined;
+    this.searchSettingsCache.stop();
     this.sessionService.stop();
     this.aggsService.stop();
   }
 
-  private async initializeSearchSettingsCache(
-    uiSettings: CoreStart['uiSettings'],
-    savedObjects: CoreStart['savedObjects']
-  ): Promise<void> {
-    try {
-      const internalClient = savedObjects.createInternalRepository();
-      const globalClient = uiSettings.globalAsScopedToClient(internalClient);
-
-      const [includeFrozen, maxConcurrentShardRequests] = await Promise.all([
-        globalClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-        globalClient.get<number>(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS),
-      ]);
-
-      this.searchSettingsCache = {
-        includeFrozen,
-        maxConcurrentShardRequests,
-      };
-
-      this.lastRefreshTime = Date.now();
-
-      this.logger.info(
-        `Search settings cache initialized: includeFrozen=${includeFrozen}, maxConcurrentShardRequests=${maxConcurrentShardRequests}`
-      );
-    } catch (error) {
-      this.logger.error('Failed to initialize search settings cache', error);
-      // Fallback to defaults
-      this.searchSettingsCache = {
-        includeFrozen: searchSettingsDefaults.includeFrozen,
-        maxConcurrentShardRequests: searchSettingsDefaults.maxConcurrentShardRequests,
-      };
-      this.lastRefreshTime = Date.now();
-    }
-  }
-
-  private maybeRefreshSearchSettings(): void {
-    if (!this.uiSettings || !this.savedObjects) {
-      return;
-    }
-
-    const now = Date.now();
-    const timeSinceLastRefresh = now - this.lastRefreshTime;
-
-    if (timeSinceLastRefresh >= this.MIN_SETTINGS_REFRESH_INTERVAL_MS) {
-      this.initializeSearchSettingsCache(this.uiSettings, this.savedObjects).catch((error) => {
-        this.logger.error('Failed to refresh search settings cache on demand', error);
-      });
-    }
-  }
-
   public getSearchSettings(): { includeFrozen: boolean; maxConcurrentShardRequests: number } {
-    if (!this.searchSettingsCache) {
-      // Fallback if cache not initialized yet
-      return {
-        includeFrozen: searchSettingsDefaults.includeFrozen,
-        maxConcurrentShardRequests: searchSettingsDefaults.maxConcurrentShardRequests,
-      };
-    }
-    return this.searchSettingsCache;
+    return this.searchSettingsCache.getSettings();
   }
 
   private registerSearchStrategy = <
@@ -452,7 +378,7 @@ export class SearchService {
     options: ISearchOptions
   ) => {
     try {
-      this.maybeRefreshSearchSettings();
+      this.searchSettingsCache.maybeRefresh();
 
       const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
         options.strategy
