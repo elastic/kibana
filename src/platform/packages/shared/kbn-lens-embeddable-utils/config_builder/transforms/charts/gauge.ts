@@ -16,6 +16,7 @@ import type {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { GaugeState, LensApiState } from '../../schema';
 import {
   AUTO_COLOR,
@@ -57,6 +58,24 @@ function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
   return `${ACCESSOR}_${type}`;
 }
 
+function convertColorToLensState(color: GaugeState['metric']['color']): {
+  colorMode: GaugeVisualizationState['colorMode'];
+  palette?: PaletteOutput<CustomPaletteParams>;
+} {
+  if (!color || isAutoColor(color)) {
+    return { colorMode: 'palette' };
+  }
+
+  if (isNoColor(color)) {
+    return { colorMode: 'none' };
+  }
+
+  return {
+    colorMode: 'palette' as const,
+    palette: fromColorByValueAPIToLensState(color),
+  };
+}
+
 function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
   const layer = config;
 
@@ -76,14 +95,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
         ? 'semiCircle'
         : layer.shape.type
       : 'horizontalBullet',
-    ...(isNoColor(layer.metric.color)
-      ? { colorMode: 'none' }
-      : isAutoColor(layer.metric.color)
-      ? { colorMode: 'palette' }
-      : {
-          colorMode: 'palette',
-          palette: fromColorByValueAPIToLensState(layer.metric.color),
-        }),
+    ...convertColorToLensState(layer.metric.color),
     ticksPosition:
       layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
     ...(layer.metric.title?.visible === false
@@ -195,10 +207,10 @@ function reverseBuildVisualizationState(
           : { visible: true, mode: 'auto' };
     }
 
-    if (visualization.colorMode === 'none') {
-      props.metric.color = NO_COLOR;
-    } else {
+    if (visualization.colorMode === 'palette') {
       props.metric.color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+    } else {
+      props.metric.color = NO_COLOR;
     }
   }
 
