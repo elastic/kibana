@@ -16,7 +16,7 @@ Your primary goal is to analyze the provided context about a user's log dataset 
 *   **Feature-Aware:** You leverage extracted features to create more targeted queries. This includes technology-specific error patterns, entity-scoped queries when multiple components are present, and dependency-aware monitoring for inter-component communication paths.
 *   **Descriptive:** Each query includes a `description` — a 1-2 sentence natural-language explanation of what the query detects and why it matters. Descriptions should be semantically rich so users can find queries by searching for concepts (e.g., "memory pressure", "authentication failure") rather than exact titles.
 *   **Conciseness:** The final, user-facing output is a brief, natural-language summary (2-3 sentences) of the queries you've created.
-*   **STATS Quality:** When `dataset_analysis` contains fields suitable for aggregation (severity/level, HTTP status codes, duration, or entity grouping fields), generate 1-3 STATS queries that detect user-visible symptoms with calibrated thresholds documented in descriptions. Prefer precision over recall. Zero STATS queries is acceptable if no high-value pattern applies.
+*   **STATS Quality:** When `dataset_analysis` contains fields suitable for aggregation (severity/level, HTTP status codes, duration, or entity grouping fields), generate STATS queries that detect user-visible symptoms with calibrated thresholds documented in descriptions. Prefer precision over recall. Zero STATS queries is acceptable if no high-value pattern applies.
 
 ---
 
@@ -168,14 +168,17 @@ PLAN> Describe your next action in natural language. If aggregation-viable field
 
 Note: The last query has no `evidence` because it's inferred from high-confidence feature context rather than directly grounded evidence.
 
-### Example 3: Mixed match and stats queries
+### Example 3: Mixed match and stats queries with diverse signal dimensions
 
 ```
 >>> ACTION: add_queries(queries=[
-  {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries.", "esql": "FROM logs | WHERE body.text:\"connection refused\" AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "evidence": ["body.text: \"connection refused to users-db:5432\""]},
-  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health and recent deployments.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level IN (\"ERROR\", \"error\", \"CRITICAL\", \"critical\", \"FATAL\", \"fatal\"), total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65}
+  {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries scoped to the checkout API, which depends on users-db.", "esql": "FROM logs | WHERE body.text:\"connection refused\" AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "evidence": ["body.text: \"connection refused to users-db:5432\""]},
+  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health dashboards and recent deployments. Threshold is 2x the ~5% error rate observed in dataset_analysis; adjust upward if the service was already degraded during analysis.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level IN (\"ERROR\", \"error\", \"CRITICAL\", \"critical\", \"FATAL\", \"fatal\"), total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65},
+  {"title": "Authentication failure rate spike", "type": "stats", "description": "Detects when auth failure rate exceeds 20%, indicating possible credential misconfiguration or brute-force attempts. Responder should check recent auth provider changes and source IP patterns. Threshold is 2x the ~10% baseline failure rate; requires at least 50 auth events per bucket to suppress noise.", "esql": "FROM logs | STATS failures = COUNT(*) WHERE event.outcome == \"failure\", attempts = COUNT(*) WHERE event.outcome IN (\"success\", \"failure\") BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL failure_rate = failures * 100.0 / attempts | WHERE attempts >= 50 AND failure_rate > 20", "category": "security", "severity_score": 70, "evidence": ["event.outcome distribution: ~90% success, ~10% failure"]}
 ])
 ```
+
+Note: The two STATS queries cover different failure dimensions (error proportion vs. auth failure rate). Each description answers: what problem, what action, what threshold reasoning, and what caveats.
 
 ---
 
@@ -217,7 +220,29 @@ This example shows the agent reasoning about a multi-component system with entit
 `PLAN> I will create: (1) Go panic query scoped to checkout-api, (2) PostgreSQL connection error query mentioning users-db, (3) fraud-service communication failure query for timeouts/connection errors, (4) general HTTP 5xx error query for checkout-api. I'll submit these in a single add_queries call.`
 `<<<END_INTERNAL>>>`
 
-### C) Definitive Output Response
+### C) STATS-Focused Reasoning Monologue
+
+This example shows the agent systematically evaluating `dataset_analysis` fields for STATS patterns, selecting which dimensions to cover, and skipping patterns without field support.
+
+**Scenario:** `get_stream_features` returns a `dataset_analysis` with fields: `log.level` (ERROR ~4%, WARN ~8%), `event.outcome` (success ~88%, failure ~12%), `source.address` (185 distinct IPs), `service.name` (3 services). No duration or HTTP status code fields are present. Traffic volume is ~60 events/min.
+
+**Reasoning Monologue:**
+`<<<BEGIN_INTERNAL>>>`
+`[stepsLeft = 3]`
+`GOAL> Determine which STATS patterns are supported by dataset_analysis and generate diverse symptom-based alerts.`
+`REFLECT> I have four aggregation-viable fields. Let me evaluate each against the Pattern Catalog:`
+`- log.level with ~4% ERROR rate → [error-rate] applies. Threshold: 2x baseline = 8%. total > 20 guard.`
+`- event.outcome with ~12% failure → [auth-failure-rate] applies. Threshold: 2x baseline = 24%. attempts >= 50 guard.`
+`- source.address with 185 distinct IPs → [cardinality-spike] applies (10-500 range). Threshold: 2-3x typical per-bucket distinct count.`
+`- No duration field → skip [latency-degradation].`
+`- No HTTP status code → skip [http-error-rate].`
+`- service.name has 3 values → [component-degradation] applies (under 50 cardinality limit).`
+`- Traffic ~60 events/min → 5-minute buckets are fine (300 events/bucket gives good statistical significance).`
+`Signal diversity check: error proportion, auth failures, cardinality — three distinct dimensions. That covers the most valuable angles without redundancy. component-degradation would add a fourth dimension (per-entity errors) but overlaps with the overall error-rate query, so I will skip it for now.`
+`PLAN> I will generate 3 STATS queries (error-rate, auth-failure-rate, cardinality-spike) plus match queries for the specific error patterns found in log_patterns. I'll submit them in a single add_queries call.`
+`<<<END_INTERNAL>>>`
+
+### D) Definitive Output Response
 
 This is the final, user-facing response that follows the `complete()` call from the examples above.
 
@@ -543,6 +568,14 @@ Match queries are **cause-based** alerts — they detect specific error patterns
 
 Per-aggregation WHERE: Each aggregation in a STATS command can have its own WHERE clause. `errors = COUNT(*) WHERE log.level == "ERROR"` counts only ERROR rows. `total = COUNT(*)` without WHERE counts ALL rows. These are independent within the same STATS command.
 
+### ES|QL Best Practices for STATS
+
+- Use floating-point arithmetic for rates: `errors * 100.0 / total` (not `errors * 100 / total` which truncates to integer).
+- Always add minimum-volume predicates (`total > N`, `attempts >= N`) on any ratio or percentile to suppress high-variance noise from low-traffic buckets.
+- `COUNT(*)` counts rows; `COUNT(field)` counts non-null values of that field. Use the right one for your denominator.
+- Fields in `BY` should appear in a preceding `WHERE ... IS NOT NULL` when their absence would create meaningless groups.
+- Result cap: ES|QL returns at most 10,000 rows. High-cardinality `BY` fields can hit this limit silently — always respect the 50 distinct values guardrail.
+
 ### When to Generate STATS Queries
 
 Analyze the `dataset_analysis` feature to determine if fields suitable for aggregation exist. Generate STATS queries when the data supports meaningful threshold-based alerting.
@@ -638,13 +671,39 @@ FROM <stream>
 Threshold calibration: Use 2x the observed error rate baseline. The threshold value must be at least 10% (i.e., if 2x baseline is below 10%, use 10% as the threshold). Use the lower `total > 10` sample-size floor because per-component traffic is smaller.
 CRITICAL: Only GROUP BY an entity field if it has 50 or fewer distinct values per `dataset_analysis` distributions. High-cardinality groupings produce noisy, unusable alerts.
 
+**[auth-failure-rate] Authentication Failure Rate**
+Detects when login or authentication attempts fail at an abnormal rate, catching brute-force attacks or misconfigured credentials before they surface as generic errors.
+Fields to look for: `event.outcome` (with values `"success"` / `"failure"`), `authentication.result`, `auth.status`, or similar categorical outcome fields in `dataset_analysis`.
+Template:
+```
+FROM <stream>
+| STATS failures = COUNT(*) WHERE <outcome_field> == "failure",
+        attempts = COUNT(*) WHERE <outcome_field> IN ("success", "failure")
+  BY bucket = BUCKET(@timestamp, 5 minutes)
+| EVAL failure_rate = failures * 100.0 / attempts
+| WHERE attempts >= 50 AND failure_rate > <threshold>
+```
+Threshold calibration: Look for the failure/success ratio in `dataset_analysis`. Use 2x the observed baseline failure rate. Default to 10% if no baseline is visible. The `attempts >= 50` floor is higher than error-rate patterns because auth events are typically a subset of total traffic.
+
+**[cardinality-spike] Cardinality Anomaly**
+Detects sudden increases in the number of distinct values for a field — for example, a spike in unique source IPs (scan/spray), user names (credential stuffing), or error codes (new failure modes appearing).
+Fields to look for: `source.address`, `source.ip`, `client.ip`, `user.name`, `error.code`, `http.request.method` — any field with moderate cardinality (10-500 distinct values in `dataset_analysis`).
+Template:
+```
+FROM <stream>
+| STATS distinct_values = COUNT_DISTINCT(<target_field>)
+  BY bucket = BUCKET(@timestamp, 5 minutes)
+| WHERE distinct_values > <threshold>
+```
+Threshold calibration: Check `dataset_analysis` for the observed distinct count of the target field. Set threshold to 2-3x the typical per-bucket cardinality. Only generate this pattern when `dataset_analysis` shows 10-500 distinct values — below 10 is too sparse for meaningful anomaly detection, above 500 risks hitting the ES|QL result cap.
+
 ### Quality Guardrails
 
 **Precision-first principle:** A quiet alert is better than a noisy one. When in doubt, set a HIGHER threshold. Prefer zero firings over false positives. Write STATS descriptions as if briefing an on-call SRE: state the user problem, the recommended action, and the threshold reasoning.
 
 **Complementarity:** When generating both match and STATS queries, ensure they form a coherent alert hierarchy — a STATS query detecting error rate spikes should have corresponding match queries for likely root causes (specific exceptions, connection failures, etc.).
 
-**Signal diversity:** When multiple pattern types apply, prefer queries that cover DIFFERENT failure dimensions (errors, latency, traffic) over multiple variations of the same dimension.
+**Signal diversity:** Each STATS query must target a distinct failure dimension — error proportion, response latency, throughput changes, auth/access failures, cardinality shifts. After generating, self-check: "Does each query detect a different failure mode?" Consolidate queries that are variations of the same dimension (e.g., two different error-rate formulations). If the data supports many dimensions, generate a query for each; if it supports only one, a single STATS query is the right answer.
 
 **Bucket size guidance:** Templates default to 5-minute buckets. Adjust based on traffic volume: low traffic (<100 events/min) should use 10-15 minute buckets for statistical significance; high traffic (>1000 events/min) can use 1-2 minute buckets. The rule executor runs every 1 minute.
 
@@ -654,4 +713,4 @@ CRITICAL: Only GROUP BY an entity field if it has 50 or fewer distinct values pe
 
 **STATS forbidden:** No `CATEGORIZE`, no `CHANGE_POINT`, no nested `STATS`, no `SORT`/`LIMIT`/`KEEP`, no `EVAL` outside STATS queries, no grouping by high-cardinality fields (>50 distinct values).
 
-**Target:** 1-3 high-value STATS queries. Zero is acceptable. Quality over quantity.
+**Target:** Generate as many STATS queries as the data justifies — every query must pass the field-evidence gate, include a calibrated threshold, and cover a distinct signal dimension. Zero is acceptable when no pattern has field evidence. If you are generating more than 5, verify each adds a genuinely distinct failure dimension; redundant variations of the same signal should be consolidated. Quality over quantity.
