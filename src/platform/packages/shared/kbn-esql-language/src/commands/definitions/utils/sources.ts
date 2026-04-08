@@ -80,9 +80,9 @@ export const buildSourcesDefinitions = (
     // Build markdown documentation from description and links (shown in detail popup)
     const linkParts = links?.length ? links.map(({ label, url }) => `[${label}](${url})`) : [];
     const parts = [
-      ...(description ? [description] : []),
-      ...(description && linkParts.length ? [''] : []),
       ...linkParts,
+      ...(description && linkParts.length > 0 ? [''] : []),
+      ...(description ? [description] : []),
     ];
 
     const documentation = parts.length > 0 ? { value: parts.join('\n') } : undefined;
