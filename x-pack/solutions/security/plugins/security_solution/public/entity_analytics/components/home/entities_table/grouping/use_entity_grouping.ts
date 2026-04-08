@@ -326,7 +326,7 @@ export const useEntityGrouping = ({
     if (!isResolutionGrouping || !('groupByFields' in groupData)) return [];
     const buckets = groupData.groupByFields?.buckets;
     if (!buckets) return [];
-    return buckets.map((bucket) => bucket.key_as_string).filter((id): id is string => !!id);
+    return buckets.map((bucket) => String(bucket.key_as_string ?? bucket.key));
   }, [groupData, isResolutionGrouping]);
 
   const targetMetadata = useFetchTargetMetadata(targetEntityIds);
