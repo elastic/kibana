@@ -29,6 +29,7 @@ const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Pro
 export const createListIndicesInitializationFlow: InitializationFlowDefinition<CreateListIndicesInitializationFlowContext> =
   {
     id: INITIALIZATION_FLOW_CREATE_LIST_INDICES,
+    spaceAware: true,
     resolveProvisionContext: async (
       initializationContext: InitializationFlowContext
     ): Promise<CreateListIndicesInitializationFlowContext> => {

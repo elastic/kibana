@@ -22,6 +22,7 @@ export interface InitializationFlowContext {
 
 export interface InitializationFlowDefinition<ProvisionContext> {
   id: InitializationFlowId;
+  spaceAware?: boolean;
   /**
    * When true, this flow is executed sequentially and must complete before any
    * remaining (non-runFirst) flows start in parallel. Multiple runFirst flows

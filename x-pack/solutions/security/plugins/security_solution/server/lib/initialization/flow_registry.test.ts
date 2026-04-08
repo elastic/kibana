@@ -21,6 +21,7 @@ import { FlowInitializationError, runInitializationFlows } from './flow_registry
 jest.mock('./flows/create_list_indices', () => ({
   createListIndicesInitializationFlow: {
     id: 'create-list-indices',
+    spaceAware: true,
     resolveProvisionContext: jest.fn().mockResolvedValue({}),
     provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
@@ -29,6 +30,7 @@ jest.mock('./flows/create_list_indices', () => ({
 jest.mock('./flows/initialize_security_data_views', () => ({
   initializeSecurityDataViewsFlow: {
     id: 'security-data-views' as const,
+    spaceAware: true,
     resolveProvisionContext: jest.fn().mockResolvedValue({}),
     provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
   },
@@ -415,6 +417,58 @@ describe('runInitializationFlows', () => {
 
       // provision was called twice — once per space
       expect(createListIndicesInitializationFlow.provision).toHaveBeenCalledTimes(2);
+    });
+
+    it('deduplicates non-space-aware flows across different spaces', async () => {
+      let resolveProvision: (value: { status: string; payload: null }) => void;
+      const { installEndpointPackageFlow } = jest.requireMock('./flows/install_endpoint_package');
+
+      installEndpointPackageFlow.provision.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveProvision = resolve;
+          })
+      );
+
+      const contextSpaceA = {
+        requestHandlerContext: {
+          securitySolution: Promise.resolve({ getSpaceId: () => 'space-a' }),
+        },
+      } as unknown as InitializationFlowContext;
+
+      const contextSpaceB = {
+        requestHandlerContext: {
+          securitySolution: Promise.resolve({ getSpaceId: () => 'space-b' }),
+        },
+      } as unknown as InitializationFlowContext;
+
+      const promise1 = runInitializationFlows(
+        [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE],
+        contextSpaceA,
+        logger
+      );
+      await new Promise((r) => setImmediate(r));
+      const promise2 = runInitializationFlows(
+        [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE],
+        contextSpaceB,
+        logger
+      );
+
+      resolveProvision!({ status: 'ready', payload: null });
+
+      const [response1, response2] = await Promise.all([promise1, promise2]);
+
+      expect(response1.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toEqual({
+        status: INITIALIZATION_FLOW_STATUS_READY,
+        payload: null,
+      });
+      expect(response2.flows[INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]).toEqual({
+        status: INITIALIZATION_FLOW_STATUS_READY,
+        payload: null,
+      });
+
+      // provision was called only once — non-space-aware flows deduplicate across spaces
+      expect(installEndpointPackageFlow.provision).toHaveBeenCalledTimes(1);
     });
 
     it('executes a new request after a previous one completes', async () => {

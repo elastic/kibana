@@ -58,9 +58,9 @@ interface FlowRunResult {
   result: FlowResult;
 }
 
-// Deduplicates concurrent server-side executions of the same flow within the
-// same space. The key is `flowId:spaceId` so flows running in different spaces
-// execute independently.
+// Deduplicates concurrent server-side executions of the same flow.
+// Space-aware flows use `flowId:spaceId` so they run independently per space.
+// Non-space-aware flows use `flowId` only, deduplicating across all spaces.
 const inflightFlows = new Map<string, Promise<FlowRunResult>>();
 
 const runSingleFlow = async (
@@ -68,8 +68,13 @@ const runSingleFlow = async (
   context: InitializationFlowContext,
   logger: Logger
 ): Promise<FlowRunResult> => {
-  const spaceId = (await context.requestHandlerContext.securitySolution).getSpaceId();
-  const key = `${flowId}:${spaceId}`;
+  const definition = flows[flowId];
+  let key: string = flowId;
+
+  if (definition.spaceAware) {
+    const spaceId = (await context.requestHandlerContext.securitySolution).getSpaceId();
+    key = `${flowId}:${spaceId}`;
+  }
 
   const inflight = inflightFlows.get(key);
   if (inflight) {

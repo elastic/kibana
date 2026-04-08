@@ -209,6 +209,7 @@ export const getOrCreateAttackDataView = async ({
 export const initializeSecurityDataViewsFlow: InitializationFlowDefinition<InitializeSecurityDataViewsProvisionContext> =
   {
     id: INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
+    spaceAware: true,
 
     resolveProvisionContext: async (
       context: InitializationFlowContext
