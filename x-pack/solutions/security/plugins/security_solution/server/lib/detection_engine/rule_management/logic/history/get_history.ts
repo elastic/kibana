@@ -33,7 +33,7 @@ export const getRuleHistory = async ({
   perPage = 20,
   page = 1,
 }: GetRuleHistoryOptions): Promise<GetRuleHistoryResponse> => {
-  const history = await client.getHistoryForRule({
+  const history = await client.getHistory({
     module: 'security',
     ruleId,
     page,

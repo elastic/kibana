@@ -57,7 +57,7 @@ export interface RulesClientFactoryOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
-  changeTrackingService: IChangeTrackingService;
+  changeTrackingService?: IChangeTrackingService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
@@ -87,7 +87,7 @@ export class RulesClientFactory {
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
-  private changeTrackingService!: IChangeTrackingService;
+  private changeTrackingService?: IChangeTrackingService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
@@ -119,10 +119,10 @@ export class RulesClientFactory {
     this.internalSavedObjectsRepository = options.internalSavedObjectsRepository;
     this.actions = options.actions;
     this.eventLog = options.eventLog;
+    this.changeTrackingService = options.changeTrackingService;
     this.kibanaVersion = options.kibanaVersion;
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
-    this.changeTrackingService = options.changeTrackingService;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;

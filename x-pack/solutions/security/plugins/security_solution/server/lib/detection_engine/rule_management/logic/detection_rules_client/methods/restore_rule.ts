@@ -44,7 +44,7 @@ export const restoreRule = async ({
   await validateMlAuth(mlAuthz, existingRule.type);
 
   const module = 'security';
-  const history = await rulesClient.getHistoryForRule({ module, ruleId, changeId });
+  const history = await rulesClient.getHistory({ module, ruleId, changeId });
   const change = history.items.at(0);
   if (!change?.rule) {
     throw new Error(`Change id not found ${changeId}`);
