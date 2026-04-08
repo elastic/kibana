@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import {
+  EuiButton,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
@@ -102,7 +103,9 @@ export const OtelKubernetesPanel: React.FC = () => {
     onboardingId: data?.onboardingId,
   });
 
-  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
+  const [manuallyTriggered, setManuallyTriggered] = useState(false);
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly || manuallyTriggered;
   const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {};
 
   useEffect(() => {
@@ -515,17 +518,28 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
               : isMonitoringStepActive
               ? 'current'
               : 'incomplete') as EuiStepStatus,
-            children: isMonitoringStepActive && data && (
-              <DataIngestStatus
-                onboardingId={data.onboardingId}
-                onboardingFlowType="kubernetes_otel"
-                dataset="kubernetes"
-                integration="kubernetes_otel"
-                actionLinks={otelKubernetesActionLinks}
-                onDataReceived={() => setDataReceived(true)}
-                respectPreExistingData={useWiredStreams}
-              />
-            ),
+            children:
+              isMonitoringStepActive && data ? (
+                <DataIngestStatus
+                  onboardingId={data.onboardingId}
+                  onboardingFlowType="kubernetes_otel"
+                  dataset="kubernetes"
+                  integration="kubernetes_otel"
+                  actionLinks={otelKubernetesActionLinks}
+                  onDataReceived={() => setDataReceived(true)}
+                  respectPreExistingData={useWiredStreams}
+                />
+              ) : (
+                <EuiButton
+                  data-test-subj="observabilityOnboardingOtelKubernetesCheckForDataButton"
+                  onClick={() => setManuallyTriggered(true)}
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.otelKubernetesPanel.checkForDataButton',
+                    { defaultMessage: 'Check for data' }
+                  )}
+                </EuiButton>
+              ),
           },
         ]}
       />

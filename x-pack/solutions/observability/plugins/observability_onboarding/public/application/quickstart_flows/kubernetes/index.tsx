@@ -7,7 +7,14 @@
 
 import React, { useEffect, useState } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiSteps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPanel,
+  EuiSkeletonRectangle,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiSteps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -58,7 +65,9 @@ export const KubernetesPanel: React.FC = () => {
     onboardingId: data?.onboardingId,
   });
 
-  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
+  const [manuallyTriggered, setManuallyTriggered] = useState(false);
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly || manuallyTriggered;
 
   useEffect(() => {
     if (data) {
@@ -153,16 +162,26 @@ export const KubernetesPanel: React.FC = () => {
         : isMonitoringStepActive
         ? 'current'
         : 'incomplete') as EuiStepStatus,
-      children: isMonitoringStepActive && data && (
-        <DataIngestStatus
-          onboardingId={data.onboardingId}
-          onboardingFlowType="kubernetes"
-          dataset="kubernetes"
-          integration="kubernetes"
-          actionLinks={kubernetesActionLinks}
-          onDataReceived={() => setDataReceived(true)}
-        />
-      ),
+      children:
+        isMonitoringStepActive && data ? (
+          <DataIngestStatus
+            onboardingId={data.onboardingId}
+            onboardingFlowType="kubernetes"
+            dataset="kubernetes"
+            integration="kubernetes"
+            actionLinks={kubernetesActionLinks}
+            onDataReceived={() => setDataReceived(true)}
+          />
+        ) : (
+          <EuiButton
+            data-test-subj="observabilityOnboardingKubernetesCheckForDataButton"
+            onClick={() => setManuallyTriggered(true)}
+          >
+            {i18n.translate('xpack.observability_onboarding.kubernetesPanel.checkForDataButton', {
+              defaultMessage: 'Check for data',
+            })}
+          </EuiButton>
+        ),
     },
   ];
 

@@ -13,6 +13,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiButton,
   EuiButtonIcon,
   EuiFieldText,
   EuiFormRow,
@@ -76,7 +77,9 @@ export function OtelApmQuickstartFlow() {
     onboardingId: data?.onboardingId,
   });
 
-  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
+  const [manuallyTriggered, setManuallyTriggered] = useState(false);
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly || manuallyTriggered;
 
   // Set sessionStartTime when monitoring begins (first blur or early
   // pre-existing data detection) rather than on mount, to narrow the
@@ -236,7 +239,16 @@ export function OtelApmQuickstartFlow() {
                   </>
                 )}
               </>
-            ) : null,
+            ) : (
+              <EuiButton
+                data-test-subj="observabilityOnboardingOtelApmCheckForDataButton"
+                onClick={() => setManuallyTriggered(true)}
+              >
+                {i18n.translate('xpack.observability_onboarding.otelApm.checkForDataButton', {
+                  defaultMessage: 'Check for data',
+                })}
+              </EuiButton>
+            ),
           },
         ]}
       />
