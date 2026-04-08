@@ -587,15 +587,14 @@ export class AutomaticImportService {
     integrationId: string;
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
-    internalEsClient: ElasticsearchClient;
+    esClient: ElasticsearchClient;
     fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, internalEsClient, fieldsMetadataClient } =
-      params;
+    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
 
     let parsedPipeline: Pipeline;
     try {
@@ -622,7 +621,7 @@ export class AutomaticImportService {
 
     let simulateResponse: estypes.IngestSimulateResponse;
     try {
-      simulateResponse = await internalEsClient.ingest.simulate({
+      simulateResponse = await esClient.ingest.simulate({
         pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
         docs: samples.map((sample) => ({
           _source: { message: sample },
@@ -648,11 +647,7 @@ export class AutomaticImportService {
       fieldsMetadataClient
     );
 
-    const validationResult = await validateFieldMappings(
-      internalEsClient,
-      fieldMapping,
-      this.logger
-    );
+    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
     if (!validationResult.valid) {
       this.logger.warn(
         `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
