@@ -9,6 +9,8 @@ import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import type {
+  BulkOperationParams,
+  BulkOperationResponse,
   CreateRuleData,
   FindRulesSortField,
   RuleResponse,
@@ -35,19 +37,7 @@ export interface ListRulesParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface BulkOperationError {
-  id: string;
-  error: { message: string; statusCode: number };
-}
-
-export interface BulkOperationResponse {
-  rules: RuleResponse[];
-  errors: BulkOperationError[];
-}
-
-export type BulkOperationParams =
-  | { ids: string[]; filter?: undefined }
-  | { filter: string; ids?: undefined };
+export type { BulkOperationParams, BulkOperationResponse };
 
 @injectable()
 export class RulesApi {

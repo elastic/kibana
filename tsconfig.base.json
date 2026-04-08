@@ -164,6 +164,8 @@
       "@kbn/as-code-filters-transforms/*": ["src/platform/packages/shared/as-code/filters-transforms/*"],
       "@kbn/as-code-shared-schemas": ["src/platform/packages/shared/as-code/shared-schemas"],
       "@kbn/as-code-shared-schemas/*": ["src/platform/packages/shared/as-code/shared-schemas/*"],
+      "@kbn/as-code-shared-transforms": ["src/platform/packages/shared/as-code/shared-transforms"],
+      "@kbn/as-code-shared-transforms/*": ["src/platform/packages/shared/as-code/shared-transforms/*"],
       "@kbn/audit-log-plugin": ["x-pack/platform/test/security_api_integration/plugins/audit_log"],
       "@kbn/audit-log-plugin/*": ["x-pack/platform/test/security_api_integration/plugins/audit_log/*"],
       "@kbn/automatic-import-plugin": ["x-pack/platform/plugins/shared/automatic_import"],
