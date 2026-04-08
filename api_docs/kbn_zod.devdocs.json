@@ -18481,6 +18481,18 @@
                 "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
+              },
+              {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/tools/tool_types/esql/create_schema.ts"
               },
