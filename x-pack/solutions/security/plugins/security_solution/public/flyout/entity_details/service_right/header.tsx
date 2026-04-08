@@ -17,7 +17,8 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
-import { RISK_SEVERITY_COLOUR } from '../../../entity_analytics/common/utils';
+import { EntitySourceBadge } from '../shared/components/entity_source_badge';
+import { RiskLevelBadge } from '../shared/components/risk_level_badge';
 
 interface ServicePanelHeaderProps {
   serviceName: string;
@@ -60,31 +61,15 @@ export const ServicePanelHeader = ({
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {(observedService.lastSeen.date || isEntityInStore) && (
-                <EuiBadge data-test-subj="service-panel-header-observed-badge" color="hollow">
-                  {isEntityInStore ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.service.entityStoreBadge"
-                      defaultMessage="Entity Store"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.service.observedBadge"
-                      defaultMessage="Observed"
-                    />
-                  )}
-                </EuiBadge>
-              )}
+              <EntitySourceBadge
+                isEntityInStore={!!isEntityInStore}
+                hasLastSeenDate={!!observedService.lastSeen.date}
+                data-test-subj="service-panel-header-observed-badge"
+              />
             </EuiFlexItem>
             {isEntityInStore && riskLevel && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color={RISK_SEVERITY_COLOUR[riskLevel]}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.service.riskBadge"
-                    defaultMessage="Risk: {level}"
-                    values={{ level: riskLevel }}
-                  />
-                </EuiBadge>
+                <RiskLevelBadge riskLevel={riskLevel} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

@@ -40,6 +40,7 @@ import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
 import type { Entity } from '../../../../common/api/entity_analytics';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   applyEntityStoreSearchCachePatch,
   useEntityFromStore,
@@ -247,6 +248,21 @@ export const UserPanel = ({
     [http, queryClient, calculateEntityRiskScore]
   );
 
+  const onCriticalitySave = entityFromStoreResult.entityRecord
+    ? (level: CriticalityLevelWithUnassigned) => {
+        const record = entityFromStoreResult.entityRecord;
+        if (!record) return;
+        const updated = {
+          ...record,
+          asset: {
+            ...record.asset,
+            criticality: level === 'unassigned' ? undefined : level,
+          },
+        };
+        handleSaveAssetCriticalityViaEntityStore(updated);
+      }
+    : undefined;
+
   const defaultTab = useMemo(() => {
     if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
     if (hasMisconfigurationFindings || hasNonClosedAlerts)
@@ -323,22 +339,7 @@ export const UserPanel = ({
           <EntitySummaryGrid
             entityRecord={entityFromStoreResult.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
-            onCriticalitySave={
-              entityFromStoreResult.entityRecord
-                ? (level) => {
-                    const record = entityFromStoreResult.entityRecord;
-                    if (!record) return;
-                    const updated = {
-                      ...record,
-                      asset: {
-                        ...record.asset,
-                        criticality: level === 'unassigned' ? undefined : level,
-                      },
-                    };
-                    handleSaveAssetCriticalityViaEntityStore(updated);
-                  }
-                : undefined
-            }
+            onCriticalitySave={onCriticalitySave}
           />
         )}
         {tabsNode}

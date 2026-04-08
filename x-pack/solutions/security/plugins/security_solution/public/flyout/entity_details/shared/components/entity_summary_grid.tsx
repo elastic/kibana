@@ -56,7 +56,7 @@ export const EntitySummaryGrid = memo(
           <SummaryPanel
             label={i18n.translate(
               'xpack.securitySolution.flyout.entityDetails.grid.entityIdLabel',
-              { defaultMessage: 'Entity id' }
+              { defaultMessage: 'Entity ID' }
             )}
           >
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>

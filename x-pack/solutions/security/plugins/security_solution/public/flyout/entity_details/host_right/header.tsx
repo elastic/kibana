@@ -24,7 +24,8 @@ import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
-import { RISK_SEVERITY_COLOUR } from '../../../entity_analytics/common/utils';
+import { EntitySourceBadge } from '../shared/components/entity_source_badge';
+import { RiskLevelBadge } from '../shared/components/risk_level_badge';
 
 interface HostPanelHeaderProps {
   hostName: string;
@@ -118,31 +119,15 @@ export const HostPanelHeader = ({
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {(lastSeenDateFormatted || isEntityInStore) && (
-                  <EuiBadge data-test-subj="host-panel-header-observed-badge" color="hollow">
-                    {isEntityInStore ? (
-                      <FormattedMessage
-                        id="xpack.securitySolution.flyout.entityDetails.host.entityStoreBadge"
-                        defaultMessage="Entity Store"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"
-                        defaultMessage="Observed"
-                      />
-                    )}
-                  </EuiBadge>
-                )}
+                <EntitySourceBadge
+                  isEntityInStore={!!isEntityInStore}
+                  hasLastSeenDate={!!lastSeenDateFormatted}
+                  data-test-subj="host-panel-header-observed-badge"
+                />
               </EuiFlexItem>
               {isEntityInStore && riskLevel && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={RISK_SEVERITY_COLOUR[riskLevel]}>
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.host.riskBadge"
-                      defaultMessage="Risk: {level}"
-                      values={{ level: riskLevel }}
-                    />
-                  </EuiBadge>
+                  <RiskLevelBadge riskLevel={riskLevel} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

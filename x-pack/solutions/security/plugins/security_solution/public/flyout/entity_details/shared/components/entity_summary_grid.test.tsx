@@ -47,7 +47,7 @@ describe('EntitySummaryGrid', () => {
       </TestProviders>
     );
 
-    expect(getByText('Entity id')).toBeInTheDocument();
+    expect(getByText('Entity ID')).toBeInTheDocument();
     expect(getByText('Data source')).toBeInTheDocument();
     expect(getByText('Asset criticality')).toBeInTheDocument();
     expect(getByText('Watchlists')).toBeInTheDocument();
@@ -120,7 +120,7 @@ describe('EntitySummaryGrid', () => {
 
     fireEvent.click(getByTestId('asset-criticality-badge'));
 
-    expect(getByTestId('entity-summary-criticality-modal-title')).toBeInTheDocument();
+    expect(getByTestId('asset-criticality-modal-title')).toBeInTheDocument();
   });
 
   it('displays first watchlist name', () => {

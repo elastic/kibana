@@ -43,6 +43,7 @@ import {
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
 import type { Entity } from '../../../../common/api/entity_analytics';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   applyEntityStoreSearchCachePatch,
   useEntityFromStore,
@@ -238,6 +239,22 @@ export const HostPanel = ({
     [http, queryClient, calculateEntityRiskScore]
   );
 
+  const onCriticalitySave =
+    entityFromStoreResult.entityRecord && observedHost.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) => {
+          const record = observedHost.entityRecord;
+          if (!record) return;
+          const updated = {
+            ...record,
+            asset: {
+              ...record.asset,
+              criticality: level === 'unassigned' ? undefined : level,
+            },
+          };
+          handleSaveAssetCriticalityViaEntityStore(updated);
+        }
+      : undefined;
+
   const entityStoreEntityId = entityStoreV2Enabled
     ? observedHost.entityRecord?.entity?.id
     : undefined;
@@ -321,22 +338,7 @@ export const HostPanel = ({
           <EntitySummaryGrid
             entityRecord={observedHost.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
-            onCriticalitySave={
-              entityFromStoreResult.entityRecord && observedHost.entityRecord
-                ? (level) => {
-                    const record = observedHost.entityRecord;
-                    if (!record) return;
-                    const updated = {
-                      ...record,
-                      asset: {
-                        ...record.asset,
-                        criticality: level === 'unassigned' ? undefined : level,
-                      },
-                    };
-                    handleSaveAssetCriticalityViaEntityStore(updated);
-                  }
-                : undefined
-            }
+            onCriticalitySave={onCriticalitySave}
           />
         )}
         {tabsNode}
