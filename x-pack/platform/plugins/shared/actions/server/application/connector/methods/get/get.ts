@@ -14,8 +14,6 @@ import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
 import { getAuthMode } from '../../lib/get_auth_mode';
-import { resolveProfileUidsForRequest } from '../../lib/resolve_profile_uids_for_request';
-import { resolveUserAuthStatusForConnector } from '../../lib/resolve_user_auth_status_for_connector';
 
 export async function get({
   context,
@@ -74,18 +72,6 @@ export async function get({
       id,
     });
     const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
-    const profileUids = await resolveProfileUidsForRequest({
-      request: context.request,
-      getCurrentUser: context.getCurrentUser,
-      getCurrentUserProfileUid: context.getCurrentUserProfileUid,
-      getCurrentUserProfileIdFromAPIKey: context.getCurrentUserProfileIdFromAPIKey,
-    });
-    const userAuthStatus = await resolveUserAuthStatusForConnector({
-      authMode,
-      connectorId: id,
-      profileUids,
-      savedObjectsClient: context.unsecuredSavedObjectsClient,
-    });
 
     context.auditLogger?.log(
       connectorAuditEvent({
@@ -105,7 +91,6 @@ export async function get({
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
       authMode,
-      userAuthStatus,
     };
   }
 

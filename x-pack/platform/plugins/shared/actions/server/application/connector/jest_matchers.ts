@@ -23,7 +23,6 @@ export const toContainConnector: MatcherFunction<[expected: Connector]> = functi
     isDeprecated: false,
     isSystemAction: false,
     isConnectorTypeDeprecated: false,
-    userAuthStatus: 'not_applicable',
     ...(expected as Partial<Connector>),
   };
 
@@ -74,7 +73,6 @@ export const toContainConnectors: MatcherFunction<
       isDeprecated: false,
       isSystemAction: false,
       isConnectorTypeDeprecated: false,
-      userAuthStatus: 'not_applicable',
       ...expectedConnector,
     };
 
@@ -126,7 +124,6 @@ export const toContainConnectorsFindResult: MatcherFunction<
       isDeprecated: false,
       isSystemAction: false,
       isConnectorTypeDeprecated: false,
-      userAuthStatus: 'not_applicable',
       referencedByCount: 0, // This is the difference between this and toMatchConnectors
       ...expectedConnector,
     };

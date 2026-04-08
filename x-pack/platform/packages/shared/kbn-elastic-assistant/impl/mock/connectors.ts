@@ -60,7 +60,6 @@ export const mockConnectors: AIConnector[] = [
     isPreconfigured: false,
     isDeprecated: false,
     isSystemAction: false,
-    userAuthStatus: 'not_applicable',
     config: {
       apiProvider: 'OpenAI',
     },
@@ -75,7 +74,6 @@ export const mockConnectors: AIConnector[] = [
     isPreconfigured: false,
     isDeprecated: false,
     isSystemAction: false,
-    userAuthStatus: 'not_applicable',
     config: {
       apiProvider: 'OpenAI',
     },
@@ -90,7 +88,6 @@ export const mockConnectors: AIConnector[] = [
     isPreconfigured: false,
     isDeprecated: false,
     isSystemAction: false,
-    userAuthStatus: 'not_applicable',
     config: {
       apiProvider: 'OpenAI',
       taskType: 'chat_completion',

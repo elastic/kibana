@@ -24,7 +24,6 @@ describe('updateActionConnector', () => {
       is_missing_secrets: false,
       is_system_action: false,
       is_connector_type_deprecated: false,
-      user_auth_status: 'not_applicable',
       name: 'My test',
       config: {},
       secrets: {},

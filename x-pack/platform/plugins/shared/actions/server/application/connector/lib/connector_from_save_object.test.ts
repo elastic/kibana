@@ -8,7 +8,6 @@
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { RawAction } from '../../../types';
 import { connectorFromSavedObject } from './connector_from_save_object';
-import type { GetUserTokenConnectorsSoResult } from '../../../data/connector/types';
 
 function makeSavedObject(id: string, overrides: Partial<RawAction> = {}): SavedObject<RawAction> {
   return {
@@ -27,56 +26,19 @@ function makeSavedObject(id: string, overrides: Partial<RawAction> = {}): SavedO
 }
 
 describe('connectorFromSavedObject', () => {
-  describe('userAuthStatus', () => {
-    describe('authMode resolves to shared', () => {
-      it('returns not_applicable when no authMode is stored (defaults to shared)', () => {
-        const so = makeSavedObject('conn-1');
-        const userTokenConnectors: GetUserTokenConnectorsSoResult = {
-          connectorIds: ['conn-1'],
-        };
-        const result = connectorFromSavedObject(so, false, false, userTokenConnectors);
-        expect(result.userAuthStatus).toBe('not_applicable');
-      });
-
-      it('returns not_applicable when authMode is explicitly shared', () => {
-        const so = makeSavedObject('conn-1', { authMode: 'shared' });
-        const result = connectorFromSavedObject(so, false, false, {
-          connectorIds: ['conn-1'],
-        });
-        expect(result.userAuthStatus).toBe('not_applicable');
-      });
+  it('maps saved object fields and resolved auth mode', () => {
+    const so = makeSavedObject('conn-1', { authMode: 'per-user' });
+    const result = connectorFromSavedObject(so, false, false);
+    expect(result).toMatchObject({
+      id: 'conn-1',
+      actionTypeId: '.test',
+      name: 'Test connector',
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
+      isConnectorTypeDeprecated: false,
+      authMode: 'per-user',
     });
-
-    describe('authMode is per-user', () => {
-      it('returns connected when the connector id is in the userTokenConnectors list', () => {
-        const so = makeSavedObject('conn-1', { authMode: 'per-user' });
-        const result = connectorFromSavedObject(so, false, false, {
-          connectorIds: ['conn-1', 'conn-2'],
-        });
-        expect(result.userAuthStatus).toBe('connected');
-      });
-
-      it('returns not_connected when the connector id is not in the userTokenConnectors list', () => {
-        const so = makeSavedObject('conn-1', { authMode: 'per-user' });
-        const result = connectorFromSavedObject(so, false, false, {
-          connectorIds: ['conn-other'],
-        });
-        expect(result.userAuthStatus).toBe('not_connected');
-      });
-
-      it('returns not_connected when userTokenConnectors list is empty', () => {
-        const so = makeSavedObject('conn-1', { authMode: 'per-user' });
-        const result = connectorFromSavedObject(so, false, false, { connectorIds: [] });
-        expect(result.userAuthStatus).toBe('not_connected');
-      });
-    });
-
-    describe('when userTokenConnectors is not provided', () => {
-      it('returns not_applicable', () => {
-        const so = makeSavedObject('conn-1', { authMode: 'per-user' });
-        const result = connectorFromSavedObject(so, false, false);
-        expect(result.userAuthStatus).toBe('not_applicable');
-      });
-    });
+    expect('userAuthStatus' in result).toBe(false);
   });
 });

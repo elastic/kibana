@@ -99,7 +99,6 @@ export default function torqTest({ getService }: FtrProviderContext) {
           webhookIntegrationUrl: torqSimulatorURL,
         },
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable',
       });
 
       expect(typeof createdAction.id).to.be('string');

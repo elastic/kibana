@@ -68,7 +68,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
         connector_type_id: '.slack',
         config: {},
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -88,7 +87,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
         config: {},
         is_connector_type_deprecated: false,
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
     });
 

@@ -79,7 +79,6 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
                   unencrypted: `This value shouldn't get encrypted`,
                 },
                 is_connector_type_deprecated: false,
-                user_auth_status: 'not_applicable',
               });
               expect(typeof response.body.id).to.be('string');
               // Ensure AAD isn't broken
@@ -317,7 +316,6 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
                   unencrypted: `This value shouldn't get encrypted`,
                 },
                 is_connector_type_deprecated: false,
-                user_auth_status: 'not_applicable',
               });
               expect(typeof response.body.id).to.be('string');
               // Ensure AAD isn't broken

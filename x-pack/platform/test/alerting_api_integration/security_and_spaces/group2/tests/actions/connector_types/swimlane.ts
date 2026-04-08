@@ -158,7 +158,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           is_deprecated: false,
           name: 'A swimlane action',
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
 
         expect(typeof createdAction.id).to.be('string');
@@ -181,7 +180,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           },
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
-          user_auth_status: 'not_applicable',
         });
       });
 

@@ -139,7 +139,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           url: webhookSimulatorURL,
         },
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -162,7 +161,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         },
         is_connector_type_deprecated: false,
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
     });
 
@@ -199,7 +197,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             method,
           },
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         };
 
         expect(createdAction).to.eql(expectedResult);
@@ -248,7 +245,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           },
         },
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable',
       });
 
       await supertest
@@ -290,7 +286,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         },
         is_connector_type_deprecated: false,
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
     });
 

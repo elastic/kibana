@@ -24,7 +24,6 @@ describe('transformConnectorsResponse', () => {
         secrets: {},
         config: {},
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable' as const,
       },
       {
         id: 'test-connector-2',
@@ -38,7 +37,6 @@ describe('transformConnectorsResponse', () => {
         secrets: {},
         config: {},
         is_connector_type_deprecated: true,
-        user_auth_status: 'not_applicable' as const,
       },
     ]);
 
@@ -55,7 +53,6 @@ describe('transformConnectorsResponse', () => {
         referencedByCount: 0,
         secrets: {},
         isConnectorTypeDeprecated: false,
-        userAuthStatus: 'not_applicable',
       },
       {
         actionTypeId: 'test-2',
@@ -69,42 +66,7 @@ describe('transformConnectorsResponse', () => {
         referencedByCount: 0,
         secrets: {},
         isConnectorTypeDeprecated: true,
-        userAuthStatus: 'not_applicable',
       },
     ]);
-  });
-
-  test('should map user_auth_status enum values correctly', () => {
-    const result = transformConnectorResponse([
-      {
-        id: 'connector-connected',
-        name: 'Connected',
-        connector_type_id: '.google-drive',
-        is_preconfigured: false,
-        is_deprecated: false,
-        is_system_action: false,
-        referenced_by_count: 0,
-        is_connector_type_deprecated: false,
-        secrets: {},
-        config: {},
-        user_auth_status: 'connected' as const,
-      },
-      {
-        id: 'connector-not-connected',
-        name: 'Not connected',
-        connector_type_id: '.google-drive',
-        is_preconfigured: false,
-        is_deprecated: false,
-        is_system_action: false,
-        referenced_by_count: 0,
-        is_connector_type_deprecated: false,
-        secrets: {},
-        config: {},
-        user_auth_status: 'not_connected' as const,
-      },
-    ]);
-
-    expect(result[0].userAuthStatus).toBe('connected');
-    expect(result[1].userAuthStatus).toBe('not_connected');
   });
 });

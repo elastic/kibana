@@ -12,7 +12,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
-import type { GetUserTokenConnectorsSoResult } from '../../../../data/connector/types';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../..';
 import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
@@ -20,12 +19,7 @@ import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import {
-  connectorFromSavedObject,
-  isConnectorDeprecated,
-  mergeUserTokenConnectorsForProfiles,
-  resolveProfileUidsForRequest,
-} from '../../lib';
+import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
@@ -38,7 +32,6 @@ interface GetAllHelperOpts {
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
   connectorTypeRegistry: ActionTypeRegistry;
-  userTokenConnectors: GetUserTokenConnectorsSoResult;
 }
 
 export async function getAll({
@@ -57,17 +50,6 @@ export async function getAll({
     throw error;
   }
 
-  const profileUids = await resolveProfileUidsForRequest({
-    request: context.request,
-    getCurrentUser: context.getCurrentUser,
-    getCurrentUserProfileUid: context.getCurrentUserProfileUid,
-    getCurrentUserProfileIdFromAPIKey: context.getCurrentUserProfileIdFromAPIKey,
-  });
-  const userTokenConnectors = await mergeUserTokenConnectorsForProfiles({
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-    profileUids,
-  });
-
   return await getAllHelper({
     auditLogger: context.auditLogger,
     esClient: context.scopedClusterClient.asInternalUser,
@@ -78,7 +60,6 @@ export async function getAll({
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     connectorTypeRegistry: context.actionTypeRegistry,
-    userTokenConnectors,
   });
 }
 
@@ -103,7 +84,6 @@ export async function getAllUnsecured({
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
     connectorTypeRegistry,
-    userTokenConnectors: { connectorIds: [] },
   });
 }
 
@@ -116,7 +96,6 @@ async function getAllHelper({
   namespace,
   savedObjectsClient,
   connectorTypeRegistry,
-  userTokenConnectors,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
@@ -124,8 +103,7 @@ async function getAllHelper({
     const connector = connectorFromSavedObject(
       rawAction,
       isConnectorDeprecated(rawAction.attributes),
-      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId),
-      userTokenConnectors
+      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
     );
     return omit(connector, 'secrets');
   });
@@ -153,7 +131,6 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         authMode: getAuthMode(connector.authMode),
-        userAuthStatus: 'not_applicable' as const,
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
     }),
@@ -216,7 +193,6 @@ export async function getAllSystemConnectors({
           systemConnector.actionTypeId
         ),
         authMode: getAuthMode(systemConnector.authMode),
-        userAuthStatus: 'not_applicable' as const,
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));

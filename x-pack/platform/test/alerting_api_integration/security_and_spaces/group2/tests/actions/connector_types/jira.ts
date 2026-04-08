@@ -90,7 +90,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             projectKey: mockJira.config.projectKey,
           },
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
 
         const { body: fetchedAction } = await supertest
@@ -111,7 +110,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           },
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
-          user_auth_status: 'not_applicable',
         });
       });
 

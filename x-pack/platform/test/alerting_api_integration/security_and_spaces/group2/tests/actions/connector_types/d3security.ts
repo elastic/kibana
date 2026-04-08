@@ -82,7 +82,6 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config,
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
       });
 

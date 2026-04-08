@@ -16,8 +16,6 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
-import { resolveProfileUidsForRequest } from '../../lib/resolve_profile_uids_for_request';
-import { resolveUserAuthStatusForConnector } from '../../lib/resolve_user_auth_status_for_connector';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 
@@ -212,18 +210,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const resolvedAuthMode = getAuthMode(
     result.attributes.authMode as Connector['authMode'] | undefined
   );
-  const profileUids = await resolveProfileUidsForRequest({
-    request: context.request,
-    getCurrentUser: context.getCurrentUser,
-    getCurrentUserProfileUid: context.getCurrentUserProfileUid,
-    getCurrentUserProfileIdFromAPIKey: context.getCurrentUserProfileIdFromAPIKey,
-  });
-  const userAuthStatus = await resolveUserAuthStatusForConnector({
-    authMode: resolvedAuthMode,
-    connectorId: id,
-    profileUids,
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-  });
 
   return {
     id,
@@ -235,7 +221,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
-    userAuthStatus,
     authMode: resolvedAuthMode,
   };
 }

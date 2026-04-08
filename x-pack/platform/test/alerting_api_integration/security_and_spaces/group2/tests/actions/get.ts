@@ -72,7 +72,6 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
                 auth_mode: 'shared',
-                user_auth_status: 'not_applicable',
               });
               break;
             default:
@@ -158,7 +157,6 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_deprecated: false,
                 is_connector_type_deprecated: false,
                 auth_mode: 'shared',
-                user_auth_status: 'not_applicable',
               });
               break;
             default:

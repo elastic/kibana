@@ -127,7 +127,6 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: null,
           },
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
 
         const { body: fetchedAction } = await supertest
@@ -151,7 +150,6 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
           },
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
-          user_auth_status: 'not_applicable',
         });
       });
 
@@ -186,7 +184,6 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
 
         const { body: fetchedConnector } = await supertest
@@ -210,7 +207,6 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
           },
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
-          user_auth_status: 'not_applicable',
         });
       });
 

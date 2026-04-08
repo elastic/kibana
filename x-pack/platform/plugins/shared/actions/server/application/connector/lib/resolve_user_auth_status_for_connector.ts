@@ -19,7 +19,7 @@ export async function resolveUserAuthStatusForConnector({
   connectorId: string;
   profileUids: string[];
   savedObjectsClient: SavedObjectClientForFind;
-}): Promise<NonNullable<Connector['userAuthStatus']>> {
+}): Promise<'connected' | 'not_connected' | 'not_applicable'> {
   if (authMode !== 'per-user') {
     return 'not_applicable';
   }

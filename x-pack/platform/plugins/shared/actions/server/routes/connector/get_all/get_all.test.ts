@@ -249,7 +249,7 @@ describe('getAllConnectorsRoute', () => {
     expect(actionsClient.getAll).toHaveBeenCalledWith();
   });
 
-  it('includes user_auth_status in response body', async () => {
+  it('includes auth_mode in response body when present', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -270,7 +270,6 @@ describe('getAllConnectorsRoute', () => {
         isConnectorTypeDeprecated: false,
         referencedByCount: 0,
         authMode: 'per-user',
-        userAuthStatus: 'connected',
       },
     ]);
 
@@ -282,7 +281,7 @@ describe('getAllConnectorsRoute', () => {
       body: [
         expect.objectContaining({
           id: '1',
-          user_auth_status: 'connected',
+          auth_mode: 'per-user',
         }),
       ],
     });

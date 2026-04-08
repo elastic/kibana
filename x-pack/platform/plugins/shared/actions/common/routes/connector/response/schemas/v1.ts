@@ -47,19 +47,6 @@ export const connectorResponseSchema = schema.object({
       },
     })
   ),
-  user_auth_status: schema.oneOf(
-    [
-      schema.literal('connected'),
-      schema.literal('not_connected'),
-      schema.literal('not_applicable'),
-    ],
-    {
-      meta: {
-        description:
-          "The current user's authorization status for this connector (per-user auth types only; shared is 'not_applicable').",
-      },
-    }
-  ),
 });
 
 const connectorResponseWithReferencesCountSchema = connectorResponseSchema.extends({

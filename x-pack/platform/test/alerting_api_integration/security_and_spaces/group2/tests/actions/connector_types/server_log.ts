@@ -39,7 +39,6 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         connector_type_id: '.server-log',
         config: {},
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -59,7 +58,6 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         config: {},
         is_connector_type_deprecated: false,
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
     });
 

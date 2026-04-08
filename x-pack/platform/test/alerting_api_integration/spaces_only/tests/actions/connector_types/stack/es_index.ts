@@ -66,7 +66,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: false,
           executionTimeField: null,
         },
-        user_auth_status: 'not_applicable',
       });
       createdConnectorID = createdConnector.id;
       expect(typeof createdConnectorID).to.be('string');
@@ -86,7 +85,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
 
       // create connector with all config props
@@ -118,7 +116,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: true,
           executionTimeField: 'test',
         },
-        user_auth_status: 'not_applicable',
       });
       createdConnectorIDWithIndex = createdConnectorWithIndex.id;
       expect(typeof createdConnectorIDWithIndex).to.be('string');
@@ -142,7 +139,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
           executionTimeField: 'test',
         },
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
     });
 

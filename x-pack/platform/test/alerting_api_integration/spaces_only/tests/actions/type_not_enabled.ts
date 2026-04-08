@@ -67,7 +67,6 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         name: 'an action created before test.not-enabled was disabled',
         is_connector_type_deprecated: false,
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
     });
 
@@ -100,7 +99,6 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         name: 'an action created before test.not-enabled was disabled',
         is_connector_type_deprecated: false,
         auth_mode: 'shared',
-        user_auth_status: 'not_applicable',
       });
     });
 

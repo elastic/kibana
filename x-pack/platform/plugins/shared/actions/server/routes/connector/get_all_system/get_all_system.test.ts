@@ -61,7 +61,6 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
             "is_system_action": true,
             "name": "my system action",
             "referenced_by_count": 0,
-            "user_auth_status": "not_applicable",
           },
         ],
       }
@@ -82,7 +81,6 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
           name: 'my system action',
           referenced_by_count: 0,
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         },
       ],
     });

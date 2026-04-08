@@ -65,7 +65,6 @@ describe('getConnectorRoute', () => {
           "is_preconfigured": false,
           "is_system_action": false,
           "name": "action name",
-          "user_auth_status": "not_applicable",
         },
       }
     `);
@@ -85,7 +84,6 @@ describe('getConnectorRoute', () => {
         is_system_action: false,
         is_connector_type_deprecated: false,
         auth_mode: 'per-user',
-        user_auth_status: 'not_applicable',
       },
     });
   });

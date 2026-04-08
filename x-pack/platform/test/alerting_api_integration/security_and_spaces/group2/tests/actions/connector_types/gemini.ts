@@ -97,7 +97,6 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             defaultModel: DEFAULT_MODEL,
           },
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
       });
 

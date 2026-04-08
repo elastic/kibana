@@ -6,31 +6,14 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { AuthMode } from '@kbn/connector-specs';
-import type { GetUserTokenConnectorsSoResult } from '../../../data/connector/types';
 import type { RawAction } from '../../../types';
 import type { Connector } from '../types';
 import { getAuthMode } from './get_auth_mode';
 
-function getUserAuthStatus(
-  connectorId: string,
-  userTokenConnectors: GetUserTokenConnectorsSoResult,
-  authMode?: AuthMode
-): 'connected' | 'not_connected' | 'not_applicable' {
-  if (!authMode || authMode === 'shared') {
-    return 'not_applicable';
-  }
-  if (userTokenConnectors.connectorIds.includes(connectorId)) {
-    return 'connected';
-  }
-  return 'not_connected';
-}
-
 export function connectorFromSavedObject(
   savedObject: SavedObject<RawAction>,
   isDeprecated: boolean,
-  isConnectorTypeDeprecated: boolean,
-  userTokenConnectors?: GetUserTokenConnectorsSoResult
+  isConnectorTypeDeprecated: boolean
 ): Connector {
   const { authMode: savedAuthMode, ...restAttributes } = savedObject.attributes;
   const authMode = getAuthMode(savedAuthMode as Connector['authMode'] | undefined);
@@ -42,8 +25,5 @@ export function connectorFromSavedObject(
     isSystemAction: false,
     isConnectorTypeDeprecated,
     authMode,
-    userAuthStatus: userTokenConnectors
-      ? getUserAuthStatus(savedObject.id, userTokenConnectors, authMode)
-      : 'not_applicable',
   };
 }

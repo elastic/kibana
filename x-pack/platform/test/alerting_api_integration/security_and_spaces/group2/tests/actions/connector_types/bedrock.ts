@@ -95,7 +95,6 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config,
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
       });
 
@@ -122,7 +121,6 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           is_connector_type_deprecated: false,
           is_missing_secrets: false,
           config,
-          user_auth_status: 'not_applicable',
         });
       });
 

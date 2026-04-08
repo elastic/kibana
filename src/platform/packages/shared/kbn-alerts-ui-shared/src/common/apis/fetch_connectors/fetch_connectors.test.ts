@@ -29,7 +29,6 @@ describe('fetchConnectors', () => {
         is_system_action: false,
         referenced_by_count: 0,
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable',
         secrets: {},
         config: {},
       },
@@ -42,7 +41,6 @@ describe('fetchConnectors', () => {
         actionTypeId: 'test',
         referencedByCount: 0,
         isMissingSecrets: false,
-        userAuthStatus: 'not_applicable',
         secrets: {},
         config: {},
       }),
@@ -72,7 +70,6 @@ describe('fetchConnectors', () => {
         is_system_action: true,
         referenced_by_count: 0,
         is_connector_type_deprecated: false,
-        user_auth_status: 'not_applicable',
       },
     ];
 
@@ -87,7 +84,6 @@ describe('fetchConnectors', () => {
         isSystemAction: true,
         referencedByCount: 0,
         isConnectorTypeDeprecated: false,
-        userAuthStatus: 'not_applicable',
       }),
     ];
 

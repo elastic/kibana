@@ -102,7 +102,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             url: 'https://example.com',
           },
           is_connector_type_deprecated: false,
-          user_auth_status: 'not_applicable',
         });
       });
     });
