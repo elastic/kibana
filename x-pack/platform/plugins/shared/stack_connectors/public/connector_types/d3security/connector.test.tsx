@@ -8,7 +8,7 @@
 import React from 'react';
 import D3SecurityConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -82,7 +82,7 @@ describe('D3ActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
