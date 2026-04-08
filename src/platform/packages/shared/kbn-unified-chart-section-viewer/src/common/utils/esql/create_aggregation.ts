@@ -68,8 +68,10 @@ function buildAggregationNode(
 
   const primaryType = types[0];
   if (customFunction) return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
-  if (isLegacyHistogram(primaryType, instrument)) return synth.exp`PERCENTILE(TO_TDIGEST(${resolvedField}), ${95})`;
-  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') return synth.exp`PERCENTILE(${resolvedField}, ${95})`;
+  if (isLegacyHistogram(primaryType, instrument))
+    return synth.exp`PERCENTILE(TO_TDIGEST(${resolvedField}), ${95})`;
+  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest')
+    return synth.exp`PERCENTILE(${resolvedField}, ${95})`;
   if (instrument === 'counter') return synth.exp`SUM(RATE(${resolvedField}))`;
   return synth.exp`AVG(${resolvedField})`;
 }
