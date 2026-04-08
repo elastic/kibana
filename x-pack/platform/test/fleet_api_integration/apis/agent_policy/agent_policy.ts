@@ -597,15 +597,14 @@ export default function (providerContext: FtrProviderContext) {
 
         const policyIds = results.map((r: any) => r.body.item.id);
 
-        // Fetch each policy individually to avoid pagination truncating the list
-        const createdPolicies = await Promise.all(
-          policyIds.map((id: string) =>
-            supertest
-              .get(`/api/fleet/agent_policies/${id}?full=true`)
-              .expect(200)
-              .then((r: any) => r.body.item)
-          )
-        );
+        // Use _bulk_get with explicit IDs to avoid pagination issues and get full package policy details
+        const {
+          body: { items: createdPolicies },
+        } = await supertest
+          .post('/api/fleet/agent_policies/_bulk_get')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: policyIds, full: true })
+          .expect(200);
 
         const systemPolicyNames: string[] = createdPolicies.map(
           (p: any) => p.package_policies[0].name
