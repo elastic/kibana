@@ -254,19 +254,17 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
 
         // 2. Stream descriptions
         if (streamNames?.length) {
-          const streamParts: string[] = [];
-          for (const streamName of streamNames) {
-            const streamMetadata = await fieldsMetadataClient.find({
-              fieldNames: [strippedFieldName],
-              attributes: ['description'],
-              streamName,
-              source: ['streams'],
-            });
-            const streamDescription = streamMetadata.fields[strippedFieldName]?.description;
-            if (streamDescription) {
-              streamParts.push(`Described in **${streamName}** stream:\n\n> ${streamDescription}`);
-            }
-          }
+          const streamMetadata = await fieldsMetadataClient.find({
+            fieldNames: [strippedFieldName],
+            attributes: ['description'],
+            streamNames,
+            source: ['streams'],
+          });
+          const streamParts = streamNames.flatMap((streamName) => {
+            const streamDescription =
+              streamMetadata.streamFields[streamName]?.[strippedFieldName]?.description;
+            return streamDescription ? [`Per **${streamName}** stream: ${streamDescription}`] : [];
+          });
           if (streamParts.length > 0) {
             if (documentationParts.length > 0) {
               documentationParts.push('---');

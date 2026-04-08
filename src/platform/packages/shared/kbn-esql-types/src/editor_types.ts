@@ -80,12 +80,12 @@ export interface PartialFieldsMetadataClient {
   find: ({
     fieldNames,
     attributes,
-    streamName,
+    streamNames,
     source,
   }: {
     fieldNames?: string[];
     attributes: string[];
-    streamName?: string;
+    streamNames?: string[];
     source?: string[];
   }) => Promise<{
     fields: Record<
@@ -95,6 +95,10 @@ export interface PartialFieldsMetadataClient {
         source: string;
         description?: string;
       }
+    >;
+    streamFields: Record<
+      string,
+      Record<string, { type: string; source: string; description?: string }>
     >;
   }>;
 }

@@ -30,6 +30,7 @@ describe('ESQLLang', () => {
                 description: 'Test field description',
               },
             },
+            streamFields: {},
           }),
         });
 
@@ -77,6 +78,7 @@ describe('ESQLLang', () => {
         const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
           find: jest.fn().mockResolvedValue({
             fields: {},
+            streamFields: {},
           }),
         });
 
@@ -160,15 +162,18 @@ describe('ESQLLang', () => {
           } as unknown as monaco.editor.ITextModel);
 
         it('should show stream description for a field when the query sources a stream', async () => {
-          const mockFind = jest.fn().mockImplementation(({ streamName, source }) => {
-            if (streamName === 'logs-kibana.otel-default' && source?.includes('streams')) {
+          const mockFind = jest.fn().mockImplementation(({ streamNames, source }) => {
+            if (streamNames?.includes('logs-kibana.otel-default') && source?.includes('streams')) {
               return Promise.resolve({
-                fields: {
-                  'body.text': { type: 'keyword', description: 'Kibana body.text description' },
+                fields: {},
+                streamFields: {
+                  'logs-kibana.otel-default': {
+                    'body.text': { type: 'keyword', description: 'Kibana body.text description' },
+                  },
                 },
               });
             }
-            return Promise.resolve({ fields: {} });
+            return Promise.resolve({ fields: {}, streamFields: {} });
           });
 
           const suggestionProvider = ESQLLang.getSuggestionProvider({
@@ -191,18 +196,20 @@ describe('ESQLLang', () => {
           expect(resolvedItem).toEqual({
             ...makeFieldItem('body.text'),
             documentation: {
-              value:
-                'Described in **logs-kibana.otel-default** stream:\n\n> Kibana body.text description',
+              value: 'Per **logs-kibana.otel-default** stream: Kibana body.text description',
             },
           });
         });
 
         it('should combine ECS description and stream description separated by a divider', async () => {
-          const mockFind = jest.fn().mockImplementation(({ streamName, source }) => {
-            if (streamName === 'logs-kibana.otel-default' && source?.includes('streams')) {
+          const mockFind = jest.fn().mockImplementation(({ streamNames, source }) => {
+            if (streamNames?.includes('logs-kibana.otel-default') && source?.includes('streams')) {
               return Promise.resolve({
-                fields: {
-                  'body.text': { type: 'keyword', description: 'Stream description' },
+                fields: {},
+                streamFields: {
+                  'logs-kibana.otel-default': {
+                    'body.text': { type: 'keyword', description: 'Stream description' },
+                  },
                 },
               });
             }
@@ -210,6 +217,7 @@ describe('ESQLLang', () => {
               fields: {
                 'body.text': { type: 'keyword', description: 'ECS description' },
               },
+              streamFields: {},
             });
           });
 
@@ -234,30 +242,28 @@ describe('ESQLLang', () => {
             ...makeFieldItem('body.text'),
             documentation: {
               value:
-                'ECS description\n\n---\n\nDescribed in **logs-kibana.otel-default** stream:\n\n> Stream description',
+                'ECS description\n\n---\n\nPer **logs-kibana.otel-default** stream: Stream description',
             },
           });
         });
 
         it('should show descriptions for multiple streams separated by a blank line', async () => {
-          const mockFind = jest.fn().mockImplementation(({ streamName, source }) => {
-            if (source?.includes('streams')) {
-              if (streamName === 'stream-a') {
-                return Promise.resolve({
-                  fields: {
-                    'my.field': { type: 'keyword', description: 'Description from stream-a' },
-                  },
-                });
+          const mockFind = jest.fn().mockImplementation(({ streamNames, source }) => {
+            if (source?.includes('streams') && streamNames?.length) {
+              const streamFields: Record<string, Record<string, unknown>> = {};
+              if (streamNames.includes('stream-a')) {
+                streamFields['stream-a'] = {
+                  'my.field': { type: 'keyword', description: 'Description from stream-a' },
+                };
               }
-              if (streamName === 'stream-b') {
-                return Promise.resolve({
-                  fields: {
-                    'my.field': { type: 'keyword', description: 'Description from stream-b' },
-                  },
-                });
+              if (streamNames.includes('stream-b')) {
+                streamFields['stream-b'] = {
+                  'my.field': { type: 'keyword', description: 'Description from stream-b' },
+                };
               }
+              return Promise.resolve({ fields: {}, streamFields });
             }
-            return Promise.resolve({ fields: {} });
+            return Promise.resolve({ fields: {}, streamFields: {} });
           });
 
           const suggestionProvider = ESQLLang.getSuggestionProvider({
@@ -281,13 +287,13 @@ describe('ESQLLang', () => {
             ...makeFieldItem('my.field'),
             documentation: {
               value:
-                'Described in **stream-a** stream:\n\n> Description from stream-a\n\nDescribed in **stream-b** stream:\n\n> Description from stream-b',
+                'Per **stream-a** stream: Description from stream-a\n\nPer **stream-b** stream: Description from stream-b',
             },
           });
         });
 
         it('should not fetch stream descriptions when no stream is in the FROM clause', async () => {
-          const mockFind = jest.fn().mockResolvedValue({ fields: {} });
+          const mockFind = jest.fn().mockResolvedValue({ fields: {}, streamFields: {} });
 
           const suggestionProvider = ESQLLang.getSuggestionProvider({
             getFieldsMetadata: Promise.resolve({ find: mockFind }),
@@ -305,19 +311,22 @@ describe('ESQLLang', () => {
         });
 
         it('should strip .keyword suffix when looking up stream description', async () => {
-          const mockFind = jest.fn().mockImplementation(({ fieldNames, streamName, source }) => {
+          const mockFind = jest.fn().mockImplementation(({ fieldNames, streamNames, source }) => {
             if (
-              streamName === 'logs-kibana.otel-default' &&
+              streamNames?.includes('logs-kibana.otel-default') &&
               source?.includes('streams') &&
               fieldNames?.includes('body.text')
             ) {
               return Promise.resolve({
-                fields: {
-                  'body.text': { type: 'keyword', description: 'Kibana body.text description' },
+                fields: {},
+                streamFields: {
+                  'logs-kibana.otel-default': {
+                    'body.text': { type: 'keyword', description: 'Kibana body.text description' },
+                  },
                 },
               });
             }
-            return Promise.resolve({ fields: {} });
+            return Promise.resolve({ fields: {}, streamFields: {} });
           });
 
           const suggestionProvider = ESQLLang.getSuggestionProvider({
@@ -340,14 +349,13 @@ describe('ESQLLang', () => {
           expect(resolvedItem).toEqual({
             ...makeFieldItem('body.text.keyword'),
             documentation: {
-              value:
-                'Described in **logs-kibana.otel-default** stream:\n\n> Kibana body.text description',
+              value: 'Per **logs-kibana.otel-default** stream: Kibana body.text description',
             },
           });
         });
 
         it('should not fetch stream descriptions for wildcard sources', async () => {
-          const mockFind = jest.fn().mockResolvedValue({ fields: {} });
+          const mockFind = jest.fn().mockResolvedValue({ fields: {}, streamFields: {} });
 
           const suggestionProvider = ESQLLang.getSuggestionProvider({
             getFieldsMetadata: Promise.resolve({ find: mockFind }),

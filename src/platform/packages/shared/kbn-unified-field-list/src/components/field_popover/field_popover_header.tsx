@@ -206,7 +206,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
 const FieldDescriptionWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return (
     <>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {children}
     </>
   );
