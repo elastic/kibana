@@ -25,7 +25,7 @@ import {
   isElementCommandBadge,
 } from './command_badge';
 import { serializeEditorContent } from './serialize';
-import { getSelectionRange, insertNodeAtCursor } from './utils';
+import { createTextFragment, getSelectionRange, insertNodeAtCursor } from './utils';
 
 const EDITOR_MAX_HEIGHT = 240;
 
@@ -62,24 +62,6 @@ const fragmentContainsBadge = (fragment?: DocumentFragment): boolean => {
     return false;
   }
   return fragment.querySelector(`[${COMMAND_BADGE_ATTRIBUTE}]`) !== null;
-};
-
-/**
- * Converts a plain text string into a DocumentFragment, preserving line breaks
- * as <br> elements. Text nodes alone cannot render \n in a contenteditable div.
- */
-export const createTextFragment = (text: string): DocumentFragment => {
-  const fragment = document.createDocumentFragment();
-  const parts = text.split('\n');
-  parts.forEach((part, i) => {
-    if (part) {
-      fragment.appendChild(document.createTextNode(part));
-    }
-    if (i < parts.length - 1) {
-      fragment.appendChild(document.createElement('br'));
-    }
-  });
-  return fragment;
 };
 
 /**

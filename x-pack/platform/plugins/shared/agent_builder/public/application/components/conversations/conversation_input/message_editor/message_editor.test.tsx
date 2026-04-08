@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MessageEditor, createTextFragment } from './message_editor';
+import { MessageEditor } from './message_editor';
+import { createTextFragment } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
 import type {
