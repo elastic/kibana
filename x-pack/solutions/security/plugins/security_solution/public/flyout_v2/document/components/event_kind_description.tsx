@@ -6,34 +6,36 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { startCase } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDocumentDetailsContext } from '../../shared/context';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { EVENT_CATEGORY_FIELD, getFieldValue } from '@kbn/discover-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { getEventCategoriesFromData } from '../utils/get_event_categories';
 import { getEcsAllowedValueDescription } from '../utils/event_utils';
-import { getFieldArray } from '../../shared/utils';
 import {
+  EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID,
   EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_KIND_DESCRIPTION_TEXT_TEST_ID,
-  EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID,
 } from './test_ids';
 
 export interface EventKindDescriptionProps {
   /**
-   * Event kind field from ecs
+   * Document record to render event kind description for
    */
-  eventKind: string;
+  hit: DataTableRecord;
 }
 
 /**
- * Display description of a document at the event kind level
- * Shows the ecs description of the event kind, and a list of event categories
+ * Display description of a document at the event kind level.
+ * Shows the ecs description of the event kind, and a list of event categories.
  */
-export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ eventKind }) => {
-  const { getFieldsData } = useDocumentDetailsContext();
+export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ hit }) => {
+  const eventKind = useMemo(() => getFieldValue(hit, EVENT_KIND) as string, [hit]);
   const eventCategories = useMemo(
-    () => getFieldArray(getFieldsData('event.category')),
-    [getFieldsData]
+    () => getEventCategoriesFromData(hit).allEventCategories ?? [],
+    [hit]
   );
 
   return (
@@ -42,7 +44,7 @@ export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ even
         <h5>{startCase(eventKind)}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiText size="s">{getEcsAllowedValueDescription('event.kind', eventKind)}</EuiText>
+      <EuiText size="s">{getEcsAllowedValueDescription(EVENT_KIND, eventKind)}</EuiText>
       {eventCategories.length > 0 && (
         <>
           <EuiSpacer size="s" />
@@ -50,7 +52,7 @@ export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ even
             <h5>
               <FormattedMessage
                 defaultMessage="Event category"
-                id="xpack.securitySolution.flyout.right.eventCategoryText"
+                id="xpack.securitySolution.flyout.document.about.eventCategoryText"
               />
             </h5>
           </EuiTitle>
@@ -62,7 +64,7 @@ export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ even
           >
             {eventCategories.map((category, idx) => (
               <EuiFlexItem grow={false} key={`event-category-${category}`}>
-                <EuiToolTip content={getEcsAllowedValueDescription('event.category', category)}>
+                <EuiToolTip content={getEcsAllowedValueDescription(EVENT_CATEGORY_FIELD, category)}>
                   <EuiText size="s" tabIndex={0}>
                     {category}
                     {idx !== eventCategories.length - 1 && ','}
