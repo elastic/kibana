@@ -33,7 +33,7 @@ import { EditConnectorTabs } from '../../../../types';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import type { EditConnectorProps } from './types';
-import { loadAllActions } from '../../../lib/action_connector_api';
+import { loadAllActions, loadConnectorAuthStatus } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
 
@@ -78,8 +78,20 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const loadActions = useCallback(async () => {
     setIsLoadingActions(true);
     try {
-      const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      const [actionsResponse, authStatusMap] = await Promise.all([
+        loadAllActions({ http }),
+        loadConnectorAuthStatus({ http }).catch(() => null),
+      ]);
+
+      const actionsWithAuth = actionsResponse.map((connector) => {
+        const authEntry = authStatusMap?.[connector.id];
+        if (!authEntry) {
+          return connector;
+        }
+        return { ...connector, userAuthStatus: authEntry.userAuthStatus };
+      });
+
+      setActions(actionsWithAuth);
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(

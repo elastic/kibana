@@ -17,6 +17,10 @@ import type { ActionTypeSource } from '@kbn/actions-types';
 import type { RuleFormParamsErrors } from './rule_types';
 import type { TypeRegistry } from '../type_registry';
 
+export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';
+
+export type ConnectorAuthStatusMap = Record<string, { userAuthStatus: ConnectorUserAuthStatus }>;
+
 export interface GenericValidationResult<T> {
   errors: Record<Extract<keyof T, string>, string[] | unknown>;
 }
@@ -48,7 +52,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   isConnectorTypeDeprecated: boolean;
   source?: ActionTypeSource;
   authMode?: 'shared' | 'per-user';
-  userAuthStatus?: 'connected' | 'not_connected' | 'not_applicable';
+  userAuthStatus?: ConnectorUserAuthStatus;
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
