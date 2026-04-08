@@ -22,7 +22,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import { OnboardingStep } from '@kbn/streams-schema';
 import React, { useCallback } from 'react';
 import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
-import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
+import { buildConnectorSelectOptions } from './connector_select_options';
 import {
   FEATURES_STEP_LABEL,
   ONBOARDING_CONFIG_POPOVER_ARIA_LABEL,
@@ -70,17 +70,7 @@ const StepRow = ({
 }: StepRowProps) => {
   const selectId = useGeneratedHtmlId({ prefix: `onboardingStep_${step}` });
 
-  const connectorOptions = connectors.allConnectors.map((connector) => ({
-    value: connector.connectorId,
-    inputDisplay: (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <ConnectorIcon connectorName={connector.name} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{connector.name}</EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  }));
+  const connectorOptions = buildConnectorSelectOptions(connectors.allConnectors);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

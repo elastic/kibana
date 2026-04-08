@@ -20,6 +20,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import {
   OnboardingStep,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   TaskStatus,
@@ -40,6 +41,7 @@ import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
+import { InsightsConnectorPopover } from './insights_connector_popover';
 import type { OnboardingConfig } from './onboarding_config_popover';
 import { OnboardingConfigPopover } from './onboarding_config_popover';
 import {
@@ -92,6 +94,15 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const queriesConnectors = useInferenceFeatureConnectors(
     STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
   );
+  const discoveryConnectors = useInferenceFeatureConnectors(
+    STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID
+  );
+
+  const [discoveryConnectorOverride, setDiscoveryConnectorOverride] = useState<
+    string | undefined
+  >();
+  const displayDiscoveryConnectorId =
+    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnector?.connectorId;
 
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
     steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
@@ -146,7 +157,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     const streamNames =
       selectedStreams.length > 0 ? selectedStreams.map((row) => row.stream.name) : undefined;
     try {
-      await scheduleInsightsDiscoveryTask(streamNames);
+      await scheduleInsightsDiscoveryTask(streamNames, discoveryConnectorOverride);
       setIsWaitingForInsightsTask(true);
       await getInsightsTaskStatus();
     } catch (error) {
@@ -155,7 +166,13 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       });
       throw error;
     }
-  }, [scheduleInsightsDiscoveryTask, selectedStreams, toasts, getInsightsTaskStatus]);
+  }, [
+    scheduleInsightsDiscoveryTask,
+    selectedStreams,
+    discoveryConnectorOverride,
+    toasts,
+    getInsightsTaskStatus,
+  ]);
 
   // When we started the insights task from this view and it completes, show toast
   useEffect(() => {
@@ -367,16 +384,35 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiButtonEmpty
-            iconType="crosshair"
-            onClick={() => scheduleInsightsTask()}
-            disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
-            isLoading={isSchedulingInsights || isWaitingForInsightsTask}
-            data-test-subj="significant_events_discover_insights_button"
-            size="xs"
-          >
-            {DISCOVER_INSIGHTS_BUTTON_LABEL}
-          </EuiButtonEmpty>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="crosshair"
+                  onClick={() => scheduleInsightsTask()}
+                  disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
+                  isLoading={isSchedulingInsights || isWaitingForInsightsTask}
+                  data-test-subj="significant_events_discover_insights_button"
+                  size="xs"
+                >
+                  {DISCOVER_INSIGHTS_BUTTON_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InsightsConnectorPopover
+                  displayConnectorId={displayDiscoveryConnectorId}
+                  connectors={discoveryConnectors}
+                  onConnectorChange={setDiscoveryConnectorOverride}
+                  onRun={scheduleInsightsTask}
+                  isRunDisabled={
+                    !aiFeatures?.genAiConnectors?.connectors?.length ||
+                    isSchedulingInsights ||
+                    isWaitingForInsightsTask
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
