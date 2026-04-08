@@ -25,6 +25,8 @@ export const INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE =
   InitializationFlowIdEnum['install-endpoint-package'];
 export const INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE =
   InitializationFlowIdEnum['install-ai-prompts-package'];
+export const INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS =
+  InitializationFlowIdEnum['install-detection-engine-rule-monitoring-assets'];
 
 // Flow statuses
 export const INITIALIZATION_FLOW_STATUS_READY = CreateListIndicesReadyResult.shape.status.value;

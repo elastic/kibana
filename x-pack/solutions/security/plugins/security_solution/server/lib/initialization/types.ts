@@ -12,6 +12,7 @@ import type {
   CreateListIndicesReadyResult,
   PackageInstallReadyResult,
   SecurityDataViewsReadyResult,
+  InstallDetectionEngineRuleMonitoringAssetsReadyResult,
 } from '../../../common/api/initialization';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 
@@ -38,6 +39,7 @@ export interface InitializationFlowDefinition<ProvisionContext> {
     | CreateListIndicesReadyResult
     | SecurityDataViewsReadyResult
     | PackageInstallReadyResult
+    | InstallDetectionEngineRuleMonitoringAssetsReadyResult
     | InitializationFlowErrorResult
   >;
 }

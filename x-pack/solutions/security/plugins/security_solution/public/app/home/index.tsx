@@ -19,12 +19,12 @@ import { ConsoleManager } from '../../management/components/console/components/c
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
-import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
 import { useSecuritySolutionInitialization } from '../../common/components/initialization/use_security_solution_initialization';
 import {
   INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+  INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
 } from '../../../common/api/initialization';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
@@ -60,14 +60,12 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
     newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields
   ) as BrowserFields;
 
-  // Install Fleet packages (prebuilt rules, endpoint, AI prompts) via the
-  // initialization framework. Runs on every Security app navigation.
   useSecuritySolutionInitialization([
     INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
     INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
     INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+    INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
   ]);
-  useSetupDetectionEngineHealthApi();
 
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">

@@ -15,6 +15,7 @@ export {
   DataViewPayload,
   PackageInstallReadyResult,
   SecurityDataViewsReadyResult,
+  InstallDetectionEngineRuleMonitoringAssetsReadyResult,
 } from './initialization.gen';
 
 export type { InitializationFlowsResult as InitializationFlowsResultType } from './initialization.gen';
@@ -27,6 +28,7 @@ export {
   INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+  INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from './constants';

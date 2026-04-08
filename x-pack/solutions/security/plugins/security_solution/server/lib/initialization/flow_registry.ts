@@ -13,6 +13,7 @@ import type {
   CreateListIndicesReadyResult,
   PackageInstallReadyResult,
   SecurityDataViewsReadyResult,
+  InstallDetectionEngineRuleMonitoringAssetsReadyResult,
 } from '../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
@@ -20,6 +21,7 @@ import {
   INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE,
   INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE,
+  INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../common/api/initialization';
 
@@ -27,6 +29,7 @@ type FlowResult =
   | CreateListIndicesReadyResult
   | SecurityDataViewsReadyResult
   | PackageInstallReadyResult
+  | InstallDetectionEngineRuleMonitoringAssetsReadyResult
   | InitializationFlowErrorResult;
 import type { InitializationFlowContext, InitializationFlowDefinition } from './types';
 import { createListIndicesInitializationFlow } from './flows/create_list_indices';
@@ -34,6 +37,7 @@ import { initializeSecurityDataViewsFlow } from './flows/initialize_security_dat
 import { installPrebuiltRulesPackageFlow } from './flows/install_prebuilt_rules_package';
 import { installEndpointPackageFlow } from './flows/install_endpoint_package';
 import { installAiPromptsPackageFlow } from './flows/install_ai_prompts_package';
+import { setupHealthAssetsFlow } from './flows/install_de_rule_monitoring_assets';
 
 // Each flow has a different ProvisionContext type, so `any` is needed to store
 // them in a single map. Type safety is preserved inside each flow definition.
@@ -44,6 +48,7 @@ const flows: Record<InitializationFlowId, InitializationFlowDefinition<any>> = {
   [INITIALIZATION_FLOW_INSTALL_PREBUILT_RULES_PACKAGE]: installPrebuiltRulesPackageFlow,
   [INITIALIZATION_FLOW_INSTALL_ENDPOINT_PACKAGE]: installEndpointPackageFlow,
   [INITIALIZATION_FLOW_INSTALL_AI_PROMPTS_PACKAGE]: installAiPromptsPackageFlow,
+  [INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS]: setupHealthAssetsFlow,
 };
 
 export class FlowInitializationError extends Error {}

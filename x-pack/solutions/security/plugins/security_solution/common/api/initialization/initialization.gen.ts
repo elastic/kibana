@@ -26,6 +26,7 @@ export const InitializationFlowId = z.enum([
   'install-prebuilt-rules-package',
   'install-endpoint-package',
   'install-ai-prompts-package',
+  'install-detection-engine-rule-monitoring-assets',
 ]);
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
 export const InitializationFlowIdEnum = InitializationFlowId.enum;
@@ -73,6 +74,13 @@ export const PackageInstallReadyResult = z.object({
   }),
 });
 
+export type InstallDetectionEngineRuleMonitoringAssetsReadyResult = z.infer<
+  typeof InstallDetectionEngineRuleMonitoringAssetsReadyResult
+>;
+export const InstallDetectionEngineRuleMonitoringAssetsReadyResult = z.object({
+  status: z.literal('ready'),
+});
+
 /**
  * Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
  */
@@ -92,6 +100,9 @@ export const InitializationFlowsResult = z.object({
     .optional(),
   'install-ai-prompts-package': z
     .union([PackageInstallReadyResult, InitializationFlowErrorResult])
+    .optional(),
+  'install-detection-engine-rule-monitoring-assets': z
+    .union([InstallDetectionEngineRuleMonitoringAssetsReadyResult, InitializationFlowErrorResult])
     .optional(),
 });
 

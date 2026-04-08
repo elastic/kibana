@@ -48,6 +48,7 @@ components:
         - install-prebuilt-rules-package
         - install-endpoint-package
         - install-ai-prompts-package
+        - install-detection-engine-rule-monitoring-assets
 
     InitializationFlowsResult:
       type: object
@@ -75,6 +76,10 @@ components:
         install-ai-prompts-package:
           oneOf:
             - $ref: '#/components/schemas/PackageInstallReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        install-detection-engine-rule-monitoring-assets:
+          oneOf:
+            - $ref: '#/components/schemas/InstallDetectionEngineRuleMonitoringAssetsReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
 
     CreateListIndicesReadyResult:
@@ -158,6 +163,16 @@ components:
             install_status:
               type: string
               description: Fleet package installation status (e.g., installed, already_installed).
+
+    InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
 
     InitializationFlowErrorResult:
       type: object

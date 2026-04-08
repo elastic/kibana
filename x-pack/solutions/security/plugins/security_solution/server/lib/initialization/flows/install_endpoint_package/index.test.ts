@@ -146,8 +146,11 @@ describe('installEndpointPackageFlow', () => {
         logger
       );
 
-      expect(result.payload).toEqual(
-        expect.objectContaining({ install_status: 'already_installed' })
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: expect.objectContaining({ install_status: 'already_installed' }),
+        })
       );
     });
 

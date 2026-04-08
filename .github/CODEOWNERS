@@ -2948,6 +2948,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_prebuilt_rules_package @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_endpoint_package @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_ai_prompts_package @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/install_de_rule_monitoring_assets @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
