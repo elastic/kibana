@@ -7,7 +7,7 @@
 
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
 
 export enum AgentActionType {
   Error = 'error',
@@ -34,7 +34,7 @@ export interface AgentErrorAction {
 
 export interface ToolCallAction {
   type: AgentActionType.ToolCall;
-  tool_calls: ToolCall[];
+  tool_calls: ToolCallWithReasoning[];
   message?: string;
 }
 
@@ -125,7 +125,10 @@ export function errorAction(error: AgentBuilderAgentExecutionError): AgentErrorA
   };
 }
 
-export function toolCallAction(toolCalls: ToolCall[], message?: string): ToolCallAction {
+export function toolCallAction(
+  toolCalls: ToolCallWithReasoning[],
+  message?: string
+): ToolCallAction {
   return {
     type: AgentActionType.ToolCall,
     tool_calls: toolCalls,

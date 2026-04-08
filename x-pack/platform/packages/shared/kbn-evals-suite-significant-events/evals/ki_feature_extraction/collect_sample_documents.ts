@@ -29,12 +29,10 @@ const addUniqueHitsToSample = ({
   hits,
   docs,
   seen,
-  uniqueApps,
 }: {
   hits: Array<SearchHit<Record<string, unknown>>>;
   docs: Array<SearchHit<Record<string, unknown>>>;
   seen: Set<string>;
-  uniqueApps: Set<string>;
 }): void => {
   for (const hit of hits) {
     if (!hit._id || !hit.fields || isEmpty(hit.fields)) {
@@ -47,11 +45,6 @@ const addUniqueHitsToSample = ({
 
     seen.add(hit._id);
     docs.push(hit);
-
-    const app = getAppNameFromFields(hit.fields);
-    if (app) {
-      uniqueApps.add(app);
-    }
 
     if (docs.length >= SAMPLE_DOCS_MAX) {
       break;
@@ -71,7 +64,6 @@ export const collectSampleDocuments = async ({
   const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
-  const uniqueApps = new Set<string>();
   const seen = new Set<string>();
   const criteriaWithFilters = scenario.output.criteria.filter(
     (criterion) => (criterion.sampling_filters?.length ?? 0) > 0
@@ -113,7 +105,6 @@ export const collectSampleDocuments = async ({
     hits: samplingFilterResults.flatMap(({ hits }) => hits),
     docs,
     seen,
-    uniqueApps,
   });
   const criteriaCount = docs.length;
   const duplicateCount = preDedupe - criteriaCount;
@@ -133,7 +124,7 @@ export const collectSampleDocuments = async ({
       size: SAMPLE_DOCS_MAX - docs.length,
     });
 
-    addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
+    addUniqueHitsToSample({ hits, docs, seen });
   }
 
   const appCounts = new Map<string, number>();
@@ -147,7 +138,7 @@ export const collectSampleDocuments = async ({
     .join(', ');
 
   log.info(
-    `Collected ${docs.length} sample document(s) across ${uniqueApps.size} app(s) ` +
+    `Collected ${docs.length} sample document(s) across ${appCounts.size} app(s) ` +
       `(${criteriaCount} from criteria filters, ${docs.length - criteriaCount} general fill). ` +
       `Distribution: ${distribution}`
   );

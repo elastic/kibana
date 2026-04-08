@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton', true));
 
       it('should return focus to the alerts button when dismissing the alerts popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed(
