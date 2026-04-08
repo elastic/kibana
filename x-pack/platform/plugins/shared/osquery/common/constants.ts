@@ -45,7 +45,7 @@ export const OSQUERY_PACKAGE_INSTALLATION_CACHE_TTL_MS = 60_000;
 
 export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
-  MAX = 900, // 15 minutes (matches backend inRangeRt(60, 60 * 15))
+  MAX = 86400, // 24 hours (matches osquerybeat max and io-ts inRangeRt(60, 60 * 60 * 24))
 }
 
 export const MAX_TAGS_PER_ACTION = 20;
