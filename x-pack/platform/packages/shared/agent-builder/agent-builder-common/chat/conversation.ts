@@ -421,8 +421,6 @@ export type TimelineConversation = Omit<Conversation, 'rounds'> & {
   conversation_mode: ConversationMode;
   /** Current execution state */
   execution_state: ConversationExecutionState;
-  /** If new events arrived during execution, ID of the event to retrigger from */
-  queued_trigger?: string;
 };
 
 /**

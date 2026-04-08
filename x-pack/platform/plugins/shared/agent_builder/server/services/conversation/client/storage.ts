@@ -78,7 +78,6 @@ const storageSettings = {
       }),
       conversation_mode: types.keyword({}),
       execution_state: types.keyword({}),
-      queued_trigger: types.keyword({}),
       // deprecated
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
     },
@@ -102,7 +101,6 @@ export interface ConversationProperties {
   events?: TimelineEvent[];
   conversation_mode?: ConversationMode;
   execution_state?: ConversationExecutionState;
-  queued_trigger?: string;
 }
 
 export type ConversationStorageSettings = typeof storageSettings;
