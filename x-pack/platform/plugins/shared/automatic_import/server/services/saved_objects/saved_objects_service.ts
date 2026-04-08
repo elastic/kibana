@@ -35,18 +35,12 @@ export interface FieldMappingEntry {
   is_ecs: boolean;
 }
 
-export interface AgentFieldMappingEntry {
-  name: string;
-  type: string;
-}
-
 export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
   ingestPipeline?: Pipeline;
   pipelineDocs?: Array<NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source']>;
   fieldMapping?: FieldMappingEntry[];
-  agentFieldMappings?: AgentFieldMappingEntry[];
   status: keyof typeof TASK_STATUSES;
 }
 
@@ -594,15 +588,8 @@ export class AutomaticImportSavedObjectService {
       throw new Error('Task was cancelled');
     }
 
-    const {
-      integrationId,
-      dataStreamId,
-      ingestPipeline,
-      pipelineDocs,
-      fieldMapping,
-      agentFieldMappings,
-      status,
-    } = updateDataStreamParams;
+    const { integrationId, dataStreamId, ingestPipeline, pipelineDocs, fieldMapping, status } =
+      updateDataStreamParams;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -622,15 +609,11 @@ export class AutomaticImportSavedObjectService {
         `Updating data stream ${dataStreamId} with pipeline docs: ${JSON.stringify(pipelineDocs)}`
       );
 
-      const existingAgentMappings = dataStream.attributes.result?.agent_field_mappings;
-      const resolvedAgentMappings = agentFieldMappings ?? existingAgentMappings;
-
       const updatedResult = ingestPipeline
         ? {
             ingest_pipeline: ingestPipeline,
             ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
             ...(fieldMapping ? { field_mapping: fieldMapping } : {}),
-            ...(resolvedAgentMappings ? { agent_field_mappings: resolvedAgentMappings } : {}),
           }
         : dataStream.attributes.result;
 

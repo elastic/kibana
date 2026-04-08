@@ -26,7 +26,7 @@ import {
   addManifestToZip,
   addReadmeToZip,
 } from './util';
-import { applyAgentFieldMappingOverrides, generateFieldMappings } from './fields';
+import { generateFieldMappings } from './fields';
 import { buildReadme } from './package_readme';
 import { getInputVars } from './input_vars';
 
@@ -206,16 +206,12 @@ export const buildIntegrationPackage = async (
 
     addAgentStreamToZip(zip, packageName, dataStream.data_stream_id, dataStream.input_types);
 
-    const rawFieldMappings =
+    const fieldMappings =
       dataStream.result?.field_mapping ??
       (await generateFieldMappings(
         (dataStream.result?.pipeline_docs as Array<Record<string, unknown>>) ?? [],
         fieldsMetadataClient
       ));
-    const fieldMappings = applyAgentFieldMappingOverrides(
-      rawFieldMappings,
-      dataStream.result?.agent_field_mappings
-    );
     fieldMappingsPerStream.set(dataStream.data_stream_id, fieldMappings);
     addFieldsToZip(zip, packageName, dataStream.data_stream_id, manifest.name, fieldMappings);
   }

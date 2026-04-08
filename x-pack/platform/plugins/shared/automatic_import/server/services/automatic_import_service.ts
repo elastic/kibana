@@ -48,7 +48,7 @@ import type {
 import { TASK_STATUSES } from './saved_objects/constants';
 import type { BuildIntegrationPackageResult } from './build_integration/build_integration_service';
 import { buildIntegrationPackage } from './build_integration/build_integration_service';
-import { applyAgentFieldMappingOverrides, generateFieldMappings } from './build_integration/fields';
+import { generateFieldMappings } from './build_integration/fields';
 import { validateFieldMappings } from './build_integration/validate_fields';
 
 /**
@@ -643,14 +643,10 @@ export class AutomaticImportService {
           source !== undefined
       );
 
-    const dataStreamSO = await this.savedObjectService.getDataStream(dataStreamId, integrationId);
-    const agentMappings = dataStreamSO.attributes.result?.agent_field_mappings;
-
-    const rawFieldMapping = await generateFieldMappings(
+    const fieldMapping = await generateFieldMappings(
       pipelineDocs as Array<Record<string, unknown>>,
       fieldsMetadataClient
     );
-    const fieldMapping = applyAgentFieldMappingOverrides(rawFieldMapping, agentMappings);
 
     const validationResult = await validateFieldMappings(
       internalEsClient,

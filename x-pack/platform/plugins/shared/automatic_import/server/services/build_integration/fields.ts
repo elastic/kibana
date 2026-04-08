@@ -7,10 +7,7 @@
 
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FieldMapping } from '../../agents/state';
-import type {
-  AgentFieldMappingEntry,
-  FieldMappingEntry,
-} from '../saved_objects/saved_objects_service';
+import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 
 interface SampleObj {
   [key: string]: unknown;
@@ -154,32 +151,5 @@ export const generateFieldMappings = async (
       type: isEcs && ecsEntry.type ? ecsEntry.type : agentType ?? f.type,
       is_ecs: isEcs,
     };
-  });
-};
-
-/**
- * Applies agent-determined field type overrides to a set of field mappings.
- * For non-ECS fields whose name matches an entry in `agentMappings`, the type
- * is replaced with the agent's type. This ensures types that cannot be inferred
- * from JSON values (e.g. `date`) are correctly represented in the final output.
- */
-export const applyAgentFieldMappingOverrides = (
-  fieldMappings: FieldMappingEntry[],
-  agentMappings: AgentFieldMappingEntry[] | undefined
-): FieldMappingEntry[] => {
-  if (!agentMappings || agentMappings.length === 0) return fieldMappings;
-
-  const agentTypeMap = new Map<string, string>();
-  for (const mapping of agentMappings) {
-    agentTypeMap.set(mapping.name, mapping.type);
-  }
-
-  return fieldMappings.map((f) => {
-    if (f.is_ecs) return f;
-    const agentType = agentTypeMap.get(f.name);
-    if (agentType && agentType !== f.type) {
-      return { ...f, type: agentType };
-    }
-    return f;
   });
 };

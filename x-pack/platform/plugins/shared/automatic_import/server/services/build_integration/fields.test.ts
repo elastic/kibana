@@ -7,7 +7,7 @@
 
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import { fieldsMetadataPluginServerMock } from '@kbn/fields-metadata-plugin/server/mocks';
-import { applyAgentFieldMappingOverrides, generateFieldMappings, mergeSamples } from './fields';
+import { generateFieldMappings, mergeSamples } from './fields';
 
 const KNOWN_ECS_FIELDS: Record<string, { name: string; type: string; source: string }> = {
   '@timestamp': { name: '@timestamp', type: 'date', source: 'ecs' },
@@ -407,73 +407,5 @@ describe('fields', () => {
         is_ecs: false,
       });
     });
-  });
-});
-
-describe('applyAgentFieldMappingOverrides', () => {
-  it('returns original mappings when agentMappings is undefined', () => {
-    const fieldMappings = [
-      { name: 'my_app.ts', type: 'keyword', is_ecs: false },
-      { name: 'my_app.count', type: 'long', is_ecs: false },
-    ];
-    expect(applyAgentFieldMappingOverrides(fieldMappings, undefined)).toBe(fieldMappings);
-  });
-
-  it('returns original mappings when agentMappings is empty', () => {
-    const fieldMappings = [{ name: 'my_app.ts', type: 'keyword', is_ecs: false }];
-    expect(applyAgentFieldMappingOverrides(fieldMappings, [])).toBe(fieldMappings);
-  });
-
-  it('overrides non-ECS field types from agent mappings', () => {
-    const fieldMappings = [
-      { name: 'my_app.created_at', type: 'keyword', is_ecs: false },
-      { name: 'my_app.updated_at', type: 'keyword', is_ecs: false },
-      { name: 'my_app.count', type: 'long', is_ecs: false },
-    ];
-    const agentMappings = [
-      { name: 'my_app.created_at', type: 'date' },
-      { name: 'my_app.updated_at', type: 'date' },
-    ];
-    const result = applyAgentFieldMappingOverrides(fieldMappings, agentMappings);
-
-    expect(result).toEqual([
-      { name: 'my_app.created_at', type: 'date', is_ecs: false },
-      { name: 'my_app.updated_at', type: 'date', is_ecs: false },
-      { name: 'my_app.count', type: 'long', is_ecs: false },
-    ]);
-  });
-
-  it('does not override ECS fields', () => {
-    const fieldMappings = [
-      { name: '@timestamp', type: 'date', is_ecs: true },
-      { name: 'source.ip', type: 'ip', is_ecs: true },
-      { name: 'my_app.ts', type: 'keyword', is_ecs: false },
-    ];
-    const agentMappings = [
-      { name: '@timestamp', type: 'keyword' },
-      { name: 'source.ip', type: 'keyword' },
-      { name: 'my_app.ts', type: 'date' },
-    ];
-    const result = applyAgentFieldMappingOverrides(fieldMappings, agentMappings);
-
-    expect(result[0]).toEqual({ name: '@timestamp', type: 'date', is_ecs: true });
-    expect(result[1]).toEqual({ name: 'source.ip', type: 'ip', is_ecs: true });
-    expect(result[2]).toEqual({ name: 'my_app.ts', type: 'date', is_ecs: false });
-  });
-
-  it('leaves fields unchanged when agent type matches existing type', () => {
-    const fieldMappings = [{ name: 'my_app.name', type: 'keyword', is_ecs: false }];
-    const agentMappings = [{ name: 'my_app.name', type: 'keyword' }];
-    const result = applyAgentFieldMappingOverrides(fieldMappings, agentMappings);
-
-    expect(result[0]).toBe(fieldMappings[0]);
-  });
-
-  it('leaves fields unchanged when no agent mapping matches', () => {
-    const fieldMappings = [{ name: 'my_app.unknown', type: 'keyword', is_ecs: false }];
-    const agentMappings = [{ name: 'my_app.other', type: 'date' }];
-    const result = applyAgentFieldMappingOverrides(fieldMappings, agentMappings);
-
-    expect(result[0]).toBe(fieldMappings[0]);
   });
 });
