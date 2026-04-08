@@ -16,6 +16,7 @@ paths-ignore:
   - '**/*.mock.*'
   - '**/*.mocks.*'
   - '**/*.test.*'
+  - '**/*.spec.*'
   - '**/cypress/**'
   - '**/e2e/**'
   - '**/ftr_e2e/**'

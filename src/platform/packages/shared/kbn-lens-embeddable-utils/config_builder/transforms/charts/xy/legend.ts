@@ -82,6 +82,7 @@ function isOutsideListLegendLayoutState(legend: XYVisualizationState['legend']) 
 function getLegendTruncation(legend: XYState['legend']): {
   max_lines?: number;
   max_pixels?: number;
+  enabled?: boolean;
 } | null {
   return legend && 'layout' in legend && legend.layout?.truncate ? legend.layout.truncate : null;
 }
@@ -97,11 +98,12 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
   const legendTruncation = getLegendTruncation(legend);
   const truncateMaxLines = legendTruncation?.max_lines;
   const truncateMaxPixels = legendTruncation?.max_pixels;
+  const truncateEnabled = legendTruncation?.enabled;
   const outsideLegendSize = getOutsideLegendSize(legend);
 
   const newStateLegend: XYVisualizationState['legend'] = {
     isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
-    shouldTruncate: Boolean(truncateMaxLines || truncateMaxPixels), // 0 will be interpreted as false
+    shouldTruncate: truncateEnabled,
     ...(legend?.statistics
       ? {
           legendStats: (legend?.statistics ?? []).map((stat) =>
@@ -161,14 +163,17 @@ function getLegendAlignment(legend: XYVisualizationState['legend']) {
 }
 
 function getLegendLayout(legend: XYVisualizationState['legend']) {
-  const { max_pixels, max_lines } = getApiLegendTruncate(legend);
+  const { max_pixels, max_lines, enabled } = getApiLegendTruncate(legend);
 
   if (isLegendInside(legend)) {
     return {
       placement: 'inside',
       layout: {
         type: 'grid',
-        ...(max_lines != null ? { truncate: { max_lines } } : {}),
+        truncate: {
+          max_lines,
+          enabled,
+        },
       },
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
@@ -188,11 +193,17 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
     layout: isListLayout
       ? {
           type: 'list',
-          ...(max_pixels != null ? { truncate: { max_pixels } } : {}),
+          truncate: {
+            max_pixels,
+            enabled,
+          },
         }
       : {
           type: 'grid',
-          ...(max_lines != null ? { truncate: { max_lines } } : {}),
+          truncate: {
+            max_lines,
+            enabled,
+          },
         },
   } satisfies HorizontalOutsideLayoutLegend | VerticalOutsideLayoutLegend;
 }
@@ -202,19 +213,16 @@ function getApiLegendTruncate(
 ): {
   max_lines?: number;
   max_pixels?: number;
+  enabled?: boolean;
 } {
   if (!legend) return {};
 
-  const { shouldTruncate: stateShouldTruncate, maxLines, maxPixels } = legend;
-  // if shouldTruncate is not explicitly set, infer it from maxLines and maxPixels
-  const shouldTruncate =
-    stateShouldTruncate != null ? stateShouldTruncate : Boolean(maxLines || maxPixels);
-
-  if (!shouldTruncate) return {};
+  const { shouldTruncate, maxLines, maxPixels } = legend;
 
   return {
     max_lines: maxLines ?? 1,
     max_pixels: maxPixels ?? 250,
+    enabled: shouldTruncate,
   };
 }
 
