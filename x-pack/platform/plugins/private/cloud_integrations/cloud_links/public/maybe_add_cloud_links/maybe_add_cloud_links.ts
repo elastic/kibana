@@ -31,7 +31,7 @@ export function maybeAddCloudLinks({
 }: MaybeAddCloudLinksDeps): void {
   const userObservable = defer(() => security.authc.getCurrentUser()).pipe(
     // Check if user is a cloud user.
-    map((user) => user.elastic_cloud_user),
+    map((user) => true || user.elastic_cloud_user),
     // If user is not defined due to an unexpected error, then fail *open*.
     catchError(() => of(true)),
     filter((isElasticCloudUser) => isElasticCloudUser === true),

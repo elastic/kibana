@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { AppearanceSelector, openAppearanceModal } from './appearance_selector';
+import { openAppearanceModal } from './appearance_selector';
 
 export const createUserMenuLinks = async ({
   core,
@@ -62,30 +61,18 @@ export const createUserMenuLinks = async ({
     });
   }
 
-  const appearanceEnabled = !core.uiSettings.isOverridden('theme:darkMode');
-
-  userMenuLinks.push({
-    label: appearanceEnabled
-      ? i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceLinkText', {
-          defaultMessage: 'Appearance',
-        })
-      : '',
-    iconType: 'brush',
-    ...(appearanceEnabled && {
+  if (!core.uiSettings.isOverridden('theme:darkMode')) {
+    userMenuLinks.push({
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceLinkText', {
+        defaultMessage: 'Appearance',
+      }),
+      iconType: 'brush',
       onClick: () => {
         openAppearanceModal({ core, security, isServerless });
       },
-    }),
-    content: ({ closePopover }) => (
-      <AppearanceSelector
-        core={core}
-        security={security}
-        closePopover={closePopover}
-        isServerless={isServerless}
-      />
-    ),
-    order: 400,
-  });
+      order: 400,
+    });
+  }
 
   return userMenuLinks;
 };
