@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import * as stories from './index.stories';
-import { composeStories } from '@storybook/react';
-import type { ErrorCountRuleParams } from '.';
-import { ErrorCountRuleType } from '.';
+import type { ErrorRateRuleParams } from '.';
+import { TransactionErrorRateRuleType } from '.';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 
@@ -42,13 +41,11 @@ jest.mock('../../../../services/rest/create_call_apm_api', () => ({
   createCallApmApi: jest.fn(),
 }));
 
-const { CreatingInApmFromService } = composeStories(stories);
-
-const renderRuleType = (ruleParams: Partial<ErrorCountRuleParams>, setRuleParams = jest.fn()) => {
+const renderRuleType = (ruleParams: Partial<ErrorRateRuleParams>, setRuleParams = jest.fn()) => {
   render(
     <IntlProvider locale="en">
-      <ErrorCountRuleType
-        ruleParams={ruleParams as ErrorCountRuleParams}
+      <TransactionErrorRateRuleType
+        ruleParams={ruleParams as ErrorRateRuleParams}
         setRuleParams={setRuleParams}
         setRuleProperty={jest.fn()}
       />
@@ -57,27 +54,22 @@ const renderRuleType = (ruleParams: Partial<ErrorCountRuleParams>, setRuleParams
   return { setRuleParams };
 };
 
-describe('ErrorCountRuleType', () => {
-  it('renders', async () => {
-    render(<CreatingInApmFromService />);
-
-    expect(await screen.findByText('Service')).toBeInTheDocument();
-  });
-
+describe('TransactionErrorRateRuleType', () => {
   it('defaults groupBy to include transaction.name for new rules', () => {
     const { setRuleParams } = renderRuleType({});
 
     expect(setRuleParams).toHaveBeenCalledWith('groupBy', [
       SERVICE_NAME,
       SERVICE_ENVIRONMENT,
+      TRANSACTION_TYPE,
       TRANSACTION_NAME,
     ]);
   });
 
   it('preserves existing groupBy when editing a rule', () => {
-    const existingGroupBy = [SERVICE_NAME, SERVICE_ENVIRONMENT];
+    const existingGroupBy = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE];
     const { setRuleParams } = renderRuleType({
-      threshold: 25,
+      threshold: 30,
       groupBy: existingGroupBy,
     });
 
@@ -85,7 +77,7 @@ describe('ErrorCountRuleType', () => {
   });
 
   it('does not inject default groupBy when editing a rule without groupBy', () => {
-    const { setRuleParams } = renderRuleType({ threshold: 25 });
+    const { setRuleParams } = renderRuleType({ threshold: 30 });
 
     expect(setRuleParams).not.toHaveBeenCalledWith(
       'groupBy',
@@ -94,7 +86,7 @@ describe('ErrorCountRuleType', () => {
   });
 
   it('preserves empty groupBy array when editing a rule', () => {
-    const { setRuleParams } = renderRuleType({ threshold: 25, groupBy: [] });
+    const { setRuleParams } = renderRuleType({ threshold: 30, groupBy: [] });
 
     expect(setRuleParams).toHaveBeenCalledWith('groupBy', []);
   });
