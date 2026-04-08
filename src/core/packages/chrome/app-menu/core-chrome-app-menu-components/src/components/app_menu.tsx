@@ -26,8 +26,7 @@ export interface AppMenuItemsProps {
   isCollapsed?: boolean;
 }
 
-const hasNoItems = (config: AppMenuConfig) =>
-  !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
+const hasNoItems = (config: AppMenuConfig) => !config.items?.length && !config?.primaryActionItem;
 
 export const AppMenuComponent = ({
   config,
@@ -43,7 +42,6 @@ export const AppMenuComponent = ({
   }
 
   const primaryActionItem = config?.primaryActionItem;
-  const secondaryActionItem = config?.secondaryActionItem;
   const showMoreButtonId = 'show-more';
 
   const headerLinksProps = {
@@ -76,22 +74,10 @@ export const AppMenuComponent = ({
     />
   ) : undefined;
 
-  const secondaryActionComponent = secondaryActionItem ? (
-    <AppMenuActionButton
-      {...secondaryActionItem}
-      isPopoverOpen={openPopoverId === secondaryActionItem.id}
-      onPopoverToggle={() => {
-        handlePopoverToggle(secondaryActionItem.id);
-      }}
-      onPopoverClose={handleOnPopoverClose}
-    />
-  ) : undefined;
-
   const collapsedComponent = (
     <AppMenuOverflowButton
       items={[...displayedItems, ...overflowItems]}
       isPopoverOpen={openPopoverId === showMoreButtonId}
-      secondaryActionItem={secondaryActionItem}
       primaryActionItem={primaryActionItem}
       onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
       onPopoverClose={handleOnPopoverClose}
@@ -111,7 +97,6 @@ export const AppMenuComponent = ({
           onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
           onPopoverClose={handleOnPopoverClose}
         />
-        {secondaryActionComponent}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );
@@ -138,7 +123,6 @@ export const AppMenuComponent = ({
             onPopoverClose={handleOnPopoverClose}
           />
         )}
-        {secondaryActionComponent}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );

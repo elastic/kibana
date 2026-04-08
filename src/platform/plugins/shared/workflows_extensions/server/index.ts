@@ -35,6 +35,7 @@ export type {
 export {
   EVENT_CHAIN_DEPTH_HEADER,
   EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
   getEventChainContext,
   getOutboundEventChainHeaders,
   setWorkflowEventChainContext,
