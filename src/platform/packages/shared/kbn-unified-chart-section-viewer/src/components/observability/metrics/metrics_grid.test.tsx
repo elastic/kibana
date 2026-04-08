@@ -201,6 +201,49 @@ describe('MetricsGrid', () => {
     );
   });
 
+  it('applies breakdown per-metric when metrics have different dimensionFields', () => {
+    const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
+      {
+        metricName: 'fieldsense.energy.battery.voltage',
+        dataStream: 'fieldsense-station-metrics',
+        units: [null],
+        metricTypes: ['gauge'],
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+        dimensionFields: [{ name: 'station.id' }, { name: 'sensor.type' }],
+      },
+      {
+        metricName: 'system.cpu.utilization',
+        dataStream: 'metrics-hostmetricsreceiver.otel-default',
+        units: [null],
+        metricTypes: ['gauge'],
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+        dimensionFields: [{ name: 'attributes.cpu' }, { name: 'host.name' }],
+      },
+    ];
+
+    // Select station.id, which only exists in the fieldsense metric
+    renderMetricsGrid({
+      metricItems: heterogeneousMetrics,
+      dimensions: [{ name: 'station.id' }],
+    });
+
+    // First chart (fieldsense) should get the breakdown
+    expect(createESQLQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricItem: expect.objectContaining({ metricName: 'fieldsense.energy.battery.voltage' }),
+        splitAccessors: ['station.id'],
+      })
+    );
+
+    // Second chart (hostmetrics) should get no breakdown
+    expect(createESQLQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricItem: expect.objectContaining({ metricName: 'system.cpu.utilization' }),
+        splitAccessors: [],
+      })
+    );
+  });
+
   describe('MetricsGrid keyboard navigation', () => {
     beforeEach(() => {
       jest.useFakeTimers();
