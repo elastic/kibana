@@ -22,6 +22,43 @@ import {
 } from './utils';
 
 /**
+ * Creates filter expression for multi-value arrays with the following logic:
+ * - When `esMappingType` is passed, it uses MV_CONTAINS
+ * - Otherwise it uses MATCH clauses combined with AND
+ * - Both cases use NOT for negation when the operation is '-'
+ */
+function buildMultiValueFilterExpression(
+  field: string,
+  values: unknown[],
+  operation: SupportedOperation,
+  esMappingType?: string
+) {
+  const fieldName = sanitazeESQLInput(field);
+  if (!fieldName) {
+    return '';
+  }
+
+  const escapedValues = values.map((val) =>
+    typeof val === 'string' ? escapeStringValue(val) : val
+  );
+
+  // If we have an ES mapping type, we can safely use MV_CONTAINS with casting
+  if (esMappingType) {
+    const mvContainsValue =
+      escapedValues.length === 1 ? escapedValues[0] : `[${escapedValues.join(', ')}]`;
+    return operation === '-'
+      ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`
+      : `MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`;
+  }
+
+  // Otherwise we fall back to using MATCH clauses combined with AND
+  const matchClauses = escapedValues.map((val) => `MATCH(${fieldName}, ${val})`);
+  return operation === '-'
+    ? matchClauses.map((clause) => `NOT ${clause}`).join(' AND ')
+    : matchClauses.join(' AND ');
+}
+
+/**
  * Creates filter expression for both single and multi-value cases
  * For single values, it creates standard comparison expressions
  * For multi-value arrays, it creates MV_CONTAINS or MATCH clauses
@@ -41,31 +78,10 @@ function createFilterExpression(
   }
   // Handle multi-value arrays with MV_CONTAINS or MATCH
   if (Array.isArray(value)) {
-    const fieldName = sanitazeESQLInput(field);
-    if (!fieldName) {
-      return { expression: '', isMultiValue: true };
-    }
-
-    const escapedValues = value.map((val) =>
-      typeof val === 'string' ? escapeStringValue(val) : val
-    );
-    let expression: string;
-    if (esMappingType) {
-      const mvContainsValue =
-        escapedValues.length === 1 ? escapedValues[0] : `[${escapedValues.join(', ')}]`;
-      expression =
-        operation === '-'
-          ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`
-          : `MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`;
-    } else {
-      const matchClauses = escapedValues.map((val) => `MATCH(${fieldName}, ${val})`);
-      expression =
-        operation === '-'
-          ? matchClauses.map((clause) => `NOT ${clause}`).join(' AND ')
-          : matchClauses.join(' AND ');
-    }
-
-    return { expression, isMultiValue: true };
+    return {
+      expression: buildMultiValueFilterExpression(field, value, operation, esMappingType),
+      isMultiValue: true,
+    };
   }
 
   // Handle single values with standard operators
