@@ -62,6 +62,8 @@ else
   AFFECTED_MODULES_FILE=".scout/affected_modules.json"
   .buildkite/pipeline-utils/affected-packages/list_affected \
     --strategy git --deep --merge-base "$AFFECTED_MERGE_BASE" --json \
+    --ignore 'src/platform/packages/shared/kbn-scout/**' \
+    --ignore '.buildkite/**' \
     > "$AFFECTED_MODULES_FILE"
 
   echo "--- Discover Playwright Configs and upload to Buildkite artifacts (affected modules detected)"
