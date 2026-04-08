@@ -101,11 +101,8 @@ export class DashboardPageObject extends FtrService {
 
   public async clickFullScreenMode() {
     await this.header.waitUntilLoadingHasFinished();
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.testSubjects.click('app-menu-overflow-button');
-    }
     this.log.debug(`clickFullScreenMode`);
-    await this.testSubjects.click('dashboardFullScreenMode');
+    await this.appMenu.clickMenuItem('dashboardFullScreenMode');
     await this.testSubjects.exists('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
@@ -118,7 +115,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async fullScreenModeMenuItemExists() {
-    return await this.testSubjects.exists('dashboardFullScreenMode');
+    return await this.appMenu.menuItemExists('dashboardFullScreenMode');
   }
 
   public async exitFullScreenTextButtonExists() {
@@ -261,10 +258,12 @@ export class DashboardPageObject extends FtrService {
   public async duplicateDashboard(dashboardNameOverride?: string) {
     this.log.debug('Clicking duplicate');
 
-    if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+    if (await this.appMenu.menuItemExists('dashboardInteractiveSaveMenuItem')) {
+      await this.appMenu.clickMenuItem('dashboardInteractiveSaveMenuItem');
+    } else {
       await this.openSaveSplitMenu();
+      await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     }
-    await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
 
     if (dashboardNameOverride) {
       this.log.debug('entering dashboard duplicate override title');
@@ -364,20 +363,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('clickCancelOutOfEditMode');
     if (!(await this.getIsInEditMode())) return;
 
-    await this.retry.waitFor('leave edit mode button enabled', async () => {
-      // Open overflow menu if the button is not visible and overflow menu exists
-      if (
-        !(await this.testSubjects.exists('dashboardViewOnlyMode')) &&
-        (await this.testSubjects.exists('app-menu-overflow-button'))
-      ) {
-        await this.testSubjects.click('app-menu-overflow-button');
-      }
-      const leaveEditModeButton = await this.testSubjects.find('dashboardViewOnlyMode');
-      const isDisabled = await leaveEditModeButton.getAttribute('disabled');
-      return !isDisabled;
-    });
-
-    await this.testSubjects.click('dashboardViewOnlyMode');
+    await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
 
     if (accept) {
       const confirmation = await this.testSubjects.exists('confirmModalTitleText');
@@ -506,8 +492,7 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('openSettingsFlyout');
     const isOpen = await this.isSettingsOpen();
     if (!isOpen) {
-      await this.testSubjects.click('app-menu-overflow-button');
-      return await this.testSubjects.click('dashboardSettingsButton');
+      await this.appMenu.clickMenuItem('dashboardSettingsButton');
     }
   }
 
@@ -658,10 +643,14 @@ export class DashboardPageObject extends FtrService {
     });
 
     if (!isSaveModalOpen) {
-      if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+      if (await this.appMenu.menuItemExists('dashboardInteractiveSaveMenuItem')) {
+        // Item is in the app menu (directly visible or in the overflow)
+        await this.appMenu.clickMenuItem('dashboardInteractiveSaveMenuItem');
+      } else {
+        // Item is inside the save split button dropdown
         await this.openSaveSplitMenu();
+        await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
       }
-      await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     }
 
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
