@@ -1,8 +1,26 @@
 steps:
-  # TODO: run the bash files directly and only run the build and promote, because verify will fail.
-  - name: Trigger ES Build/Verify/Promote
-    key: trigger-es-build
-    trigger: kibana-elasticsearch-snapshot-build
-    async: false
-    build:
-      branch: '$BRANCH'
+  # run the bash files directly and only run the build and promote, because verify will fail.
+  # TODO: Ask @alex if this would work, especially because the meta data get happens in two separate bash files.
+
+  # Step 1: Run the ES Snapshot Build
+  - command: .buildkite/scripts/steps/es_snapshots/build.sh
+    label: Build ES Snapshot
+    timeout_in_minutes: 30
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: c2-standard-8
+      diskSizeGb: 130
+
+  # Step 2: Run the ES Promote
+  - label: Promote Snapshot
+    command: .buildkite/scripts/steps/es_snapshots/promote.sh
+    depends_on: build-es-snapshot
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
