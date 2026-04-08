@@ -211,9 +211,7 @@ function checkSampleSizeFloor(esql: string, hints: string[]): void {
   const pipeWhereMatch = esql.match(/\|\s*WHERE\b((?:(?!\|).)*)/gis);
   if (!pipeWhereMatch) return;
 
-  const allWhereBodies = pipeWhereMatch
-    .map((m) => m.replace(/^\|\s*WHERE\b/i, ''))
-    .join(' ');
+  const allWhereBodies = pipeWhereMatch.map((m) => m.replace(/^\|\s*WHERE\b/i, '')).join(' ');
 
   // A threshold clause needs at least two comparisons: one for the volume
   // floor (e.g. total > 20) and one for the metric threshold (e.g.
@@ -311,7 +309,9 @@ export function getStatsQueryHints(esql: string): string[] {
     .map((cmd) => cmd.name.toUpperCase());
   if (found.length > 0) {
     hints.push(
-      `Warning: ${found.join(', ')} after STATS should not be used. The system manages ordering and limits.`
+      `Warning: ${found.join(
+        ', '
+      )} after STATS should not be used. The system manages ordering and limits.`
     );
   }
 
@@ -405,25 +405,28 @@ export function extractBucketColumnName(esql: string): string | null {
 
   // Regex fallback for cases where the AST doesn't expose the alias.
   // Supports dotted identifiers (e.g. `foo.bar = BUCKET(...)`).
-  const match = esql.match(
-    /([\w.]+)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i
-  );
+  const match = esql.match(/([\w.]+)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i);
   return match?.[1] ?? null;
 }
 
+const ONE_SECOND_IN_MS = 1_000;
+const ONE_MINUTE_IN_MS = 60 * ONE_SECOND_IN_MS;
+const ONE_HOUR_IN_MS = 60 * ONE_MINUTE_IN_MS;
+const ONE_DAY_IN_MS = 24 * ONE_HOUR_IN_MS;
+
 export const MS_PER_UNIT: Record<string, number> = {
-  s: 1_000,
-  second: 1_000,
-  seconds: 1_000,
-  m: 60_000,
-  minute: 60_000,
-  minutes: 60_000,
-  h: 3_600_000,
-  hour: 3_600_000,
-  hours: 3_600_000,
-  d: 86_400_000,
-  day: 86_400_000,
-  days: 86_400_000,
+  s: ONE_SECOND_IN_MS,
+  second: ONE_SECOND_IN_MS,
+  seconds: ONE_SECOND_IN_MS,
+  m: ONE_MINUTE_IN_MS,
+  minute: ONE_MINUTE_IN_MS,
+  minutes: ONE_MINUTE_IN_MS,
+  h: ONE_HOUR_IN_MS,
+  hour: ONE_HOUR_IN_MS,
+  hours: ONE_HOUR_IN_MS,
+  d: ONE_DAY_IN_MS,
+  day: ONE_DAY_IN_MS,
+  days: ONE_DAY_IN_MS,
 };
 
 /**
@@ -433,9 +436,7 @@ export const MS_PER_UNIT: Record<string, number> = {
  * Returns `null` when no temporal bucketing is found.
  */
 export function extractBucketTargetField(esql: string): string | null {
-  const match = esql.match(
-    /(?:BUCKET|TBUCKET)\s*\(\s*([\w@.]+)\s*,/i
-  );
+  const match = esql.match(/(?:BUCKET|TBUCKET)\s*\(\s*([\w@.]+)\s*,/i);
   return match?.[1] ?? null;
 }
 
