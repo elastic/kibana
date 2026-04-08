@@ -40,7 +40,7 @@ export const getTransformOut = (
       stripInheritedContext
     );
 
-    const state = transformsFlow(storedState);
+    const { attributes, ...state } = transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
 
@@ -51,7 +51,7 @@ export const getTransformOut = (
       } satisfies LensByRefTransformOutResult;
     }
 
-    const migratedAttributes = migrateAttributes(state.attributes);
+    const migratedAttributes = migrateAttributes(attributes);
     const injectedState = injectLensReferences(
       {
         ...state,
@@ -77,7 +77,7 @@ export const getTransformOut = (
 
     return {
       ...state,
-      attributes: apiConfig,
+      ...apiConfig,
     } satisfies LensByValueTransformOutResult;
   };
 };
