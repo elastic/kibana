@@ -6,10 +6,8 @@
  */
 
 import {
-=======
   EuiBadge,
   EuiContextMenu,
->>>>>>> 9f0c98ac44f (first commit)
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -46,60 +44,6 @@ export interface OnboardingConfig {
   };
 }
 
-interface StepRowProps {
-  step: OnboardingStep;
-  label: string;
-  enabled: boolean;
-  displayConnectorId: string | undefined;
-  connectors: UseInferenceFeatureConnectorsResult;
-  onToggle: (step: OnboardingStep, enabled: boolean) => void;
-  onConnectorChange: (step: OnboardingStep, connectorId: string) => void;
-}
-
-const StepRow = ({
-  step,
-  label,
-  enabled,
-  displayConnectorId,
-  connectors,
-  onToggle,
-  onConnectorChange,
-}: StepRowProps) => {
-  const selectId = useGeneratedHtmlId({ prefix: `onboardingStep_${step}` });
-
-  const connectorOptions = buildConnectorSelectOptions(connectors.allConnectors);
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiSwitch
-          label={label}
-          checked={enabled}
-          onChange={(e) => onToggle(step, e.target.checked)}
-          compressed
-        />
-      </EuiFlexItem>
-      {displayConnectorId && connectorOptions.length > 0 && (
-        <EuiFlexItem>
-          <EuiFormRow display="rowCompressed" aria-label={label}>
-            <EuiSuperSelect
-              id={selectId}
-              options={connectorOptions}
-              valueOfSelected={displayConnectorId}
-              onChange={(value) => onConnectorChange(step, value)}
-              disabled={!enabled}
-              compressed
-              fullWidth
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-};
-
-=======
->>>>>>> 9f0c98ac44f (first commit)
 interface OnboardingConfigPopoverProps {
   config: OnboardingConfig;
   featuresConnectors: UseInferenceFeatureConnectorsResult;

@@ -30,7 +30,7 @@ import {
   TaskStatus,
 } from '@kbn/streams-schema';
 import pMap from 'p-map';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
@@ -496,75 +496,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiText size="s">
-            {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
-              {
-                defaultMessage: '{count} streams',
-                values: { count: streamsListFetch.data?.streams.length ?? 0 },
-              }
-            )}
-          </EuiText>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={onBulkOnboardStreamsClick}
-                  iconType="radar"
-                  disabled={selectedStreams.length === 0 || onboardingConfig.steps.length === 0}
-                  size="xs"
-                  data-test-subj="significant_events_onboard_streams_button"
-                >
-                  {dynamicButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <OnboardingConfigPopover
-                  config={onboardingConfig}
-                  displayConnectors={displayConnectors}
-                  featuresConnectors={featuresConnectors}
-                  queriesConnectors={queriesConnectors}
-                  onConfigChange={setOnboardingConfig}
-                  onRun={onBulkOnboardStreamsClick}
-                  isRunDisabled={selectedStreams.length === 0}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="crosshair"
-                  onClick={() => scheduleInsightsTask()}
-                  disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
-                  isLoading={isSchedulingInsights || isWaitingForInsightsTask}
-                  data-test-subj="significant_events_discover_insights_button"
-                  size="xs"
-                >
-                  {DISCOVER_INSIGHTS_BUTTON_LABEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InsightsConnectorPopover
-                  displayConnectorId={displayDiscoveryConnectorId}
-                  connectors={discoveryConnectors}
-                  onConnectorChange={setDiscoveryConnectorOverride}
-                  onRun={scheduleInsightsTask}
-                  isRunDisabled={
-                    !aiFeatures?.genAiConnectors?.connectors?.length ||
-                    isSchedulingInsights ||
-                    isWaitingForInsightsTask
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-=======
         <EuiText size="s">
           {i18n.translate(
             'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
@@ -574,7 +505,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             }
           )}
         </EuiText>
->>>>>>> 9f0c98ac44f (first commit)
       </EuiFlexItem>
 
       <EuiFlexItem>
