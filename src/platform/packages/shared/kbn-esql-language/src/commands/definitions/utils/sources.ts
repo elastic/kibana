@@ -85,7 +85,6 @@ export const buildSourcesDefinitions = (
               type: type ?? SOURCES_TYPES.INDEX,
             },
           }),
-      sortText: 'A',
       ...(rangeToReplace && { rangeToReplace }),
       ...(filterText && { filterText }),
     });
@@ -109,7 +108,6 @@ export const buildViewsDefinitions = (
         detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
           defaultMessage: 'View',
         }),
-        sortText: 'A-view',
       });
     });
 
@@ -199,7 +197,6 @@ export async function additionalSourcesSuggestions(
         ...pipeCompleteItem,
         filterText: prefix,
         text: prefix + ' | ',
-        sortText: '0',
       }),
       withAutoSuggest({
         ...commaCompleteItem,
@@ -248,7 +245,6 @@ export const specialIndicesToSuggestions = (
             type: index.mode ?? SOURCES_TYPES.INDEX,
           },
         }),
-        sortText: '0-INDEX-' + index.name,
       })
     );
 
@@ -266,7 +262,6 @@ export const specialIndicesToSuggestions = (
                 defaultMessage: 'Alias',
               }
             ),
-            sortText: '1-ALIAS-' + alias,
           })
         );
       }
