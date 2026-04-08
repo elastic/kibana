@@ -12,6 +12,8 @@ import { z } from '@kbn/zod/v4';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
+export type { WorkflowYaml } from '../spec/schema';
+
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
@@ -117,6 +119,8 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Caller-supplied execution metadata, separate from workflow inputs */
   metadata?: Record<string, unknown>;
+  /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
+  dispatchEventId?: string;
 }
 
 export interface ProviderInput {
@@ -298,6 +302,7 @@ export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
+  executionContext: z.record(z.string(), z.unknown()).optional(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
@@ -353,7 +358,7 @@ export interface WorkflowListItemDto {
   enabled: boolean;
   definition: WorkflowYaml | null;
   createdAt: string;
-  history: WorkflowExecutionHistoryModel[];
+  history?: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;
 }
@@ -393,7 +398,7 @@ export interface WorkflowStatsDto {
     enabled: number;
     disabled: number;
   };
-  executions: WorkflowExecutionsHistoryStats[];
+  executions?: WorkflowExecutionsHistoryStats[];
 }
 
 export interface WorkflowAggsDto {

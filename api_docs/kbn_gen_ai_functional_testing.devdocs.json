@@ -294,7 +294,7 @@
           "\nMax number of LLMs (connectors / EIS models) to run per FTR suite when unset.\nOverride with {@link FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV}."
         ],
         "signature": [
-          "3"
+          "1"
         ],
         "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/random_llm_sample.ts",
         "lineNumber": 16,

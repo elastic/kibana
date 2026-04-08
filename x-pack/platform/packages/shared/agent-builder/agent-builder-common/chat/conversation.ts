@@ -9,8 +9,8 @@ import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
 import type {
   Attachment,
-  AttachmentInput,
   VersionedAttachment,
+  AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
@@ -46,6 +46,7 @@ export interface ConverseInput {
   message?: string;
   /**
    * Optional attachments to provide to the agent.
+   * Use `origin` without `data` for by-reference types that implement `resolve`.
    * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
@@ -206,8 +207,8 @@ export interface ConversationRound {
   status: ConversationRoundStatus;
   /** persisted state to resume interrupted states */
   state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt request*/
-  pending_prompt?: PromptRequest;
+  /** if status is awaiting_prompt, contains the current prompt requests */
+  pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */

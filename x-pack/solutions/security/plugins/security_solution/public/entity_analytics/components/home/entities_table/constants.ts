@@ -40,12 +40,14 @@ export const ENTITY_FIELDS = {
   ENTITY_SOURCE: 'entity.source',
   ENTITY_TYPE: 'entity.EngineMetadata.Type',
   ENTITY_RISK: 'entity.risk.calculated_score_norm',
+  RESOLUTION_RISK_SCORE: 'entity.relationships.resolution.risk.calculated_score_norm',
   RESOLVED_TO: 'entity.relationships.resolution.resolved_to',
   TIMESTAMP: '@timestamp',
 } as const;
 
 export const ENTITY_GROUPING_OPTIONS = {
   NONE: 'none',
+  RESOLUTION: ENTITY_FIELDS.RESOLVED_TO,
   ENTITY_TYPE: ENTITY_FIELDS.ENTITY_TYPE,
 };
 

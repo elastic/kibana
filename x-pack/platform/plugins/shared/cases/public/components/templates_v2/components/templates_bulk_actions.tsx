@@ -66,7 +66,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
         items: [
           {
             name: i18n.BULK_EXPORT_TEMPLATES,
-            icon: 'exportAction',
+            icon: 'upload',
             onClick: handleBulkExport,
             disabled: isLoading,
             'data-test-subj': 'templates-bulk-action-export',
@@ -106,7 +106,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
               onClick={togglePopover}
               size="xs"
               iconSide="right"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               flush="left"
               data-test-subj="templates-bulk-actions-link-icon"
             >

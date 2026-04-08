@@ -46,7 +46,7 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
         panelReferences: Reference[] | undefined,
         containerReferences: Reference[] | undefined,
         id: string | undefined
-      ): RangeSliderControlState => {
+      ): Partial<RangeSliderControlState> => {
         const dataControlState = transformDataControlOut(
           id,
           state,
@@ -56,8 +56,8 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
         );
         return {
           ...dataControlState,
-          value: state.value,
-          step: state.step,
+          ...(state.value && { value: state.value }),
+          ...(typeof state.step === 'number' && { step: state.step }),
         };
       },
     }),

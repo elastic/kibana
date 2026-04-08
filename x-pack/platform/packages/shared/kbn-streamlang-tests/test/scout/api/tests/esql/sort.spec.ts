@@ -29,7 +29,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
         await testBed.ingest(indexName, docs);
@@ -57,7 +57,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
         await testBed.ingest(indexName, docs);
@@ -86,7 +86,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
         await testBed.ingest(indexName, docs);
@@ -116,7 +116,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ numbers: [3, 1, 4, 1, 5, 9, 2, 6] }];
       await testBed.ingest(indexName, docs);
@@ -140,7 +140,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ tags: ['single'] }];
       await testBed.ingest(indexName, docs);
@@ -168,7 +168,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { tags: ['charlie', 'alpha', 'bravo'], event: { kind: 'test' }, status: 'doc1' },
@@ -211,7 +211,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         // Use a non-empty placeholder for sorted_tags to ensure a mapping exists in ES|QL
         const docs = [
@@ -266,7 +266,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithField = { tags: ['charlie', 'alpha', 'bravo'], status: 'doc1' };
       const docWithoutField = { status: 'doc2' }; // Should pass through
@@ -291,7 +291,7 @@ apiTest.describe(
           } as SortProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

@@ -14,6 +14,7 @@ import { GRAPH_CALLOUT_TEST_ID, GRAPH_CALLOUT_LINK_TEST_ID } from '../test_ids';
 
 const mockLinks = {
   integrationUrl: '/app/integrations/browse/security/asset_inventory',
+  entityStoreUrl: '/app/security/entity_analytics_management',
   discoverUrl: '/app/discover',
 };
 

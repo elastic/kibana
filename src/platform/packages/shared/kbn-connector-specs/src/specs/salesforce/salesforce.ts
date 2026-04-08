@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-
 const SALESFORCE_API_VERSION = 'v66.0';
 
 /** Derive instance base URL from the full token URL (strip /services/oauth2/token and any path). */
@@ -65,6 +64,23 @@ export const SalesforceConnector: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: 'api refresh_token',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/authorize',
+            },
+            tokenUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/token',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
     ],
   },
 
@@ -99,7 +115,7 @@ export const SalesforceConnector: ConnectorSpec = {
         sobjectName: z
           .string()
           .describe(
-            'SObject API name (e.g. Account, Contact). Must match the object that owns the record.'
+            'SObject API name (standard or custom, e.g. Account, Contact, MyObject__c). Must match the object that owns the record.'
           ),
         recordId: z
           .string()
@@ -156,12 +172,12 @@ export const SalesforceConnector: ConnectorSpec = {
         searchTerm: z
           .string()
           .describe(
-            'Search phrase. Use specific terms to narrow results (e.g. account name, keyword).'
+            'Search phrase for SOSL full-text search (e.g. "Acme Corp" or "Q4 renewal"). Only searches objects listed in returning; not all text fields are indexed; results capped at ~2000. Prefer query (SOQL) for structured filtering; use search for broad text discovery.'
           ),
         returning: z
           .string()
           .describe(
-            'Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep result size down.'
+            'Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep result size down. Custom objects require "Allow Search" enabled. Use describe to discover object names.'
           ),
         nextRecordsUrl: z.string().optional().describe('Pagination URL from previous response'),
       }),
@@ -190,7 +206,11 @@ export const SalesforceConnector: ConnectorSpec = {
 
     describe: {
       input: z.object({
-        sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c).'),
+        sobjectName: z
+          .string()
+          .describe(
+            'SObject API name. Use before query or search to discover field names, relationships, and picklist values. Common standard objects you can describe without prior discovery: Account (companies/orgs), Contact (people linked to Account), Opportunity (sales deals with stage/amount/close date), Case (support tickets), Lead (unqualified prospects), Task (action items/follow-ups), ContentVersion (file/attachment versions; use with ContentDocumentLink for downloads). Custom objects always end with __c (e.g. MyObject__c).'
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string };
@@ -206,8 +226,15 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     download_file: {
+      isTool: true,
+      description:
+        'Download a file from Salesforce by its ContentVersion Id. Returns the file as base64-encoded data with its content type. WARNING: Returns potentially large base64 payloads. Only call this when you have a plan to process the binary data (e.g. via an Elasticsearch ingest pipeline attachment processor). Use SOQL on ContentDocumentLink and ContentVersion to discover file Ids first.',
       input: z.object({
-        contentVersionId: z.string().describe('ContentVersion record Id from query.'),
+        contentVersionId: z
+          .string()
+          .describe(
+            'ContentVersion record Id (15 or 18 chars). Get from SOQL on ContentVersion or ContentDocumentLink. Returns base64-encoded file content and content-type.'
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { contentVersionId: string };
@@ -248,4 +275,32 @@ export const SalesforceConnector: ConnectorSpec = {
       }
     },
   },
+
+  skill: [
+    '## Salesforce connector — LLM usage guide',
+    '',
+    '### Discovery: always describe before querying',
+    'Before writing a SOQL query or SOSL search against an unfamiliar object, call `describe` with the SObject API name.',
+    '`describe` returns every field name, its type, relationships to other objects, and picklist values.',
+    '',
+    '### Choosing between get_record, list_records, and query',
+    '- `get_record`: use when you already have a record Id and want all fields for that single record.',
+    '- `list_records`: use when you need a quick list of Ids for a known object type with no filtering.',
+    '  Returns only `Id` by default; follow up with `get_record` or `query` for field details.',
+    '- `query`: use when you need filtering (`WHERE`), specific field selection, sorting, or joins across objects.',
+    '  This is the most flexible option and should be preferred when more than just Ids are needed.',
+    '',
+    '### File downloads',
+    'Salesforce stores files as `ContentVersion` records linked to any object via `ContentDocumentLink`.',
+    'Workflow to download a file:',
+    '1. Query `ContentDocumentLink` to find file links for a record:',
+    "   `SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = '<recordId>'`",
+    '2. Query `ContentVersion` to get the version Id:',
+    "   `SELECT Id, Title, FileType FROM ContentVersion WHERE ContentDocumentId = '<docId>' AND IsLatest = true LIMIT 1`",
+    '3. Call `download_file` with the `ContentVersion` Id.',
+    '   The response includes `base64`-encoded file content and `contentType`.',
+    '   WARNING: download_file returns potentially large base64 payloads. Only call it when you',
+    '   have a plan to process the binary data (e.g. via an Elasticsearch ingest pipeline',
+    '   attachment processor to extract text).',
+  ].join('\n'),
 };

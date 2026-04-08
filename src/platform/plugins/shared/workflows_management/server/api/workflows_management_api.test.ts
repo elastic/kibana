@@ -655,5 +655,40 @@ steps:
       expect(passedRequest).toBe(mockRequest);
       expect(result).toBe('scheduled-exec-123');
     });
+
+    it('passes schedule metadata through to the execution engine context', async () => {
+      const mockWorkflowsExecutionEngine = {
+        scheduleWorkflow: jest
+          .fn()
+          .mockResolvedValue({ workflowExecutionId: 'scheduled-with-meta' }),
+        isEventDrivenExecutionEnabled: jest.fn().mockReturnValue(true),
+        isLogTriggerEventsEnabled: jest.fn().mockReturnValue(true),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const workflow = {
+        id: 'wf-1',
+        name: 'Test Workflow',
+        enabled: true,
+        definition: { triggers: [{ type: 'cases.updated' }], steps: [] },
+        yaml: 'name: Test Workflow\ntriggers: [{ type: "cases.updated" }]\nsteps: []',
+      };
+      const scheduleMeta = {
+        eventDispatchTimestamp: '2024-01-01T00:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      };
+
+      await api.scheduleWorkflow(
+        workflow as any,
+        'default',
+        { event: { caseId: '1' } },
+        mockRequest,
+        'cases.updated',
+        scheduleMeta
+      );
+
+      const [, passedContext] = mockWorkflowsExecutionEngine.scheduleWorkflow.mock.calls[0];
+      expect(passedContext.metadata).toEqual(scheduleMeta);
+    });
   });
 });

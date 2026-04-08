@@ -31,7 +31,7 @@ export function getTranslateRuleGraph({
     logger,
   });
   const translationResultNode = getTranslationResultNode();
-  const inlineQueryNode = getInlineQueryNode({ model, logger });
+  const inlineQueryNode = getInlineQueryNode({ model, logger, telemetryClient });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({

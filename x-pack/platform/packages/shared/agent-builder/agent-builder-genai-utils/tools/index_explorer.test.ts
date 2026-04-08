@@ -49,6 +49,59 @@ describe('createIndexSelectorPrompt', () => {
   });
 });
 
+describe('formatResource', () => {
+  it('formats a resource with description and fields', () => {
+    const result = formatResource({
+      type: EsResourceType.index,
+      name: 'my-index',
+      description: 'My index description',
+      fields: ['field1', 'field2', 'field3'],
+    });
+    expect(result).toEqual(
+      '- my-index (index): My index description\n  fields: field1, field2, field3'
+    );
+  });
+
+  it('omits description when not provided', () => {
+    const result = formatResource({
+      type: EsResourceType.dataStream,
+      name: 'logs-nginx',
+      fields: ['@timestamp', 'message'],
+    });
+    expect(result).toEqual('- logs-nginx (data_stream)\n  fields: @timestamp, message');
+  });
+
+  it('omits fields line when fields is empty', () => {
+    const result = formatResource({
+      type: EsResourceType.alias,
+      name: 'my-alias',
+      description: 'An alias',
+      fields: [],
+    });
+    expect(result).toEqual('- my-alias (alias): An alias');
+  });
+
+  it('omits fields line when fields is undefined', () => {
+    const result = formatResource({
+      type: EsResourceType.alias,
+      name: 'my-alias',
+    });
+    expect(result).toEqual('- my-alias (alias)');
+  });
+
+  it('truncates fields to 10 entries', () => {
+    const fields = Array.from({ length: 15 }, (_, i) => `field${i + 1}`);
+    const result = formatResource({
+      type: EsResourceType.index,
+      name: 'big-index',
+      fields,
+    });
+    expect(result).toContain('fields: field1,');
+    expect(result).toContain('[and 5 more]');
+    expect(result).not.toContain('field11');
+  });
+});
+
 describe('indexExplorer', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let model: ScopedModel;

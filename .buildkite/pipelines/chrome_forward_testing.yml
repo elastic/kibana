@@ -58,7 +58,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       # Unit-tests don't depend on Chrome's versions, integration tests , so we don't need to run those
       LIMIT_CONFIG_TYPE: 'functional'
@@ -118,6 +118,7 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -132,6 +133,7 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -384,6 +386,7 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -398,6 +401,7 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -412,6 +416,7 @@ steps:
     label: 'Osquery Cypress Tests on Serverless'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
