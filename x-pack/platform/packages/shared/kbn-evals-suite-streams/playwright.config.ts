@@ -18,17 +18,16 @@ export default defineConfig({
   ...baseConfig,
   workers: 20,
   fullyParallel: true,
-  projects:
-    baseConfig.projects?.flatMap((project) => [
-      {
-        name: `setup-${project.name}`,
-        use: project.use,
-        testMatch: /global\.setup\.ts/,
-        timeout: GLOBAL_SETUP_TIMEOUT_MS,
-      },
-      {
-        ...project,
-        dependencies: [`setup-${project.name}`],
-      },
-    ]) ?? [],
+  projects: [
+    {
+      name: 'setup',
+      testMatch: /global\.setup\.ts/,
+      use: baseConfig.projects?.[0]?.use,
+      timeout: GLOBAL_SETUP_TIMEOUT_MS,
+    },
+    ...(baseConfig.projects?.map((project) => ({
+      ...project,
+      dependencies: ['setup'],
+    })) ?? []),
+  ],
 });

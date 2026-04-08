@@ -32,6 +32,8 @@ globalSetupHookWithSynthtrace(
     }
 
     log.info('[streams eval setup] forking child streams and indexing synthtrace data');
+
+    // Clean up child streams from previous runs so forks don't 409
     await apiServices.streams.clearStreamChildren('logs.otel');
 
     for (const example of indexModeExamples) {
