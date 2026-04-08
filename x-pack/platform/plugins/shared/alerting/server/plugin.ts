@@ -252,7 +252,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
-  private changeTrackingService: IChangeTrackingService;
+  private changeTrackingService?: IChangeTrackingService;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -272,7 +272,9 @@ export class AlertingPlugin {
     this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
     this.enabledRuleTypes =
       this.config.enabledRuleTypes != null ? new Set(this.config.enabledRuleTypes) : null;
-    this.changeTrackingService = new ChangeTrackingService(this.logger, this.kibanaVersion);
+    if (this.config.ruleChangeTracking.enabled) {
+      this.changeTrackingService = new ChangeTrackingService(this.logger, this.kibanaVersion);
+    }
   }
 
   public setup(
@@ -566,14 +568,14 @@ export class AlertingPlugin {
               ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
           }
 
-          // There are many alert types but they all belong to a specific solution
-          // (security, stack, observability) which in turn determines the business
-          // domain. We register the desire for each business domain to track historical
-          // changes separately. Then we initialize during plugin start() phase
-          // (once esClient.asInternalUser becomes available).
-          if (ruleType.trackChanges) {
-            const module = ruleType.solution;
-            this.changeTrackingService.register(module);
+          // Rule Change Tracking
+          // There are many alerting rule types but they all belong to a specific solution
+          // (security, stack, observability).
+          if (this.changeTrackingService) {
+            const { scope } = this.config.ruleChangeTracking;
+            if (scope.includes('all') || scope.includes(ruleType.solution)) {
+              this.changeTrackingService.register(ruleType.solution);
+            }
           }
 
           ruleTypeRegistry.register(ruleType);
@@ -618,8 +620,8 @@ export class AlertingPlugin {
       logger,
       taskRunnerFactory,
       ruleTypeRegistry,
-      changeTrackingService,
       rulesClientFactory,
+      changeTrackingService,
       alertingAuthorizationClientFactory,
       rulesSettingsClientFactory,
       security,
@@ -653,9 +655,8 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
-    // This is where we initialize the change tracking service using
-    // the priviledged elasticsearch client.
-    changeTrackingService.initialize(core.elasticsearch.client.asInternalUser);
+    changeTrackingService?.initialize(core.elasticsearch.client.asInternalUser);
+
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       logger,

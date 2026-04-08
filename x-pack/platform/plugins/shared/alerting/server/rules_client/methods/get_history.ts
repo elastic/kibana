@@ -33,12 +33,10 @@ export interface GetHistoryByParams {
   sort?: estypes.Sort;
 }
 
-export async function getHistoryForRule(
+export async function getHistory(
   context: RulesClientContext,
   params: GetHistoryByParams
 ): Promise<GetRuleHistoryResult> {
-  context.logger.debug(`getHistoryForRule(): getting history log for rule ${params.ruleId}`);
-
   const { spaceId } = context;
   const { module, ruleId, changeId } = params;
   const { id, attributes } = await getRuleSo({
@@ -64,7 +62,7 @@ export async function getHistoryForRule(
     throw error;
   }
 
-  if (context.changeTrackingService?.initialized(module)) {
+  if (context.changeTrackingService?.isInitialized(module)) {
     const { page = 1, perPage = 10 } = params;
     const opts: GetChangeHistoryOptions = {
       size: perPage,
@@ -89,8 +87,13 @@ export async function getHistoryForRule(
 const mapHistoryItem =
   (context: RulesClientContext) =>
   (item: ChangeHistoryDocument): RuleChangeHistoryDocument => {
-    const { attributes, references } = (item.object.snapshot ?? {}) as unknown as RuleSnapshot;
+    const { attributes, references } = item.object.snapshot as unknown as RuleSnapshot;
 
+    // Transform to rule domain.
+    // This will be best effort by necessity. Filling gaps as needed.
+    // Bear in mind that change histories are stored indefinitely
+    // so that changes in rule schema over time could cause problems
+    // (they will need to be additive-only and tested across versions).
     const ruleDomain = transformRuleAttributesToRuleDomain(
       attributes,
       {

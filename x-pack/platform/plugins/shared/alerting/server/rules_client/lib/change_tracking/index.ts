@@ -19,9 +19,9 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ChangeHistoryClient } from '@kbn/change-history';
 import type { RawRule } from '../../../types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../..';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
-export const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
+const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
   attributes: {
     executionStatus: true,
     monitoring: true,
@@ -56,10 +56,10 @@ export interface GetRuleHistoryResult extends GetHistoryResult {
 
 export interface IChangeTrackingService {
   register(module: RuleTypeSolution): void;
-  initialized(module: RuleTypeSolution): void;
+  isInitialized(module: RuleTypeSolution): boolean;
   initialize(elasticsearchClient: ElasticsearchClient): void;
-  log(change: RuleChange, opts: LogChangeHistoryOptions): void;
-  logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions): void;
+  log(change: RuleChange, opts: LogChangeHistoryOptions): Promise<void>;
+  logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions): Promise<void>;
   getHistory(
     module: RuleTypeSolution,
     spaceId: string,
@@ -91,26 +91,26 @@ export class ChangeTrackingService implements IChangeTrackingService {
     }
   }
 
-  initialized(module: RuleTypeSolution) {
+  isInitialized(module: RuleTypeSolution) {
     return !!this.clients[module]?.isInitialized();
   }
 
-  async initialize(elasticsearchClient: ElasticsearchClient) {
-    this.logger.warn(`ChangeTrackingService.initialize(esClient)`);
-    for (const module of this.modules) {
-      // Initialize the change history client
-      const client = this.clients[module];
-      await client.initialize(elasticsearchClient);
-
-      if (!client.isInitialized()) {
-        // TODO: Dont throw all the way up to the plugin.start().
-        const error = new Error('Change history client not initialized properly');
-        this.logger.error(error);
+  initialize(elasticsearchClient: ElasticsearchClient) {
+    this.logger.debug(`ChangeTrackingService.initialize(esClient)`);
+    void (async () => {
+      // Initialize each change history client (in sequence, using IIFE)
+      for (const [module, client] of Object.entries(this.clients)) {
+        try {
+          await client.initialize(elasticsearchClient);
+        } catch (cause) {
+          const error = new Error(
+            `Unable to initialize change tracking for [${module}, ${this.dataset}]`,
+            { cause }
+          );
+          this.logger.error(error);
+        }
       }
-
-      // Step 4: Stash the client for later use
-      this.clients[module] = client;
-    }
+    })();
   }
 
   async log(change: RuleChange, opts: LogChangeHistoryOptions) {
@@ -118,10 +118,6 @@ export class ChangeTrackingService implements IChangeTrackingService {
   }
 
   async logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions) {
-    this.logger.warn(
-      `ChangeTrackingService.logBulkChange(action: ${opts.action}, userId: ${opts.username}, changes: ${changes.length})`
-    );
-
     // Group rule changes per solution
     const correlationId = crypto.randomBytes(16).toString('hex');
     const groups = changes.reduce((result, change) => {
@@ -130,7 +126,6 @@ export class ChangeTrackingService implements IChangeTrackingService {
       if (!objects) {
         result.set(module, (objects = []));
       }
-      // TODO: Dont forget `references`, these are kept separate in the SOs
       objects.push({ objectType, objectId, before, after });
       return result;
     }, new Map<RuleTypeSolution, ObjectChange[]>());
@@ -140,7 +135,14 @@ export class ChangeTrackingService implements IChangeTrackingService {
     for (const module of groups.keys()) {
       const client = this.clients[module];
       const groupedChanges = groups.get(module);
-      if (client && groupedChanges) {
+      if (!client) {
+        const error = new Error(
+          `Unable to log changes. Change history client not initialized for [${module}, ${this.dataset}]`
+        );
+        this.logger.error(error);
+        continue;
+      }
+      if (groupedChanges) {
         try {
           await client.logBulk(groupedChanges, {
             ...opts,
@@ -150,7 +152,10 @@ export class ChangeTrackingService implements IChangeTrackingService {
           });
         } catch (err) {
           // Just catch the error.
-          const error = new Error(`Error saving change history: ${err}`, { cause: err });
+          const error = new Error(
+            `Error saving change history for [${module}, ${this.dataset}]: ${err}`,
+            { cause: err }
+          );
           this.logger.error(error);
         }
       }
@@ -165,7 +170,9 @@ export class ChangeTrackingService implements IChangeTrackingService {
   ): Promise<GetHistoryResult> {
     const client = this.clients[module];
     if (!client) {
-      const error = new Error('Change history client not initialized properly');
+      const error = new Error(
+        `Unable to get history. Change history client not initialized for [${module}, ${this.dataset}]`
+      );
       this.logger.error(error);
       throw error;
     }
