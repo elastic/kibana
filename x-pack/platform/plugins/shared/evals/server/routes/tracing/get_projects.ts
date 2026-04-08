@@ -41,6 +41,9 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
+          const ES_MAX_TERMS_COUNT = 60_000;
+          const maxTraceIdsPerProject = Math.min(10_000, Math.floor(ES_MAX_TERMS_COUNT / perPage));
+
           const rangeFilter: Array<Record<string, unknown>> = [];
           if (from || to) {
             const range: Record<string, string> = {};
@@ -90,7 +93,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                     },
                   },
                   trace_ids: {
-                    terms: { field: 'trace_id', size: 10000 },
+                    terms: { field: 'trace_id', size: maxTraceIdsPerProject },
                   },
                   error_count: {
                     filter: {
