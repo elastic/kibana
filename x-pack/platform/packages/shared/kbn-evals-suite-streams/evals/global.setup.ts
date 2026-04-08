@@ -24,7 +24,10 @@ globalSetupHookWithSynthtrace(
     log.info('[streams eval setup] enabling streams');
     await apiServices.streams.enable();
 
+    // Dissect/grok pattern extraction (and other routes under logs.otel) need streams enabled,
+    // but not the fork + synthtrace path below—that is only for index-mode pipeline examples.
     if (indexModeExamples.length === 0) {
+      log.info('[streams eval setup] no index-mode pipeline examples; skipping fork/synthtrace');
       return;
     }
 
