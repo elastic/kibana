@@ -141,6 +141,7 @@ tags:
     description: |
       Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
     x-displayName: Fleet Server hosts
+  - name: Fleet service tokens
   - name: Fleet uninstall tokens
     description: |
       Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
@@ -51609,6 +51610,79 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/service_tokens:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/service_tokens</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-service-tokens
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                remote:
+                  default: false
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: string
+                required:
+                  - name
+                  - value
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Create a service token
+      tags:
+        - Fleet service tokens
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
