@@ -122,6 +122,13 @@ export const Zoom: ConnectorSpec = {
       },
       {
         type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
         defaults: {
           authorizationUrl: 'https://zoom.us/oauth/authorize',
           tokenUrl: 'https://zoom.us/oauth/token',
