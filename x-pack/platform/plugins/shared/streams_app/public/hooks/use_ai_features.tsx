@@ -74,7 +74,7 @@ export function useAIFeatures(): AIFeatures | null {
   const selectedConnector = (genAiConnectors.connectors || []).find(
     (connector) => connector.connectorId === genAiConnectors.selectedConnector
   );
-  const isManagedAIConnector = selectedConnector?.isPreconfigured || false;
+  const isManagedAIConnector = selectedConnector?.isEis || false;
 
   return {
     loading: false,

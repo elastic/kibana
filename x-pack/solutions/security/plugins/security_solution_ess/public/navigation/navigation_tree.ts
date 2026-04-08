@@ -110,6 +110,10 @@ export const createNavigationTree = (
             title: i18nStrings.launchPad.migrations.title,
             children: [
               {
+                id: SecurityPageName.siemMigrationsManage,
+                link: securityLink(SecurityPageName.siemMigrationsManage),
+              },
+              {
                 id: SecurityPageName.siemMigrationsRules,
                 link: securityLink(SecurityPageName.siemMigrationsRules),
               },
@@ -199,6 +203,7 @@ export const createNavigationTree = (
                   renderAs: 'panelOpener' as const,
                   children: [
                     { link: 'management:rules' as const },
+                    { link: 'management:episodes' as const },
                     { link: 'management:notification_policies' as const },
                   ],
                 },

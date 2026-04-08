@@ -15,6 +15,7 @@ import {
   type AttachmentPanel,
   type VisualizationContent,
 } from '@kbn/dashboard-agent-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { VisualizationFailure } from './utils';
 import { getErrorMessage } from './utils';
 
@@ -75,7 +76,7 @@ export const createVisualizationResolver = ({
 }): ResolveVisualizationConfig => {
   return async ({ operationType, identifier, nlQuery, index, chartType, esql, existingPanel }) => {
     try {
-      if (existingPanel && existingPanel.type !== 'lens') {
+      if (existingPanel && existingPanel.type !== LENS_EMBEDDABLE_TYPE) {
         return createVisualizationFailureResult(
           operationType,
           identifier,
@@ -84,7 +85,7 @@ export const createVisualizationResolver = ({
       }
 
       const existingConfig =
-        existingPanel?.type === 'lens'
+        existingPanel?.type === LENS_EMBEDDABLE_TYPE
           ? (fromEmbeddablePanel(existingPanel).config as VisualizationConfig)
           : undefined;
 
@@ -106,7 +107,7 @@ export const createVisualizationResolver = ({
       return {
         type: 'success',
         visContent: {
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: result.validatedConfig,
         },
       };

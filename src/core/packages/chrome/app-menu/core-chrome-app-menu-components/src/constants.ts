@@ -8,16 +8,13 @@
  */
 
 /**
- * The maximum number of items that can be displayed in the app menu before overflowing into
- * "More" popover.
- * If the number of items exceeds this limit, the extra items will be shown in an overflow
- * popover.
- * Primary and secondary action items count towards this limit but always remain visible and are
- * not moved to the overflow popover.
- * The overflow button itself does not count towards this limit.
- * @deprecated The number of visible items will be reduced to 3 in a future release.
+ * The maximum number of item slots on the left side of the app menu.
+ * - If the number of items is within this limit, all items are shown.
+ * - If the number of items exceeds this limit, one slot is reserved for the overflow
+ *   button, so only (limit - 1) items are visible and the rest go into the overflow popover.
+ * The primary action button is on the right side and does not count towards this limit.
  */
-export const APP_MENU_ITEM_LIMIT = 5;
+export const APP_MENU_ITEM_LIMIT = 3;
 export const APP_MENU_NOTIFICATION_INDICATOR_TOP = 2;
 export const APP_MENU_NOTIFICATION_INDICATOR_LEFT = 25;
 export const DEFAULT_POPOVER_WIDTH = 200;
