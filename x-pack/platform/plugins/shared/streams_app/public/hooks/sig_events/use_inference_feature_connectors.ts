@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { AIConnector } from '@kbn/inference-connectors';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../use_kibana';
 
 export interface UseInferenceFeatureConnectorsResult {
-  resolvedConnector: AIConnector | undefined;
-  allConnectors: AIConnector[];
+  resolvedConnectorId: string | undefined;
   loading: boolean;
   error: Error | undefined;
 }
@@ -29,8 +27,7 @@ export function useInferenceFeatureConnectors(
   });
 
   return {
-    resolvedConnector: query.data?.[0],
-    allConnectors: query.data ?? [],
+    resolvedConnectorId: query.data?.[0]?.id,
     loading: query.isLoading,
     error: query.error ?? undefined,
   };

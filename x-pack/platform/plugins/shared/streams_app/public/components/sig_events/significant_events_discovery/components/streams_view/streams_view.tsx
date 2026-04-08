@@ -102,7 +102,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     string | undefined
   >();
   const displayDiscoveryConnectorId =
-    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnector?.id;
+    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnectorId;
 
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
     steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
@@ -111,13 +111,13 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
 
   const displayConnectors = useMemo(
     () => ({
-      features: onboardingConfig.connectors.features ?? featuresConnectors.resolvedConnector?.id,
-      queries: onboardingConfig.connectors.queries ?? queriesConnectors.resolvedConnector?.id,
+      features: onboardingConfig.connectors.features ?? featuresConnectors.resolvedConnectorId,
+      queries: onboardingConfig.connectors.queries ?? queriesConnectors.resolvedConnectorId,
     }),
     [
       onboardingConfig.connectors,
-      featuresConnectors.resolvedConnector,
-      queriesConnectors.resolvedConnector,
+      featuresConnectors.resolvedConnectorId,
+      queriesConnectors.resolvedConnectorId,
     ]
   );
 
@@ -139,6 +139,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   >({});
   const router = useStreamsAppRouter();
   const aiFeatures = useAIFeatures();
+  const genAiConnectors = aiFeatures?.genAiConnectors;
+  const isConnectorCatalogUnavailable =
+    !genAiConnectors?.connectors?.length || !!genAiConnectors?.loading || !!genAiConnectors?.error;
   const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
   const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
     useInsightsDiscoveryApi();
@@ -373,16 +376,15 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                 <OnboardingConfigPopover
                   config={onboardingConfig}
                   displayConnectors={displayConnectors}
-                  featuresConnectors={featuresConnectors}
-                  queriesConnectors={queriesConnectors}
+                  connectorList={genAiConnectors?.connectors ?? []}
+                  connectorError={genAiConnectors?.error}
                   onConfigChange={setOnboardingConfig}
                   onRun={onBulkOnboardStreamsClick}
                   isRunDisabled={
                     selectedStreams.length === 0 ||
+                    isConnectorCatalogUnavailable ||
                     featuresConnectors.loading ||
-                    queriesConnectors.loading ||
-                    !!featuresConnectors.error ||
-                    !!queriesConnectors.error
+                    queriesConnectors.loading
                   }
                 />
               </EuiFlexItem>
@@ -395,7 +397,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                 <EuiButtonEmpty
                   iconType="crosshair"
                   onClick={() => scheduleInsightsTask()}
-                  disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
+                  disabled={isConnectorCatalogUnavailable}
                   isLoading={isSchedulingInsights || isWaitingForInsightsTask}
                   data-test-subj="significant_events_discover_insights_button"
                   size="xs"
@@ -406,15 +408,15 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
               <EuiFlexItem grow={false}>
                 <InsightsConnectorPopover
                   displayConnectorId={displayDiscoveryConnectorId}
-                  connectors={discoveryConnectors}
+                  connectorList={genAiConnectors?.connectors ?? []}
+                  connectorError={genAiConnectors?.error}
                   onConnectorChange={setDiscoveryConnectorOverride}
                   onRun={scheduleInsightsTask}
                   isRunDisabled={
-                    !aiFeatures?.genAiConnectors?.connectors?.length ||
+                    isConnectorCatalogUnavailable ||
                     isSchedulingInsights ||
                     isWaitingForInsightsTask ||
-                    discoveryConnectors.loading ||
-                    !!discoveryConnectors.error
+                    discoveryConnectors.loading
                   }
                 />
               </EuiFlexItem>

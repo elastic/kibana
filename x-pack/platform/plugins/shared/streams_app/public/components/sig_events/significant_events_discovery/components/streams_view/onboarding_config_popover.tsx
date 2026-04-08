@@ -19,10 +19,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { useBoolean } from '@kbn/react-hooks';
 import { OnboardingStep } from '@kbn/streams-schema';
 import React, { useCallback } from 'react';
-import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
 import { buildConnectorSelectOptions } from './connector_select_options';
 import {
   CONNECTOR_LOAD_ERROR,
@@ -56,7 +56,8 @@ interface StepRowProps {
   label: string;
   enabled: boolean;
   displayConnectorId: string | undefined;
-  connectors: UseInferenceFeatureConnectorsResult;
+  connectorList: InferenceConnector[];
+  connectorError: Error | undefined;
   onToggle: (step: OnboardingStep, enabled: boolean) => void;
   onConnectorChange: (step: OnboardingStep, connectorId: string) => void;
 }
@@ -66,13 +67,18 @@ const StepRow = ({
   label,
   enabled,
   displayConnectorId,
-  connectors,
+  connectorList,
+  connectorError,
   onToggle,
   onConnectorChange,
 }: StepRowProps) => {
   const selectId = useGeneratedHtmlId({ prefix: `onboardingStep_${step}` });
 
-  const connectorOptions = buildConnectorSelectOptions(connectors.allConnectors);
+  const connectorOptions = buildConnectorSelectOptions(connectorList);
+  const effectiveConnectorId =
+    displayConnectorId && connectorOptions.some((opt) => opt.value === displayConnectorId)
+      ? displayConnectorId
+      : connectorOptions[0]?.value;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -84,19 +90,19 @@ const StepRow = ({
           compressed
         />
       </EuiFlexItem>
-      {connectors.error ? (
+      {connectorError ? (
         <EuiFlexItem>
-          <EuiCallOut color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
+          <EuiCallOut announceOnMount color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
         </EuiFlexItem>
       ) : (
-        displayConnectorId &&
+        effectiveConnectorId &&
         connectorOptions.length > 0 && (
           <EuiFlexItem>
             <EuiFormRow display="rowCompressed" aria-label={label}>
               <EuiSuperSelect
                 id={selectId}
                 options={connectorOptions}
-                valueOfSelected={displayConnectorId}
+                valueOfSelected={effectiveConnectorId}
                 onChange={(value) => onConnectorChange(step, value)}
                 disabled={!enabled}
                 compressed
@@ -113,8 +119,8 @@ const StepRow = ({
 interface OnboardingConfigPopoverProps {
   config: OnboardingConfig;
   displayConnectors: OnboardingConfig['connectors'];
-  featuresConnectors: UseInferenceFeatureConnectorsResult;
-  queriesConnectors: UseInferenceFeatureConnectorsResult;
+  connectorList: InferenceConnector[];
+  connectorError: Error | undefined;
   onConfigChange: (config: OnboardingConfig) => void;
   onRun: () => void;
   isRunDisabled: boolean;
@@ -127,19 +133,14 @@ const popoverContentStyle = css`
 export const OnboardingConfigPopover = ({
   config,
   displayConnectors,
-  featuresConnectors,
-  queriesConnectors,
+  connectorList,
+  connectorError,
   onConfigChange,
   onRun,
   isRunDisabled,
 }: OnboardingConfigPopoverProps) => {
   const [isOpen, { off: close, toggle }] = useBoolean(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'onboardingConfigPopover' });
-
-  const connectorsByStep: Record<OnboardingStep, UseInferenceFeatureConnectorsResult> = {
-    [OnboardingStep.FeaturesIdentification]: featuresConnectors,
-    [OnboardingStep.QueriesGeneration]: queriesConnectors,
-  };
 
   const handleToggle = useCallback(
     (step: OnboardingStep, enabled: boolean) => {
@@ -190,7 +191,8 @@ export const OnboardingConfigPopover = ({
               label={label}
               enabled={config.steps.includes(step)}
               displayConnectorId={displayConnectors[STEP_CONNECTOR_KEY[step]]}
-              connectors={connectorsByStep[step]}
+              connectorList={connectorList}
+              connectorError={connectorError}
               onToggle={handleToggle}
               onConnectorChange={handleConnectorChange}
             />

@@ -18,9 +18,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback } from 'react';
-import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
 import { buildConnectorSelectOptions } from './connector_select_options';
 import {
   CONNECTOR_LOAD_ERROR,
@@ -31,7 +31,8 @@ import {
 
 interface InsightsConnectorPopoverProps {
   displayConnectorId: string | undefined;
-  connectors: UseInferenceFeatureConnectorsResult;
+  connectorList: InferenceConnector[];
+  connectorError: Error | undefined;
   onConnectorChange: (connectorId: string) => void;
   onRun: () => void;
   isRunDisabled: boolean;
@@ -43,7 +44,8 @@ const popoverContentStyle = css`
 
 export const InsightsConnectorPopover = ({
   displayConnectorId,
-  connectors,
+  connectorList,
+  connectorError,
   onConnectorChange,
   onRun,
   isRunDisabled,
@@ -52,7 +54,11 @@ export const InsightsConnectorPopover = ({
   const popoverId = useGeneratedHtmlId({ prefix: 'insightsConnectorPopover' });
   const selectId = useGeneratedHtmlId({ prefix: 'insightsConnectorSelect' });
 
-  const connectorOptions = buildConnectorSelectOptions(connectors.allConnectors);
+  const connectorOptions = buildConnectorSelectOptions(connectorList);
+  const effectiveConnectorId =
+    displayConnectorId && connectorOptions.some((opt) => opt.value === displayConnectorId)
+      ? displayConnectorId
+      : connectorOptions[0]?.value;
 
   const handleRun = useCallback(() => {
     close();
@@ -79,19 +85,19 @@ export const InsightsConnectorPopover = ({
     >
       <EuiPopoverTitle paddingSize="s">{INSIGHTS_CONNECTOR_POPOVER_TITLE}</EuiPopoverTitle>
       <EuiFlexGroup direction="column" gutterSize="m" css={popoverContentStyle}>
-        {connectors.error ? (
+        {connectorError ? (
           <EuiFlexItem>
-            <EuiCallOut color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
+            <EuiCallOut announceOnMount color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
           </EuiFlexItem>
         ) : (
-          displayConnectorId &&
+          effectiveConnectorId &&
           connectorOptions.length > 0 && (
             <EuiFlexItem>
               <EuiFormRow display="rowCompressed" aria-label={INSIGHTS_CONNECTOR_POPOVER_TITLE}>
                 <EuiSuperSelect
                   id={selectId}
                   options={connectorOptions}
-                  valueOfSelected={displayConnectorId}
+                  valueOfSelected={effectiveConnectorId}
                   onChange={onConnectorChange}
                   compressed
                   fullWidth
