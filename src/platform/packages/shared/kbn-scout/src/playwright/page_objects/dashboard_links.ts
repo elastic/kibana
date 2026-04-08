@@ -206,15 +206,15 @@ export class DashboardLinks {
     }
 
     await this.setEuiSwitch(
-      this.page.testSubj.locator('dashboardNavigationOptions--useFilters--checkbox'),
+      this.page.testSubj.locator('dashboardDrillDownOptions--useCurrentFilters--checkbox'),
       useFilters
     );
     await this.setEuiSwitch(
-      this.page.testSubj.locator('dashboardNavigationOptions--useTimeRange--checkbox'),
+      this.page.testSubj.locator('dashboardDrillDownOptions--useCurrentDateRange--checkbox'),
       useTimeRange
     );
     await this.setEuiSwitch(
-      this.page.testSubj.locator('dashboardNavigationOptions--openInNewTab--checkbox'),
+      this.page.testSubj.locator('dashboardDrillDownOptions--openInNewTab--checkbox'),
       openInNewTab
     );
 
