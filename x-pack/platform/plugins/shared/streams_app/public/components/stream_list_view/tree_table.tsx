@@ -80,6 +80,20 @@ const datePickerStyle = css`
   }
 `;
 
+const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);
+
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -444,20 +458,14 @@ export function StreamsTreeTable({
                       hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
                     />
                   )}
-                  {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {Streams.QueryStream.Definition.is(item.stream) && (
+                    <>
+                      <TechnicalPreviewBadge />
+                      <QueryStreamBadge />
+                    </>
+                  )}
                   {ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) && (
-                    <EuiBetaBadge
-                      tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
-                        defaultMessage:
-                          'This feature is in technical preview. We are working on it...',
-                      })}
-                      label={i18n.translate('xpack.streams.technicalPreviewLabel', {
-                        defaultMessage: 'Technical preview',
-                      })}
-                      iconType="flask"
-                      size="s"
-                      css={{ display: 'block' }}
-                    />
+                    <TechnicalPreviewBadge />
                   )}
                   {isRoot(item.stream.name) &&
                     item.stream.name !== LOGS_ROOT_STREAM_NAME &&
