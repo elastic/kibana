@@ -77,7 +77,7 @@ export const TopNavMenuPopover = ({
       panelStyle={{
         width: popoverWidth,
       }}
-      aria-label={i18n.translate('core.chrome.appMenu.popoverAriaLabel', {
+      aria-label={i18n.translate('navigation.topNavMenu.popoverAriaLabel', {
         defaultMessage: 'App menu',
       })}
     >
