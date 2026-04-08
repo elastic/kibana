@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './data_source';
-import { dataSourceSchema, dataSourceEsqlTableTypeSchema } from './data_source';
+import { dataSourceSchema, dataSourceEsqlTypeSchema } from './data_source';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
@@ -94,7 +93,7 @@ describe('DataSource Schema', () => {
         query: 'FROM my-index | LIMIT 100',
       } satisfies DataSourceTypeESQL;
 
-      const validated = dataSourceEsqlTableTypeSchema.validate(input);
+      const validated = dataSourceEsqlTypeSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -104,36 +103,8 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
-      expect(() => dataSourceEsqlTableTypeSchema.validate(input)).toThrow(
-        /\[0.query\]: expected value of type/
-      );
-    });
-  });
-
-  describe('table type', () => {
-    it('validates a valid table configuration', () => {
-      const mockTable: Datatable = {
-        type: 'datatable',
-        columns: [{ id: 'col1', name: 'Column 1', meta: { type: 'string' } }],
-        rows: [{ col1: 'value1' }],
-      };
-
-      const input = {
-        type: 'table',
-        table: mockTable,
-      } satisfies DataSourceTypeESQL;
-
-      const validated = dataSourceEsqlTableTypeSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
-
-    it('throws on missing table', () => {
-      const input = {
-        type: 'table' as const,
-      };
-
-      expect(() => dataSourceEsqlTableTypeSchema.validate(input)).toThrow(
-        /\[1.table\]: expected value of type/
+      expect(() => dataSourceEsqlTypeSchema.validate(input)).toThrow(
+        /\[query\]: expected value of type/
       );
     });
   });
