@@ -82,7 +82,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
       {
         title: 'source_index',
         description: Array.isArray(item.config.source.index)
-          ? item.config.source.index[0]
+          ? item.config.source.index.join(', ')
           : item.config.source.index,
       },
       {
