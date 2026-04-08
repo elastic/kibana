@@ -113,6 +113,8 @@ export interface GetEntityExpandItemsOptions {
   showEntityDetailsDisabled?: boolean;
   /** Whether entity relationships is currently expanded (controls show/hide label) */
   isEntityRelationshipsExpanded?: boolean;
+  /** Whether the entity is part of the initial set of entities (e.g., from the original graph request) */
+  isInitialEntity?: boolean;
   /** Callback to toggle entity relationships on/off */
   toggleEntityRelationships?: (action: 'show' | 'hide') => void;
   /** Whether entity relationships should be disabled. Defaults to false. */
@@ -140,6 +142,7 @@ export const getEntityExpandItems = (
     shouldRender,
     showEntityDetailsDisabled = false,
     isEntityRelationshipsExpanded = false,
+    isInitialEntity = false,
     toggleEntityRelationships,
     showEntityRelationshipsDisabled = false,
   } = options;
@@ -168,10 +171,15 @@ export const getEntityExpandItems = (
       },
       showToolTip: showEntityRelationshipsDisabled,
       toolTipText: showEntityRelationshipsDisabled
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.entityRelationshipsNotAvailable',
-            { defaultMessage: 'Entity relationships not available' }
-          )
+        ? isInitialEntity
+          ? i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.initialEntityRelationshipsNotAvailable',
+              { defaultMessage: 'Cannot hide entity relationships of investigation entity' }
+            )
+          : i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.entityRelationshipsNotAvailable',
+              { defaultMessage: 'Entity relationships not available' }
+            )
         : undefined,
       toolTipProps: showEntityRelationshipsDisabled
         ? {
