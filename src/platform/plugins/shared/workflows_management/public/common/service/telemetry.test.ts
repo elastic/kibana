@@ -728,6 +728,51 @@ describe('WorkflowsBaseTelemetry', () => {
     });
   });
 
+  describe('reportWorkflowExecutionsCancelled', () => {
+    it('reports a successful bulk cancellation', () => {
+      telemetry.reportWorkflowExecutionsCancelled({
+        workflowId: 'wf-1',
+        origin: 'workflow_detail',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowExecutionEventTypes.WorkflowExecutionsCancelled,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowExecutionsCancelled],
+          workflowId: 'wf-1',
+          origin: 'workflow_detail',
+          result: 'success',
+        })
+      );
+    });
+
+    it('reports a failed bulk cancellation', () => {
+      const error = new Error('Bulk cancel failed');
+      telemetry.reportWorkflowExecutionsCancelled({
+        workflowId: 'wf-1',
+        error,
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowExecutionEventTypes.WorkflowExecutionsCancelled,
+        expect.objectContaining({
+          result: 'failed',
+          errorMessage: 'Bulk cancel failed',
+        })
+      );
+    });
+
+    it('does not include origin when not provided', () => {
+      telemetry.reportWorkflowExecutionsCancelled({
+        workflowId: 'wf-1',
+      });
+
+      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const eventData = call[1];
+      expect(eventData).not.toHaveProperty('origin');
+    });
+  });
+
   describe('reportWorkflowTestRunInitiated', () => {
     it('reports a successful test run initiation', () => {
       telemetry.reportWorkflowTestRunInitiated({

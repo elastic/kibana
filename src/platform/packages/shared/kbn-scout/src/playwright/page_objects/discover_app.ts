@@ -76,10 +76,47 @@ export class DiscoverApp {
       .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
-  async clickNewSearch() {
-    await this.page.testSubj.hover('discoverNewButton');
-    await this.page.testSubj.click('discoverNewButton');
+  private async clickAppMenuItem(
+    testId: string,
+    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
+  ) {
+    const item = this.page.testSubj.locator(testId);
+    if (!isInOverflowMenu && (await item.isVisible())) {
+      await item.click();
+      return;
+    }
+    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    const popover = this.page.testSubj.locator('app-menu-popover');
+
+    // Dismiss any stale popovers
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
+    await expect(overflowButton).toBeVisible();
+    await overflowButton.click();
+
+    // If the click was consumed by closing a stale overlay, the popover won't be open.
+    // Click the overflow button again if needed.
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+
+    await expect(popover).toBeVisible();
+    const menuItem = this.page.testSubj.locator(testId);
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+  }
+
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
+    await this.waitForDiscoverPage();
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
@@ -106,7 +143,7 @@ export class DiscoverApp {
   }
 
   async loadSavedSearch(searchName: string) {
-    await this.page.testSubj.click('discoverOpenButton');
+    await this.clickAppMenuItem('discoverOpenButton');
     await this.page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
 
     // Filter for the search
