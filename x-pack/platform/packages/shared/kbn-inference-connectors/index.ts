@@ -8,3 +8,4 @@
 export { useLoadConnectors } from './src/use_load_connectors';
 export type { UseLoadConnectorsProps, UseLoadConnectorsResult } from './src/use_load_connectors';
 export type { AIConnector } from './src/types';
+export { loadConnectors } from './src/load_connectors';

@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
+import throttle from 'lodash/throttle';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -37,8 +29,12 @@ import {
   useTriggerTypeDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
+import { DocumentationLink } from './documentation_link';
+import type { ExtraAction } from './extra_actions_bar';
+import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
+import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -164,7 +160,6 @@ export const WorkflowYAMLEditor = ({
   onStepRun,
   editorRef: parentEditorRef,
 }: WorkflowYAMLEditorProps) => {
-  const { euiTheme } = useEuiTheme();
   const { notifications, http } = useKibana().services;
 
   const saveYaml = useSaveYaml();
@@ -328,13 +323,16 @@ export const WorkflowYAMLEditor = ({
       return;
     }
 
-    editorRef.current!.onDidScrollChange(() => {
-      if (!focusedStepInfoRef.current) {
-        return;
-      }
+    const disposeListener = editorRef.current?.onDidScrollChange(
+      throttle(() => {
+        if (!focusedStepInfoRef.current || !editorRef.current) {
+          return;
+        }
 
-      updateContainerPosition(focusedStepInfoRef.current, editorRef.current!);
-    });
+        updateContainerPosition(focusedStepInfoRef.current, editorRef.current);
+      }, 50)
+    );
+    return () => disposeListener?.dispose();
   }, [isEditorMounted]);
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
@@ -513,10 +511,10 @@ export const WorkflowYAMLEditor = ({
   };
 
   useEffect(() => {
-    if (!focusedStepInfo) {
+    if (!focusedStepInfo || !editorRef.current) {
       return;
     }
-    updateContainerPosition(focusedStepInfo, editorRef.current!);
+    updateContainerPosition(focusedStepInfo, editorRef.current);
   }, [isEditorMounted, focusedStepInfo]);
 
   useEffect(() => {
@@ -524,7 +522,7 @@ export const WorkflowYAMLEditor = ({
       return;
     }
 
-    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
+    const disposable = editorRef.current?.onDidChangeCursorPosition((event) => {
       dispatch(
         setCursorPosition({
           lineNumber: event.position.lineNumber,
@@ -533,7 +531,7 @@ export const WorkflowYAMLEditor = ({
       );
     });
 
-    return () => disposable.dispose();
+    return () => disposable?.dispose();
   }, [isEditorMounted, dispatch]);
 
   // Scroll editor to highlighted step when selected from execution flyout.
@@ -634,84 +632,81 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
+  const extraActions = useMemo<ExtraAction[]>(
+    () => [
+      {
+        id: 'documentation',
+        content: <DocumentationLink />,
+        showInReadOnly: true,
+      },
+      {
+        id: 'actions-menu',
+        content: <ActionsMenuButton onClick={openActionsPopover} />,
+        showInReadOnly: false,
+      },
+      {
+        id: 'keyboard-shortcuts',
+        content: <KeyboardShortcutsPopover />,
+        showInReadOnly: true,
+      },
+    ],
+    [openActionsPopover]
+  );
+
+  // These were triggering rerendering of the actions containers on every scroll, because they were
+  // being re-created on every render. Memoizing them prevents unnecessary child re-renders.
+  const extraActionElement = useMemo(
+    () => <ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />,
+    [extraActions, isExecutionYaml]
+  );
+
+  const actionsMenuPanelProps = useMemo(() => {
+    return {
+      Button: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
+      css: { css: styles.actionsMenuPopoverPanel },
+    };
+  }, [styles.actionsMenuPopoverPanel, styles.hiddenButtonCss]);
+
+  const editorWrapperCss = useMemo(
+    () => css([styles.container, stepExecutionStyles]),
+    [styles.container, stepExecutionStyles]
+  );
+
   return (
-    <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
+    <div css={editorWrapperCss} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
-        button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
+        button={actionsMenuPanelProps.Button}
         container={containerRef.current ?? undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
-        panelProps={{ css: styles.actionsMenuPopoverPanel }}
+        panelProps={actionsMenuPanelProps.css}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       <div
         css={styles.stepActionsContainer}
-        style={positionStyles ? positionStyles : {}}
+        style={positionStyles ?? {}}
         data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
-        <div
-          css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {isAgentBuilderAvailable && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="workflows.yamlEditor.aiAgentTooltip"
-                      defaultMessage="Ask AI to help edit this workflow"
-                    />
-                  }
-                >
-                  <EuiButtonEmpty
-                    iconType="sparkles"
-                    size="xs"
-                    aria-label="Open AI Agent"
-                    onClick={() => openAgentChat()}
-                    data-test-subj="workflowYamlEditorAiAgentButton"
-                  >
-                    <FormattedMessage
-                      id="workflows.yamlEditor.aiAgentButtonLabel"
-                      defaultMessage="AI Agent"
-                    />
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            {isDevelopment && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  css={styles.downloadSchemaButton}
-                  iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
-                  size="xs"
-                  aria-label="Download JSON schema for debugging"
-                  onClick={downloadSchema}
-                  tabIndex={0}
-                  disabled={workflowJsonSchemaStrict === null}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.currentTarget.click();
-                    }
-                  }}
-                >
-                  <FormattedMessage
-                    id="workflows.yamlEditor.downloadSchemaButtonLabel"
-                    defaultMessage="JSON Schema"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
+        <div css={styles.agentBuilderSectionCss}>
+          <WorkflowYamlEditorAssistActions
+            isAgentBuilderAvailable={isAgentBuilderAvailable}
+            isDevelopment={isDevelopment}
+            workflowJsonSchema={
+              (workflowJsonSchemaStrict ?? null) as SchemasSettings['schema'] | null
+            }
+            onOpenAgentChat={openAgentChat}
+            onDownloadSchema={downloadSchema}
+          />
         </div>
-      )}
+      ) : null}
       <div
         css={styles.editorContainer}
         className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
@@ -735,12 +730,77 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          extraAction={
-            // Only show the shortcuts in edit mode
-            !isExecutionYaml ? <ActionsMenuButton onClick={openActionsPopover} /> : null
-          }
+          extraAction={extraActionElement}
         />
       </div>
     </div>
   );
 };
+
+const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAssistActions({
+  isAgentBuilderAvailable,
+  isDevelopment,
+  workflowJsonSchema,
+  onOpenAgentChat,
+  onDownloadSchema,
+}: {
+  isAgentBuilderAvailable: boolean;
+  isDevelopment: boolean;
+  workflowJsonSchema: SchemasSettings['schema'] | null;
+  onOpenAgentChat: () => void;
+  onDownloadSchema: () => void;
+}) {
+  const styles = useWorkflowEditorStyles();
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {isAgentBuilderAvailable && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="workflows.yamlEditor.aiAgentTooltip"
+                defaultMessage="Ask AI to help edit this workflow"
+              />
+            }
+          >
+            <EuiButtonEmpty
+              iconType="sparkles"
+              size="xs"
+              aria-label="Open AI Agent"
+              onClick={onOpenAgentChat}
+              data-test-subj="workflowYamlEditorAiAgentButton"
+            >
+              <FormattedMessage
+                id="workflows.yamlEditor.aiAgentButtonLabel"
+                defaultMessage="AI Agent"
+              />
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {isDevelopment && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            css={styles.downloadSchemaButton}
+            iconType={workflowJsonSchema === null ? 'warning' : 'download'}
+            size="xs"
+            aria-label="Download JSON schema for debugging"
+            onClick={onDownloadSchema}
+            tabIndex={0}
+            disabled={workflowJsonSchema === null}
+            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.currentTarget.click();
+              }
+            }}
+          >
+            <FormattedMessage
+              id="workflows.yamlEditor.downloadSchemaButtonLabel"
+              defaultMessage="JSON Schema"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+});

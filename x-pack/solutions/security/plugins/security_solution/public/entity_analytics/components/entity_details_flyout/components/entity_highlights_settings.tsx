@@ -307,6 +307,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
                   onConnectorSelected={noop}
                   onConnectorIdSelected={setConnectorId}
                   selectedConnectorId={connectorId}
+                  loadConnectorFeatureId="entity_ai_highlight_summary"
                   explicitConnectorSelection={true}
                 />
               </EuiContextMenuItem>

@@ -112,43 +112,6 @@
     "functions": [
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.AIAgentTourCallout",
-        "type": "Function",
-        "tags": [],
-        "label": "AIAgentTourCallout",
-        "description": [],
-        "signature": [
-          "({ children, zIndex, isConversationApp, }: AIAgentTourCalloutProps) => React.JSX.Element"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/ai_agent_tour_callout.tsx",
-        "lineNumber": 32,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.AIAgentTourCallout.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  children,\n  zIndex,\n  isConversationApp = false,\n}",
-            "description": [],
-            "signature": [
-              "AIAgentTourCalloutProps"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/ai_agent_tour_callout.tsx",
-            "lineNumber": 32,
-            "columnNumber": 36,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ChatItemControls",
         "type": "Function",
         "tags": [],
@@ -1311,23 +1274,23 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.useAIAgentTourDismissed",
+        "id": "def-public.useDefaultExperienceCalloutDismissed",
         "type": "Function",
         "tags": [],
-        "label": "useAIAgentTourDismissed",
+        "label": "useDefaultExperienceCalloutDismissed",
         "description": [],
         "signature": [
           "(defaultValue: boolean) => [boolean, (isDismissed: boolean) => void]"
         ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_ai_agent_tour_dismissed.ts",
-        "lineNumber": 12,
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_default_experience_callout_dismissed.ts",
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.useAIAgentTourDismissed.$1",
+            "id": "def-public.useDefaultExperienceCalloutDismissed.$1",
             "type": "boolean",
             "tags": [],
             "label": "defaultValue",
@@ -1335,8 +1298,8 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_ai_agent_tour_dismissed.ts",
-            "lineNumber": 13,
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_default_experience_callout_dismissed.ts",
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6443,23 +6406,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.AIAgentTourKey",
-        "type": "string",
-        "tags": [],
-        "label": "AIAgentTourKey",
-        "description": [],
-        "signature": [
-          "\"observabilityAIAssistant.aiAgentTourDismissed\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_ai_agent_tour_dismissed.ts",
-        "lineNumber": 10,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.aiAssistantLogsIndexPattern",
         "type": "string",
         "tags": [],
@@ -7807,6 +7753,23 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.DefaultExperienceCalloutKey",
+        "type": "string",
+        "tags": [],
+        "label": "DefaultExperienceCalloutKey",
+        "description": [],
+        "signature": [
+          "\"observabilityAIAssistant.defaultExperienceCalloutDismissed\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_default_experience_callout_dismissed.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.E5_SMALL_INFERENCE_ID",
         "type": "string",
         "tags": [],
@@ -7864,7 +7827,7 @@
         "label": "elasticAiAssistantImage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/index.ts",
-        "lineNumber": 118,
+        "lineNumber": 115,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7917,23 +7880,6 @@
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "lineNumber": 13,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.INFERENCE_CONNECTOR_ACTION_TYPE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "INFERENCE_CONNECTOR_ACTION_TYPE_ID",
-        "description": [],
-        "signature": [
-          "\".inference\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/get_elastic_managed_llm_connector.ts",
-        "lineNumber": 10,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9047,7 +8993,15 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, infer TRouteParamsRT extends unknown, any, any, ",
+          "<any, infer TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined, any, any, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -9055,7 +9009,15 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          " | undefined> ? TRouteParamsRT extends any ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
+          " | undefined> ? TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/api/index.ts",
         "lineNumber": 46,
@@ -11345,7 +11307,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 782,
@@ -11403,7 +11365,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; role: ",
+                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; role: ",
                       {
                         "pluginId": "observabilityAIAssistant",
                         "scope": "common",
@@ -11411,7 +11373,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 819,
@@ -14482,7 +14444,7 @@
       "label": "ObservabilityAIAssistantServerStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/types.ts",
-      "lineNumber": 39,
+      "lineNumber": 43,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -14500,7 +14462,7 @@
             "ObservabilityAIAssistantService"
           ],
           "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/types.ts",
-          "lineNumber": 40,
+          "lineNumber": 44,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -14517,7 +14479,7 @@
       "label": "ObservabilityAIAssistantServerSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/types.ts",
-      "lineNumber": 32,
+      "lineNumber": 36,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -14535,7 +14497,7 @@
             "ObservabilityAIAssistantService"
           ],
           "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/types.ts",
-          "lineNumber": 33,
+          "lineNumber": 37,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

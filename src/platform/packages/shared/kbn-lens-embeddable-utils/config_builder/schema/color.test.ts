@@ -9,7 +9,12 @@
 
 import { freeze, produce } from 'immer';
 
-import type { ColorByValueStep, ColorByValueType, ColorMappingType } from './color';
+import type {
+  ColorByValueStep,
+  ColorByValueType,
+  ColorMappingCategoricalType,
+  ColorMappingType,
+} from './color';
 import { allColoringTypeSchema, colorByValueStepsSchema } from './color';
 
 describe('Color Schema', () => {
@@ -238,7 +243,7 @@ describe('Color Schema', () => {
             color: { type: 'color_code', value: 'red' },
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -271,7 +276,7 @@ describe('Color Schema', () => {
             color: { type: 'from_palette', palette: 'default', index: 0 },
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -354,7 +359,7 @@ describe('Color Schema', () => {
             palette: 'default',
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -376,25 +381,15 @@ describe('Color Schema', () => {
       it('throws on invalid mode in color mapping', () => {
         const input = {
           palette: 'kibana_palette',
+          // @ts-expect-error
           mode: 'invalid',
-          colorMapping: {
-            values: ['value1'],
-          },
-          otherColors: {},
-        };
-
-        expect(() => allColoringTypeSchema.validate(input)).toThrow();
-      });
-
-      it('throws on empty values array in categorical mapping', () => {
-        const input = {
-          palette: 'kibana_palette',
-          mode: 'categorical',
-          colorMapping: {
-            values: [],
-          },
-          otherColors: {},
-        };
+          mapping: [
+            {
+              values: ['value1'],
+              color: { type: 'color_code', value: '#FF00FF' },
+            },
+          ],
+        } satisfies ColorMappingCategoricalType;
 
         expect(() => allColoringTypeSchema.validate(input)).toThrow();
       });

@@ -17,6 +17,7 @@ import {
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
+import type { IdentityFields } from '../../shared/utils';
 import { PrevalenceDetails as PrevalenceDetailsContent } from '../../../../flyout_v2/prevalence/prevalence';
 import type { PrevalenceDetailsRow } from '../../../../flyout_v2/prevalence/utils/get_columns';
 import {
@@ -43,20 +44,29 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {data.values.map((value) => (
-          <EuiFlexItem key={value}>
-            <CellActions field={data.field} value={value}>
-              <PreviewLink
-                field={data.field}
-                value={value}
-                scopeId={data.scopeId}
-                data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
-              >
-                <EuiText size="xs">{value}</EuiText>
-              </PreviewLink>
-            </CellActions>
-          </EuiFlexItem>
-        ))}
+        {data.values.map((value) => {
+          const linkIdentityFields: IdentityFields =
+            data.field === 'host.name' && data.documentHostEntityIdentifiers
+              ? data.documentHostEntityIdentifiers
+              : data.field === 'user.name' && data.documentUserEntityIdentifiers
+              ? data.documentUserEntityIdentifiers
+              : { [data.field]: value };
+          return (
+            <EuiFlexItem key={value}>
+              <CellActions field={data.field} value={value}>
+                <PreviewLink
+                  field={data.field}
+                  value={value}
+                  identityFields={linkIdentityFields}
+                  scopeId={data.scopeId}
+                  data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
+                >
+                  <EuiText size="xs">{value}</EuiText>
+                </PreviewLink>
+              </CellActions>
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     ),
     width: '20%',

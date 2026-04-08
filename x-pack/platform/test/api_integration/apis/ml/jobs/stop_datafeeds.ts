@@ -180,9 +180,9 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
           }
 
-          // check jobs are still open
+          // check jobs are now closed
           for (const id of testData.jobIds) {
-            await ml.api.waitForJobState(id, JOB_STATE.OPENED);
+            await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
           }
         });
       }
@@ -211,9 +211,9 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
           }
 
-          // check jobs are still open
+          // check jobs are still closed
           for (const id of testData.jobIds) {
-            await ml.api.waitForJobState(id, JOB_STATE.OPENED);
+            await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
           }
         });
       }

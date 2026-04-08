@@ -85,6 +85,9 @@ describe('<IndexDetailsPage />', () => {
       testIndexName,
       testUserStartPrivilegesResponse
     );
+    httpRequestsMockHelpers.setLoadIndexDocCountResponse({
+      [testIndexName]: testIndexMock.documents,
+    });
   });
 
   describe('error section', () => {

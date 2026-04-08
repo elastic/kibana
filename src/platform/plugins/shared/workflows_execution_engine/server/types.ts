@@ -72,6 +72,7 @@ export type ExecuteWorkflow = (
 export type ExecuteWorkflowStep = (
   workflow: WorkflowExecutionEngineModel,
   stepId: string,
+  executionContext: Record<string, unknown> | undefined,
   contextOverride: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowStepResponse>;

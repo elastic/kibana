@@ -19,6 +19,8 @@ export {
   STREAMS_TIERED_AI_FEATURE,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
+  DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  MIN_EXTRACTION_INTERVAL_HOURS,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
@@ -29,3 +31,9 @@ export {
   isKqlQueryValid,
   buildEsqlFilter,
 } from './query_helpers';
+
+export {
+  PRIORITIZED_CONTENT_FIELDS,
+  getDefaultTextField,
+  extractMessagesFromField,
+} from './pattern_extraction_helpers';

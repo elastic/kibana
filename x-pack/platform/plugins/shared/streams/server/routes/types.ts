@@ -21,10 +21,12 @@ import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { FeatureClient } from '../lib/streams/feature/feature_client';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
+import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
-import type { InsightClient } from '../lib/significant_events/insights/client/insight_client';
-import type { ModelSettingsConfigClient } from '../lib/saved_objects/significant_events/model_settings_config_service';
+import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
+import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
+import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
 
 export type GetScopedClients = ({
   request,
@@ -44,9 +46,11 @@ export interface RouteHandlerScopedClients {
   queryClient: QueryClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
+  globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   taskClient: TaskClient<StreamsTaskType>;
-  modelSettingsClient: ModelSettingsConfigClient;
+  streamsSettingsStorageClient: StreamsSettingsStorageClient;
+  isSecurityEnabled: boolean;
 }
 
 export interface RouteDependencies {
@@ -54,6 +58,8 @@ export interface RouteDependencies {
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
   processorSuggestions: ProcessorSuggestionsService;
+  patternExtractionService: IPatternExtractionService;
+  continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

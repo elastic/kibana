@@ -18,34 +18,42 @@ import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import { UsersTableType } from '../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 import type { ManagedUserData } from '../shared/hooks/use_managed_user';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 interface UserPanelHeaderProps {
   userName: string;
   managedUser: ManagedUserData;
   lastSeen: FirstLastSeenData;
+  entityId?: string;
+  identityFields?: IdentityFields;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
-
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const UserPanelHeader = ({ userName, managedUser, lastSeen }: UserPanelHeaderProps) => {
-  const observedUserLastSeenDate = lastSeen?.date;
-  const isLoading = lastSeen?.isLoading ?? false;
-
+export const UserPanelHeader = ({
+  userName,
+  managedUser,
+  lastSeen,
+  entityId,
+  identityFields,
+}: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
   const entraTimestamp = managedUser.data?.[ManagedUserDatasetKey.ENTRA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
+  const observedUserLastSeenDate = lastSeen?.date;
+  const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
   const lastSeenDate = useMemo(
@@ -74,16 +82,40 @@ export const UserPanelHeader = ({ userName, managedUser, lastSeen }: UserPanelHe
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.users}
-            path={getUsersDetailsUrl(userName)}
-            target={'_blank'}
-            external={false}
-            css={linkTitleCSS}
-            override={urlParamOverride}
+          <EuiFlexGroup
+            gutterSize="xs"
+            responsive={false}
+            direction="column"
+            alignItems="flexStart"
           >
-            <FlyoutTitle title={userName} iconType={'user'} isLink />
-          </SecuritySolutionLinkAnchor>
+            <EuiFlexItem grow={false}>
+              <SecuritySolutionLinkAnchor
+                deepLinkId={SecurityPageName.users}
+                path={getTabsOnUsersDetailsUrl(
+                  userName,
+                  UsersTableType.events,
+                  undefined,
+                  entityId,
+                  identityFields && Object.keys(identityFields).length > 0
+                    ? identityFields
+                    : undefined
+                )}
+                target={'_blank'}
+                external={false}
+                css={linkTitleCSS}
+                override={urlParamOverride}
+              >
+                <FlyoutTitle title={userName} iconType={'user'} isLink />
+              </SecuritySolutionLinkAnchor>
+            </EuiFlexItem>
+            {entityId ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="user-panel-header-entity-id">
+                  {entityId}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         {isLoading ? (
           <EuiFlexItem grow={true}>

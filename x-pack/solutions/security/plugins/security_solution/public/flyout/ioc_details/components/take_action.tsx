@@ -71,7 +71,11 @@ export const TakeAction = memo(() => {
 
   const button = useMemo(
     () => (
-      <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setPopover(!isPopoverOpen)}>
+      <EuiButton
+        iconType="chevronSingleDown"
+        iconSide="right"
+        onClick={() => setPopover(!isPopoverOpen)}
+      >
         <FormattedMessage
           id="xpack.securitySolution.threatIntelligence.indicators.flyout.take-action.button"
           defaultMessage="Take action"

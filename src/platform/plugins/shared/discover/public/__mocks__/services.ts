@@ -330,13 +330,18 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
+      getEmbeddableTransformsEnabled: jest.fn(() => true),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
       isEmbeddedEditor: jest.fn(() => false),
+      canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
       clearEditorState: jest.fn(),
+    },
+    alertingVTwo: {
+      DynamicRuleFormFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;
