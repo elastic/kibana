@@ -168,11 +168,15 @@ export function createGitUtils(options: { cwd: string; canonical: string }) {
     return null;
   };
 
-  // non-GitHub URLs (local paths, self-hosted) are not considered non-canonical
+  // only flag GitHub repos whose repo name matches canonical but owner differs
+  // (e.g. Bamieh/kibana is a fork, elastic/elasticsearch is unrelated)
   const isNonCanonical = (url: string): boolean => {
     const parsed = parseGithubRepo(url);
-    return parsed !== null && parsed !== canonical;
+    if (!parsed || parsed === canonical) return false;
+    return parsed.split('/')[1] === canonical.split('/')[1];
   };
+
+  const isMainRef = (ref: string) => ref === 'main' || ref === 'refs/heads/main';
 
   const findGuardedRemotes = (command: string, onMain: boolean): GuardedRemote[] => {
     const tracking = git(['rev-parse', '--abbrev-ref', '@{u}']);
@@ -188,20 +192,16 @@ export function createGitUtils(options: { cwd: string; canonical: string }) {
       const args = rest.filter((t) => !t.startsWith('-'));
 
       switch (sub) {
-        // git pull origin main | git pull origin (on main) | git pull (on main, uses upstream)
+        // git pull origin main | git pull origin refs/heads/main | git pull origin (on main)
         case 'pull':
-          if (args.length >= 2 && args[1] === 'main')
+          if (args.length >= 2 && isMainRef(args[1]))
             result.push({ remote: args[0], kind: 'pull' });
           else if (args.length === 1 && onMain) result.push({ remote: args[0], kind: 'pull' });
           else if (args.length === 0 && onMain && upstream)
             result.push({ remote: upstream, kind: 'pull' });
           break;
-        // git fetch origin main | git fetch origin refs/heads/main
         case 'fetch':
-          if (
-            args.length >= 2 &&
-            args.slice(1).some((r) => r === 'main' || r === 'refs/heads/main')
-          )
+          if (args.length >= 2 && args.slice(1).some(isMainRef))
             result.push({ remote: args[0], kind: 'pull' });
           break;
         // git merge origin/main | git rebase origin/main

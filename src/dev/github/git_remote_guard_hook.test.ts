@@ -108,6 +108,7 @@ describe('git remote guard hook', () => {
 
     const cases = [
       'git pull bamieh main',
+      'git pull bamieh refs/heads/main',
       'git pull --rebase bamieh main',
       'git pull --ff-only bamieh main',
       'git fetch bamieh main',
@@ -157,6 +158,24 @@ describe('git remote guard hook', () => {
       { claude: true }
     );
     expect(allow).toBeNull();
+  });
+
+  it('ignores unrelated remotes when checking for fork', () => {
+    const remotesWithUnrelated = [
+      'origin\tgit@github.com:elastic/kibana.git (fetch)',
+      'origin\tgit@github.com:elastic/kibana.git (push)',
+      'other\tgit@github.com:someuser/other-repo.git (fetch)',
+      'other\tgit@github.com:someuser/other-repo.git (push)',
+    ].join('\n');
+
+    setupGit({
+      'remote -v': remotesWithUnrelated,
+      'remote get-url other': 'git@github.com:someuser/other-repo.git',
+    });
+
+    expect(runHook({ command: 'git push origin my-branch', cwd: '/repo' })).toEqual({
+      permission: 'allow',
+    });
   });
 
   it('allows everything when KIBANA_GIT_REMOTE_GUARD_BYPASS=1', () => {
