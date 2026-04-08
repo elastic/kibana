@@ -16,6 +16,6 @@ export function clearDocumentationDirectives(docString: string): string {
   return (
     docString
       // MyST directives have the following format {name}`content`
-      .replace(/\{([a-z_]+)\}`([^`]*)`/g, '')
+      .replace(/\{([a-zA-Z_]+)\}`([^`]*)`/g, '')
   );
 }
