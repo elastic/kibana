@@ -97,7 +97,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
       : 'horizontalBullet',
     ...convertColorToLensState(layer.metric.color),
     ticksPosition:
-      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
+      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'bands',
     ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
       : layer.metric.title?.text
