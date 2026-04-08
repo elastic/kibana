@@ -128,6 +128,15 @@ test.describe(
 
       await test.step('Verify error is visible in errors table', async () => {
         await expect(page.getByRole('link', { name: 'ResponseError', exact: true })).toBeVisible();
+        await page
+          .getByRole('link', { name: 'ResponseError', exact: true })
+          .scrollIntoViewIfNeeded();
+
+        await expect(page.getByRole('link', { name: 'ResponseError', exact: true })).toBeInViewport(
+          {
+            timeout: EXTENDED_TIMEOUT,
+          }
+        );
       });
 
       await test.step('Click on error link and wait for navigation', async () => {
