@@ -456,7 +456,7 @@ describe('XY', () => {
                   index_pattern: 'companyIndex',
                   time_field: '@timestamp',
                 },
-                type: 'referenceLines',
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
