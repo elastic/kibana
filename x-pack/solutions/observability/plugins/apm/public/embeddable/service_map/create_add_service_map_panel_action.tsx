@@ -47,7 +47,7 @@ export function createAddServiceMapPanelAction(): UiActionsActionDefinition<Embe
     },
     getDisplayName: () =>
       i18n.translate('xpack.apm.embeddable.serviceMap.addPanelTitle', {
-        defaultMessage: 'Service Map (APM)',
+        defaultMessage: 'Service map',
       }),
   };
 }

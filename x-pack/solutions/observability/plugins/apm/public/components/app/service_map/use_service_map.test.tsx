@@ -11,6 +11,8 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { transformToReactFlow } from '../../../../common/service_map';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
 
 jest.mock('../../../context/license/use_license_context', () => ({
   useLicenseContext: jest.fn(),
@@ -42,6 +44,12 @@ jest.mock('../../../../common/service_map', () => {
 const mockedUseLicenseContext = jest.mocked(useLicenseContext);
 const mockedUseApmPluginContext = jest.mocked(useApmPluginContext);
 const mockedTransformToReactFlow = jest.mocked(transformToReactFlow);
+const defaultParams: Parameters<typeof useServiceMap>[0] = {
+  start: '2026-01-01T00:00:00.000Z',
+  end: '2026-01-01T01:00:00.000Z',
+  environment: ENVIRONMENT_ALL.value,
+  kuery: '',
+};
 
 describe('useServiceMap()', () => {
   beforeEach(() => {
@@ -61,10 +69,10 @@ describe('useServiceMap()', () => {
 
   it('returns transformed data for a successful fetch', () => {
     const apiResponse = { spans: [] };
-    const transformedResponse = {
-      nodes: [{ id: 'service-a' }],
+    const transformedResponse: ReactFlowServiceMapResponse = {
+      nodes: [],
       edges: [],
-      nodesCount: 1,
+      nodesCount: 0,
       tracesCount: 1,
     };
 
@@ -74,14 +82,7 @@ describe('useServiceMap()', () => {
     });
     mockedTransformToReactFlow.mockReturnValue(transformedResponse);
 
-    const { result } = renderHook(() =>
-      useServiceMap({
-        start: '2026-01-01T00:00:00.000Z',
-        end: '2026-01-01T01:00:00.000Z',
-        environment: 'ENVIRONMENT_ALL',
-        kuery: '',
-      })
-    );
+    const { result } = renderHook(() => useServiceMap(defaultParams));
 
     expect(mockedTransformToReactFlow).toHaveBeenCalledWith(apiResponse);
     expect(result.current).toEqual(
@@ -99,14 +100,7 @@ describe('useServiceMap()', () => {
         status: FETCH_STATUS.SUCCESS,
       });
 
-      const { result } = renderHook(() =>
-        useServiceMap({
-          start: '2026-01-01T00:00:00.000Z',
-          end: '2026-01-01T01:00:00.000Z',
-          environment: 'ENVIRONMENT_ALL',
-          kuery: '',
-        })
-      );
+      const { result } = renderHook(() => useServiceMap(defaultParams));
 
       expect(result.current.status).not.toBe(FETCH_STATUS.LOADING);
     });

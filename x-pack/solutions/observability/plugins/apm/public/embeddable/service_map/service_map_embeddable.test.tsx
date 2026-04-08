@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { License } from '@kbn/licensing-plugin/common/license';
+import { BehaviorSubject } from 'rxjs';
 import { ServiceMapEmbeddable } from './service_map_embeddable';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import { mockApmPluginContextValue } from '../../context/apm_plugin/mock_apm_plugin_context';
@@ -18,16 +19,6 @@ import { LicenseContext } from '../../context/license/license_context';
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext
 >[0]['deps']['coreStart'];
-
-const mockDeps = {
-  coreStart: mockCore,
-  coreSetup: mockCore,
-  pluginsSetup: mockApmPluginContextValue.plugins,
-  pluginsStart: mockApmPluginContextValue.corePlugins,
-  config: { serviceMapEnabled: true },
-  kibanaEnvironment: { isCloud: false },
-  observabilityRuleTypeRegistry: {},
-} as unknown as Parameters<typeof ApmEmbeddableContext>[0]['deps'];
 
 const defaultProps = {
   rangeFrom: 'now-15m',
@@ -45,6 +36,23 @@ const platinumLicense = new License({
     uid: '1',
   },
 });
+
+const mockLicensing = {
+  license$: new BehaviorSubject(platinumLicense),
+};
+
+const mockDeps = {
+  coreStart: mockCore,
+  coreSetup: mockCore,
+  pluginsSetup: mockApmPluginContextValue.plugins,
+  pluginsStart: {
+    ...mockApmPluginContextValue.corePlugins,
+    licensing: mockLicensing,
+  },
+  config: { serviceMapEnabled: true },
+  kibanaEnvironment: { isCloud: false },
+  observabilityRuleTypeRegistry: {},
+} as unknown as Parameters<typeof ApmEmbeddableContext>[0]['deps'];
 
 function renderEmbeddable(
   extraProps: Partial<React.ComponentProps<typeof ServiceMapEmbeddable>> = {}
@@ -142,5 +150,33 @@ describe('ServiceMapEmbeddable', () => {
     renderEmbeddable();
     expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
+  });
+
+  it('updates graph height to match panel height on resize', async () => {
+    mockUseServiceMap.mockReturnValue({
+      data: {
+        nodes: [
+          {
+            id: 'node-1',
+            data: { id: 'node-1', label: 'service-a', isService: true as const },
+            position: { x: 0, y: 0 },
+            type: 'service',
+          },
+        ],
+        edges: [],
+        nodesCount: 1,
+        tracesCount: 10,
+      },
+      status: FETCH_STATUS.SUCCESS,
+    });
+
+    const { container } = renderEmbeddable();
+    const panel = container.querySelector('.euiPanel') as HTMLElement;
+    const embeddable = screen.getByTestId('apmServiceMapEmbeddable');
+
+    Object.defineProperty(panel, 'clientHeight', { configurable: true, value: 720 });
+    window.dispatchEvent(new Event('resize'));
+
+    expect(embeddable).toHaveStyle({ height: '720px' });
   });
 });
