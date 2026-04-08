@@ -207,6 +207,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     isLoadingSuggestions,
     suggestions,
     suggestionReason,
+    refinementHistory,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -268,14 +269,39 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     }
   };
 
-  const getSuggestionsForStream = (connectorId: string) => {
-    fetchSuggestions({
-      streamName: definition.stream.name,
-      connectorId,
-      start: timeState.start,
-      end: timeState.end,
-    });
-  };
+  const getSuggestionsForStream = useCallback(
+    (connectorId: string) => {
+      fetchSuggestions({
+        streamName: definition.stream.name,
+        connectorId,
+        start: timeState.start,
+        end: timeState.end,
+      });
+    },
+    [fetchSuggestions, definition.stream.name, timeState.start, timeState.end]
+  );
+
+  const refineSuggestionsForStream = useCallback(
+    (connectorId: string, userPrompt?: string) => {
+      fetchSuggestions({
+        streamName: definition.stream.name,
+        connectorId,
+        start: timeState.start,
+        end: timeState.end,
+        userPrompt,
+        existingPartitions: suggestions ?? undefined,
+        refinementHistory: refinementHistory.length > 0 ? refinementHistory : undefined,
+      });
+    },
+    [
+      fetchSuggestions,
+      definition.stream.name,
+      timeState.start,
+      timeState.end,
+      suggestions,
+      refinementHistory,
+    ]
+  );
 
   const renderCreateButton = () => {
     return (
@@ -301,7 +327,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   isDisabled={isEditingOrReorderingStreams}
                   aiFeatures={aiFeatures}
                 >
-                  {suggestPartitionsWithAIText}
+                  {suggestPartitionsText}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
               {showAdditionalChargesCallout && (
@@ -322,7 +348,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                 onClick={createNewRule}
                 disabled={!canCreateRoutingRules || isAtMaxNestingLevel}
               >
-                {createPartitionManuallyText}
+                {createPartitionText}
               </CreateButtonComponent>
             </EuiToolTip>
           </EuiFlexItem>
@@ -368,7 +394,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
             isDisabled={isEditingOrReorderingStreams}
             aiFeatures={aiFeatures}
           >
-            {suggestPartitionsWithAIText}
+            {suggestPartitionsText}
           </GenerateSuggestionButton>
           {showAdditionalChargesCallout && (
             <>
@@ -461,7 +487,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onDismiss={resetForm}
-                  onRegenerate={getSuggestionsForStream}
+                  onRetry={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
                   reason={suggestionReason}
                 />
@@ -471,7 +497,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   definition={definition}
                   isLoadingSuggestions={isLoadingSuggestions}
-                  onRegenerate={getSuggestionsForStream}
+                  onRegenerate={refineSuggestionsForStream}
                   previewSuggestion={previewSuggestion}
                   rejectSuggestion={rejectSuggestion}
                   resetForm={resetForm}
@@ -631,13 +657,16 @@ const cannotManageRoutingRulesText = i18n.translate(
   }
 );
 
-const suggestPartitionsWithAIText = i18n.translate(
+const suggestPartitionsText = i18n.translate(
   'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
   {
-    defaultMessage: 'Suggest partitions with AI',
+    defaultMessage: 'Get partitions suggestions',
   }
 );
 
-const createPartitionManuallyText = i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-  defaultMessage: 'Create partition manually',
-});
+const createPartitionText = i18n.translate(
+  'xpack.streams.streamDetailRouting.childStreamList.createPartition',
+  {
+    defaultMessage: 'Create partition',
+  }
+);
