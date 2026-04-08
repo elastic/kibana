@@ -18,7 +18,7 @@ import {
   APP_MENU_NOTIFICATION_INDICATOR_LEFT,
   APP_MENU_NOTIFICATION_INDICATOR_TOP,
 } from '../constants';
-import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type {
   AppMenuPrimaryActionItem,
@@ -85,7 +85,11 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    run?.({ triggerElement: event.currentTarget });
+    const triggerElement = event.currentTarget;
+    run?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
   const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
@@ -96,7 +100,11 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    splitButtonRun?.({ triggerElement: event.currentTarget });
+    const triggerElement = event.currentTarget;
+    splitButtonRun?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
   const routerLinkProps =

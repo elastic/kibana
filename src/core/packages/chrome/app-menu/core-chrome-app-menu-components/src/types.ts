@@ -23,7 +23,7 @@ export interface AppMenuRunActionParams {
    * the overflow button). This is useful when a run action opens and later closes a
    * modal/flyout/dialog that should restore keyboard focus.
    */
-  returnFocus?: () => void;
+  returnFocus: () => void;
   /**
    * Generic context object that can be used to pass additional data to the run action.
    * Consumers can extend this to add custom properties as needed.

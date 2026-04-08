@@ -83,6 +83,7 @@ export const AppMenuOverflowButton = ({
       primaryActionItem={primaryActionItem}
       secondaryActionItem={secondaryActionItem}
       onClose={onPopoverClose}
+      onCloseOverflowButton={onPopoverClose}
     />
   );
 };

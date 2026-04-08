@@ -110,6 +110,16 @@ export const getTooltip = ({
   };
 };
 
+export const createReturnFocus = (triggerElement: HTMLElement) => () => {
+  if (document.body.contains(triggerElement)) {
+    triggerElement.focus();
+    return;
+  }
+  // triggerElement is no longer in the DOM (e.g. it was inside a popover that closed),
+  // fall back to the overflow button.
+  document.querySelector<HTMLElement>('[data-test-subj="app-menu-overflow-button"]')?.focus();
+};
+
 export const mapAppMenuItemToPanelItem = (
   item: AppMenuPopoverItem,
   childPanelId?: number,
@@ -128,7 +138,11 @@ export const mapAppMenuItemToPanelItem = (
 
     const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
 
-    item.run?.({ triggerElement: event?.currentTarget as HTMLElement });
+    const triggerElement = event.currentTarget as HTMLElement;
+    item.run?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
 
     if (shouldClosePopover) {
       onClose();

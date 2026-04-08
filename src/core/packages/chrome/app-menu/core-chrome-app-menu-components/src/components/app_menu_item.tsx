@@ -12,7 +12,7 @@ import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType } from '../types';
 
@@ -58,7 +58,11 @@ export const AppMenuItem = ({
       return;
     }
 
-    run?.({ triggerElement: event.currentTarget });
+    const triggerElement = event.currentTarget;
+    run?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
   const routerLinkProps =
