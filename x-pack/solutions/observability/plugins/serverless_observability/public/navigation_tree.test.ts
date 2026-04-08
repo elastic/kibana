@@ -20,6 +20,21 @@ describe('Navigation Tree', () => {
     });
   });
 
+  it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {
+    const { body } = createNavigationTree({});
+    const mlNode = body.find((item) => item.id === 'machine_learning-landing');
+    const anomalySection = mlNode?.children?.find(
+      (item) => item.id === 'category-anomaly_detection'
+    );
+
+    expect(anomalySection?.children?.[0]).toEqual(
+      expect.objectContaining({
+        link: 'management:anomaly_detection',
+        title: 'Manage jobs',
+      })
+    );
+  });
+
   it('should not generate tree with overview', () => {
     const navigation = createNavigationTree({ overviewAvailable: false });
     expect(navigation.body).not.toEqual(
