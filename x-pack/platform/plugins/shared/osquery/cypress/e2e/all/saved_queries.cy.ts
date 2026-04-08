@@ -128,9 +128,11 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       // save new query from the detail page
       cy.contains('Exit full screen').should('not.exist');
       navigateTo('/app/osquery/live_queries');
-      cy.get('tbody tr', { timeout: 60000 }).first().within(() => {
-        cy.get('[aria-label="Details"]').click();
-      });
+      cy.get('tbody tr', { timeout: 60000 })
+        .first()
+        .within(() => {
+          cy.get('[aria-label="Details"]').click();
+        });
       cy.contains('Query results');
       cy.getBySel('save-query-button').should('exist').click();
       cy.getBySel('osquery-save-query-flyout').should('exist');
