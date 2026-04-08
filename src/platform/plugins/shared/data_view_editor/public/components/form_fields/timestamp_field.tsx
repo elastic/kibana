@@ -97,7 +97,7 @@ export const TimestampField = ({
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
       {(field) => {
-        const { label, value, setValue } = field;
+        const { label, value, setValue, reset } = field;
 
         if (value === undefined) {
           return null;
@@ -115,6 +115,8 @@ export const TimestampField = ({
           if (val.length) {
             setValue(val[0]);
           }
+        } else if (!isLoadingOptions && typeof value === 'object' && value?.value && !valueInList) {
+          reset();
         }
 
         const isComboBoxInvalid = !isDisabled && isInvalid;
