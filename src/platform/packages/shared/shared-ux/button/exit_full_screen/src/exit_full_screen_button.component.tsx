@@ -78,14 +78,14 @@ export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) 
             {customLogo ? (
               <EuiImage src={customLogo} size={16} alt="customLogo" />
             ) : (
-              <EuiIcon type="logoElastic" size="m" />
+              <EuiIcon type="logoElastic" size="m" aria-hidden={true} />
             )}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false} data-test-subj="exitFullScreenModeText">
             {text}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
-            <EuiIcon type="fullScreenExit" size="s" />
+            <EuiIcon type="fullScreenExit" size="s" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </button>

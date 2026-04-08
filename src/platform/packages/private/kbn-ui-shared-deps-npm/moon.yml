@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ui-shared-deps-npm'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-shared-deps-npm'
+  title: '@kbn/ui-shared-deps-npm'
   description: Moon project for @kbn/ui-shared-deps-npm
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
+  sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
 dependsOn:
   - '@kbn/repo-info'
 tags:
@@ -37,7 +36,7 @@ tasks:
   extract-version-dependencies:
     command: node
     args:
-      - $workspaceRoot/scripts/extract_version_dependencies.js
+      - scripts/extract_version_dependencies.js
       - src/platform/packages/private/kbn-ui-shared-deps-npm/version_dependencies.txt
       - '--collect'
       - '@babel/runtime'
@@ -138,7 +137,7 @@ tasks:
     args:
       - build
     deps:
-      - extract-version-dependencies
+      - ~:extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'

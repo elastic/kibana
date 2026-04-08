@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/runtime-fields-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/runtime-fields-plugin'
+  title: '@kbn/runtime-fields-plugin'
   description: Moon project for @kbn/runtime-fields-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/runtime_fields
+  sourceRoot: x-pack/platform/plugins/private/runtime_fields
 dependsOn:
   - '@kbn/core'
   - '@kbn/es-ui-shared-plugin'
@@ -38,16 +37,6 @@ fileGroups:
   src:
     - public/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

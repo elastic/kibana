@@ -15,9 +15,8 @@ import getopts from 'getopts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
+import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test-es-server';
 import type { Config } from '../../functional_test_runner';
-import type { ICluster } from '../../es';
-import { createTestEsCluster, esTestConfig } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -76,19 +75,6 @@ function getEsConfig({
     serverless,
     files,
   };
-}
-
-export async function cleanupElasticsearch(
-  node: ICluster,
-  isServerless: boolean,
-  logsDir: string | undefined,
-  log: ToolingLog
-): Promise<void> {
-  await node.cleanup();
-
-  if (isServerless) {
-    await extractAndArchiveLogs({ outputFolder: logsDir, log });
-  }
 }
 
 export async function runElasticsearch(

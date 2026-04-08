@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_error';
-
 // @internal
 export { startServersCli, startServers } from './src/functional_tests/start_servers';
 
@@ -32,21 +30,17 @@ export {
   type SamlSessionManagerOptions,
   type HostOptions,
   type GetCookieOptions,
-} from './src/auth';
+  type Role,
+} from '@kbn/test-saml-auth';
 
 export type {
   CreateTestEsClusterOptions,
   EsTestCluster,
   ICluster,
   EsClientForTestingOptions,
-} from './src/es';
-export {
-  esTestConfig,
-  createTestEsCluster,
-  createEsClientForTesting,
-  createEsClientForFtrConfig,
-  createRemoteEsClientForFtrConfig,
-} from './src/es';
+} from '@kbn/test-es-server';
+export { esTestConfig, createTestEsCluster, createEsClientForTesting } from '@kbn/test-es-server';
+export { createEsClientForFtrConfig, createRemoteEsClientForFtrConfig } from './src/ftr_es_client';
 
 export { kbnTestConfig } from './kbn_test_config';
 export type { UrlParts } from './kbn_test_config';
@@ -62,7 +56,7 @@ export {
 // @internal
 export { setupJUnitReportGeneration, escapeCdata } from './src/mocha';
 
-export { CI_PARALLEL_PROCESS_PREFIX } from './src/ci_parallel_process_prefix';
+export { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test-es-server';
 
 export * from './src/functional_test_runner';
 
@@ -76,14 +70,17 @@ export { runJestAll } from './src/jest/run_all';
 
 export * from './src/kbn_archiver_cli';
 
-export * from './src/kbn_client';
+export * from '@kbn/kbn-client';
 
-export * from './src/find_test_plugin_paths';
+export { findTestPluginPaths } from '@kbn/test-kibana-server';
 
 export { getDockerFileMountPath } from '@kbn/es';
 
+// Docker server config + Fleet package registry image (implemented in @kbn/test-docker-servers).
+export type { DockerServer, DockerServerSpec } from '@kbn/test-docker-servers';
 export {
+  defineDockerServersConfig,
+  dockerRegistryPort,
   fleetPackageRegistryDockerImage,
   packageRegistryDocker,
-  dockerRegistryPort,
-} from './src/functional_test_runner';
+} from '@kbn/test-docker-servers';
