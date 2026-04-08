@@ -48,7 +48,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
 
         return {
           type: 'lens',
-          uid: panel.uid ?? '',
+          id: panel.id ?? '',
           config: {
             ...panelConfig,
             attributes: apiFormatAttributes,
@@ -63,7 +63,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
 
   return {
     type: panel.type,
-    uid: panel.uid ?? '',
+    id: panel.id ?? '',
     config: (panel.config as Record<string, unknown> | undefined) ?? {},
     grid: panel.grid,
   };
@@ -73,7 +73,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
  * Converts a DashboardSection to a DashboardAttachmentSection.
  */
 export const toAttachmentSection = (section: DashboardSection): DashboardAttachmentSection => ({
-  uid: section.uid ?? '',
+  id: section.id ?? '',
   title: section.title,
   collapsed: section.collapsed ?? false,
   grid: { y: section.grid.y },

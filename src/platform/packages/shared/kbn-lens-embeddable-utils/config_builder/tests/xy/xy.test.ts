@@ -30,6 +30,10 @@ import {
   esqlChartWithBreakdownColorMapping,
   esqlXYWithCollapseByBreakdown,
 } from './esqlXY.mock';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
@@ -281,7 +285,7 @@ describe('XY', () => {
             {
               ignore_global_filters: false,
               sampling: 1,
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               y: [{ operation: 'count', empty_as_null: false }],
             },
@@ -298,7 +302,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              dataset: {
+              data_source: {
                 type: 'esql',
                 query:
                   'FROM kibana_simple_logs_data | STATS count = count() BY buckets = BUCKET(3 hours, order_date), product',
@@ -325,7 +329,7 @@ describe('XY', () => {
             title: `${type} Chart with collapse`,
             layers: [
               {
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs',
                 },
@@ -352,7 +356,7 @@ describe('XY', () => {
             title: `${type} Chart with Color Mapping`,
             layers: [
               {
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query:
                     'FROM kibana_sample_data | STATS count = count() BY category, buckets = BUCKET(3 hours, order_date)',
@@ -391,7 +395,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -419,7 +423,7 @@ describe('XY', () => {
                 },
               },
               {
-                dataset: { type: 'dataView', id: 'companyBIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -447,7 +451,11 @@ describe('XY', () => {
                 },
               },
               {
-                dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+                  index_pattern: 'companyIndex',
+                  time_field: '@timestamp',
+                },
                 type: 'referenceLines',
                 ignore_global_filters: false,
                 sampling: 1,
@@ -473,9 +481,9 @@ describe('XY', () => {
               {
                 type: 'annotations',
                 ignore_global_filters: false,
-                dataset: {
-                  type: 'dataView',
-                  id: 'metrics-*',
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+                  ref_id: 'metrics-*',
                 },
                 events: [
                   {
@@ -553,7 +561,7 @@ describe('XY', () => {
           title: 'Chart with by-ref annotation',
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type: 'line',
               ignore_global_filters: false,
               sampling: 1,
@@ -584,7 +592,7 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query:
                     'FROM kibana_sample_data_logs | STATS count = count() BY buckets = BUCKET(@timestamp, 1 hour)',
@@ -613,7 +621,7 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
@@ -636,7 +644,7 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
@@ -664,7 +672,7 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },

@@ -72,7 +72,7 @@ export function getDiscoverSessionEmbeddableComparators(
         // skip tab-dependent comparators so unsaved-changes badges don't appear
         // until the user explicitly applies a tab change.
         selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
-        discover_session_id: 'skip',
+        ref_id: 'skip',
         overrides: (prev = {}, next = {}) => {
           return (
             isEqual(prev.column_order ?? [], next.column_order ?? []) &&

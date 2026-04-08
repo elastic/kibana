@@ -84,14 +84,14 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
 
   it('returns by-reference comparators when not by-value', () => {
     const c = getDiscoverSessionEmbeddableComparators(false, false);
-    expect('discover_session_id' in c && c.discover_session_id).toBe('skip');
+    expect('ref_id' in c && c.ref_id).toBe('skip');
     expect('selected_tab_id' in c && c.selected_tab_id).toBe('referenceEquality');
     expect('overrides' in c && typeof c.overrides).toBe('function');
   });
 
   it('skips selected_tab_id when tab comparators should be skipped', () => {
     const c = getDiscoverSessionEmbeddableComparators(false, true);
-    expect('discover_session_id' in c && c.discover_session_id).toBe('skip');
+    expect('ref_id' in c && c.ref_id).toBe('skip');
     expect('selected_tab_id' in c && c.selected_tab_id).toBe('skip');
     expect('overrides' in c && typeof c.overrides).toBe('function');
   });

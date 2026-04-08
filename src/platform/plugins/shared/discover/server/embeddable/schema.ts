@@ -195,7 +195,7 @@ const panelOverridesSchema = schema.object(
           defaultValue: [],
           meta: {
             description:
-              'When set, overrides column order for the data table relative to the referenced saved object (`discover_session_id`) or the inline tab in `tabs`. If omitted, the source configuration is used.',
+              'When set, overrides column order for the data table relative to the referenced saved object (`ref_id`) or the inline tab in `tabs`. If omitted, the source configuration is used.',
           },
         }
       )
@@ -355,7 +355,7 @@ const discoverSessionByValuePropsSchema = schema.object({
     maxSize: 1,
     meta: {
       description:
-        'Inline tab configuration. Used when no `discover_session_id` is set. Currently supports one tab.',
+        'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
     },
   }),
 });
@@ -365,7 +365,7 @@ const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
 );
 
 const discoverSessionByReferencePropsSchema = schema.object({
-  discover_session_id: schema.string(),
+  ref_id: schema.string(),
   selected_tab_id: schema.maybe(
     schema.string({
       meta: {
