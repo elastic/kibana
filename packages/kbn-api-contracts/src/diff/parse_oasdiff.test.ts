@@ -35,7 +35,7 @@ describe('parseOasdiff', () => {
       }),
     ]);
     expect(result).toEqual([
-      { type: 'method_removed', path: '/api/test', method: 'GET', reason: 'GET /api/test removed' },
+      { type: 'method_removed', path: '/api/test', method: 'GET', reason: 'GET /api/test removed', oasdiffId: 'api-removed-without-deprecation', source: 'test' },
     ]);
   });
 
@@ -54,6 +54,8 @@ describe('parseOasdiff', () => {
         path: '/api/spaces/space',
         method: undefined,
         reason: '/api/spaces/space removed',
+        oasdiffId: 'api-path-removed-without-deprecation',
+        source: 'test',
       },
     ]);
   });
@@ -73,6 +75,8 @@ describe('parseOasdiff', () => {
         path: '/api/old',
         method: 'DELETE',
         reason: 'DELETE /api/old removed before sunset',
+        oasdiffId: 'api-removed-before-sunset',
+        source: 'test',
       },
     ]);
   });
@@ -92,6 +96,8 @@ describe('parseOasdiff', () => {
         path: '/api/test',
         method: 'POST',
         reason: 'something broke',
+        oasdiffId: 'some-unknown-breaking-check',
+        source: 'test',
       },
     ]);
   });
@@ -111,6 +117,8 @@ describe('parseOasdiff', () => {
         path: '/api/test',
         method: 'PUT',
         reason: 'request property removed',
+        oasdiffId: 'request-property-removed',
+        source: 'test',
       },
     ]);
   });
@@ -125,7 +133,7 @@ describe('parseOasdiff', () => {
       }),
     ]);
     expect(result).toEqual([
-      { type: 'parameter_removed', path: '/api/test', method: 'GET', reason: 'parameter removed' },
+      { type: 'parameter_removed', path: '/api/test', method: 'GET', reason: 'parameter removed', oasdiffId: 'request-parameter-removed', source: 'test' },
     ]);
   });
 
@@ -144,6 +152,8 @@ describe('parseOasdiff', () => {
         path: '/api/test',
         method: 'GET',
         reason: 'required response property removed',
+        oasdiffId: 'response-required-property-removed',
+        source: 'test',
       },
     ]);
   });
@@ -163,6 +173,8 @@ describe('parseOasdiff', () => {
         path: '/api/test',
         method: 'GET',
         reason: 'optional response property removed',
+        oasdiffId: 'response-optional-property-removed',
+        source: 'test',
       },
     ]);
   });
