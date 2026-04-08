@@ -23,12 +23,12 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/datemath'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/streamlang'
   - '@kbn/streams-schema'
   - '@kbn/kibana-api-cli'
   - '@kbn/dev-cli-runner'
   - '@kbn/core'
-  - '@kbn/gen-ai-functional-testing'
 tags:
   - functional-tests
   - package
