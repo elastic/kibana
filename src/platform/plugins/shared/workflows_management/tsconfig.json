@@ -94,7 +94,8 @@
     "@kbn/tooling-log",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

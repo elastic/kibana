@@ -297,6 +297,14 @@ export class WorkflowsManagementApi {
     return result;
   }
 
+  public async disableAllWorkflows(): Promise<{
+    total: number;
+    disabled: number;
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    return this.workflowsService.disableAllWorkflows();
+  }
+
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
@@ -538,6 +546,18 @@ export class WorkflowsManagementApi {
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+  }
+
+  public async cancelAllActiveWorkflowExecutions(
+    workflowId: string,
+    spaceId: string
+  ): Promise<void> {
+    const workflow = await this.getWorkflow(workflowId, spaceId);
+    if (!workflow) {
+      throw new WorkflowNotFoundError(workflowId);
+    }
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({ spaceId, workflowId });
   }
 
   public async resumeWorkflowExecution(

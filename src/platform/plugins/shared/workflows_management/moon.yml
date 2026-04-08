@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/logging'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
