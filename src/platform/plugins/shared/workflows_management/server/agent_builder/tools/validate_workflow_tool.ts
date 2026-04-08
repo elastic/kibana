@@ -8,9 +8,9 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
 import type { StepDefinitionForAgent } from './get_step_definitions_tool';
 import {
@@ -20,8 +20,8 @@ import {
 } from './get_step_definitions_tool';
 import { workflowTools } from '../../../common/agent_builder/constants';
 import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 const extractStepTypes = (yaml: string): string[] => {
   const parsed = parseYamlToJSONWithoutValidation(yaml);
@@ -101,7 +101,9 @@ If validation fails, fix the issues and re-validate until the YAML is valid.`,
     tags: ['workflows', 'yaml', 'validation'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };

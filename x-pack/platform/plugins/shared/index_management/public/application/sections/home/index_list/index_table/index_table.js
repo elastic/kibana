@@ -44,7 +44,7 @@ import {
   attemptToURIDecode,
 } from '../../../../../shared_imports';
 import { formatBytes } from '../../../../..';
-import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
+import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
@@ -62,8 +62,6 @@ const getColumnConfigs = ({
   filterChanged,
   extensionsService,
   location,
-  application,
-  http,
   docCountApi,
 }) => {
   const columns = [
@@ -80,15 +78,7 @@ const getColumnConfigs = ({
           <>
             <EuiLink
               data-test-subj="indexTableIndexNameLink"
-              onClick={() => {
-                navigateToIndexDetailsPage(
-                  index.name,
-                  location.search || '',
-                  extensionsService,
-                  application,
-                  http
-                );
-              }}
+              onClick={() => history.push(getIndexDetailsLink(index.name, location.search || ''))}
             >
               {index.name}
             </EuiLink>
@@ -741,6 +731,7 @@ export class IndexTable extends Component {
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
                           indicesListURLParams={location.search || ''}
+                          docCountApi={this.docCountApi}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}

@@ -28,6 +28,7 @@ const dataIndexSchema = schema.object({
   fields: schema.recordOf(schema.string(), schema.any()),
 
   // times fields that will be updated relative to now when data is installed
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
   timeFields: schema.arrayOf(schema.string()),
 
   // should index be created as data stream
@@ -79,18 +80,21 @@ export const sampleDataSchema = schema.object({
 
   // Kibana saved objects (index patter, visualizations, dashboard, ...)
   // Should provide a nice demo of Kibana's functionality with the sample data set
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
   savedObjects: schema.arrayOf(
     schema.object(
       {
         id: schema.string(),
         type: schema.string(),
         attributes: schema.any(),
+        // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
         references: schema.arrayOf(schema.any()),
         version: schema.maybe(schema.any()),
       },
       { unknowns: 'allow' }
     )
   ),
+  // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
   dataIndices: schema.arrayOf(dataIndexSchema),
 
   status: schema.maybe(schema.string()),

@@ -41,7 +41,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
@@ -111,6 +111,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -128,6 +129,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -434,6 +436,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -451,6 +454,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -468,6 +472,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build

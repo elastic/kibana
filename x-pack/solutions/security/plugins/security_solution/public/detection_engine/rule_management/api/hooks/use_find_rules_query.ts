@@ -22,6 +22,7 @@ export interface FindRulesQueryArgs {
     start: string;
     end: string;
   };
+  schedulerId?: string;
 }
 
 const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];

@@ -11,7 +11,7 @@ import type { Position } from '@elastic/charts';
 import { LegendValue, ScaleType } from '@elastic/charts';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
 import { LegendLayout, LegendSize } from '@kbn/chart-expressions-common';
-import type { VisualizationToolbarProps, XYState } from '@kbn/lens-common';
+import type { VisualizationToolbarProps, XYVisualizationState } from '@kbn/lens-common';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings';
 import { getScaleType } from '../to_expression';
@@ -27,7 +27,7 @@ export const XyLegendSettings = ({
   state,
   setState,
   frame,
-}: VisualizationToolbarProps<XYState>) => {
+}: VisualizationToolbarProps<XYVisualizationState>) => {
   const hasLayoutChange = useRef(false);
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
@@ -124,11 +124,11 @@ export const XyLegendSettings = ({
           legend: { ...state.legend, maxLines: val },
         });
       }}
-      listLayoutMaxWidth={state?.legend.listLayoutMaxWidth}
-      onListLayoutMaxWidthChange={(val) => {
+      maxPixels={state?.legend.maxPixels}
+      onMaxPixelsChange={(val) => {
         setState({
           ...state,
-          legend: { ...state.legend, listLayoutMaxWidth: val },
+          legend: { ...state.legend, maxPixels: val },
         });
       }}
       shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}

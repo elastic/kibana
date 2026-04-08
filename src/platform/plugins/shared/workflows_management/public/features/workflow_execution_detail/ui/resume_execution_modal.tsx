@@ -25,6 +25,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import {
@@ -34,6 +35,29 @@ import {
 
 const DEFAULT_SCHEMA = z.object({}).catchall(z.unknown());
 const SCHEMA_URI = 'inmemory://schemas/resume-execution-json-editor-schema';
+
+/**
+ * JSON Schema `required` means each listed property must exist on the instance.
+ * Monaco's JSON dialect enforces that even when a property also declares `default`.
+ * Zod's `.default(...)` fills missing keys during `safeParse`, so we check `required`
+ * explicitly to keep the Resume button aligned with editor diagnostics.
+ */
+const parsedObjectHasRequiredJsonSchemaKeys = (
+  parsed: unknown,
+  rawJsonSchema: JsonModelSchemaType | undefined
+): boolean => {
+  const required = rawJsonSchema?.required;
+  if (!Array.isArray(required) || required.length === 0) {
+    return true;
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return false;
+  }
+  const record = parsed as Record<string, unknown>;
+  return required.every(
+    (key) => typeof key === 'string' && Object.prototype.hasOwnProperty.call(record, key)
+  );
+};
 
 export interface ResumeExecutionModalProps {
   resumeMessage?: string;
@@ -60,16 +84,18 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   const isResumePayloadValid = useMemo(() => {
     try {
       const parsed: unknown = JSON.parse(inputsJson);
+      if (!parsedObjectHasRequiredJsonSchemaKeys(parsed, initialcontextOverride?.rawJsonSchema)) {
+        return false;
+      }
       const schema = initialcontextOverride?.schema;
       if (schema) {
         return schema.safeParse(parsed).success;
-      } else {
-        return true;
       }
+      return true;
     } catch {
       return false;
     }
-  }, [inputsJson, initialcontextOverride?.schema]);
+  }, [inputsJson, initialcontextOverride?.schema, initialcontextOverride?.rawJsonSchema]);
 
   const jsonSchema = useMemo(() => {
     if (initialcontextOverride?.rawJsonSchema) {

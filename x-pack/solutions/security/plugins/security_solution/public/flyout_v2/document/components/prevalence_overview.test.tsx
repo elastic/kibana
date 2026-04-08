@@ -23,11 +23,11 @@ import {
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { usePrevalence } from '../hooks/use_prevalence';
+import { usePrevalence } from '../../prevalence/hooks/use_prevalence';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockSearchHit } from '../../../flyout/document_details/shared/mocks/mock_search_hit';
 
-jest.mock('../hooks/use_prevalence');
+jest.mock('../../prevalence/hooks/use_prevalence');
 jest.mock('../../../common/lib/kibana');
 
 const mockNavigateToLeftPanel = jest.fn();

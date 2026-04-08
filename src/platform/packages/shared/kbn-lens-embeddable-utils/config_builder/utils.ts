@@ -38,7 +38,7 @@ import type {
   LensESQLDataset,
 } from './types';
 import type { LensApiState } from './schema';
-import type { DatasetType } from './schema/dataset';
+import type { DataSourceType } from './schema/data_source';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -351,11 +351,7 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
 }
 
 export function isLensAPIFormat(config: unknown): config is LensApiState {
-  // We need to check the type is not lens because embeddable logic sometimes add it for some reason.
-  // See https://github.com/elastic/kibana/issues/250115
-  return (
-    typeof config === 'object' && config !== null && 'type' in config && config.type !== 'lens'
-  );
+  return typeof config === 'object' && config !== null && 'type' in config;
 }
 
 export function isLensLegacyFormat(config: unknown): config is LensConfig {
@@ -368,10 +364,10 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   );
 }
 
-export function isEsqlTableTypeDataset(
-  dataset: DatasetType
-): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
-  return dataset.type === 'esql' || dataset.type === 'table';
+export function isEsqlTableTypeDataSource(
+  dataSource: DataSourceType
+): dataSource is Extract<DataSourceType, { type: 'esql' }> {
+  return dataSource.type === 'esql';
 }
 
 export function groupIsNotCollapsed(def: {
@@ -381,6 +377,9 @@ export function groupIsNotCollapsed(def: {
 }
 
 export function isLensESQLConfig(config: LensApiState): boolean {
-  if (config.type === 'xy') return config.layers.some((layer) => layer.dataset?.type === 'esql');
-  return config.dataset?.type === 'esql';
+  if (config.type === 'xy')
+    return config.layers.some(
+      (layer) => 'data_source' in layer && layer.data_source?.type === 'esql'
+    );
+  return config.data_source?.type === 'esql';
 }

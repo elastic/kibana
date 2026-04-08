@@ -24,7 +24,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { ChildWorkflowExecutionItem, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
@@ -33,7 +33,6 @@ import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
-import type { ChildWorkflowExecutionInfo } from '../model/use_child_workflow_executions';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -45,7 +44,7 @@ interface WorkflowStepExecutionDetailsProps {
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
-  childWorkflowExecution?: ChildWorkflowExecutionInfo;
+  childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
   parentWorkflowExecution?: WorkflowExecutionLinkInfo;
 }

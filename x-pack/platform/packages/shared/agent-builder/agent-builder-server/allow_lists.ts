@@ -34,6 +34,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
+  `${internalNamespaces.observability}.get_apm_correlations`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
@@ -77,7 +78,9 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
+  `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  'elasticsearch-onboarding',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -114,13 +117,35 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic_troubleshooting',
   'entity-analytics',
   'alert-analysis',
+  'detection-rule-edit',
+  'threat-hunting',
 
   // O11Y
-  'observability.log-search',
+  'observability.rca',
+
+  // Search
+  `${internalNamespaces.search}.keyword-search`,
+  `${internalNamespaces.search}.catalog-ecommerce`,
+  `${internalNamespaces.search}.vector-database`,
+  `${internalNamespaces.search}.semantic-search`,
+  `${internalNamespaces.search}.hybrid-search`,
+  `${internalNamespaces.search}.rag-chatbot`,
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
 
 export const isAllowedBuiltinSkill = (skillId: string) => {
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
+};
+
+/**
+ * This is a manually maintained list of all built-in plugins registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new plugin.
+ */
+export const AGENT_BUILDER_BUILTIN_PLUGINS = [] as const;
+
+export type AgentBuilderBuiltinPlugin = (typeof AGENT_BUILDER_BUILTIN_PLUGINS)[number];
+
+export const isAllowedBuiltinPlugin = (pluginId: string) => {
+  return (AGENT_BUILDER_BUILTIN_PLUGINS as readonly string[]).includes(pluginId);
 };

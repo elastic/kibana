@@ -10,12 +10,11 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
-import { WORKFLOWS_CONFIG_PATH } from '../../../../common/routes';
-import { useKibana } from '../../../hooks/use_kibana';
 
-jest.mock('../../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+jest.mock('@kbn/workflows-ui');
+const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -24,14 +23,12 @@ const createWrapper = (queryClient: QueryClient) => {
 };
 
 describe('useEventDrivenExecutionStatus', () => {
-  let mockHttpGet: jest.Mock;
+  let mockGetConfig: jest.Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    mockHttpGet = jest.fn();
-    mockUseKibana.mockReturnValue({
-      services: { http: { get: mockHttpGet } },
-    } as any);
+    mockGetConfig = jest.fn();
+    mockUseWorkflowsApi.mockReturnValue({ getConfig: mockGetConfig } as any);
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -43,8 +40,8 @@ describe('useEventDrivenExecutionStatus', () => {
     queryClient.clear();
   });
 
-  it('calls GET /internal/workflows/config and returns eventDrivenExecutionEnabled from response', async () => {
-    mockHttpGet.mockResolvedValue({ eventDrivenExecutionEnabled: true });
+  it('calls getConfig and returns eventDrivenExecutionEnabled from response', async () => {
+    mockGetConfig.mockResolvedValue({ eventDrivenExecutionEnabled: true });
 
     const { result } = renderHook(() => useEventDrivenExecutionStatus(), {
       wrapper: createWrapper(queryClient),
@@ -54,13 +51,13 @@ describe('useEventDrivenExecutionStatus', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(mockHttpGet).toHaveBeenCalledWith(WORKFLOWS_CONFIG_PATH);
+    expect(mockGetConfig).toHaveBeenCalled();
     expect(result.current.eventDrivenExecutionEnabled).toBe(true);
     expect(result.current.error).toBe(false);
   });
 
   it('returns eventDrivenExecutionEnabled false when API returns false', async () => {
-    mockHttpGet.mockResolvedValue({ eventDrivenExecutionEnabled: false });
+    mockGetConfig.mockResolvedValue({ eventDrivenExecutionEnabled: false });
 
     const { result } = renderHook(() => useEventDrivenExecutionStatus(), {
       wrapper: createWrapper(queryClient),
@@ -73,7 +70,7 @@ describe('useEventDrivenExecutionStatus', () => {
   });
 
   it('sets error to true and defaults eventDrivenExecutionEnabled to true on request failure', async () => {
-    mockHttpGet.mockRejectedValue(new Error('Network error'));
+    mockGetConfig.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useEventDrivenExecutionStatus(), {
       wrapper: createWrapper(queryClient),
@@ -81,22 +78,6 @@ describe('useEventDrivenExecutionStatus', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.error).toBe(true);
-    expect(result.current.eventDrivenExecutionEnabled).toBe(true);
-  });
-
-  it('sets error to true when http is undefined (queryFn throws)', async () => {
-    mockUseKibana.mockReturnValue({
-      services: { http: undefined },
-    } as any);
-
-    const { result } = renderHook(() => useEventDrivenExecutionStatus(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(mockHttpGet).not.toHaveBeenCalled();
     expect(result.current.error).toBe(true);
     expect(result.current.eventDrivenExecutionEnabled).toBe(true);
   });

@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "actions",
       "features",
+      "inference",
       "licensing",
       "management",
       "share",

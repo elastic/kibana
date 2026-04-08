@@ -10,7 +10,3 @@
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
-
-export function isNotNullable<T>(v: T): v is NonNullable<T> {
-  return v != null;
-}

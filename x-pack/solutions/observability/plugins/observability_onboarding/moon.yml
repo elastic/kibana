@@ -53,8 +53,14 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
   - '@kbn/core-security-server'
+  - '@kbn/scout-oblt'
+  - '@kbn/scout-synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/streams-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/ingest-hub-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
@@ -68,27 +74,8 @@ fileGroups:
     - public/**/*.json
     - server/**/*
     - e2e/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

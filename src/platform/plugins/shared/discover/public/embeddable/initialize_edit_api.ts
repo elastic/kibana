@@ -19,7 +19,7 @@ import { apiHasAppContext } from '@kbn/presentation-publishing';
 import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch, PublishesSelectedTabId } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
-import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux/tab_mapping_utils';
+import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &

@@ -22,17 +22,25 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 interface HostPanelHeaderProps {
   hostName: string;
   lastSeen: FirstLastSeenData;
+  entityId?: string;
+  identityFields?: IdentityFields;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ hostName, lastSeen }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({
+  hostName,
+  lastSeen,
+  entityId,
+  identityFields,
+}: HostPanelHeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
   const lastSeenDateFormatted = useMemo(
@@ -57,16 +65,39 @@ export const HostPanelHeader = ({ hostName, lastSeen }: HostPanelHeaderProps) =>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.hosts}
-            path={getHostDetailsUrl(hostName)}
-            target={'_blank'}
-            external={false}
-            css={linkTitleCSS}
-            override={urlParamOverride}
+          <EuiFlexGroup
+            gutterSize="xs"
+            responsive={false}
+            direction="column"
+            alignItems="flexStart"
           >
-            <FlyoutTitle title={hostName} iconType={'storage'} isLink />
-          </SecuritySolutionLinkAnchor>
+            <EuiFlexItem grow={false}>
+              <SecuritySolutionLinkAnchor
+                deepLinkId={SecurityPageName.hosts}
+                path={getHostDetailsUrl(
+                  hostName,
+                  undefined,
+                  entityId,
+                  identityFields && Object.keys(identityFields).length > 0
+                    ? identityFields
+                    : undefined
+                )}
+                target={'_blank'}
+                external={false}
+                css={linkTitleCSS}
+                override={urlParamOverride}
+              >
+                <FlyoutTitle title={hostName} iconType={'storage'} isLink />
+              </SecuritySolutionLinkAnchor>
+            </EuiFlexItem>
+            {entityId ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="host-panel-header-entity-id">
+                  {entityId}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         {isLoading ? (
           <EuiFlexItem grow={true}>

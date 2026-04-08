@@ -245,7 +245,7 @@ export class UsersGridPage extends Component<Props, State> {
                     data-test-subj="createUserButton"
                     {...reactRouterNavigate(this.props.history, `/create`)}
                     fill
-                    iconType="plusInCircleFilled"
+                    iconType="plusCircle"
                   >
                     <FormattedMessage
                       id="xpack.security.management.users.createNewUserButtonLabel"

@@ -31,6 +31,7 @@ import { useCopyPack } from '../../../packs/use_copy_pack';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { useDuplicateGuard } from '../../../common/hooks/use_duplicate_guard';
 
 const EditPackPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
@@ -44,6 +45,11 @@ const EditPackPageComponent = () => {
   const deletePackMutation = useDeletePack({ packId, withRedirect: true });
   const copyPackMutation = useCopyPack({ packId });
   const isReadOnly = useMemo(() => !!data?.read_only, [data]);
+
+  const { handleDuplicateClick, handleDirtyStateChange, duplicateModal } = useDuplicateGuard({
+    copyMutation: copyPackMutation,
+    resourceType: 'pack',
+  });
 
   useBreadcrumbs('pack_edit', {
     packId: data?.id ?? '',
@@ -64,13 +70,14 @@ const EditPackPageComponent = () => {
     });
   }, [deletePackMutation, handleCloseDeleteConfirmationModal]);
 
-  const handleDuplicateClick = useCallback(() => {
-    copyPackMutation.mutateAsync();
-  }, [copyPackMutation]);
-
   const backLink = useMemo(
     () => (
-      <EuiButtonEmpty iconType="arrowLeft" {...queryDetailsLinkProps} flush="left" size="xs">
+      <EuiButtonEmpty
+        iconType="chevronSingleLeft"
+        {...queryDetailsLinkProps}
+        flush="left"
+        size="xs"
+      >
         <FormattedMessage
           id="xpack.osquery.editPack.viewPackListTitle"
           defaultMessage="View {queryName} details"
@@ -162,6 +169,7 @@ const EditPackPageComponent = () => {
         defaultValue={data}
         isReadOnly={isReadOnly}
         packId={packId}
+        onDirtyStateChange={handleDirtyStateChange}
       />
     );
 
@@ -251,6 +259,7 @@ const EditPackPageComponent = () => {
         <EuiSpacer size="l" />
         {formContent}
         {deleteModal}
+        {duplicateModal}
       </div>
     );
   }
@@ -283,6 +292,7 @@ const EditPackPageComponent = () => {
     >
       {formContent}
       {deleteModal}
+      {duplicateModal}
     </WithHeaderLayout>
   );
 };

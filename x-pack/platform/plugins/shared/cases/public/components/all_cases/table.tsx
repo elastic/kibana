@@ -111,7 +111,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
                   size="s"
                   onClick={navigateToCreateCaseClick}
                   href={getCreateCaseUrl()}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   data-test-subj="cases-table-add-case"
                 >
                   {i18n.CREATE_CASE_TITLE}

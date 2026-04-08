@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYDataLayerConfig, XYLayerConfig } from '@kbn/lens-common';
-import { isEsqlTableTypeDataset } from '../../../utils';
+import type { XYDataLayerConfig, XYLayerConfig, XYPersistedLayerConfig } from '@kbn/lens-common';
+import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import type {
-  DataLayerType,
-  ReferenceLineLayerType,
   AnnotationLayerType,
+  DataLayerType,
   LayerTypeESQL,
   LayerTypeNoESQL,
+  ReferenceLineLayerType,
 } from '../../../schema/charts/xy';
+import { isEsqlTableTypeDataSource } from '../../../utils';
 import {
-  XY_ANNOTATION_LAYER_TYPES,
-  XY_REFERENCE_LAYER_TYPES,
-  XY_DATA_LAYER_TYPES,
   AVAILABLE_XY_LAYER_TYPES,
+  XY_ANNOTATION_LAYER_TYPES,
+  XY_DATA_LAYER_TYPES,
+  XY_REFERENCE_LAYER_TYPES,
 } from './constants';
+import { getReversibleMappings } from '../utils';
 
 type XYLayer = DataLayerType | ReferenceLineLayerType | AnnotationLayerType;
 
@@ -63,9 +65,31 @@ export function isAPIXYLayer(layer: unknown): layer is XYLayer {
 }
 
 export function isAPIesqlXYLayer(layer: XYLayer): layer is LayerTypeESQL {
-  return isEsqlTableTypeDataset(layer.dataset);
+  return 'data_source' in layer && isEsqlTableTypeDataSource(layer.data_source);
 }
 
-export function isLensStateDataLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {
+export function isLensStateDataLayer(
+  layer: XYLayerConfig | XYPersistedLayerConfig
+): layer is XYDataLayerConfig {
   return layer.layerType === 'data' || !('layerType' in layer);
 }
+
+type XYApiIconName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;
+
+export const xyIconCompat = getReversibleMappings<XYApiIconName, AvailableAnnotationIcon>([
+  ['alert', 'alert'],
+  ['asterisk', 'asterisk'],
+  ['bell', 'bell'],
+  ['bolt', 'bolt'],
+  ['bug', 'bug'],
+  ['circle', 'circle'],
+  ['editor_comment', 'editorComment'],
+  ['flag', 'flag'],
+  ['heart', 'heart'],
+  ['map_marker', 'mapMarker'],
+  ['pin_filled', 'pinFilled'],
+  ['star_empty', 'starEmpty'],
+  ['star_filled', 'starFilled'],
+  ['tag', 'tag'],
+  ['triangle', 'triangle'],
+]);

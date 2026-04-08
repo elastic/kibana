@@ -63,10 +63,10 @@ const mockTimelineConfig = {
 const mockStore = createMockStore(mockGlobalState);
 const mockHit = buildDataTableRecord({ _index: 'test', _id: 'test-id' } as EsHitRecord);
 
-const renderNotesDetails = (isTimelineFlyout = true) =>
+const renderNotesDetails = () =>
   render(
     <TestProviders store={mockStore}>
-      <NotesDetails hit={mockHit} isTimelineFlyout={isTimelineFlyout} />
+      <NotesDetails hit={mockHit} />
     </TestProviders>
   );
 
@@ -76,6 +76,11 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: true },
       timelinePrivileges: { crud: true },
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
     });
     (useTimelineConfig as jest.Mock).mockReturnValue(mockTimelineConfig);
     useIsInSecurityAppMock.mockReturnValue(false);
@@ -100,7 +105,7 @@ describe('NotesDetails', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -129,7 +134,7 @@ describe('NotesDetails', () => {
 
     const { getByText } = render(
       <TestProviders store={store}>
-        <NotesDetails hit={alertHit} isTimelineFlyout={true} />
+        <NotesDetails hit={alertHit} />
       </TestProviders>
     );
 
@@ -150,7 +155,7 @@ describe('NotesDetails', () => {
 
     const { getByText } = render(
       <TestProviders store={store}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -175,7 +180,7 @@ describe('NotesDetails', () => {
 
     render(
       <TestProviders store={store}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -188,6 +193,11 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: false },
       timelinePrivileges: { crud: false },
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
     });
 
     const { queryByTestId } = renderNotesDetails();
@@ -249,7 +259,7 @@ describe('NotesDetails hideTimelineIcon prop', () => {
 
     const { getByTestId } = render(
       <TestProviders store={getNotesStoreWithTimelineNote()}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={false} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
@@ -261,7 +271,7 @@ describe('NotesDetails hideTimelineIcon prop', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={getNotesStoreWithTimelineNote()}>
-        <NotesDetails hit={mockHit} isTimelineFlyout={false} />
+        <NotesDetails hit={mockHit} />
       </TestProviders>
     );
 
