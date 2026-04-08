@@ -23,7 +23,7 @@ import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -42,7 +42,7 @@ import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { isEsqlTableTypeDataset } from '../../utils';
+import { isEsqlTableTypeDataSource } from '../../utils';
 
 const ACCESSOR = 'gauge_accessor';
 
@@ -96,10 +96,16 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null) {
+    throw new Error('Unsupported DataSource type');
   }
 
   const props: DeepPartial<DeepMutable<GaugeState>> = {
@@ -112,7 +118,7 @@ function reverseBuildVisualizationState(
         : {
             type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
           },
-    metric: isEsqlTableTypeDataset(dataset)
+    metric: isEsqlTableTypeDataSource(dataSource)
       ? {
           ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
           ...(visualization.minAccessor
@@ -184,7 +190,7 @@ function reverseBuildVisualizationState(
 
   return {
     type: 'gauge',
-    dataset: dataset satisfies GaugeState['dataset'],
+    data_source: dataSource satisfies GaugeState['data_source'],
     ...props,
   } as GaugeState;
 }

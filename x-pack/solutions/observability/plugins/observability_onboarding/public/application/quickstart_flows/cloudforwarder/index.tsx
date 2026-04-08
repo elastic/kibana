@@ -6,10 +6,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonGroup,
-  EuiCallOut,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
@@ -20,6 +20,7 @@ import {
   EuiSteps,
   EuiText,
 } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -28,6 +29,10 @@ import type { ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
+import { ProgressIndicator } from '../shared/progress_indicator';
+import { GetStartedPanel } from '../shared/get_started_panel';
 import { useCloudForwarderFlow } from './use_cloudforwarder_flow';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
@@ -36,6 +41,9 @@ import { isValidS3BucketName, buildS3BucketArn, buildCloudFormationUrl } from '.
 
 const EDOT_CLOUD_FORWARDER_DOCS_URL =
   'https://www.elastic.co/docs/reference/opentelemetry/edot-cloud-forwarder/aws';
+
+const FETCH_INTERVAL = 5000;
+const SHOW_TROUBLESHOOTING_DELAY = 300_000;
 
 export function CloudForwarderPanel() {
   useFlowBreadcrumb({
@@ -49,6 +57,7 @@ export function CloudForwarderPanel() {
 
   const {
     services: {
+      http,
       analytics,
       context: { cloudServiceProvider },
     },
@@ -61,6 +70,28 @@ export function CloudForwarderPanel() {
   const isBucketNameInvalid =
     trimmedBucketName.length > 0 && !isValidS3BucketName(trimmedBucketName);
   const { onPageReady } = usePerformanceContext();
+
+  const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
+  const [monitoringLogType, setMonitoringLogType] = useState<LogType | null>(null);
+  const [launchStackClicked, setLaunchStackClicked] = useState(false);
+
+  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+    isActive: status === FETCH_STATUS.SUCCESS && launchStackClicked,
+    onboardingFlowType: 'cloudforwarder',
+    onboardingId: data?.onboardingId,
+  });
+
+  const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+    isMonitoringActive:
+      isMonitoringStepActive && monitoringLogType !== null && sessionStartTime !== null,
+    sessionStartTime: sessionStartTime ?? '',
+    fetchInterval: FETCH_INTERVAL,
+    troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
+    flowType: 'cloudforwarder',
+    onboardingId: data?.onboardingId ?? '',
+    endpoint: '/internal/observability_onboarding/cloudforwarder/has-data',
+    extraQueryParams: monitoringLogType ? { logType: monitoringLogType } : undefined,
+  });
 
   useEffect(() => {
     if (data) {
@@ -216,6 +247,7 @@ export function CloudForwarderPanel() {
                   value={s3BucketName}
                   onChange={(e) => setS3BucketName(e.target.value)}
                   isInvalid={isBucketNameInvalid}
+                  disabled={launchStackClicked}
                   placeholder={i18n.translate(
                     'xpack.observability_onboarding.cloudforwarderPanel.s3BucketNamePlaceholder',
                     {
@@ -246,6 +278,7 @@ export function CloudForwarderPanel() {
                 idSelected={selectedLogType}
                 onChange={(id) => setSelectedLogType(id as LogType)}
                 buttonSize="m"
+                isDisabled={launchStackClicked}
               />
             </>
           )}
@@ -290,6 +323,9 @@ export function CloudForwarderPanel() {
                 fill
                 isDisabled={!isValidS3BucketName(trimmedBucketName)}
                 onClick={() => {
+                  setLaunchStackClicked(true);
+                  setMonitoringLogType(selectedLogType);
+                  setSessionStartTime(new Date().toISOString());
                   analytics?.reportEvent(
                     OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT.eventType,
                     {
@@ -323,35 +359,90 @@ export function CloudForwarderPanel() {
           defaultMessage: 'Visualize your data',
         }
       ),
-      children: (
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.observability_onboarding.cloudforwarderPanel.visualizeDataCalloutTitle',
-            {
-              defaultMessage: 'Data will appear in Discover',
-            }
-          )}
-          color="success"
-          iconType="check"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.observability_onboarding.cloudforwarderPanel.visualizeDataCalloutDescription"
-              defaultMessage="Once logs are flowing, you can view them in Discover and create visualizations in Dashboard. Look for indices prefixed with {logsPrefix}."
-              values={{
-                logsPrefix: (
-                  <strong>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.cloudforwarderPanel.strong.logsawsLabel',
-                      { defaultMessage: 'logs-aws.*' }
-                    )}
-                  </strong>
-                ),
-              }}
+      status: (hasData || hasPreExistingData
+        ? 'complete'
+        : isMonitoringStepActive
+        ? 'current'
+        : 'incomplete') as EuiStepStatus,
+      children: isMonitoringStepActive ? (
+        <>
+          {!(hasPreExistingData && !hasData) && (
+            <ProgressIndicator
+              title={
+                hasData
+                  ? i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.dataReceived',
+                      { defaultMessage: 'We are receiving your AWS logs' }
+                    )
+                  : i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.waitingForData',
+                      { defaultMessage: 'Waiting for data from EDOT Cloud Forwarder' }
+                    )
+              }
+              iconType="checkInCircleFilled"
+              isLoading={!hasData}
+              css={css`
+                max-width: 40%;
+              `}
+              data-test-subj="observabilityOnboardingCloudForwarderDataProgressIndicator"
             />
-          </p>
-        </EuiCallOut>
-      ),
+          )}
+
+          {isTroubleshootingVisible && (
+            <>
+              <EuiSpacer />
+              <EuiText color="subdued" size="s">
+                <FormattedMessage
+                  id="xpack.observability_onboarding.cloudforwarderPanel.troubleshootingTextLabel"
+                  defaultMessage="Data hasn't arrived yet. Check the CloudFormation stack status in the AWS console, verify your S3 bucket has data, and ensure the region matches. {troubleshootingLink}"
+                  values={{
+                    troubleshootingLink: (
+                      <EuiLink
+                        data-test-subj="observabilityOnboardingCloudForwarderTroubleshootingLink"
+                        href={EDOT_CLOUD_FORWARDER_DOCS_URL}
+                        external
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'xpack.observability_onboarding.cloudforwarderPanel.troubleshootingLinkText',
+                          { defaultMessage: 'Open documentation' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </>
+          )}
+
+          {(hasData === true || hasPreExistingData) && (
+            <>
+              <EuiSpacer />
+              <GetStartedPanel
+                onboardingFlowType="cloudforwarder"
+                onboardingId={data?.onboardingId ?? ''}
+                dataset="cloudforwarder"
+                newTab={false}
+                isLoading={false}
+                actionLinks={[
+                  {
+                    id: 'discover',
+                    title: i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.discoverTitle',
+                      { defaultMessage: 'View and analyze your AWS logs' }
+                    ),
+                    label: i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.discoverLabel',
+                      { defaultMessage: 'Explore logs in Discover' }
+                    ),
+                    href: http?.basePath.prepend('/app/discover') ?? '/app/discover',
+                  },
+                ]}
+              />
+            </>
+          )}
+        </>
+      ) : null,
     },
   ];
 
