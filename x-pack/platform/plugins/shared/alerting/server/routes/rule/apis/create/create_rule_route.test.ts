@@ -47,6 +47,7 @@ describe('createRuleRoute', () => {
     },
     enableFrameworkAlerts: true,
     cancelAlertsOnRuleTimeout: true,
+    enableRuleChangeTracking: false,
     rules: {
       minimumScheduleInterval: {
         value: '1m',

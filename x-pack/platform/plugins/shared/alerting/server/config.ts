@@ -76,6 +76,7 @@ export const configSchema = schema.object({
   }),
   maxEphemeralActionsPerAlert: schema.maybe(schema.number()),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
+  enableRuleChangeTracking: schema.boolean({ defaultValue: false }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
   rulesSettings: schema.object({

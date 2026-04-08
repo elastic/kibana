@@ -98,6 +98,14 @@ describe('RulesClientFactory', () => {
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       actions: actionsMock.createStart(),
       eventLog: eventLogMock.createStart(),
+      changeTrackingService: {
+        register: jest.fn(),
+        isInitialized: jest.fn(),
+        initialize: jest.fn(),
+        log: jest.fn(),
+        logBulk: jest.fn(),
+        getHistory: jest.fn(),
+      },
       kibanaVersion: '7.10.0',
       authorization:
         alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
@@ -176,6 +184,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
+        changeTrackingService: rulesClientFactoryParams.changeTrackingService,
         getActionsClient: expect.any(Function),
         getEventLogClient: expect.any(Function),
         createAPIKey: expect.any(Function),
@@ -193,6 +202,27 @@ describe('RulesClientFactory', () => {
         backfillClient,
         uiSettings: rulesClientFactoryParams.uiSettings,
         shouldGrantUiam: false,
+      })
+    );
+  });
+
+  test('creates a rules client without changeTrackingService when omitted', async () => {
+    const factory = new RulesClientFactory();
+    const { changeTrackingService: _omit, ...paramsWithoutChangeTracking } =
+      rulesClientFactoryParams;
+    factory.initialize(paramsWithoutChangeTracking);
+    const request = mockRouter.createKibanaRequest();
+
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
+
+    await factory.create(request, savedObjectsService);
+
+    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        changeTrackingService: undefined,
       })
     );
   });
@@ -236,6 +266,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
+        changeTrackingService: rulesClientFactoryParams.changeTrackingService,
         createAPIKey: expect.any(Function),
         internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
         encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
