@@ -91,6 +91,7 @@ export interface ToolItem {
   popoverWidth?: number | string;
   badgeType?: BadgeType;
   'data-test-subj'?: string;
+  shortcutKey?: string;
 }
 
 /**

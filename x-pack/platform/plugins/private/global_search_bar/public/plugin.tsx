@@ -5,14 +5,27 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  CoreSetup,
+  CoreStart,
+  OverlayRef,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
+import {
+  SEARCH_MODAL_KEYBOARD_SHORTCUT,
+  SEARCH_MODAL_SELECTOR_PREFIX,
+  type SearchProps,
+} from './components/types';
+import { SearchModal } from './components/search_modal';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
@@ -40,26 +53,52 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
     const { application, http } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
+    const searchProps: SearchProps = {
+      globalSearch: { ...globalSearch, searchCharLimit: this.config.input_max_limit },
+      navigateToUrl: application.navigateToUrl,
+      taggingApi: savedObjectsTagging,
+      basePathUrl: http.basePath.prepend('/plugins/globalSearchBar/assets/'),
+      reportEvent,
+    };
+
+    let activeModalRef: OverlayRef | null = null;
+
+    const toggleSearchModal = () => {
+      if (activeModalRef) {
+        activeModalRef.close();
+        activeModalRef = null;
+        return;
+      }
+      activeModalRef = core.overlays.openModal(
+        toMountPoint(
+          <SearchModal
+            {...searchProps}
+            onClose={() => {
+              activeModalRef?.close();
+              activeModalRef = null;
+            }}
+          />,
+          core
+        ),
+        {
+          className: SEARCH_MODAL_SELECTOR_PREFIX,
+          'data-test-subj': SEARCH_MODAL_SELECTOR_PREFIX,
+          outsideClickCloses: true,
+        }
+      );
+      activeModalRef.onClose.then(() => {
+        activeModalRef = null;
+      });
+    };
+
     core.chrome.next.globalSearch.set({
-      onClick: () => {
-        // TODO: open search modal
-        // eslint-disable-next-line no-console
-        console.log('[GlobalSearch] search button clicked — modal not yet implemented');
-      },
+      onClick: toggleSearchModal,
+      shortcutKey: SEARCH_MODAL_KEYBOARD_SHORTCUT,
     });
 
     core.chrome.navControls.registerCenter({
       order: 1000,
-      content: (
-        <SearchBar
-          globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
-          navigateToUrl={application.navigateToUrl}
-          taggingApi={savedObjectsTagging}
-          basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
-          chromeStyle$={core.chrome.getChromeStyle$()}
-          reportEvent={reportEvent}
-        />
-      ),
+      content: <SearchBar {...searchProps} chromeStyle$={core.chrome.getChromeStyle$()} />,
     });
 
     return {};

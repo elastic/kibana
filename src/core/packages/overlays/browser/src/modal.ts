@@ -68,4 +68,5 @@ export interface OverlayModalOpenOptions {
   'data-test-subj'?: string;
   maxWidth?: boolean | number | string;
   'aria-labelledby'?: EuiModalProps['aria-labelledby'];
+  outsideClickCloses?: boolean;
 }

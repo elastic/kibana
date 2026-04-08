@@ -13,4 +13,6 @@
 export interface ChromeNextGlobalSearchConfig {
   /** Called when the search icon button in the sidenav is clicked. */
   onClick: () => void;
+  /** The keyboard shortcut key to trigger the global search modal. */
+  shortcutKey?: string;
 }

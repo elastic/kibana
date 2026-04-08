@@ -52,6 +52,7 @@ const getHeaderTools = (
       }),
       iconType: 'search',
       onClick: globalSearch.onClick,
+      shortcutKey: globalSearch.shortcutKey,
     });
   }
 

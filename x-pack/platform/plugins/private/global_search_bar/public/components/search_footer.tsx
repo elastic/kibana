@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '@kbn/shared-ux-utility';
 
-export const PopoverFooter: FC = () => {
+interface SearchFooterProps {
+  shortcutKey?: string;
+}
+
+export const SearchFooter = ({ shortcutKey = '/' }: SearchFooterProps) => {
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -56,12 +59,14 @@ export const PopoverFooter: FC = () => {
                     {isMac ? (
                       <FormattedMessage
                         id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
-                        defaultMessage="Command + /"
+                        defaultMessage="Command + {key}"
+                        values={{ key: shortcutKey }}
                       />
                     ) : (
                       <FormattedMessage
                         id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
-                        defaultMessage="Control + /"
+                        defaultMessage="Control + {key}"
+                        values={{ key: shortcutKey }}
                       />
                     )}
                   </EuiCode>

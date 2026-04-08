@@ -44,6 +44,7 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
+import { useToolShortcuts } from '../hooks/use_tool_shortcuts';
 
 const navigationWrapperStyles = css`
   display: flex;
@@ -165,6 +166,8 @@ export const Navigation = ({
   const hasHeaderTools = headerTools.length > 0;
   const hasFooterTools = footerTools.length > 0;
   const showFooterToolbar = hasFooterTools || Boolean(collapseToggle);
+
+  useToolShortcuts({ tools: [...headerTools, ...footerTools] });
 
   const topSectionStyles = useMemo(() => getTopSectionStyles(euiThemeContext), [euiThemeContext]);
 
@@ -612,7 +615,15 @@ const renderToolItems = ({
   popoverItemPrefix,
 }: RenderToolItemsArgs) =>
   items.map((item) => {
-    const { onClick: itemOnClick, sections, renderContent, renderPopover, popoverWidth, ...itemProps } = item;
+    const {
+      onClick: itemOnClick,
+      sections,
+      renderContent,
+      renderPopover,
+      popoverWidth,
+      shortcutKey,
+      ...itemProps
+    } = item;
     const hasPopoverContent = getHasSubmenu(item);
     return (
       <SideNav.Popover
