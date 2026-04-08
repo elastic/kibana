@@ -290,11 +290,20 @@ const approveIntegrationRoute = (
         } catch (err) {
           logger.error(`approveIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
-          const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
-          return automaticImportResponse.error({
-            statusCode,
-            body: statusCode === 404 ? 'Integration not found' : undefined,
-          });
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return automaticImportResponse.error({
+              statusCode: 404,
+              body: 'Integration not found',
+            });
+          }
+          const rawMessage = err instanceof Error ? err.message : String(err);
+          if (rawMessage.includes('no data streams')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Cannot approve integration with no data streams',
+            });
+          }
+          return automaticImportResponse.error({ statusCode: 500 });
         }
       })
     );
