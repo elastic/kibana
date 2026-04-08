@@ -6,6 +6,7 @@
  */
 
 import { AI_ASSISTANT_BUTTON } from '../../screens/ai_assistant';
+import { AGENT_BUILDER_NAV_CONTROL_BUTTON } from '../../screens/agent_builder';
 import { login } from '../../tasks/login';
 import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visitGetStartedPage } from '../../tasks/navigation';
@@ -21,3 +22,18 @@ describe('App Features for Security Complete', { tags: ['@serverless'] }, () => 
     cy.get(AI_ASSISTANT_BUTTON).should('be.visible');
   });
 });
+
+describe(
+  'App Features for Security Complete - Agent experience',
+  { tags: ['@serverless', '@ess'] },
+  () => {
+    beforeEach(() => {
+      login();
+    });
+
+    it('should have Agent Builder experience available by default', () => {
+      visitGetStartedPage();
+      cy.get(AGENT_BUILDER_NAV_CONTROL_BUTTON).should('be.visible');
+    });
+  }
+);
