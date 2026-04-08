@@ -61,7 +61,9 @@ export const exportScheduledQueryResultsRoute = (
           const { scheduleId, executionCount } = request.params;
 
           return await handleExport(context, request, response, {
-            baseFilter: `schedule_id: "${escapeKuery(scheduleId)}" AND osquery_meta.schedule_execution_count: ${executionCount}`,
+            baseFilter: `schedule_id: "${escapeKuery(
+              scheduleId
+            )}" AND osquery_meta.schedule_execution_count: ${executionCount}`,
             metadata: {
               action_id: scheduleId,
               query: `Scheduled query: ${scheduleId}`,

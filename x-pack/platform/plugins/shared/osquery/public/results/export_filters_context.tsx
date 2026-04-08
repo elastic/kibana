@@ -32,9 +32,7 @@ export const ExportFiltersProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const value = useMemo(() => ({ getFilters, setFilters }), [getFilters, setFilters]);
 
-  return (
-    <ExportFiltersContext.Provider value={value}>{children}</ExportFiltersContext.Provider>
-  );
+  return <ExportFiltersContext.Provider value={value}>{children}</ExportFiltersContext.Provider>;
 };
 
 export const useExportFiltersContext = () => useContext(ExportFiltersContext);
