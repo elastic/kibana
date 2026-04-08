@@ -293,7 +293,11 @@ export function QueriesTable() {
           return (
             <SparkPlot
               id={`sparkplot-${item.query.id}`}
-              name={item.query.type === QUERY_TYPE_STATS ? THRESHOLD_BREACHES_TOOLTIP_NAME : OCCURRENCES_TOOLTIP_NAME}
+              name={
+                item.query.type === QUERY_TYPE_STATS
+                  ? THRESHOLD_BREACHES_TOOLTIP_NAME
+                  : OCCURRENCES_TOOLTIP_NAME
+              }
               type="bar"
               timeseries={item.occurrences}
               annotations={[]}
