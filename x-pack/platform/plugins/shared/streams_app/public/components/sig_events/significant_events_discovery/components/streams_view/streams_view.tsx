@@ -102,7 +102,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     string | undefined
   >();
   const displayDiscoveryConnectorId =
-    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnector?.connectorId;
+    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnector?.id;
 
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
     steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
@@ -111,10 +111,8 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
 
   const displayConnectors = useMemo(
     () => ({
-      features:
-        onboardingConfig.connectors.features ?? featuresConnectors.resolvedConnector?.connectorId,
-      queries:
-        onboardingConfig.connectors.queries ?? queriesConnectors.resolvedConnector?.connectorId,
+      features: onboardingConfig.connectors.features ?? featuresConnectors.resolvedConnector?.id,
+      queries: onboardingConfig.connectors.queries ?? queriesConnectors.resolvedConnector?.id,
     }),
     [
       onboardingConfig.connectors,
@@ -379,7 +377,13 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   queriesConnectors={queriesConnectors}
                   onConfigChange={setOnboardingConfig}
                   onRun={onBulkOnboardStreamsClick}
-                  isRunDisabled={selectedStreams.length === 0}
+                  isRunDisabled={
+                    selectedStreams.length === 0 ||
+                    featuresConnectors.loading ||
+                    queriesConnectors.loading ||
+                    !!featuresConnectors.error ||
+                    !!queriesConnectors.error
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -408,7 +412,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   isRunDisabled={
                     !aiFeatures?.genAiConnectors?.connectors?.length ||
                     isSchedulingInsights ||
-                    isWaitingForInsightsTask
+                    isWaitingForInsightsTask ||
+                    discoveryConnectors.loading ||
+                    !!discoveryConnectors.error
                   }
                 />
               </EuiFlexItem>

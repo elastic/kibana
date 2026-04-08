@@ -6,13 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { AIConnector } from '@kbn/inference-connectors';
 import React from 'react';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
 
-export const buildConnectorSelectOptions = (connectors: InferenceConnector[]) =>
+export const buildConnectorSelectOptions = (connectors: AIConnector[]) =>
   connectors.map((connector) => ({
-    value: connector.connectorId,
+    value: connector.id,
     inputDisplay: (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>

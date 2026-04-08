@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -24,6 +25,7 @@ import React, { useCallback } from 'react';
 import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
 import { buildConnectorSelectOptions } from './connector_select_options';
 import {
+  CONNECTOR_LOAD_ERROR,
   FEATURES_STEP_LABEL,
   ONBOARDING_CONFIG_POPOVER_ARIA_LABEL,
   ONBOARDING_CONFIG_POPOVER_TITLE,
@@ -82,20 +84,27 @@ const StepRow = ({
           compressed
         />
       </EuiFlexItem>
-      {displayConnectorId && connectorOptions.length > 0 && (
+      {connectors.error ? (
         <EuiFlexItem>
-          <EuiFormRow display="rowCompressed" aria-label={label}>
-            <EuiSuperSelect
-              id={selectId}
-              options={connectorOptions}
-              valueOfSelected={displayConnectorId}
-              onChange={(value) => onConnectorChange(step, value)}
-              disabled={!enabled}
-              compressed
-              fullWidth
-            />
-          </EuiFormRow>
+          <EuiCallOut color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
         </EuiFlexItem>
+      ) : (
+        displayConnectorId &&
+        connectorOptions.length > 0 && (
+          <EuiFlexItem>
+            <EuiFormRow display="rowCompressed" aria-label={label}>
+              <EuiSuperSelect
+                id={selectId}
+                options={connectorOptions}
+                valueOfSelected={displayConnectorId}
+                onChange={(value) => onConnectorChange(step, value)}
+                disabled={!enabled}
+                compressed
+                fullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )
       )}
     </EuiFlexGroup>
   );

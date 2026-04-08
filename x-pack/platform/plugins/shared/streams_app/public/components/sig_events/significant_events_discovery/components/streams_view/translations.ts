@@ -208,3 +208,10 @@ export const INSIGHTS_CONNECTOR_POPOVER_TITLE = i18n.translate(
     defaultMessage: 'Discovery connector',
   }
 );
+
+export const CONNECTOR_LOAD_ERROR = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.connectorLoadError',
+  {
+    defaultMessage: 'Failed to load connectors',
+  }
+);

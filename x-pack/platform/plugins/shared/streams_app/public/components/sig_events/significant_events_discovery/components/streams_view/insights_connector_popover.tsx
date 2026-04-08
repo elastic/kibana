@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -22,6 +23,7 @@ import React, { useCallback } from 'react';
 import type { UseInferenceFeatureConnectorsResult } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
 import { buildConnectorSelectOptions } from './connector_select_options';
 import {
+  CONNECTOR_LOAD_ERROR,
   INSIGHTS_CONNECTOR_POPOVER_ARIA_LABEL,
   INSIGHTS_CONNECTOR_POPOVER_TITLE,
   RUN_BUTTON_LABEL,
@@ -77,19 +79,26 @@ export const InsightsConnectorPopover = ({
     >
       <EuiPopoverTitle paddingSize="s">{INSIGHTS_CONNECTOR_POPOVER_TITLE}</EuiPopoverTitle>
       <EuiFlexGroup direction="column" gutterSize="m" css={popoverContentStyle}>
-        {displayConnectorId && connectorOptions.length > 0 && (
+        {connectors.error ? (
           <EuiFlexItem>
-            <EuiFormRow display="rowCompressed" aria-label={INSIGHTS_CONNECTOR_POPOVER_TITLE}>
-              <EuiSuperSelect
-                id={selectId}
-                options={connectorOptions}
-                valueOfSelected={displayConnectorId}
-                onChange={onConnectorChange}
-                compressed
-                fullWidth
-              />
-            </EuiFormRow>
+            <EuiCallOut color="danger" size="s" title={CONNECTOR_LOAD_ERROR} />
           </EuiFlexItem>
+        ) : (
+          displayConnectorId &&
+          connectorOptions.length > 0 && (
+            <EuiFlexItem>
+              <EuiFormRow display="rowCompressed" aria-label={INSIGHTS_CONNECTOR_POPOVER_TITLE}>
+                <EuiSuperSelect
+                  id={selectId}
+                  options={connectorOptions}
+                  valueOfSelected={displayConnectorId}
+                  onChange={onConnectorChange}
+                  compressed
+                  fullWidth
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )
         )}
         <EuiFlexItem>
           <EuiButton
