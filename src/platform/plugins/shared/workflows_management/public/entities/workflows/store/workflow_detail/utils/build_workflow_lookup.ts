@@ -226,7 +226,10 @@ function setNested(obj: Record<string, unknown>, segments: string[], value: unkn
   let current = obj;
   for (let i = 0; i < segments.length - 1; i++) {
     const seg = segments[i];
-    current = isRecord(current[seg]) ? current[seg] : {};
+    if (!isRecord(current[seg])) {
+      current[seg] = {};
+    }
+    current = current[seg] as Record<string, unknown>;
   }
   current[segments[segments.length - 1]] = value;
 }
