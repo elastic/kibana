@@ -29,7 +29,7 @@ export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape 
     },
 
     // Remove the contain property from the data cascade scroll container when full screen mode is active
-    '&:has(.euiDataGrid--fullScreen) [data-test-subj="data-cascade-scroll-container"]': {
+    '&:has(.euiDataGrid--fullScreen) [data-test-subj="dataCascadeScrollContainer"]': {
       contain: 'none',
     },
 

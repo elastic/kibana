@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { Row } from '@tanstack/react-table';
 import type { GroupNode } from '../../../store_provider';
 import type {
@@ -75,36 +68,34 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
 
   const handleRef = useRef<ChildConnectionHandle | null>(null);
 
-  // Connect/disconnect in useLayoutEffect so React's guaranteed cleanup
-  // ordering (old layout cleanup before new layout effect) prevents stale
-  // disconnects from removing freshly established connections on remount.
-  useLayoutEffect(() => {
+  if (!handleRef.current) {
     handleRef.current = controller.connect(cellId, rowIndex);
-    return () => {
-      handleRef.current?.disconnect();
-      handleRef.current = null;
-    };
-  }, [controller, cellId, rowIndex]);
+  }
+
+  const innerHandle = handleRef.current;
 
   const wrappedHandle = useMemo<ChildConnectionHandle>(
     () => ({
-      reportState(state) {
-        handleRef.current?.reportState(state);
-      },
-      disconnect() {
-        handleRef.current?.disconnect();
-        handleRef.current = null;
-      },
+      reportState: innerHandle.reportState,
+      disconnect: innerHandle.disconnect,
       detachScrollElement() {
-        handleRef.current?.detachScrollElement();
+        innerHandle.detachScrollElement();
         setIsDetached(true);
       },
       reattachScrollElement() {
-        handleRef.current?.reattachScrollElement();
+        innerHandle.reattachScrollElement();
         setIsDetached(false);
       },
     }),
-    []
+    [innerHandle]
+  );
+
+  useEffect(
+    () => () => {
+      innerHandle.disconnect();
+      handleRef.current = null;
+    },
+    [innerHandle]
   );
 
   const onStateChange = useCallback<
@@ -130,9 +121,9 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
         patch.hasStabilized = true;
       }
 
-      handleRef.current?.reportState(patch);
+      innerHandle.reportState(patch);
     },
-    [isActive]
+    [innerHandle, isActive]
   );
 
   const getScrollElement = useCallback(() => {
