@@ -8,16 +8,16 @@
 /** Scout reuses one Elasticsearch role name per worker; keep one SAML role per spec file. */
 export const INTEGRATION_API_BASE_PATH = 'api/automatic_import/integrations';
 
-export const SHARED_INTEGRATION_ID = 'scout-integration-shared';
+export const SHARED_INTEGRATION_ID = 'scout_integration_shared';
 
-export const NON_EXISTENT_INTEGRATION_ID = 'non-existent-scout-test-id';
+export const NON_EXISTENT_INTEGRATION_ID = 'non_existent_scout_test_id';
 
-export const DATA_STREAMS_INTEGRATION_ID = 'scout-ds-test-integration';
+export const DATA_STREAMS_INTEGRATION_ID = 'scout_ds_test_integration';
 
 /** Dedicated integration for manager happy-path data stream flow (upload → patch → results → delete). */
-export const MANAGER_DS_FLOW_INTEGRATION_ID = 'scout-ds-manager-flow';
+export const MANAGER_DS_FLOW_INTEGRATION_ID = 'scout_ds_manager_flow';
 
-export const MANAGER_DS_FLOW_DATA_STREAM_ID = 'scout-ds-manager-flow-ds';
+export const MANAGER_DS_FLOW_DATA_STREAM_ID = 'scout_ds_manager_flow_ds';
 
 export const dataStreamsApiBasePath = (integrationId: string): string =>
   `api/automatic_import/integrations/${integrationId}/data_streams`;

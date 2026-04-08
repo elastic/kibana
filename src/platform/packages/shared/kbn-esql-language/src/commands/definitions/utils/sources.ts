@@ -104,16 +104,15 @@ export const buildSourcesDefinitions = (
       kind,
       detail: isIntegration
         ? i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
-            defaultMessage: SOURCES_TYPES.INTEGRATION,
-          })
+          defaultMessage: SOURCES_TYPES.INTEGRATION,
+        })
         : i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
-            defaultMessage: '{type}',
-            values: {
-              type: type ?? SOURCES_TYPES.INDEX,
-            },
-          }),
+          defaultMessage: '{type}',
+          values: {
+            type: type ?? SOURCES_TYPES.INDEX,
+          },
+        }),
       documentation,
-      sortText: documentation ? `0-INDEX-${name}` : 'A',
       ...(rangeToReplace && { rangeToReplace }),
       ...(filterText && { filterText }),
     });
@@ -137,7 +136,6 @@ export const buildViewsDefinitions = (
         detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
           defaultMessage: 'View',
         }),
-        sortText: 'A-view',
       });
     });
 
@@ -234,7 +232,6 @@ export async function additionalSourcesSuggestions(
         ...pipeCompleteItem,
         filterText: prefix,
         text: prefix + ' | ',
-        sortText: '0',
       }),
       withAutoSuggest({
         ...commaCompleteItem,
@@ -249,10 +246,10 @@ export async function additionalSourcesSuggestions(
       ...recommendedQuerySuggestions.map((suggestion) =>
         suggestion.text
           ? {
-              ...suggestion,
-              filterText: prefix,
-              text: prefix + suggestion.text,
-            }
+            ...suggestion,
+            filterText: prefix,
+            text: prefix + suggestion.text,
+          }
           : suggestion
       ),
     ];
@@ -283,7 +280,6 @@ export const specialIndicesToSuggestions = (
             type: index.mode ?? SOURCES_TYPES.INDEX,
           },
         }),
-        sortText: '0-INDEX-' + index.name,
       })
     );
 
@@ -301,7 +297,6 @@ export const specialIndicesToSuggestions = (
                 defaultMessage: 'Alias',
               }
             ),
-            sortText: '1-ALIAS-' + alias,
           })
         );
       }

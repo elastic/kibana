@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { builderEnums } from '../enums';
 import {
@@ -78,7 +78,7 @@ export const tagcloudStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...tagcloudStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
@@ -97,7 +97,7 @@ export const tagcloudStateSchemaESQL = schema.object(
     type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...tagcloudStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
