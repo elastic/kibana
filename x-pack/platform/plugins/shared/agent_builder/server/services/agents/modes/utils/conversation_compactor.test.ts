@@ -557,11 +557,11 @@ describe('compactConversation', () => {
 
     it('should emit compactionStarted before compactionCompleted when compaction is triggered', async () => {
       const rounds = [
-        createMockRound('r1', 2000, 3),
-        createMockRound('r2', 2000, 3),
-        createMockRound('r3', 2000, 3),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
+        createMockEventPair('r1', 2000, 3),
+        createMockEventPair('r2', 2000, 3),
+        createMockEventPair('r3', 2000, 3),
+        createMockEventPair('recent-1', 200),
+        createMockEventPair('recent-2', 200),
       ];
       const conversation = createMockConversation(rounds);
 
@@ -587,10 +587,10 @@ describe('compactConversation', () => {
 
     it('should emit compactionStarted with correct token_count_before', async () => {
       const rounds = [
-        createMockRound('r1', 2000, 2),
-        createMockRound('r2', 2000, 1),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
+        createMockEventPair('r1', 2000, 2),
+        createMockEventPair('r2', 2000, 1),
+        createMockEventPair('recent-1', 200),
+        createMockEventPair('recent-2', 200),
       ];
       const conversation = createMockConversation(rounds);
 
@@ -609,10 +609,10 @@ describe('compactConversation', () => {
 
     it('should emit compactionCompleted with correct token_count_after and summarized_round_count', async () => {
       const rounds = [
-        createMockRound('r1', 2000, 2),
-        createMockRound('r2', 2000, 1),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
+        createMockEventPair('r1', 2000, 2),
+        createMockEventPair('r2', 2000, 1),
+        createMockEventPair('recent-1', 200),
+        createMockEventPair('recent-2', 200),
       ];
       const conversation = createMockConversation(rounds);
 
@@ -632,10 +632,10 @@ describe('compactConversation', () => {
 
     it('should not emit events when eventEmitter is not provided', async () => {
       const rounds = [
-        createMockRound('r1', 2000, 3),
-        createMockRound('r2', 2000, 3),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
+        createMockEventPair('r1', 2000, 3),
+        createMockEventPair('r2', 2000, 3),
+        createMockEventPair('recent-1', 200),
+        createMockEventPair('recent-2', 200),
       ];
       const conversation = createMockConversation(rounds);
 
