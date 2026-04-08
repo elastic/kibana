@@ -292,10 +292,28 @@ export const colorMappingSchema = schema.oneOf(
   { meta: { id: 'colorMapping', title: 'Color Mapping' } }
 );
 
+export const noColorSchema = schema.object(
+  { type: schema.literal('none') },
+  { meta: { id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring.' } }
+);
+
+export const autoColorSchema = schema.object(
+  { type: schema.literal('auto') },
+  {
+    meta: {
+      id: 'autoColor',
+      title: 'Auto Color',
+      description: 'Coloring determined at runtime based on chart defaults.',
+    },
+  }
+);
+
 export const allColoringTypeSchema = schema.oneOf([
   colorByValueSchema,
   staticColorSchema,
   colorMappingSchema,
+  noColorSchema,
+  autoColorSchema,
 ]);
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
@@ -308,8 +326,30 @@ export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
 export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
 export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
+export type NoColorType = TypeOf<typeof noColorSchema>;
+export type AutoColorType = TypeOf<typeof autoColorSchema>;
 export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
 export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
+
+export const NO_COLOR: NoColorType = { type: 'none' };
+export const AUTO_COLOR: AutoColorType = { type: 'auto' };
+
+export const GAUGE_DEFAULT_COLOR: ColorByValueType = {
+  type: 'dynamic',
+  range: 'percentage',
+  steps: [
+    { gte: 0, lt: 25, color: '#24c292' },
+    { gte: 25, lt: 50, color: '#aee8d2' },
+    { gte: 50, lt: 75, color: '#ffc9c2' },
+    { gte: 75, lte: 100, color: '#f6726a' },
+  ],
+};
+
+export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
+  mode: 'categorical',
+  palette: 'default',
+  mapping: [],
+};
 /**
  * Schema for where to apply the color (to value or background).
  */
