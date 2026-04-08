@@ -82,7 +82,7 @@ export function getActionOptions(
   };
 
   const kibanaCasesGroup: ActionGroup = {
-    iconType: 'casesApp',
+    iconType: 'briefcase',
     id: 'kibana.cases',
     label: i18n.translate('workflows.actionsMenu.kibanaCases', {
       defaultMessage: 'Cases',
