@@ -260,6 +260,63 @@ AND MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
     );
   });
 
+  it('does not append MV_CONTAINS clauses for multivalue fields when WHERE clause already exists with the same filter', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, ["info", "success"]::keyword)',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string',
+        'keyword'
+      )
+    ).toBe(`from logstash-* | WHERE MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`);
+  });
+
+  it('negates the MV_CONTAINS clause for multivalue fields when WHERE clause already exists with the same filter', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, ["info", "success"]::keyword)',
+        'tags.keyword',
+        ['info', 'success'],
+        '-',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-* | WHERE NOT MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
+    );
+  });
+
+  it('negates existing MV_CONTAINS clauses without inline casts', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, ["info", "success"])',
+        'tags.keyword',
+        ['info', 'success'],
+        '-',
+        'string',
+        'keyword'
+      )
+    ).toBe(`from logstash-* | WHERE NOT MV_CONTAINS(\`tags.keyword\`, ["info", "success"])`);
+  });
+
+  it('appends a new MV_CONTAINS clause when an existing one only partially matches the selected values', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, "info"::keyword)',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-* | WHERE MV_CONTAINS(\`tags.keyword\`, "info"::keyword)
+AND MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
+    );
+  });
+
   it('does not append MATCH clauses for multivalue fields when WHERE clause already exists with the same filters', () => {
     expect(
       appendWhereClauseToESQLQuery(
