@@ -164,16 +164,13 @@ describe('ScriptLibrarySearchTermFilter', () => {
       await userEvent.type(searchField, 'test-term');
       expect(searchField.value).toBe('test-term');
 
-      const clearButton = searchField.parentElement?.querySelector(
-        '[class*="euiFieldSearch__clearButton"]'
-      );
-      if (clearButton) {
-        await userEvent.click(clearButton);
+      const clearButton = getByTestId('clearSearchButton');
+      expect(clearButton).toBeInTheDocument();
+      await userEvent.click(clearButton);
 
-        await waitFor(() => {
-          expect(mockOnChangeSearch).toHaveBeenCalledWith([]);
-        });
-      }
+      await waitFor(() => {
+        expect(mockOnChangeSearch).toHaveBeenCalledWith([]);
+      });
     });
 
     it('should update search when last character is removed via backspace', async () => {
