@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
+  EuiFieldText,
+  EuiFormRow,
   EuiLink,
   EuiMarkdownFormat,
   EuiPanel,
@@ -26,14 +29,21 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ValuesType } from 'utility-types';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../../..';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
+import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
+import { ProgressIndicator } from '../shared/progress_indicator';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 import { useOtelApmFlow } from './use_otel_apm_flow';
 import { EmptyPrompt } from '../shared/empty_prompt';
+
+const FETCH_INTERVAL = 2000;
+const SHOW_TROUBLESHOOTING_DELAY = 120_000;
 
 export function OtelApmQuickstartFlow() {
   useFlowBreadcrumb({
@@ -46,6 +56,7 @@ export function OtelApmQuickstartFlow() {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useOtelApmFlow();
   const { onPageReady } = usePerformanceContext();
+  const [serviceName, setServiceName] = useState('');
 
   useEffect(() => {
     if (data) {
@@ -56,6 +67,41 @@ export function OtelApmQuickstartFlow() {
       });
     }
   }, [data, onPageReady]);
+
+  const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_apm' });
+
+  const windowBlurred = useWindowBlurDataMonitoringTrigger({
+    isActive: status === FETCH_STATUS.SUCCESS,
+    onboardingFlowType: 'otel_apm',
+    onboardingId: data?.onboardingId,
+  });
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
+
+  // Set sessionStartTime when monitoring begins (first blur or early
+  // pre-existing data detection) rather than on mount, to narrow the
+  // time-window and reduce false positives from other APM services
+  // already ingesting data on the same cluster.
+  const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
+  useEffect(() => {
+    if (isMonitoringStepActive && sessionStartTime === null) {
+      setSessionStartTime(new Date().toISOString());
+    }
+  }, [isMonitoringStepActive, sessionStartTime]);
+
+  const trimmedServiceName = serviceName.trim();
+  const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+    isMonitoringActive: isMonitoringStepActive && sessionStartTime !== null,
+    sessionStartTime: sessionStartTime ?? '',
+    fetchInterval: FETCH_INTERVAL,
+    troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
+    flowType: 'otel_apm',
+    onboardingId: data?.onboardingId ?? '',
+    endpoint: '/internal/observability_onboarding/otel_apm/has-data',
+    extraQueryParams: trimmedServiceName ? { serviceName: trimmedServiceName } : undefined,
+  });
+
+  const hasPreExistingDataFinal = hasPreExistingData || hasPreExistingDataEarly;
 
   if (error !== undefined) {
     return <EmptyPrompt onboardingFlowType="otel_apm" error={error} onRetryClick={refetch} />;
@@ -98,6 +144,8 @@ export function OtelApmQuickstartFlow() {
                   <ConfigureSDKInstructions
                     managedOtlpServiceUrl={data.managedOtlpServiceUrl}
                     apiKeyEncoded={data.apiKeyEncoded}
+                    serviceName={serviceName}
+                    onServiceNameChange={setServiceName}
                   />
                 )}
               </>
@@ -107,42 +155,88 @@ export function OtelApmQuickstartFlow() {
             title: i18n.translate('xpack.observability_onboarding.otelApm.monitorStepTitle', {
               defaultMessage: 'Visualize your data',
             }),
-            children: (
+            status: (hasData || hasPreExistingDataFinal
+              ? 'complete'
+              : isMonitoringStepActive
+              ? 'current'
+              : 'incomplete') as EuiStepStatus,
+            children: isMonitoringStepActive ? (
               <>
-                <p>
-                  <FormattedMessage
-                    id="xpack.observability_onboarding.otelApm.onceYourKubernetesInfrastructureLabel"
-                    defaultMessage="Go to the Service Inventory to explore your traces, logs, and metrics."
+                {!hasPreExistingDataFinal && (
+                  <ProgressIndicator
+                    title={
+                      hasData
+                        ? i18n.translate('xpack.observability_onboarding.otelApm.monitoringApp', {
+                            defaultMessage: 'We are receiving your application data',
+                          })
+                        : i18n.translate('xpack.observability_onboarding.otelApm.waitingForData', {
+                            defaultMessage: 'Waiting for data to be shipped',
+                          })
+                    }
+                    iconType="checkInCircleFilled"
+                    isLoading={!hasData}
+                    css={css`
+                      max-width: 40%;
+                    `}
+                    data-test-subj="observabilityOnboardingOtelApmDataProgressIndicator"
                   />
-                </p>
-                <EuiSpacer />
-                <GetStartedPanel
-                  onboardingFlowType="otel_apm"
-                  onboardingId={data?.onboardingId}
-                  dataset="otel_apm"
-                  newTab={false}
-                  isLoading={status !== FETCH_STATUS.SUCCESS}
-                  actionLinks={[
-                    {
-                      id: 'services',
-                      title: i18n.translate(
-                        'xpack.observability_onboarding.otelApm.servicesTitle',
+                )}
+
+                {isTroubleshootingVisible && (
+                  <>
+                    <EuiSpacer />
+                    <EuiText color="subdued" size="s">
+                      <FormattedMessage
+                        id="xpack.observability_onboarding.otelApm.troubleshootingTextLabel"
+                        defaultMessage="Find more details and troubleshooting solutions in our documentation. {troubleshootingLink}"
+                        values={{
+                          troubleshootingLink: (
+                            <EuiLink
+                              data-test-subj="observabilityOnboardingOtelApmTroubleshootingLink"
+                              href="https://ela.st/edot-sdks"
+                              external
+                              target="_blank"
+                            >
+                              {i18n.translate(
+                                'xpack.observability_onboarding.otelApm.troubleshootingLinkText',
+                                { defaultMessage: 'Open documentation' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiText>
+                  </>
+                )}
+
+                {(hasData === true || hasPreExistingDataFinal) && (
+                  <>
+                    <EuiSpacer />
+                    <GetStartedPanel
+                      onboardingFlowType="otel_apm"
+                      onboardingId={data?.onboardingId ?? ''}
+                      dataset="otel_apm"
+                      newTab={false}
+                      isLoading={false}
+                      actionLinks={[
                         {
-                          defaultMessage: 'View and analyze your services',
-                        }
-                      ),
-                      label: i18n.translate(
-                        'xpack.observability_onboarding.otelApm.servicesLabel',
-                        {
-                          defaultMessage: 'Open Service Inventory',
-                        }
-                      ),
-                      href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
-                    },
-                  ]}
-                />
+                          id: 'services',
+                          title: i18n.translate(
+                            'xpack.observability_onboarding.otelApm.servicesTitle',
+                            { defaultMessage: 'View and analyze your services' }
+                          ),
+                          label: i18n.translate(
+                            'xpack.observability_onboarding.otelApm.servicesLabel',
+                            { defaultMessage: 'Open Service Inventory' }
+                          ),
+                          href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
+                        },
+                      ]}
+                    />
+                  </>
+                )}
               </>
-            ),
+            ) : null,
           },
         ]}
       />
@@ -173,7 +267,7 @@ function InstallSDKInstructions() {
             <EuiLink
               data-test-subj="apmCreateOpenTelemetryAgentInstructionsEDOTDocsLink"
               target="_blank"
-              href="http://ela.st/edot-sdks"
+              href="https://ela.st/edot-sdks"
             >
               {i18n.translate('xpack.observability_onboarding.otelApm.EDOTDocumentationLinkLabel', {
                 defaultMessage: 'Elastic Distribution of OpenTelemetry documentation',
@@ -208,10 +302,15 @@ function InstallSDKInstructions() {
 function ConfigureSDKInstructions({
   managedOtlpServiceUrl,
   apiKeyEncoded,
+  serviceName,
+  onServiceNameChange,
 }: {
   managedOtlpServiceUrl: string;
   apiKeyEncoded: string;
+  serviceName: string;
+  onServiceNameChange: (value: string) => void;
 }) {
+  const serviceNameDisplay = serviceName.trim() || '<app-name>';
   const items = [
     {
       setting: 'OTEL_EXPORTER_OTLP_ENDPOINT',
@@ -223,8 +322,7 @@ function ConfigureSDKInstructions({
     },
     {
       setting: 'OTEL_RESOURCE_ATTRIBUTES',
-      value:
-        'service.name=<app-name>,service.version=<app-version>,deployment.environment=production',
+      value: `service.name=${serviceNameDisplay},service.version=<app-version>,deployment.environment=production`,
     },
   ];
 
@@ -265,15 +363,42 @@ function ConfigureSDKInstructions({
 
   return (
     <>
+      <EuiFormRow
+        label={i18n.translate('xpack.observability_onboarding.otelApm.serviceNameLabel', {
+          defaultMessage: 'Service name',
+        })}
+        helpText={i18n.translate('xpack.observability_onboarding.otelApm.serviceNameHelpText', {
+          defaultMessage:
+            'Enter the name of your application service. This updates the configuration below and helps detect your data.',
+        })}
+      >
+        <EuiFieldText
+          data-test-subj="observabilityOnboardingOtelApmServiceNameInput"
+          placeholder={i18n.translate(
+            'xpack.observability_onboarding.otelApm.serviceNamePlaceholder',
+            { defaultMessage: 'my-service' }
+          )}
+          value={serviceName}
+          onChange={(e) => onServiceNameChange(e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
       <EuiMarkdownFormat>
         {i18n.translate('xpack.observability_onboarding.otelApm.configureAgent.textPre', {
           defaultMessage:
-            'Set the following variables in your application’s environment to configure the SDK:',
+            "Set the following variables in your application's environment to configure the SDK:",
         })}
       </EuiMarkdownFormat>
       <EuiSpacer />
 
-      <EuiBasicTable items={items} columns={columns} data-test-subj="otel-instructions-table" />
+      <EuiBasicTable
+        items={items}
+        columns={columns}
+        tableCaption={i18n.translate('xpack.observability_onboarding.otelApm.configTableCaption', {
+          defaultMessage: 'OpenTelemetry SDK configuration settings',
+        })}
+        data-test-subj="otel-instructions-table"
+      />
     </>
   );
 }
