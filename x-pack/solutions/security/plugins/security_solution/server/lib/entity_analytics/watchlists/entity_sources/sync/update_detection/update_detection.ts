@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
@@ -15,7 +14,7 @@ import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../enti
 import type { WatchlistBulkEntity } from '../../types';
 import { createWatchlistSyncMarkersService } from '../sync_markers';
 import type { WatchlistEntitySourceClient } from '../../infra';
-import { isTimestampGreaterThan } from '../utils';
+import { isTimestampGreaterThan, getExistingEntitiesMap } from '../utils';
 import { buildEntitiesSearchBody, buildIndexSourceSearchBody } from './queries';
 import { applyBulkUpsert } from '../../bulk/upsert';
 import { getEntityNameFromDoc } from './entity_utils';
@@ -53,37 +52,6 @@ const pickLaterTimestamp = (
   if (!candidate) return current;
   if (!current || isTimestampGreaterThan(candidate, current)) return candidate;
   return current;
-};
-
-const getExistingEntitiesMap = async (
-  esClient: ElasticsearchClient,
-  watchlist: { name: string; id: string; index: string },
-  euids: string[]
-): Promise<Map<string, string>> => {
-  if (euids.length === 0) {
-    return new Map();
-  }
-
-  const uniqueEuids = uniq(euids);
-  const response = await esClient.search<{ entity?: { id?: string } }>({
-    index: watchlist.index,
-    size: uniqueEuids.length,
-    query: {
-      bool: {
-        must: [{ terms: { 'entity.id': uniqueEuids } }, { term: { 'watchlist.id': watchlist.id } }],
-      },
-    },
-    _source: ['entity.id'],
-  });
-
-  const map = new Map<string, string>();
-  for (const hit of response.hits.hits) {
-    const euid = hit._source?.entity?.id;
-    if (euid && hit._id) {
-      map.set(euid, hit._id);
-    }
-  }
-  return map;
 };
 
 const paginatedDetection = async <B>(
