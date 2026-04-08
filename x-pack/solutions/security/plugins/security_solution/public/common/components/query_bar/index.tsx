@@ -91,8 +91,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
     preventCacheClearOnUnmount = false,
   }) => {
     const { data } = useKibana().services;
+    const isEsql = filterQuery?.language === 'esql';
     const [dataView, setDataView] = useState<DataView>();
-    const [isCreatingDataView, setIsCreatingDataView] = useState(false);
+    const needsAsyncCreate = !isDataView(indexPattern) && !isEsql && !isEmpty(indexPattern.title);
+    const [isCreatingDataView, setIsCreatingDataView] = useState(needsAsyncCreate);
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -142,7 +144,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const isEsql = filterQuery?.language === 'esql';
     const query = useMemo(() => {
       if (isEsql && typeof filterQuery.query === 'string') {
         return { esql: filterQuery.query };
