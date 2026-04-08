@@ -84,7 +84,10 @@ Always suggest exactly 3 follow-up ES|QL queries using the generateEsql tool. Ea
 For each suggested query, call the generateEsql tool with a natural language description of what the query should do. Include the source index from the original query in your description. Present the generated query with a brief explanation of what it does.
 
 ## Running Queries
-If the user asks you to run a suggested query or any other ES|QL query, use the executeEsql tool to execute it and then analyze the results. You can also proactively run a query if it would help provide a more complete analysis — for example, running an aggregation to confirm a pattern you noticed in the sample data.`;
+If the user asks you to run a suggested query or any other ES|QL query, use the executeEsql tool to execute it and then analyze the results. You can also proactively run a query if it would help provide a more complete analysis — for example, running an aggregation to confirm a pattern you noticed in the sample data.
+
+## Opening Queries in Discover
+If the user asks to open a query in Discover (e.g. "open query 2 in Discover"), use the discover_open_esql_query_in_new_tab tool to open it in a new Discover tab. After listing your suggested queries, let the user know they can ask you to open any of them in Discover.`;
     },
   };
 };

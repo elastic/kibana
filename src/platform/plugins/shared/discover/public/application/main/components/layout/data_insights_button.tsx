@@ -8,12 +8,19 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { z } from '@kbn/zod/v4';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useAppStateSelector, useCurrentTabDataStateContainer } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useAppStateSelector,
+  useCurrentTabDataStateContainer,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from './use_fetch_more_records';
@@ -23,8 +30,13 @@ const MAX_SAMPLE_ROWS = 15;
 const MAX_COLUMNS = 30;
 const MAX_VALUE_LENGTH = 100;
 
+const openEsqlQuerySchema = z.object({
+  esqlQuery: z.string().describe('The ES|QL query string to open in a new Discover tab'),
+});
+
 export const DataInsightsButton = () => {
   const { agentBuilder, timefilter } = useDiscoverServices();
+  const dispatch = useInternalStateDispatch();
   const query = useAppStateSelector((state) => state.query);
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
@@ -86,6 +98,25 @@ export const DataInsightsButton = () => {
     timefilter,
   ]);
 
+  const openInDiscoverTabTool = useMemo<
+    BrowserApiToolDefinition<z.infer<typeof openEsqlQuerySchema>>
+  >(
+    () => ({
+      id: 'discover_open_esql_query_in_new_tab',
+      description:
+        'Opens an ES|QL query in a new Discover tab within Kibana. Call this when the user asks to open or run a suggested query in Discover.',
+      schema: openEsqlQuerySchema,
+      handler: async ({ esqlQuery }: { esqlQuery: string }) => {
+        dispatch(
+          internalStateActions.openInNewTab({
+            appState: { query: { esql: esqlQuery } },
+          })
+        );
+      },
+    }),
+    [dispatch]
+  );
+
   const handleClick = useCallback(() => {
     if (!agentBuilder?.openChat || !attachmentData) {
       return;
@@ -105,8 +136,9 @@ export const DataInsightsButton = () => {
       }),
       attachments: [attachment],
       sessionTag: 'discover-insights',
+      browserApiTools: [openInDiscoverTabTool],
     });
-  }, [agentBuilder, attachmentData]);
+  }, [agentBuilder, attachmentData, openInDiscoverTabTool]);
 
   if (!agentBuilder?.openChat || !isEsqlQuery || !hasResults || !attachmentData) {
     return null;
