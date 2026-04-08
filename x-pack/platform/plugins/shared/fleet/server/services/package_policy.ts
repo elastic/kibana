@@ -52,6 +52,8 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   hasMultipleEnabledPolicyTemplates,
+  getRegistryInputEffectiveId,
+  getPolicyInputEffectiveId,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -3989,11 +3991,15 @@ export function updatePackageInputs(
         return false;
       }
 
-      // Ignore any inputs removed from this policy template in the new package version
+      // Ignore any inputs removed from this policy template in the new package version.
+      // Match by id ?? type on both sides so that inputs with explicit ids are correctly
+      // retained or pruned when the new package version changes its input list.
+      const policyInputEffectiveId = getPolicyInputEffectiveId(input);
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
         ? policyTemplate.input === input.type
         : policyTemplate.inputs?.some(
-            (policyTemplateInput) => policyTemplateInput.type === input.type
+            (policyTemplateInput) =>
+              getRegistryInputEffectiveId(policyTemplateInput) === policyInputEffectiveId
           ) ?? false;
       return policyTemplateStillIncludesInput;
     }),
@@ -4004,21 +4010,30 @@ export function updatePackageInputs(
 
     if (update.policy_template) {
       // If the updated value defines a policy template, try to find an original input
-      // with the same policy template value
+      // with the same policy template value. Match by input_id ?? type on both sides
+      // so that inputs with explicit ids are correctly matched during upgrade.
+      const updateEffectiveId = getPolicyInputEffectiveId(update);
       const matchingInput = inputs.find(
-        (i) => i.type === update.type && i.policy_template === update.policy_template
+        (i) =>
+          getPolicyInputEffectiveId(i) === updateEffectiveId &&
+          i.policy_template === update.policy_template
       );
 
       // If we didn't find an input with the same policy template, try to look for one
-      // with the same type, but with an undefined policy template. This ensures we catch
-      // cases where we're upgrading an older policy from before policy template was
-      // reliably define on package policy inputs.
+      // with the same effective id, but with an undefined policy template. This ensures
+      // we catch cases where we're upgrading an older policy from before policy template
+      // was reliably defined on package policy inputs.
       originalInput =
-        matchingInput || inputs.find((i) => i.type === update.type && !i.policy_template);
+        matchingInput ||
+        inputs.find(
+          (i) => getPolicyInputEffectiveId(i) === updateEffectiveId && !i.policy_template
+        );
     } else {
       // For inputs that don't specify a policy template, just grab the first input
-      // that matches its `type`
-      originalInput = inputs.find((i) => i.type === update.type);
+      // that matches its effective id
+      originalInput = inputs.find(
+        (i) => getPolicyInputEffectiveId(i) === getPolicyInputEffectiveId(update)
+      );
     }
 
     // If there's no corresponding input on the original package policy, just

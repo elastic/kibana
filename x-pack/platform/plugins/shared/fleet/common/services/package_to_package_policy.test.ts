@@ -7,8 +7,50 @@
 
 import type { PackageInfo } from '../types';
 
-import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
+import {
+  packageToPackagePolicy,
+  packageToPackagePolicyInputs,
+  getRegistryInputEffectiveId,
+  getPolicyInputEffectiveId,
+} from './package_to_package_policy';
 import { AWS_PACKAGE } from './fixtures/aws_package';
+
+describe('getRegistryInputEffectiveId', () => {
+  it('returns the id when present', () => {
+    expect(getRegistryInputEffectiveId({ id: 'filelog_otel', type: 'otelcol' })).toBe(
+      'filelog_otel'
+    );
+  });
+
+  it('falls back to type when id is absent', () => {
+    expect(getRegistryInputEffectiveId({ type: 'logfile' })).toBe('logfile');
+  });
+});
+
+describe('getPolicyInputEffectiveId', () => {
+  it('returns input_id when present, ignoring the instance id', () => {
+    expect(
+      getPolicyInputEffectiveId({
+        id: 'otelcol-nginx-abc123',
+        input_id: 'filelog_otel',
+        type: 'otelcol',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('filelog_otel');
+  });
+
+  it('falls back to type when input_id is absent', () => {
+    expect(
+      getPolicyInputEffectiveId({
+        id: 'logfile-nginx-abc123',
+        type: 'logfile',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('logfile');
+  });
+});
 
 describe('Fleet - packageToPackagePolicy', () => {
   const mockPackage: PackageInfo = {

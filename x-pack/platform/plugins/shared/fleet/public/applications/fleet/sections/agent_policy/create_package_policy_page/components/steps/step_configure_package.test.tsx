@@ -586,7 +586,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
     });
   });
 
-  it('should show each input stream under its correct input panel without mixing', async () => {
+  it('should render two separate input panels with independent stream toggles, not mixed', async () => {
     const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, load);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -599,14 +599,19 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
     );
 
     await waitFor(async () => {
-      // Both stream titles should be visible
-      expect(await renderResult.findByText('Nginx access logs')).toBeInTheDocument();
-      expect(await renderResult.findByText('Nginx stub status metrics')).toBeInTheDocument();
-    });
+      // Both input panel titles should be present
+      expect(
+        await renderResult.findByText('Collect Nginx access logs via filelog OTel receiver')
+      ).toBeInTheDocument();
+      expect(
+        await renderResult.findByText('Collect Nginx stub status metrics via OTel receiver')
+      ).toBeInTheDocument();
 
-    // Each input panel should have exactly one stream toggle
-    const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
-    expect(switches).toHaveLength(2);
+      // Each input panel has exactly one stream toggle switch (one per data stream)
+      // If inputs were mixed, the wrong streams would appear under each panel
+      const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
+      expect(switches).toHaveLength(2);
+    });
   });
 });
 

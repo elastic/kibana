@@ -22,6 +22,8 @@ import {
   getNormalizedInputs,
   isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
+  getRegistryInputEffectiveId,
+  getPolicyInputEffectiveId,
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
@@ -94,14 +96,15 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
             const inputsToRender = inputs
               .map((packageInput) => {
+                const registryEffectiveId = getRegistryInputEffectiveId(packageInput);
                 const packagePolicyInput = packagePolicyInputs.find(
                   (input) =>
-                    input.type === packageInput.type &&
+                    getPolicyInputEffectiveId(input) === registryEffectiveId &&
                     (hasIntegrations ? input.policy_template === policyTemplate.name : true)
                 );
 
                 const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
-                  packageInput.type,
+                  registryEffectiveId,
                   packageInfo,
                   hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
                     ? policyTemplate.data_streams
@@ -165,12 +168,13 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   </>
                 )}
                 {inputsToRender.map(({ packageInput, packagePolicyInput, packageInputStreams }) => {
+                  const policyInputEffectiveId = getPolicyInputEffectiveId(packagePolicyInput);
                   const updatePackagePolicyInput = (
                     updatedInput: Partial<NewPackagePolicyInput>
                   ) => {
                     const indexOfUpdatedInput = packagePolicyInputs.findIndex(
                       (input) =>
-                        input.type === packageInput.type &&
+                        getPolicyInputEffectiveId(input) === policyInputEffectiveId &&
                         (hasIntegrations ? input.policy_template === policyTemplate.name : true)
                     );
                     const newInputs = [...packagePolicyInputs];
@@ -184,7 +188,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   };
 
                   return (
-                    <EuiFlexItem key={packageInput.type}>
+                    <EuiFlexItem key={packageInput.id ?? packageInput.type}>
                       <PackagePolicyInputPanel
                         isSingleInputAndStreams={isSingleInputAndStreams}
                         packageInput={packageInput}
@@ -195,8 +199,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                         inputValidationResults={
                           validationResults?.inputs?.[
                             hasIntegrations
-                              ? `${policyTemplate.name}-${packagePolicyInput.type}`
-                              : packagePolicyInput.type
+                              ? `${policyTemplate.name}-${policyInputEffectiveId}`
+                              : policyInputEffectiveId
                           ] ?? {}
                         }
                         forceShowErrors={submitAttempted}

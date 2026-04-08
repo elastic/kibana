@@ -745,7 +745,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             input_id: 'nginx_otel',
             policy_template: 'nginx',
             enabled: true,
-            vars: { endpoint: { value: '' } },
+            vars: { endpoint: { value: undefined } },
             streams: [
               {
                 enabled: true,
@@ -756,16 +756,13 @@ describe('Fleet - validatePackagePolicy()', () => {
         ],
       };
 
-      const result = validatePackagePolicy(
-        packagePolicy,
-        packageWithDuplicateTypeInputs,
-        load
-      );
+      const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, load);
 
       // The first input (filelog_otel) has a valid var, so no error
-      expect(result.inputs?.['nginx-filelog_otel']?.vars?.log_path).toBeNull();
+      // Single policy template packages use just the effectiveId as key (no template prefix)
+      expect(result.inputs?.filelog_otel?.vars?.log_path).toBeNull();
       // The second input (nginx_otel) has an empty required var, so it should error
-      expect(result.inputs?.['nginx-nginx_otel']?.vars?.endpoint).not.toBeNull();
+      expect(result.inputs?.nginx_otel?.vars?.endpoint).not.toBeNull();
     });
   });
 });
