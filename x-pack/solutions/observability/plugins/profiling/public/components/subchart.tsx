@@ -137,7 +137,6 @@ export function SubChart({
         >
           <EuiFlexGroup
             direction="column"
-            gutterSize="none"
             role="list"
             aria-label={i18n.translate('xpack.profiling.subChart.frameListLabel', {
               defaultMessage: 'Stack frames',
@@ -166,11 +165,14 @@ export function SubChart({
                         css={css`
                           display: flex;
                           flex-direction: column-reverse;
-
-                          .css-bknxw4-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isOpen {
-                            transform: rotate(-90deg) !important;
-                          }
                         `}
+                        arrowProps={{
+                          css: css`
+                            transform: ${currentAccordionState === 'open'
+                              ? 'rotate(-90deg)'
+                              : 'rotate(0deg)'} !important;
+                          `,
+                        }}
                         id={`accordion_${frame.AddressOrLine}`}
                         buttonContent={renderFrameItem(frame, parentIndex)}
                         paddingSize="s"
@@ -204,7 +206,9 @@ export function SubChart({
                           <EuiFlexGroup
                             direction="column"
                             gutterSize="s"
-                            style={{ marginLeft: '12px' }}
+                            css={css`
+                              margin-left: 12px;
+                            `}
                           >
                             {children.map((child, childIndex) => {
                               return (
