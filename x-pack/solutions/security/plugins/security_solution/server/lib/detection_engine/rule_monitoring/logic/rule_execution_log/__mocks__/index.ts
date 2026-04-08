@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  getRuleExecutionEventsResponseMock,
-  getRuleExecutionResultsResponseMock,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
+import { getRuleExecutionEventsResponseMock } from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 
 import type { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
 import type {
@@ -17,7 +14,6 @@ import type {
 } from '../client_for_executors/client_interface';
 
 type GetExecutionEvents = IRuleExecutionLogForRoutes['getExecutionEvents'];
-type GetExecutionResults = IRuleExecutionLogForRoutes['getExecutionResults'];
 type GetUnifiedExecutionResults = IRuleExecutionLogForRoutes['getUnifiedExecutionResults'];
 
 const ruleExecutionLogForRoutesMock = {
@@ -25,10 +21,6 @@ const ruleExecutionLogForRoutesMock = {
     getExecutionEvents: jest
       .fn<ReturnType<GetExecutionEvents>, Parameters<GetExecutionEvents>>()
       .mockResolvedValue(getRuleExecutionEventsResponseMock.getSomeResponse()),
-
-    getExecutionResults: jest
-      .fn<ReturnType<GetExecutionResults>, Parameters<GetExecutionResults>>()
-      .mockResolvedValue(getRuleExecutionResultsResponseMock.getSomeResponse()),
 
     getUnifiedExecutionResults: jest
       .fn<ReturnType<GetUnifiedExecutionResults>, Parameters<GetUnifiedExecutionResults>>()

@@ -7,14 +7,10 @@
 
 import type {
   GetRuleExecutionEventsResponse,
-  GetRuleExecutionResultsResponse,
   LogLevel,
   ReadRuleExecutionResultsRequestBody,
   ReadRuleExecutionResultsResponse,
   RuleExecutionEventType,
-  RuleExecutionStatus,
-  SortFieldOfRuleExecutionResult,
-  RuleRunType,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../../../common/api/detection_engine';
@@ -30,12 +26,6 @@ export interface IRuleExecutionLogForRoutes {
    * error messages that executor functions write during a rule execution to the log.
    */
   getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
-
-  /**
-   * Fetches execution results aggregated by execution UUID, combining data from both alerting
-   * and security-solution event-log documents.
-   */
-  getExecutionResults(args: GetExecutionResultsArgs): Promise<GetRuleExecutionResultsResponse>;
 
   /**
    * Fetches rule execution results for a given rule ID.
@@ -72,37 +62,6 @@ export interface GetExecutionEventsArgs {
 
   /** Number of results to fetch per page. */
   perPage: number;
-}
-
-export interface GetExecutionResultsArgs {
-  /** Saved object id of the rule (`rule.id`). */
-  ruleId: RuleObjectId;
-
-  /** Start of daterange to filter to. */
-  start: string;
-
-  /** End of daterange to filter to. */
-  end: string;
-
-  /** String of field-based filters, e.g. kibana.alert.rule.execution.status:* */
-  queryText: string;
-
-  /** Array of status filters, e.g. ['succeeded', 'going to run'] */
-  statusFilters: RuleExecutionStatus[];
-
-  /** Field to sort by. */
-  sortField: SortFieldOfRuleExecutionResult;
-
-  /** What order to sort by (e.g. `asc` or `desc`). */
-  sortOrder: SortOrder;
-
-  /** Current page to fetch. */
-  page: number;
-
-  /** Number of results to fetch per page. */
-  perPage: number;
-
-  runTypeFilters: RuleRunType[];
 }
 
 export interface GetUnifiedExecutionResultsArgs {
