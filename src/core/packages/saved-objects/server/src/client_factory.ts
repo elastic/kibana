@@ -110,9 +110,11 @@ export interface SavedObjectsRepositoryFactory {
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
+   * @param request - Optional request for observability/timing purposes only (not used for authentication).
    */
   createInternalRepository: (
     includedHiddenTypes?: string[],
-    extensions?: SavedObjectsExtensions
+    extensions?: SavedObjectsExtensions,
+    request?: KibanaRequest
   ) => ISavedObjectsRepository;
 }

@@ -336,7 +336,8 @@ export class SavedObjectsService
     const createRepository = (
       esClient: ElasticsearchClient,
       includedHiddenTypes: string[] = [],
-      extensions?: SavedObjectsExtensions
+      extensions?: SavedObjectsExtensions,
+      request?: KibanaRequest
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -345,20 +346,23 @@ export class SavedObjectsService
         esClient,
         this.logger.get('repository'),
         includedHiddenTypes,
-        extensions
+        extensions,
+        request
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (
         includedHiddenTypes?: string[],
-        extensions?: SavedObjectsExtensions | undefined
-      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+        extensions?: SavedObjectsExtensions | undefined,
+        request?: KibanaRequest
+      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions, request),
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions
-      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
+      ) =>
+        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions, req),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
@@ -368,7 +372,7 @@ export class SavedObjectsService
           includedHiddenTypes,
           extensions
         );
-        return new SavedObjectsClient(repository, request);
+        return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,
       encryptionExtensionFactory: this.encryptionExtensionFactory,

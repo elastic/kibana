@@ -8,7 +8,6 @@
  */
 
 import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -64,22 +63,15 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   public errors = SavedObjectsErrorHelpers;
 
   private _repository: ISavedObjectsRepository;
-  private _request?: KibanaRequest;
 
   /** @internal */
-  constructor(repository: ISavedObjectsRepository, request?: KibanaRequest) {
+  constructor(repository: ISavedObjectsRepository) {
     this._repository = repository;
-    this._request = request;
   }
 
   /** {@inheritDoc SavedObjectsClientContract.create} */
   async create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) {
-    const timer = this._request?.serverTiming.start('so-create', type);
-    try {
-      return await this._repository.create(type, attributes, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.create(type, attributes, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkCreate} */
@@ -87,12 +79,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ) {
-    const timer = this._request?.serverTiming.start('so-bulk-create');
-    try {
-      return await this._repository.bulkCreate(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.bulkCreate(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.checkConflicts} */
@@ -100,22 +87,12 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsCheckConflictsObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsCheckConflictsResponse> {
-    const timer = this._request?.serverTiming.start('so-check-conflicts');
-    try {
-      return await this._repository.checkConflicts(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.checkConflicts(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.delete} */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}) {
-    const timer = this._request?.serverTiming.start('so-delete', type);
-    try {
-      return await this._repository.delete(type, id, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.delete(type, id, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkDelete} */
@@ -123,36 +100,21 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsBulkDeleteObject[],
     options: SavedObjectsBulkDeleteOptions = {}
   ): Promise<SavedObjectsBulkDeleteResponse> {
-    const timer = this._request?.serverTiming.start('so-bulk-delete');
-    try {
-      return await this._repository.bulkDelete(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.bulkDelete(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.find} */
   async find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
-    const timer = this._request?.serverTiming.start('so-find');
-    try {
-      return await this._repository.find(options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.find(options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.search} */
   async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
   ): Promise<SavedObjectsSearchResponse<T, A>> {
-    const timer = this._request?.serverTiming.start('so-search');
-    try {
-      return await this._repository.search(options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.search(options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkGet} */
@@ -160,12 +122,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsGetOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const timer = this._request?.serverTiming.start('so-bulk-get');
-    try {
-      return await this._repository.bulkGet(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.bulkGet(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.get} */
@@ -174,12 +131,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     id: string,
     options: SavedObjectsGetOptions = {}
   ): Promise<SavedObject<T>> {
-    const timer = this._request?.serverTiming.start('so-get', type);
-    try {
-      return await this._repository.get(type, id, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.get(type, id, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkResolve} */
@@ -187,12 +139,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsBulkResolveObject[],
     options?: SavedObjectsResolveOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
-    const timer = this._request?.serverTiming.start('so-bulk-resolve');
-    try {
-      return await this._repository.bulkResolve(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.bulkResolve(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.resolve} */
@@ -201,12 +148,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     id: string,
     options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    const timer = this._request?.serverTiming.start('so-resolve', type);
-    try {
-      return await this._repository.resolve(type, id, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.resolve(type, id, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.update} */
@@ -216,12 +158,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
-    const timer = this._request?.serverTiming.start('so-update', type);
-    try {
-      return await this._repository.update(type, id, attributes, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.update(type, id, attributes, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkUpdate} */
@@ -229,12 +166,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    const timer = this._request?.serverTiming.start('so-bulk-update');
-    try {
-      return await this._repository.bulkUpdate(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.bulkUpdate(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.removeReferencesTo} */
@@ -243,12 +175,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     id: string,
     options?: SavedObjectsRemoveReferencesToOptions
   ) {
-    const timer = this._request?.serverTiming.start('so-remove-refs', type);
-    try {
-      return await this._repository.removeReferencesTo(type, id, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.removeReferencesTo(type, id, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.openPointInTimeForType} */
@@ -256,22 +183,12 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     type: string | string[],
     options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
-    const timer = this._request?.serverTiming.start('so-open-pit');
-    try {
-      return await this._repository.openPointInTimeForType(type, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.openPointInTimeForType(type, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.closePointInTime} */
   async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
-    const timer = this._request?.serverTiming.start('so-close-pit');
-    try {
-      return await this._repository.closePointInTime(id, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.closePointInTime(id, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.createPointInTimeFinder} */
@@ -291,12 +208,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
     options?: SavedObjectsCollectMultiNamespaceReferencesOptions
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-    const timer = this._request?.serverTiming.start('so-collect-refs');
-    try {
-      return await this._repository.collectMultiNamespaceReferences(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.collectMultiNamespaceReferences(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.updateObjectsSpaces} */
@@ -306,17 +218,12 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     spacesToRemove: string[],
     options?: SavedObjectsUpdateObjectsSpacesOptions
   ) {
-    const timer = this._request?.serverTiming.start('so-update-spaces');
-    try {
-      return await this._repository.updateObjectsSpaces(
-        objects,
-        spacesToAdd,
-        spacesToRemove,
-        options
-      );
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
   }
 
   /** {@inheritDoc SavedObjectsClientContract.getCurrentNamespace} */
@@ -326,7 +233,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
   /** {@inheritDoc SavedObjectsClientContract.asScopedToNamespace} */
   asScopedToNamespace(namespace: string) {
-    return new SavedObjectsClient(this._repository.asScopedToNamespace(namespace), this._request);
+    return new SavedObjectsClient(this._repository.asScopedToNamespace(namespace));
   }
 
   /** {@inheritDoc SavedObjectsClientContract.changeOwnership} */
@@ -334,12 +241,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeOwnershipOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
-    const timer = this._request?.serverTiming.start('so-change-owner');
-    try {
-      return await this._repository.changeOwnership(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.changeOwnership(objects, options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.changeAccessMode} */
@@ -347,11 +249,6 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
-    const timer = this._request?.serverTiming.start('so-change-access');
-    try {
-      return await this._repository.changeAccessMode(objects, options);
-    } finally {
-      timer?.end();
-    }
+    return await this._repository.changeAccessMode(objects, options);
   }
 }
