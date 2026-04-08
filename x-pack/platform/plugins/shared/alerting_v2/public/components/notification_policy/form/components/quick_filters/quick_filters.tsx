@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../../../hooks/use_fetch_rules';
+import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
 import { EPISODE_STATUS_FILTER_OPTIONS, type EpisodeStatusFilterOption } from '../../constants';
 import {
   mergeEpisodeStatusIntoMatcher,
@@ -393,18 +394,7 @@ const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const tagsPopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterTags' });
 
-  // Derive tags from the rules list instead of the _tags endpoint,
-  // which may return empty when tags aren't indexed for aggregation.
-  const { data: rulesData, isLoading } = useFetchRules({ page: 1, perPage: 1000 });
-  const apiTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    for (const rule of rulesData?.items ?? []) {
-      for (const tag of rule.metadata.tags ?? []) {
-        tagSet.add(tag);
-      }
-    }
-    return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
-  }, [rulesData]);
+  const { data: apiTags = [], isLoading } = useFetchRuleTags();
   const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
 
   const tagOptions = useMemo((): Array<EuiSelectableOption<TagSelectableMeta>> => {

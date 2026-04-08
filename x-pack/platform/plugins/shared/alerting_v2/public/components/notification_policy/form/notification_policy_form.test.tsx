@@ -55,6 +55,10 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
+jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
+  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+}));
+
 jest.mock('../../../hooks/use_fetch_tags', () => ({
   useFetchTags: () => ({ data: [], isLoading: false }),
 }));
