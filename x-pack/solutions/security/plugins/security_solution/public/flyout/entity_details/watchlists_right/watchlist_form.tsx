@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiRange,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { canUpdateWatchlistField } from '../../../../common/api/entity_analytics/watchlists/management';
