@@ -292,10 +292,29 @@ export function generateCosmosDBApiRequestHeaders(
   };
 }
 
+// Kibana project type names mapped to CLI aliases used for role file paths.
+export const projectTypeToAlias = new Map<string, string>([
+  ['observability', 'oblt'],
+  ['security', 'security'],
+  ['search', 'es'],
+  ['workplaceai', 'workplaceai'],
+]);
+
+// Normalizes CLI aliases (e.g. 'oblt', 'es') to the canonical project type names
+// used in UIAM tokens and ES serverless configuration.
+// Note: 'es' maps to 'elasticsearch' for UIAM (not 'search' which is the Kibana solution name).
+const projectTypeAliases = new Map<string, string>([
+  ['oblt', 'observability'],
+  ['es', 'elasticsearch'],
+]);
+
+const normalizeProjectType = (projectType: string): string =>
+  projectTypeAliases.get(projectType) ?? projectType;
+
 export async function createUiamSessionTokens({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   fullName,
   email,
@@ -313,6 +332,7 @@ export async function createUiamSessionTokens({
   accessTokenLifetimeSec?: number;
   refreshTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';

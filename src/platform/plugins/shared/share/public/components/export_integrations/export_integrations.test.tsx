@@ -200,7 +200,7 @@ describe('Export Integrations', () => {
 
       if (isFlyoutVisible) {
         flyout = (
-          <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)}>
+          <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-label="Export">
             <ManagedFlyout
               exportIntegration={mockCsvConfigForFlyout}
               shareObjectType={mockShareContext.objectType}

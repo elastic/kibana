@@ -32,9 +32,11 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
+import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -66,6 +68,10 @@ export interface DiscoverAppState {
    * Hide chart
    */
   hideChart?: boolean;
+  /**
+   * Hide table
+   */
+  hideTable?: boolean;
   /**
    * The current data source
    */
@@ -139,6 +145,7 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
   'rowHeight',
   'breakdownField',
   'hideChart',
+  'hideTable',
 ] as const;
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
@@ -204,6 +211,8 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: DataCascadeRestorableState;
+    cascadedDocumentsDataGridMap?: CascadedDocumentsDataGridUiStateMap;
   };
   expandedDoc: DataTableRecord | undefined;
   expandedDocOwner: string | undefined;
