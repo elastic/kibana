@@ -160,10 +160,12 @@ export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep
 
   for (const step of steps) {
     if (!isToolCallStep(step)) {
-      if (currentGroup.length > 0) {
+      // Only break the group if there's no active group_id.
+      // Non-tool-call steps (e.g. reasoning) can appear between parallel
+      // tool calls that share the same group_id and must not split them.
+      if (currentGroup.length > 0 && !currentGroupId) {
         groups.push(currentGroup);
         currentGroup = [];
-        currentGroupId = undefined;
       }
       continue;
     }
