@@ -7,6 +7,8 @@
 
 export const NEW_AGENT_BUILDER_ATTACHMENT_BUTTON = '[data-test-subj="newAgentBuilderAttachment"]';
 
+export const AGENT_BUILDER_NAV_CONTROL_BUTTON = '[data-test-subj="AgentBuilderNavControlButton"]';
+
 export const AGENT_BUILDER_SIDEBAR_PANEL = '[data-test-subj="sidebarPanel"]';
 
 export const AGENT_BUILDER_CONVERSATION_INPUT_EDITOR =
