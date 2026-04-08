@@ -94,20 +94,19 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     connectors: {},
   });
 
-  useEffect(() => {
-    setOnboardingConfig((prev) => ({
-      ...prev,
-      connectors: {
-        ...prev.connectors,
-        ...(featuresConnectors.resolvedConnector && !prev.connectors.features
-          ? { features: featuresConnectors.resolvedConnector.connectorId }
-          : {}),
-        ...(queriesConnectors.resolvedConnector && !prev.connectors.queries
-          ? { queries: queriesConnectors.resolvedConnector.connectorId }
-          : {}),
-      },
-    }));
-  }, [featuresConnectors.resolvedConnector, queriesConnectors.resolvedConnector]);
+  const displayConnectors = useMemo(
+    () => ({
+      features:
+        onboardingConfig.connectors.features ?? featuresConnectors.resolvedConnector?.connectorId,
+      queries:
+        onboardingConfig.connectors.queries ?? queriesConnectors.resolvedConnector?.connectorId,
+    }),
+    [
+      onboardingConfig.connectors,
+      featuresConnectors.resolvedConnector,
+      queriesConnectors.resolvedConnector,
+    ]
+  );
 
   const streamsListFetch = useFetchStreams({
     select: (result) => {
@@ -249,12 +248,14 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     });
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
 
+  const isStreamActionable = (streamName: string) => {
+    const status = streamOnboardingResultMap[streamName]?.status;
+    return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status);
+  };
+
   const getActionableStreamNames = () =>
     selectedStreams
-      .filter((item) => {
-        const status = streamOnboardingResultMap[item.stream.name]?.status;
-        return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status);
-      })
+      .filter((item) => isStreamActionable(item.stream.name))
       .map((item) => item.stream.name);
 
   const bulkScheduleOnboardingTask = async (
@@ -293,14 +294,14 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     cancelOnboardingTask(streamName);
   };
 
+  const { steps: selectedSteps } = onboardingConfig;
   const dynamicButtonLabel = useMemo(() => {
-    const { steps } = onboardingConfig;
-    const hasFeatures = steps.includes(OnboardingStep.FeaturesIdentification);
-    const hasQueries = steps.includes(OnboardingStep.QueriesGeneration);
+    const hasFeatures = selectedSteps.includes(OnboardingStep.FeaturesIdentification);
+    const hasQueries = selectedSteps.includes(OnboardingStep.QueriesGeneration);
     if (hasFeatures && !hasQueries) return GENERATE_FEATURES_BUTTON_LABEL;
     if (hasQueries && !hasFeatures) return GENERATE_QUERIES_BUTTON_LABEL;
     return RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL;
-  }, [onboardingConfig]);
+  }, [selectedSteps]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -350,6 +351,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
               <EuiFlexItem grow={false}>
                 <OnboardingConfigPopover
                   config={onboardingConfig}
+                  displayConnectors={displayConnectors}
                   featuresConnectors={featuresConnectors}
                   queriesConnectors={queriesConnectors}
                   onConfigChange={setOnboardingConfig}
@@ -382,13 +384,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           selection={{
             selected: selectedStreams,
             onSelectionChange: setSelectedStreams,
-            selectable: (row) => {
-              const status = streamOnboardingResultMap[row.stream.name]?.status;
-              return (
-                status === undefined ||
-                ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(status)
-              );
-            },
+            selectable: (row) => isStreamActionable(row.stream.name),
           }}
           onOnboardStreamActionClick={onOnboardStreamActionClick}
           onStopOnboardingActionClick={onStopOnboardingActionClick}

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import type { InferenceConnector } from '@kbn/inference-common';
 import {
   INFERENCE_CONNECTORS_INTERNAL_API_PATH,
   type InferenceConnectorsApiResponseBody,
 } from '@kbn/inference-common';
 import { useAbortController } from '@kbn/react-hooks';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../use_kibana';
 
 export interface UseInferenceFeatureConnectorsResult {
@@ -28,7 +27,7 @@ export function useInferenceFeatureConnectors(
   const { core } = useKibana();
   const { signal } = useAbortController();
 
-  const [state, fetchConnectors] = useAsyncFn(
+  const state = useAsync(
     () =>
       core.http.get<InferenceConnectorsApiResponseBody>(INFERENCE_CONNECTORS_INTERNAL_API_PATH, {
         query: { featureId },
@@ -38,11 +37,8 @@ export function useInferenceFeatureConnectors(
     [core.http, featureId, signal]
   );
 
-  useEffect(() => {
-    fetchConnectors();
-  }, [fetchConnectors]);
-
   return {
+    // The API returns the feature-matched connector as the first element of `connectors`
     resolvedConnector: state.value?.connectors[0],
     allConnectors: state.value?.allConnectors ?? [],
     loading: state.loading,

@@ -21,14 +21,14 @@ export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
 export const QUERIES_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.queriesColumnName',
   {
-    defaultMessage: 'Queries',
+    defaultMessage: 'KI Queries',
   }
 );
 
 export const KNOWLEDGE_INDICATORS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.knowledgeIndicatorsColumnName',
   {
-    defaultMessage: 'Knowledge Indicators',
+    defaultMessage: 'KI Features',
   }
 );
 
@@ -149,14 +149,14 @@ export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
 export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
   {
-    defaultMessage: 'Generate Features',
+    defaultMessage: 'Generate KI Features',
   }
 );
 
 export const GENERATE_QUERIES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateQueriesButtonLabel',
   {
-    defaultMessage: 'Generate Queries',
+    defaultMessage: 'Generate KI Queries',
   }
 );
 
@@ -177,14 +177,14 @@ export const ONBOARDING_CONFIG_POPOVER_TITLE = i18n.translate(
 export const FEATURES_STEP_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.featuresStepLabel',
   {
-    defaultMessage: 'Feature identification',
+    defaultMessage: 'KI Features',
   }
 );
 
 export const QUERIES_STEP_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.queriesStepLabel',
   {
-    defaultMessage: 'Query generation',
+    defaultMessage: 'KI Queries',
   }
 );
 
