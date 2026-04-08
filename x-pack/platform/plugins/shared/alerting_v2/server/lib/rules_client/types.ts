@@ -8,6 +8,7 @@
 import type {
   BulkOperationResponse,
   CreateRuleData,
+  FindRulesResponse,
   UpdateRuleData,
   RuleResponse,
   FindRulesSortField,
@@ -17,6 +18,7 @@ import type {
 export type {
   BulkOperationResponse,
   CreateRuleData,
+  FindRulesResponse,
   UpdateRuleData,
   RuleResponse,
   FindRulesSortField,
@@ -36,13 +38,6 @@ export interface FindRulesParams {
   search?: string;
   sortField?: FindRulesSortField;
   sortOrder?: 'asc' | 'desc';
-}
-
-export interface FindRulesResponse {
-  items: RuleResponse[];
-  total: number;
-  page: number;
-  perPage: number;
 }
 
 export type BulkRulesParams =
