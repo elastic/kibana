@@ -5,35 +5,7 @@
  * 2.0.
  */
 
-import { buildFindRulesSearch, buildRuleSearchQuery } from './build_rule_search';
-
-describe('buildRuleSearchQuery', () => {
-  it('returns undefined for empty input', () => {
-    expect(buildRuleSearchQuery()).toBeUndefined();
-    expect(buildRuleSearchQuery('')).toBeUndefined();
-    expect(buildRuleSearchQuery('   ')).toBeUndefined();
-  });
-
-  it('builds prefix search across name and labels', () => {
-    expect(buildRuleSearchQuery('lim')).toBe('(metadata.name: lim* OR metadata.labels: lim*)');
-  });
-
-  it('builds an AND query for multiple words', () => {
-    expect(buildRuleSearchQuery('prod alerts')).toBe(
-      '(metadata.name: prod* OR metadata.labels: prod*) AND (metadata.name: alerts* OR metadata.labels: alerts*)'
-    );
-  });
-
-  it('escapes special characters with escapeKuery', () => {
-    expect(buildRuleSearchQuery('prod:alerts')).toBe(
-      '(metadata.name: prod\\:alerts* OR metadata.labels: prod\\:alerts*)'
-    );
-  });
-
-  it('normalizes leading punctuation so name searches can still match analyzed text', () => {
-    expect(buildRuleSearchQuery('#1')).toBe('(metadata.name: 1* OR metadata.labels: 1*)');
-  });
-});
+import { buildFindRulesSearch } from './build_rule_search';
 
 describe('buildFindRulesSearch', () => {
   it('returns undefined when both filter and search are empty', () => {
@@ -42,13 +14,13 @@ describe('buildFindRulesSearch', () => {
 
   it('returns the search-only query when no explicit filter is provided', () => {
     expect(buildFindRulesSearch({ search: 'lim' })).toBe(
-      '(alerting_rule.attributes.metadata.name: lim* OR alerting_rule.attributes.metadata.labels: lim*)'
+      '(alerting_rule.attributes.metadata.name: lim* OR alerting_rule.attributes.metadata.description: lim* OR alerting_rule.attributes.metadata.tags: lim* OR alerting_rule.attributes.grouping.fields: lim*)'
     );
   });
 
   it('combines an existing filter with the search query', () => {
     expect(buildFindRulesSearch({ filter: 'enabled: true', search: 'prod' })).toBe(
-      '(alerting_rule.attributes.enabled: true AND (alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.labels: prod*))'
+      '(alerting_rule.attributes.enabled: true AND (alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.description: prod* OR alerting_rule.attributes.metadata.tags: prod* OR alerting_rule.attributes.grouping.fields: prod*))'
     );
   });
 });

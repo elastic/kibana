@@ -48,7 +48,7 @@ export const formValuesToYamlObject = (values: FormValues): Record<string, unkno
     enabled: values.metadata.enabled,
     ...(values.metadata.description && { description: values.metadata.description }),
     ...(values.metadata.owner && { owner: values.metadata.owner }),
-    ...(values.metadata.labels?.length && { labels: values.metadata.labels }),
+    ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
   },
   time_field: values.timeField,
   schedule: {
@@ -167,7 +167,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         enabled: metadata?.enabled !== false,
         description: typeof metadata?.description === 'string' ? metadata.description : undefined,
         owner: typeof metadata?.owner === 'string' ? metadata.owner : undefined,
-        labels: Array.isArray(metadata?.labels) ? (metadata.labels as string[]) : undefined,
+        tags: Array.isArray(metadata?.tags) ? (metadata.tags as string[]) : undefined,
       },
       timeField: typeof obj.time_field === 'string' ? obj.time_field : '@timestamp',
       schedule: {
