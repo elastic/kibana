@@ -11,7 +11,6 @@ import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { Location, type ISuggestionItem, type ICommandContext } from '../types';
 import { pipeCompleteItem, byCompleteItem, defaultLimitValueSuggestions } from '../complete_items';
-import { esqlCommandRegistry } from '..';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 import { getByColumns, getByOption, getPosition } from './utils';
@@ -25,8 +24,6 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const position = getPosition(command, innerText);
-  // TODO: Remove these temporary guards once LIMIT BY is fully supported in Elasticsearch.
-  const limitByHidden = esqlCommandRegistry.getCommandByName(command.name)?.metadata.limitByHidden;
 
   switch (position) {
     case 'after_limit_keyword': {
@@ -36,14 +33,10 @@ export async function autocomplete(
     }
 
     case 'after_value': {
-      return limitByHidden ? [pipeCompleteItem] : [byCompleteItem, pipeCompleteItem];
+      return [byCompleteItem, pipeCompleteItem];
     }
 
     case 'grouping_expression': {
-      if (limitByHidden) {
-        return [];
-      }
-
       const byNode = getByOption(command);
       if (!byNode) {
         return [];
