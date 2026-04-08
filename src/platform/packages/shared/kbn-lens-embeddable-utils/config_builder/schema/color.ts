@@ -303,7 +303,7 @@ export const colorMappingSchema = schema.oneOf(
 
 export const noColorSchema = schema.object(
   { type: schema.literal('none') },
-  { meta: { id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring.' } }
+  { meta: { id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring' } }
 );
 
 export const autoColorSchema = schema.object(
@@ -312,7 +312,7 @@ export const autoColorSchema = schema.object(
     meta: {
       id: 'autoColor',
       title: 'Auto Color',
-      description: 'Coloring determined at runtime based on chart defaults.',
+      description: 'Coloring determined at runtime based on chart defaults',
     },
   }
 );
