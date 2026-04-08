@@ -350,7 +350,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   iconType="radar"
                   disabled={selectedStreams.length === 0 || onboardingConfig.steps.length === 0}
                   size="xs"
->>>>>>> d41dadb078c (feat(onboarding): add onboarding options)
+=======
+                  css={onboardingButtonStyle}
+>>>>>>> e0081458af0 (fix(style): min width for onboarding button)
                   data-test-subj="significant_events_onboard_streams_button"
                 >
                   {dynamicButtonLabel}
