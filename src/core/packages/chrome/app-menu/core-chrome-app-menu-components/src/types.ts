@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonColor, EuiButtonProps, EuiHideForProps, IconType } from '@elastic/eui';
+import type { EuiButtonColor, EuiHideForProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 
 /**
@@ -245,20 +245,6 @@ type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
 };
 
 /**
- * Secondary action button type. Can't be a split button.
- */
-export type AppMenuSecondaryActionItem = AppMenuActionButton & {
-  /**
-   * Whether the button should be filled.
-   */
-  isFilled?: boolean;
-  /**
-   * Equal to EUI `minWidth` property.
-   */
-  minWidth?: EuiButtonProps['minWidth'];
-};
-
-/**
  * Primary action button type. Can be either a simple button or a split button.
  */
 export type AppMenuPrimaryActionItem =
@@ -288,8 +274,4 @@ export interface AppMenuConfig {
    * Primary action button to display in the app menu.
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
-  /**
-   * @deprecated secondaryActionItem will be removed in a future release. Use {@link AppMenuConfig.items} instead
-   */
-  secondaryActionItem?: AppMenuSecondaryActionItem;
 }
