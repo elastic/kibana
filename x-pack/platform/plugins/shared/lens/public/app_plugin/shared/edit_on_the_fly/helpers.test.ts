@@ -113,6 +113,20 @@ describe('Lens inline editing helpers', () => {
         })
       ).toEqual(values);
     });
+
+    it('returns one null-filled row when display columns exist but value columns and values are empty', () => {
+      const displayColumns = [
+        { name: 'count', type: 'double' },
+        { name: 'max_value', type: 'integer' },
+      ];
+      expect(
+        expandEsqlValuesToDisplayColumns({
+          displayColumns,
+          valueColumns: [],
+          values: [],
+        })
+      ).toEqual([[null, null]]);
+    });
   });
 
   describe('getSuggestions', () => {

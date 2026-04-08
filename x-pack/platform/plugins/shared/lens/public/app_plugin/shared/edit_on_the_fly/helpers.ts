@@ -50,6 +50,10 @@ export const expandEsqlValuesToDisplayColumns = ({
   valueColumns: ESQLColumn[];
   values: ESQLRow[];
 }): ESQLRow[] => {
+  if (displayColumns.length > 0 && valueColumns.length === 0 && values.length === 0) {
+    return [displayColumns.map(() => null)];
+  }
+
   if (!values.length || !valueColumns.length || columnsMatchInOrder(valueColumns, displayColumns)) {
     return values;
   }
