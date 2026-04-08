@@ -46,7 +46,7 @@ export default createTestConfig({
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
-    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8089`,
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller

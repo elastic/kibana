@@ -69,7 +69,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-123',
+        ref_id: 'session-123',
         selected_tab_id: undefined,
         overrides: {},
       });
@@ -171,18 +171,18 @@ describe('search embeddable transform utils', () => {
 
       expect('tabs' in result && result.tabs).toBeDefined();
       expect('tabs' in result && result.tabs?.[0]).toMatchObject({
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: dataViewId },
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
       });
     });
   });
 
   describe('toStoredSearchEmbeddable', () => {
-    it('dispatches to by-reference transform when state has discover_session_id', () => {
+    it('dispatches to by-reference transform when state has ref_id', () => {
       const apiState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-456',
+        ref_id: 'session-456',
         selected_tab_id: undefined,
         overrides: {},
       };
@@ -213,7 +213,7 @@ describe('search embeddable transform utils', () => {
             row_height: 'auto',
             query: { language: 'kuery', query: '' },
             filters: [],
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
           },
         ],
       };
@@ -298,7 +298,7 @@ describe('search embeddable transform utils', () => {
             header_row_height: 3,
             data_source: {
               type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-              id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
+              ref_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
             },
           },
         ],
@@ -325,7 +325,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Saved Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-123',
+        ref_id: 'session-123',
         selected_tab_id: undefined,
         overrides: {},
       });
@@ -358,7 +358,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Saved Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-xyz',
+        ref_id: 'session-xyz',
         selected_tab_id: 'tab-active',
         overrides: {
           sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -399,7 +399,7 @@ describe('search embeddable transform utils', () => {
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-picked' },
       ];
       const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
-      expect(result.discover_session_id).toBe('session-picked');
+      expect(result.ref_id).toBe('session-picked');
     });
 
     it('uses savedObjectId on state when present so a saved search reference is not required', () => {
@@ -408,7 +408,7 @@ describe('search embeddable transform utils', () => {
         savedObjectId: 'session-without-ref-array',
       };
       const result = fromStoredSearchEmbeddableByRef(storedSearch, []);
-      expect(result.discover_session_id).toBe('session-without-ref-array');
+      expect(result.ref_id).toBe('session-without-ref-array');
     });
 
     it('prefers savedObjectId on state over the matching saved search reference', () => {
@@ -424,7 +424,7 @@ describe('search embeddable transform utils', () => {
         },
       ];
       const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
-      expect(result.discover_session_id).toBe('id-from-state');
+      expect(result.ref_id).toBe('id-from-state');
     });
   });
 
@@ -434,7 +434,7 @@ describe('search embeddable transform utils', () => {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-456',
+        ref_id: 'session-456',
         selected_tab_id: 'tab-1',
         overrides: {},
       };
@@ -474,7 +474,7 @@ describe('search embeddable transform utils', () => {
             filters: [],
             rows_per_page: 100,
             sample_size: 1000,
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
           },
         ],
       };
@@ -1000,7 +1000,7 @@ describe('search embeddable transform utils', () => {
       expect(result.density).toBe(DataGridDensity.COMPACT);
       expect('data_source' in result && result.data_source).toEqual({
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'data-view-1',
+        ref_id: 'data-view-1',
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
     });
@@ -1020,7 +1020,7 @@ describe('search embeddable transform utils', () => {
         filters: [],
         rows_per_page: 100,
         sample_size: 500,
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
       };
       const { state, references } = toStoredTab(apiTab);
       expect(references).toContainEqual({

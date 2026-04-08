@@ -2808,7 +2808,7 @@
         "label": "SecuritySolutionApiRequestHandlerContext",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-        "lineNumber": 58,
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2824,7 +2824,7 @@
               "CoreRequestHandlerContext"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2841,7 +2841,7 @@
               "AnalyticsServiceSetup"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2859,7 +2859,7 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2881,7 +2881,7 @@
               ">>"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2900,7 +2900,26 @@
               "EndpointAppContextService"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getCheckOsqueryResponseActionAuthz",
+            "type": "Function",
+            "tags": [],
+            "label": "getCheckOsqueryResponseActionAuthz",
+            "description": [],
+            "signature": [
+              "() => ",
+              "CheckOsqueryResponseActionAuthz"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2925,7 +2944,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2944,7 +2963,7 @@
               "FrameworkRequest"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2969,7 +2988,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2987,7 +3006,7 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3012,7 +3031,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3031,7 +3050,7 @@
               "IDetectionRulesClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3050,7 +3069,7 @@
               "IDetectionEngineHealthClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3069,7 +3088,7 @@
               "IRuleExecutionLogForRoutes"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3097,7 +3116,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3114,7 +3133,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-                "lineNumber": 72,
+                "lineNumber": 74,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3136,7 +3155,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3161,7 +3180,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3186,7 +3205,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3212,7 +3231,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3231,7 +3250,7 @@
               "ApiKeyManager"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 77,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3257,7 +3276,7 @@
               " | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3276,7 +3295,7 @@
               "EndpointInternalFleetServicesInterface"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3295,7 +3314,7 @@
               "RiskEngineDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3314,7 +3333,7 @@
               "RiskScoreDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3333,7 +3352,7 @@
               "AssetCriticalityDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3352,7 +3371,7 @@
               "EntityStoreDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3371,7 +3390,7 @@
               "EntityStoreCrudClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3396,7 +3415,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3415,7 +3434,7 @@
               "PrivilegeMonitoringDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 86,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3434,7 +3453,7 @@
               "MonitoringEntitySourceDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 87,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3453,7 +3472,7 @@
               "ApiKeyManager"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3472,7 +3491,7 @@
               "PadPackageInstallationClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3490,7 +3509,7 @@
               "SiemMigrationClients"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 90,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3513,7 +3532,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 91,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3532,7 +3551,7 @@
               "AssetInventoryDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3551,7 +3570,7 @@
               "ProductFeaturesService"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 93,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3570,7 +3589,7 @@
               "MlAuthz"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3589,7 +3608,7 @@
               "DetectionRulesAuthz"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
-            "lineNumber": 95,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
