@@ -678,7 +678,7 @@
           "\"http://saml.elastic-cloud.com/attributes/email\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 56,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -695,7 +695,7 @@
           "\"http://saml.elastic-cloud.com/attributes/name\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 57,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -712,7 +712,7 @@
           "\"http://saml.elastic-cloud.com/attributes/principal\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 54,
+        "lineNumber": 61,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -729,7 +729,7 @@
           "\"http://saml.elastic-cloud.com/attributes/roles\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 55,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -746,7 +746,7 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 60,
+        "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -763,7 +763,7 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 62,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -780,7 +780,7 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 64,
+        "lineNumber": 71,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -797,7 +797,7 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 66,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -814,7 +814,7 @@
           "\"urn:mock-idp\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 51,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -865,7 +865,7 @@
           "\"cloud-saml-kibana\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 49,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -882,7 +882,7 @@
           "\"saml\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 50,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -899,7 +899,24 @@
           "\"mock-idp-mapping\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 52,
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_CLOUD_ID",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_CLOUD_ID",
+        "description": [],
+        "signature": [
+          "\"ci:ZXMwMTo5MjIwJDo5MjIwJGtpYmFuYTo5MjIw\" | \"local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1094,7 +1111,7 @@
         "label": "MOCK_IDP_UIAM_SERVICE_INTERNAL_URL",
         "description": [],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 44,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1108,7 +1125,7 @@
         "label": "MOCK_IDP_UIAM_SERVICE_URL",
         "description": [],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 46,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
