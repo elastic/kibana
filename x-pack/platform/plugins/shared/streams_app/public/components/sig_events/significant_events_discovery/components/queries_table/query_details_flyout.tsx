@@ -112,7 +112,10 @@ export function QueryDetailsFlyout({
   };
 
   const queryType = useMemo(
-    () => (isEditMode && query.trim() ? deriveQueryType(query.trim()) : item.query.type ?? QUERY_TYPE_MATCH),
+    () =>
+      isEditMode && query.trim()
+        ? deriveQueryType(query.trim())
+        : item.query.type ?? QUERY_TYPE_MATCH,
     [isEditMode, query, item.query.type]
   );
   const hasDetectedOccurrences = item.occurrences?.some((point) => point.y > 0) ?? false;

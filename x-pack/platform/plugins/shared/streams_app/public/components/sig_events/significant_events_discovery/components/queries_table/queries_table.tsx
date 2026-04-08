@@ -139,11 +139,10 @@ export function QueriesTable() {
   useEffect(() => {
     if (!queriesList) return;
     setSelectedQuery((prev) => {
-      if (!prev) return prev;
-      const refreshed = queriesList.find((item) => item.query.id === prev.query.id);
-      return refreshed ?? null;
+      if (!prev) return null;
+      return queriesList.find((q) => q.query.id === prev.query.id) ?? null;
     });
-  }, [queriesList]);
+  }, [queriesList, setSelectedQuery]);
 
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
 

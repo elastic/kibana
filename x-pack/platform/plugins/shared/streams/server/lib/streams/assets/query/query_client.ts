@@ -15,6 +15,7 @@ import type {
   StorageClientSearchResponse,
 } from '@kbn/storage-adapter';
 import {
+  type QueryType,
   type StreamQuery,
   type Streams,
   QUERY_TYPE_STATS,
@@ -224,14 +225,11 @@ export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperat
 
 function fromStorage(link: StoredQueryLink, logger?: Logger): QueryLink {
   const esql = link[QUERY_ESQL_QUERY];
-  const storedType = link[QUERY_TYPE];
-  const type = deriveQueryType(esql);
+  const storedType = link[QUERY_TYPE] as QueryType | undefined;
 
-  if (storedType && storedType !== type) {
-    logger?.warn(
-      `Query ${link[ASSET_ID]}: stored type "${storedType}" disagrees with derived type "${type}" — using derived type as authoritative.`
-    );
-  }
+  // Trust the persisted type when present (set by toStorage and migration).
+  // Only derive from ES|QL for pre-migration docs that lack the field.
+  const type: QueryType = storedType ?? deriveQueryType(esql);
 
   const ruleBacked = type === QUERY_TYPE_STATS ? false : link[RULE_BACKED];
 
@@ -466,11 +464,13 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links that are stored but do not have a backing Kibana rule for the given stream.
-   * Used internally by promoteQueries.
+   * Returns promotable query links: unbacked and non-STATS.
+   * Mirrors the STATS exclusion in {@link getUnbackedQueriesCount} so the
+   * badge count and the promote candidate list always agree.
    */
   private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
-    return this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
+    const links = await this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
+    return links.filter((link) => link.query.type !== QUERY_TYPE_STATS);
   }
 
   /**
@@ -791,7 +791,9 @@ export class QueryClient {
         `installQueries failed during syncQueries for stream "${definition.name}". ` +
           `Attempting to uninstall partially created rules before re-throwing.`
       );
-      await this.uninstallQueries([...toCreate, ...toUpdate]).catch((compensateError) => {
+      // Only compensate toCreate — toUpdate rules existed before this call
+      // and must not be deleted if the failure occurred during the create phase.
+      await this.uninstallQueries(toCreate).catch((compensateError) => {
         this.dependencies.logger.error(
           `Failed to compensate after installQueries failure for stream "${definition.name}": ` +
             `${

@@ -316,27 +316,25 @@ export function getStatsQueryHints(esql: string): string[] {
 type ByArg = ESQLCommand['args'][number];
 
 function findStatsByArgs(esql: string): ByArg[] | null {
-  try {
-    const { root } = Parser.parse(esql);
-    const statsCmd = root.commands.find(
-      (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'stats'
-    );
-    if (!statsCmd) return null;
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return null;
 
-    const byOption = statsCmd.args.find(
-      (arg) =>
-        !Array.isArray(arg) &&
-        'type' in arg &&
-        arg.type === 'option' &&
-        'name' in arg &&
-        arg.name === 'by'
-    );
-    if (!byOption || Array.isArray(byOption) || !('args' in byOption)) return null;
+  const statsCmd = root.commands.find(
+    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'stats'
+  );
+  if (!statsCmd) return null;
 
-    return (byOption as { args: ESQLCommand['args'] }).args;
-  } catch {
-    return null;
-  }
+  const byOption = statsCmd.args.find(
+    (arg) =>
+      !Array.isArray(arg) &&
+      'type' in arg &&
+      arg.type === 'option' &&
+      'name' in arg &&
+      arg.name === 'by'
+  );
+  if (!byOption || Array.isArray(byOption) || !('args' in byOption)) return null;
+
+  return (byOption as { args: ESQLCommand['args'] }).args;
 }
 
 function getAssignmentLhsName(arg: ByArg): string | null {

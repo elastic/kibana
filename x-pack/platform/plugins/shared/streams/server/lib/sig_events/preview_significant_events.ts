@@ -14,6 +14,8 @@ import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs, extr
 
 const PREVIEW_STATS_LIMIT = 10_000;
 
+// Short-to-long unit names for the ES|QL AST builder (Builder.expression.literal.timespan).
+// Millisecond conversions live in MS_PER_UNIT (imported from @kbn/streams-schema).
 const ESQL_UNITS: Record<string, string> = {
   s: 'seconds',
   m: 'minutes',
@@ -301,9 +303,12 @@ async function previewStatsQuery(
   const { scopedClusterClient, logger } = deps;
 
   const queryWithoutLimit = stripLimitCommand(esqlQuery);
+  const composedQuery = `${queryWithoutLimit} | LIMIT ${PREVIEW_STATS_LIMIT}`;
+
+  logger?.debug(`STATS preview executing composed query: ${composedQuery}`);
 
   const response = await scopedClusterClient.asCurrentUser.esql.query({
-    query: `${queryWithoutLimit} | LIMIT ${PREVIEW_STATS_LIMIT}`,
+    query: composedQuery,
     filter,
     drop_null_columns: true,
   });
