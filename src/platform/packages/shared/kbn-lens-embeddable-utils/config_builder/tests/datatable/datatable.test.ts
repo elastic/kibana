@@ -219,8 +219,8 @@ describe('Datatable', () => {
       const lensState = builder.fromAPIFormat(config);
       const apiOutput = builder.toAPIFormat(lensState) as DatatableState;
 
-      expect(apiOutput.rows?.[0].color).not.toBeDefined();
-      expect(apiOutput.rows?.[0].apply_color_to).not.toBeDefined();
+      expect(apiOutput.metrics?.[0].color).not.toBeDefined();
+      expect(apiOutput.metrics?.[0].apply_color_to).not.toBeDefined();
     });
   });
 });
