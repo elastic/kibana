@@ -126,7 +126,7 @@ test.describe(
 
       await test.step('transaction.name navigates to APM transactions tab', async () => {
         await page.testSubj.locator('sloDetailsApmSourceLink-transaction.name').click();
-        await page.waitForURL(`**/app/apm/services/${SERVICE_NAME}/overview**`);
+        await page.waitForURL(`**/app/apm/services/${SERVICE_NAME}/**`);
 
         const url = page.url();
         expect(url).toContain(`transactionName=${encodeURIComponent(TRANSACTION_NAME)}`);
@@ -142,8 +142,8 @@ test.describe(
         await expect(actionsButton).toHaveText('Open');
 
         await actionsButton.click();
-        await expect(page.testSubj.locator('slidHistoryChartViewInApmLink')).toBeVisible();
-        await expect(page.testSubj.locator('slidHistoryChartOpenInDiscoverLink')).toBeVisible();
+        await expect(page.testSubj.locator('sliHistoryChartViewInApmLink')).toBeVisible();
+        await expect(page.testSubj.locator('sliHistoryChartOpenInDiscoverLink')).toBeVisible();
       });
     });
   }

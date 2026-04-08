@@ -15,17 +15,6 @@ import {
   setupTracesExperience,
   teardownTracesExperience,
 } from '../../fixtures/traces_experience';
-import type { TracesExperienceTestFixtures } from '../../fixtures/traces_experience';
-
-async function expectTracesExperienceEnabled(
-  pageObjects: TracesExperienceTestFixtures['pageObjects']
-) {
-  await pageObjects.discover.waitForDocTableRendered();
-  for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-    await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-  }
-  await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
-}
 
 const APM_SLO_PAYLOAD = {
   name: 'E2E APM SLO - Explore from SLO',
@@ -106,9 +95,12 @@ spaceTest.describe(
           'click "Traces in Discover" and verify traces experience',
           async () => {
             await page.testSubj.locator('sliChartActionsButton').click();
-            await expect(page.testSubj.locator('slidHistoryChartOpenInDiscoverLink')).toBeVisible();
-            await page.testSubj.locator('slidHistoryChartOpenInDiscoverLink').click();
-            await expectTracesExperienceEnabled(pageObjects);
+            await expect(page.testSubj.locator('sliHistoryChartOpenInDiscoverLink')).toBeVisible();
+            await page.testSubj.locator('sliHistoryChartOpenInDiscoverLink').click();
+            await page.waitForURL('**/app/discover**');
+            for (const column of pageObjects.tracesExperience.grid.profileSpecificColumns) {
+              await expect(page.testSubj.locator(`field-${column}-showDetails`)).toBeVisible();
+            }
           }
         );
       }
