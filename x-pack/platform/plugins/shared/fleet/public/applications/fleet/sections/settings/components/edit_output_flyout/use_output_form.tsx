@@ -247,7 +247,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
   const otelExporterConfigInput = useInput(
     (output as NewElasticsearchOutput)?.otel_exporter_config_yaml ?? '',
-    validateYamlConfig,
+    validateYamlConfigFn,
     isDisabled('otel_exporter_config_yaml')
   );
 
