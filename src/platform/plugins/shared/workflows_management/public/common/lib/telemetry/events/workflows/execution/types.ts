@@ -34,6 +34,10 @@ export enum WorkflowExecutionEventTypes {
    * This event tracks cancellation request attempts.
    */
   WorkflowRunCancelled = 'workflows_workflow_run_cancelled',
+  /**
+   * When bulk cancellation of all non-terminal executions for a workflow is requested from the UI.
+   */
+  WorkflowExecutionsCancelled = 'workflows_workflow_executions_cancelled',
 }
 
 /**
@@ -138,4 +142,15 @@ export interface ReportWorkflowRunCancelledActionParams extends BaseResultAction
    * Time in milliseconds from execution start to cancellation request
    */
   timeToCancellation?: number;
+}
+
+/**
+ * Parameters for bulk workflow execution cancellation telemetry (all active executions for a workflow).
+ */
+export interface ReportWorkflowExecutionsCancelledActionParams extends BaseResultActionParams {
+  eventName: string;
+  /**
+   * The workflow whose non-terminal executions were cancelled in bulk.
+   */
+  workflowId: string;
 }
