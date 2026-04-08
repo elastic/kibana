@@ -60933,6 +60933,7 @@ paths:
                             type: object
                             properties:
                               description:
+                                default: ''
                                 type: string
                               esql:
                                 type: object
@@ -60956,10 +60957,9 @@ paths:
                                 minLength: 1
                                 type: string
                             required:
-                              - id
                               - title
-                              - description
                               - esql
+                              - id
                         required:
                           - index
                       - type: object
@@ -69407,6 +69407,12 @@ components:
                 description: A non-empty string.
                 minLength: 1
                 type: string
+              type:
+                default: match
+                enum:
+                  - match
+                  - stats
+                type: string
             required:
               - id
               - title
@@ -71769,6 +71775,12 @@ components:
                 description: A non-empty string.
                 minLength: 1
                 type: string
+              type:
+                default: match
+                enum:
+                  - match
+                  - stats
+                type: string
             required:
               - id
               - title
@@ -73601,6 +73613,12 @@ components:
               title:
                 description: A non-empty string.
                 minLength: 1
+                type: string
+              type:
+                default: match
+                enum:
+                  - match
+                  - stats
                 type: string
             required:
               - id
