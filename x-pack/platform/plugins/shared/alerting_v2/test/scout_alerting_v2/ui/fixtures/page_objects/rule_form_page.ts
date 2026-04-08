@@ -40,12 +40,8 @@ export class RuleFormPage {
     return this.page.testSubj.locator('createRuleButton');
   }
 
-  nameInlineEdit() {
-    return this.page.testSubj.locator('ruleNameInlineEdit');
-  }
-
-  nameReadModeButton() {
-    return this.page.testSubj.locator('euiInlineReadModeButton');
+  nameInput() {
+    return this.page.testSubj.locator('ruleNameInput');
   }
 
   submitButton() {
@@ -64,22 +60,12 @@ export class RuleFormPage {
     return this.page.locator('.euiCallOut--danger');
   }
 
-  async activateNameEditMode() {
-    await this.nameReadModeButton().click();
-  }
-
   async setRuleName(name: string) {
-    await this.activateNameEditMode();
-    const input = this.page.getByLabel('Edit rule name');
-    await input.fill(name);
-    await input.press('Enter');
+    await this.nameInput().fill(name);
   }
 
   async clearRuleName() {
-    await this.activateNameEditMode();
-    const input = this.page.getByLabel('Edit rule name');
-    await input.fill('');
-    await input.press('Enter');
+    await this.nameInput().fill('');
   }
 
   async clickSave() {
