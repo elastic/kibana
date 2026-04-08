@@ -15,7 +15,6 @@ import {
   EuiButtonIcon,
   EuiCodeBlock,
   EuiConfirmModal,
-  EuiDescriptionList,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -287,12 +286,19 @@ export const DatasetDetailPage: React.FC = () => {
       {
         field: 'input',
         name: i18n.COLUMN_INPUT,
+        truncateText: true,
         render: (value: unknown) => {
-          if (value == null) return <EuiText size="s">-</EuiText>;
+          if (value == null) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {'-'}
+              </EuiText>
+            );
+          }
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" tabIndex={0} className={truncatedCellStyles}>
+              <EuiText size="xs" color="subdued" tabIndex={0}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -302,12 +308,19 @@ export const DatasetDetailPage: React.FC = () => {
       {
         field: 'output',
         name: i18n.COLUMN_OUTPUT,
+        truncateText: true,
         render: (value: unknown) => {
-          if (value == null) return <EuiText size="s">-</EuiText>;
+          if (value == null) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {'-'}
+              </EuiText>
+            );
+          }
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" tabIndex={0} className={truncatedCellStyles}>
+              <EuiText size="xs" color="subdued" tabIndex={0}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -317,12 +330,19 @@ export const DatasetDetailPage: React.FC = () => {
       {
         field: 'metadata',
         name: i18n.COLUMN_METADATA,
+        truncateText: true,
         render: (value: unknown) => {
-          if (value == null) return <EuiText size="s">-</EuiText>;
+          if (value == null) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {'-'}
+              </EuiText>
+            );
+          }
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" tabIndex={0} className={truncatedCellStyles}>
+              <EuiText size="xs" color="subdued" tabIndex={0}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -372,13 +392,16 @@ export const DatasetDetailPage: React.FC = () => {
     [datasetId, history]
   );
 
-  const metadataListItems = useMemo(() => {
-    if (!dataset) return [];
-    return [
-      { title: i18n.METADATA_DESCRIPTION_LABEL, description: dataset.description || '-' },
-      { title: i18n.METADATA_CREATED_AT_LABEL, description: formatDate(dataset.created_at) },
-      { title: i18n.METADATA_UPDATED_AT_LABEL, description: formatDate(dataset.updated_at) },
-    ];
+  const datesSummary = useMemo(() => {
+    if (!dataset) return '';
+    const parts: string[] = [];
+    if (dataset.created_at) {
+      parts.push(`${i18n.METADATA_CREATED_AT_LABEL} ${formatDate(dataset.created_at)}`);
+    }
+    if (dataset.updated_at) {
+      parts.push(`${i18n.METADATA_UPDATED_AT_LABEL} ${formatDate(dataset.updated_at)}`);
+    }
+    return parts.join(' · ');
   }, [dataset]);
 
   interface RunScoreRow {
@@ -598,31 +621,39 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiText color="danger" size="s">
                   <p>{formError}</p>
                 </EuiText>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
               </>
             ) : null}
 
-            <EuiDescriptionList type="inline" listItems={metadataListItems} compressed />
+            {dataset.description ? (
+              <>
+                <EuiText size="s" color="subdued">
+                  <p>{dataset.description}</p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
+            <EuiText size="xs" color="subdued">
+              <p>{datesSummary}</p>
+            </EuiText>
 
             <EuiSpacer size="l" />
 
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h3>{i18n.getExamplesCountTitle(dataset.examples.length)} </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ minWidth: 300 }}>
+            <EuiTitle size="xs">
+              <h3>{i18n.getExamplesCountTitle(dataset.examples.length)}</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
                 <EuiFieldSearch
                   placeholder={i18n.SEARCH_EXAMPLES_PLACEHOLDER}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   isClearable
-                  compressed
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiBasicTable<DatasetExample>
               tableCaption={i18n.EXAMPLES_SECTION_TITLE}
               items={filteredExamples}

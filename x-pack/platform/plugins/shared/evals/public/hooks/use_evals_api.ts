@@ -103,6 +103,12 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
       });
     },
     keepPreviousData: true,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
   });
 };
 

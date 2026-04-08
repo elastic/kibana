@@ -33,7 +33,14 @@ export const mountManagementSection = async ({
   const [coreStart, startDeps] = await core.getStartServices();
   coreStart.chrome.docTitle.change(PLUGIN_NAME);
 
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+      },
+    },
+  });
+
   const breadcrumbPrefix = [{ text: aiBreadcrumbLabel }, { text: PLUGIN_NAME }];
   const getHref = (path: string) => path;
 
