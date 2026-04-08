@@ -68,11 +68,7 @@ export function getHelp({
         ...getLogLevelFlagHelpItems(defaultLogLevel),
         ...GLOBAL_FLAG_ITEMS,
       ])
-    : joinAndTrimLines(
-        dedent(flagHelp || ''),
-        getLogLevelFlagsHelp(defaultLogLevel),
-        GLOBAL_FLAGS
-      );
+    : joinAndTrimLines(dedent(flagHelp || ''), getLogLevelFlagsHelp(defaultLogLevel), GLOBAL_FLAGS);
 
   const examplesHelp = examples ? joinAndTrimLines('Examples:', examples) : '';
 

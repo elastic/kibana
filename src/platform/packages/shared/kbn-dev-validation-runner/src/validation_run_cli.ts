@@ -28,8 +28,7 @@ const VALIDATION_RUN_FLAGS = new Set(VALIDATION_RUN_STRING_FLAGS.map((flag) => `
 export const VALIDATION_RUN_HELP: FlagHelpItem[] = [
   {
     flag: '--profile [name]',
-    description:
-      'Validation profile: precommit, quick, agent, branch, pr, full (default: branch)',
+    description: 'Validation profile: precommit, quick, agent, branch, pr, full (default: branch)',
   },
   { flag: '--scope [scope]', description: 'Scope: staged, local, branch, full' },
   { flag: '--test-mode [mode]', description: 'Test selection mode: related, affected, all' },
