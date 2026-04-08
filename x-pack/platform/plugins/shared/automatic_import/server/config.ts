@@ -26,6 +26,7 @@ export const configSchema = schema.object({
     defaultValue: () => [],
   }),
 });
+
 export type AutomaticImportConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<AutomaticImportConfigType> = {

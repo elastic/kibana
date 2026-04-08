@@ -5,85 +5,38 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { FieldValue, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getSampleDocuments } from '@kbn/ai-tools';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
 
-const SAMPLE_DOCS_TARGET_UNIQUE_APPS = 8;
-const SAMPLE_DOCS_MAX = 60;
-const SAMPLE_DOCS_PAGE_SIZE = 50;
-const REQUIRED_APP_SAMPLE_SIZE = 10;
-
-const getAppNameFromLogDoc = (doc: Record<string, unknown>): string | undefined => {
-  const resource = doc.resource as Record<string, unknown> | undefined;
-  const attributes = resource?.attributes as Record<string, unknown> | undefined;
-  const app = attributes?.app;
-  return typeof app === 'string' && app.length > 0 ? app : undefined;
-};
-
-const extractRequiredAppsFromCriteria = (scenario: KIFeatureExtractionScenario): string[] => {
-  const apps = new Set<string>();
-
-  for (const criteria of scenario.output.criteria) {
-    if (typeof criteria === 'string') continue;
-
-    const id = (criteria as { id?: unknown }).id;
-    if (typeof id !== 'string') continue;
-
-    if (id.startsWith('entity-')) {
-      apps.add(id.slice('entity-'.length));
-      continue;
-    }
-
-    if (id.startsWith('dep-')) {
-      const parts = id.slice('dep-'.length).split('-').filter(Boolean);
-      for (const part of parts) apps.add(part);
-    }
-  }
-
-  return [...apps].filter(Boolean);
-};
-
-const docKey = (doc: Record<string, unknown>): string => {
-  const ts = String(doc['@timestamp'] ?? '');
-  const body = doc.body as Record<string, unknown> | undefined;
-  const text = typeof body?.text === 'string' ? body.text : '';
-  return `${ts}:${text.slice(0, 200)}`;
-};
+const SAMPLE_DOCS_MAX = 50;
 
 const addUniqueHitsToSample = ({
   hits,
   docs,
   seen,
-  uniqueApps,
 }: {
   hits: Array<SearchHit<Record<string, unknown>>>;
   docs: Array<SearchHit<Record<string, unknown>>>;
   seen: Set<string>;
-  uniqueApps: Set<string>;
 }): void => {
   for (const hit of hits) {
-    const source = hit._source;
-    if (!source) {
+    if (!hit._id || !hit.fields || isEmpty(hit.fields)) {
       continue;
     }
 
-    const key = docKey(source);
-    if (seen.has(key)) {
+    if (seen.has(hit._id)) {
       continue;
     }
 
-    seen.add(key);
+    seen.add(hit._id);
     docs.push(hit);
-
-    const app = getAppNameFromLogDoc(source);
-    if (app) {
-      uniqueApps.add(app);
-    }
 
     if (docs.length >= SAMPLE_DOCS_MAX) {
       break;
@@ -100,72 +53,64 @@ export const collectSampleDocuments = async ({
   scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
-  const query = scenario.input.log_query_filter ?? { match_all: {} };
+  const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
-  const uniqueApps = new Set<string>();
   const seen = new Set<string>();
+  const criteriaWithFilters = scenario.output.criteria.filter(
+    (criterion) => (criterion.sampling_filters?.length ?? 0) > 0
+  );
 
-  let searchAfter: FieldValue[] | undefined;
+  const samplingFilterResults = await Promise.all(
+    criteriaWithFilters.flatMap((criterion) => {
+      const { sampling_filters = [], ...details } = criterion;
 
-  while (docs.length < SAMPLE_DOCS_MAX && uniqueApps.size < SAMPLE_DOCS_TARGET_UNIQUE_APPS) {
-    const searchResult = await esClient.search<Record<string, unknown>>({
+      return sampling_filters.map(async (filter) => {
+        const { hits } = await getSampleDocuments({
+          esClient,
+          index: MANAGED_STREAM_SEARCH_PATTERN,
+          start: 0,
+          end: Date.now(),
+          filter: [...query, filter],
+          size: 1,
+        });
+        return { hits, criterion: details, filter };
+      });
+    })
+  );
+
+  addUniqueHitsToSample({
+    hits: samplingFilterResults.flatMap(({ hits }) => hits),
+    docs,
+    seen,
+  });
+
+  if (docs.length < SAMPLE_DOCS_MAX) {
+    const { hits } = await getSampleDocuments({
+      esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
-      size: SAMPLE_DOCS_PAGE_SIZE,
-      query,
-      sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
+      start: 0,
+      end: Date.now(),
+      filter: [...query, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
+      size: SAMPLE_DOCS_MAX - docs.length,
     });
 
-    const hits = searchResult.hits.hits;
-    if (hits.length === 0) {
-      break;
-    }
-
-    addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
-
-    searchAfter = hits.at(-1)?.sort as FieldValue[] | undefined;
-    if (!searchAfter) {
-      break;
-    }
+    addUniqueHitsToSample({ hits, docs, seen });
   }
 
-  const requiredApps = extractRequiredAppsFromCriteria(scenario);
-  const missingRequiredApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (missingRequiredApps.length > 0 && docs.length < SAMPLE_DOCS_MAX) {
-    log.debug(`Missing required apps in sample: ${missingRequiredApps.join(', ')}`);
-  }
-
-  for (const app of missingRequiredApps) {
-    if (docs.length >= SAMPLE_DOCS_MAX) break;
-
-    const remaining = SAMPLE_DOCS_MAX - docs.length;
-    const size = Math.min(REQUIRED_APP_SAMPLE_SIZE, remaining);
-
-    const result = await esClient.search<Record<string, unknown>>({
-      index: MANAGED_STREAM_SEARCH_PATTERN,
-      size,
-      query: { term: { 'resource.attributes.app': app } },
-      sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],
-    });
-
-    addUniqueHitsToSample({ hits: result.hits.hits, docs, seen, uniqueApps });
+  const samplingFiltersWithNoHits = samplingFilterResults.filter(({ hits }) => hits.length === 0);
+  if (samplingFiltersWithNoHits.length > 0) {
+    log.warning(
+      `${samplingFiltersWithNoHits.length} sampling filters returned no matching document:\n
+      ${samplingFiltersWithNoHits
+        .map(({ criterion, filter }) => JSON.stringify({ criterion, filter }, null, 2))
+        .join('\n')}`
+    );
+    return docs;
   }
 
   log.info(
-    `Collected ${docs.length} sample document(s) across ${uniqueApps.size} app(s): ${[
-      ...uniqueApps,
-    ].join(', ')}`
+    `Successfully collected ${docs.length} sample documents (${criteriaWithFilters.length} criteria with sampling filters)`
   );
-
-  const remainingMissingApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (remainingMissingApps.length > 0) {
-    log.warning(
-      `Sample is missing required app(s) from criteria: ${remainingMissingApps.join(
-        ', '
-      )} (criteria may not be satisfiable from available logs)`
-    );
-  }
-
   return docs;
 };

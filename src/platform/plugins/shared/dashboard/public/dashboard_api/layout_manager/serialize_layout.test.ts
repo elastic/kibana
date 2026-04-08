@@ -52,7 +52,7 @@ describe('serializeLayout', () => {
           grid: {
             y: 6,
           },
-          uid: 'section1',
+          id: 'section1',
           title: 'Section One',
         },
       },
@@ -85,14 +85,15 @@ describe('serializeLayout', () => {
             "x": 0,
             "y": 0,
           },
+          "id": "1",
           "type": "testPanelType",
-          "uid": "1",
         },
         Object {
           "collapsed": true,
           "grid": Object {
             "y": 6,
           },
+          "id": "section1",
           "panels": Array [
             Object {
               "config": Object {
@@ -104,12 +105,11 @@ describe('serializeLayout', () => {
                 "x": 0,
                 "y": 0,
               },
+              "id": "3",
               "type": "testPanelType",
-              "uid": "3",
             },
           ],
           "title": "Section One",
-          "uid": "section1",
         },
       ]
     `);
@@ -119,16 +119,16 @@ describe('serializeLayout', () => {
           "config": Object {
             "anotherValue": "test",
           },
+          "id": "control2",
           "type": "someOtherControl",
-          "uid": "control2",
         },
         Object {
           "config": Object {
             "selection": "some value",
           },
           "grow": true,
+          "id": "control1",
           "type": "someControl",
-          "uid": "control1",
           "width": "small",
         },
       ]

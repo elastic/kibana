@@ -847,7 +847,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_evals_executor/client.ts",
-            "lineNumber": 211,
+            "lineNumber": 220,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -859,6 +859,112 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.calculateFactualScore",
+        "type": "Function",
+        "tags": [],
+        "label": "calculateFactualScore",
+        "description": [
+          "\nCalculates the Factual Accuracy score using geometric mean of individual claim scores.\n\nThis function computes the geometric mean of the scores assigned to each claim,\nensuring that a single critically incorrect claim (such as a contradicted central claim\nwith a score of 0.0) will result in an overall factual score of 0.0."
+        ],
+        "signature": [
+          "(correctnessEvaluation: ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.CorrectnessAnalysis",
+            "text": "CorrectnessAnalysis"
+          },
+          ") => number"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/scoring.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.calculateFactualScore.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "correctnessEvaluation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/evals",
+                "scope": "common",
+                "docId": "kibKbnEvalsPluginApi",
+                "section": "def-common.CorrectnessAnalysis",
+                "text": "CorrectnessAnalysis"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/scoring.ts",
+            "lineNumber": 34,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.calculateRelevanceScore",
+        "type": "Function",
+        "tags": [],
+        "label": "calculateRelevanceScore",
+        "description": [
+          "\nCalculates the Relevance score based on proportion of central vs peripheral claims.\n\nThis function measures how effectively the response addresses the user's core query\nby calculating the proportion of claims that are classified as 'central' compared to the total number of claims."
+        ],
+        "signature": [
+          "(correctnessEvaluation: ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.CorrectnessAnalysis",
+            "text": "CorrectnessAnalysis"
+          },
+          ") => number"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/scoring.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.calculateRelevanceScore.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "correctnessEvaluation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/evals",
+                "scope": "common",
+                "docId": "kibKbnEvalsPluginApi",
+                "section": "def-common.CorrectnessAnalysis",
+                "text": "CorrectnessAnalysis"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/scoring.ts",
+            "lineNumber": 70,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/evals",
         "id": "def-common.containsAllTerms",
@@ -2894,7 +3000,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2747,
+            "lineNumber": 2767,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -2912,7 +3018,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2747,
+            "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -2929,7 +3035,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2653,
+                "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2945,7 +3051,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2653,
+                "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4012,6 +4118,54 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.CorrectnessAnalysis",
+        "type": "Interface",
+        "tags": [],
+        "label": "CorrectnessAnalysis",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.CorrectnessAnalysis.summary",
+            "type": "Object",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "signature": [
+              "{ factual_accuracy_summary: string; relevance_summary: string; sequence_accuracy_summary: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.CorrectnessAnalysis.analysis",
+            "type": "Array",
+            "tags": [],
+            "label": "analysis",
+            "description": [],
+            "signature": [
+              "{ claim: string; centrality: \"central\" | \"peripheral\"; centrality_reason: string; verdict: \"FULLY_SUPPORTED\" | \"PARTIALLY_SUPPORTED\" | \"CONTRADICTED\" | \"NOT_IN_GROUND_TRUTH\"; sequence_match: \"MATCH\" | \"MISMATCH\" | \"NOT_APPLICABLE\"; justification_snippet: string | undefined; explanation: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/evals",
         "id": "def-common.DefaultEvaluators",
@@ -6772,6 +6926,30 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.LlmCorrectnessEvaluationPrompt",
+        "type": "Object",
+        "tags": [],
+        "label": "LlmCorrectnessEvaluationPrompt",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Prompt",
+            "text": "Prompt"
+          },
+          "<{ user_query: string; agent_response: string; ground_truth_response?: string | undefined; }, [{ readonly system: { readonly mustache: { readonly template: string; }; }; readonly template: { readonly mustache: { readonly template: string; }; }; readonly tools: { readonly analyze: { readonly description: \"Return correctness evaluation with summary and detailed claim analysis.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly summary: { readonly type: \"object\"; readonly properties: { readonly factual_accuracy_summary: { readonly type: \"string\"; readonly description: \"Overall factual accuracy assessment.\"; readonly enum: readonly [\"ACCURATE\", \"MINOR_INACCURACIES\", \"MAJOR_INACCURACIES\"]; }; readonly relevance_summary: { readonly type: \"string\"; readonly description: \"Overall relevance assessment of the response.\"; readonly enum: readonly [\"RELEVANT\", \"PARTIALLY_RELEVANT\", \"IRRELEVANT\"]; }; readonly sequence_accuracy_summary: { readonly type: \"string\"; readonly description: \"Overall sequence accuracy assessment for procedural queries.\"; readonly enum: readonly [\"MATCH\", \"MISMATCH\", \"NOT_APPLICABLE\"]; }; }; readonly required: readonly [\"factual_accuracy_summary\", \"relevance_summary\", \"sequence_accuracy_summary\"]; readonly description: \"High-level summary of the correctness evaluation.\"; }; readonly analysis: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly claim: { readonly type: \"string\"; readonly description: \"The specific claim extracted from the agent response.\"; }; readonly centrality: { readonly type: \"string\"; readonly description: \"Whether the claim is central or peripheral to answering the user query.\"; readonly enum: readonly [\"central\", \"peripheral\"]; }; readonly centrality_reason: { readonly type: \"string\"; readonly description: \"A brief explanation of why the claim is central or peripheral.\"; }; readonly verdict: { readonly type: \"string\"; readonly description: \"Factual accuracy verdict for the claim against ground truth.\"; readonly enum: readonly [\"FULLY_SUPPORTED\", \"PARTIALLY_SUPPORTED\", \"CONTRADICTED\", \"NOT_IN_GROUND_TRUTH\"]; }; readonly sequence_match: { readonly type: \"string\"; readonly description: \"Whether the claim appears in the correct sequence relative to other claims.\"; readonly enum: readonly [\"MATCH\", \"MISMATCH\", \"NOT_APPLICABLE\"]; }; readonly justification_snippet: { readonly type: \"string\"; readonly nullable: true; readonly description: \"A direct snippet from the Ground Truth Response supporting the verdict, or null if not applicable.\"; }; readonly explanation: { readonly type: \"string\"; readonly description: \"A brief explanation of the verdict reasoning.\"; }; }; readonly required: readonly [\"claim\", \"centrality\", \"centrality_reason\", \"verdict\", \"sequence_match\", \"justification_snippet\", \"explanation\"]; }; readonly description: \"Detailed analysis of each claim in the agent response.\"; }; }; readonly required: readonly [\"summary\", \"analysis\"]; }; }; }; }]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/prompt.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/evals",
         "id": "def-common.tags",

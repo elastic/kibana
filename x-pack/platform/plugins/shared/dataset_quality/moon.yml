@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/streams-schema'
   - '@kbn/streams-plugin'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod

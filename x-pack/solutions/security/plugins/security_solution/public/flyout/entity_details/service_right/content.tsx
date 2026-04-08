@@ -19,6 +19,9 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
@@ -29,9 +32,11 @@ interface ServicePanelContentProps {
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
+  isPreviewMode: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
+  entityStoreEntityId?: string;
 }
 
 export const ServicePanelContent = ({
@@ -42,10 +47,13 @@ export const ServicePanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
+  isPreviewMode,
   openDetailsPanel,
   onAssetCriticalityChange,
+  entityStoreEntityId,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   return (
     <FlyoutBody>
@@ -56,10 +64,16 @@ export const ServicePanelContent = ({
             recalculatingScore={recalculatingScore}
             queryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
-            isPreviewMode={false}
+            isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
             entityId={entityRecord?.entity.id}
           />
+          <EuiHorizontalRule />
+        </>
+      )}
+      {entityStoreEntityId && hasEntityResolutionLicense && (
+        <>
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />
         </>
       )}
@@ -67,6 +81,17 @@ export const ServicePanelContent = ({
         entity={{ name: serviceName, type: EntityType.service }}
         onChange={onAssetCriticalityChange}
       />
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedEntity
         observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
         contextID={contextID}
