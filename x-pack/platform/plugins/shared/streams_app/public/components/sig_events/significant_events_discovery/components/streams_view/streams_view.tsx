@@ -58,6 +58,10 @@ import {
 import { StreamsTreeTable } from './tree_table';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
 
+const onboardingButtonStyle = css`
+  min-width: 160px;
+`;
+
 const datePickerStyle = css`
   .euiFormControlLayout,
   .euiSuperDatePicker button,
@@ -343,6 +347,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   iconType="radar"
                   disabled={selectedStreams.length === 0 || onboardingConfig.steps.length === 0}
                   size="xs"
+                  css={onboardingButtonStyle}
                   data-test-subj="significant_events_onboard_streams_button"
                 >
                   {dynamicButtonLabel}
