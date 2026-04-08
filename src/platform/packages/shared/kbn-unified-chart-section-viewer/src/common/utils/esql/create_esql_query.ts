@@ -44,10 +44,9 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
   const index = dataStream;
-  const type = firstNonNullable(fieldTypes);
   const instrument = firstNonNullable(metricTypes);
 
-  if (!type || !instrument) {
+  if (fieldTypes.length === 0 || !instrument) {
     return '';
   }
 
