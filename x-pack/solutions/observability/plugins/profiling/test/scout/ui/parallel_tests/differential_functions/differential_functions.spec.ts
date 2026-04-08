@@ -56,9 +56,6 @@ test.describe('Differential Functions page', { tag: tags.stateful.classic }, () 
     await expect(differentialFunctionsPage.getSummaryValue('totalNumberOfSamples')).toContainText(
       '498'
     );
-    await expect(differentialFunctionsPage.getSummaryValue('totalNumberOfSamples')).toContainText(
-      '498'
-    );
     await expect(
       differentialFunctionsPage.getSummaryComparisonValue('totalNumberOfSamples')
     ).toContainText('169 (66.06%)');
