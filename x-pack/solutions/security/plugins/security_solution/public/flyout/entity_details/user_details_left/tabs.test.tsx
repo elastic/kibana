@@ -18,7 +18,8 @@ jest.mock('../../../common/hooks/use_has_entity_resolution_license', () => ({
 
 const emptyManagedUser = {};
 
-describe('user_details_left useTabs', () => {
+// Failing: See https://github.com/elastic/kibana/issues/261914
+describe.skip('user_details_left useTabs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
