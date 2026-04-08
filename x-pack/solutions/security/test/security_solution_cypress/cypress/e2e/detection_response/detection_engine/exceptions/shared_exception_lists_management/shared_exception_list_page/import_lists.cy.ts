@@ -102,7 +102,7 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
     ENDPOINT_ARTIFACT_LIST_IDS.forEach((listId) => {
       it(`Should not allow to import Endpoint artifacts to "${listId}" list`, () => {
         cy.intercept(/(\/api\/exception_lists\/_import)/, () => {
-          throw new Error('Import API should not be called when importing ${listId} list');
+          throw new Error(`Import API should not be called when importing ${listId} list`);
         });
 
         importExceptionLists(prepareFile(listId));
