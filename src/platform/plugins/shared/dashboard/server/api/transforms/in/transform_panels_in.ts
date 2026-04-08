@@ -10,6 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
@@ -84,7 +85,9 @@ function transformPanelIn(
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
   const transformType =
-    panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
+    panel.type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest
+      ? 'lens-dashboard-app'
+      : panel.type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   // Dashboard application routes do not validate panel.config at route level

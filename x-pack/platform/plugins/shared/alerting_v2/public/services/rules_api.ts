@@ -12,6 +12,7 @@ import type {
   BulkOperationParams,
   BulkOperationResponse,
   CreateRuleData,
+  FindRulesResponse,
   FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
@@ -19,14 +20,7 @@ import type {
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
-export type { RuleResponse as RuleApiResponse };
-
-export interface FindRulesResponse {
-  items: RuleResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
 export interface ListRulesParams {
   page?: number;
