@@ -3000,7 +3000,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2747,
+            "lineNumber": 2767,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -3018,7 +3018,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2747,
+            "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -3035,7 +3035,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2653,
+                "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3051,7 +3051,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2653,
+                "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
