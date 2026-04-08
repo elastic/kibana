@@ -134,9 +134,12 @@ export const EntityField = z
  * The criticality level of the asset.
  */
 export type AssetCriticalityLevel = z.infer<typeof AssetCriticalityLevel>;
-export const AssetCriticalityLevel = z
-  .enum(['low_impact', 'medium_impact', 'high_impact', 'extreme_impact'])
-  .nullable();
+export const AssetCriticalityLevel = z.enum([
+  'low_impact',
+  'medium_impact',
+  'high_impact',
+  'extreme_impact',
+]);
 export type AssetCriticalityLevelEnum = typeof AssetCriticalityLevel.enum;
 export const AssetCriticalityLevelEnum = AssetCriticalityLevel.enum;
 
@@ -150,7 +153,7 @@ export const Asset = z
     model: z.string().optional(),
     vendor: z.string().optional(),
     environment: z.string().optional(),
-    criticality: AssetCriticalityLevel.optional(),
+    criticality: AssetCriticalityLevel.nullable().optional(),
     business_unit: z.string().optional(),
   })
   .strict();

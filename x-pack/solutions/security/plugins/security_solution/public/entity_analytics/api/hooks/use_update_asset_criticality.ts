@@ -37,6 +37,7 @@ export const useUpdateAssetCriticality = (
             }
           ),
         });
+        return;
       }
 
       await bulkUpdateEntities(http, {

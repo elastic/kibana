@@ -173,6 +173,7 @@ components:
         environment:
           type: string
         criticality:
+          nullable: true
           $ref: '#/components/schemas/AssetCriticalityLevel'
         business_unit:
           type: string
@@ -521,7 +522,6 @@ components:
     # Temporary addition of risk score and asset criticality assets
     AssetCriticalityLevel:
       type: string
-      nullable: true
       enum:
         - low_impact
         - medium_impact
