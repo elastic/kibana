@@ -334,16 +334,6 @@ export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
 export const NO_COLOR: NoColorType = { type: 'none' };
 export const AUTO_COLOR: AutoColorType = { type: 'auto' };
 
-export const GAUGE_DEFAULT_COLOR: ColorByValueType = {
-  type: 'dynamic',
-  range: 'percentage',
-  steps: [
-    { gte: 0, lt: 25, color: '#24c292' },
-    { gte: 25, lt: 50, color: '#aee8d2' },
-    { gte: 50, lt: 75, color: '#ffc9c2' },
-    { gte: 75, lte: 100, color: '#f6726a' },
-  ],
-};
 
 export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',

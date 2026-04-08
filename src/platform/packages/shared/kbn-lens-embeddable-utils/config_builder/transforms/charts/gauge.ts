@@ -17,7 +17,13 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { GaugeState, LensApiState } from '../../schema';
-import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
+import {
+  NO_COLOR,
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  isNoColor,
+} from '../coloring';
+import { GAUGE_DEFAULT_COLOR } from './gauge/defaults';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
@@ -69,9 +75,12 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
         ? 'semiCircle'
         : layer.shape.type
       : 'horizontalBullet',
-    ...(layer.metric.color
-      ? { colorMode: 'palette', palette: fromColorByValueAPIToLensState(layer.metric.color) }
-      : {}),
+    ...(isNoColor(layer.metric.color)
+      ? { colorMode: 'none' }
+      : {
+          colorMode: 'palette',
+          palette: fromColorByValueAPIToLensState(layer.metric.color),
+        }),
     ticksPosition:
       layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
     ...(layer.metric.title?.visible === false
@@ -183,8 +192,11 @@ function reverseBuildVisualizationState(
           : { visible: true, mode: 'auto' };
     }
 
-    if (visualization.colorMode === 'palette' && visualization.palette) {
-      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette);
+    if (visualization.colorMode === 'none') {
+      props.metric.color = NO_COLOR;
+    } else {
+      props.metric.color =
+        fromColorByValueLensStateToAPI(visualization.palette) ?? GAUGE_DEFAULT_COLOR;
     }
   }
 

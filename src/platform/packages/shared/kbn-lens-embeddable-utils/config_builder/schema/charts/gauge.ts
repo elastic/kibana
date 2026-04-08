@@ -14,7 +14,8 @@ import {
   esqlColumnSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
-import { colorByValueSchema } from '../color';
+import { colorByValueSchema, noColorSchema } from '../color';
+import { GAUGE_DEFAULT_COLOR } from '../../transforms/charts/gauge/defaults';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
@@ -121,7 +122,11 @@ const gaugeStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, noColorSchema], {
+      defaultValue: GAUGE_DEFAULT_COLOR,
+    })
+  ),
   /**
    * Tick marks configuration
    */
