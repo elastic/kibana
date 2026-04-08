@@ -171,7 +171,9 @@ describe('MetricsGrid', () => {
     );
   });
 
-  it('handles multiple dimensions correctly in ESQL query and chart layers', () => {
+  it('filters dimensions to only those applicable to each metric', () => {
+    // mockMetricItems only have dimensionFields: [{ name: 'host.name' }]
+    // so service.name and container.id should be filtered out
     const multipleDimensions = [
       { name: 'host.name' },
       { name: 'service.name' },
@@ -183,7 +185,7 @@ describe('MetricsGrid', () => {
     expect(createESQLQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         metricItem: expect.any(Object),
-        splitAccessors: ['host.name', 'service.name', 'container.id'],
+        splitAccessors: ['host.name'],
       })
     );
 
@@ -191,7 +193,7 @@ describe('MetricsGrid', () => {
       expect.objectContaining({
         chartLayers: expect.arrayContaining([
           expect.objectContaining({
-            breakdown: ['host.name', 'service.name', 'container.id'],
+            breakdown: ['host.name'],
           }),
         ]),
       }),
