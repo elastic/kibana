@@ -41,6 +41,7 @@ export const AgentBasedPackagePoliciesTable = ({
   pagination,
   addAgentToPolicyIdFromParams,
   showAddAgentHelpForPolicyId,
+  from,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -53,6 +54,7 @@ export const AgentBasedPackagePoliciesTable = ({
   pagination: ReturnType<typeof usePagination>;
   addAgentToPolicyIdFromParams?: string | null;
   showAddAgentHelpForPolicyId?: string | null;
+  from?: 'installed-integrations';
 }) => {
   const { getHref } = useLink();
   const { search } = useLocation();
@@ -110,13 +112,14 @@ export const AgentBasedPackagePoliciesTable = ({
               defaultMessage: 'Integration policy',
             }),
             render(_, { agentPolicies, packagePolicy }) {
+              const editHref = getHref('integration_policy_edit', {
+                packagePolicyId: packagePolicy.id,
+              });
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="integrationNameLink"
-                  href={getHref('integration_policy_edit', {
-                    packagePolicyId: packagePolicy.id,
-                  })}
+                  href={from ? `${editHref}?from=${from}` : editHref}
                 >
                   {packagePolicy.name}
                 </EuiLink>
@@ -279,6 +282,7 @@ export const AgentBasedPackagePoliciesTable = ({
               packagePolicy: InMemoryPackagePolicy;
             }) {
               const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
+              const upgradeFrom = from || 'integrations-policy-list';
               return (
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
@@ -289,9 +293,10 @@ export const AgentBasedPackagePoliciesTable = ({
                       ? `${getHref('upgrade_package_policy', {
                           policyId: agentPolicy.id,
                           packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`
+                        })}?from=${upgradeFrom}`
                       : undefined
                   }
+                  from={from}
                 />
               );
             },
@@ -299,6 +304,12 @@ export const AgentBasedPackagePoliciesTable = ({
         ]}
         loading={isLoading}
         data-test-subj="integrationPolicyTable"
+        tableCaption={i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.tableCaption',
+          {
+            defaultMessage: 'Integration policies',
+          }
+        )}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           pageSize: pagination.pagination.pageSize,

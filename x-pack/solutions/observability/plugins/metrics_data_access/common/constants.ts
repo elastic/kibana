@@ -23,8 +23,9 @@ export const DATASTREAM_DATASET = 'data_stream.dataset';
 export const EVENT_DATASET = 'event.dataset';
 
 // otel
-export const OS_NAME = 'os.name';
+export const OS_TYPE = 'os.type';
 
 // integrations
 export const SYSTEM_INTEGRATION = 'system';
 export const HOST_METRICS_RECEIVER_OTEL = 'hostmetricsreceiver.otel';
+export const KUBELET_STATS_RECEIVER_OTEL = 'kubeletstatsreceiver.otel';

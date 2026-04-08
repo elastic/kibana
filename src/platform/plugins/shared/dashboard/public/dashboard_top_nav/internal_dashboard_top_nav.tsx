@@ -285,8 +285,6 @@ export function InternalDashboardTopNav({
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
         onClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
-        iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
-        iconOnClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
       } as TopNavMenuBadgeProps;
 
       allBadges.push({
@@ -298,6 +296,7 @@ export function InternalDashboardTopNav({
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
               panelStyle={{ maxWidth: 250 }}
+              aria-label={dashboardManagedBadge.getBadgeAriaLabel()}
             >
               <FormattedMessage
                 id="dashboard.managedContentPopoverButton"

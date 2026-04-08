@@ -339,6 +339,46 @@ describe('EditSpaceSettings', () => {
     expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('navigates away when cancel is clicked after changing the solution view', async () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: undefined,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={true}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // update the space solution view
+    const solutionViewPicker = screen.getByTestId('solutionViewSelect');
+    await userEvent.click(solutionViewPicker);
+
+    const esSolutionOption = await screen.findByTestId('solutionViewEsOption');
+    await userEvent.click(esSolutionOption);
+
+    expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+
+    // click cancel - should navigate back to spaces list without saving
+    const cancelButton = screen.getByTestId('cancel-space-button');
+    await userEvent.click(cancelButton);
+
+    expect(navigateSpy).toHaveBeenCalledWith('/');
+  });
+
   it('warns when updating features in the active space', async () => {
     const features = [
       new KibanaFeature({

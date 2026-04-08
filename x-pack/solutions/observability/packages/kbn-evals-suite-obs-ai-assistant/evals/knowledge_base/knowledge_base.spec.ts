@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/evals';
 import type { EvaluateKnowledgeBaseDataset } from './evaluate_knowledge_base_dataset';
 import { createEvaluateKnowledgeBaseDataset } from './evaluate_knowledge_base_dataset';
 import { evaluate as base } from '../../src/evaluate';
@@ -34,7 +35,7 @@ const evaluate = base.extend<{
   ],
 });
 
-evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
+evaluate.describe('Knowledge base', { tag: tags.serverless.observability.complete }, () => {
   evaluate.describe('kb functions', () => {
     evaluate.afterEach(async ({ esClient, knowledgeBaseClient, conversationsClient }) => {
       await knowledgeBaseClient.clear();

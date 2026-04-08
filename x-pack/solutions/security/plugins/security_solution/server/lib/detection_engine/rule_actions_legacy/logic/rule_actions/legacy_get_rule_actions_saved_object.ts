@@ -49,14 +49,12 @@ export const legacyGetRuleActionsSavedObject = async ({
     id: ruleAlertId,
     type: 'alert',
   };
-  const {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    saved_objects,
-  } = await savedObjectsClient.find<LegacyIRuleActionsAttributesSavedObjectAttributes>({
-    type: legacyRuleActionsSavedObjectType,
-    perPage: 1,
-    hasReference: reference,
-  });
+  const { saved_objects } =
+    await savedObjectsClient.find<LegacyIRuleActionsAttributesSavedObjectAttributes>({
+      type: legacyRuleActionsSavedObjectType,
+      perPage: 1,
+      hasReference: reference,
+    });
 
   if (!saved_objects[0]) {
     return null;

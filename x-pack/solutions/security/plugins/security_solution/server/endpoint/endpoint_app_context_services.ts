@@ -28,6 +28,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { EndpointError } from '../../common/endpoint/errors';
 import type { ReferenceDataClientInterface } from './lib/reference_data';
 import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
@@ -452,5 +453,19 @@ export class EndpointAppContextService {
       this.savedObjects.createInternalScopedSoClient({ readonly: false }),
       this.createLogger('ReferenceDataClient')
     );
+  }
+
+  public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(
+    key: TKey
+  ): ConfigType[TKey] {
+    if (!this.startDependencies?.config) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(this.startDependencies.config, key)) {
+      throw new EndpointError(`Missing config value for key: ${key}`);
+    }
+
+    return this.startDependencies.config[key];
   }
 }

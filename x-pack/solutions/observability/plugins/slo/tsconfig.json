@@ -109,6 +109,7 @@
     "@kbn/lock-manager",
     "@kbn/object-utils",
     "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",

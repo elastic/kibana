@@ -18,7 +18,6 @@ jest.mock('./use_alert_prevalence_from_process_tree');
 
 const documentId = 'documentId';
 const indices = ['index1'];
-const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsByAncestry', () => {
   let hookResult: RenderHookResult<
@@ -33,9 +32,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
       alertIds: [],
     });
 
-    hookResult = renderHook(() =>
-      useFetchRelatedAlertsByAncestry({ documentId, indices, scopeId })
-    );
+    hookResult = renderHook(() => useFetchRelatedAlertsByAncestry({ documentId, indices }));
 
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
@@ -50,9 +47,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
       alertIds: [],
     });
 
-    hookResult = renderHook(() =>
-      useFetchRelatedAlertsByAncestry({ documentId, indices, scopeId })
-    );
+    hookResult = renderHook(() => useFetchRelatedAlertsByAncestry({ documentId, indices }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(true);
@@ -67,9 +62,7 @@ describe('useFetchRelatedAlertsByAncestry', () => {
       alertIds: ['1', '2'],
     });
 
-    hookResult = renderHook(() =>
-      useFetchRelatedAlertsByAncestry({ documentId, indices, scopeId })
-    );
+    hookResult = renderHook(() => useFetchRelatedAlertsByAncestry({ documentId, indices }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);

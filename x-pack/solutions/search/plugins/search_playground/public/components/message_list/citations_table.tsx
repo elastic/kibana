@@ -45,6 +45,10 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate(
+        'xpack.searchPlayground.chat.message.assistant.citations.tableCaption',
+        { defaultMessage: 'Assistant response citations' }
+      )}
       columns={[
         {
           field: 'metadata._id',

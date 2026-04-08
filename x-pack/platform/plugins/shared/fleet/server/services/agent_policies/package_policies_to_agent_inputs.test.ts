@@ -30,6 +30,16 @@ packageInfoCache.set('limited_package-0.0.0', {
     },
   ],
 });
+packageInfoCache.set('endpoint-8.5.0', {
+  name: 'endpoint',
+  version: '8.5.0',
+  release: 'ga',
+  policy_templates: [
+    {
+      multiple: false,
+    },
+  ],
+});
 packageInfoCache.set('mock_package_agentless-0.0.0', {
   name: 'mock_package_agentless',
   version: '0.0.0',
@@ -228,7 +238,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ]);
   });
 
-  it('returns unique agent inputs IDs, with policy template name if one exists for non-limited packages', async () => {
+  it('returns unique agent inputs IDs with policy template name for all packages including limited ones', async () => {
     expect(
       await storedPackagePoliciesToAgentInputs(
         [
@@ -306,7 +316,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         ],
       },
       {
-        id: 'some-uuid',
+        id: 'test-metrics-some-template-some-uuid',
         name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         revision: 1,
@@ -317,6 +327,49 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'limited_package',
             version: '0.0.0',
+          },
+        },
+        streams: [
+          {
+            id: 'test-metrics-foo',
+            data_stream: { dataset: 'foo', type: 'metrics' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns simplified ID for endpoint (Elastic Defend) package', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'endpoint',
+              title: 'Endpoint',
+              version: '8.5.0',
+            },
+            inputs: [mockInput2],
+          },
+        ],
+        packageInfoCache
+      )
+    ).toEqual([
+      {
+        id: 'some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-metrics',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'endpoint',
+            version: '8.5.0',
           },
         },
         streams: [

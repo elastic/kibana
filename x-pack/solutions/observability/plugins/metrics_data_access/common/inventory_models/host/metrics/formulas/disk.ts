@@ -52,8 +52,10 @@ export const diskUsage: SchemaBasedFormula = {
   label: DISK_USAGE_LABEL,
   value: {
     ecs: 'max(system.filesystem.used.pct)',
+    // Some OTel datasets do not provide `metrics.system.filesystem.utilization`.
+    // Compute usage from state-based usage values instead.
     semconv:
-      "1 - max(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
+      "1 - sum(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
   },
   format: 'percent',
   decimals: 0,

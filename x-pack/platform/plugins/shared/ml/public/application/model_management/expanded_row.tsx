@@ -132,13 +132,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     metadata,
     tags,
     version,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     estimated_operations,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     estimated_heap_memory_usage_bytes,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     default_field_map,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     license_level,
     pipelines,
     description,

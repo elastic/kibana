@@ -7,31 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { DocViewsRegistry } from './doc_views_registry';
 
-const fnDocView = {
-  id: 'function-doc-view',
+const docView1 = {
+  id: 'doc-view-1',
   order: 10,
   title: 'Render function',
-  component: jest.fn(),
+  render: jest.fn(),
 };
-const componentDocView = {
-  id: 'component-doc-view',
+
+const docView2 = {
+  id: 'doc-view-2',
   order: 20,
-  title: 'React component',
-  component: () => <div>test</div>,
+  title: 'Render function',
+  render: jest.fn(),
 };
 
 describe('DocViewerRegistry', () => {
   test('can be initialized from an array of doc views', () => {
-    const registry = new DocViewsRegistry([fnDocView, componentDocView]);
+    const registry = new DocViewsRegistry([docView1, docView2]);
 
     expect(registry.getAll()).toHaveLength(2);
   });
 
   test('can be initialized from another DocViewsRegistry instance', () => {
-    const registry = new DocViewsRegistry([fnDocView, componentDocView]);
+    const registry = new DocViewsRegistry([docView1, docView2]);
     const newRegistry = new DocViewsRegistry(registry);
 
     expect(registry.getAll()).toHaveLength(2);
@@ -41,54 +41,54 @@ describe('DocViewerRegistry', () => {
 
   describe('#add', () => {
     test('should add a doc view to the registry in the correct order', () => {
-      const registry = new DocViewsRegistry([componentDocView]);
+      const registry = new DocViewsRegistry([docView1]);
 
-      registry.add(fnDocView);
+      registry.add(docView2);
 
       const docViews = registry.getAll();
 
-      expect(docViews[0]).toHaveProperty('id', 'function-doc-view');
-      expect(docViews[1]).toHaveProperty('id', 'component-doc-view');
+      expect(docViews[0]).toHaveProperty('id', 'doc-view-1');
+      expect(docViews[1]).toHaveProperty('id', 'doc-view-2');
     });
 
     test('should throw an error when the passed doc view already exists for the given id', () => {
-      const registry = new DocViewsRegistry([fnDocView]);
+      const registry = new DocViewsRegistry([docView1]);
 
-      expect(() => registry.add(fnDocView)).toThrow(
-        'DocViewsRegistry#add: a DocView is already registered with id "function-doc-view".'
+      expect(() => registry.add(docView1)).toThrow(
+        'DocViewsRegistry#add: a DocView is already registered with id "doc-view-1".'
       );
     });
   });
 
   describe('#removeById', () => {
     test('should remove a doc view given the passed id', () => {
-      const registry = new DocViewsRegistry([fnDocView, componentDocView]);
+      const registry = new DocViewsRegistry([docView1, docView2]);
 
       const docViews = registry.getAll();
 
-      expect(docViews[0]).toHaveProperty('id', 'function-doc-view');
-      expect(docViews[1]).toHaveProperty('id', 'component-doc-view');
+      expect(docViews[0]).toHaveProperty('id', 'doc-view-1');
+      expect(docViews[1]).toHaveProperty('id', 'doc-view-2');
 
-      registry.removeById('function-doc-view');
+      registry.removeById('doc-view-1');
 
-      expect(registry.getAll()[0]).toHaveProperty('id', 'component-doc-view');
+      expect(registry.getAll()[0]).toHaveProperty('id', 'doc-view-2');
     });
   });
 
   describe('#enableById & #disableById', () => {
     test('should enable/disable a doc view given the passed id', () => {
-      const registry = new DocViewsRegistry([fnDocView, componentDocView]);
+      const registry = new DocViewsRegistry([docView1, docView2]);
 
       const docViews = registry.getAll();
 
       expect(docViews[0]).toHaveProperty('enabled', true);
       expect(docViews[1]).toHaveProperty('enabled', true);
 
-      registry.disableById('function-doc-view');
+      registry.disableById('doc-view-1');
 
       expect(registry.getAll()[0]).toHaveProperty('enabled', false);
 
-      registry.enableById('function-doc-view');
+      registry.enableById('doc-view-1');
 
       expect(registry.getAll()[0]).toHaveProperty('enabled', true);
     });
@@ -96,28 +96,28 @@ describe('DocViewerRegistry', () => {
 
   describe('#clone', () => {
     test('should return a new DocViewRegistry instance starting from the current one', () => {
-      const registry = new DocViewsRegistry([fnDocView, componentDocView]);
+      const registry = new DocViewsRegistry([docView1, docView2]);
 
       const clonedRegistry = registry.clone();
       const docViews = clonedRegistry.getAll();
 
-      expect(docViews[0]).toHaveProperty('id', 'function-doc-view');
-      expect(docViews[1]).toHaveProperty('id', 'component-doc-view');
+      expect(docViews[0]).toHaveProperty('id', 'doc-view-1');
+      expect(docViews[1]).toHaveProperty('id', 'doc-view-2');
       expect(registry).not.toBe(clonedRegistry);
 
       // Test against shared references between clones
       expect(clonedRegistry).not.toBe(registry);
 
       // Mutating a cloned registry should not affect the original registry
-      registry.disableById('function-doc-view');
+      registry.disableById('doc-view-1');
       expect(registry.getAll()[0]).toHaveProperty('enabled', false);
       expect(clonedRegistry.getAll()[0]).toHaveProperty('enabled', true);
 
       clonedRegistry.add({
         id: 'additional-doc-view',
-        order: 20,
+        order: 30,
         title: 'Render function',
-        component: jest.fn(),
+        render: jest.fn(),
       });
 
       expect(registry.getAll().length).toBe(2);

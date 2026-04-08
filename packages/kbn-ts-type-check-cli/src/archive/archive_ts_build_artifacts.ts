@@ -9,7 +9,7 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import globby from 'globby';
-import { CACHE_IGNORE_GLOBS, CACHE_MATCH_GLOBS } from './constants';
+import { CACHE_IGNORE_GLOBS, CACHE_MATCH_GLOBS, CACHE_INVALIDATION_FILES } from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
@@ -46,7 +46,12 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
 
     const prNumber = getPullRequestNumber();
 
-    const options = { files: matches, sha: commitSha, prNumber };
+    const options = {
+      files: matches,
+      sha: commitSha,
+      prNumber,
+      cacheInvalidationFiles: CACHE_INVALIDATION_FILES,
+    };
 
     if (isCiEnvironment()) {
       await withGcsAuth(log, () => new GcsFileSystem(log).updateArchive(options));

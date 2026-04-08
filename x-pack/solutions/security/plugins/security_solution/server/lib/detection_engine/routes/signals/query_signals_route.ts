@@ -44,7 +44,6 @@ export const querySignalsRoute = (
       async (context, request, response) => {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { query, aggs, _source, fields, track_total_hits, size, runtime_mappings, sort } =
           request.body;
         const siemResponse = buildSiemResponse(response);

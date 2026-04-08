@@ -110,7 +110,7 @@ describe('Handle request to generate', () => {
         jobParams: mockJobParams,
       });
 
-      const { _id, created_at: _created_at, payload, ...snapObj } = report;
+      const { _id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "_index": ".reporting-foo-index-234",
@@ -168,7 +168,7 @@ describe('Handle request to generate', () => {
         jobParams: mockJobParams,
       });
 
-      const { _id, created_at: _created_at, ...snapObj } = report;
+      const { _id, created_at, ...snapObj } = report;
       expect(snapObj.payload.version).toBe('7.14.0');
     });
   });

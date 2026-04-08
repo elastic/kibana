@@ -27,7 +27,6 @@ export default createTestConfig({
     require.resolve('../../test_suites/reporting'),
     require.resolve('../../test_suites/grok_debugger'),
     require.resolve('../../test_suites/painless_lab'),
-    require.resolve('../../test_suites/console'),
     require.resolve('../../test_suites/saved_objects_management'),
     require.resolve('../../test_suites/telemetry'),
     require.resolve('../../test_suites/data_usage'),
@@ -58,4 +57,5 @@ export default createTestConfig({
     // Enables /internal/cloud_security_posture/graph API
     `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
   ],
+  enableFleetDockerRegistry: false,
 });

@@ -121,7 +121,8 @@
     "@kbn/unified-metrics-grid",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/background-search",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

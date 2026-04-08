@@ -379,12 +379,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         : 'Login has been initiated by Identity Provider.'
     );
 
-    this.logger.debug(
-      `SAML RESPONSE: ${samlResponse}:::${JSON.stringify(
-        !isIdPInitiatedLogin ? [...stateRequestIds] : []
-      )}`
-    );
-
     const providerRealm = this.realm || stateRealm;
 
     let result: {
@@ -702,6 +696,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           requestIdMap: this.updateRequestIdMap(requestId, redirectURL, state?.requestIdMap),
           realm,
         },
+        stateCookieOptions: { sameSite: 'None', isSecure: true },
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);

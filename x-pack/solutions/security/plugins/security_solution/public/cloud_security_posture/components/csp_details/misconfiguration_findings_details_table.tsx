@@ -334,6 +334,12 @@ export const MisconfigurationFindingsDetailsTable = memo(
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
             sorting={sorting}
             loading={isLoading}
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.misconfigurations.tableCaption',
+              {
+                defaultMessage: 'Misconfiguration findings',
+              }
+            )}
           />
         </EuiPanel>
       </>

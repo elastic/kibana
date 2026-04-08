@@ -37,6 +37,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
         title={
           <TitleWithTooltip
             title={CONTAINER_METRIC_GROUP_TITLES[metric]}
+            data-test-subj={`infraAssetDetailsDockerChartsSection${metric}Title`}
             tooltipContent={
               <EuiText size="xs">
                 <FormattedMessage
@@ -45,7 +46,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
                   values={{
                     link: (
                       <EuiLink
-                        data-test-subj="infraAssetDetailsViewContainerMetricsDocumentationLink"
+                        data-test-subj={`infraAssetDetailsDockerChartsSection${metric}DocumentationLink`}
                         href={`${CONTAINER_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
                         target="_blank"
                         className={cx({

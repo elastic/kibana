@@ -13,7 +13,7 @@ import { conditionToESQLAst, esqlLiteralFromAny } from '../condition_to_esql';
 export function convertAppendProcessorToESQL(processor: AppendProcessor): ESQLAstCommand[] {
   const {
     to,
-    value, // eslint-disable-next-line @typescript-eslint/naming-convention
+    value,
     allow_duplicates = true, // default to true to match Append Ingest Processor
     where,
   } = processor as AppendProcessor;

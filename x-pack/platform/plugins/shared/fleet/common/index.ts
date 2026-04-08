@@ -65,6 +65,7 @@ export {
   FLEET_ENROLLMENT_API_PREFIX,
   API_VERSIONS,
   APP_API_ROUTES,
+  FLEET_LOG_INDICES,
 } from './constants';
 export {
   // Route services

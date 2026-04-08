@@ -29,10 +29,6 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     mkdir -p ./.moon/cache
     echo "Extracting moon-cache.tar.gz to ./.moon/cache"
     tar -xzf ~/moon-cache.tar.gz -C ./
-  elif [[ -d ~/.kibana-moon-cache ]]; then
-    echo "Using ~/.moon/cache as a starting point"
-    mkdir -p ./.moon/cache
-    mv ~/.kibana-moon-cache/* ./.moon/cache
   fi
 fi
 
@@ -45,7 +41,6 @@ if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTS
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
-  export MOON_LOG=debug
   echo "--- yarn install and bootstrap, attempt 2"
   yarn kbn bootstrap --force-install || yarn kbn bootstrap
 fi

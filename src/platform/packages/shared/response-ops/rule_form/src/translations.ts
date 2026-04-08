@@ -38,6 +38,13 @@ export const SCHEDULE_DESCRIPTION_TEXT = i18n.translate(
   }
 );
 
+export const SCHEDULE_UNIT_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.scheduleUnitLabel',
+  {
+    defaultMessage: 'Time unit',
+  }
+);
+
 export const SCHEDULE_TOOLTIP_TEXT = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.scheduleTooltipText',
   {

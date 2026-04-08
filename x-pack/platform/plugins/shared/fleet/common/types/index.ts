@@ -111,6 +111,14 @@ export interface FleetConfigType {
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
   installIntegrationsKnowledge?: boolean;
+  fleetPolicyRevisionsCleanup?: {
+    maxRevisions: number;
+    interval: string;
+    maxPoliciesPerRun: number;
+  };
+  unenrollInactiveAgents?: {
+    taskInterval?: string;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

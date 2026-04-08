@@ -115,7 +115,12 @@ export const MonitorList = ({
 
   return (
     <ContextWrapper>
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj={loading ? 'syntheticsMonitorList-loading' : 'syntheticsMonitorList-loaded'}
+      >
         <MonitorListHeader
           recordRangeLabel={recordRangeLabel}
           selectedItems={selectedItems}
@@ -125,6 +130,9 @@ export const MonitorList = ({
         <EuiBasicTable
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',
+          })}
+          tableCaption={i18n.translate('xpack.synthetics.management.monitorList.caption', {
+            defaultMessage: 'Synthetics monitors',
           })}
           error={error?.body?.message}
           loading={loading}

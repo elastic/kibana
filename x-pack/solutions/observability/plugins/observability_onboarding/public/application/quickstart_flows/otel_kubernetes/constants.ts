@@ -6,6 +6,6 @@
  */
 
 export const OTEL_STACK_NAMESPACE = 'opentelemetry-operator-system';
-export const OTEL_KUBE_STACK_VERSION = '0.10.5';
+export const OTEL_KUBE_STACK_VERSION = '0.12.4';
 export const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
 export const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';

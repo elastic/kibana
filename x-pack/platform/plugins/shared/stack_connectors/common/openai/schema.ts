@@ -20,6 +20,7 @@ export const ConfigSchema = schema.oneOf([
     apiUrl: schema.string(),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     contextWindowLength: schema.maybe(schema.number({})),
+    defaultModel: schema.maybe(schema.string()),
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),

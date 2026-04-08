@@ -8,7 +8,8 @@
  */
 
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
-import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
+import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import { LINKS_HORIZONTAL_LAYOUT } from '../../common/content_management';
 import type { LinksEmbeddableState } from '../../common';
 import type { LinksState } from '../../server';

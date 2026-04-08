@@ -389,6 +389,9 @@ export const TransformList: FC<TransformListProps> = ({
         selection={selection}
         sorting={sorting}
         search={search}
+        tableCaption={i18n.translate('xpack.transform.list.tableCaption', {
+          defaultMessage: 'Transform list',
+        })}
         data-test-subj={`transformListTable ${
           isLoading || transformsLoading ? 'loading' : 'loaded'
         }`}

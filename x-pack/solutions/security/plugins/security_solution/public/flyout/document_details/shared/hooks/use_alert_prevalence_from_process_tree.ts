@@ -73,10 +73,6 @@ export interface UseAlertPrevalenceFromProcessTreeParams {
    */
   documentId: string;
   /**
-   * Whether or not the timeline is active
-   */
-  isActiveTimeline: boolean;
-  /**
    * The indices to search for alerts
    */
   indices: string[];
@@ -106,7 +102,6 @@ export interface UserAlertPrevalenceFromProcessTreeResult {
  */
 export function useAlertPrevalenceFromProcessTree({
   documentId,
-  isActiveTimeline,
   indices,
 }: UseAlertPrevalenceFromProcessTreeParams): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
@@ -123,13 +118,19 @@ export function useAlertPrevalenceFromProcessTree({
     () => [...new Set(securityDefaultPatterns.concat(indices))],
     [indices, securityDefaultPatterns]
   );
+
+  const indexPatternsKey = useMemo(
+    () => alertAndOriginalIndices.slice().sort().join(','),
+    [alertAndOriginalIndices]
+  );
+
   const { loading, id, schema, agentId } = useAlertDocumentAnalyzerSchema({
     documentId,
     indices: alertAndOriginalIndices,
   });
 
   const query = useQuery<ProcessTreeAlertPrevalenceResponse>(
-    ['getAlertPrevalenceFromProcessTree', id],
+    ['getAlertPrevalenceFromProcessTree', id, indexPatternsKey],
     () => {
       return http.post<TreeResponse>(`/api/endpoint/resolver/tree`, {
         body: JSON.stringify({

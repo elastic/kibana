@@ -51,6 +51,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   varsReducer,
+  hasMultipleEnabledPolicyTemplates,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -438,7 +439,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Make sure the associated package is installed
     if (!enrichedPackagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${enrichedPackagePolicy.name}" without package are not supported`
+      );
     }
     if (!options?.skipEnsureInstalled) {
       await ensureInstalledPackage({
@@ -711,7 +714,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
         if (!packagePolicy.package) {
-          throw new FleetError('Package policy without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
@@ -842,7 +847,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
 
     if (!packagePolicy.package) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = packageInfos.get(
@@ -1280,7 +1287,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let { version, ...restOfPackagePolicy } = packagePolicy;
 
     if (!packagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = await getPackageInfo({
@@ -1695,13 +1704,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         if (!packagePolicy.package?.name) {
-          throw new FleetError('Package policies without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
         const pkgInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
         );
         if (!pkgInfoAndAsset) {
-          throw new FleetError('Package info and assets not found');
+          throw new FleetError(
+            `Package info and assets not found: ${packagePolicy.package.name}-${packagePolicy.package.version}`
+          );
         }
         const { pkgInfo, assetsMap } = pkgInfoAndAsset;
         let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
@@ -3148,6 +3161,15 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
         })
       );
     }
+  }
+
+  if (
+    pkgInfo.policy_templates_behavior === 'individual_policies' &&
+    hasMultipleEnabledPolicyTemplates(packagePolicy)
+  ) {
+    throw new FleetError(
+      `Unable to create integration policy. Package '${pkgInfo.name}' with individual policy templates cannot have enabled inputs from multiple policy templates.`
+    );
   }
 }
 

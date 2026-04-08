@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
-
 import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
-import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
 import { setUISettings } from '../../tasks/ui_settings';
-
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
-import { request } from '../../tasks/common';
+import { request, visit } from '../../tasks/common';
 import { login } from '../../tasks/login';
 
 const createAgentDocs = (kibanaVersion: string) => [
@@ -131,7 +129,7 @@ describe('View agents list', () => {
 
   describe('Agent filter suggestions', () => {
     it('should filter based on agent id', () => {
-      cy.visit('/app/fleet/agents');
+      visit('/app/fleet/agents');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.QUERY_INPUT).type('agent.id: "agent-1"{enter}');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE);
       assertTableContainsNAgents(1);
@@ -208,11 +206,11 @@ describe('View agents list', () => {
   describe('Agent status filter', () => {
     const clearFilters = () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
-      cy.get('li').contains('Healthy').click();
-      cy.get('li').contains('Unhealthy').click();
-      cy.get('li').contains('Updating').click();
-      cy.get('li').contains('Offline').click();
-      cy.get('li').contains('Orphaned').click();
+      cy.get('li').contains('Healthy').click({ force: true });
+      cy.get('li').contains('Unhealthy').click({ force: true });
+      cy.get('li').contains('Updating').click({ force: true });
+      cy.get('li').contains('Offline').click({ force: true });
+      cy.get('li').contains('Orphaned').click({ force: true });
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
       cy.wait('@getAgents');
     };
@@ -221,7 +219,7 @@ describe('View agents list', () => {
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Healthy').click();
+      cy.get('li').contains('Healthy').click({ force: true });
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);
@@ -233,7 +231,7 @@ describe('View agents list', () => {
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Unhealthy').click();
+      cy.get('li').contains('Unhealthy').click({ force: true });
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(1);
@@ -246,7 +244,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Inactive').click();
+      cy.get('li').contains('Inactive').click({ force: true });
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
     });
@@ -257,8 +255,8 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('li').contains('Healthy').click();
-      cy.get('li').contains('Unhealthy').click();
+      cy.get('li').contains('Healthy').click({ force: true });
+      cy.get('li').contains('Unhealthy').click({ force: true });
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);

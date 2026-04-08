@@ -79,6 +79,13 @@ export const EmailParamsFields = ({
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
 
+  const subjectLabel = i18n.translate(
+    'xpack.stackConnectors.components.email.subjectTextFieldLabel',
+    {
+      defaultMessage: 'Subject',
+    }
+  );
+
   return (
     <>
       <EuiFormRow
@@ -100,7 +107,11 @@ export const EmailParamsFields = ({
                 </EuiButtonEmpty>
               ) : null}
               {!addBCC && (!bcc || bcc?.length === 0) ? (
-                <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => setAddBCC(true)}
+                  data-test-subj="emailAddBccButton"
+                >
                   <FormattedMessage
                     defaultMessage="Bcc"
                     id="xpack.stackConnectors.components.email.addBccButton"
@@ -237,9 +248,7 @@ export const EmailParamsFields = ({
           fullWidth
           error={errors.subject as string}
           isInvalid={isSubjectInvalid}
-          label={i18n.translate('xpack.stackConnectors.components.email.subjectTextFieldLabel', {
-            defaultMessage: 'Subject',
-          })}
+          label={subjectLabel}
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -248,6 +257,7 @@ export const EmailParamsFields = ({
             paramsProperty={'subject'}
             inputTargetValue={subject}
             errors={(errors.subject ?? []) as string[]}
+            aria-label={subjectLabel}
           />
         </EuiFormRow>
       )}

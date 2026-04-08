@@ -16,12 +16,12 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
-import { applyFipsOverrides } from '../lib/fips_overrides';
+import { runKibanaServer } from '@kbn/test-kibana-server';
+import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
-import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config
@@ -73,9 +73,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       }
 
       let config: Config;
-      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
-      } else {
+      if (fipsIsEnabled()) {
         config = await readConfigFile(
           log,
           options.esVersion,
@@ -83,6 +81,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           settingOverrides,
           applyFipsOverrides
         );
+      } else {
+        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
       }
 
       const hasTests = await checkForEnabledTestsInFtrConfig({

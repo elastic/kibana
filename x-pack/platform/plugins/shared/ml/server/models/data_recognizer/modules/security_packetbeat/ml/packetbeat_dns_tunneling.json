@@ -8,7 +8,7 @@
         "detector_description": "Detects high info content of DNS questions over a population of TLDs.",
         "function": "high_info_content",
         "field_name": "dns.question.name",
-        "over_field_name": "dns.question.etld_plus_one",
+        "over_field_name": "dns_question_etld",
         "custom_rules": [
           {
             "actions": ["skip_result"],
@@ -23,7 +23,7 @@
         ]
       }
     ],
-    "influencers": ["destination.ip", "host.name", "dns.question.etld_plus_one"]
+    "influencers": ["destination.ip", "host.name", "dns_question_etld"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

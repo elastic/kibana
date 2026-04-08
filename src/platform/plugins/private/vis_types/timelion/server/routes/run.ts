@@ -48,7 +48,7 @@ export function runRoute(
       },
       validate: {
         body: schema.object({
-          sheet: schema.arrayOf(schema.string()),
+          sheet: schema.arrayOf(schema.string(), { maxSize: 1 }),
           extended: schema.maybe(
             schema.object({
               es: schema.object({

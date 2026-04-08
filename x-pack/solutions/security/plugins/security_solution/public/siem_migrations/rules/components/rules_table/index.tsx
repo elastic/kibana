@@ -455,6 +455,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   itemId={'id'}
                   data-test-subj={'rules-translation-table'}
                   columns={rulesColumns}
+                  tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
                 />
               </>
             )

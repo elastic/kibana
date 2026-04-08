@@ -9,13 +9,13 @@ import type { UsersTableType } from '../../../explore/users/store/model';
 import { appendSearch } from './helpers';
 
 export const getUsersDetailsUrl = (detailName: string, search?: string) =>
-  `/name/${detailName}${appendSearch(search)}`;
+  `/name/${encodeURIComponent(detailName)}${appendSearch(search)}`;
 
 export const getTabsOnUsersDetailsUrl = (
   detailName: string,
   tabName: UsersTableType,
   search?: string
-) => `/name/${detailName}/${tabName}${appendSearch(search)}`;
+) => `/name/${encodeURIComponent(detailName)}/${tabName}${appendSearch(search)}`;
 
 export const getTabsOnUsersUrl = (tabName: UsersTableType, search?: string) =>
   `/${tabName}${appendSearch(search)}`;

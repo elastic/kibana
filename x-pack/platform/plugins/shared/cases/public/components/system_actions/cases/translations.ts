@@ -28,6 +28,20 @@ export const TIME_WINDOW = i18n.translate(
   }
 );
 
+export const TIME_WINDOW_VALUE_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.timeWindowValueLabel',
+  {
+    defaultMessage: 'Time window value',
+  }
+);
+
+export const TIME_WINDOW_UNIT_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.timeWindowUnitLabel',
+  {
+    defaultMessage: 'Time window unit',
+  }
+);
+
 export const TIME_WINDOW_SIZE_ERROR = i18n.translate(
   'xpack.cases.systemActions.casesConnector.timeWindowSizeError',
   {

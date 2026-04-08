@@ -66,8 +66,6 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
-import type { GetPanelPlacementSettings } from './panel_placement';
-import { registerDashboardPanelSettings } from './panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
@@ -119,10 +117,6 @@ interface DashboardSetup {}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelSettings: <SerializedState extends object = object>(
-    embeddableType: string,
-    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
-  ) => void;
 }
 
 export class DashboardPlugin
@@ -225,14 +219,17 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        const [{ mountApp }] = await Promise.all([
+        const [{ mountApp }, { initializeDashboardApiServices }] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
           import('./dashboard_renderer/dashboard_module'),
           untilPluginStartServicesReady(),
         ]);
         appMounted();
 
-        const [coreStart] = await core.getStartServices();
+        const [[coreStart], _] = await Promise.all([
+          core.getStartServices(),
+          initializeDashboardApiServices(),
+        ]);
 
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
@@ -295,7 +292,6 @@ export class DashboardPlugin
     untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {
-      registerDashboardPanelSettings,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(
           './services/dashboard_content_management_service'

@@ -16,6 +16,7 @@ import {
 import type { FunctionComponent } from 'react';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InternalLegacyUrlAliasTarget } from './types';
@@ -99,6 +100,9 @@ export const AliasTable: FunctionComponent<Props> = ({ spaces, aliasesToDisable 
               setPageSize(size);
             }}
             tableLayout="auto"
+            tableCaption={i18n.translate('xpack.spaces.shareToSpace.aliasTableCaption', {
+              defaultMessage: 'Legacy URL aliases to disable',
+            })}
           />
         </Suspense>
       </EuiFlexItem>

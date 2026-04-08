@@ -1662,14 +1662,14 @@ describe('runs with default preResponse handlers', () => {
       `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
     );
     expect(response.header['content-security-policy-report-only']).toBe(
-      `form-action 'report-sample' 'self'`
+      `form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co`
     );
   });
 });
 
 describe('runs with default preResponse deprecation handlers', () => {
   const deprecationMessage = 'This is a deprecated endpoint for testing reasons';
-  const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+  const warningString = `299 Kibana-${kibanaVersion} "${encodeURIComponent(deprecationMessage)}"`;
 
   it('should handle a deprecated route and include deprecation warning headers', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);

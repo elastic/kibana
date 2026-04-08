@@ -87,7 +87,6 @@ export const getSignificantTermRequest = (
             ],
           },
         },
-        // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
         p_value: { background_is_superset: false },
         size: 1000,
       },

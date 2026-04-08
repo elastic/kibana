@@ -225,7 +225,6 @@ export default function createMicrosoftDefenderEndpointTests({ getService }: Ftr
             isAllowedSubAction ? 'allow' : 'deny'
           } execute of ${subActionValue}`, async () => {
             const {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               body: { status, message, connector_id, statusCode, error },
             } = await executeSubAction({
               supertest: supertestWithoutAuth,

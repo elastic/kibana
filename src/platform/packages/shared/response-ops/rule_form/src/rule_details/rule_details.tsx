@@ -9,6 +9,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import {
   EuiFormRow,
   EuiFieldText,
@@ -97,10 +99,14 @@ export const RuleDetails = () => {
     [dispatch, formData.artifacts]
   );
 
+  const flexItemCss = css`
+    min-width: 0;
+  `;
+
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem grow={1} css={flexItemCss}>
           <EuiFormRow
             data-test-subj="ruleDetails"
             fullWidth
@@ -118,7 +124,7 @@ export const RuleDetails = () => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={1} css={flexItemCss}>
           <EuiFormRow
             fullWidth
             label={RULE_TAG_INPUT_TITLE}

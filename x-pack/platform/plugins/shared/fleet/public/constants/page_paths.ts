@@ -38,6 +38,7 @@ export type DynamicPage =
   | 'integration_details_configs'
   | 'integration_policy_edit'
   | 'integration_policy_upgrade'
+  | 'integration_policy_edit_from_installed'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
@@ -211,6 +212,11 @@ export const pagePathGetters: {
   // Upgrades happen on the same edit form, just with a flag set. Separate page record here
   // allows us to set different breadcrumbs for upgrades when needed.
   integration_policy_upgrade: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
+  // Used for breadcrumbs when editing a policy from the installed integrations tab
+  integration_policy_edit_from_installed: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],

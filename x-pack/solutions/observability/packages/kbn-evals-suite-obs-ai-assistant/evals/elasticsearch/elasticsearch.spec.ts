@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/evals';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateElasticsearchDataset } from './evaluate_elasticsearch_dataset';
 import { createEvaluateElasticsearchDataset } from './evaluate_elasticsearch_dataset';
@@ -34,7 +35,7 @@ const evaluate = base.extend<{
 
 // Using 'all' for elasticsearch scenarios enables the LLM to correctly pick
 // elasticsearch functions when querying for data.
-evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
+evaluate.describe('Elasticsearch function', { tag: tags.serverless.observability.complete }, () => {
   evaluate('returns the cluster health state', async ({ evaluateElasticsearchDataset }) => {
     await evaluateElasticsearchDataset({
       dataset: {

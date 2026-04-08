@@ -168,13 +168,23 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 1 }]]));
       await waitForEvents(createdRule.id, 'actions', new Map([['execute', { gte: 2 }]]));
 
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
-          createdRule.id
-        }/_action_error_log?date_start=${dateStart}`
-      );
+      // Action error log may index slightly after action execute events; retry until both errors are visible
+      let response: Awaited<ReturnType<typeof supertest.get>>;
+      await retry.try(async () => {
+        const res = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+            createdRule.id
+          }/_action_error_log?date_start=${dateStart}`
+        );
+        if (res.body.totalErrors !== 2) {
+          throw new Error(
+            `expected 2 action errors, got ${res.body.totalErrors} (retrying for event log to catch up)`
+          );
+        }
+        response = res;
+      });
 
-      expect(response.body.totalErrors).to.eql(2);
+      expect(response!.body.totalErrors).to.eql(2);
 
       const filteredResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${

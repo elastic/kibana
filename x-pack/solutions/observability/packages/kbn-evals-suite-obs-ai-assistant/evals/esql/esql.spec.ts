@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/evals';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateEsqlDataset } from './evaluate_esql_dataset';
 import { createEvaluateEsqlDataset } from './evaluate_esql_dataset';
@@ -39,7 +40,7 @@ const evaluate = base.extend<{
   ],
 });
 
-evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
+evaluate.describe('ES|QL query generation', { tag: tags.serverless.observability.complete }, () => {
   // --- Test Suite for Logs Data ---
   evaluate.describe('with Logs data', () => {
     evaluate.beforeAll(async ({ logsSynthtraceEsClient }) => {

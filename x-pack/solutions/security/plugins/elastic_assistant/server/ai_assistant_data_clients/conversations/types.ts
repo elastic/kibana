@@ -27,6 +27,7 @@ export interface EsConversationSchema {
     '@timestamp': string;
     id?: string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;
@@ -73,6 +74,7 @@ export interface CreateMessageSchema {
     '@timestamp': string;
     id: string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;

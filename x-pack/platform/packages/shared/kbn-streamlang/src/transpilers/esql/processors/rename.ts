@@ -24,7 +24,7 @@ import { buildIgnoreMissingFilter, buildOverrideFilter } from './common';
 export function convertRenameProcessorToESQL(processor: RenameProcessor): ESQLAstCommand[] {
   const {
     from,
-    to, // eslint-disable-next-line @typescript-eslint/naming-convention
+    to,
     ignore_missing = false, // default same as Rename Ingest Processor
     override = false, // default same as Rename Ingest Processor
     where,

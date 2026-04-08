@@ -65,7 +65,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           }
 
           tabStateContainer.savedSearchState.set(savedSearch);
-          tabStateContainer.actions.undoSavedSearchChanges();
+          tabStateContainer.actions.undoSavedSearchChanges(tab, dataView);
           tabStateContainer.appState.resetInitialState();
         }
 

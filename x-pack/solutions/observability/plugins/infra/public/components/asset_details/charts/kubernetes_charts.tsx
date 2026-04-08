@@ -44,7 +44,12 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <Section
-        title={<SectionTitle title={HOST_METRIC_GROUP_TITLES.kubernetes} />}
+        title={
+          <SectionTitle
+            title={HOST_METRIC_GROUP_TITLES.kubernetes}
+            data-test-subj="infraAssetDetailsKubernetesChartsSectionTitle"
+          />
+        }
         data-test-subj="infraAssetDetailsKubernetesChartsSection"
         id="kubernetes"
         ref={ref}

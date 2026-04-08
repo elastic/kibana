@@ -447,6 +447,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="dataStreamTable"
+        tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
+          defaultMessage: 'Data streams',
+        })}
         message={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"

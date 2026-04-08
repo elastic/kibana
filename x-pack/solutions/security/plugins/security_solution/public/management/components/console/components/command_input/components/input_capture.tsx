@@ -24,6 +24,10 @@ const ARIA_PLACEHOLDER_MESSAGE = i18n.translate(
   { defaultMessage: 'Enter a command' }
 );
 
+const ARIA_LABEL_MESSAGE = i18n.translate('xpack.securitySolution.inputCapture.ariaLabel', {
+  defaultMessage: 'Response console input',
+});
+
 const deSelectTextOnPage = () => {
   const selection = getSelection();
   if (selection) {
@@ -262,6 +266,7 @@ export const InputCapture = memo<InputCaptureProps>(
       >
         <div
           role="textbox"
+          aria-label={ARIA_LABEL_MESSAGE}
           aria-placeholder={ARIA_PLACEHOLDER_MESSAGE}
           tabIndex={0}
           ref={focusEleRef}

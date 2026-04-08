@@ -5,34 +5,37 @@
  * 2.0.
  */
 
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
+import { RANDOM_SAMPLER_SEED } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';
 import type { FetchCategoriesResponse } from './fetch_categories';
 
-const isMsearchResponseItem = (arg: unknown): arg is estypes.MsearchMultiSearchItem =>
-  isPopulatedObject(arg, ['hits']);
+interface CategoryCountsBuckets {
+  category_counts: {
+    buckets: Record<string, estypes.AggregationsFiltersBucket>;
+  };
+}
 
 export const getCategoryCountRequest = (
   params: AiopsLogRateAnalysisSchema,
   fieldName: string,
-  category: Category,
+  categories: Category[],
   from: number | undefined,
-  to: number | undefined
+  to: number | undefined,
+  sampleProbability: number
 ): estypes.SearchRequest => {
   const { index } = params;
-
-  const categoryQuery = getCategoryQuery(fieldName, [category]);
 
   const query = getQueryWithParams({
     // This will override the original start/end params if
@@ -42,34 +45,45 @@ export const getCategoryCountRequest = (
       ...(from ? { start: from } : {}),
       ...(to ? { end: to } : {}),
     },
-    filter: categoryQuery,
+  });
+
+  const categoryFilters = categories.reduce<Record<string, estypes.QueryDslQueryContainer>>(
+    (acc, category, i) => {
+      acc[`category_${i}`] = getCategoryQuery(fieldName, [category]);
+      return acc;
+    },
+    {}
+  );
+
+  const filtersAgg: Record<string, estypes.AggregationsAggregationContainer> = {
+    category_counts: {
+      filters: {
+        filters: categoryFilters,
+        other_bucket: false,
+      },
+    },
+  };
+
+  const { wrap } = createRandomSamplerWrapper({
+    probability: sampleProbability,
+    seed: RANDOM_SAMPLER_SEED,
   });
 
   return {
     index,
     query,
     size: 0,
-    track_total_hits: true,
+    track_total_hits: false,
+    aggs: wrap(filtersAgg),
   };
 };
-
-export const getCategoryCountMSearchRequest = (
-  params: AiopsLogRateAnalysisSchema,
-  fieldName: string,
-  categories: FetchCategoriesResponse['categories'],
-  from: number | undefined,
-  to: number | undefined
-): estypes.MsearchRequestItem[] =>
-  categories.flatMap((category) => [
-    { index: params.index },
-    omit(getCategoryCountRequest(params, fieldName, category, from, to), ['index']),
-  ]);
 
 export const fetchCategoryCounts = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   fieldName: string,
   categories: FetchCategoriesResponse,
+  sampleProbability: number,
   from: number | undefined,
   to: number | undefined,
   logger?: Logger,
@@ -78,18 +92,28 @@ export const fetchCategoryCounts = async (
 ): Promise<FetchCategoriesResponse> => {
   const updatedCategories = cloneDeep(categories);
 
-  const searches = getCategoryCountMSearchRequest(
+  if (updatedCategories.categories.length === 0) {
+    return updatedCategories;
+  }
+
+  const { unwrap } = createRandomSamplerWrapper({
+    probability: sampleProbability,
+    seed: RANDOM_SAMPLER_SEED,
+  });
+
+  const request = getCategoryCountRequest(
     params,
     fieldName,
-    categories.categories,
+    updatedCategories.categories,
     from,
-    to
+    to,
+    sampleProbability
   );
 
-  let mSearchresponse;
+  let response;
 
   try {
-    mSearchresponse = await esClient.msearch({ searches }, { signal: abortSignal, maxRetries: 0 });
+    response = await esClient.search(request, { signal: abortSignal, maxRetries: 0 });
   } catch (error) {
     if (!isRequestAbortedError(error)) {
       if (logger) {
@@ -109,25 +133,21 @@ export const fetchCategoryCounts = async (
     return updatedCategories;
   }
 
-  for (const [index, resp] of mSearchresponse.responses.entries()) {
-    if (isMsearchResponseItem(resp)) {
-      updatedCategories.categories[index].count =
-        (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
-    } else {
-      if (logger) {
-        logger.error(
-          `Failed to fetch category count for category "${
-            updatedCategories.categories[index].key
-          }", got: \n${JSON.stringify(resp, null, 2)}`
-        );
-      }
+  if (!response.aggregations) {
+    logger?.error(`No aggregations in category counts response for field "${fieldName}".`);
 
-      if (emitError) {
-        emitError(
-          `Failed to fetch category count for category "${updatedCategories.categories[index].key}".`
-        );
-      }
+    if (emitError) {
+      emitError(`Failed to fetch category counts for field name "${fieldName}".`);
     }
+    return updatedCategories;
+  }
+
+  const { category_counts: categoryCounts } = unwrap(
+    response.aggregations
+  ) as CategoryCountsBuckets;
+
+  for (const [i, category] of updatedCategories.categories.entries()) {
+    category.count = categoryCounts.buckets[`category_${i}`]?.doc_count ?? 0;
   }
 
   return updatedCategories;

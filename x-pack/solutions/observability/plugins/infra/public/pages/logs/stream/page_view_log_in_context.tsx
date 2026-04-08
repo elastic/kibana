@@ -25,7 +25,6 @@ import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import { i18n } from '@kbn/i18n';
 import { Global, css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useDatePickerContext } from '../../../components/asset_details/hooks/use_date_picker';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../hooks/use_viewport_dimensions';
 
@@ -46,13 +45,22 @@ export const PageViewLogInContext: React.FC = () => {
     },
   } = useKibanaContextForPlugin();
 
-  const { dateRange } = useDatePickerContext();
   const logsLocator = getLogsLocatorFromUrlService(url);
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
-  const [{ contextEntry }, { setContextEntry }] = useViewLogInProviderContext();
+  const [{ contextEntry, startTimestamp, endTimestamp }, { setContextEntry }] =
+    useViewLogInProviderContext();
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
+
+  // Convert timestamps to TimeRange format for LazySavedSearchComponent
+  const timeRange = useMemo(
+    () => ({
+      from: new Date(startTimestamp).toISOString(),
+      to: new Date(endTimestamp).toISOString(),
+    }),
+    [startTimestamp, endTimestamp]
+  );
 
   const contextQuery = useMemo(() => {
     if (contextEntry && !isEmpty(contextEntry.context)) {
@@ -75,7 +83,7 @@ export const PageViewLogInContext: React.FC = () => {
   }
 
   const discoverLink = logsLocator?.getRedirectUrl({
-    timeRange: dateRange,
+    timeRange,
     query: contextQuery,
   });
 
@@ -100,7 +108,7 @@ export const PageViewLogInContext: React.FC = () => {
                 <LazySavedSearchComponent
                   dependencies={{ embeddable, searchSource, dataViews }}
                   index={logSources.value}
-                  timeRange={dateRange}
+                  timeRange={timeRange}
                   query={contextQuery}
                   height={'100%'}
                   displayOptions={{

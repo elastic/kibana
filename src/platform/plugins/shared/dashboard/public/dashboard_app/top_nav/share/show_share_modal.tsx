@@ -22,7 +22,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
 import type { DashboardLocatorParams } from '../../../../common';
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
@@ -268,7 +268,7 @@ export function ShowShareModal({
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR
       ) as LocatorPublic<DashboardLocatorParams>,
-      params: locatorParams,
+      params: { ...locatorParams, timeRange: locatorParams.timeRange ?? undefined },
     },
   });
 }

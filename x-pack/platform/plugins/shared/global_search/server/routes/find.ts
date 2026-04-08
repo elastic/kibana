@@ -29,7 +29,7 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
           }),
           options: schema.maybe(
             schema.object({
-              preference: schema.maybe(schema.string()),
+              preference: schema.maybe(schema.string({ maxLength: 64 })),
             })
           ),
         }),

@@ -27,6 +27,11 @@ export const InferenceHistory: React.FC = () => {
     fetchIndexInferenceHistory({ indexName });
   }, [indexName]);
 
+  const historyTitle = i18n.translate(
+    'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.title',
+    { defaultMessage: 'Historical inference processors' }
+  );
+
   const historyColumns: Array<EuiBasicTableColumn<MlInferenceHistoryItem>> = [
     {
       dataType: 'string',
@@ -51,14 +56,7 @@ export const InferenceHistory: React.FC = () => {
       <DataPanel
         hasBorder
         iconType="compute"
-        title={
-          <h3>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.title',
-              { defaultMessage: 'Historical inference processors' }
-            )}
-          </h3>
-        }
+        title={<h3>{historyTitle}</h3>}
         subtitle={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.subtitle',
           {
@@ -74,6 +72,7 @@ export const InferenceHistory: React.FC = () => {
             columns={historyColumns}
             items={inferenceHistory ?? []}
             rowHeader="pipeline"
+            tableCaption={historyTitle}
             noItemsMessage={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.emptyMessage',
               { defaultMessage: 'This index has no inference history' }

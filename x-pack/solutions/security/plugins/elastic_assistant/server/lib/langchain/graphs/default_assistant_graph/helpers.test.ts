@@ -109,7 +109,8 @@ describe('streamGraph', () => {
           expect(mockOnLlmResponse).toHaveBeenCalledWith(
             'final message',
             { transactionId: 'transactionId', traceId: 'traceId' },
-            false
+            false,
+            undefined
           );
         });
       });
@@ -178,7 +179,8 @@ describe('streamGraph', () => {
           expect(mockOnLlmResponse).toHaveBeenCalledWith(
             'content',
             { transactionId: 'transactionId', traceId: 'traceId' },
-            false
+            false,
+            undefined
           );
         });
       });
@@ -240,7 +242,8 @@ describe('streamGraph', () => {
         expect(mockOnLlmResponse).toHaveBeenCalledWith(
           'Look at these rare IP addresses.',
           { transactionId: 'transactionId', traceId: 'traceId' },
-          false
+          false,
+          undefined
         );
       });
     };

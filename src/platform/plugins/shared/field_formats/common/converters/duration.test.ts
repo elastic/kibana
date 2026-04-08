@@ -8,8 +8,25 @@
  */
 
 import { DurationFormat } from './duration';
+import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Duration Format', () => {
+  test('handles missing values in html context', () => {
+    const duration = new DurationFormat(
+      {
+        inputFormat: 'seconds',
+        outputFormat: 'humanize',
+      },
+      jest.fn()
+    );
+    expect(duration.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(duration.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+  });
+
   testCase({
     inputFormat: 'seconds',
     outputFormat: 'humanize',
@@ -35,6 +52,14 @@ describe('Duration Format', () => {
       {
         input: 125,
         output: '2 minutes',
+      },
+      {
+        input: null,
+        output: '(null)',
+      },
+      {
+        input: undefined,
+        output: '(null)',
       },
     ],
   });
@@ -552,9 +577,9 @@ describe('Duration Format', () => {
     showSuffix: boolean | undefined;
     useShortSuffix?: boolean;
     includeSpaceWithSuffix?: boolean;
-    fixtures: Array<{ input: number; output: string }>;
+    fixtures: Array<{ input: number | null | undefined; output: string }>;
   }) {
-    fixtures.forEach((fixture: { input: number; output: string }) => {
+    fixtures.forEach((fixture: { input: number | null | undefined; output: string }) => {
       const input = fixture.input;
       const output = fixture.output;
 

@@ -196,6 +196,9 @@ function PipelinesTableUi({
       rowProps={{
         'data-test-subj': 'row',
       }}
+      tableCaption={i18n.translate('xpack.logstash.pipelinesTable.tableCaption', {
+        defaultMessage: 'Logstash pipelines',
+      })}
     />
   );
 }

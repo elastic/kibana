@@ -8,11 +8,11 @@
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 import {
+  buildThreatDetailsItems,
   filterDuplicateEnrichments,
   getEnrichmentFields,
-  parseExistingEnrichments,
   getEnrichmentIdentifiers,
-  buildThreatDetailsItems,
+  parseExistingEnrichments,
 } from './threat_intelligence';
 
 describe('parseExistingEnrichments', () => {
@@ -510,28 +510,28 @@ describe('buildThreatDetailsItems', () => {
       {
         description: {
           fieldName: 'feed.name',
-          value: 'feed name',
+          value: ['feed name'],
         },
         title: 'feed.name',
       },
       {
         description: {
           fieldName: 'matched.atomic',
-          value: 'matched atomic',
+          value: ['matched atomic'],
         },
         title: 'matched.atomic',
       },
       {
         description: {
           fieldName: 'matched.field',
-          value: 'matched field',
+          value: ['matched field'],
         },
         title: 'matched.field',
       },
       {
         description: {
           fieldName: 'matched.type',
-          value: 'matched type',
+          value: ['matched type'],
         },
         title: 'matched.type',
       },
@@ -548,7 +548,7 @@ describe('buildThreatDetailsItems', () => {
         title: 'array_values',
         description: {
           fieldName: 'array_values',
-          value: 'first value',
+          value: ['first value', 'second value'],
         },
       },
     ]);
@@ -563,7 +563,7 @@ describe('buildThreatDetailsItems', () => {
         title: 'indicator.ip',
         description: {
           fieldName: 'threat.indicator.ip',
-          value: '127.0.0.1',
+          value: ['127.0.0.1'],
         },
       },
     ]);
@@ -579,7 +579,7 @@ describe('buildThreatDetailsItems', () => {
         title: 'object_field.foo',
         description: {
           fieldName: 'object_field.foo',
-          value: 'bar',
+          value: ['bar'],
         },
       },
     ]);
@@ -597,8 +597,9 @@ describe('buildThreatDetailsItems', () => {
             title: 'flattened_object',
             description: {
               fieldName: 'flattened_object',
-              value:
+              value: [
                 'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
+              ],
             },
           },
         ]);
@@ -614,8 +615,9 @@ describe('buildThreatDetailsItems', () => {
             title: 'array_field',
             description: {
               fieldName: 'array_field',
-              value:
+              value: [
                 'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
+              ],
             },
           },
         ]);

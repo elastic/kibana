@@ -74,7 +74,6 @@ export default ({ getService }: FtrProviderContext) => {
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
       const itemsWithoutServerGeneratedValues = items.map(
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         ({ item_id, ...restOfItem }: ExceptionListItemSchema) =>
           removeExceptionListItemServerGeneratedProperties(restOfItem)
       );
@@ -131,7 +130,6 @@ export default ({ getService }: FtrProviderContext) => {
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
       const itemsWithoutServerGeneratedValues = items.map(
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         ({ item_id, ...restOfItem }: ExceptionListItemSchema) =>
           removeExceptionListItemServerGeneratedProperties(restOfItem)
       );
@@ -203,7 +201,6 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       const itemsWithoutServerGeneratedValues = items.map(
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         ({ item_id, ...restOfItem }: ExceptionListItemSchema) =>
           removeExceptionListItemServerGeneratedProperties(restOfItem)
       );

@@ -89,7 +89,7 @@ export const KQL_INPUT_TEXT_AREA = '[data-test-subj="queryInput"]';
 export const KQL_INPUT = (dataTestSubj: string = KQL_INPUT_TEXT_AREA) =>
   `${GLOBAL_KQL_WRAPPER} ${dataTestSubj}`;
 
-export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
+export const REFRESH_BUTTON = `[data-test-subj="kbnQueryBar"] [data-test-subj="querySubmitButton"]`;
 
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';

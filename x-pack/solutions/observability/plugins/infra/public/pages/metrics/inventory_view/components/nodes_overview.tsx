@@ -106,7 +106,8 @@ export const NodesOverview = ({
 
   const noData = !loading && nodes && nodes.length === 0;
 
-  const hasDataOnAnotherSchema = schemas.length === 1 && preferredSchema !== schemas[0];
+  const hasDataOnAnotherSchema =
+    schemas.length === 1 && preferredSchema !== schemas[0] && nodeType === 'host';
   const refetchProps = hasDataOnAnotherSchema
     ? {}
     : {
@@ -127,6 +128,7 @@ export const NodesOverview = ({
         text={i18n.translate('xpack.infra.waffle.loadingDataText', {
           defaultMessage: 'Loading data',
         })}
+        data-test-subj="infraNodesOverviewLoadingPanel"
       />
     );
   } else if (noData) {
@@ -173,7 +175,7 @@ export const NodesOverview = ({
 
   if (view === 'table') {
     return (
-      <TableContainer>
+      <TableContainer data-test-subj="infraNodesOverviewTable">
         <TableView
           nodeType={nodeType}
           nodes={nodes}

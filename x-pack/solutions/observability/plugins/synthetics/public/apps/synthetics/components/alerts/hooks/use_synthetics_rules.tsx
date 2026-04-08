@@ -16,6 +16,7 @@ import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
+  selectSyntheticsAlertsLoaded,
 } from '../../../state/alert_rules/selectors';
 import {
   enableDefaultAlertingSilentlyAction,
@@ -35,12 +36,11 @@ export const useSyntheticsRules = (isOpen: boolean) => {
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
   const loading = useSelector(selectSyntheticsAlertsLoading);
+  const rulesLoaded = useSelector(selectSyntheticsAlertsLoaded);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewRule);
   const { settings } = useSelector(selectDynamicSettings);
-
   const { canSave } = useSyntheticsSettingsContext();
-
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
@@ -55,34 +55,36 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     }
   }, [canSave, dispatch]);
 
+  // Fetch or create default rules when popover opens
   useEffect(() => {
-    if (hasMonitors && defaultRulesEnabled) {
-      if (!defaultRules) {
-        // on initial load we prioritize loading the app
-        setTimeout(() => {
-          getOrCreateAlerts();
-        }, 1000);
-      } else {
-        getOrCreateAlerts();
-      }
+    const shouldGetOrCreateAlerts =
+      isOpen && hasMonitors && defaultRulesEnabled && !loading && rulesLoaded === null;
+    if (shouldGetOrCreateAlerts) {
+      getOrCreateAlerts();
     }
-    // we don't want to run this on defaultRules change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, isOpen, hasMonitors, defaultRulesEnabled]);
+  }, [isOpen, hasMonitors, defaultRulesEnabled, loading, rulesLoaded, getOrCreateAlerts]);
 
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
     ...plugins
   } = useKibana<CoreStart & ClientPluginsStart>().services;
 
-  const onClose = useMemo(() => () => dispatch(setAlertFlyoutVisible(null)), [dispatch]);
+  const onClose = useCallback(() => dispatch(setAlertFlyoutVisible(null)), [dispatch]);
 
   const EditAlertFlyout = useMemo(() => {
-    const initialRule =
-      alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules?.tlsRule : defaultRules?.statusRule;
-    if (!initialRule || isNewRule) {
+    // Don't render if this is a new rule flyout
+    if (isNewRule || !alertFlyoutVisible) {
       return null;
     }
+
+    const initialRule =
+      alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules?.tlsRule : defaultRules?.statusRule;
+
+    // If the rule doesn't exist yet, return null (the useEffect will try to fetch/create it)
+    if (!initialRule) {
+      return null;
+    }
+
     return (
       <RuleFormFlyout
         plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
@@ -127,7 +129,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   }, [isNewRule, alertFlyoutVisible, plugins, ruleTypeRegistry, actionTypeRegistry, onClose]);
 
   return useMemo(
-    () => ({ loading, EditAlertFlyout, NewRuleFlyout }),
-    [EditAlertFlyout, loading, NewRuleFlyout]
+    () => ({ loading, EditAlertFlyout, NewRuleFlyout, defaultRules }),
+    [EditAlertFlyout, loading, NewRuleFlyout, defaultRules]
   );
 };

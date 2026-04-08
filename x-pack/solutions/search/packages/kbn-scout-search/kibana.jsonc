@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/scout-search",
+  "owner": ["@elastic/appex-qa", "@elastic/search-kibana"],
+  "group": "search",
+  "visibility": "private",
+  "devOnly": true
+}

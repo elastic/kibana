@@ -442,6 +442,7 @@ describe('SAMLAuthenticationProvider', () => {
                 requestIdMap: requestIdMapResult,
                 realm: 'test-realm',
               },
+              stateCookieOptions: { sameSite: 'None', isSecure: true },
             }
           )
         );
@@ -945,6 +946,7 @@ describe('SAMLAuthenticationProvider', () => {
                 },
                 realm: 'test-realm',
               },
+              stateCookieOptions: { sameSite: 'None', isSecure: true },
             }
           )
         );
@@ -988,6 +990,7 @@ describe('SAMLAuthenticationProvider', () => {
                 },
                 realm: 'test-realm',
               },
+              stateCookieOptions: { sameSite: 'None', isSecure: true },
             }
           )
         );
@@ -1037,6 +1040,7 @@ describe('SAMLAuthenticationProvider', () => {
                 },
                 realm: 'test-realm',
               },
+              stateCookieOptions: { sameSite: 'None', isSecure: true },
             }
           )
         );
@@ -1162,6 +1166,7 @@ describe('SAMLAuthenticationProvider', () => {
                 },
               },
             },
+            stateCookieOptions: { sameSite: 'None', isSecure: true },
           }
         )
       );

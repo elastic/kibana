@@ -6,10 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import type { MaintenanceWindow } from '../../types';
+import type { MaintenanceWindowAttributes } from '../../../../data/maintenance_window/types';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
 
@@ -25,7 +27,8 @@ export interface MaintenanceWindowAggregationResult {
 
 export async function getActiveMaintenanceWindows(
   context: MaintenanceWindowClientContext,
-  cacheIntervalMs?: number
+  cacheIntervalMs?: number,
+  perPage: number = 100
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
 
@@ -51,10 +54,22 @@ export async function getActiveMaintenanceWindows(
   ]);
 
   try {
-    const { saved_objects: savedObjects } = await findMaintenanceWindowSo({
-      savedObjectsClient,
-      savedObjectsFindOptions: { filter },
-    });
+    const savedObjects = [];
+    let page = 1;
+    let response: SavedObjectsFindResponse<
+      MaintenanceWindowAttributes,
+      MaintenanceWindowAggregationResult
+    >;
+
+    do {
+      response = await findMaintenanceWindowSo({
+        savedObjectsClient,
+        savedObjectsFindOptions: { filter, page, perPage },
+      });
+
+      savedObjects.push(...response.saved_objects);
+      page++;
+    } while (response.saved_objects.length === perPage);
 
     return savedObjects.map((savedObject) => {
       return transformMaintenanceWindowAttributesToMaintenanceWindow({

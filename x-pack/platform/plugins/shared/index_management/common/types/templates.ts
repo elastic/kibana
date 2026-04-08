@@ -29,6 +29,8 @@ export interface TemplateSerialized {
   _meta?: { [key: string]: any };
   data_stream?: {};
   allow_auto_create?: boolean;
+  created_date_millis?: number;
+  modified_date_millis?: number;
 }
 
 /**

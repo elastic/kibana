@@ -51,6 +51,7 @@ export const transformESToConversation = (
           messageContent: message.content,
           replacements,
         }),
+        ...(message.refusal ? { refusal: message.refusal } : {}),
         ...(message.is_error ? { isError: message.is_error } : {}),
         ...(message.reader ? { reader: message.reader } : {}),
         ...(message.user ? { user: message.user } : {}),

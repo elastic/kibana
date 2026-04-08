@@ -10,7 +10,7 @@ import { isToolCallStep, ConversationRoundStepType, ToolResultType } from '@kbn/
 import { getToolResultId } from '@kbn/onechat-server/tools/utils';
 
 import { fromEs, toEs, type Document as ConversationDocument } from './converters';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 jest.mock('@kbn/onechat-server/tools/utils');
 

@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const retry = getService('retry');
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
   const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
@@ -44,6 +45,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(time.end).to.be(toTime);
       const rowData = await discover.getDocTableIndex(1);
       expect(rowData.startsWith('Sep 22, 2019 @ 23:50:13.253123345')).to.be.ok();
+    });
+
+    it('should show all documents when time range is expanded', async () => {
+      const fromUnknown = 'Jan 1, 2000 @ 00:00:00.000';
+      const toUnknown = 'Jan 1, 2000 @ 23:59:59.999';
+      await timePicker.setAbsoluteRange(fromUnknown, toUnknown);
+      await discover.waitUntilTabIsLoaded();
+      await discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+      await retry.try(async function () {
+        expect(await discover.hasNoResults()).to.be(false);
+        expect(await discover.getHitCount()).to.be('9');
+        const entireTimeRange = await timePicker.getTimeConfig();
+        expect(entireTimeRange.start).to.be('Sep 19, 2015 @ 06:50:13.000');
+        expect(entireTimeRange.end).to.be('Sep 22, 2019 @ 23:50:13.254');
+      });
     });
   });
 }

@@ -42,7 +42,10 @@ export const selectOriginalPreviewRecords = createSelector(
     }
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
     // return the samples where the filterFn matches the documents at the same index
-    return samples.filter((_, index) => filterFn(documents[index]));
+    return samples.filter((_, index) => {
+      const doc = documents[index];
+      return doc ? filterFn(doc) : false;
+    });
   }
 );
 

@@ -17,6 +17,7 @@ import { ServerlessRoleName } from '../support/roles';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
+export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
 export const selectAllAgents = () => {
   cy.getBySel('globalLoadingIndicator').should('not.exist');
@@ -127,6 +128,7 @@ export const navigateToRule = (ruleName: string) => {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
   clickRuleName(ruleName);
+  goToAlertsTab();
   waitForAlertsToPopulate();
 };
 
@@ -192,4 +194,8 @@ export const takeOsqueryActionWithParams = () => {
 
 export const clickRuleName = (ruleName: string) => {
   cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
+};
+
+export const goToAlertsTab = () => {
+  cy.get(ALERTS_TAB).click();
 };

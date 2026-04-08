@@ -154,6 +154,7 @@ import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task'
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
+import { FleetPolicyRevisionsCleanupTask } from './tasks/fleet_policy_revisions_cleanup/fleet_policy_revisions_cleanup_task';
 import { registerSetupTasks } from './tasks/setup';
 
 export interface FleetSetupDeps {
@@ -211,6 +212,7 @@ export interface FleetAppContext {
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   autoInstallContentPackagesTask: AutoInstallContentPackagesTask;
   agentStatusChangeTask?: AgentStatusChangeTask;
+  fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
@@ -325,6 +327,7 @@ export class FleetPlugin
   private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
   private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
   private agentStatusChangeTask?: AgentStatusChangeTask;
+  private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -664,6 +667,9 @@ export class FleetPlugin
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.unenrollInactiveAgents?.taskInterval,
+      },
     });
     this.deleteUnenrolledAgentsTask = new DeleteUnenrolledAgentsTask({
       core,
@@ -706,6 +712,16 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.agentStatusChange?.taskInterval,
+      },
+    });
+    this.fleetPolicyRevisionsCleanupTask = new FleetPolicyRevisionsCleanupTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        maxRevisions: config.fleetPolicyRevisionsCleanup?.maxRevisions,
+        interval: config.fleetPolicyRevisionsCleanup?.interval,
+        maxPoliciesPerRun: config.fleetPolicyRevisionsCleanup?.maxPoliciesPerRun,
       },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
@@ -766,6 +782,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
@@ -789,6 +806,9 @@ export class FleetPlugin
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
     this.agentStatusChangeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.fleetPolicyRevisionsCleanupTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 

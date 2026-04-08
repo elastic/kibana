@@ -115,6 +115,42 @@ export default function (providerContext: FtrProviderContext) {
         expect(readmeResponse.text).to.equal(newReadmeContent);
       });
 
+      it('should allow to update readme with an empty string and increment version', async () => {
+        // Define new readme content
+        const newReadmeContent = '';
+
+        // Update the custom integration
+        await supertest
+          .put(`/api/fleet/epm/custom_integrations/${testCustomIntegrationName}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            readMeData: newReadmeContent,
+          })
+          .expect(200);
+
+        // Verify the integration was updated with new version
+        const response = await getCustomIntegrationInfo(testCustomIntegrationName);
+        const updatedIntegration = response.body.item;
+
+        // Version should be incremented
+        const parsedInitialVersion = initialVersion.split('.');
+        const expectedNewVersion = `${parsedInitialVersion[0]}.${parsedInitialVersion[1]}.${
+          Number(parsedInitialVersion[2]) + 1
+        }`;
+
+        expect(updatedIntegration.version).to.not.equal(initialVersion);
+        expect(updatedIntegration.version).to.equal(expectedNewVersion);
+
+        // Get the readme file to verify content
+        const readmeResponse = await supertest
+          .get(
+            `/api/fleet/epm/packages/${testCustomIntegrationName}/${expectedNewVersion}/docs/README.md`
+          )
+          .expect(200);
+        // The response body contains the raw file content, verify it matches the new content
+        expect(readmeResponse.text).to.equal(newReadmeContent);
+      });
+
       it('should return 404 for non-existent integration', async () => {
         await supertest
           .put(`/api/fleet/epm/custom_integrations/non-existent-integration`)

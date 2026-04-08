@@ -18,7 +18,10 @@ export const tracingConfigSchema: Type<TracingConfig> = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
   exporters: schema.oneOf(
-    [inferenceTracingExportConfigSchema, schema.arrayOf(inferenceTracingExportConfigSchema)],
+    [
+      inferenceTracingExportConfigSchema,
+      schema.arrayOf(inferenceTracingExportConfigSchema, { maxSize: 25 }),
+    ],
     { defaultValue: [] }
   ),
 });

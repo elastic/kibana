@@ -75,7 +75,7 @@ export async function bootstrap({ dir, log }: CheckoutAndBootstrapOptions) {
   await updatePackageJsonEngines(log, dir, currentNodeVersion);
 
   await writeVersionFile(log, Path.join(dir, '.node-version'), currentNodeVersion, false);
-  await writeVersionFile(log, Path.join(dir, '.nvmrc'), currentNodeVersion, true);
+  await writeVersionFile(log, Path.join(dir, '.nvmrc'), currentNodeVersion, false);
 
   // set ignore-engines to true to prevent validation errors from other spawned processes
   await exec(`yarn config set ignore-engines true`, {

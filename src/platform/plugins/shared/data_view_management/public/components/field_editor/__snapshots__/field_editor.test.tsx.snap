@@ -1307,6 +1307,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             },
           ]
         }
+        tableCaption="Indices listed by conflicting field type"
       />
       <eui-spacer
         size="m"

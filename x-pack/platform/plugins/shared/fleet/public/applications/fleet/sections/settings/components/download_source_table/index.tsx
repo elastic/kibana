@@ -144,6 +144,7 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
       columns={columns}
       items={downloadSources}
       data-test-subj="AgentDownloadSourcesTable"
+      tableCaption="Download sources"
     />
   );
 };

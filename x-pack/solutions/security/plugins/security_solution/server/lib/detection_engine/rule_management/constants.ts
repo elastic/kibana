@@ -106,3 +106,8 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   created_at: false,
   created_by: false,
 };
+
+// This constant is used in rule tags aggregations. It limits the maximum number of tags that can be returned by a "terms" aggregation.
+// By default, the "terms" aggregation returns only 10 results, so we set it to a high number to ensure we get all tags.
+// If there are more than this number of tags, only the first EXPECTED_MAX_TAGS of tags will be returned.
+export const EXPECTED_MAX_TAGS = 65536;
