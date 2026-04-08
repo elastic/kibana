@@ -52,7 +52,7 @@ export function createESQLQuery({
   }
 
   const metricAggregation = createMetricAggregation({
-    type: fieldTypes,
+    types: fieldTypes,
     instrument,
     metricName,
     placeholderName: 'metricName',
