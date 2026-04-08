@@ -86,10 +86,10 @@ const buildApi = (overrides: {
   const fleetGetInstallation =
     overrides.fleetGetInstallation ?? jest.fn().mockResolvedValue({ install_status: 'installed' });
 
-  // Default: all agents healthy (online > 0)
+  // Default: all agents healthy (active > 0, online > 0)
   const fleetGetAgentStatusForAgentPolicy =
     overrides.fleetGetAgentStatusForAgentPolicy ??
-    jest.fn().mockResolvedValue({ all: 1, online: 1 });
+    jest.fn().mockResolvedValue({ all: 1, active: 1, online: 1 });
 
   const server = {
     coreStart: {
@@ -625,9 +625,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-      const fleetGetAgentStatusForAgentPolicy = jest
-        .fn()
-        .mockResolvedValue({ all: 0, online: 0 });
+      const fleetGetAgentStatusForAgentPolicy = jest.fn().mockResolvedValue({ all: 0, active: 0, online: 0 });
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
@@ -656,9 +654,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-      const fleetGetAgentStatusForAgentPolicy = jest
-        .fn()
-        .mockResolvedValue({ all: 2, online: 0 });
+      const fleetGetAgentStatusForAgentPolicy = jest.fn().mockResolvedValue({ all: 2, active: 2, online: 0 });
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
@@ -685,9 +681,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const expectedPolicyId = 'mon-1-priv-loc-1';
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-      const fleetGetAgentStatusForAgentPolicy = jest
-        .fn()
-        .mockResolvedValue({ all: 3, online: 1 });
+      const fleetGetAgentStatusForAgentPolicy = jest.fn().mockResolvedValue({ all: 3, active: 3, online: 1 });
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
@@ -697,7 +691,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
       expect(result.monitors[0].isHealthy).toBe(true);
     });
   });

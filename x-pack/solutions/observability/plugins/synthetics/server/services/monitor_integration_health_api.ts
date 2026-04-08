@@ -32,7 +32,7 @@ const STATUS_REASONS: Record<
   [PrivateLocationHealthStatusValue.MissingAgentPolicy]:
     'The agent policy referenced by this private location no longer exists.',
   [PrivateLocationHealthStatusValue.MissingLocation]:
-    'The monitor references a private location that no longer exists.',  
+    'The monitor references a private location that no longer exists.',
   [PrivateLocationHealthStatusValue.MissingAgents]:
     'No Fleet agents are enrolled in the agent policy for this private location.',
   [PrivateLocationHealthStatusValue.UnhealthyAgent]:
@@ -91,7 +91,7 @@ export class MonitorIntegrationHealthApi {
       // Only the first matching status is returned per location — downstream issues
       // are moot when a more fundamental problem exists.
       //
-      // Priority: missing_location > missing_agent_policy > missing_package_policy > healthy
+      // Priority: missing_location > missing_agent_policy > missing_package_policy > missing_agents > unhealthy_agent > healthy
       const locationStatuses: PrivateLocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const newFormatPolicyId = privateLocationAPI.getPolicyId(
@@ -147,7 +147,7 @@ export class MonitorIntegrationHealthApi {
               existingPrivateLocation.label,
               PrivateLocationHealthStatusValue.MissingAgents,
               resolvedPolicyId,
-              expectedAgentPolicyId,
+              expectedAgentPolicyId
             );
           }
           if (agentStatus.online === 0) {
@@ -156,7 +156,7 @@ export class MonitorIntegrationHealthApi {
               existingPrivateLocation.label,
               PrivateLocationHealthStatusValue.UnhealthyAgent,
               resolvedPolicyId,
-              expectedAgentPolicyId,
+              expectedAgentPolicyId
             );
           }
         }
@@ -276,10 +276,11 @@ export class MonitorIntegrationHealthApi {
 
     const entries = await Promise.all(
       agentPolicyIds.map(async (policyId) => {
-        const status = await this.server.fleet.agentService.asInternalUser.getAgentStatusForAgentPolicy(
-          policyId
-        );
-        return [policyId, { total: status.all, online: status.online }] as const;
+        const status =
+          await this.server.fleet.agentService.asInternalUser.getAgentStatusForAgentPolicy(
+            policyId
+          );
+        return [policyId, { total: status.active, online: status.online }] as const;
       })
     );
 
