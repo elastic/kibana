@@ -15,12 +15,27 @@ import {
   formatEvalSummary,
 } from './src/dashboards/evaluate_dataset';
 import type { DashboardExample } from './datasets/dashboards/types';
+import { RuleMigrationClient } from './src/rules/migration_client';
+import {
+  createRuleEvaluateDataset,
+  getRuleDatasetSkipSummaries,
+  clearRuleDatasetSkipSummaries,
+  formatRuleEvalSummary,
+} from './src/rules/evaluate_dataset';
+import type { RuleExample } from './datasets/rules/types';
 
 type EvaluateDatasetFn = (args: { dataset: EvaluationDataset<DashboardExample> }) => Promise<void>;
+
+type EvaluateRuleDatasetFn = (args: {
+  dataset: EvaluationDataset<RuleExample>;
+  vendor: 'splunk' | 'qradar';
+}) => Promise<void>;
 
 interface WorkerFixtures {
   migrationClient: DashboardMigrationClient;
   evaluateDataset: EvaluateDatasetFn;
+  ruleMigrationClient: RuleMigrationClient;
+  evaluateRuleDataset: EvaluateRuleDatasetFn;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: ReturnType<typeof createDefaultTerminalReporter>;
 }
@@ -46,6 +61,26 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+  ruleMigrationClient: [
+    async ({ fetch, log }, use) => {
+      await use(new RuleMigrationClient(fetch, log));
+    },
+    { scope: 'worker' },
+  ],
+  evaluateRuleDataset: [
+    async ({ evaluators, executorClient, ruleMigrationClient, log, connector }, use) => {
+      await use(
+        createRuleEvaluateDataset({
+          evaluators,
+          executorClient,
+          ruleMigrationClient,
+          log,
+          connectorId: connector.id,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
   reportDisplayOptions: [
     async ({ evaluators }, use) => {
       const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
@@ -64,6 +99,15 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
         ['Translation Completeness', { statsToInclude: ['mean'] }],
         ['Index Pattern Validity', { statsToInclude: ['mean'] }],
         ['translation_fidelity', { statsToInclude: ['mean'] }],
+        ['Custom Query Accuracy', { statsToInclude: ['mean', 'median'] }],
+        ['LOOKUP JOIN Preservation', { statsToInclude: ['mean'] }],
+        ['Translated ESQL Validity', { statsToInclude: ['mean'] }],
+        ['Integration Match', { statsToInclude: ['mean'] }],
+        ['Prebuilt Rule Match', { statsToInclude: ['mean'] }],
+        ['Unsupported Pattern Detection', { statsToInclude: ['mean'] }],
+        ['Hallucination Detection', { statsToInclude: ['mean'] }],
+        ['Translation Result', { statsToInclude: ['mean'] }],
+        ['NL Description Faithfulness', { statsToInclude: ['mean'] }],
       ]);
 
       await use({
@@ -87,6 +131,27 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
             evaluatorNames: ['Lookup Join Presence', 'translation_fidelity'],
             combinedColumnName: 'Translation Quality',
           },
+          {
+            evaluatorNames: [
+              'Translated ESQL Validity',
+              'LOOKUP JOIN Preservation',
+              'Unsupported Pattern Detection',
+              'Translation Result',
+            ],
+            combinedColumnName: 'Rule Structural Checks',
+          },
+          {
+            evaluatorNames: [
+              'Custom Query Accuracy',
+              'Integration Match',
+              'Prebuilt Rule Match',
+            ],
+            combinedColumnName: 'Rule Matching',
+          },
+          {
+            evaluatorNames: ['Hallucination Detection', 'NL Description Faithfulness'],
+            combinedColumnName: 'Rule Faithfulness',
+          },
         ],
       });
     },
@@ -103,6 +168,12 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
           log.info(`\n${evalSummary}`);
         }
         clearDatasetSkipSummaries();
+
+        const ruleSummary = formatRuleEvalSummary(getRuleDatasetSkipSummaries());
+        if (ruleSummary) {
+          log.info(`\n${ruleSummary}`);
+        }
+        clearRuleDatasetSkipSummaries();
       });
     },
     { scope: 'worker' },
