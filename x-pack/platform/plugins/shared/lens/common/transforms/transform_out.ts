@@ -20,7 +20,7 @@ import type {
   LensByValueTransformOutResult,
   LensTransformOut,
 } from './types';
-import { findLensReference, isByRefLensState } from './utils';
+import { findLensReference } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
 
@@ -44,7 +44,7 @@ export const getTransformOut = (
 
     const savedObjectRef = findLensReference(panelReferences);
 
-    if (savedObjectRef && isByRefLensState(state)) {
+    if (savedObjectRef) {
       return {
         ...state,
         ref_id: savedObjectRef.id,
