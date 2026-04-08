@@ -10,6 +10,8 @@ import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IndexSelectPopover } from './index_select_popover';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 // EuiComboBox uses FixedSizeList from react-window for virtualized rendering.
 // In jsdom the container has zero height so FixedSizeList renders no items.
@@ -48,18 +50,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
       ];
     },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
     getIndexOptions: () => {
       return Promise.resolve([
         {
@@ -80,6 +70,30 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   };
 });
 
+const dataViewsMock =
+  dataViewPluginMocks.createStartContract() as jest.Mocked<DataViewsPublicPluginStart>;
+
+const setupDataViewsMock = () => {
+  dataViewsMock.getFieldsForWildcard = jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]);
+};
+
 describe('IndexSelectPopover', () => {
   const onIndexChange = jest.fn();
   const onTimeFieldChange = jest.fn();
@@ -91,12 +105,14 @@ describe('IndexSelectPopover', () => {
       index: [],
       timeField: [],
     },
+    dataViews: dataViewsMock,
     onIndexChange,
     onTimeFieldChange,
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
+    setupDataViewsMock();
   });
 
   test('renders closed popover initially and opens on click', async () => {

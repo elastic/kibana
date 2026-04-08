@@ -9,13 +9,28 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  getLatestVersion,
+  type VisualizationAttachmentData,
+} from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 /** Attachment type for visualization configurations */
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
+
+const getExistingVisualizationConfig = (data: unknown): VisualizationConfig | null => {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  const candidate =
+    'visualization' in data
+      ? (data as VisualizationAttachmentData).visualization
+      : (data as VisualizationConfig);
+
+  return candidate && typeof candidate === 'object' ? (candidate as VisualizationConfig) : null;
+};
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -62,15 +77,6 @@ This tool will:
 4. Generate a valid visualization configuration
 5. Store the result as an attachment (creating new or updating existing) for future modifications`,
     schema: createVisualizationSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ uiSettings }) => {
-        const enabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return { status: enabled ? 'available' : 'unavailable' };
-      },
-    },
     tags: [],
     handler: async (
       { query: nlQuery, index, chartType, esql, attachment_id: attachmentId },
@@ -86,9 +92,11 @@ This tool will:
           if (existingAttachmentRecord) {
             const latestVersion = getLatestVersion(existingAttachmentRecord);
             if (latestVersion?.data) {
-              parsedExistingConfig = latestVersion.data as VisualizationConfig;
-              existingConfig = JSON.stringify(parsedExistingConfig);
-              logger.debug(`Loaded existing visualization from attachment ${attachmentId}`);
+              parsedExistingConfig = getExistingVisualizationConfig(latestVersion.data);
+              existingConfig = parsedExistingConfig
+                ? JSON.stringify(parsedExistingConfig)
+                : undefined;
+              logger.debug(`Loaded existing visualization config from attachment ${attachmentId}`);
             }
           } else {
             logger.warn(`Attachment ${attachmentId} not found, creating new visualization`);

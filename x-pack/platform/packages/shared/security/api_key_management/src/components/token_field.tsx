@@ -48,7 +48,7 @@ export const TokenField: FunctionComponent<TokenFieldProps> = ({ value, ...props
           {(copyText) => (
             <EuiFormAppend
               element="button"
-              iconLeft="copyClipboard"
+              iconLeft="copy"
               onClick={copyText}
               aria-label={i18n.translate('xpack.security.copyTokenField.copyButton', {
                 defaultMessage: 'Copy to clipboard',
@@ -96,7 +96,7 @@ export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> 
             <EuiFormPrepend
               element="button"
               label={selectedOption.label}
-              iconRight="arrowDown"
+              iconRight="chevronSingleDown"
               data-test-subj="selectableTokenFieldButton"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             />

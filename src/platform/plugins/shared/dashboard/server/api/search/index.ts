@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './types';
+export type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
 export { registerSearchRoute } from './register_search_route';

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/elastic-console-plugin",
-  "owner": "@elastic/obs-onboarding-team",
+  "owner": "@elastic/obs-elastic-brain-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {

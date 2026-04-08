@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { useTabs } from './tabs';
 import type {
   EntityDetailsLeftPanelTab,
@@ -16,16 +17,15 @@ import type {
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 
-interface ServiceParam {
-  name: string;
-  email: string[];
-}
+const getServiceNameFromEntityIdentifiers = (identityFields: IdentityFields): string =>
+  identityFields['service.name'] || Object.values(identityFields)[0] || '';
 
 export interface ServiceDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  service: ServiceParam;
+  identityFields: IdentityFields;
   path?: PanelPath;
   scopeId: string;
+  entityStoreEntityId?: string;
 }
 export interface ServiceDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'service_details';
@@ -35,13 +35,25 @@ export const ServiceDetailsPanelKey: ServiceDetailsExpandableFlyoutProps['key'] 
 
 export const ServiceDetailsPanel = ({
   isRiskScoreExist,
-  service,
+  identityFields,
   path,
   scopeId,
+  entityStoreEntityId,
 }: ServiceDetailsPanelProps) => {
-  const tabs = useTabs(service.name, scopeId);
+  const serviceName = useMemo(
+    () => getServiceNameFromEntityIdentifiers(identityFields ?? {}),
+    [identityFields]
+  );
+  const tabs = useTabs(serviceName, scopeId, entityStoreEntityId);
 
-  const { selectedTabId, setSelectedTabId } = useSelectedTab(isRiskScoreExist, service, tabs, path);
+  const { selectedTabId, setSelectedTabId } = useSelectedTab(
+    isRiskScoreExist,
+    identityFields ?? {},
+    scopeId,
+    tabs,
+    path,
+    entityStoreEntityId
+  );
 
   if (!selectedTabId) {
     return null;
@@ -61,9 +73,11 @@ export const ServiceDetailsPanel = ({
 
 const useSelectedTab = (
   isRiskScoreExist: boolean,
-  service: ServiceParam,
+  identityFields: IdentityFields,
+  scopeId: string,
   tabs: LeftPanelTabsType,
-  path: PanelPath | undefined
+  path: PanelPath | undefined,
+  entityStoreEntityId?: string
 ) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -78,8 +92,10 @@ const useSelectedTab = (
     openLeftPanel({
       id: ServiceDetailsPanelKey,
       params: {
-        service,
+        identityFields,
         isRiskScoreExist,
+        scopeId,
+        entityStoreEntityId,
         path: {
           tab: tabId,
         },

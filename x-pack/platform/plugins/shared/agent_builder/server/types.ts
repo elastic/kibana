@@ -6,12 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup, UsageApiStart } from '@kbn/usage-api-plugin/server';
+import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -37,6 +39,8 @@ import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
 import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
+import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
+import type { ConversationListOptions } from './services/conversation/client/types';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -50,6 +54,7 @@ export interface AgentBuilderSetupDependencies {
   taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -166,6 +171,14 @@ export interface SmlSetup {
   registerType: (definition: SmlTypeDefinition) => void;
 }
 
+export interface PluginsSetup {
+  /**
+   * Register a built-in plugin to be available in agentBuilder.
+   * Built-in plugins are read-only and registered programmatically by solution teams.
+   */
+  register: PluginsServiceSetup['register'];
+}
+
 /**
  * Setup contract of the agentBuilder plugin.
  */
@@ -190,6 +203,10 @@ export interface AgentBuilderPluginSetup {
    * Skills setup contract, which can be used to register skills.
    */
   skills: SkillsSetup;
+  /**
+   * Plugins setup contract, which can be used to register built-in plugins.
+   */
+  plugins: PluginsSetup;
   /**
    * SML (Semantic Metadata Layer) setup contract.
    * Used to register content types for discovery and search.
@@ -221,6 +238,41 @@ export interface SmlStart {
 }
 
 /**
+ * AgentBuilder plugins service's start contract
+ */
+export interface PluginsStart {
+  /**
+   * Return a plugin registry scoped to the current user and context.
+   * The registry provides access to both built-in and persisted plugins.
+   */
+  getRegistry: (opts: { request: KibanaRequest }) => PluginRegistry;
+}
+
+/**
+ * A read-only conversation client exposing only get and list operations.
+ */
+export interface ReadOnlyConversationClient {
+  /**
+   * Retrieve a single conversation by its ID, including all rounds.
+   */
+  get(conversationId: string): Promise<Conversation>;
+  /**
+   * List conversations for the current user, optionally filtered by agent ID.
+   */
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+}
+
+/**
+ * AgentBuilder conversations service's start contract (read-only).
+ */
+export interface ConversationsStart {
+  /**
+   * Returns a read-only conversation client scoped to the given request's user and space.
+   */
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+}
+
+/**
  * Start contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
@@ -237,6 +289,10 @@ export interface AgentBuilderPluginStart {
    */
   skills: SkillsStart;
   /**
+   * Plugins service, to query built-in and persisted plugins.
+   */
+  plugins: PluginsStart;
+  /**
    * Execution service, to execute agents and retrieve execution status.
    */
   execution: ExecutionStart;
@@ -250,4 +306,8 @@ export interface AgentBuilderPluginStart {
    * discoverable content.
    */
   sml: SmlStart;
+  /**
+   * Conversations service (read-only), to list and retrieve conversations.
+   */
+  conversations: ConversationsStart;
 }

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -77,6 +78,10 @@ import {
   initializeOAuthStateCleanupTask,
   scheduleOAuthStateCleanupTask,
 } from './lib/oauth_state_cleanup_task';
+import {
+  initializeUserConnectorTokenCleanupTask,
+  scheduleUserConnectorTokenCleanupTask,
+} from './lib/user_connector_token_cleanup_task';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -256,6 +261,7 @@ export class ActionsPlugin
   private inMemoryMetrics: InMemoryMetrics;
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
+  private skippedPreconfiguredConnectorIds: Set<string> = new Set();
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -348,7 +354,11 @@ export class ActionsPlugin
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.inMemoryConnectors
+      this.inMemoryConnectors,
+      async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
+      }
     );
 
     const usageCollection = plugins.usageCollection;
@@ -414,6 +424,7 @@ export class ActionsPlugin
     }
 
     initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    initializeUserConnectorTokenCleanupTask(this.logger, plugins.taskManager, core);
 
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
@@ -527,6 +538,8 @@ export class ActionsPlugin
      * Issue: https://github.com/elastic/kibana/issues/160797
      */
     this.setSystemActions();
+
+    this.detectPreconfiguredConflicts(core);
 
     const createActionsClient = async ({
       request,
@@ -657,14 +670,23 @@ export class ActionsPlugin
       request: KibanaRequest
     ): Promise<string | undefined> => {
       try {
+        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+        if (!id) {
+          this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+          return undefined;
+        }
+
         const response = await core.elasticsearch.client
           .asScoped(request)
           .asCurrentUser.security.getApiKey({
             with_profile_uid: true,
+            id,
           });
+
         if (response.api_keys && response.api_keys.length > 0) {
           return response.api_keys[0].profile_uid;
         }
+
         logger.debug(
           `No API keys were returned from query, cannot retrieve associated profile id.`
         );
@@ -720,6 +742,7 @@ export class ActionsPlugin
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
         scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        scheduleUserConnectorTokenCleanupTask(this.logger, plugins.taskManager);
       })
       .catch(() => {});
 
@@ -848,6 +871,56 @@ export class ActionsPlugin
     this.inMemoryConnectors.push(...systemConnectors);
   };
 
+  private detectPreconfiguredConflicts = (core: CoreStart) => {
+    const preconfiguredIds = new Set(
+      this.inMemoryConnectors.filter((c) => c.isPreconfigured).map((c) => c.id)
+    );
+
+    if (preconfiguredIds.size === 0) return;
+
+    const internalRepo = core.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
+
+    void (async () => {
+      try {
+        const rawIds = Array.from(preconfiguredIds).map(
+          (id) => `${ACTION_SAVED_OBJECT_TYPE}:${id}`
+        );
+        const result = await internalRepo.search({
+          type: ACTION_SAVED_OBJECT_TYPE,
+          query: { ids: { values: rawIds } },
+          _source: false,
+          namespaces: ['*'],
+        });
+
+        const conflictingIds = (result?.hits?.hits ?? [])
+          .map((hit) => hit._id?.replace(`${ACTION_SAVED_OBJECT_TYPE}:`, ''))
+          .filter((id): id is string => id !== undefined && preconfiguredIds.has(id));
+
+        if (conflictingIds.length > 0) {
+          this.skippedPreconfiguredConnectorIds = new Set(conflictingIds);
+          const conflictSet = new Set(conflictingIds);
+          this.inMemoryConnectors.splice(
+            0,
+            this.inMemoryConnectors.length,
+            ...this.inMemoryConnectors.filter((c) => !(c.isPreconfigured && conflictSet.has(c.id)))
+          );
+          this.logger.error(
+            i18n.translate('xpack.actions.preconfiguredConnectorConflictSkipped', {
+              defaultMessage:
+                'Preconfigured {count, plural, one {connector} other {connectors}} with {count, plural, one {ID} other {IDs}} [{ids}] {count, plural, one {conflicts} other {conflict}} with existing saved {count, plural, one {connector} other {connectors}} and {count, plural, one {was} other {were}} skipped.',
+              values: {
+                count: conflictingIds.length,
+                ids: conflictingIds.join(', '),
+              },
+            })
+          );
+        }
+      } catch (err) {
+        this.logger.debug(`Failed to check for preconfigured connector conflicts: ${err.message}`);
+      }
+    })();
+  };
+
   private throwIfSystemActionsInConfig = () => {
     const hasSystemActionAsPreconfiguredInConfig = this.inMemoryConnectors
       .filter((connector) => connector.isPreconfigured)
@@ -876,6 +949,7 @@ export class ActionsPlugin
       spaces,
       connectorLifecycleListeners,
     } = this;
+    const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
@@ -938,6 +1012,7 @@ export class ActionsPlugin
         listTypes: (featureId?: string) => {
           return actionTypeRegistry!.list({ featureId });
         },
+        getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
       };
     };
   };

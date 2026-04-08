@@ -69,7 +69,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
           theFile.hash?.md5
             ? {
                 name: 'MD5',
-                icon: 'copyClipboard',
+                icon: 'copy',
                 onClick: () => {
                   if (theFile.hash?.md5) {
                     navigator.clipboard.writeText(theFile.hash.md5).then(() => {
@@ -84,7 +84,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
           theFile.hash?.sha1
             ? {
                 name: 'SHA1',
-                icon: 'copyClipboard',
+                icon: 'copy',
                 onClick: () => {
                   if (theFile.hash?.sha1) {
                     navigator.clipboard.writeText(theFile.hash.sha1).then(() => {
@@ -99,7 +99,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
           theFile.hash?.sha256
             ? {
                 name: 'SHA256',
-                icon: 'copyClipboard',
+                icon: 'copy',
                 onClick: () => {
                   if (theFile.hash?.sha256) {
                     navigator.clipboard.writeText(theFile.hash.sha256).then(() => {
@@ -118,7 +118,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
     if (fileHashesAvailable) {
       mainPanelItems.push({
         name: i18n.COPY_FILE_HASH,
-        icon: 'copyClipboard',
+        icon: 'copy',
         panel: 1,
         'data-test-subj': 'cases-files-copy-hash-button',
       });
@@ -158,7 +158,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
         button={
           <EuiButtonIcon
             onClick={tooglePopover}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18n.ACTIONS}
             color="text"
             key={`cases-files-actions-popover-button-${theFile.id}`}

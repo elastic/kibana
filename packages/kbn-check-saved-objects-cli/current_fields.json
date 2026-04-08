@@ -90,6 +90,66 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
+  ],
+  "alerting_notification_policy": [
+    "auth",
+    "auth.apiKey",
+    "auth.createdByUser",
+    "auth.owner",
+    "createdAt",
+    "createdBy",
+    "createdByUsername",
+    "description",
+    "destinations",
+    "destinations.id",
+    "destinations.type",
+    "enabled",
+    "groupBy",
+    "groupingMode",
+    "name",
+    "snoozedUntil",
+    "tags",
+    "throttle",
+    "throttle.strategy",
+    "updatedAt",
+    "updatedBy",
+    "updatedByUsername"
+  ],
+  "alerting_rule": [
+    "createdAt",
+    "createdBy",
+    "enabled",
+    "evaluation",
+    "evaluation.query",
+    "evaluation.query.base",
+    "evaluation.query.condition",
+    "grouping",
+    "grouping.fields",
+    "kind",
+    "metadata",
+    "metadata.description",
+    "metadata.name",
+    "metadata.owner",
+    "metadata.tags",
+    "no_data",
+    "no_data.behavior",
+    "no_data.timeframe",
+    "recovery_policy",
+    "recovery_policy.query",
+    "recovery_policy.query.base",
+    "recovery_policy.query.condition",
+    "recovery_policy.type",
+    "schedule",
+    "schedule.every",
+    "schedule.lookback",
+    "time_field",
+    "updatedAt",
+    "updatedBy"
+  ],
   "alerting_rule_template": [
     "description",
     "name",
@@ -329,13 +389,6 @@
     "title",
     "version"
   ],
-  "data_connector": [
-    "kscIds",
-    "name",
-    "toolIds",
-    "type",
-    "workflowIds"
-  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
@@ -345,7 +398,8 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "result"
+    "result",
+    "title"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -603,6 +657,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "min_agent_version",
     "monitoring_enabled",
@@ -628,7 +683,10 @@
     "namespace",
     "packagePolicyCount",
     "updated_at",
-    "vars"
+    "vars",
+    "verification_failed_at",
+    "verification_started_at",
+    "verification_status"
   ],
   "fleet-fleet-server-host": [
     "host_urls",
@@ -745,6 +803,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "min_agent_version",
     "monitoring_diagnostics",
@@ -1282,7 +1341,6 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
-  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
@@ -1424,6 +1482,12 @@
     "managed",
     "name",
     "riskModifier"
+  ],
+  "watchlist-entity-source": [
+    "enabled",
+    "managed",
+    "name",
+    "type"
   ],
   "workplace_search_telemetry": []
 }

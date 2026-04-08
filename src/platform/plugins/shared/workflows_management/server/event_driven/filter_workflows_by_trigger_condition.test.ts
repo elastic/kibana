@@ -9,7 +9,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { workflowMatchesTriggerCondition } from './filter_workflows_by_trigger_condition';
+import {
+  classifyWorkflowTriggerMatch,
+  workflowMatchesTriggerCondition,
+} from './filter_workflows_by_trigger_condition';
 
 /** Definition overrides for tests; allows custom trigger types (e.g. cases.updated). */
 interface TestDefinitionOverrides {
@@ -177,5 +180,92 @@ describe('workflowMatchesTriggerCondition', () => {
         mockLogger
       )
     ).toBe(false);
+  });
+
+  it('should match when condition uses array field like Elasticsearch multi-valued semantics', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'example.customTrigger',
+            on: {
+              condition: 'event.category: "alerts" and event.labels: "demo"',
+            },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'example.customTrigger',
+        { category: 'alerts', labels: ['example', 'demo'], message: 'x', another: 'y' },
+        mockLogger
+      )
+    ).toBe(true);
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'example.customTrigger',
+        { category: 'alerts', labels: ['example'], message: 'x', another: 'y' },
+        mockLogger
+      )
+    ).toBe(false);
+  });
+});
+
+describe('classifyWorkflowTriggerMatch', () => {
+  const mockLogger: Logger = {
+    warn: jest.fn(),
+  } as unknown as Logger;
+
+  it('returns disabled when workflow is not enabled', () => {
+    const workflow = createMockWorkflow({ enabled: false });
+    expect(classifyWorkflowTriggerMatch(workflow, 'cases.updated', {}, mockLogger)).toBe(
+      'disabled'
+    );
+  });
+
+  it('returns kql_false when condition does not match', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'cases.updated',
+            on: { condition: 'event.severity: "high"' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      classifyWorkflowTriggerMatch(workflow, 'cases.updated', { severity: 'low' }, mockLogger)
+    ).toBe('kql_false');
+  });
+
+  it('returns kql_error when KQL throws', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'cases.updated',
+            on: { condition: 'invalid ( unclosed' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(classifyWorkflowTriggerMatch(workflow, 'cases.updated', {}, mockLogger)).toBe(
+      'kql_error'
+    );
+    expect(mockLogger.warn).toHaveBeenCalled();
+  });
+
+  it('returns matched when trigger has no condition', () => {
+    const workflow = createMockWorkflow({
+      definition: { triggers: [{ type: 'cases.updated' }], steps: [] },
+    });
+    expect(classifyWorkflowTriggerMatch(workflow, 'cases.updated', {}, mockLogger)).toBe('matched');
   });
 });

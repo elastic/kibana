@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { isNumber } from 'lodash';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { type AlertsQueryParams, createFindAlerts } from '../services/find_alerts';
 
 export type UseAlertsQueryParams = AlertsQueryParams;
@@ -48,6 +49,7 @@ export const useFetchAlerts = ({
   const {
     services: { data: dataService },
   } = useKibana();
+  const { hasAlertsRead } = useAlertsPrivileges();
 
   const findAlerts = useMemo(() => createFindAlerts(dataService.search), [dataService.search]);
 
@@ -67,6 +69,7 @@ export const useFetchAlerts = ({
       }),
     {
       keepPreviousData: true,
+      enabled: hasAlertsRead && (alertIds?.length ?? 0) > 0,
     }
   );
 

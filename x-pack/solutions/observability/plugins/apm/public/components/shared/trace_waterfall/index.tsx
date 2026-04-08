@@ -5,20 +5,23 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   AutoSizer,
-  WindowScroller,
   List,
   CellMeasurerCache,
   CellMeasurer,
+  WindowScroller,
 } from 'react-virtualized';
 import type { ListRowRenderer, ListRowProps } from 'react-virtualized';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Error } from '@kbn/apm-types';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
+import type {
+  IWaterfallGetRelatedErrorsHref,
+  WaterfallGetServiceBadgeHref,
+} from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
@@ -29,16 +32,18 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
 import { WaterfallAccordionButton } from './waterfall_accordion_button';
+import { WaterfallSizeWarning } from './waterfall_size_warning';
 
-export interface Props {
+/** Base props shared by all TraceWaterfall variants */
+interface BaseTraceWaterfallProps {
   traceItems: TraceItem[];
   errors?: Error[];
   showAccordion?: boolean;
-  highlightedTraceId?: string;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   isEmbeddable?: boolean;
   showLegend?: boolean;
   serviceName?: string;
@@ -50,38 +55,59 @@ export interface Props {
   onShowCriticalPathChange?: (value: boolean) => void;
   children?: React.ReactNode;
   entryTransactionId?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
 }
 
-export function TraceWaterfall({
-  traceItems,
-  errors,
-  showAccordion = true,
-  highlightedTraceId,
-  onClick,
-  onErrorClick,
-  scrollElement,
-  getRelatedErrorsHref,
-  isEmbeddable = false,
-  showLegend = false,
-  serviceName,
-  isFiltered,
-  agentMarks,
-  showCriticalPathControl = false,
-  showCriticalPath,
-  defaultShowCriticalPath,
-  onShowCriticalPathChange,
-  children,
-  entryTransactionId,
-}: Props) {
+/** Default: 'window' (page scroll). Use 'parent' for flyout. */
+export type TraceWaterfallProps = BaseTraceWaterfallProps &
+  (
+    | { scrollStrategy?: 'window'; highlightedSpanId?: string }
+    | { scrollStrategy: 'parent'; highlightedSpanId?: string; scrollToHighlightedOnMount?: boolean }
+  );
+
+export function TraceWaterfall(props: TraceWaterfallProps) {
+  const {
+    traceItems,
+    errors,
+    showAccordion = true,
+    onClick,
+    onErrorClick,
+    scrollElement,
+    getRelatedErrorsHref,
+    getServiceBadgeHref,
+    isEmbeddable = false,
+    showLegend = false,
+    serviceName,
+    isFiltered,
+    agentMarks,
+    showCriticalPathControl = false,
+    showCriticalPath,
+    defaultShowCriticalPath,
+    onShowCriticalPathChange,
+    children,
+    entryTransactionId,
+    traceDocsTotal = 0,
+    maxTraceItems = 0,
+    discoverHref,
+  } = props;
+  const highlightedSpanId = props.highlightedSpanId;
+  const scrollToHighlightedOnMount =
+    props.scrollStrategy === 'parent' ? props.scrollToHighlightedOnMount : undefined;
+  const exceedMax = traceDocsTotal > maxTraceItems;
+
   return (
     <TraceWaterfallContextProvider
       traceItems={traceItems}
       showAccordion={showAccordion}
-      highlightedTraceId={highlightedTraceId}
+      highlightedSpanId={highlightedSpanId}
+      scrollStrategy={props.scrollStrategy ?? 'window'}
       onClick={onClick}
       onErrorClick={onErrorClick}
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}
+      getServiceBadgeHref={getServiceBadgeHref}
       isEmbeddable={isEmbeddable}
       showLegend={showLegend}
       serviceName={serviceName}
@@ -93,7 +119,18 @@ export function TraceWaterfall({
       defaultShowCriticalPath={defaultShowCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
       entryTransactionId={entryTransactionId}
+      scrollToHighlightedOnMount={scrollToHighlightedOnMount}
     >
+      {exceedMax && (
+        <>
+          <WaterfallSizeWarning
+            traceDocsTotal={traceDocsTotal}
+            maxTraceItems={maxTraceItems}
+            discoverHref={discoverHref}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <TraceWarning>
         <TraceWaterfallComponent />
       </TraceWarning>
@@ -112,37 +149,50 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
-    errorMarks,
     showAccordion,
     isAccordionOpen,
     toggleAllAccordions,
-    agentMarks,
+    marks,
     showCriticalPath,
     setShowCriticalPath,
     showCriticalPathControl,
   } = useTraceWaterfallContext();
-
-  const marks = useMemo(() => {
-    return [...agentMarks, ...errorMarks];
-  }, [agentMarks, errorMarks]);
 
   const stickyTop = isEmbeddable
     ? '0px'
     : 'var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))';
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      css={css`
+        flex: 1;
+        min-height: 0;
+      `}
+    >
       {showCriticalPathControl && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <div style={{ position: 'relative' }}>
+      <EuiFlexItem
+        css={css`
+          min-height: 0;
+        `}
+      >
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+          `}
+        >
           <EuiFlexGroup
             direction="column"
             gutterSize="m"
             css={css`
+              flex: none;
               position: sticky;
               top: ${stickyTop};
               z-index: ${euiTheme.levels.menu};
@@ -193,19 +243,10 @@ function TraceWaterfallComponent() {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <VerticalLinesContainer
-            xMax={duration}
-            margins={{
-              top: 40,
-              left,
-              right,
-              bottom: 0,
-            }}
-            marks={marks}
-          />
           <div
             css={css`
-              position: relative;
+              flex: 1;
+              min-height: 0;
             `}
           >
             <TraceTree />
@@ -220,9 +261,14 @@ function TraceTree() {
   const {
     traceWaterfallMap,
     traceWaterfall,
-    scrollElement,
     accordionStatesMap,
     toggleAccordionState,
+    highlightedSpanId,
+    scrollStrategy = 'window',
+    duration,
+    margin: { left, right },
+    marks,
+    scrollToHighlightedOnMount,
   } = useTraceWaterfallContext();
 
   const listRef = useRef<List>(null);
@@ -237,6 +283,34 @@ function TraceTree() {
   const visibleList = useMemo(
     () => convertTreeToList(traceWaterfallMap, accordionStatesMap, traceWaterfall[0]),
     [accordionStatesMap, traceWaterfall, traceWaterfallMap]
+  );
+
+  const totalContentHeight = useMemo(
+    () =>
+      visibleList.reduce((sum, _, index) => sum + rowHeightCache.current.rowHeight({ index }), 0),
+    [visibleList]
+  );
+
+  const [scrollComplete, setScrollComplete] = useState(false);
+
+  const scrollToIndex = useMemo(() => {
+    if (!scrollToHighlightedOnMount || scrollStrategy !== 'parent') return undefined;
+    if (scrollComplete || !highlightedSpanId || visibleList.length === 0) return undefined;
+    const index = visibleList.findIndex((item) => item.id === highlightedSpanId);
+    return index >= 0 ? index : undefined;
+  }, [scrollToHighlightedOnMount, scrollStrategy, scrollComplete, highlightedSpanId, visibleList]);
+
+  const onRowsRendered = useCallback(
+    ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
+      if (
+        scrollToIndex !== undefined &&
+        startIndex <= scrollToIndex &&
+        scrollToIndex <= stopIndex
+      ) {
+        setScrollComplete(true);
+      }
+    },
+    [scrollToIndex]
   );
 
   const rowRenderer: ListRowRenderer = useCallback(
@@ -261,34 +335,84 @@ function TraceTree() {
     [visibleList, traceWaterfallMap, accordionStatesMap, toggleAccordionState]
   );
 
-  return (
-    <WindowScroller
-      scrollElement={
-        scrollElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
-      }
-    >
-      {({ height, onChildScroll, scrollTop, registerChild }) => (
-        <AutoSizer disableHeight>
-          {({ width }) => (
-            <div data-test-subj="waterfall" ref={registerChild}>
-              <List
-                ref={listRef}
-                autoHeight
-                height={height}
-                onScroll={onChildScroll}
-                scrollTop={scrollTop}
-                width={width}
-                rowCount={visibleList.length}
-                deferredMeasurementCache={rowHeightCache.current}
-                rowHeight={rowHeightCache.current.rowHeight}
-                rowRenderer={rowRenderer}
-                containerRole="rowgroup"
-              />
-            </div>
+  const listProps = {
+    ref: listRef,
+    rowCount: visibleList.length,
+    deferredMeasurementCache: rowHeightCache.current,
+    rowHeight: rowHeightCache.current.rowHeight,
+    rowRenderer,
+    containerRole: 'rowgroup',
+  };
+
+  const verticalLines = (
+    <VerticalLinesContainer
+      xMax={duration}
+      margins={{ top: 0, left, right, bottom: 0 }}
+      marks={marks}
+      height={totalContentHeight}
+    />
+  );
+
+  if (scrollStrategy === 'window') {
+    return (
+      <div
+        css={css`
+          position: relative;
+        `}
+      >
+        {verticalLines}
+        <WindowScroller
+          scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined}
+        >
+          {({ height, onChildScroll, scrollTop, registerChild }) => (
+            <AutoSizer disableHeight>
+              {({ width }) => (
+                <div data-test-subj="waterfall" ref={registerChild}>
+                  <List
+                    ref={listRef}
+                    autoHeight
+                    height={height}
+                    onScroll={onChildScroll}
+                    scrollTop={scrollTop}
+                    width={width}
+                    rowCount={visibleList.length}
+                    deferredMeasurementCache={rowHeightCache.current}
+                    rowHeight={rowHeightCache.current.rowHeight}
+                    rowRenderer={rowRenderer}
+                    containerRole="rowgroup"
+                  />
+                </div>
+              )}
+            </AutoSizer>
           )}
-        </AutoSizer>
-      )}
-    </WindowScroller>
+        </WindowScroller>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      css={css`
+        position: relative;
+        height: 100%;
+      `}
+    >
+      {verticalLines}
+      <AutoSizer>
+        {({ width, height }) => (
+          <div data-test-subj="waterfall">
+            <List
+              {...listProps}
+              scrollToIndex={scrollToIndex}
+              scrollToAlignment="center"
+              onRowsRendered={onRowsRendered}
+              height={height}
+              width={width}
+            />
+          </div>
+        )}
+      </AutoSizer>
+    </div>
   );
 }
 

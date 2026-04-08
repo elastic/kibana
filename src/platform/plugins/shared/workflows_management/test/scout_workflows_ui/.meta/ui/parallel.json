@@ -1,5 +1,5 @@
 {
-  "sha1": "02fe16a8448a3dd395e4114268b28cbf0dbcb857",
+  "sha1": "530beed816d7fce80594b32c260642314a8922ed",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -336,6 +336,78 @@
       }
     },
     {
+      "id": "3ff6decf4c25127-1e36b15992c9e68",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] setModelMarkers cascade completes within frame budget after edit",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ff6decf4c25127-bb6c00e207d6b96",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 225,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ff6decf4c25127-b92795356361dc9",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] setModelMarkers cascade completes within frame budget after edit",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ff6decf4c25127-c189381fa89f5ce",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
+        "line": 225,
+        "column": 11
+      }
+    },
+    {
       "id": "02966260206ed5b-1eaf3f4c5859ccb",
       "title": "Sanity tests for workflows Create, save, run and view a dummy workflow",
       "expectedStatus": "passed",
@@ -349,7 +421,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 9
       }
     },
@@ -367,7 +439,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 9
       }
     },
@@ -385,7 +457,25 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 94,
+        "line": 95,
+        "column": 9
+      }
+    },
+    {
+      "id": "02966260206ed5b-097049eb176efd2",
+      "title": "Sanity tests for workflows should show root-level property suggestions on empty lines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 137,
         "column": 9
       }
     },
@@ -403,14 +493,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 136,
+        "line": 155,
         "column": 9
       }
     },
     {
       "id": "8a478a8cadc4edc-063497b8c9edff4",
       "title": "Workflow execution - Alert triggers should trigger workflow from alert",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -421,14 +511,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 81,
+        "line": 101,
         "column": 9
       }
     },
     {
       "id": "8a478a8cadc4edc-c4010c12909cde8",
       "title": "Workflow execution - Alert triggers should not trigger a disabled workflow when alert fires",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -439,7 +529,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 211,
+        "line": 224,
         "column": 9
       }
     },
@@ -537,7 +627,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 119,
+        "line": 124,
         "column": 7
       }
     },
@@ -874,6 +964,34 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
         "line": 198,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-54e320e1fa67f55",
+      "title": "WorkflowsList/ImportExport should show file size error for oversized files",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 226,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-869d74e73bdbfd0",
+      "title": "WorkflowsList/ImportExport should show parse error callout when ZIP contains non-YAML entries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 247,
         "column": 7
       }
     },

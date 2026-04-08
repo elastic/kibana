@@ -37,7 +37,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 53,
+        "lineNumber": 76,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -53,7 +53,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 54,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -81,7 +81,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 63,
+        "lineNumber": 86,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -97,7 +97,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 64,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -120,7 +120,7 @@
           "(controlState: unknown) => controlState is HasVariableName"
         ],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 80,
+        "lineNumber": 103,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -138,7 +138,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 80,
+            "lineNumber": 103,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -148,6 +148,80 @@
         "returnComment": [
           "True if the control state has a defined variableName property"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.isQueryESQLControl",
+        "type": "Function",
+        "tags": [],
+        "label": "isQueryESQLControl",
+        "description": [],
+        "signature": [
+          "(control?: object | undefined) => control is Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.isQueryESQLControl.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "control",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "lineNumber": 52,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.isStaticESQLControl",
+        "type": "Function",
+        "tags": [],
+        "label": "isStaticESQLControl",
+        "description": [],
+        "signature": [
+          "(control?: object | undefined) => control is Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.isStaticESQLControl.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "control",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "lineNumber": 42,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -829,7 +903,7 @@
         "label": "ESQLControlVariable",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 37,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -842,7 +916,7 @@
             "label": "key",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 38,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -858,7 +932,7 @@
               "string | number | (string | number)[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 39,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -880,7 +954,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 40,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -896,7 +970,7 @@
               "{ controlledBy?: string | undefined; group?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 41,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1697,7 +1771,7 @@
         "label": "PublishesESQLVariable",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 49,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1744,7 +1818,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "; closed: boolean; pipe: { (): ",
+              "; pipe: { (): ",
               "Observable",
               "<",
               {
@@ -1964,7 +2038,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -2063,7 +2137,7 @@
               " | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 50,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2079,7 +2153,7 @@
         "label": "PublishesESQLVariables",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 59,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2126,7 +2200,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]; closed: boolean; pipe: { (): ",
+              "[]; pipe: { (): ",
               "Observable",
               "<",
               {
@@ -2346,7 +2420,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -2445,7 +2519,7 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "lineNumber": 60,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2810,7 +2884,7 @@
           "\nTypes of ES|QL controls\n- STATIC_VALUES: Static values that are not dependent on any query\n- VALUES_FROM_QUERY: Values that are dependent on an ES|QL query"
         ],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2824,7 +2898,7 @@
         "label": "ESQLVariableType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2880,7 +2954,7 @@
         "label": "VariableNamePrefix",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3032,6 +3106,23 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.QueryESQLControl",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryESQLControl",
+        "description": [],
+        "signature": [
+          "{ readonly title?: string | undefined; readonly display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; readonly selected_options: string[]; readonly single_select: boolean; readonly control_type: \"VALUES_FROM_QUERY\"; readonly variable_name: string; readonly variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; readonly esql_query: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.REGISTRY_EXTENSIONS_ROUTE",
         "type": "string",
         "tags": [],
@@ -3060,6 +3151,23 @@
         "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.StaticESQLControl",
+        "type": "Type",
+        "tags": [],
+        "label": "StaticESQLControl",
+        "description": [],
+        "signature": [
+          "{ readonly title?: string | undefined; readonly display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; readonly selected_options: string[]; readonly single_select: boolean; readonly control_type: \"STATIC_VALUES\"; readonly available_options: string[]; readonly variable_name: string; readonly variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

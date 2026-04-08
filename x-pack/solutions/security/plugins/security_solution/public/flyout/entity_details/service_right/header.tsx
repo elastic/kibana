@@ -14,7 +14,7 @@ import { EntityIconByType } from '../../../entity_analytics/components/entity_st
 import type { ServiceItem } from '../../../../common/search_strategy/security_solution/services/common';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 interface ServicePanelHeaderProps {

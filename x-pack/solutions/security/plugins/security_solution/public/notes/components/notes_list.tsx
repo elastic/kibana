@@ -70,7 +70,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
                   <OpenFlyoutButtonIcon
                     eventId={note.eventId}
                     timelineId={note.timelineId}
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                   />
                 )}
                 {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (

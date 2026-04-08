@@ -150,7 +150,7 @@ export const ConfigureStandaloneAgentStep = ({
                       {(copy) => (
                         <EuiFormAppend
                           element="button"
-                          iconLeft="copyClipboard"
+                          iconLeft="copy"
                           onClick={copy}
                           aria-label={i18n.translate('xpack.fleet.apiKeyBanner.field.copyButton', {
                             defaultMessage: 'Copy to clipboard',
@@ -180,7 +180,7 @@ export const ConfigureStandaloneAgentStep = ({
                         copy();
                         if (onCopy) onCopy();
                       }}
-                      iconType="copyClipboard"
+                      iconType="copy"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentEnrollment.copyPolicyButton"

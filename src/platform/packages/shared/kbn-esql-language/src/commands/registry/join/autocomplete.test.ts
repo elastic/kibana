@@ -324,7 +324,7 @@ describe('JOIN Autocomplete', () => {
       test('suggests full-text search functions', async () => {
         await joinExpectSuggestions(
           'FROM index | LOOKUP JOIN join_index ON keywordField == "value" AND ',
-          { contains: ['MATCH($0)', 'MULTI_MATCH($0)', 'QSTR("""$0""")'] },
+          { contains: ['MATCH($0)', 'QSTR("""$0""")'] },
           mockCallbacks
         );
       });

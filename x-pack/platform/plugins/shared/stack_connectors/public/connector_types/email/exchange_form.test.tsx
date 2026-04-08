@@ -13,13 +13,19 @@ import userEvent from '@testing-library/user-event';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('ExchangeFormFields renders', () => {
   const actionConnector = createMockActionConnector({
     secrets: {
       clientSecret: 'secret',
     },
-    id: 'test',
+    id: 'email',
     actionTypeId: '.email',
     name: 'email',
     isDeprecated: false,
@@ -96,7 +102,7 @@ describe('ExchangeFormFields renders', () => {
             secrets: {
               clientSecret: 'secret',
             },
-            id: 'test',
+            id: 'email',
             actionTypeId: '.email',
             name: 'email',
             isDeprecated: false,
@@ -126,7 +132,9 @@ describe('ExchangeFormFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });
