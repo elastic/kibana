@@ -79,7 +79,7 @@ directory and report this error to the Operations team.\n`);
    * @returns {string}
    */
   getKey(path, source) {
-    return `${this.#prefix}:${Crypto.createHash('sha1').update(path).update(source).digest('hex')}`; // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    return `${this.#prefix}:${Crypto.createHash('sha1').update(path).update(source).digest('hex')}`;
   }
 
   /**

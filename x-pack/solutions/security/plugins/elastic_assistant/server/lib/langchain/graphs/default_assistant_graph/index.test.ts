@@ -15,7 +15,7 @@ import { AgentExecutorParams, AssistantDataClients } from '../../executors/types
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
-import { createOpenAIToolsAgent, createToolCallingAgent } from 'langchain/agents';
+import { createOpenAIToolsAgent, createToolCallingAgent } from '@langchain/classic/agents';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
@@ -25,7 +25,7 @@ import { promptGroupId } from '../../../prompt/local_prompt_object';
 
 jest.mock('./graph');
 jest.mock('./helpers');
-jest.mock('langchain/agents');
+jest.mock('@langchain/classic/agents');
 jest.mock('@kbn/langchain/server/tracers/apm');
 jest.mock('@kbn/langchain/server/tracers/telemetry');
 jest.mock('@kbn/security-ai-prompts');

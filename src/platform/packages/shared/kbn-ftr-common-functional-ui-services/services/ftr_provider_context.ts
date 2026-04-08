@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
-import {
+import type { GenericFtrProviderContext } from '@kbn/test';
+import { GenericFtrService } from '@kbn/test';
+import type {
   RetryService,
   EsProvider,
   KibanaServerProvider,
 } from '@kbn/ftr-common-functional-services';
-import { services as commonFunctionalUiServices } from './all';
+import type { services as commonFunctionalUiServices } from './all';
 
-const services = {
-  ...commonFunctionalUiServices,
-  retry: RetryService,
-  es: EsProvider,
-  kibanaServer: KibanaServerProvider,
+type AllServices = typeof commonFunctionalUiServices & {
+  retry: typeof RetryService;
+  es: typeof EsProvider;
+  kibanaServer: typeof KibanaServerProvider;
 };
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<AllServices, {}>;
 export class FtrService extends GenericFtrService<FtrProviderContext> {}

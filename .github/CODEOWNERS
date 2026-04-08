@@ -1956,7 +1956,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 #CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
-# security
+packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-security
+/src/setup_node_env/harden @elastic/kibana-security
+
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/spaces @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/security @elastic/kibana-security
