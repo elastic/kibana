@@ -57,7 +57,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
       it('should be able to run saved queries but not add new ones', () => {
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryName);
-        cy.contains('Save query').should('be.disabled');
+        cy.contains('Create query').should('be.disabled');
         cy.get(`[aria-label="Run ${savedQueryName}"]`).should('not.be.disabled');
         cy.get(`[aria-label="Run ${savedQueryName}"]`).click();
 

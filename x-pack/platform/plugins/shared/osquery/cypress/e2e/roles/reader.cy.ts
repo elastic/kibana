@@ -55,7 +55,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
   it('should not be able to add nor run saved queries', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.contains(savedQueryName);
-    cy.contains('Save query').should('be.disabled');
+    cy.contains('Create query').should('be.disabled');
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('be.disabled');
     cy.get(rowActionsMenuSelector(savedQueryName)).click();
     cy.contains('Edit query').click();
