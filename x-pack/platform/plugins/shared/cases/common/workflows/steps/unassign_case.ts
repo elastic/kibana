@@ -34,7 +34,7 @@ export const unassignCaseStepCommonDefinition: CommonStepDefinition<
   UnassignCaseStepOutputSchema
 > = {
   id: UnassignCaseStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.UNASSIGN_CASE_STEP_LABEL,
   description: i18n.UNASSIGN_CASE_STEP_DESCRIPTION,
   documentation: {
