@@ -108,6 +108,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             idMapping: {},
             sessionId: id,
             version: '8.8.0',
+            // Required so the session service's user-based filter matches the FTR test user.
+            realmType: 'reserved',
+            realmName: 'reserved',
+            username: 'elastic',
           },
         });
       }

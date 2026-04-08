@@ -21,7 +21,6 @@ const SEEDED_TASKS = [
   {
     id: `task:${MIGRATED_TASK_ID}`,
     source: {
-      migrationVersion: { task: '7.16.0' },
       type: 'task',
       references: [],
       updated_at: '2021-11-05T16:21:37.629Z',
@@ -43,7 +42,6 @@ const SEEDED_TASKS = [
   {
     id: `task:${RULE_ID_2}`,
     source: {
-      migrationVersion: { task: '7.16.0' },
       type: 'task',
       references: [],
       updated_at: '2021-11-05T16:21:37.629Z',
@@ -65,7 +63,6 @@ const SEEDED_TASKS = [
   {
     id: `task:${RULE_ID_3}`,
     source: {
-      migrationVersion: { task: '7.16.0' },
       type: 'task',
       references: [],
       updated_at: '2021-11-05T16:21:37.629Z',
