@@ -252,7 +252,8 @@ function handleExistingFilterForMultiValues(
  * @param field the field to filter on.
  * @param value the value to filter by.
  * @param operation the operation to perform ('+', '-', 'is_not_null', 'is_null').
- * @param fieldType the type of the field being filtered (optional).
+ * @param kibanaFieldType the type of the field being filtered (optional).
+ * @param esMappingType the ES mapping type of the field (optional, used to determine whether to use MV_CONTAINS).
  * @returns the modified ES|QL query string with the appended WHERE clause, or undefined if no changes were made.
  */
 export function appendWhereClauseToESQLQuery(
@@ -260,8 +261,8 @@ export function appendWhereClauseToESQLQuery(
   field: string,
   value: unknown,
   operation: SupportedOperation,
-  fieldType?: string,
-  esFieldType?: string
+  kibanaFieldType?: string,
+  esMappingType?: string
 ): string | undefined {
   const { root } = Parser.parse(baseESQLQuery);
   const lastCommand = root.commands[root.commands.length - 1];
@@ -271,8 +272,8 @@ export function appendWhereClauseToESQLQuery(
     field,
     value,
     operation,
-    fieldType,
-    esFieldType
+    kibanaFieldType,
+    esMappingType
   );
 
   if (!filterExpression) {
