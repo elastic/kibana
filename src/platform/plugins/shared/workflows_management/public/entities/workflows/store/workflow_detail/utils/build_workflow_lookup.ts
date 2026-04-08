@@ -12,6 +12,7 @@
 import type { LineCounter } from 'yaml';
 import YAML from 'yaml';
 import { isBuiltInStepProperty, type StepSelectionValues } from '@kbn/workflows';
+import { isRecord } from '../../../../../../common/lib/type_guards';
 
 export interface StepInfo {
   stepId: string;
@@ -225,10 +226,7 @@ function setNested(obj: Record<string, unknown>, segments: string[], value: unkn
   let current = obj;
   for (let i = 0; i < segments.length - 1; i++) {
     const seg = segments[i];
-    if (current[seg] == null || typeof current[seg] !== 'object') {
-      current[seg] = {};
-    }
-    current = current[seg] as Record<string, unknown>;
+    current = isRecord(current[seg]) ? current[seg] : {};
   }
   current[segments[segments.length - 1]] = value;
 }
