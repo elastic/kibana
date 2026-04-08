@@ -29,7 +29,7 @@ const toPanelSummary = (panel: DashboardPanel): string[] => {
     (panel.config as { title?: string } | undefined)?.title ??
     (panel.config as { attributes?: { title?: string } } | undefined)?.attributes?.title;
 
-  return [title, panel.type, panel.uid ? `panel:${panel.uid}` : undefined].filter(
+  return [title, panel.type, panel.id ? `panel:${panel.id}` : undefined].filter(
     (value): value is string => Boolean(value)
   );
 };
@@ -47,7 +47,7 @@ const toDashboardSearchContent = (state: DashboardState): string => {
   }
 
   for (const section of sections) {
-    contentParts.push(section.title, `section:${section.uid}`);
+    contentParts.push(section.title, `section:${section.id}`);
     for (const panel of section.panels) {
       contentParts.push(...toPanelSummary(panel));
     }

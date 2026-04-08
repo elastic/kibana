@@ -61,6 +61,13 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
       'bearer',
       {
         type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',

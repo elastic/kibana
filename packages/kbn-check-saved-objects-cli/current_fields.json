@@ -859,6 +859,7 @@
     "is_preconfigured",
     "key",
     "name",
+    "otel_exporter_config_yaml",
     "output_id",
     "partition",
     "password",

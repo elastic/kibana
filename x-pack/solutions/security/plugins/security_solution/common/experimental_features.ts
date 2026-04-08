@@ -257,6 +257,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: false,
+
+  /**
+   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
+   */
+  securityClassicNavUpdate: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
