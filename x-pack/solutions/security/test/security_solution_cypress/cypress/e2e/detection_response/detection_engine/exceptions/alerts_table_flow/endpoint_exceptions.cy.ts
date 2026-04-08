@@ -35,12 +35,9 @@ import {
   ADD_NESTED_BTN,
   ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN,
   ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../../../screens/exceptions';
 import {
-  goToEndpointExceptionsTab,
+  goToEndpointExceptions,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
@@ -123,13 +120,17 @@ describe(
       selectCloseSingleAlerts();
       submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
-      // Endpoint Exception will move to Endpoint List under Exception tab of rule
-      goToEndpointExceptionsTab();
+      goToEndpointExceptions();
 
       // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
-      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+      cy.get('[data-test-subj="endpointExceptionsListPage-card"]').should('have.length', 1);
+      cy.get('[data-test-subj="endpointExceptionsListPage-card-header-title"]').should(
+        'have.text',
+        ITEM_NAME_EDIT
+      );
+      cy.get(
+        '[data-test-subj="endpointExceptionsListPage-card-criteriaConditions-condition"]'
+      ).contains('span', ADDITIONAL_ENTRY);
     });
   }
 );
