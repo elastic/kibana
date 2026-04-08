@@ -11,23 +11,21 @@ import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppMenuActionButton } from './app_menu_action_button';
-import type { AppMenuPrimaryActionItem, AppMenuSecondaryActionItem } from '../types';
+import type { AppMenuPrimaryActionItem } from '../types';
 
 interface AppMenuPopoverActionButtonsProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
   onCloseOverflowButton?: () => void;
 }
 
 export const AppMenuPopoverActionButtons = ({
   primaryActionItem,
-  secondaryActionItem,
   onCloseOverflowButton,
 }: AppMenuPopoverActionButtonsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const { euiTheme } = useEuiTheme();
 
-  if (!primaryActionItem && !secondaryActionItem) {
+  if (!primaryActionItem) {
     return null;
   }
 
@@ -53,23 +51,6 @@ export const AppMenuPopoverActionButtons = ({
       css={containerCss}
       data-test-subj="app-menu-popover-action-buttons-container"
     >
-      {secondaryActionItem && (
-        <EuiFlexItem grow={false}>
-          <AppMenuActionButton
-            {...secondaryActionItem}
-            run={(params) => {
-              secondaryActionItem?.run?.(params);
-              onCloseOverflowButton?.();
-            }}
-            isPopoverOpen={openPopoverId === secondaryActionItem.id}
-            onPopoverToggle={() => {
-              handlePopoverToggle(secondaryActionItem.id);
-            }}
-            onPopoverClose={handleOnPopoverClose}
-            onCloseOverflowButton={onCloseOverflowButton}
-          />
-        </EuiFlexItem>
-      )}
       {primaryActionItem && (
         <EuiFlexItem grow={false}>
           <AppMenuActionButton

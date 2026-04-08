@@ -12,7 +12,6 @@ import type { ScoutServerConfig } from '../../../../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
-  esServerlessOptions: { uiam: true },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [

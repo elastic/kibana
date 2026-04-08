@@ -527,6 +527,96 @@ export const labels = {
     referencedContentLabel: i18n.translate('xpack.agentBuilder.skills.referencedContentLabel', {
       defaultMessage: 'Additional files',
     }),
+    referencedFileCard: {
+      skillNamePathPlaceholder: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.skillNamePathPlaceholder',
+        {
+          defaultMessage: '(skill name)',
+        }
+      ),
+      fileNameLabel: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameLabel', {
+        defaultMessage: 'File name',
+      }),
+      fileNameHelp: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameHelp', {
+        defaultMessage: 'Do not include .md — it is added automatically.',
+      }),
+      folderPathLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.folderPathLabel',
+        {
+          defaultMessage: 'Folder path',
+        }
+      ),
+      folderPathHelp: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.folderPathHelp',
+        {
+          defaultMessage: 'Start with ./ for the root directory. Example: ./templates',
+        }
+      ),
+      fullPathPreview: (path: string) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fullPathPreview', {
+          defaultMessage: 'Full path preview: {path}',
+          values: { path },
+        }),
+      contentLabel: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.contentLabel', {
+        defaultMessage: 'Content',
+      }),
+      contentAriaLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.contentAriaLabel',
+        {
+          defaultMessage: 'Referenced file markdown content',
+        }
+      ),
+      estimatedTokens: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileCard.estimatedTokens', {
+          defaultMessage: 'Estimated tokens: {count}',
+          values: { count },
+        }),
+    },
+    referencedFileSection: {
+      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.description', {
+        defaultMessage:
+          'Attach extra markdown files that belong to this skill. Paths are relative to the skill folder.',
+      }),
+      addFileButton: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.addFileButton',
+        {
+          defaultMessage: 'Add file',
+        }
+      ),
+      filesAddedCount: (current: number, max: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.filesAddedCount', {
+          defaultMessage: '({current}/{max} files added)',
+          values: { current, max },
+        }),
+      removeFileAriaLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.removeFileAriaLabel',
+        {
+          defaultMessage: 'Remove this additional file',
+        }
+      ),
+      emptyReadOnly: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyReadOnly',
+        {
+          defaultMessage: 'This skill has no additional files.',
+        }
+      ),
+      addFileButtonDisabledTooltip: (max: number) =>
+        i18n.translate(
+          'xpack.agentBuilder.skills.referencedFileSection.addFileButtonDisabledTooltip',
+          {
+            defaultMessage: 'You cannot add more than {max} additional files.',
+            values: { max },
+          }
+        ),
+      readOnlyFileAccordionAriaLabel: (path: string) =>
+        i18n.translate(
+          'xpack.agentBuilder.skills.referencedFileSection.readOnlyFileAccordionAriaLabel',
+          {
+            defaultMessage: 'Additional file {path}. Expand to view markdown content.',
+            values: { path },
+          }
+        ),
+    },
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
       defaultMessage: 'Save',
