@@ -186,9 +186,10 @@ export const useBulkActionItems = ({
       });
   }, [data, eventIds]);
 
+  const noop = useCallback(() => {}, []);
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
     documents: workflowDocuments,
-    closePopover,
+    closePopover: closePopover ?? noop,
   });
 
   const items = useMemo(() => {
