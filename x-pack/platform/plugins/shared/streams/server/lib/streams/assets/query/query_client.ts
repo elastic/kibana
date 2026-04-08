@@ -427,7 +427,9 @@ export class QueryClient {
       const name = hit._source[STREAM_NAME];
       if (!queriesPerName[name]) {
         this.dependencies.logger.warn(
-          `Skipping query asset with unexpected stream_name "${name}" (requested: ${names.join(', ')})`
+          `Skipping query asset with unexpected stream_name "${name}" (requested: ${names.join(
+            ', '
+          )})`
         );
         return;
       }
@@ -792,7 +794,9 @@ export class QueryClient {
       await this.uninstallQueries([...toCreate, ...toUpdate]).catch((compensateError) => {
         this.dependencies.logger.error(
           `Failed to compensate after installQueries failure for stream "${definition.name}": ` +
-            `${compensateError instanceof Error ? compensateError.message : String(compensateError)}`
+            `${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
         );
       });
       throw installError;
@@ -969,7 +973,9 @@ export class QueryClient {
       );
       await this.uninstallQueries(toPromote).catch((uninstallError) => {
         this.dependencies.logger.error(
-          `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${uninstallError instanceof Error ? uninstallError.message : String(uninstallError)}`
+          `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${
+            uninstallError instanceof Error ? uninstallError.message : String(uninstallError)
+          }`
         );
       });
       throw storageError;
@@ -1004,8 +1010,6 @@ export class QueryClient {
       return { demoted: 0 };
     }
 
-    await this.uninstallQueries(toDemote);
-
     await this.bulkStorage(
       definition,
       toDemote.map((link) => ({
@@ -1020,6 +1024,8 @@ export class QueryClient {
         },
       }))
     );
+
+    await this.uninstallQueries(toDemote);
 
     return { demoted: toDemote.length };
   }
