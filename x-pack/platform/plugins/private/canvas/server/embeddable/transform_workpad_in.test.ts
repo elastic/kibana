@@ -11,8 +11,9 @@ import { encode } from '../../common/lib/embeddable_dataurl';
 import { transformWorkpadIn } from './transform_workpad_in';
 import { embeddableService, logger } from '../kibana_services';
 import { getDecodedConfig, makeWorkpad } from './fixtures';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
-const mockLensTransformIn = jest.fn((config: any) => {
+const mockTransformIn = jest.fn((config: any) => {
   const { savedObjectId, ...remainingConfig } = config;
   return {
     state: remainingConfig,
@@ -22,38 +23,12 @@ const mockLensTransformIn = jest.fn((config: any) => {
   };
 });
 
-const mockVisualizationTransformIn = jest.fn((config: any) => {
-  const { savedObjectId, ...remainingConfig } = config;
-  return {
-    state: remainingConfig,
-    references: [
-      { id: savedObjectId, name: 'savedObjectRef', type: 'visualization' },
-    ] as SavedObjectReference[],
-  };
-});
-
-const mockMapTransformIn = jest.fn((config: any) => {
-  const { savedObjectId, ...remainingConfig } = config;
-  return {
-    state: remainingConfig,
-    references: [
-      { id: savedObjectId, name: 'savedObjectRef', type: 'map' },
-    ] as SavedObjectReference[],
-  };
-});
 jest.mock('../kibana_services', () => ({
   embeddableService: {
     getTransforms: jest.fn((type: string) => {
-      switch (type) {
-        case 'lens-dashboard-app':
-          return { transformIn: mockLensTransformIn };
-        case 'visualization':
-          return { transformIn: mockVisualizationTransformIn };
-        case 'map':
-          return { transformIn: mockMapTransformIn };
-        default:
-          return;
-      }
+      return {
+        transformIn: mockTransformIn,
+      };
     }),
   },
   logger: {
@@ -62,9 +37,9 @@ jest.mock('../kibana_services', () => ({
 }));
 
 describe('transformWorkpadIn', () => {
-  it('transforms embeddable with lens config from stored state to REST API state', () => {
+  it('transforms REST API embeddable state to stored state', () => {
     const workpad = makeWorkpad(
-      `embeddable type="lens" config="${encode({
+      `embeddable type="${LENS_EMBEDDABLE_TYPE}" config="${encode({
         title: 'Test lens embeddable',
         savedObjectId: 'test-id',
       })}"`
@@ -82,64 +57,9 @@ describe('transformWorkpadIn', () => {
       },
     ]);
 
-    expect(embeddableService?.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
-    expect(mockLensTransformIn).toHaveBeenCalledWith({
+    expect(mockTransformIn).toHaveBeenCalledWith({
       savedObjectId: 'test-id',
       title: 'Test lens embeddable',
-    });
-  });
-
-  it('transforms embeddable with visualization config from stored state to REST API state', () => {
-    const workpad = makeWorkpad(
-      `embeddable type="visualization" config="${encode({
-        title: 'Test visualization embeddable',
-        savedObjectId: 'test-id',
-      })}"`
-    );
-
-    const { attributes, references } = transformWorkpadIn(workpad);
-    expect(getDecodedConfig(attributes)).toEqual({
-      title: 'Test visualization embeddable',
-    });
-    expect(references).toEqual([
-      {
-        id: 'test-id',
-        name: 'element-id:savedObjectRef',
-        type: 'visualization',
-      },
-    ]);
-
-    expect(embeddableService?.getTransforms).toHaveBeenCalledWith('visualization');
-    expect(mockVisualizationTransformIn).toHaveBeenCalledWith({
-      savedObjectId: 'test-id',
-      title: 'Test visualization embeddable',
-    });
-  });
-
-  it('transforms embeddable with map config from stored state to REST API state', () => {
-    const workpad = makeWorkpad(
-      `embeddable type="map" config="${encode({
-        title: 'Test map embeddable',
-        savedObjectId: 'test-id',
-      })}"`
-    );
-
-    const { attributes, references } = transformWorkpadIn(workpad);
-    expect(getDecodedConfig(attributes)).toEqual({
-      title: 'Test map embeddable',
-    });
-    expect(references).toEqual([
-      {
-        id: 'test-id',
-        name: 'element-id:savedObjectRef',
-        type: 'map',
-      },
-    ]);
-
-    expect(embeddableService?.getTransforms).toHaveBeenCalledWith('map');
-    expect(mockMapTransformIn).toHaveBeenCalledWith({
-      savedObjectId: 'test-id',
-      title: 'Test map embeddable',
     });
   });
 

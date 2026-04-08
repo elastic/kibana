@@ -91,7 +91,7 @@ describe('GenAiSettingsApp', () => {
     showAiBreadcrumb: true,
     showAiAssistantsVisibilitySetting: true,
     showChatExperienceSetting: true,
-    showAnonymizationProfilesSection: true,
+    showAnonymizationProfilesSection: false,
     ...overrides,
   });
 
@@ -198,12 +198,7 @@ describe('GenAiSettingsApp', () => {
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
 
-      // Anonymization section
-      expect(screen.getByTestId('anonymizationProfilesSection')).toBeInTheDocument();
-      expect(screen.getByTestId('anonymizationProfilesActiveSpaceId')).toHaveTextContent(
-        'Space: default'
-      );
-      expect(screen.getByText('Manage')).toBeInTheDocument();
+      expect(screen.queryByTestId('anonymizationProfilesSection')).not.toBeInTheDocument();
     });
 
     it('should conditionally render sections based on settings', () => {
@@ -241,6 +236,12 @@ describe('GenAiSettingsApp', () => {
   });
 
   describe('Anonymization Profiles section', () => {
+    beforeEach(() => {
+      mockUseEnabledFeatures.mockReturnValue(
+        createFeatureFlagsMock({ showAnonymizationProfilesSection: true })
+      );
+    });
+
     it('switches to read-only mode when manage capability is absent', async () => {
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
