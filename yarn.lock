@@ -8074,7 +8074,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/perf-lighthouse@link:packages/kbn-perf-lighthouse":
+"@kbn/perf-page-load@link:packages/kbn-perf-page-load":
   version "0.0.0"
   uid ""
 

@@ -23,7 +23,7 @@ const SPEC_PATH = resolve(
 export const runCmd: Command<{}> = {
   name: 'run',
   description: 'Run a Lighthouse performance benchmark on the current checkout',
-  usage: 'node scripts/perf_lighthouse.js run [--dist] [--throttle devtools]',
+  usage: 'node scripts/perf_page_load.js run [--dist] [--throttle devtools]',
   flags: {
     boolean: ['dist'],
     string: ['throttle', 'output'],
@@ -80,7 +80,7 @@ export const runCmd: Command<{}> = {
     }
 
     // Set up temp file for result handoff
-    const scoutDir = resolve(REPO_ROOT, '.scout/perf-lighthouse');
+    const scoutDir = resolve(REPO_ROOT, '.scout/perf-page-load');
     Fs.mkdirSync(scoutDir, { recursive: true });
     const resultFile = resolve(scoutDir, `_latest_${process.pid}.json`);
 

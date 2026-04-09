@@ -16,5 +16,6 @@
     "@kbn/transpiler-config",
     "@kbn/core-ui-settings-common",
     "@kbn/repo-packages",
+    "@kbn/ci-stats-reporter",
   ]
 }

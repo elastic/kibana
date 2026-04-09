@@ -18,7 +18,7 @@ export async function cli() {
   await new RunWithCommands(
     {
       description: 'Lighthouse performance benchmarking CLI for Kibana',
-      usage: 'node scripts/perf_lighthouse.js <command> [options]',
+      usage: 'node scripts/perf_page_load.js <command> [options]',
     },
     [
       runCmd,

@@ -30,7 +30,7 @@ const runBenchmark = (
   throttle: string,
   log: any
 ): Record<string, any> => {
-  const scoutDir = resolve(REPO_ROOT, '.scout/perf-lighthouse');
+  const scoutDir = resolve(REPO_ROOT, '.scout/perf-page-load');
   Fs.mkdirSync(scoutDir, { recursive: true });
   const resultFile = resolve(scoutDir, `${label}.json`);
 
@@ -106,7 +106,7 @@ const runBenchmark = (
 export const compareOptimizersCmd: Command<{}> = {
   name: 'compare-optimizers',
   description: '[rspack-transition] Compare legacy vs rspack optimizer benchmarks',
-  usage: 'node scripts/perf_lighthouse.js compare-optimizers [--dist] [--throttle devtools]',
+  usage: 'node scripts/perf_page_load.js compare-optimizers [--dist] [--throttle devtools]',
   flags: {
     boolean: ['dist'],
     string: ['throttle', 'threshold'],

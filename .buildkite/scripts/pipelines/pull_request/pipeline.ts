@@ -673,6 +673,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml', cancelable));
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:bench-page-load')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
+      );
+    }
+
     // post_build is not cancelable — cleanup/reporting should always run
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 

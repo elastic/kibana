@@ -1745,7 +1745,7 @@
     "@kbn/otel-demo": "link:src/platform/packages/shared/kbn-otel-demo",
     "@kbn/peggy": "link:src/platform/packages/private/kbn-peggy",
     "@kbn/peggy-loader": "link:packages/kbn-peggy-loader",
-    "@kbn/perf-lighthouse": "link:packages/kbn-perf-lighthouse",
+    "@kbn/perf-page-load": "link:packages/kbn-perf-page-load",
     "@kbn/performance-testing-dataset-extractor": "link:packages/kbn-performance-testing-dataset-extractor",
     "@kbn/picomatcher": "link:packages/kbn-picomatcher",
     "@kbn/plugin-check": "link:packages/kbn-plugin-check",

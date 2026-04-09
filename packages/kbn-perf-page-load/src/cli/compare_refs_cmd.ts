@@ -24,7 +24,7 @@ const runInWorktree = async (
   log: any
 ): Promise<Record<string, any>> => {
   const workspace = await activateWorktreeOrUseSourceRepo({ log, ref });
-  const wsRoot = workspace.getPath();
+  const wsRoot = workspace.getDir();
 
   log.info(`[${label}] Using workspace at ${wsRoot}`);
 
@@ -57,17 +57,17 @@ const runInWorktree = async (
   // Find the spec file in the worktree
   const specPath = resolve(
     wsRoot,
-    'packages/kbn-perf-lighthouse/test/scout_lighthouse/ui/tests/lighthouse_page_load.spec.ts'
+    'packages/kbn-perf-page-load/test/scout_lighthouse/ui/tests/lighthouse_page_load.spec.ts'
   );
 
   if (!Fs.existsSync(specPath)) {
     throw createFailError(
       `[${label}] Spec file not found at ${specPath}. ` +
-        `The @kbn/perf-lighthouse package may not exist in this ref.`
+        `The @kbn/perf-page-load package may not exist in this ref.`
     );
   }
 
-  const scoutDir = resolve(REPO_ROOT, '.scout/perf-lighthouse');
+  const scoutDir = resolve(REPO_ROOT, '.scout/perf-page-load');
   Fs.mkdirSync(scoutDir, { recursive: true });
   const resultFile = resolve(scoutDir, `${label}.json`);
 
@@ -112,7 +112,7 @@ const runInWorktree = async (
 export const compareRefsCmd: Command<{}> = {
   name: 'compare-refs',
   description: 'Compare Lighthouse benchmarks between two git refs using worktrees',
-  usage: 'node scripts/perf_lighthouse.js compare-refs <ref1> <ref2> [--dist] [--throttle devtools]',
+  usage: 'node scripts/perf_page_load.js compare-refs <ref1> <ref2> [--dist] [--throttle devtools]',
   flags: {
     boolean: ['dist'],
     string: ['throttle', 'threshold'],
@@ -130,7 +130,7 @@ export const compareRefsCmd: Command<{}> = {
     if (positional.length < 2) {
       throw createFailError(
         'Two git refs are required.\n' +
-          'Usage: node scripts/perf_lighthouse.js compare-refs <ref1> <ref2>'
+          'Usage: node scripts/perf_page_load.js compare-refs <ref1> <ref2>'
       );
     }
 

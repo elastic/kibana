@@ -1,4 +1,4 @@
-# @kbn/perf-lighthouse
+# @kbn/perf-page-load
 
 Lighthouse performance benchmarking CLI for Kibana. Measures page-load performance (FCP, LCP, TBT, TTI, CLS, Speed Index) and Kibana-specific custom metrics (`first_app_nav`, `bootstrap_started`) against dev or production dist builds.
 
@@ -16,7 +16,7 @@ npx playwright install chromium
 Run a Lighthouse audit against the current checkout.
 
 ```bash
-node scripts/perf_lighthouse.js run [--dist] [--throttle devtools] [--output path]
+node scripts/perf_page_load.js run [--dist] [--throttle devtools] [--output path]
 ```
 
 | Flag | Description |
@@ -29,13 +29,13 @@ node scripts/perf_lighthouse.js run [--dist] [--throttle devtools] [--output pat
 
 ```bash
 # Dev mode, no throttling
-node scripts/perf_lighthouse.js run
+node scripts/perf_page_load.js run
 
 # Dist build with realistic throttling
-node scripts/perf_lighthouse.js run --dist --throttle devtools
+node scripts/perf_page_load.js run --dist --throttle devtools
 
 # Save results to a file
-node scripts/perf_lighthouse.js run --output results/baseline.json
+node scripts/perf_page_load.js run --output results/baseline.json
 ```
 
 ---
@@ -45,7 +45,7 @@ node scripts/perf_lighthouse.js run --output results/baseline.json
 Compare two previously saved JSON result files offline, without re-running benchmarks.
 
 ```bash
-node scripts/perf_lighthouse.js compare <file1> <file2> [--threshold 5]
+node scripts/perf_page_load.js compare <file1> <file2> [--threshold 5]
 ```
 
 | Flag | Description |
@@ -57,10 +57,10 @@ node scripts/perf_lighthouse.js compare <file1> <file2> [--threshold 5]
 **Example:**
 
 ```bash
-node scripts/perf_lighthouse.js run --output before.json
+node scripts/perf_page_load.js run --output before.json
 # ... make changes ...
-node scripts/perf_lighthouse.js run --output after.json
-node scripts/perf_lighthouse.js compare before.json after.json --threshold 3
+node scripts/perf_page_load.js run --output after.json
+node scripts/perf_page_load.js compare before.json after.json --threshold 3
 ```
 
 ---
@@ -70,7 +70,7 @@ node scripts/perf_lighthouse.js compare before.json after.json --threshold 3
 Check out each ref into a temporary worktree, bootstrap, optionally build dist bundles, run Lighthouse, and compare results.
 
 ```bash
-node scripts/perf_lighthouse.js compare-refs <ref1> <ref2> [--dist] [--throttle devtools] [--threshold 5]
+node scripts/perf_page_load.js compare-refs <ref1> <ref2> [--dist] [--throttle devtools] [--threshold 5]
 ```
 
 | Flag | Description |
@@ -85,13 +85,13 @@ node scripts/perf_lighthouse.js compare-refs <ref1> <ref2> [--dist] [--throttle 
 
 ```bash
 # Compare two commits
-node scripts/perf_lighthouse.js compare-refs abc1234 def5678 --dist --throttle devtools
+node scripts/perf_page_load.js compare-refs abc1234 def5678 --dist --throttle devtools
 
 # Compare HEAD against a specific commit
-node scripts/perf_lighthouse.js compare-refs HEAD abc1234 --dist
+node scripts/perf_page_load.js compare-refs HEAD abc1234 --dist
 
 # Compare HEAD against main
-node scripts/perf_lighthouse.js compare-refs HEAD main --dist --throttle devtools
+node scripts/perf_page_load.js compare-refs HEAD main --dist --throttle devtools
 ```
 
 > **Note:** Each ref goes through a full bootstrap + build + Lighthouse cycle in an isolated
@@ -104,7 +104,7 @@ node scripts/perf_lighthouse.js compare-refs HEAD main --dist --throttle devtool
 Run back-to-back benchmarks on the current working tree — first with the legacy Webpack optimizer, then with Rspack — and output a side-by-side comparison.
 
 ```bash
-node scripts/perf_lighthouse.js compare-optimizers [--dist] [--throttle devtools] [--threshold 5]
+node scripts/perf_page_load.js compare-optimizers [--dist] [--throttle devtools] [--threshold 5]
 ```
 
 | Flag | Description |
@@ -116,7 +116,7 @@ node scripts/perf_lighthouse.js compare-optimizers [--dist] [--throttle devtools
 **Example:**
 
 ```bash
-node scripts/perf_lighthouse.js compare-optimizers --dist --throttle devtools
+node scripts/perf_page_load.js compare-optimizers --dist --throttle devtools
 ```
 
 > **Note:** This command is tagged `[rspack-transition]` and will be removed when the legacy
@@ -129,13 +129,13 @@ node scripts/perf_lighthouse.js compare-optimizers --dist --throttle devtools
 ### Compare performance across two commits
 
 ```bash
-node scripts/perf_lighthouse.js compare-refs abc1234 def5678 --dist --throttle devtools
+node scripts/perf_page_load.js compare-refs abc1234 def5678 --dist --throttle devtools
 ```
 
 ### Compare current work against a baseline commit
 
 ```bash
-node scripts/perf_lighthouse.js compare-refs HEAD abc1234 --dist
+node scripts/perf_page_load.js compare-refs HEAD abc1234 --dist
 ```
 
 ### Compare a PR against its base branch
@@ -145,14 +145,14 @@ Self-contained check that benchmarks the PR tip against the merge base with `mai
 ```bash
 # Find the common ancestor between HEAD and the target branch
 MERGE_BASE=$(git merge-base HEAD origin/main)
-node scripts/perf_lighthouse.js compare-refs HEAD "$MERGE_BASE" --dist --throttle devtools --threshold 5
+node scripts/perf_page_load.js compare-refs HEAD "$MERGE_BASE" --dist --throttle devtools --threshold 5
 ```
 
 In CI, most systems provide the target branch as an environment variable (e.g., Buildkite: `BUILDKITE_PULL_REQUEST_BASE_BRANCH`, GitHub Actions: `GITHUB_BASE_REF`). Use it directly:
 
 ```bash
 MERGE_BASE=$(git merge-base HEAD "origin/$TARGET_BRANCH")
-node scripts/perf_lighthouse.js compare-refs HEAD "$MERGE_BASE" --dist --throttle devtools --threshold 5
+node scripts/perf_page_load.js compare-refs HEAD "$MERGE_BASE" --dist --throttle devtools --threshold 5
 ```
 
 ### Incremental development workflow
@@ -160,10 +160,10 @@ node scripts/perf_lighthouse.js compare-refs HEAD "$MERGE_BASE" --dist --throttl
 Save results before and after changes, then compare offline:
 
 ```bash
-node scripts/perf_lighthouse.js run --output before.json
+node scripts/perf_page_load.js run --output before.json
 # ... make changes ...
-node scripts/perf_lighthouse.js run --output after.json
-node scripts/perf_lighthouse.js compare before.json after.json --threshold 3
+node scripts/perf_page_load.js run --output after.json
+node scripts/perf_page_load.js compare before.json after.json --threshold 3
 ```
 
 ---
@@ -172,12 +172,12 @@ node scripts/perf_lighthouse.js compare before.json after.json --threshold 3
 
 | Goal | Command |
 |---|---|
-| Single benchmark | `node scripts/perf_lighthouse.js run` |
-| Legacy vs Rspack | `node scripts/perf_lighthouse.js compare-optimizers` |
-| Commit A vs Commit B | `node scripts/perf_lighthouse.js compare-refs <A> <B>` |
-| HEAD vs a commit | `node scripts/perf_lighthouse.js compare-refs HEAD <commit>` |
-| HEAD vs base branch (PR) | `node scripts/perf_lighthouse.js compare-refs HEAD $(git merge-base HEAD origin/main)` |
-| Two saved JSON files | `node scripts/perf_lighthouse.js compare <f1> <f2>` |
+| Single benchmark | `node scripts/perf_page_load.js run` |
+| Legacy vs Rspack | `node scripts/perf_page_load.js compare-optimizers` |
+| Commit A vs Commit B | `node scripts/perf_page_load.js compare-refs <A> <B>` |
+| HEAD vs a commit | `node scripts/perf_page_load.js compare-refs HEAD <commit>` |
+| HEAD vs base branch (PR) | `node scripts/perf_page_load.js compare-refs HEAD $(git merge-base HEAD origin/main)` |
+| Two saved JSON files | `node scripts/perf_page_load.js compare <f1> <f2>` |
 
 Add `--dist` to any command to benchmark production bundles, and `--throttle devtools` for realistic network/CPU conditions.
 

@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/perf-lighthouse').cli();
+require('@kbn/perf-page-load').cli();

@@ -43,8 +43,8 @@ with `[rspack-transition]` comments for easy discovery via `grep -r 'rspack-tran
 
 ## Performance benchmarks
 
-- [ ] `packages/kbn-perf-lighthouse/src/cli/compare_optimizers_cmd.ts`: Delete the entire file (compare-optimizers command). Remove `compareOptimizersCmd` import and registration from `cli/index.ts`.
-- [ ] `packages/kbn-perf-lighthouse/src/cli/run_cmd.ts`: Remove the `[rspack-transition]` legacy build branch (the `build_kibana_platform_plugins.js --dist` code path).
+- [ ] `packages/kbn-perf-page-load/src/cli/compare_optimizers_cmd.ts`: Delete the entire file (compare-optimizers command). Remove `compareOptimizersCmd` import and registration from `cli/index.ts`.
+- [ ] `packages/kbn-perf-page-load/src/cli/run_cmd.ts`: Remove the `[rspack-transition]` legacy build branch (the `build_kibana_platform_plugins.js --dist` code path).
 
 ## Package rename
 

@@ -17,7 +17,7 @@ import { formatComparisonResults } from './format_results';
 export const compareCmd: Command<{}> = {
   name: 'compare',
   description: 'Compare two saved Lighthouse result JSON files',
-  usage: 'node scripts/perf_lighthouse.js compare <file1> <file2> [--threshold 5]',
+  usage: 'node scripts/perf_page_load.js compare <file1> <file2> [--threshold 5]',
   flags: {
     string: ['threshold'],
     default: { threshold: '5' },
@@ -32,7 +32,7 @@ export const compareCmd: Command<{}> = {
     if (positional.length < 2) {
       throw createFailError(
         'Two result file paths are required.\n' +
-          'Usage: node scripts/perf_lighthouse.js compare <file1> <file2>'
+          'Usage: node scripts/perf_page_load.js compare <file1> <file2>'
       );
     }
 
