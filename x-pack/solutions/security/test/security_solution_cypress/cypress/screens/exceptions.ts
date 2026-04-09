@@ -134,6 +134,14 @@ export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutN
 export const ENDPOINT_EXCEPTION_ITEM_NAME_INPUT =
   'input[data-test-subj="endpointExceptions-form-name-input"]';
 
+export const ENDPOINT_EXCEPTION_CARD = '[data-test-subj="endpointExceptionsListPage-card"]';
+
+export const ENDPOINT_EXCEPTION_CARD_HEADER_TITLE =
+  '[data-test-subj="endpointExceptionsListPage-card-header-title"]';
+
+export const ENDPOINT_EXCEPTION_CARD_CONDITIONS =
+  '[data-test-subj="endpointExceptionsListPage-card-criteriaConditions-condition"]';
+
 export const ADD_TO_SHARED_LIST_RADIO_LABEL = '[data-test-subj="addToListsRadioOption"] label';
 
 export const ADD_TO_SHARED_LIST_RADIO_INPUT = 'input[id="add_to_lists"]';

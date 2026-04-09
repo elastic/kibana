@@ -33,6 +33,9 @@ import {
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import {
   ADD_NESTED_BTN,
+  ENDPOINT_EXCEPTION_CARD,
+  ENDPOINT_EXCEPTION_CARD_CONDITIONS,
+  ENDPOINT_EXCEPTION_CARD_HEADER_TITLE,
   ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN,
   ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
 } from '../../../../../screens/exceptions';
@@ -123,14 +126,9 @@ describe(
       goToEndpointExceptions();
 
       // new exception item displays
-      cy.get('[data-test-subj="endpointExceptionsListPage-card"]').should('have.length', 1);
-      cy.get('[data-test-subj="endpointExceptionsListPage-card-header-title"]').should(
-        'have.text',
-        ITEM_NAME_EDIT
-      );
-      cy.get(
-        '[data-test-subj="endpointExceptionsListPage-card-criteriaConditions-condition"]'
-      ).contains('span', ADDITIONAL_ENTRY);
+      cy.get(ENDPOINT_EXCEPTION_CARD).should('have.length', 1);
+      cy.get(ENDPOINT_EXCEPTION_CARD_HEADER_TITLE).should('have.text', ITEM_NAME_EDIT);
+      cy.get(ENDPOINT_EXCEPTION_CARD_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
     });
   }
 );
