@@ -12,17 +12,44 @@ import {
   EuiSpacer,
   EuiText,
   useCurrentEuiBreakpoint,
+  useEuiTheme,
+  EuiBadge,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_details';
 
 export const SearchGettingStartedHeader: React.FC = () => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
+  const { euiTheme } = useEuiTheme();
+
+  const trialUsageBannerStyles = css({
+    paddingInline: euiTheme.size.xs,
+    paddingBlock: euiTheme.size.xxs,
+    borderRadius: '16px',
+    backgroundColor: euiTheme.colors.backgroundBasePrimary,
+    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePrimary}`,
+  });
 
   return (
     <EuiFlexGroup gutterSize={currentBreakpoint === 'xl' ? 'l' : 'xl'} direction="column">
       <EuiFlexGroup gutterSize="l" alignItems="flexStart" direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            css={trialUsageBannerStyles}
+          >
+            <EuiFlexItem grow={false}>
+              <span><EuiBadge color="primary" fill>TRIAL</EuiBadge></span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="chevronSingleDown" iconSide="right" color="primary" size="xs">Usage limits</EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="l">
             <h1>
