@@ -25,7 +25,7 @@ export function buildConnectorSelectionPanel({
 }) {
   return {
     title: MODEL_SELECTION_PANEL_TITLE,
-    width: 240,
+    width: 300,
     content: (
       <ConnectorSubPanel
         connectors={connectors}
