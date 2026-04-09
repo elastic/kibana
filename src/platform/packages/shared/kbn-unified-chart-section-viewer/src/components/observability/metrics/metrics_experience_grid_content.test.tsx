@@ -345,9 +345,7 @@ describe('MetricsExperienceGridContent', () => {
       });
 
       act(() => {
-        rerender(
-          <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading={false} />
-        );
+        rerender(<MetricsExperienceGridContent {...defaultProps} isDiscoverLoading={false} />);
       });
 
       const lastCall = mockMetricsGrid.mock.calls[mockMetricsGrid.mock.calls.length - 1][0];
