@@ -120,6 +120,20 @@ const ruleEditedEvent: AiRuleCreationTelemetryEvent = {
         optional: false,
       },
     },
+    numberOfEdits: {
+      type: 'long',
+      _meta: {
+        description: 'How many times AI-generated rule was applied to the form',
+        optional: false,
+      },
+    },
+    durationSinceSessionStartMs: {
+      type: 'long',
+      _meta: {
+        description: 'Milliseconds elapsed since the AI rule creation session started',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -147,6 +161,20 @@ const ruleCreationErrorEvent: AiRuleCreationTelemetryEvent = {
         optional: false,
       },
     },
+    numberOfEdits: {
+      type: 'long',
+      _meta: {
+        description: 'How many times AI-generated rule was applied to the form',
+        optional: false,
+      },
+    },
+    durationSinceSessionStartMs: {
+      type: 'long',
+      _meta: {
+        description: 'Milliseconds elapsed since the AI rule creation session started',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -164,6 +192,13 @@ const sessionAbandonedEvent: AiRuleCreationTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'The rule type at the time of abandonment',
+        optional: false,
+      },
+    },
+    numberOfEdits: {
+      type: 'long',
+      _meta: {
+        description: 'How many times AI-generated rule was applied to the form',
         optional: false,
       },
     },

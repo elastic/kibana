@@ -86,7 +86,7 @@ import { AiRuleCreationEventTypes } from '../../../../common/lib/telemetry/types
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
-  const { application, triggersActionsUi, cps, telemetry } = useKibana().services;
+  const { application, triggersActionsUi, cps, telemetry, aiRuleCreation } = useKibana().services;
   const { navigateToApp } = application;
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
@@ -427,9 +427,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     });
 
     if (isAiRuleUpdateRef.current) {
+      const session = aiRuleCreation.getSession();
       telemetry.reportEvent(AiRuleCreationEventTypes.RuleEdited, {
         ruleType: updatedRule.type,
         enabled: updatedRule.enabled,
+        numberOfEdits: session?.applyCount ?? 0,
+        durationSinceSessionStartMs: session ? Date.now() - session.startTimestamp : 0,
       });
     }
 
@@ -441,6 +444,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, [
     aboutStepData,
     actionsStepData,
+    aiRuleCreation,
     defineStepData,
     defineFieldsTransform,
     addSuccess,

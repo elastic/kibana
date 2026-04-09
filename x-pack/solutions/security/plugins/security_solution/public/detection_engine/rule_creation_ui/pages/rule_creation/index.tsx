@@ -275,6 +275,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         telemetry.reportEvent(AiRuleCreationEventTypes.SessionAbandoned, {
           sessionId: session.sessionId,
           ruleType: ruleTypeRef.current ?? 'unknown',
+          numberOfEdits: session.applyCount,
           durationSinceSessionStartMs: Date.now() - session.startTimestamp,
         });
         aiRuleCreation.clearSession();
@@ -537,6 +538,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
             sessionId: session.sessionId,
             ruleType,
             errorMessage: error?.message ?? 'Unknown error',
+            numberOfEdits: session.applyCount,
+            durationSinceSessionStartMs: Date.now() - session.startTimestamp,
           });
         }
         throw error;

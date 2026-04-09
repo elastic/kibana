@@ -38,17 +38,22 @@ export interface ReportRuleCreatedParams {
 export interface ReportRuleEditedParams {
   ruleType: string;
   enabled: boolean;
+  numberOfEdits: number;
+  durationSinceSessionStartMs: number;
 }
 
 export interface ReportRuleCreationErrorParams {
   sessionId: string;
   ruleType: string;
   errorMessage: string;
+  numberOfEdits: number;
+  durationSinceSessionStartMs: number;
 }
 
 export interface ReportSessionAbandonedParams {
   sessionId: string;
   ruleType: string;
+  numberOfEdits: number;
   durationSinceSessionStartMs: number;
 }
 
