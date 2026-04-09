@@ -40,6 +40,8 @@ import {
 
 const featureKey = (feature: Feature) => `${feature.id}::${feature.stream_name}`;
 
+type DiscoveryFeatureTableRow = Feature & { indicator_label: string };
+
 export function FeaturesTable() {
   const router = useStreamsAppRouter();
   const { data, isLoading: loading, refetch } = useFetchFeatures();
@@ -49,7 +51,7 @@ export function FeaturesTable() {
   } = useKibana();
 
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<DiscoveryFeatureTableRow[]>([]);
   const [isBulkDeleteModalVisible, { on: showBulkDeleteModal, off: hideBulkDeleteModal }] =
     useBoolean(false);
 
@@ -145,13 +147,22 @@ export function FeaturesTable() {
     }
   }, [selectedFeatures, deleteFeaturesInBulk, refetch, notifications.toasts, hideBulkDeleteModal]);
 
-  const columns: Array<EuiBasicTableColumn<Feature>> = useMemo(
+  const tableItems: DiscoveryFeatureTableRow[] = useMemo(
+    () =>
+      (data?.features ?? []).map((feature) => ({
+        ...feature,
+        indicator_label: feature.title ?? feature.id,
+      })),
+    [data?.features]
+  );
+
+  const columns: Array<EuiBasicTableColumn<DiscoveryFeatureTableRow>> = useMemo(
     () => [
       {
         field: 'details',
         name: '',
         width: '40px',
-        render: (_: unknown, feature: Feature) => {
+        render: (_: unknown, feature: DiscoveryFeatureTableRow) => {
           const isSelected =
             selectedFeature !== null && featureKey(selectedFeature) === featureKey(feature);
           return (
@@ -168,17 +179,17 @@ export function FeaturesTable() {
         },
       },
       {
-        field: 'name',
+        field: 'indicator_label',
         name: i18n.translate(
           'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.knowledgeIndicatorColumn',
           {
             defaultMessage: 'Knowledge Indicator',
           }
         ),
-        sortable: (feature: Feature) => (feature.title ?? feature.id).toLowerCase(),
+        sortable: (feature: DiscoveryFeatureTableRow) => feature.indicator_label.toLowerCase(),
         truncateText: true,
-        render: (_name: string, feature: Feature) => {
-          const displayTitle = feature.title ?? feature.id;
+        render: (_label: string, feature: DiscoveryFeatureTableRow) => {
+          const displayTitle = feature.indicator_label;
           return (
             <EuiLink
               onClick={() => handleSelectFeature(feature)}
@@ -225,7 +236,7 @@ export function FeaturesTable() {
         ),
         sortable: true,
         width: '15%',
-        render: (_streamName: string, feature: Feature) => (
+        render: (_streamName: string, feature: DiscoveryFeatureTableRow) => (
           <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
         ),
       },
@@ -326,8 +337,8 @@ export function FeaturesTable() {
           )}
           columns={columns}
           itemId={featureKey}
-          items={data?.features ?? []}
-          rowProps={(feature: Feature) => ({
+          items={tableItems}
+          rowProps={(feature: DiscoveryFeatureTableRow) => ({
             isSelected:
               selectedFeature !== null && featureKey(selectedFeature) === featureKey(feature),
           })}
@@ -339,7 +350,7 @@ export function FeaturesTable() {
           }}
           sorting={{
             sort: {
-              field: 'name',
+              field: 'indicator_label',
               direction: 'asc',
             },
           }}

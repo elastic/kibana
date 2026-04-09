@@ -121,7 +121,8 @@ export function QueriesTable() {
   }, []);
   const {
     data: queriesData,
-    isLoading: queriesLoading,
+    isLoading: queriesInitialLoading,
+    isFetching: queriesFetching,
     isError: hasQueriesError,
   } = useFetchDiscoveryQueries({
     query: searchQuery,
@@ -334,8 +335,7 @@ export function QueriesTable() {
     ];
   }, [share.url.locators, timeState, selectedQuery, handleSelectQuery]);
 
-  const isLoading = queriesLoading;
-  if (isLoading) {
+  if (queriesInitialLoading) {
     return <LoadingPanel size="l" />;
   }
 
@@ -351,7 +351,8 @@ export function QueriesTable() {
     );
   }
 
-  const isEmpty = !queriesLoading && (queriesData?.total ?? 0) === 0 && !searchQuery;
+  const isEmpty =
+    !queriesFetching && !queriesInitialLoading && (queriesData?.total ?? 0) === 0 && !searchQuery;
   if (isEmpty) {
     return (
       <EuiEmptyPrompt
@@ -413,7 +414,7 @@ export function QueriesTable() {
       )}
       <EuiFlexItem grow={false}>
         <StreamsAppSearchBar
-          isLoading={queriesLoading}
+          isLoading={queriesFetching}
           onQuerySubmit={(queryPayload) => {
             setSearchQuery(String(queryPayload.query?.query ?? ''));
             setPagination((currentPagination) => ({ index: 0, size: currentPagination.size }));
@@ -466,8 +467,8 @@ export function QueriesTable() {
           rowProps={(item: SignificantEventQueryRow) => ({
             isSelected: selectedQuery?.query.id === item.query.id,
           })}
-          loading={queriesLoading}
-          noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
+          loading={queriesFetching}
+          noItemsMessage={!queriesFetching ? NO_ITEMS_MESSAGE : ''}
           pagination={{
             pageIndex: pagination.index,
             pageSize: pagination.size,
