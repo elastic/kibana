@@ -13,12 +13,7 @@ import {
   reverseMap,
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type {
-  BrowserApiToolMetadata,
-  ChatAgentEvent,
-  RoundInput,
-  AgentExecutionEvent,
-} from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
