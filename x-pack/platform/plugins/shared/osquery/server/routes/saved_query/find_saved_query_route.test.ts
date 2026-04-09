@@ -156,7 +156,9 @@ describe('findSavedQueryRoute', () => {
 
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
     expect(findArgs.filter).toContain('osquery-saved-query.attributes.id: *test\\<script\\>*');
-    expect(findArgs.filter).toContain('osquery-saved-query.attributes.description: *test\\<script\\>*');
+    expect(findArgs.filter).toContain(
+      'osquery-saved-query.attributes.description: *test\\<script\\>*'
+    );
     expect(findArgs.filter).toContain('osquery-saved-query.attributes.query: *test\\<script\\>*');
   });
 
