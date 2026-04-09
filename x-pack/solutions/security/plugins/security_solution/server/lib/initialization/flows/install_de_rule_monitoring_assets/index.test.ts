@@ -37,7 +37,9 @@ describe('installDeRuleMonitoringAssetsFlow', () => {
   });
 
   it('has the correct id', () => {
-    expect(installDeRuleMonitoringAssetsFlow.id).toBe(INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS);
+    expect(installDeRuleMonitoringAssetsFlow.id).toBe(
+      INITIALIZATION_FLOW_INSTALL_DE_RULE_MONITORING_ASSETS
+    );
   });
 
   it('does not have runFirst set', () => {
@@ -50,7 +52,10 @@ describe('installDeRuleMonitoringAssetsFlow', () => {
       const healthClient = createMockHealthClient();
       const context = createMockInitializationFlowContext(healthClient);
 
-      const provisionContext = await installDeRuleMonitoringAssetsFlow.resolveProvisionContext(context, logger);
+      const provisionContext = await installDeRuleMonitoringAssetsFlow.resolveProvisionContext(
+        context,
+        logger
+      );
 
       expect(provisionContext.healthClient).toBe(healthClient);
     });
@@ -82,9 +87,9 @@ describe('installDeRuleMonitoringAssetsFlow', () => {
         new Error('Failed to import saved objects')
       );
 
-      await expect(installDeRuleMonitoringAssetsFlow.provision({ healthClient }, logger)).rejects.toThrow(
-        'Failed to import saved objects'
-      );
+      await expect(
+        installDeRuleMonitoringAssetsFlow.provision({ healthClient }, logger)
+      ).rejects.toThrow('Failed to import saved objects');
     });
   });
 });
