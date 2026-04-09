@@ -22,7 +22,7 @@ import {
   type SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import type { TimeRange } from '@kbn/es-query';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -53,9 +53,13 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
     data: { transaction: transactionIndex },
   } = useFetchApmIndices({ enabled: isApmSlo });
 
-  const timeRange: TimeRange = dynamicTimeRange
-    ? { from: range.from.toISOString(), to: range.to.toISOString() }
-    : { from: 'now-24h', to: 'now', mode: 'relative' };
+  const timeRange: TimeRange = useMemo(
+    () =>
+      dynamicTimeRange
+        ? { from: range.from.toISOString(), to: range.to.toISOString() }
+        : { from: 'now-24h', to: 'now', mode: 'relative' },
+    [dynamicTimeRange, range]
+  );
 
   const { isLoading, data } = useGetPreviewData({
     range,
@@ -66,30 +70,37 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
     remoteName: slo.remote?.remoteName,
   });
 
-  const viewEventsHref = isApmSlo
-    ? getApmTracesEsqlLink({ slo, timeRange, discover, transactionIndex })
-    : getDiscoverLink({ slo, timeRange, discover, uiSettings });
+  const viewEventsHref = useMemo(
+    () =>
+      isApmSlo
+        ? getApmTracesEsqlLink({ slo, timeRange, discover, transactionIndex })
+        : getDiscoverLink({ slo, timeRange, discover, uiSettings }),
+    [isApmSlo, slo, timeRange, discover, transactionIndex, uiSettings]
+  );
 
-  const handleGoodBadEventsBarClick = (barTimeRange: TimeRange, eventType: SloEventType) => {
-    if (isApmSlo) {
-      navigateToApmTracesEsqlLink({
-        slo,
-        timeRange: barTimeRange,
-        discover,
-        transactionIndex,
-        selectedEventType: eventType,
-      });
-    } else {
-      openInDiscover({
-        slo,
-        showGood: eventType === 'Good',
-        showBad: eventType === 'Bad',
-        timeRange: barTimeRange,
-        discover,
-        uiSettings,
-      });
-    }
-  };
+  const handleGoodBadEventsBarClick = useCallback(
+    (barTimeRange: TimeRange, eventType: SloEventType) => {
+      if (isApmSlo) {
+        navigateToApmTracesEsqlLink({
+          slo,
+          timeRange: barTimeRange,
+          discover,
+          transactionIndex,
+          selectedEventType: eventType,
+        });
+      } else {
+        openInDiscover({
+          slo,
+          showGood: eventType === 'Good',
+          showBad: eventType === 'Bad',
+          timeRange: barTimeRange,
+          discover,
+          uiSettings,
+        });
+      }
+    },
+    [isApmSlo, slo, discover, transactionIndex, uiSettings]
+  );
 
   function getChartTitle() {
     switch (slo.indicator.type) {
