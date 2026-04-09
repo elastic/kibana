@@ -272,6 +272,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const [isParsing, setIsParsing] = useState(false);
   const [fileError, setFileError] = useState<string | undefined>(undefined);
   const [uploadedFileName, setUploadedFileName] = useState<string | undefined>(undefined);
+  const [collectionMethodResetKey, setCollectionMethodResetKey] = useState(0);
 
   const logsSourceOption = formData?.logsSourceOption ?? 'file';
   const logSample = formData?.logSample;
@@ -604,11 +605,16 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                 fullWidth
               >
                 <EuiComboBox
+                  key={collectionMethodResetKey}
                   options={dataCollectionMethodOptions}
                   selectedOptions={selectedOptions}
-                  onChange={(options) =>
-                    field.setValue(options.map((option) => option.value as string))
-                  }
+                  onChange={(options) => {
+                    field.setValue(options.map((option) => option.value as string));
+                    if (options.length === 0) {
+                      setCollectionMethodResetKey((k) => k + 1);
+                    }
+                  }}
+                  isClearable
                   isInvalid={field.errors.length > 0}
                   data-test-subj="dataCollectionMethodSelect"
                   css={styles.comboBox}
