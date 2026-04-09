@@ -28,8 +28,8 @@ export class FunctionsPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/functions`);
-    await this.page.testSubj
-      .locator('profilingNormalizationMenuButton')
+    await this.page
+      .getByRole('tab', { name: 'TopN functions' })
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
@@ -37,8 +37,8 @@ export class FunctionsPage {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}/functions?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
-    await this.page.testSubj
-      .locator('profilingNormalizationMenuButton')
+    await this.page
+      .getByRole('tab', { name: 'TopN functions' })
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 

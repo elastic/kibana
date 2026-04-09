@@ -14,7 +14,7 @@ export class ProfilingHomePage {
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}`);
     await this.page.testSubj
-      .locator('profilingNormalizationMenuButton')
+      .locator('stackTracesDisplayOptionButtonGroup')
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
@@ -23,7 +23,7 @@ export class ProfilingHomePage {
       `${this.kbnUrl.app('profiling')}?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
     await this.page.testSubj
-      .locator('profilingNormalizationMenuButton')
+      .locator('stackTracesDisplayOptionButtonGroup')
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
