@@ -532,8 +532,10 @@ export async function createSingleCompileConfig(
   return {
     name: 'kibana',
     mode: dist ? 'production' : 'development',
-    // Match legacy webpack optimizer: no sourcemaps in dist, cheap-source-map in dev
-    devtool: dist ? false : 'cheap-source-map',
+    // No sourcemaps in dist; cheap-module-source-map in dev for original-source
+    // quality (maps through SWC back to TypeScript/TSX). Aligns with rspack's
+    // new recommended dev default (PR #12934).
+    devtool: dist ? false : 'cheap-module-source-map',
     // ES2020 target auto-sets output.environment for modern JS in rspack's
     // generated runtime code (arrow functions, const, destructuring, etc.).
     // Safe because SWC already targets ES2020 and .browserslistrc requires it.
@@ -559,6 +561,8 @@ export async function createSingleCompileConfig(
       publicPath: 'auto',
       clean: !watch,
       uniqueName: 'kibana-bundle',
+      pathinfo: false,
+      ...(dist ? {} : { devtoolModuleFilenameTemplate: 'kibana:///[resource-path]' }),
     },
 
     // Only externalize shared deps (npm packages), NOT cross-plugin imports
@@ -581,6 +585,7 @@ export async function createSingleCompileConfig(
     },
 
     module: {
+      noParse: [/[\\/]node_modules[\\/]lodash[\\/]index\.js$/],
       // Use shared module rules (same loaders as external plugins)
       // Plus additional rules specific to main build
       // SWC for performance + require_interop_loader for ESM/CJS interop
@@ -732,8 +737,8 @@ export async function createSingleCompileConfig(
         ...(hmr && hmrPort ? { __KBN_HMR_PORT__: JSON.stringify(hmrPort) } : {}),
       }),
 
-      // Elastic License 2.0 banner for x-pack plugin chunks
-      new XPackBannerPlugin(repoRoot, plugins),
+      // Elastic License 2.0 banner for x-pack plugin chunks (dist only)
+      ...(dist ? [new XPackBannerPlugin(repoRoot, plugins)] : []),
 
       // Emit chunk-manifest.json with sharedChunks (for <link rel="preload">) and
       // allChunks (for eager loading via the bootstrap load() array)
