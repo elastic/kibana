@@ -35,7 +35,6 @@ export type { ReviewIntegrationDetails } from './review_approve_modal';
 export const ManageIntegrationActions: React.FC<{
   integration: CreatedIntegrationRow;
   isPackageReady: boolean;
-  isInstalled?: boolean;
   inlineActionType?: 'reviewApprove' | 'editIntegration';
   showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
@@ -52,7 +51,6 @@ export const ManageIntegrationActions: React.FC<{
 }> = ({
   integration,
   isPackageReady,
-  isInstalled = false,
   inlineActionType,
   showMenuButton = true,
   onEdit,
@@ -220,25 +218,17 @@ export const ManageIntegrationActions: React.FC<{
               <EuiContextMenuItem
                 key="installToCluster"
                 icon="exportAction"
-                disabled={!isApproved || isInstalling || isInstalled}
+                disabled={!isApproved || isInstalling}
                 data-test-subj="manageIntegrationInstallMenuItem"
                 toolTipContent={
-                  isInstalled
-                    ? i18n.translate(
-                        'xpack.fleet.epmList.manageIntegrations.actions.installAlreadyInstalledHelp',
-                        {
-                          defaultMessage:
-                            'This integration is already installed. Make changes before reinstalling.',
-                        }
-                      )
-                    : !isApproved
-                    ? i18n.translate(
+                  isApproved
+                    ? undefined
+                    : i18n.translate(
                         'xpack.fleet.epmList.manageIntegrations.actions.installDisabledHelp',
                         {
                           defaultMessage: 'Install is available only for approved integrations.',
                         }
                       )
-                    : undefined
                 }
                 onClick={handleInstallToCluster}
               >

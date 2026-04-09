@@ -105,7 +105,6 @@ export const ManageIntegrationsTable: React.FC<{
   const [selectedItems, setSelectedItems] = useState<CreatedIntegrationRow[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkInstalling, setIsBulkInstalling] = useState(false);
-  const [sessionInstalledIds, setSessionInstalledIds] = useState<Set<string>>(new Set());
   const { euiTheme } = useEuiTheme();
   const {
     application,
@@ -114,29 +113,6 @@ export const ManageIntegrationsTable: React.FC<{
     notifications,
     userProfile: userProfileService,
   } = useStartServices();
-
-  const { data: installedPackageIds = new Set<string>() } = useQuery(
-    ['manage-integrations-installed-packages', ...sessionInstalledIds],
-    async () => {
-      const response = await http.get<{ items: Array<{ id: string }> }>(
-        '/api/fleet/epm/packages/installed',
-        {
-          version: '2023-10-31',
-          query: { dataStreamType: '', perPage: 1000 },
-        }
-      );
-      const ids = new Set<string>();
-      (response?.items ?? []).forEach((pkg) => ids.add(pkg.id));
-      return ids;
-    },
-    { refetchOnWindowFocus: false }
-  );
-
-  const isIntegrationInstalled = useCallback(
-    (integrationId: string) =>
-      installedPackageIds.has(integrationId) || sessionInstalledIds.has(integrationId),
-    [installedPackageIds, sessionInstalledIds]
-  );
 
   const hasReportedView = useRef(false);
   useEffect(() => {
@@ -381,8 +357,6 @@ export const ManageIntegrationsTable: React.FC<{
           body: zipBlob as unknown as BodyInit,
         });
 
-        setSessionInstalledIds((prev) => new Set([...prev, integrationId]));
-
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.fleet.epmList.manageIntegrations.actions.installSuccessTitle',
@@ -419,21 +393,17 @@ export const ManageIntegrationsTable: React.FC<{
   }, [selectedItems, deleteIntegration]);
 
   const handleBulkInstall = useCallback(async () => {
-    const installableItems = selectedItems.filter(
-      (item) => item.status === 'approved' && !isIntegrationInstalled(item.integrationId)
-    );
+    const approvedItems = selectedItems.filter((item) => item.status === 'approved');
     setIsBulkInstalling(true);
     try {
-      await Promise.all(installableItems.map((item) => installToCluster(item.integrationId)));
+      await Promise.all(approvedItems.map((item) => installToCluster(item.integrationId)));
       setSelectedItems([]);
     } finally {
       setIsBulkInstalling(false);
     }
-  }, [selectedItems, installToCluster, isIntegrationInstalled]);
+  }, [selectedItems, installToCluster]);
 
-  const hasInstallableSelected = selectedItems.some(
-    (item) => item.status === 'approved' && !isIntegrationInstalled(item.integrationId)
-  );
+  const hasApprovedSelected = selectedItems.some((item) => item.status === 'approved');
 
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
@@ -600,7 +570,6 @@ export const ManageIntegrationsTable: React.FC<{
               <ManageIntegrationActions
                 integration={item}
                 isPackageReady={true}
-                isInstalled={isIntegrationInstalled(item.integrationId)}
                 inlineActionType="reviewApprove"
                 showMenuButton={false}
                 onEdit={goToEditIntegration}
@@ -631,7 +600,6 @@ export const ManageIntegrationsTable: React.FC<{
           <ManageIntegrationActions
             integration={item}
             isPackageReady={isIntegrationPackageReady(item)}
-            isInstalled={isIntegrationInstalled(item.integrationId)}
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
             DataStreamResultsFlyoutComponent={automaticImport?.components.DataStreamResultsFlyout}
@@ -651,7 +619,6 @@ export const ManageIntegrationsTable: React.FC<{
       approveAndDeployIntegration,
       downloadZipPackage,
       installToCluster,
-      isIntegrationInstalled,
       automaticImport?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
       euiTheme.colors.textParagraph,
@@ -823,7 +790,7 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiButton>
           </EuiFlexItem>
-          {hasInstallableSelected && (
+          {hasApprovedSelected && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 size="s"
