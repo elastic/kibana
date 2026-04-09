@@ -15,7 +15,9 @@ import {
   EuiText,
   EuiPanel,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { elasticsearchOnboardingAgent } from '@kbn/search-agent';
 import { AiButton } from '@kbn/shared-ux-ai-components';
@@ -30,6 +32,7 @@ import { PromptModal } from './prompt_modal';
 import { buildPrompt } from './util';
 
 export const AgentInstallSection = () => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
@@ -55,47 +58,12 @@ export const AgentInstallSection = () => {
 
   return (
     <>
-      <SearchGettingStartedSectionHeading
-        icon="sparkles"
-        title={i18n.translate('xpack.gettingStarted.agentInstall.title', {
-          defaultMessage: 'Build with AI',
-        })}
-        description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
-          defaultMessage:
-            'Get AI-powered help building search for products, docs, chatbots, recommenders, and more.',
-        })}
-      />
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="m" alignItems="center" direction="row">
-        <EuiFlexItem>
-          <EuiPanel color="subdued" hasShadow={false}>
-            <EuiFlexGroup direction="column">
-              <EuiTitle size="xs">
-                <h5>
-                  {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.title', {
-                    defaultMessage: 'Open your coding agent',
-                  })}
-                </h5>
-              </EuiTitle>
-              <EuiText size="xs">
-                {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.description', {
-                  defaultMessage:
-                    'Install Elastic’s optimized getting started skills and start building with your preferred code agent.',
-                })}
-              </EuiText>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                  <EuiButton
-                    iconSide="left"
-                    iconType="code"
-                    onClick={handleOpenInClaudeCli}
-                    data-test-subj="agentInstallLaunchBtn"
-                    color="text"
-                  >
-                    {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.cta', {
-                      defaultMessage: 'Install Elastic skills',
-                    })}
-                  </EuiButton>
+      <EuiPanel color="plain" hasShadow={true} paddingSize="none">
+        <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="row">
+          <EuiFlexItem>
+            <EuiPanel color="transparent" paddingSize="l">
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
                   <EuiIcon
                     color="subdued"
                     size="m"
@@ -104,6 +72,9 @@ export const AgentInstallSection = () => {
                     })}
                     type={anthropicIcon}
                   />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
                   <EuiIcon
                     color="subdued"
                     size="m"
@@ -112,6 +83,8 @@ export const AgentInstallSection = () => {
                     })}
                     type={cursorIcon}
                   />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiIcon
                     color="subdued"
                     size="m"
@@ -120,50 +93,80 @@ export const AgentInstallSection = () => {
                     })}
                     type={vsCodeIcon}
                   />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        {services.agentBuilder ? (
-          <>
-            <EuiFlexItem>
-              <EuiPanel color="subdued" hasShadow={false}>
-                <EuiFlexGroup direction="column">
-                  <EuiTitle size="xs">
-                    <h5>
-                      {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.title', {
-                        defaultMessage: 'Elastic Agent',
-                      })}
-                    </h5>
-                  </EuiTitle>
-                  <EuiText size="xs">
-                    {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.description', {
-                      defaultMessage:
-                        'Let our agent guide you through getting data in, setting up your index and running queries.',
-                    })}
-                  </EuiText>
-                  <EuiFlexItem>
-                    <EuiFlexGroup direction="row" gutterSize="s">
-                      <AiButton
-                        iconType="productAgent"
-                        variant="outlined"
-                        onClick={handleOpenInAgentBuilder}
-                        data-test-subj="agentInstallOpenInAgentBuilder"
-                      >
-                        {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.cta', {
-                          defaultMessage: 'Open Elastic Agent',
-                        })}
-                      </AiButton>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiTitle size="xs"><h5>{i18n.translate('xpack.gettingStarted.agentInstall.title', {
+                defaultMessage: 'Install Elastic Agent skills',
+              })}</h5></EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <p>{i18n.translate('xpack.gettingStarted.agentInstall.description', {
+                  defaultMessage: 'Get started in your code prompt of choice with our curated agent skills.',
+                })}</p>
+              </EuiText>
+
+              <EuiSpacer size="l" />
+              <EuiButton
+                iconSide="left"
+                iconType="code"
+                onClick={handleOpenInClaudeCli}
+                data-test-subj="agentInstallLaunchBtn"
+                color="primary"
+                fill
+              >
+                {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.cta', {
+                  defaultMessage: 'Install Elastic skills',
+                })}
+              </EuiButton>
+
+
+
+            </EuiPanel>
+          </EuiFlexItem>
+
+          {services.agentBuilder ? (
+
+            <EuiFlexItem css={css`border-left: ${euiTheme.border.thin};`}>
+              <EuiPanel color="transparent" paddingSize="l">
+                <EuiIcon
+                  color="subdued"
+                  size="m"
+                  type="sparkles"
+                />
+                <EuiSpacer size="m" />
+                <EuiTitle size="xs"><h5>{i18n.translate('xpack.gettingStarted.agentInstall.title', {
+                  defaultMessage: 'Elasticsearch Agent',
+                })}</h5></EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  <p>{i18n.translate('xpack.gettingStarted.agentInstall.description', {
+                    defaultMessage: 'Skip the setup and start learning and interacting with Elasticsearch right away.',
+                  })}</p>
+                </EuiText>
+
+                <EuiSpacer size="l" />
+
+                <AiButton
+                  iconType="productAgent"
+                  variant="outlined"
+                  onClick={handleOpenInAgentBuilder}
+                  data-test-subj="agentInstallOpenInAgentBuilder"
+                >
+                  {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.cta', {
+                    defaultMessage: 'Open Elastic Agent',
+                  })}
+                </AiButton>
+
               </EuiPanel>
             </EuiFlexItem>
-          </>
-        ) : null}
-      </EuiFlexGroup>
-      {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />}
+
+          ) : null}
+        </EuiFlexGroup>
+      </EuiPanel>
+
+      {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />
+      }
     </>
   );
 };
