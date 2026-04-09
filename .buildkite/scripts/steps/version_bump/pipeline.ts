@@ -62,6 +62,10 @@ const BUMP_TYPE = process.env.WORKFLOW;
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/create_new_branch.yml'));
 
+      // Step 3.5: Wait for branch creation, then notify Slack that branching happened but version bump is pending
+      pipeline.push('  - wait');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/notify_branch_created.yml'));
+
       // Step 4: Wait, and then do a bunch of file changes in the new branch.
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
