@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useUpdateAssetCriticality } from './use_update_asset_criticality';
 import type { Entity } from '../../../../common/api/entity_analytics';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 const mockBulkUpdateEntities = jest.fn();
 jest.mock('@kbn/entity-store/public', () => ({
@@ -46,120 +47,221 @@ describe('useUpdateAssetCriticality', () => {
     mockBulkUpdateEntities.mockResolvedValue({});
   });
 
-  it('calls bulkUpdateEntities with the correct entity type and body', async () => {
-    const { result } = renderHook(
-      () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
-      { wrapper: TestProviders }
-    );
+  describe('updateAssetCriticalityRecord', () => {
+    it('calls bulkUpdateEntities with the correct entity type and body', async () => {
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
 
-    await act(async () => {
-      await result.current(hostRecord);
+      await act(async () => {
+        await result.current.updateAssetCriticalityRecord(hostRecord);
+      });
+
+      expect(mockBulkUpdateEntities).toHaveBeenCalledWith(
+        mockHttp,
+        expect.objectContaining({
+          entityType: 'host',
+          body: {
+            entity: { id: 'host-123' },
+            asset: { criticality: 'high_impact' },
+          },
+          force: true,
+        })
+      );
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
-    expect(mockBulkUpdateEntities).toHaveBeenCalledWith(
-      mockHttp,
-      expect.objectContaining({
-        entityType: 'host',
-        body: {
-          entity: { id: 'host-123' },
-          asset: { criticality: 'high_impact' },
-        },
-        force: true,
-      })
-    );
-    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
-  });
+    it('patches the entity store search cache after a successful update', async () => {
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
 
-  it('patches the entity store search cache after a successful update', async () => {
-    const { result } = renderHook(
-      () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
-      { wrapper: TestProviders }
-    );
+      await act(async () => {
+        await result.current.updateAssetCriticalityRecord(hostRecord);
+      });
 
-    await act(async () => {
-      await result.current(hostRecord);
+      expect(mockApplyEntityStoreSearchCachePatch).toHaveBeenCalledWith(
+        expect.anything(),
+        'host',
+        hostRecord
+      );
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
-    expect(mockApplyEntityStoreSearchCachePatch).toHaveBeenCalledWith(
-      expect.anything(),
-      'host',
-      hostRecord
-    );
-    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
+    it('shows an error toast when entity id is missing', async () => {
+      const recordWithoutId: Entity = {
+        entity: {},
+        asset: { criticality: 'low_impact' },
+      } as Entity;
+
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
+
+      await act(async () => {
+        await result.current.updateAssetCriticalityRecord(recordWithoutId);
+      });
+
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: expect.any(String) })
+      );
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+    });
+
+    it('shows an error toast when bulkUpdateEntities throws', async () => {
+      const error = new Error('network failure');
+      mockBulkUpdateEntities.mockRejectedValue(error);
+
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
+
+      await act(async () => {
+        await result.current.updateAssetCriticalityRecord(hostRecord);
+      });
+
+      expect(mockAddError).toHaveBeenCalledWith(
+        error,
+        expect.objectContaining({ title: expect.any(String) })
+      );
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+    });
+
+    it('uses null criticality when asset criticality is not set', async () => {
+      const recordWithoutCriticality: Entity = {
+        entity: { id: 'host-456' },
+      } as Entity;
+
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
+
+      await act(async () => {
+        await result.current.updateAssetCriticalityRecord(recordWithoutCriticality);
+      });
+
+      expect(mockBulkUpdateEntities).toHaveBeenCalledWith(
+        mockHttp,
+        expect.objectContaining({
+          body: {
+            entity: { id: 'host-456' },
+            asset: { criticality: null },
+          },
+        })
+      );
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('shows an error toast when entity id is missing', async () => {
-    const recordWithoutId: Entity = {
-      entity: {},
+  describe('updateAssetCriticalityLevel', () => {
+    const storeRecord: EntityStoreRecord = {
+      entity: { id: 'host-123' },
       asset: { criticality: 'low_impact' },
-    } as Entity;
+    } as EntityStoreRecord;
 
-    const { result } = renderHook(
-      () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
-      { wrapper: TestProviders }
-    );
+    it('calls bulkUpdateEntities with the given criticality level', async () => {
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
 
-    await act(async () => {
-      await result.current(recordWithoutId);
+      await act(async () => {
+        await result.current.updateAssetCriticalityLevel('high_impact', storeRecord);
+      });
+
+      expect(mockBulkUpdateEntities).toHaveBeenCalledWith(
+        mockHttp,
+        expect.objectContaining({
+          entityType: 'host',
+          body: {
+            entity: { id: 'host-123' },
+            asset: { criticality: 'high_impact' },
+          },
+          force: true,
+        })
+      );
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
-    expect(mockAddError).toHaveBeenCalledWith(
-      expect.any(Error),
-      expect.objectContaining({ title: expect.any(String) })
-    );
-    expect(mockOnSuccess).not.toHaveBeenCalled();
-  });
+    it('maps unassigned level to null criticality', async () => {
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
 
-  it('uses null criticality when asset criticality is not set', async () => {
-    const recordWithoutCriticality: Entity = {
-      entity: { id: 'host-456' },
-    } as Entity;
+      await act(async () => {
+        await result.current.updateAssetCriticalityLevel('unassigned', storeRecord);
+      });
 
-    const { result } = renderHook(
-      () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
-      { wrapper: TestProviders }
-    );
-
-    await act(async () => {
-      await result.current(recordWithoutCriticality);
+      expect(mockBulkUpdateEntities).toHaveBeenCalledWith(
+        mockHttp,
+        expect.objectContaining({
+          body: expect.objectContaining({ asset: { criticality: null } }),
+        })
+      );
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
-    expect(mockBulkUpdateEntities).toHaveBeenCalledWith(
-      mockHttp,
-      expect.objectContaining({
-        body: {
-          entity: { id: 'host-456' },
-          asset: { criticality: null },
-        },
-      })
-    );
-    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
-  });
+    it('patches the cache with the updated criticality level', async () => {
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
 
-  it('works with user entity type', async () => {
-    const userRecord: Entity = {
-      entity: { id: 'user-789' },
-      asset: { criticality: 'extreme_impact' },
-    } as Entity;
+      await act(async () => {
+        await result.current.updateAssetCriticalityLevel('extreme_impact', storeRecord);
+      });
 
-    const { result } = renderHook(
-      () => useUpdateAssetCriticality('user', { onSuccess: mockOnSuccess }),
-      { wrapper: TestProviders }
-    );
-
-    await act(async () => {
-      await result.current(userRecord);
+      expect(mockApplyEntityStoreSearchCachePatch).toHaveBeenCalledWith(
+        expect.anything(),
+        'host',
+        expect.objectContaining({
+          asset: expect.objectContaining({ criticality: 'extreme_impact' }),
+        })
+      );
     });
 
-    expect(mockBulkUpdateEntities).toHaveBeenCalledWith(
-      mockHttp,
-      expect.objectContaining({ entityType: 'user' })
-    );
-    expect(mockApplyEntityStoreSearchCachePatch).toHaveBeenCalledWith(
-      expect.anything(),
-      'user',
-      userRecord
-    );
-    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
+    it('shows an error toast when record is null', async () => {
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
+
+      await act(async () => {
+        await result.current.updateAssetCriticalityLevel('high_impact', null);
+      });
+
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: expect.any(String) })
+      );
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+    });
+
+    it('shows an error toast when bulkUpdateEntities throws', async () => {
+      const error = new Error('network failure');
+      mockBulkUpdateEntities.mockRejectedValue(error);
+
+      const { result } = renderHook(
+        () => useUpdateAssetCriticality('host', { onSuccess: mockOnSuccess }),
+        { wrapper: TestProviders }
+      );
+
+      await act(async () => {
+        await result.current.updateAssetCriticalityLevel('high_impact', storeRecord);
+      });
+
+      expect(mockAddError).toHaveBeenCalledWith(
+        error,
+        expect.objectContaining({ title: expect.any(String) })
+      );
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+    });
   });
 });

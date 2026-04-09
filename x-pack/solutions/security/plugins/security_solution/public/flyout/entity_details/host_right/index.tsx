@@ -149,7 +149,7 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const updateAssetCriticality = useUpdateAssetCriticality('host', {
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
   });
 
@@ -223,7 +223,7 @@ export const HostPanel = ({
   const onCriticalitySave =
     entityFromStoreResult.entityRecord && observedHost.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
-          updateAssetCriticality(level, observedHost.entityRecord)
+          updateAssetCriticalityLevel(level, observedHost.entityRecord)
       : undefined;
 
   const entityStoreEntityId = entityStoreV2Enabled

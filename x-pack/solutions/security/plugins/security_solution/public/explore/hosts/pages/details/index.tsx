@@ -418,7 +418,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     onSuccess: refetchRiskScore,
   });
 
-  const updateAssetCriticality = useUpdateAssetCriticality('host', {
+  const { updateAssetCriticalityRecord } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
   });
 
@@ -499,7 +499,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                 noEntityInStore={noEntityInStore}
                 observedHostEntityRecord={observedHost.entityRecord}
                 storeRecord={entityFromStoreResult.entityRecord}
-                onSaveViaEntityStore={updateAssetCriticality}
+                onSaveViaEntityStore={updateAssetCriticalityRecord}
                 onCriticalityChange={calculateEntityRiskScore}
               />
               {!noEntityInStore && (

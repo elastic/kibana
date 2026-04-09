@@ -418,7 +418,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     onSuccess: refetchRiskScore,
   });
 
-  const updateAssetCriticality = useUpdateAssetCriticality('user', {
+  const { updateAssetCriticalityRecord } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,
   });
 
@@ -492,7 +492,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 noEntityInStore={noEntityInStore}
                 observedUserEntityRecord={observedUser.entityRecord}
                 storeRecord={entityFromStoreResult.entityRecord}
-                onSaveViaEntityStore={updateAssetCriticality}
+                onSaveViaEntityStore={updateAssetCriticalityRecord}
                 onCriticalityChange={calculateEntityRiskScore}
               />
               {!noEntityInStore && (

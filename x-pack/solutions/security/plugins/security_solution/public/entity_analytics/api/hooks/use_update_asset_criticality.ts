@@ -13,6 +13,7 @@ import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_a
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { applyEntityStoreSearchCachePatch } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useKibana } from '../../../common/lib/kibana';
+import type { Entity } from '../../../../common/api/entity_analytics';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ASSET_CRITICALITY_UPDATE_ERROR = i18n.translate(
@@ -29,12 +30,12 @@ export const useUpdateAssetCriticality = (
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const updateAssetCriticalityCb = useCallback(
-    async (level: CriticalityLevelWithUnassigned, record?: EntityStoreRecord | null) => {
-      const entityIdToUpdate = record?.entity?.id;
-      const updatedAssetCriticality = level === 'unassigned' ? null : level;
+  const updateAssetCriticalityRecord = useCallback(
+    async (updatedRecord: Entity) => {
+      const entityIdToUpdate = updatedRecord.entity?.id;
+      const updatedAssetCriticality = updatedRecord.asset?.criticality ?? null;
 
-      if (!record || !entityIdToUpdate) {
+      if (!entityIdToUpdate) {
         addError(new Error('Entity ID is undefined.'), { title: ASSET_CRITICALITY_UPDATE_ERROR });
         return;
       }
@@ -50,13 +51,11 @@ export const useUpdateAssetCriticality = (
           },
           force: true,
         });
-        applyEntityStoreSearchCachePatch(queryClient, entityType, {
-          ...record,
-          asset: {
-            ...record.asset,
-            criticality: updatedAssetCriticality,
-          },
-        });
+        applyEntityStoreSearchCachePatch(
+          queryClient,
+          entityType,
+          updatedRecord as EntityStoreRecord
+        );
         onSuccess();
       } catch (error) {
         addError(error, { title: ASSET_CRITICALITY_UPDATE_ERROR });
@@ -65,5 +64,27 @@ export const useUpdateAssetCriticality = (
     [addError, http, queryClient, entityType, onSuccess]
   );
 
-  return updateAssetCriticalityCb;
+  const updateAssetCriticalityLevel = useCallback(
+    async (level: CriticalityLevelWithUnassigned, record?: EntityStoreRecord | null) => {
+      const updatedAssetCriticality = level === 'unassigned' ? null : level;
+
+      if (!record) {
+        addError(new Error('Entity ID is undefined.'), { title: ASSET_CRITICALITY_UPDATE_ERROR });
+        return;
+      }
+
+      const updatedRecord = {
+        ...record,
+        asset: {
+          ...record.asset,
+          criticality: updatedAssetCriticality,
+        },
+      };
+
+      await updateAssetCriticalityRecord(updatedRecord as Entity);
+    },
+    [addError, updateAssetCriticalityRecord]
+  );
+
+  return { updateAssetCriticalityLevel, updateAssetCriticalityRecord };
 };

@@ -164,7 +164,7 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const updateAssetCriticality = useUpdateAssetCriticality('user', {
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,
   });
 
@@ -231,7 +231,7 @@ export const UserPanel = ({
 
   const onCriticalitySave = entityFromStoreResult.entityRecord
     ? (level: CriticalityLevelWithUnassigned) =>
-        updateAssetCriticality(level, entityFromStoreResult.entityRecord)
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
     : undefined;
 
   const defaultTab = useMemo(() => {

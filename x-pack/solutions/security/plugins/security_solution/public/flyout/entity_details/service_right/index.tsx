@@ -120,7 +120,7 @@ export const ServicePanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const updateAssetCriticality = useUpdateAssetCriticality('service', {
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,
   });
 
@@ -139,7 +139,7 @@ export const ServicePanel = ({
 
   const onCriticalitySave = entityFromStoreResult.entityRecord
     ? (level: CriticalityLevelWithUnassigned) =>
-        updateAssetCriticality(level, entityFromStoreResult.entityRecord)
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
     : undefined;
 
   const openDetailsPanel = useNavigateToServiceDetails({
