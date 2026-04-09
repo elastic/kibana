@@ -29,7 +29,7 @@ export class FunctionsPage {
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/functions`);
     await this.page
-      .getByRole('tab', { name: 'TopN functions' })
+      .getByRole('tab', { name: 'TopN functions', exact: true })
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
@@ -38,7 +38,7 @@ export class FunctionsPage {
       `${this.kbnUrl.app('profiling')}/functions?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
     await this.page
-      .getByRole('tab', { name: 'TopN functions' })
+      .getByRole('tab', { name: 'TopN functions', exact: true })
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
