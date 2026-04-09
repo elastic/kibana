@@ -1559,7 +1559,9 @@ describe('Cloud Connector API', () => {
       expect(mockPackagePolicyService.list).toHaveBeenCalledWith(expect.any(Object), {
         page: 1,
         perPage: 10,
-        kuery: 'fleet-package-policies.attributes.cloud_connector_id:"connector-123"',
+        kuery: expect.stringContaining(
+          'fleet-package-policies.attributes.cloud_connector_id:"connector-123"'
+        ),
       });
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1648,7 +1650,9 @@ describe('Cloud Connector API', () => {
       expect(mockPackagePolicyService.list).toHaveBeenCalledWith(expect.any(Object), {
         page: 3,
         perPage: 5,
-        kuery: 'fleet-package-policies.attributes.cloud_connector_id:"connector-123"',
+        kuery: expect.stringContaining(
+          'fleet-package-policies.attributes.cloud_connector_id:"connector-123"'
+        ),
       });
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1732,7 +1736,7 @@ describe('Cloud Connector API', () => {
       });
     });
 
-    it('should exclude hidden packages (verifier_otel) from usage results and totals', async () => {
+    it('should exclude hidden packages (verifier_otel) via kuery filter', async () => {
       const mockCloudConnector: CloudConnector = {
         id: 'connector-123',
         name: 'test-connector',
@@ -1747,6 +1751,7 @@ describe('Cloud Connector API', () => {
       };
 
       mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      // Simulate what ES returns after the kuery filter excludes verifier_otel
       mockPackagePolicyService.list.mockResolvedValue({
         items: [
           {
@@ -1758,18 +1763,6 @@ describe('Cloud Connector API', () => {
               version: '1.0.0',
             },
             policy_ids: ['agent-policy-1'],
-            created_at: '2023-01-01T00:00:00.000Z',
-            updated_at: '2023-01-02T00:00:00.000Z',
-          },
-          {
-            id: 'policy-2',
-            name: 'Verifier Policy',
-            package: {
-              name: 'verifier_otel',
-              title: 'Permission Verifier',
-              version: '1.0.0',
-            },
-            policy_ids: ['agent-policy-2'],
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-02T00:00:00.000Z',
           },
@@ -1786,7 +1779,7 @@ describe('Cloud Connector API', () => {
             updated_at: '2023-01-02T00:00:00.000Z',
           },
         ],
-        total: 3,
+        total: 2,
         page: 1,
         perPage: 10,
       } as any);
@@ -1797,6 +1790,16 @@ describe('Cloud Connector API', () => {
       });
 
       await getCloudConnectorUsageHandler(context, request, response);
+
+      // Verify the kuery includes the NOT filter for hidden packages
+      expect(mockPackagePolicyService.list).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          kuery: expect.stringContaining(
+            'NOT fleet-package-policies.attributes.package.name:"verifier_otel"'
+          ),
+        })
+      );
 
       expect(response.ok).toHaveBeenCalledWith({
         body: {

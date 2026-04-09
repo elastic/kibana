@@ -229,8 +229,15 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
     // First, verify the cloud connector exists
     await cloudConnectorService.getById(internalSoClient, cloudConnectorId);
 
-    // Query package policies that use this cloud connector with pagination
-    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`;
+    // Build a kuery that fetches policies for this connector while excluding
+    // internal/hidden packages (e.g. verifier_otel) at the query level so that
+    // result.total is accurate across all pages.
+    const hiddenFilter = CLOUD_CONNECTOR_HIDDEN_PACKAGES.map(
+      (pkg) => `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:"${pkg}"`
+    ).join(' AND ');
+    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"${
+      hiddenFilter ? ` AND ${hiddenFilter}` : ''
+    }`;
 
     logger.debug(`Querying package policies with kuery: ${kuery}`);
 
@@ -242,16 +249,7 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
 
     logger.debug(`Found ${result?.total || 0} total package policies using cloud connector`);
 
-    // Filter out internal/hidden packages (e.g. verifier_otel) that should
-    // not appear in the Identity Federation Flyout usage list.
-    const visiblePolicies = (result?.items || []).filter(
-      (policy) =>
-        !policy.package?.name || !CLOUD_CONNECTOR_HIDDEN_PACKAGES.includes(policy.package.name)
-    );
-
-    const hiddenCount = (result?.items || []).length - visiblePolicies.length;
-
-    const usageItems: CloudConnectorUsageItem[] = visiblePolicies.map((policy) => ({
+    const usageItems: CloudConnectorUsageItem[] = (result?.items || []).map((policy) => ({
       id: policy.id,
       name: policy.name,
       package: policy.package
@@ -266,14 +264,14 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
       updated_at: policy.updated_at,
     }));
 
-    const adjustedTotal = (result?.total || 0) - hiddenCount;
-
     logger.info(
-      `Successfully retrieved usage for cloud connector ${cloudConnectorId}: ${usageItems.length} of ${adjustedTotal} policies (${hiddenCount} hidden)`
+      `Successfully retrieved usage for cloud connector ${cloudConnectorId}: ${
+        usageItems.length
+      } of ${result?.total || 0} policies`
     );
     const body: GetCloudConnectorUsageResponse = {
       items: usageItems,
-      total: adjustedTotal,
+      total: result?.total || 0,
       page,
       perPage,
     };
