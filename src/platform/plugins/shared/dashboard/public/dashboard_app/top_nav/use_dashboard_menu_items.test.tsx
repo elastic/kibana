@@ -185,7 +185,7 @@ describe('useDashboardMenuItems', () => {
     });
   });
 
-  describe('switchToViewMode', () => {
+  describe('run switchToViewMode', () => {
     describe('dashboard does not have unsaved changes', () => {
       test('should switch to view mode', () => {
         const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
