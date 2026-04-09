@@ -102,7 +102,14 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" at same timestamps as email POST /send_order_confirmation 200)',
             score: 1,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
               { term: { 'resource.attributes.app': 'email' } },
             ],
           },
@@ -140,17 +147,7 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'entity-checkout',
             text: 'Must identify checkout service as an entity with filter on resource.attributes.app=checkout (evidence: 280 docs; "[PlaceOrder] user_id=..." and "order confirmation email sent to" in body.text)',
             score: 2,
-            sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
-              {
-                bool: {
-                  filter: [
-                    { term: { 'resource.attributes.app': 'checkout' } },
-                    { term: { 'log.level': 'error' } },
-                  ],
-                },
-              },
-            ],
+            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
           },
           {
             id: 'entity-frontend',
@@ -162,7 +159,7 @@ export const otelDemoDataset: DatasetConfig = {
                 bool: {
                   filter: [
                     { term: { 'resource.attributes.app': 'frontend' } },
-                    { term: { 'log.level': 'error' } },
+                    { match_phrase: { 'body.text': 'failed to charge card' } },
                   ],
                 },
               },
@@ -233,7 +230,14 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" correlating with email POST /send_order_confirmation 200)',
             score: 1,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
               { term: { 'resource.attributes.app': 'email' } },
             ],
           },
@@ -287,7 +291,7 @@ export const otelDemoDataset: DatasetConfig = {
                 bool: {
                   filter: [
                     { term: { 'resource.attributes.app': 'cart' } },
-                    { term: { 'log.level': 'error' } },
+                    { match_phrase: { 'body.text': 'connect to redis' } },
                   ],
                 },
               },
@@ -303,7 +307,7 @@ export const otelDemoDataset: DatasetConfig = {
                 bool: {
                   filter: [
                     { term: { 'resource.attributes.app': 'frontend' } },
-                    { term: { 'log.level': 'error' } },
+                    { match_phrase: { 'body.text': 'ECONNREFUSED' } },
                   ],
                 },
               },
@@ -311,19 +315,9 @@ export const otelDemoDataset: DatasetConfig = {
           },
           {
             id: 'entity-checkout',
-            text: 'Must identify checkout service as an entity (evidence: 293 docs; "[PlaceOrder]" and "order confirmation email sent to"; also "cart failure: failed to get user cart during checkout" errors)',
+            text: 'Must identify checkout service as an entity (evidence: 293 docs; "[PlaceOrder]" and "order confirmation email sent to")',
             score: 2,
-            sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
-              {
-                bool: {
-                  filter: [
-                    { term: { 'resource.attributes.app': 'checkout' } },
-                    { term: { 'log.level': 'error' } },
-                  ],
-                },
-              },
-            ],
+            sampling_filters: [{ term: { 'resource.attributes.app': 'checkout' } }],
           },
           {
             id: 'entity-shipping',
@@ -386,20 +380,18 @@ export const otelDemoDataset: DatasetConfig = {
             ],
           },
           {
-            id: 'dep-checkout-cart',
-            text: 'Should identify the dependency checkout → cart (evidence: "cart failure: failed to get user cart during checkout: rpc error: code = Unavailable ... connect: connection refused")',
-            score: 2,
-            sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
-              { term: { 'resource.attributes.app': 'cart' } },
-            ],
-          },
-          {
             id: 'dep-checkout-email',
             text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" correlating with email POST /send_order_confirmation 200)',
             score: 1,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
               { term: { 'resource.attributes.app': 'email' } },
             ],
           },
@@ -429,7 +421,7 @@ export const otelDemoDataset: DatasetConfig = {
         required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[cart, frontend, checkout, shipping, payment, email, recommendation, ad, quote, valkey], deps=[cart->valkey, frontend->cart, checkout->cart, checkout->email, shipping->quote, frontend->checkout], infra=[kubernetes/minikube, otel-demo namespace, otel-collector, arm64 architecture], error_signatures=[ECONNREFUSED 10.105.181.182:7070 cart unreachable, gRPC code 14 UNAVAILABLE, No connection established, Application is shutting down (cart crash), cart failure: failed to get user cart during checkout; frontend and checkout observe cart errors via gRPC]',
+          'entities=[cart, frontend, checkout, shipping, payment, email, recommendation, ad, quote, valkey], deps=[cart->valkey, frontend->cart, checkout->email, shipping->quote, frontend->checkout], infra=[kubernetes/minikube, otel-demo namespace, otel-collector, arm64 architecture], error_signatures=[ECONNREFUSED 10.105.181.182:7070 cart unreachable, gRPC code 14 UNAVAILABLE, No connection established, Application is shutting down (cart crash), cart failure: failed to get user cart during checkout; frontend observes cart errors via gRPC]',
       },
       metadata: {
         difficulty: 'medium',
@@ -520,7 +512,14 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Should identify the dependency checkout → email (evidence: checkout logs "order confirmation email sent to" correlating with email POST /send_order_confirmation 200)',
             score: 1,
             sampling_filters: [
-              { term: { 'resource.attributes.app': 'checkout' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'checkout' } },
+                    { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+                  ],
+                },
+              },
               { term: { 'resource.attributes.app': 'email' } },
             ],
           },
@@ -537,6 +536,11 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'k8s-pod-events',
             text: 'Should identify Kubernetes pod lifecycle events showing checkout rolling update (evidence: 15 checkout-specific K8s events; reason=Killing "Stopping container checkout" for old pod checkout-78684c5ffd-cbbfc, then new replica set checkout-5766978597 scaled up with full pod lifecycle: Scheduled → Created → Pulled → Started)',
             score: 1,
+            sampling_filters: [
+              { match: { 'body.structured.object.reason': 'Killing' } },
+              { match: { 'body.structured.object.reason': 'ScalingReplicaSet' } },
+              { match: { 'body.structured.object.reason': 'Started' } },
+            ],
           },
           {
             id: 'tech-kubernetes',

@@ -17,14 +17,6 @@ import {
 
 const SAMPLE_DOCS_MAX = 50;
 
-const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
-  const app = fields['resource.attributes.app'];
-  if (Array.isArray(app)) {
-    return app[0];
-  }
-  return undefined;
-};
-
 const addUniqueHitsToSample = ({
   hits,
   docs,
@@ -88,17 +80,15 @@ export const collectSampleDocuments = async ({
   );
 
   const unmatchedFilters: string[] = [];
+  const criterionHitCounts = new Map<string, number>();
   for (const { hits, criterion, filter } of samplingFilterResults) {
     const hit = hits[0];
     if (!hit) {
       unmatchedFilters.push(`[${criterion.id}] filter: ${JSON.stringify(filter)}`);
       continue;
     }
-    const app = hit.fields ? getAppNameFromFields(hit.fields) : undefined;
-    const logLevel = hit.fields?.['log.level']?.[0] ?? 'unknown';
-    log.debug(
-      `  [${criterion.id}] matched doc ${hit._id} (app=${app ?? 'n/a'}, level=${logLevel})`
-    );
+    criterionHitCounts.set(criterion.id, (criterionHitCounts.get(criterion.id) ?? 0) + 1);
+    log.debug(`  [${criterion.id}] matched doc ${hit._id} via filter ${JSON.stringify(filter)}`);
   }
 
   if (unmatchedFilters.length > 0) {
@@ -109,47 +99,45 @@ export const collectSampleDocuments = async ({
     );
   }
 
-  const preDedupe = samplingFilterResults.reduce((sum, { hits }) => sum + hits.length, 0);
+  const totalFilterHits = samplingFilterResults.reduce((sum, { hits }) => sum + hits.length, 0);
   addUniqueHitsToSample({
     hits: samplingFilterResults.flatMap(({ hits }) => hits),
     docs,
     seen,
   });
   const criteriaCount = docs.length;
-  const duplicateCount = preDedupe - criteriaCount;
+  const duplicateCount = totalFilterHits - criteriaCount;
   if (duplicateCount > 0) {
     log.debug(
       `${duplicateCount} duplicate doc(s) skipped across criteria filters (multiple filters matched the same document)`
     );
   }
 
+  let generalFillCount = 0;
   if (docs.length < SAMPLE_DOCS_MAX) {
+    const remaining = SAMPLE_DOCS_MAX - docs.length;
     const { hits } = await getSampleDocuments({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
       start: 0,
       end: Date.now(),
       filter: [...query, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
-      size: SAMPLE_DOCS_MAX - docs.length,
+      size: remaining,
     });
 
+    const beforeFill = docs.length;
     addUniqueHitsToSample({ hits, docs, seen });
+    generalFillCount = docs.length - beforeFill;
   }
 
-  const appCounts = new Map<string, number>();
-  for (const doc of docs) {
-    const app = doc.fields ? getAppNameFromFields(doc.fields) : undefined;
-    appCounts.set(app ?? 'unknown', (appCounts.get(app ?? 'unknown') ?? 0) + 1);
-  }
-  const distribution = [...appCounts.entries()]
-    .sort(([, a], [, b]) => b - a)
-    .map(([app, count]) => `${app}:${count}`)
+  const criteriaDistribution = [...criterionHitCounts.entries()]
+    .map(([id, count]) => `${id}:${count}`)
     .join(', ');
 
   log.info(
-    `Collected ${docs.length} sample document(s) across ${appCounts.size} app(s) ` +
-      `(${criteriaCount} from criteria filters, ${docs.length - criteriaCount} general fill). ` +
-      `Distribution: ${distribution}`
+    `Collected ${docs.length} sample document(s) ` +
+      `(${criteriaCount} from ${criterionHitCounts.size} criteria, ${generalFillCount} general fill). ` +
+      `Per-criterion: ${criteriaDistribution}`
   );
 
   return docs;
