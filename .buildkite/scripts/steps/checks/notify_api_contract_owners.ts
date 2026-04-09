@@ -55,7 +55,7 @@ ${rows}
 ### What to do
 
 1. **Fix the breaking change** if it was unintentional.
-2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with \`@elastic/terraform-provider\`.
+2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with members in the \`#kibana-oas-terraform\` Slack channel.
 
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for details on the allowlist schema and workflow.`;
 };
