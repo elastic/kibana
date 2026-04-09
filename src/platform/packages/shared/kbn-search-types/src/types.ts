@@ -129,6 +129,11 @@ export interface ISearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
+
+  /**
+   * The length of time to wait for results before polling again.
+   */
+  pollLength?: string;
 }
 
 /**

@@ -329,7 +329,8 @@ export class SearchInterceptor {
 
     const search = ({
       abortSignal = searchAbortController.getSignal(),
-    }: Pick<ISearchOptions, 'abortSignal'> = {}) => {
+      pollLength,
+    }: Pick<ISearchOptions, 'abortSignal' | 'pollLength'> = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -343,6 +344,7 @@ export class SearchInterceptor {
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,
+          pollLength,
         }
       )
         .then((result) => {
@@ -360,7 +362,7 @@ export class SearchInterceptor {
           abort: (reason?: AbortReason) => searchAbortController.abort(reason),
           poll: async (abortSignal) => {
             if (id) {
-              await search({ abortSignal });
+              await search({ abortSignal, pollLength: '0' });
             }
           },
         })
@@ -529,11 +531,12 @@ export class SearchInterceptor {
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
     const paramsToUse = request.id
       ? {
-          wait_for_completion_timeout:
-            // don't set or override user-configured pollLength, it will be applied server-side
+          wait_for_completion_timeout: options?.pollLength
+            ? options.pollLength
+            : // don't set or override user-configured pollLength, it will be applied server-side
             !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
-              ? DEFAULT_MULTIPLEXING_POLL_LENGTH
-              : undefined,
+            ? DEFAULT_MULTIPLEXING_POLL_LENGTH
+            : undefined,
 
           // FIXME: the dropNullColumns param shouldn't be needed during polling
           // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
