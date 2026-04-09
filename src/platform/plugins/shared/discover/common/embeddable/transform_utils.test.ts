@@ -1110,7 +1110,7 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 3,
         row_height: 3,
-        query: { language: 'kuery', query: '' },
+        query: { language: 'kql', expression: '' },
         filters: [
           {
             type: ASCODE_FILTER_TYPE.CONDITION,
@@ -1127,7 +1127,7 @@ describe('search embeddable transform utils', () => {
             negate: false,
           },
         ],
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'dv-1' },
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'dv-1' },
       };
 
       const { state } = toStoredTab(apiTab);
