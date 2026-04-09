@@ -103,6 +103,7 @@ it('passes correct args to sub-classes', () => {
           "gracefulTimeout": 30000,
           "log": <TestLog>,
           "mapLogLine": [Function],
+          "proxyUrl": undefined,
           "script": <absolute path>/scripts/kibana,
           "watcher": Watcher {
             "optimizerShouldRestart$": [MockFunction],
@@ -116,6 +117,7 @@ it('passes correct args to sub-classes', () => {
     Array [
       Array [
         Object {
+          "basePath": undefined,
           "cache": true,
           "dist": true,
           "enabled": true,
