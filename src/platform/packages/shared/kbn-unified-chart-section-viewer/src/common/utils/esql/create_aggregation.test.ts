@@ -192,32 +192,32 @@ describe('createMetricAggregation with conflicting types', () => {
     });
   });
 
-  describe('incompatible types with multiple field types', () => {
-    it('should return empty string when incompatible types are detected', () => {
+  describe('incompatible types passed through for Lens to handle', () => {
+    it('should pass through keyword + double without casting', () => {
       const result = createMetricAggregation({
         types: [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE],
         instrument: 'gauge',
         metricName: 'field.name',
       });
-      expect(result).toBe('');
+      expect(result).toBe('AVG(field.name)');
     });
 
-    it('should return empty string for text + long incompatible types', () => {
+    it('should pass through text + long without casting', () => {
       const result = createMetricAggregation({
         types: [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.LONG],
         instrument: 'counter',
         metricName: 'field.name',
       });
-      expect(result).toBe('');
+      expect(result).toBe('SUM(RATE(field.name))');
     });
 
-    it('should return empty string for date + double incompatible types', () => {
+    it('should pass through date + double without casting', () => {
       const result = createMetricAggregation({
         types: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE],
         instrument: 'gauge',
         placeholderName: 'metricName',
       });
-      expect(result).toBe('');
+      expect(result).toBe('AVG(??metricName)');
     });
   });
 

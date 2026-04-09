@@ -33,22 +33,20 @@ function getCastFunctionForType(fieldType: ES_FIELD_TYPES | undefined): string |
 
 /**
  * When multiple field types are present, resolves them to a single cast
- * expression if compatible, or signals incompatibility.
+ * expression if compatible. For incompatible types, the field is returned
+ * uncast so Lens can surface its own error.
  */
-function applyCastIfNeeded(
-  types: ES_FIELD_TYPES[],
-  field: ESQLAstExpression
-): { field: ESQLAstExpression; incompatible: boolean } {
-  if (types.length <= 1) return { field, incompatible: false };
+function applyCastIfNeeded(types: ES_FIELD_TYPES[], field: ESQLAstExpression): ESQLAstExpression {
+  if (types.length <= 1) return field;
 
   const resolvedType = resolveConflictingFieldTypes(types);
   if (resolvedType) {
     const castFn = getCastFunctionForType(resolvedType);
     if (castFn) {
-      return { field: synth.exp`${synth.kwd(castFn)}(${field})`, incompatible: false };
+      return synth.exp`${synth.kwd(castFn)}(${field})`;
     }
   }
-  return { field, incompatible: new Set(types).size > 1 };
+  return field;
 }
 
 /**
@@ -63,9 +61,7 @@ function buildAggregationNode(
   field: ESQLAstExpression,
   customFunction?: string
 ): ESQLAstExpression | undefined {
-  const { field: resolvedField, incompatible } = applyCastIfNeeded(types, field);
-  if (incompatible) return undefined;
-
+  const resolvedField = applyCastIfNeeded(types, field);
   const primaryType = types[0];
   if (customFunction) return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
   if (isLegacyHistogram(primaryType, instrument))
