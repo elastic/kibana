@@ -51,7 +51,7 @@ function printWithUpdatedFrom(
  */
 function matchTimeBucket(esql: string): RegExpMatchArray | null {
   return esql.match(
-    /(?:BUCKET|TBUCKET)\s*\(\s*[\w@.]+\s*,\s*(\d+)\s*(seconds?|minutes?|hours?|days?|[smhd])\s*\)/i
+    /(?:BUCKET|TBUCKET)\s*\(\s*@?\w+(?:\.\w+)*\s*,\s*(\d+)\s*(seconds?|minutes?|hours?|days?|[smhd])\s*\)/i
   );
 }
 
@@ -405,7 +405,7 @@ export function extractBucketColumnName(esql: string): string | null {
 
   // Regex fallback for cases where the AST doesn't expose the alias.
   // Supports dotted identifiers (e.g. `foo.bar = BUCKET(...)`).
-  const match = esql.match(/([\w.]+)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i);
+  const match = esql.match(/(\w+(?:\.\w+)*)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i);
   return match?.[1] ?? null;
 }
 
@@ -436,7 +436,7 @@ export const MS_PER_UNIT: Record<string, number> = {
  * Returns `null` when no temporal bucketing is found.
  */
 export function extractBucketTargetField(esql: string): string | null {
-  const match = esql.match(/(?:BUCKET|TBUCKET)\s*\(\s*([\w@.]+)\s*,/i);
+  const match = esql.match(/(?:BUCKET|TBUCKET)\s*\(\s*(@?\w+(?:\.\w+)*)\s*,/i);
   return match?.[1] ?? null;
 }
 
