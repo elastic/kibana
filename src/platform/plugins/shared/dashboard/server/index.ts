@@ -56,6 +56,7 @@ export type {
   DashboardReadResponseBody,
   DashboardSearchRequestParams,
   DashboardSearchResponseBody,
+  DashboardUpdateRequestBody,
   DashboardUpdateResponseBody,
   GridData,
 } from './api';

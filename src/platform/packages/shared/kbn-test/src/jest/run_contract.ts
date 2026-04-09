@@ -677,9 +677,7 @@ export const runJestContract = () => {
       flags: {
         string: [...VALIDATION_RUN_STRING_FLAGS],
         allowUnexpected: true,
-        help: `
-${VALIDATION_RUN_HELP}
-        `,
+        help: [...VALIDATION_RUN_HELP],
       },
     }
   );
