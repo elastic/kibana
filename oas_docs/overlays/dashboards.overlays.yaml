@@ -1,0 +1,196 @@
+overlay: 1.0.0
+info:
+  title: Overlays for the Dashboards API
+  version: 0.0.1
+actions:
+  # ──────────────────────────────────────────────
+  # Tag description
+  # ──────────────────────────────────────────────
+  - target: '$.tags[?(@.name=="Dashboards")]'
+    description: Add tag description with getting started content, externalDocs, and displayName
+    update:
+      description: |
+        A [dashboard](https://www.elastic.co/docs/explore-analyze/dashboards) is a collection of panels arranged on a grid. Each panel can contain a visualization, a Discover session, an image, markdown text, or an interactive filter control. Use this API to create and manage dashboards programmatically.
+
+        ## When to use this API
+
+        - Use this API to define a complete, self-contained dashboard in a single payload, or to create ES|QL-based visualizations. ES|QL is only available through the Dashboards API, not the Visualizations API.
+        - Use the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
+
+        ## Get started
+
+        Before you begin:
+
+        - **Authentication**: Refer to [Authentication](https://www.elastic.co/docs/api/doc/kibana#authentication) in the Kibana API documentation.
+        - **CSRF protection**: Write operations (`POST`, `PUT`, `DELETE`) require the `kbn-xsrf: true` header.
+        - **Spaces**: If you use non-default [Kibana spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces), prepend `s/{space_id}/` to the path.
+
+        The following example creates a minimal dashboard with one inline visualization panel. You can run it as-is once you have the [Kibana sample logs dataset](https://www.elastic.co/docs/explore-analyze/index#add-sample-data) installed:
+
+        ```bash
+        curl -X POST "${KIBANA_URL}/api/dashboards" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "title": "My first dashboard",
+            "panels": [
+              {
+                "type": "vis",
+                "grid": {"x": 0, "y": 0, "w": 24, "h": 10},
+                "config": {
+                  "attributes": {
+                    "type": "metric",
+                    "title": "Total log entries",
+                    "data_source": {
+                      "type": "data_view_spec",
+                      "index_pattern": "kibana_sample_data_logs",
+                      "time_field": "timestamp"
+                    },
+                    "metrics": [{"type": "primary", "operation": "count"}]
+                  }
+                }
+              }
+            ]
+          }'
+        ```
+
+        All examples on this page use [Kibana sample datasets](https://www.elastic.co/docs/explore-analyze/index#add-sample-data) (`kibana_sample_data_logs`, `kibana_sample_data_ecommerce`, `kibana_sample_data_flights`). To use your own data, replace the `index_pattern` and field names.
+
+        ## Dashboard structure
+
+        A [dashboard](https://www.elastic.co/docs/explore-analyze/dashboards) is structured as follows:
+
+        - **`title`** (required): the display name of the dashboard.
+        - **`panels`**: array of items placed on a 48-column grid. Each item has a `type`, a `grid` position (`x`, `y`, `w`, `h`), and a `config`. Three item shapes are supported:
+          - **Panel**: embeds a visualization, Discover session, image, or other content.
+          - **Control**: an interactive filter (dropdown, slider). Use controls to let users filter dashboard data interactively. Controls in `panels` apply only to panels in the same section.
+          - **Section**: a collapsible group of panels. Use sections to organize a large dashboard into logical groups. A section has a `grid.y` position and its own nested `panels` array.
+        - **`pinned_panels`**: controls pinned at the top of the dashboard that apply to all panels.
+        - **`filters`**, **`query`**, **`time_range`**: filter the data displayed across all panels.
+
+        The grid is 48 columns wide. Use `w: 48` for a full-width panel, `w: 24` for half-width, and so on. Height (`h`) and vertical position (`y`) are in grid rows with no fixed maximum.
+
+        ## Panel types
+
+        The `type` field in each panel determines what it contains:
+
+        | Type | Content |
+        |------|---------|
+        | `vis` | Visualization (bar, line, metric, and so on) |
+        | `discover_session` | Discover session |
+        | `image` | Image |
+        | `markdown` | Markdown text |
+
+        Additional panel types for observability use cases:
+
+        | Type | Content |
+        |------|---------|
+        | `slo_alerts` | SLO alerts |
+        | `slo_burn_rate` | SLO burn rate |
+        | `slo_error_budget` | SLO error budget |
+        | `slo_overview` | SLO overview |
+        | `synthetics_monitors` | Synthetics monitors |
+        | `synthetics_stats_overview` | Synthetics stats overview |
+
+        > info
+        > The following panel types are supported in the Kibana UI but not yet by the REST API. Panels with these types return a `400` error: `map`, `legacy_vis`, `links`, `field_stats_table`, `aiops_change_point_chart`, `aiops_log_rate_analysis`, `aiops_pattern_analysis`.
+
+        Control panels (`esql_control`, `options_list_control`, `range_slider_control`, `time_slider_control`) can also appear in `panels` or `pinned_panels`, but use a different `config` structure from content panels. Controls placed in `panels` apply only to panels in the same section. Controls placed in `pinned_panels` apply to all panels.
+
+        ## Embedding visualizations
+
+        Visualization panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a saved visualization by ID).
+
+        For the full `config.attributes` schema, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization).
+
+        - **Inline**: use when the visualization is specific to this dashboard or must work across Kibana spaces. The visualization configuration goes inside `config.attributes`:
+
+          ```json
+          {
+            "type": "vis",
+            "grid": {
+              "x": 0,
+              "y": 0,
+              "w": 24,
+              "h": 10
+            },
+            "config": {
+              "attributes": {
+                "type": "metric",
+                "title": "Average bytes",
+                "data_source": {
+                  "type": "data_view_spec",
+                  "index_pattern": "kibana_sample_data_logs",
+                  "time_field": "timestamp"
+                },
+                "metrics": [
+                  {
+                    "type": "primary",
+                    "operation": "average",
+                    "field": "bytes"
+                  }
+                ]
+              }
+            }
+          }
+          ```
+
+        - **Linked from library**: references a visualization saved in your library by its ID. Use the [Visualizations API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createvisualization) to create library visualizations and retrieve their IDs.
+
+          ```json
+          {
+            "type": "vis",
+            "grid": {
+              "x": 0,
+              "y": 0,
+              "w": 24,
+              "h": 10
+            },
+            "config": {
+              "savedObjectId": "1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d"
+            }
+          }
+          ```
+
+        ## ES|QL visualizations
+
+        To create ES|QL-based charts, embed them inline as `vis` panels and set `data_source.type` to `"esql"`.
+
+        - **`metric` charts**: `data_source` goes at the top level of `attributes`. Reference query result columns in `metrics` using `operation: "value"` and `column`:
+
+          ```json
+          {
+            "type": "vis",
+            "grid": {
+              "x": 0,
+              "y": 0,
+              "w": 12,
+              "h": 6
+            },
+            "config": {
+              "attributes": {
+                "type": "metric",
+                "title": "Total requests",
+                "data_source": {
+                  "type": "esql",
+                  "query": "FROM logs-* | STATS count = COUNT()"
+                },
+                "metrics": [
+                  {
+                    "type": "primary",
+                    "operation": "value",
+                    "column": "count"
+                  }
+                ]
+              }
+            }
+          }
+          ```
+
+        - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](https://www.elastic.co/docs/api/doc/kibana/operation/operation-createdashboard) endpoint.
+
+      externalDocs:
+        description: Dashboards documentation
+        url: https://www.elastic.co/docs/explore-analyze/dashboards
+      x-displayName: Dashboards

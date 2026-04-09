@@ -59,6 +59,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'dashboard-control-esql',
             title: ESQL_CONTROL,
           },
         }
@@ -71,6 +72,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'dashboard-control-options-list',
             title: OPTIONS_LIST_CONTROL,
           },
         }
@@ -83,6 +85,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'dashboard-control-range-slider',
             title: RANGE_SLIDER_CONTROL,
           },
         }
@@ -95,6 +98,7 @@ export const getControlsGroupSchema = () => {
         },
         {
           meta: {
+            id: 'dashboard-control-time-slider',
             title: TIME_SLIDER_CONTROL,
           },
         }
