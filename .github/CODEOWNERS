@@ -1837,8 +1837,9 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts @elastic/obs-exploration-team
-
-# obs-onboarding-team
+/x-pack/performance/journeys_e2e/metrics_* @elastic/obs-exploration-team
+/x-pack/performance/utils/metrics_experience_setup.ts @elastic/obs-exploration-team
+ # obs-onboarding-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/configs/config.* @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/navigation.ts @elastic/obs-presentation-team
