@@ -16,6 +16,21 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * identifier values for a given relationship
+ */
+export type EntityRelationshipIdentifiers = z.infer<typeof EntityRelationshipIdentifiers>;
+export const EntityRelationshipIdentifiers = z
+  .object({
+    entity_id: z.array(z.string()).optional(),
+    host_id: z.array(z.string()).optional(),
+    user_id: z.array(z.string()).optional(),
+    email: z.array(z.string()).optional(),
+    hostname: z.array(z.string()).optional(),
+    username: z.array(z.string()).optional(),
+  })
+  .strict();
+
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
 export const EngineMetadata = z
   .object({
@@ -74,13 +89,13 @@ export const EntityField = z
       .optional(),
     relationships: z
       .object({
-        communicates_with: z.array(z.string()).optional(),
-        depends_on: z.array(z.string()).optional(),
-        owns: z.array(z.string()).optional(),
-        accesses_frequently: z.array(z.string()).optional(),
-        accesses_infrequently: z.array(z.string()).optional(),
-        owns_inferred: z.array(z.string()).optional(),
-        supervises: z.array(z.string()).optional(),
+        communicates_with: EntityRelationshipIdentifiers.optional(),
+        depends_on: EntityRelationshipIdentifiers.optional(),
+        owns_inferred: EntityRelationshipIdentifiers.optional(),
+        accesses_infrequently: EntityRelationshipIdentifiers.optional(),
+        accesses_frequently: EntityRelationshipIdentifiers.optional(),
+        owns: EntityRelationshipIdentifiers.optional(),
+        supervises: EntityRelationshipIdentifiers.optional(),
         resolution: z
           .object({
             /**

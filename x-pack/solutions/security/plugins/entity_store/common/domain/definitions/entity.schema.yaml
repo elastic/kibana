@@ -8,6 +8,37 @@ info:
 paths: {}
 components:
   schemas:
+    EntityRelationshipIdentifiers:
+      type: object
+      additionalProperties: false
+      description: >-
+        identifier values for a given relationship
+      properties:
+        entity_id:
+          type: array
+          items:
+            type: string
+        host_id:
+          type: array
+          items:
+            type: string
+        user_id:
+          type: array
+          items:
+            type: string
+        email:
+          type: array
+          items:
+            type: string
+        hostname:
+          type: array
+          items:
+            type: string
+        username:
+          type: array
+          items:
+            type: string
+
     EngineMetadata:
       type: object
       additionalProperties: false
@@ -84,33 +115,19 @@ components:
           additionalProperties: false
           properties:
             communicates_with:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
             depends_on:
-              type: array
-              items:
-                type: string
-            owns:
-              type: array
-              items:
-                type: string
-            accesses_frequently:
-              type: array
-              items:
-                type: string
-            accesses_infrequently:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
             owns_inferred:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+            accesses_infrequently:
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+            accesses_frequently:
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
+            owns:
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
             supervises:
-              type: array
-              items:
-                type: string
+              $ref: '#/components/schemas/EntityRelationshipIdentifiers'
             resolution:
               type: object
               additionalProperties: false

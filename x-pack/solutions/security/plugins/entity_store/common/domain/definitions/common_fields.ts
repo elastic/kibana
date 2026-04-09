@@ -9,6 +9,26 @@ import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
+/** Keyword subfields under each `entity.relationships.<leaf>` (ECS RFC bag-of-identifiers). */
+export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
+  'entity_id',
+  'host_id',
+  'user_id',
+  'email',
+  'hostname',
+  'username',
+] as const;
+
+const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+  'communicates_with',
+  'depends_on',
+  'owns_inferred',
+  'accesses_infrequently',
+  'accesses_frequently',
+  'owns',
+  'supervises',
+] as const;
+
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
@@ -121,48 +141,18 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
-    collectValues({
-      source: `${prefix}.relationships.communicates_with`,
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      fieldHistoryLength: 50,
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.depends_on`,
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns_inferred`,
-      destination: 'entity.relationships.owns_inferred',
-      mapping: { type: 'keyword' },
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_infrequently`,
-      destination: 'entity.relationships.accesses_infrequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_frequently`,
-      destination: 'entity.relationships.accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns`,
-      destination: 'entity.relationships.owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.supervises`,
-      destination: 'entity.relationships.supervises',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
+    // Each leaf is an object of keyword arrays (bag of identifiers); see ECS RFC entity.relationships.*.
+    ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((leaf) =>
+      ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
+        collectValues({
+          source: `${prefix}.relationships.${leaf}.${idField}`,
+          destination: `entity.relationships.${leaf}.${idField}`,
+          mapping: { type: 'keyword' },
+          ...(leaf === 'communicates_with' ? { fieldHistoryLength: 50 as const } : {}),
+          allowAPIUpdate: true,
+        })
+      )
+    ),
     newestValue({
       source: `${prefix}.relationships.resolution.resolved_to`,
       destination: 'entity.relationships.resolution.resolved_to',
