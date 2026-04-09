@@ -69,6 +69,16 @@ const runSingleFlow = async (
   logger: Logger
 ): Promise<FlowRunResult> => {
   const definition = flows[flowId];
+
+  if (!definition) {
+    return {
+      id: flowId,
+      result: {
+        status: INITIALIZATION_FLOW_STATUS_ERROR,
+        error: `Initialization flow '${flowId}' is not registered`,
+      },
+    };
+  }
   let key: string = flowId;
 
   if (definition.spaceAware) {
@@ -81,7 +91,7 @@ const runSingleFlow = async (
     return inflight;
   }
 
-  const promise = executeSingleFlow(flowId, context, logger);
+  const promise = executeSingleFlow(definition, context, logger);
   inflightFlows.set(key, promise);
 
   try {
@@ -92,22 +102,11 @@ const runSingleFlow = async (
 };
 
 const executeSingleFlow = async (
-  flowId: InitializationFlowId,
+  definition: InitializationFlowDefinition<InitializationFlowId>,
   context: InitializationFlowContext,
   logger: Logger
 ): Promise<FlowRunResult> => {
-  const definition = flows[flowId];
-
-  if (!definition) {
-    return {
-      id: flowId,
-      result: {
-        status: INITIALIZATION_FLOW_STATUS_ERROR,
-        error: `Initialization flow '${flowId}' is not registered`,
-      },
-    };
-  }
-
+  const flowId = definition.id;
   try {
     const provisionContext = await definition.resolveProvisionContext(context, logger);
     const result = await definition.provision(provisionContext, logger);
