@@ -22,6 +22,8 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { pagePathGetters } from '../../../common/page_paths';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
+import { SavedQueryFlyout } from '../../../saved_queries';
+import { useSaveQueryFromDetails } from './use_save_query_from_details';
 
 const tableWrapperCss = {
   paddingLeft: 0,
@@ -38,6 +40,14 @@ const LiveQueryDetailsPageComponent = () => {
   const liveQueryListProps = useRouterNavigate(backNavigationTarget, handleGoBack);
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
+
+  const {
+    canSave,
+    showSavedQueryFlyout,
+    handleShowSaveQueryFlyout,
+    handleCloseSaveQueryFlyout,
+    savedQueryDefaultValue,
+  } = useSaveQueryFromDetails({ data });
 
   const LeftColumn = useMemo(
     () => (
@@ -83,6 +93,8 @@ const LiveQueryDetailsPageComponent = () => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
 
+  const onSaveQuery = isHistoryEnabled && canSave ? handleShowSaveQueryFlyout : undefined;
+
   const tableBlock = (
     <div css={tableWrapperCss}>
       <PackQueriesStatusTable
@@ -93,36 +105,46 @@ const LiveQueryDetailsPageComponent = () => {
         agentIds={data?.agents}
         showResultsHeader
         tags={data?.tags}
+        onSaveQuery={onSaveQuery}
       />
     </div>
   );
 
+  const savedQueryFlyout = showSavedQueryFlyout ? (
+    <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={savedQueryDefaultValue} />
+  ) : null;
+
   if (isHistoryEnabled) {
     return (
-      <WithoutHeaderLayout restrictWidth={false}>
-        <div css={fullWidthContentCss}>
-          {LeftColumn}
-          <EuiSpacer size="m" />
-          {tableBlock}
-        </div>
-      </WithoutHeaderLayout>
+      <>
+        <WithoutHeaderLayout restrictWidth={false}>
+          <div css={fullWidthContentCss}>
+            {LeftColumn}
+            <EuiSpacer size="m" />
+            {tableBlock}
+          </div>
+        </WithoutHeaderLayout>
+        {savedQueryFlyout}
+      </>
     );
   }
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <EuiFlexItem css={tableWrapperCss}>
-        <PackQueriesStatusTable
-          actionId={actionId}
-          data={data?.queries}
-          startDate={data?.['@timestamp']}
-          expirationDate={data?.expiration}
-          agentIds={data?.agents}
-          showResultsHeader
-          tags={data?.tags}
-        />
-      </EuiFlexItem>
-    </WithHeaderLayout>
+    <>
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <EuiFlexItem css={tableWrapperCss}>
+          <PackQueriesStatusTable
+            actionId={actionId}
+            data={data?.queries}
+            startDate={data?.['@timestamp']}
+            expirationDate={data?.expiration}
+            agentIds={data?.agents}
+            showResultsHeader
+            tags={data?.tags}
+          />
+        </EuiFlexItem>
+      </WithHeaderLayout>
+    </>
   );
 };
 
