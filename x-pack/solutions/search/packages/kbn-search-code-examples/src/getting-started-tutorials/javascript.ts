@@ -20,7 +20,7 @@ const CLIENT_SERVERLESS_OPTION = `\n  serverMode: 'serverless',`;
 
 export const JAVASCRIPT_INFO: CodeLanguage = {
   id: 'javascript',
-  title: i18n.translate('xpack.searchIndices.codingLanguages.javascript', {
+  title: i18n.translate('xpack.searchCodeExamples.codingLanguages.javascript', {
     defaultMessage: 'Javascript (elasticsearch-js)',
   }),
   icon: 'javascript.svg',

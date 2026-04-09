@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const dashboardExpect = getService('dashboardExpect');
 
-  // Failing: See https://github.com/elastic/kibana/issues/260533
-  describe.skip('dashboard in space', () => {
+  describe('dashboard in space', () => {
     afterEach(async () => await clean());
     describe('Storing search sessions in space', () => {
       before(async () => await load(['minimal_read', 'store_search_session']));

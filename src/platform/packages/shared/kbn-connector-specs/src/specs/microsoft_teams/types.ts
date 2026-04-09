@@ -26,18 +26,30 @@ export const ListJoinedTeamsInputSchema = z
 export type ListJoinedTeamsInput = z.infer<typeof ListJoinedTeamsInputSchema>;
 
 export const ListChannelsInputSchema = z.object({
-  teamId: z.string().describe('The ID of the team'),
+  teamId: z
+    .string()
+    .describe(
+      'The ID of the Microsoft Team whose channels you want to list. Obtain this from listJoinedTeams (the "id" field on each team object).'
+    ),
 });
 export type ListChannelsInput = z.infer<typeof ListChannelsInputSchema>;
 
 export const ListChannelMessagesInputSchema = z.object({
-  teamId: z.string().describe('The ID of the team'),
-  channelId: z.string().describe('The ID of the channel'),
+  teamId: z
+    .string()
+    .describe(
+      'The ID of the Microsoft Team containing the channel. Obtain this from listJoinedTeams (the "id" field on each team object).'
+    ),
+  channelId: z
+    .string()
+    .describe(
+      'The ID of the channel whose messages you want to retrieve. Obtain this from listChannels (the "id" field on each channel object).'
+    ),
   top: z
     .number()
     .min(1)
     .max(50)
-    .optional()
+    .default(20)
     .describe('Number of messages to return (max 50; default: 20)'),
 });
 export type ListChannelMessagesInput = z.infer<typeof ListChannelMessagesInputSchema>;
@@ -49,13 +61,27 @@ export const ListChatsInputSchema = z.object({
     .describe(
       'User ID for app-only auth via client credentials. Omit when using delegated auth (bearer token).'
     ),
-  top: z.number().min(1).optional().describe('Number of chats to return (max 50; default: 20)'),
+  top: z
+    .number()
+    .min(1)
+    .max(50)
+    .default(20)
+    .describe('Number of chats to return (max 50; default: 20)'),
 });
 export type ListChatsInput = z.infer<typeof ListChatsInputSchema>;
 
 export const ListChatMessagesInputSchema = z.object({
-  chatId: z.string().describe('The ID of the chat'),
-  top: z.number().min(1).optional().describe('Number of messages to return (max 50; default: 20)'),
+  chatId: z
+    .string()
+    .describe(
+      'The ID of the chat (direct message or group chat) whose messages you want to retrieve. Obtain this from listChats (the "id" field on each chat object).'
+    ),
+  top: z
+    .number()
+    .min(1)
+    .max(50)
+    .default(20)
+    .describe('Number of messages to return (max 50; default: 20)'),
 });
 export type ListChatMessagesInput = z.infer<typeof ListChatMessagesInputSchema>;
 
@@ -69,8 +95,13 @@ export const SearchMessagesInputSchema = z.object({
     ),
   size: z
     .number()
-    .optional()
+    .min(1)
+    .max(25)
+    .default(25)
     .describe('Number of results to return (max 25; default: 25 when omitted)'),
-  enableTopResults: z.boolean().optional().describe('Sort results by relevance (default: false)'),
+  enableTopResults: z
+    .boolean()
+    .default(false)
+    .describe('Sort results by relevance (default: false)'),
 });
 export type SearchMessagesInput = z.infer<typeof SearchMessagesInputSchema>;

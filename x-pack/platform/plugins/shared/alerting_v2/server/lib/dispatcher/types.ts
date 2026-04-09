@@ -52,7 +52,7 @@ export interface Rule {
   spaceId: string;
   name: string;
   description: string;
-  labels: string[];
+  tags: string[];
   enabled: boolean;
   createdAt: string;
   updatedAt: string;

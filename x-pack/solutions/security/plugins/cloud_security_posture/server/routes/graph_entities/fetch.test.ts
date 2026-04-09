@@ -94,7 +94,7 @@ describe('fetchEntities', () => {
     (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
       .fn()
       .mockResolvedValueOnce({
-        '.entities.v2.latest.security_default': {
+        '.entities.v2.latest.security_default-00001': {
           settings: {
             index: {
               mode: 'lookup',
@@ -115,7 +115,7 @@ describe('fetchEntities', () => {
 
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0][0];
     expect(esqlCallArgs.query).toContain(
-      '| LOOKUP JOIN .entities.v2.latest.security_default ON entity.id'
+      '| LOOKUP JOIN .entities.v2.latest.security_default-00001 ON entity.id'
     );
     expect(esqlCallArgs.query).not.toContain('ENRICH');
   });
