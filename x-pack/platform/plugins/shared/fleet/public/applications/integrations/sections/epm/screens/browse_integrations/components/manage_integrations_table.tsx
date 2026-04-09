@@ -346,6 +346,7 @@ export const ManageIntegrationsTable: React.FC<{
           {
             version: '1',
             headers: { Accept: 'application/zip' },
+            query: { intent: 'install' },
           }
         );
 

@@ -28,6 +28,7 @@ export {
   CreateAutoImportIntegrationRequestBody,
   DeleteAutoImportIntegrationRequestParams,
   DownloadAutoImportIntegrationRequestParams,
+  DownloadAutoImportIntegrationRequestQuery,
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 
