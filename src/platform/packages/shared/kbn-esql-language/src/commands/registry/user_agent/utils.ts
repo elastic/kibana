@@ -67,7 +67,11 @@ export function getPosition(
   }
 
   if (expression !== undefined) {
-    if (expression.text === EDITOR_MARKER || expression.incomplete) {
+    if (
+      expression.text === EDITOR_MARKER ||
+      expression.incomplete ||
+      cursorPosition <= expression.location.max + 1
+    ) {
       return UserAgentPosition.AFTER_ASSIGN;
     }
     return UserAgentPosition.AFTER_EXPRESSION;

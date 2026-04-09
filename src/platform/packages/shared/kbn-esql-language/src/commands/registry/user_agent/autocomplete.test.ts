@@ -84,6 +84,35 @@ describe('USER_AGENT Autocomplete', () => {
     );
   });
 
+  it('suggests string fields and string functions when expression is an incomplete function call', async () => {
+    const mockCallbacks = getMockCallbacks();
+    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+      { label: 'uaString', text: 'uaString ' },
+    ]);
+
+    // CONCAT() has no arguments — the expression is not meaningfully complete;
+    // autocomplete should behave like AFTER_ASSIGN, not AFTER_EXPRESSION.
+    await expectUserAgentSuggestionsContains(
+      'FROM a | USER_AGENT ua = CONCAT()',
+      [
+        'uaString ',
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ['keyword', 'text'], { scalar: true }),
+      ],
+      mockCallbacks
+    );
+    // WITH / pipe must NOT be offered here
+    const results = await suggest(
+      'FROM a | USER_AGENT ua = CONCAT()',
+      mockContext,
+      'user_agent',
+      mockCallbacks,
+      autocomplete
+    );
+    const texts = results.map((r) => r.text);
+    expect(texts).not.toContain(withCompleteItem.text);
+    expect(texts).not.toContain(pipeCompleteItem.text);
+  });
+
   it('suggests WITH and pipe after a complete expression', async () => {
     await expectUserAgentSuggestions('FROM a | USER_AGENT ua = keywordField ', [
       withCompleteItem.text,
