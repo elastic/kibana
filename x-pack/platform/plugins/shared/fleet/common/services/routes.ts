@@ -65,6 +65,13 @@ export const epmRouteService = {
     return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
   },
 
+  getDependenciesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.DEPENDENCIES_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
+
   getFilePath: (filePath: string) => {
     return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },

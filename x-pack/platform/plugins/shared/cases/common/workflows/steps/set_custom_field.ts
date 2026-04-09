@@ -34,7 +34,7 @@ export const setCustomFieldStepCommonDefinition: CommonStepDefinition<
   SetCustomFieldStepOutputSchema
 > = {
   id: SetCustomFieldStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.SET_CUSTOM_FIELD_STEP_LABEL,
   description: i18n.SET_CUSTOM_FIELD_STEP_DESCRIPTION,
   documentation: {

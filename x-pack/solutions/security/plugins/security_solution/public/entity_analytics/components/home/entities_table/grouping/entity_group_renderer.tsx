@@ -53,6 +53,7 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
 
   const targetEntityName = bucket.resolutionEntityName?.name?.buckets?.[0]?.key;
   const displayName = targetEntityName ?? String(bucket.key_as_string ?? bucket.key);
+  const entityId = String(bucket.key_as_string ?? bucket.key);
 
   const entityType = bucket.resolutionEntityType?.type?.buckets?.[0]?.key as EntityType | undefined;
 
@@ -71,12 +72,13 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
         id: panelKey,
         params: {
           [panelParam]: targetEntityName,
+          entityId,
           contextID: ENTITY_ANALYTICS_TABLE_ID,
           scopeId: ENTITY_ANALYTICS_TABLE_ID,
         },
       });
     },
-    [openRightPanel, targetEntityName, entityType]
+    [openRightPanel, targetEntityName, entityType, entityId]
   );
 
   return (

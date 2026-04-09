@@ -87,11 +87,11 @@ describe('Serialization utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 'auto',
         row_height: 'auto',
-        query: { language: 'kuery', query: '' },
+        query: { language: 'kql', expression: '' },
         filters: [],
         rows_per_page: 100,
         sample_size: 100,
-        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: dataViewId },
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
       },
     ],
   };
@@ -168,7 +168,7 @@ describe('Serialization utils', () => {
       const apiStateByRef: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
         description: 'My description',
-        discover_session_id: 'savedSearch',
+        ref_id: 'savedSearch',
         selected_tab_id: undefined,
         overrides: {},
       };
@@ -193,7 +193,7 @@ describe('Serialization utils', () => {
       const apiStateByRef: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
         description: 'My description',
-        discover_session_id: 'savedSearch',
+        ref_id: 'savedSearch',
         selected_tab_id: undefined,
         overrides: { sort: [{ name: 'order_date', direction: 'asc' }] },
       };
@@ -226,7 +226,7 @@ describe('Serialization utils', () => {
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
-        discover_session_id: 'savedSearch',
+        ref_id: 'savedSearch',
         selected_tab_id: 'tab-2',
         overrides: {},
       };
@@ -256,7 +256,7 @@ describe('Serialization utils', () => {
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
-        discover_session_id: 'savedSearch',
+        ref_id: 'savedSearch',
         selected_tab_id: 'deleted-tab-id',
         overrides: {
           column_order: ['stale-col-a'],
@@ -288,7 +288,7 @@ describe('Serialization utils', () => {
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
-        discover_session_id: 'savedSearch',
+        ref_id: 'savedSearch',
         selected_tab_id: 'tab-2',
         overrides: { column_order: ['custom-col'] },
       };
@@ -345,7 +345,7 @@ describe('Serialization utils', () => {
             sort: [{ name: 'order_date', direction: 'desc' }],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
             density: DataGridDensity.COMPACT,
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: dataViewId },
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
           }),
         ],
       });
@@ -385,7 +385,7 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toMatchObject({
-          discover_session_id: 'test-id',
+          ref_id: 'test-id',
         });
         expect(serializedState).not.toHaveProperty('savedObjectId');
       });
@@ -410,10 +410,10 @@ describe('Serialization utils', () => {
           embeddableTransformsEnabled: true,
         });
 
-        // By-reference API shape includes discover_session_id; panel overrides (sampleSize, sort)
+        // By-reference API shape includes ref_id; panel overrides (sampleSize, sort)
         // are stored in the dashboard document but not part of the simplified by-ref schema
         expect(serializedState).toMatchObject({
-          discover_session_id: 'test-id',
+          ref_id: 'test-id',
         });
       });
 
@@ -433,7 +433,7 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toMatchObject({
-          discover_session_id: 'test-id',
+          ref_id: 'test-id',
           selected_tab_id: 'tab-2',
         });
       });
@@ -454,7 +454,7 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toMatchObject({
-          discover_session_id: 'test-id',
+          ref_id: 'test-id',
         });
       });
     });
@@ -494,7 +494,7 @@ describe('Serialization utils', () => {
       expect(deserializedState.title).toEqual('test panel title');
     });
 
-    test('serialize by-ref returns savedObjectId (not discover_session_id)', () => {
+    test('serialize by-ref returns savedObjectId (not ref_id)', () => {
       const sort: SortOrder[] = [['order_date', 'desc']];
       const searchSource = createSearchSourceMock({ index: dataViewMock });
       const savedSearch = {
@@ -522,7 +522,7 @@ describe('Serialization utils', () => {
       });
 
       expect(serialized).toMatchObject({ savedObjectId: 'legacy-id' });
-      expect(serialized).not.toHaveProperty('discover_session_id');
+      expect(serialized).not.toHaveProperty('ref_id');
     });
   });
 });
