@@ -178,7 +178,6 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       panelProps={{
         css: css`
           ${selectorPopoverPanelStyles}
-          block-size: ${SELECTOR_POPOVER_HEIGHT}px;
         `,
       }}
       panelPaddingSize="none"

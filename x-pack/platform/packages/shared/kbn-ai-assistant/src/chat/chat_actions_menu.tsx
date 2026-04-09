@@ -8,14 +8,13 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiToolTip,
 } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import {
   navigateToSettingsManagementApp,
   useAgentBuilderOptIn,
@@ -147,21 +146,21 @@ export function ChatActionsMenu({
           {
             renderItem: () => (
               <EuiPopoverFooter paddingSize="s">
-                <EuiButton
+                <AiButton
                   fullWidth
                   size="s"
-                  color="accent"
+                  variant="base"
+                  iconType="productAgent"
                   style={{ marginInlineStart: 'auto' }}
                   onClick={() => {
                     toggleActionsMenu();
                     openAgentBuilderConfirmationModal();
                   }}
                 >
-                  <EuiIcon type="productAgent" size="m" />
                   {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
                     defaultMessage: 'Try AI Agent',
                   })}
-                </EuiButton>
+                </AiButton>
               </EuiPopoverFooter>
             ),
           },

@@ -8,12 +8,13 @@
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
 import { toEmbeddablePanel, type VisualizationContent } from '@kbn/dashboard-agent-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 /**
  * Failure record for tracking visualization errors.
@@ -44,7 +45,7 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): VisualizationC
 
   return [
     {
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       config: visualization as LensApiSchemaType,
     },
   ];
@@ -132,7 +133,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.uid)) {
+    if (removeSet.has(panel.id)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);
@@ -161,15 +162,13 @@ export const retrieveLatestVersion = (
     throw new Error(`Dashboard attachment "${attachmentId}" not found.`);
   }
 
-  if (attachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
+  if (!isDashboardAttachment(attachment)) {
     throw new Error(
       `Attachment "${attachmentId}" is not a ${DASHBOARD_ATTACHMENT_TYPE} attachment.`
     );
   }
 
-  const latestVersion = getLatestVersion(
-    attachment
-  ) as unknown as AttachmentVersion<DashboardAttachmentData>;
+  const latestVersion = getLatestVersion(attachment);
   if (!latestVersion) {
     throw new Error(`Could not retrieve latest version of dashboard attachment "${attachmentId}".`);
   }

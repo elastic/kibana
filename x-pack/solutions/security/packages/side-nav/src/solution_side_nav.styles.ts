@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { transparentize, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiThemeComputed, transparentize } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-export const SolutionSideNavItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+export type SolutionSideNavSelectedAppearance = 'default' | 'primary';
+
+export const SolutionSideNavItemStyles = (
+  euiTheme: EuiThemeComputed<{}>,
+  selectedAppearance: SolutionSideNavSelectedAppearance = 'default'
+) => css`
   * {
     // EuiListGroupItem changes the links font-weight, we need to override it
     font-weight: ${euiTheme.font.weight.regular};
   }
   &.solutionSideNavItem--isSelected {
-    background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+    background-color: ${selectedAppearance === 'primary'
+      ? euiTheme.colors.backgroundBasePrimary
+      : transparentize(euiTheme.colors.lightShade, 0.5)};
     & * {
       font-weight: ${euiTheme.font.weight.medium};
     }
