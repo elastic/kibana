@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EntityStoreDataClient } from '../../entity_store/entity_store_data_client';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { LeadGenerationMode } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation/constants';
@@ -15,43 +13,14 @@ import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from '../observation_modules/risk_score_module';
 import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
-import { entityRecordToLeadEntity } from '../entity_conversion';
-import type { Lead } from '../types';
-
-const ENTITY_SOURCE_FIELDS = [
-  '@timestamp',
-  'entity.name',
-  'entity.type',
-  'entity.EngineMetadata.Type',
-  'entity.id',
-  'entity.risk',
-  'entity.attributes',
-  'entity.behaviors',
-  'entity.lifecycle',
-  'entity.relationships',
-  'user.name',
-  'user.id',
-  'user.email',
-  'user.full_name',
-  'user.roles',
-  'user.domain',
-  'host.name',
-  'host.hostname',
-  'host.id',
-  'host.ip',
-  'host.os.name',
-  'host.type',
-  'host.domain',
-  'host.architecture',
-  'asset.criticality',
-];
+import { createBehavioralAnalysisModule } from '../observation_modules/behavioral_analysis_module';
+import type { Lead, LeadEntity } from '../types';
 
 interface LeadGenerationServiceDeps {
   readonly esClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
-  readonly entityStoreDataClient: EntityStoreDataClient;
+  readonly fetchEntities: () => Promise<LeadEntity[]>;
   readonly riskScoreDataClient: RiskScoreDataClient;
 }
 
@@ -64,27 +33,23 @@ export const createLeadGenerationService = ({
   esClient,
   logger,
   spaceId,
-  entityStoreDataClient,
+  fetchEntities,
   riskScoreDataClient,
 }: LeadGenerationServiceDeps) => ({
-  async generate(mode: LeadGenerationMode): Promise<GenerateResult> {
+  async generate(mode: LeadGenerationMode, executionId: string): Promise<GenerateResult> {
     const routeStart = Date.now();
 
     const fetchStart = Date.now();
-    const entityRecords = await entityStoreDataClient.fetchAllUnifiedLatestEntities({
-      sourceFields: ENTITY_SOURCE_FIELDS,
-    });
+    const leadEntities = await fetchEntities();
     logger.debug(
       `[LeadGeneration] Entity fetch: ${Date.now() - fetchStart}ms (${
-        entityRecords.length
-      } records)`
+        leadEntities.length
+      } entities)`
     );
 
-    if (entityRecords.length === 0) {
+    if (leadEntities.length === 0) {
       return { leads: [], total: 0 };
     }
-
-    const leadEntities = entityRecords.map(entityRecordToLeadEntity);
 
     const engine = createLeadGenerationEngine({ logger });
     engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
@@ -103,7 +68,6 @@ export const createLeadGenerationService = ({
       `[LeadGeneration] Engine pipeline: ${Date.now() - generateStart}ms (${leads.length} leads)`
     );
 
-    const executionId = uuidv4();
     const formattedLeads = leads.map((lead) => formatLeadForResponse(lead, executionId));
 
     const persistStart = Date.now();
@@ -148,10 +112,36 @@ export const formatLeadForResponse = (lead: Lead, executionId: string) => ({
 
 export type FormattedLead = ReturnType<typeof formatLeadForResponse>;
 
+const toSnakeCaseDoc = (lead: FormattedLead, sourceType: LeadGenerationMode) => ({
+  id: lead.id,
+  title: lead.title,
+  byline: lead.byline,
+  description: lead.description,
+  entities: lead.entities,
+  tags: lead.tags,
+  priority: lead.priority,
+  chat_recommendations: lead.chatRecommendations,
+  timestamp: lead.timestamp,
+  staleness: lead.staleness,
+  status: 'active',
+  observations: lead.observations.map((obs) => ({
+    entity_id: obs.entityId,
+    module_id: obs.moduleId,
+    type: obs.type,
+    score: obs.score,
+    severity: obs.severity,
+    confidence: obs.confidence,
+    description: obs.description,
+    metadata: obs.metadata,
+  })),
+  execution_uuid: lead.executionId,
+  source_type: sourceType,
+});
+
 /**
  * Gap-free replace pattern:
  *   1. Bulk upsert new leads (visible immediately).
- *   2. Delete any docs whose executionId differs (stale from previous runs).
+ *   2. Delete any docs whose execution_uuid differs (stale from previous runs).
  */
 export const persistLeads = async (
   esClient: ElasticsearchClient,
@@ -167,7 +157,7 @@ export const persistLeads = async (
     if (leads.length > 0) {
       const bulkBody = leads.flatMap((lead) => [
         { index: { _index: indexName, _id: lead.id } },
-        lead,
+        toSnakeCaseDoc(lead, mode),
       ]);
       await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
       pLogger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
@@ -175,7 +165,7 @@ export const persistLeads = async (
 
     await esClient.deleteByQuery({
       index: indexName,
-      query: { bool: { must_not: [{ term: { executionId } }] } },
+      query: { bool: { must_not: [{ term: { 'execution_uuid.keyword': executionId } }] } },
       refresh: true,
       conflicts: 'proceed',
       ignore_unavailable: true,

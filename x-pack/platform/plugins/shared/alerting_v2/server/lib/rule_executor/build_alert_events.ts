@@ -10,7 +10,7 @@ import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEvent } from '../../resources/alert_events';
+import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 
 function sha256(value: string) {

@@ -131,7 +131,7 @@
         "label": "TabbedContent",
         "description": [],
         "signature": [
-          "({ items: managedItems, selectedItemId: managedSelectedItemId, recentlyClosedItems, unsavedItemIds, maxItemsCount, services, hideTabsBar, renderContent, createItem, onChanged, tabContentIdOverride, onClearRecentlyClosed, getPreviewData, onEBTEvent, customNewTabButton, disableCloseButton, disableInlineLabelEditing, disableDragAndDrop, disableTabsBarMenu, appendRight, getAdditionalTabMenuItems, }: ",
+          "({ items: managedItems, selectedItemId: managedSelectedItemId, recentlyClosedItems, unsavedItemIds, maxItemsCount, services, hideTabsBar, renderContent, createItem, onChanged, tabContentIdOverride, onClearRecentlyClosed, getPreviewData, onEBTEvent, customNewTabButton, disableCloseButton, disableInlineLabelEditing, disableDragAndDrop, disableTabsBarMenu, appendRight, getTopTabMenuItems, getAdditionalTabMenuItems, }: ",
           {
             "pluginId": "@kbn/unified-tabs",
             "scope": "public",
@@ -142,7 +142,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-        "lineNumber": 89,
+        "lineNumber": 91,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -152,7 +152,7 @@
             "id": "def-public.TabbedContent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  items: managedItems,\n  selectedItemId: managedSelectedItemId,\n  recentlyClosedItems,\n  unsavedItemIds,\n  maxItemsCount = MAX_ITEMS_COUNT,\n  services,\n  hideTabsBar = false,\n  renderContent,\n  createItem,\n  onChanged,\n  tabContentIdOverride,\n  onClearRecentlyClosed,\n  getPreviewData,\n  onEBTEvent,\n  customNewTabButton,\n  disableCloseButton = false,\n  disableInlineLabelEditing = false,\n  disableDragAndDrop = false,\n  disableTabsBarMenu = false,\n  appendRight,\n  getAdditionalTabMenuItems,\n}",
+            "label": "{\n  items: managedItems,\n  selectedItemId: managedSelectedItemId,\n  recentlyClosedItems,\n  unsavedItemIds,\n  maxItemsCount = MAX_ITEMS_COUNT,\n  services,\n  hideTabsBar = false,\n  renderContent,\n  createItem,\n  onChanged,\n  tabContentIdOverride,\n  onClearRecentlyClosed,\n  getPreviewData,\n  onEBTEvent,\n  customNewTabButton,\n  disableCloseButton = false,\n  disableInlineLabelEditing = false,\n  disableDragAndDrop = false,\n  disableTabsBarMenu = false,\n  appendRight,\n  getTopTabMenuItems,\n  getAdditionalTabMenuItems,\n}",
             "description": [],
             "signature": [
               {
@@ -164,7 +164,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 89,
+            "lineNumber": 91,
             "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
@@ -632,12 +632,12 @@
           },
           {
             "parentPluginId": "@kbn/unified-tabs",
-            "id": "def-public.TabbedContentProps.getAdditionalTabMenuItems",
+            "id": "def-public.TabbedContentProps.getTopTabMenuItems",
             "type": "Function",
             "tags": [],
-            "label": "getAdditionalTabMenuItems",
+            "label": "getTopTabMenuItems",
             "description": [
-              "Optional function to provide additional menu items for tabs"
+              "Optional function to provide menu items placed after rename/duplicate"
             ],
             "signature": [
               "((item: ",
@@ -666,7 +666,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-tabs",
-                "id": "def-public.TabbedContentProps.getAdditionalTabMenuItems.$1",
+                "id": "def-public.TabbedContentProps.getTopTabMenuItems.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "item",
@@ -682,6 +682,66 @@
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
                 "lineNumber": 67,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabbedContentProps.getAdditionalTabMenuItems",
+            "type": "Function",
+            "tags": [],
+            "label": "getAdditionalTabMenuItems",
+            "description": [
+              "Optional function to provide additional menu items placed at the end of the menu"
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/unified-tabs",
+                "scope": "public",
+                "docId": "kibKbnUnifiedTabsPluginApi",
+                "section": "def-public.TabItem",
+                "text": "TabItem"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/unified-tabs",
+                "scope": "public",
+                "docId": "kibKbnUnifiedTabsPluginApi",
+                "section": "def-public.TabMenuItem",
+                "text": "TabMenuItem"
+              },
+              "[]) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-tabs",
+                "id": "def-public.TabbedContentProps.getAdditionalTabMenuItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/unified-tabs",
+                    "scope": "public",
+                    "docId": "kibKbnUnifiedTabsPluginApi",
+                    "section": "def-public.TabItem",
+                    "text": "TabItem"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
+                "lineNumber": 69,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,

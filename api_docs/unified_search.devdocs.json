@@ -2089,7 +2089,7 @@
           "SearchBarInjectedDeps"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/search_bar.tsx",
-        "lineNumber": 177,
+        "lineNumber": 176,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -328,6 +328,16 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('cancelAllWorkflowExecutions', () => {
+    it('should call POST /api/workflows/workflow/{workflowId}/executions/cancel', async () => {
+      await api.cancelAllWorkflowExecutions('wf-1');
+
+      expect(http.post).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/executions/cancel', {
+        version: VERSION,
+      });
+    });
+  });
+
   describe('getStepExecution', () => {
     it('should call GET /api/workflows/executions/{executionId}/step/{stepExecutionId}', async () => {
       await api.getStepExecution('exec-1', 'step-1');

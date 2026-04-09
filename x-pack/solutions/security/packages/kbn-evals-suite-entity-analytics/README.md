@@ -59,18 +59,21 @@ The evaluation suite will automatically enable the Agent Builder feature if it's
 
 ### Start Scout Server
 
-Start Scout server:
+Start Scout server for v1 evals:
 
 ```bash
-node scripts/scout.js start-server --stateful --config-dir security_entity_analytics
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_entity_analytics
 ```
 
-<!-- 
-The `security_entity_analytics` configuration extends the default `--stateful` config and enables the `securitySolution.naturalLanguageThreatHunting.enabled` feature flag at the server level, which is useful for running evaluation tests that require this feature to be enabled. -->
+For v2 evals (Entity Store V2):
+
+```bash
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_entity_analytics_v2
+```
 
 ### Run Evaluations
 
-Run the evaluations:
+Run v1 evaluations:
 
 ```bash
 # Run all SIEM Entity Analytics skills evaluations
@@ -88,9 +91,61 @@ node scripts/playwright test --config x-pack/solutions/security/packages/kbn-eva
 # Run with LLM-as-a-judge for consistent evaluation results
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts
 
-# Export result to Phoenix 
+# Export result to Phoenix
 PHOENIX_BASE_URL=http://localhost:6006 KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts  --project="my-connector"
 ```
+
+Run v2 evaluations:
+
+```bash
+# Run all Entity Store V2 evaluations
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.v2.config.ts
+
+# Run with specific connector
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.v2.config.ts --project="my-connector"
+```
+
+## Coverage Matrix
+
+Prompt-to-spec mapping showing which strategy doc prompts are covered by which spec files.
+
+| Prompt | Description | Spec File |
+|--------|-------------|-----------|
+| P001 | Risk score queries (engine on) | `risk_score_engine_on.spec.ts` |
+| P001 | Risk score queries (engine off) | `risk_score_engine_off.spec.ts` |
+| P002 | Users logged in from multiple locations | `anomalous_behavior_active_jobs.spec.ts` |
+| P003 | Service accounts with unusual access | `anomalous_behavior_active_jobs.spec.ts`, `anomalous_behavior_no_jobs.spec.ts` |
+| P004 | Risk score queries (engine on/off) | `risk_score_engine_on.spec.ts`, `risk_score_engine_off.spec.ts` |
+| P005 | Risk score jump over time | `partial_feasibility.spec.ts` |
+| P006 | Riskiest hosts with high impact | `partial_feasibility.spec.ts` |
+| P007 | Risk score queries (engine on/off) | `risk_score_engine_on.spec.ts`, `risk_score_engine_off.spec.ts` |
+| P008 | Risk score change for named user | `partial_feasibility.spec.ts` |
+| P011 | Privileged accounts with unusual commands | `anomalous_behavior_active_jobs.spec.ts` |
+| P012 | Lateral movement connections | `anomalous_behavior_active_jobs.spec.ts` |
+| P013 | User activity queries | `partial_feasibility.spec.ts` |
+| P015 | Compromised account interactions | `partial_feasibility.spec.ts` |
+| P017 | Unusual administrative actions | `anomalous_behavior_active_jobs.spec.ts` |
+| P021 | Data uploads to external domains | `anomalous_behavior_active_jobs.spec.ts` |
+| P023 | Unusual access to privileged accounts | `anomalous_behavior_active_jobs.spec.ts` |
+| P024 | Large email attachments | `partial_feasibility.spec.ts` |
+| P026 | Suspicious login patterns | `anomalous_behavior_active_jobs.spec.ts` |
+| P028 | Entities with anomalous behavior | `anomalous_behavior_active_jobs.spec.ts` |
+| P032 | Unusually large data downloads | `anomalous_behavior_active_jobs.spec.ts` |
+| P035 | Downloads exceeding threshold | `anomalous_behavior_active_jobs.spec.ts` |
+| P037 | Accounts with increasing risk trends | `partial_feasibility.spec.ts` |
+| P039 | Accessing sensitive data from new locations | `anomalous_behavior_active_jobs.spec.ts` |
+| P040 | Failed logins followed by successful (EQL) | `boundary_cases.spec.ts` |
+| P043 | Unusual after-hours access patterns | `anomalous_behavior_active_jobs.spec.ts` |
+| P-AC1 | Asset criticality for host | `asset_criticality.spec.ts` |
+| P-AC2 | Business-critical assets with elevated risk | `asset_criticality.spec.ts` |
+| P-MS1 | Privileged users with anomalous activity | `multi_skill_routing.spec.ts`, `partial_feasibility.spec.ts` |
+| P-MS2 | Privileged accounts outside normal scope | `multi_skill_routing.spec.ts`, `partial_feasibility.spec.ts` |
+| P-DR1/2/3 | Detection rules boundary cases | `boundary_cases.spec.ts` |
+| Tier 3 | 18 negative/boundary prompts | `boundary_cases.spec.ts` |
+| Grounding | Risk score grounding with seeded data | `risk_score_grounding.spec.ts` |
+| V2 | Entity Store V2 get_entity routing | `v2/entity_store_v2_get_entity.spec.ts` |
+| V2 | Entity Store V2 search_entities routing | `v2/entity_store_v2_search_entities.spec.ts` |
+| V2 | Entity Store V2 multi-skill routing | `v2/entity_store_v2_multi_skill.spec.ts` |
 
 ## Adding New Tests
 

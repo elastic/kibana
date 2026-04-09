@@ -8,7 +8,7 @@
 import { ArrayFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { fromKueryExpression, KQLSyntaxError, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -24,6 +24,7 @@ const querySchema = z
     filter: z.string().optional(),
     size: z.coerce.number().int().positive().optional(),
     searchAfter: z.string().optional(),
+    source: z.array(z.string()).optional(),
     sort_field: z.string().optional(),
     sort_order: z.enum(['asc', 'desc']).optional(),
     page: z.coerce.number().int().min(1).optional(),
@@ -82,8 +83,8 @@ const isPageModeQuery = (q: z.infer<typeof querySchema>): boolean =>
 export function registerCRUDGet(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.CRUD_GET,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.CRUD_GET,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -91,7 +92,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(querySchema),
@@ -126,9 +127,14 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
             });
           }
 
-          const filter = req.query.filter
-            ? toElasticsearchQuery(fromKueryExpression(req.query.filter))
-            : undefined;
+          let filter;
+          try {
+            filter = req.query.filter
+              ? toElasticsearchQuery(fromKueryExpression(req.query.filter))
+              : undefined;
+          } catch (error) {
+            return res.badRequest({ body: `Invalid filter: ${error.message}` });
+          }
 
           const listParams: ListEntitiesParams = {
             filter,
@@ -137,6 +143,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
               req.query.searchAfter,
               'searchAfter'
             ),
+            source: req.query.source,
           };
 
           const { entities, nextSearchAfter } = await crudClient.listEntities(listParams);
@@ -146,7 +153,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
           if (message.startsWith('Invalid filterQuery')) {
             return res.badRequest({ body: { message } });
           }
-          if (error instanceof BadCRUDRequestError || error instanceof KQLSyntaxError) {
+          if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
           }
 

@@ -64,7 +64,7 @@ export function WorkflowsEmptyState({
         canCreateWorkflow && onCreateWorkflow ? (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusInCircle">
+              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusCircle">
                 <FormattedMessage
                   id="workflows.emptyState.createButton"
                   defaultMessage="Create a new workflow"
@@ -75,7 +75,7 @@ export function WorkflowsEmptyState({
               <EuiButtonEmpty
                 href="https://github.com/elastic/workflows"
                 target="_blank"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 aria-label="Example workflows"
               >
