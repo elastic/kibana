@@ -15,18 +15,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
-import {
-  PlatformErrorResponse,
-  SiemErrorResponse,
-} from '@kbn/openapi-common/schemas/error_responses.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
 export type FindEndpointListItemsFilter = z.infer<typeof FindEndpointListItemsFilter>;

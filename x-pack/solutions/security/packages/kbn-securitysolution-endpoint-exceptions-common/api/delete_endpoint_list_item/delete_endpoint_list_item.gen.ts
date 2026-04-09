@@ -15,21 +15,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import {
   ExceptionListItemId,
   ExceptionListItemHumanId,
 } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_common.gen';
-import {
-  PlatformErrorResponse,
-  SiemErrorResponse,
-} from '@kbn/openapi-common/schemas/error_responses.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
 export type DeleteEndpointListItemRequestQuery = z.infer<typeof DeleteEndpointListItemRequestQuery>;
