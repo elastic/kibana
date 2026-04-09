@@ -103,7 +103,7 @@ const getAggregations = (): Record<string, unknown> => ({
   },
 });
 
-const createService = (timezone: string) => {
+const createService = () => {
   const mlClient = {
     getJobs: jest.fn().mockResolvedValue({ jobs: getJobsResponse() }),
     anomalySearch: jest.fn().mockResolvedValue({ aggregations: getAggregations() }),
@@ -125,9 +125,6 @@ const createService = (timezone: string) => {
       .mockImplementation(({ id }: { id: string } | DeepPartial<{ id: string }>) => {
         if (id === 'date') {
           return {
-            param: jest
-              .fn()
-              .mockImplementation((key: string) => (key === 'timezone' ? timezone : undefined)),
             convert: jest
               .fn()
               .mockImplementation(
@@ -156,20 +153,20 @@ const createService = (timezone: string) => {
 };
 
 describe('alertingServiceProvider preview formatting', () => {
-  test('formats time values in preview context with explicit timezone offsets', async () => {
-    const service = createService('US/Eastern');
+  test('formats time values in preview context in UTC regardless of configured timezone', async () => {
+    const service = createService();
 
     const result = await service.preview(getPreviewRequest());
 
-    expect(result.results[0].topRecords[0].typical).toEqual(['2018-02-01 15:00 UTC-05:00']);
-    expect(result.results[0].topRecords[0].actual).toEqual(['2018-02-01 15:29 UTC-05:00']);
+    expect(result.results[0].topRecords[0].typical).toEqual(['Thu 2018-02-01 20:00 UTC']);
+    expect(result.results[0].topRecords[0].actual).toEqual(['Thu 2018-02-01 20:29 UTC']);
   });
 
-  test('falls back to UTC when timezone is Browser', async () => {
-    const service = createService('Browser');
+  test('formats time values in UTC consistently', async () => {
+    const service = createService();
 
     const result = await service.preview(getPreviewRequest());
 
-    expect(result.results[0].topRecords[0].actual).toEqual(['2018-02-01 20:29 UTC']);
+    expect(result.results[0].topRecords[0].actual).toEqual(['Thu 2018-02-01 20:29 UTC']);
   });
 });

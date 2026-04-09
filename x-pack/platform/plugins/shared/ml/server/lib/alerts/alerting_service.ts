@@ -194,7 +194,6 @@ export function buildExplorerUrl(
 export interface AnomalyDetectionAlertFieldFormatters {
   numberFormatter: IFieldFormat['convert'];
   dateFormatter?: IFieldFormat;
-  timezone?: string;
   fieldFormatters: Record<string, IFieldFormat['convert']>;
 }
 
@@ -225,12 +224,6 @@ export function alertingServiceProvider(
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
     const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
     const dateFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.DATE });
-    const formatterTimezone = dateFormatter.param('timezone');
-    const timezone =
-      typeof formatterTimezone === 'string' && formatterTimezone !== 'Browser'
-        ? formatterTimezone
-        : 'UTC';
-
     const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
     const fieldFormatters = fieldFormatMap
@@ -245,7 +238,6 @@ export function alertingServiceProvider(
     contextFieldFormatters = {
       numberFormatter: numberFormatter.convert.bind(numberFormatter),
       dateFormatter,
-      timezone,
       fieldFormatters,
     };
 
@@ -451,8 +443,9 @@ export function alertingServiceProvider(
     formatters: AnomalyDetectionAlertFieldFormatters
   ) => {
     if (isTimeFunction(source.function) && formatters.dateFormatter) {
-      const timezone = formatters.timezone ?? 'UTC';
+      const timezone = 'UTC';
       const formattedTimeValue = formatTimeValue(value, source.function, source, timezone);
+      const formattedDayOfWeek = formattedTimeValue.moment.format('ddd');
       const formattedDate = formatters.dateFormatter.convert(
         formattedTimeValue.moment.valueOf(),
         'text',
@@ -460,10 +453,7 @@ export function alertingServiceProvider(
           timezone,
         }
       );
-      const timezoneLabel =
-        timezone === 'UTC' ? 'UTC' : `UTC${formattedTimeValue.moment.format('Z')}`;
-
-      return `${formattedDate} ${timezoneLabel}`;
+      return `${formattedDayOfWeek} ${formattedDate} UTC`;
     }
 
     const fieldFormatter =
@@ -792,8 +782,7 @@ export function alertingServiceProvider(
     const resultsLabel = getAggResultsLabel(params.resultType);
 
     const fieldsFormatters =
-      contextFieldFormatters?.dateFormatter !== undefined &&
-      contextFieldFormatters?.timezone !== undefined
+      contextFieldFormatters?.dateFormatter !== undefined
         ? contextFieldFormatters
         : await getFormatters(datafeeds![0]!.indices[0]);
 
@@ -1013,8 +1002,7 @@ export function alertingServiceProvider(
     | undefined
   > => {
     const formatters =
-      contextFieldFormatters?.dateFormatter !== undefined &&
-      contextFieldFormatters?.timezone !== undefined
+      contextFieldFormatters?.dateFormatter !== undefined
         ? contextFieldFormatters
         : await getFormatters(indexPattern);
 
