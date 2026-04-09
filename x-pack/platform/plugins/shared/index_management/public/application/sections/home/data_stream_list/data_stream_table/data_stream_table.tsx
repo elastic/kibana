@@ -425,10 +425,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       {dataStreamsToEditDataRetention && dataStreamsToEditDataRetention.length > 0 ? (
         <EditDataRetentionModal
           onClose={(res) => {
+            setDataStreamsToEditDataRetention([]);
             if (res && res.hasUpdatedDataRetention) {
               reload();
-            } else {
-              setDataStreamsToEditDataRetention([]);
             }
           }}
           dataStreams={dataStreamsToEditDataRetention}
@@ -438,10 +437,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
         <DeleteDataStreamConfirmationModal
           onClose={(res) => {
+            setDataStreamsToDelete([]);
             if (res && res.hasDeletedDataStreams) {
               reload();
-            } else {
-              setDataStreamsToDelete([]);
             }
           }}
           dataStreams={dataStreamsToDelete}
