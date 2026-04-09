@@ -12,6 +12,8 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 export class ConnectorExecutor {
+  // The lifespan of this cache is one workflow execution, then it gets destroyed
+  // the probability of connectors change is pretty low in this span so it should be acceptable
   private allConnectorsCache: Map<string, ConnectorWithExtraFindData> | undefined;
 
   constructor(private actionsClient: ActionsClient) {}
