@@ -46,11 +46,11 @@ const metadataSchema = z
       .optional()
       .describe('Optional human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
-    labels: z
+    tags: z
       .array(z.string().max(MAX_TAG_LENGTH))
       .max(100)
       .optional()
-      .describe('Labels for categorization.'),
+      .describe('Tags for categorization.'),
   })
   .strict()
   .describe('Rule metadata.');
@@ -300,6 +300,8 @@ export const findRulesResponseSchema = z
   })
   .describe('Paginated list of rules.');
 
+export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
+
 /** Rule tags response schema. */
 export const ruleTagsResponseSchema = z
   .object({
@@ -322,5 +324,17 @@ export const bulkOperationResponseSchema = z
         })
       )
       .describe('Errors encountered during the bulk operation.'),
+    truncated: z
+      .boolean()
+      .optional()
+      .describe(
+        'True when the request used a filter that matched more rules than were included in this operation.'
+      ),
+    totalMatched: z
+      .number()
+      .optional()
+      .describe('Total number of rules matching the filter when truncated is true.'),
   })
   .describe('Result of a bulk rule operation.');
+
+export type BulkOperationResponse = z.infer<typeof bulkOperationResponseSchema>;

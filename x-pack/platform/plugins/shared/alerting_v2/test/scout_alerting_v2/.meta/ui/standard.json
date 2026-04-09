@@ -1,5 +1,5 @@
 {
-  "sha1": "e45d0f3d6f9a518c010feb2768e8e02a162ae035",
+  "sha1": "8e004de590abdbfeae54a3567a290d6dadee85f0",
   "tests": [
     {
       "id": "8065d296c26f2cd-b37771106c4b8c3",
@@ -33,6 +33,20 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_alerts_menu.spec.ts",
         "line": 42,
         "column": 9
+      }
+    },
+    {
+      "id": "db2a783d1c9ca06-9be44a4fb742275",
+      "title": "Discover query sync — Rule flyout flyout query updates when the Discover query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
+        "line": 39,
+        "column": 7
       }
     },
     {

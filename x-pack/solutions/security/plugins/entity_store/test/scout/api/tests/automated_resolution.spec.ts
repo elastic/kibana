@@ -16,6 +16,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { hashEuid } from '../../../../common/domain/euid';
 import {
   clearEntityStoreIndices,
   seedUserEntity,
@@ -386,6 +387,60 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
 
       const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
       expect(aliasIds).toStrictEqual(expect.arrayContaining([entityA, entityC]));
+    }
+  );
+
+  apiTest(
+    'Manually unlinked entity not re-resolved after new activity updates timestamp',
+    async ({ apiClient, esClient }) => {
+      const email = 'test9-unlink@co.com';
+      const entityA = 'test9-a';
+      const entityB = 'test9-b';
+
+      // Seed entities with current timestamps (default) so they pass
+      // any watermark advanced by previous tests
+      await seedUserEntity(esClient, {
+        entityId: entityA,
+        namespace: 'entra_id',
+        email,
+      });
+      await seedUserEntity(esClient, {
+        entityId: entityB,
+        namespace: 'okta',
+        email,
+      });
+
+      // Auto-resolve: maintainer links A → B (okta wins as target)
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entityA, entityB);
+
+      // Manual unlink: analyst removes A from B's group
+      const unlinkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entity_ids: [entityA] },
+      });
+      expect(unlinkResponse.statusCode).toBe(200);
+      expect(unlinkResponse.body.unlinked).toContain(entityA);
+
+      // Simulate new activity: update A's last_seen to a future timestamp.
+      // With the first_seen watermark fix, this should NOT cause re-entry
+      // because first_seen is immutable and stays behind the watermark.
+      const futureTimestamp = new Date(Date.now() + 3600_000).toISOString();
+      await esClient.update({
+        index: LATEST_INDEX,
+        id: hashEuid(entityA),
+        refresh: 'wait_for',
+        doc: {
+          entity: { lifecycle: { last_seen: futureTimestamp } },
+        },
+      });
+
+      // Run maintainer again — A should NOT be re-linked
+      await triggerMaintainerRun(apiClient, internalHeaders);
+
+      // A should stay unresolved (first_seen is behind watermark, so not collected)
+      await assertNotResolved(esClient, entityA);
     }
   );
 });

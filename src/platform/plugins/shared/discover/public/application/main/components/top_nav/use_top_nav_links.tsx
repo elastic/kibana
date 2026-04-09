@@ -44,6 +44,7 @@ import {
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateGetState,
+  useInternalStateSubscribe,
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -76,6 +77,7 @@ export const useTopNavLinks = ({
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
+  const subscribe = useInternalStateSubscribe();
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -129,6 +131,7 @@ export const useTopNavLinks = ({
         services,
         tabId: currentTab.id,
         getState,
+        subscribe,
         showCreateRuleV2,
       });
       items.push(alertsAppMenuItem);
@@ -206,6 +209,7 @@ export const useTopNavLinks = ({
     appId,
     dispatch,
     getState,
+    subscribe,
     isEsqlMode,
     currentDataView,
     currentTab,
@@ -232,13 +236,13 @@ export const useTopNavLinks = ({
     // Only show the ES|QL button in classic mode (not in ES|QL mode)
     // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
     if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
-      newAppMenuRegistry.setSecondaryActionItem({
+      newAppMenuRegistry.registerItem({
         id: 'esql',
+        order: 2,
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
         iconType: 'code',
-        color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
         }),
@@ -400,12 +404,6 @@ export const useTopNavLinks = ({
       primaryActionItem: config.primaryActionItem
         ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.primaryActionItem,
-            services,
-          })
-        : undefined,
-      secondaryActionItem: config.secondaryActionItem
-        ? enhanceAppMenuItemWithRunAction({
-            appMenuItem: config.secondaryActionItem,
             services,
           })
         : undefined,
