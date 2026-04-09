@@ -24,10 +24,10 @@ import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { isEcsAllowedValue } from '../utils/event_utils';
-import { EventCategoryDescription } from './event_category_description';
-import { EventKindDescription } from './event_kind_description';
-import { EventRenderer } from './event_renderer';
+import { isEcsAllowedValue } from '../../../../flyout_v2/document/utils/event_utils';
+import { EventCategoryDescription } from '../../../../flyout_v2/document/components/event_category_description';
+import { EventKindDescription } from '../../../../flyout_v2/document/components/event_kind_description';
+import { EventRenderer } from '../../../../flyout_v2/document/components/event_renderer';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
 import {
@@ -51,8 +51,15 @@ const KEY = 'about';
  */
 export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
-  const { dataFormattedForFieldBrowser, eventId, indexName, isRulePreview, scopeId, searchHit } =
-    useDocumentDetailsContext();
+  const {
+    dataAsNestedObject,
+    dataFormattedForFieldBrowser,
+    eventId,
+    indexName,
+    isRulePreview,
+    scopeId,
+    searchHit,
+  } = useDocumentDetailsContext();
   const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
@@ -123,12 +130,12 @@ export const AboutSection = memo(() => {
         {eventKindInECS &&
           (eventKind === 'event' ? (
             // if event kind is event, show a detailed description based on event category
-            <EventCategoryDescription />
+            <EventCategoryDescription hit={hit} />
           ) : (
             // if event kind is not event, show a higher level description on event kind
-            <EventKindDescription eventKind={eventKind} />
+            <EventKindDescription hit={hit} />
           ))}
-        <EventRenderer />
+        <EventRenderer hit={hit} dataAsNestedObject={dataAsNestedObject} />
       </>
     );
 
@@ -138,7 +145,7 @@ export const AboutSection = memo(() => {
       title={ABOUT_SECTION_TITLE}
       localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
       sectionId={KEY}
-      gutterSize="s"
+      gutterSize="none"
       data-test-subj={ABOUT_SECTION_TEST_ID}
     >
       {content}
