@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import type { Conversation, TimelineConversation } from '@kbn/agent-builder-common';
-import { timelineEventsToRounds } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationStateManager, ToolStateManager } from '@kbn/agent-builder-server/runner';
-import { isTimelineConversation } from '@kbn/agent-builder-common/chat';
 
 export const createConversationStateManager = (
-  conversation?: Conversation | TimelineConversation | undefined
+  conversation?: Conversation | undefined
 ): ConversationStateManager => {
   const toolCallStateMap = new Map<string, unknown>();
 
   // prefill tool state map with last round's tool state
-  const rounds = conversation
-    ? isTimelineConversation(conversation)
-      ? timelineEventsToRounds(conversation.timeline)
-      : conversation.rounds
-    : [];
-  const lastRound = rounds[rounds.length - 1];
+  const lastRound = conversation ? conversation.rounds[conversation.rounds.length - 1] : undefined;
   if (lastRound?.state) {
     for (const node of lastRound.state.agent.nodes) {
       if (node.step === 'execute_tool') {

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation, TimelineConversation, ToolResult } from '@kbn/agent-builder-common';
-import { timelineEventsToRounds } from '@kbn/agent-builder-common';
+import type { Conversation, ToolResult } from '@kbn/agent-builder-common';
 import type {
   ToolResultStore,
   WritableToolResultStore,
@@ -15,16 +14,8 @@ import type {
 import { MemoryVolume } from '../../filesystem';
 import { extractConversationToolResults, createToolCallEntry, getToolCallEntryPath } from './utils';
 
-export const createResultStore = ({
-  conversation,
-}: {
-  conversation?: Conversation | TimelineConversation;
-}) => {
-  const rounds =
-    conversation && 'timeline' in conversation
-      ? timelineEventsToRounds(conversation.timeline)
-      : conversation?.rounds ?? [];
-  const toolResults = extractConversationToolResults(rounds);
+export const createResultStore = ({ conversation }: { conversation?: Conversation }) => {
+  const toolResults = extractConversationToolResults(conversation?.rounds ?? []);
   return new ToolResultStoreImpl({ toolResults });
 };
 

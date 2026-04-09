@@ -15,7 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
-import type { Conversation, TimelineConversation, ConverseInput } from '@kbn/agent-builder-common';
+import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {
   ScopedRunner,
   ScopedRunnerRunAgentParams,
@@ -180,7 +180,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
-    conversation?: Conversation | TimelineConversation;
+    conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;

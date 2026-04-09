@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation, TimelineConversation, ConverseInput } from '@kbn/agent-builder-common';
+import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {
   PromptManager,
   ToolPromptManager,
@@ -91,7 +91,7 @@ export const getAgentPromptStorageState = ({
   conversation,
 }: {
   input: ConverseInput;
-  conversation?: Conversation | TimelineConversation;
+  conversation?: Conversation;
 }): PromptStorageState => {
   // Create a shallow copy to avoid mutating the original conversation state
   const state: PromptStorageState = {
