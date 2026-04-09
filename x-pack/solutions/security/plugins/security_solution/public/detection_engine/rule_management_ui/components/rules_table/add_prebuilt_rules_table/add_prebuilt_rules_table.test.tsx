@@ -65,6 +65,7 @@ jest.mock(
         },
       },
     }),
+    useInvalidateFetchPrebuiltRulesStatusQuery: jest.fn().mockReturnValue(jest.fn()),
   })
 );
 
@@ -105,6 +106,12 @@ jest.mock(
 jest.mock('../../../../../common/components/user_privileges');
 
 describe('AddPrebuiltRulesTable', () => {
+  afterEach(() => {
+    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
+      'install-prebuilt-rules-package': { loading: false, result: { status: 'ready' } },
+    });
+  });
+
   it('disables `Install all` button if user has no write permissions', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
@@ -138,7 +145,7 @@ describe('AddPrebuiltRulesTable', () => {
       },
     });
 
-    (useSecuritySolutionInitialization as jest.Mock).mockReturnValueOnce({
+    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
       'install-prebuilt-rules-package': { loading: true },
     });
 
