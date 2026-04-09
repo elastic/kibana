@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -13,8 +14,10 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiHealth,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -23,9 +26,13 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
+import { upperFirst } from 'lodash';
 import React from 'react';
+import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
 import { KnowledgeIndicatorFeatureDetailsContent } from '../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { DeleteFeatureModal } from './delete_feature_modal';
+import { getConfidenceColor } from './use_stream_features_table';
 
 interface FeatureDetailsFlyoutProps {
   feature: Feature;
@@ -81,100 +88,118 @@ export function FeatureDetailsFlyout({
       size="40%"
       hideCloseButton
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2 id={flyoutTitleId}>{displayTitle}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
+      {/* First header: minimal toolbar with actions and close */}
+      <FlyoutToolbarHeader>
+        {(onDelete || onExclude || onRestore) && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              {(onDelete || onExclude || onRestore) && (
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                    button={
-                      <EuiButtonIcon
-                        data-test-subj="streamsAppFeatureDetailsFlyoutActionsButton"
-                        iconType="boxesVertical"
-                        aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                        onClick={toggleActionsPopover}
-                        isLoading={isExcluding || isRestoring}
-                      />
-                    }
-                    isOpen={isActionsPopoverOpen}
-                    closePopover={closeActionsPopover}
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
-                  >
-                    <EuiContextMenuPanel
-                      size="s"
-                      items={[
-                        ...(onRestore
-                          ? [
-                              <EuiContextMenuItem
-                                key="restore"
-                                icon={<EuiIcon type="eye" color="primary" aria-hidden={true} />}
-                                css={css`
-                                  color: ${euiTheme.colors.primary};
-                                `}
-                                onClick={handleRestoreClick}
-                                data-test-subj="streamsAppFeatureDetailsFlyoutRestoreAction"
-                              >
-                                {RESTORE_ACTION_LABEL}
-                              </EuiContextMenuItem>,
-                            ]
-                          : []),
-                        ...(onExclude
-                          ? [
-                              <EuiContextMenuItem
-                                key="exclude"
-                                icon={
-                                  <EuiIcon type="eyeClosed" color="warning" aria-hidden={true} />
-                                }
-                                css={css`
-                                  color: ${euiTheme.colors.warning};
-                                `}
-                                onClick={handleExcludeClick}
-                                data-test-subj="streamsAppFeatureDetailsFlyoutExcludeAction"
-                              >
-                                {EXCLUDE_ACTION_LABEL}
-                              </EuiContextMenuItem>,
-                            ]
-                          : []),
-                        ...(onDelete
-                          ? [
-                              <EuiContextMenuItem
-                                key="delete"
-                                icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-                                css={css`
-                                  color: ${euiTheme.colors.danger};
-                                `}
-                                onClick={handleDeleteClick}
-                                data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
-                              >
-                                {DELETE_ACTION_LABEL}
-                              </EuiContextMenuItem>,
-                            ]
-                          : []),
-                      ]}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
+            <EuiPopover
+              aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+              button={
                 <EuiButtonIcon
-                  data-test-subj="streamsAppFeatureDetailsFlyoutCloseButton"
-                  iconType="cross"
-                  aria-label={CLOSE_BUTTON_ARIA_LABEL}
-                  onClick={onClose}
+                  data-test-subj="streamsAppFeatureDetailsFlyoutActionsButton"
+                  iconType="boxesVertical"
+                  aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                  onClick={toggleActionsPopover}
+                  isLoading={isExcluding || isRestoring}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              }
+              isOpen={isActionsPopoverOpen}
+              closePopover={closeActionsPopover}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  ...(onRestore
+                    ? [
+                        <EuiContextMenuItem
+                          key="restore"
+                          icon={<EuiIcon type="eye" color="primary" aria-hidden={true} />}
+                          css={css`
+                            color: ${euiTheme.colors.primary};
+                          `}
+                          onClick={handleRestoreClick}
+                          data-test-subj="streamsAppFeatureDetailsFlyoutRestoreAction"
+                        >
+                          {RESTORE_ACTION_LABEL}
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
+                  ...(onExclude
+                    ? [
+                        <EuiContextMenuItem
+                          key="exclude"
+                          icon={<EuiIcon type="eyeClosed" color="warning" aria-hidden={true} />}
+                          css={css`
+                            color: ${euiTheme.colors.warning};
+                          `}
+                          onClick={handleExcludeClick}
+                          data-test-subj="streamsAppFeatureDetailsFlyoutExcludeAction"
+                        >
+                          {EXCLUDE_ACTION_LABEL}
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
+                  ...(onDelete
+                    ? [
+                        <EuiContextMenuItem
+                          key="delete"
+                          icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                          css={css`
+                            color: ${euiTheme.colors.danger};
+                          `}
+                          onClick={handleDeleteClick}
+                          data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
+                        >
+                          {DELETE_ACTION_LABEL}
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            data-test-subj="streamsAppFeatureDetailsFlyoutCloseButton"
+            iconType="cross"
+            aria-label={CLOSE_BUTTON_ARIA_LABEL}
+            onClick={onClose}
+          />
+        </EuiFlexItem>
+      </FlyoutToolbarHeader>
+
+      {/* Second header: title and metadata cards */}
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{displayTitle}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
+              <EuiHealth color={getConfidenceColor(feature.confidence)}>
+                {feature.confidence}
+              </EuiHealth>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={TYPE_LABEL}>
+              <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={STREAM_LABEL}>
+              <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                {feature.stream_name}
+              </EuiBadge>
+            </FlyoutMetadataCard>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
+
       <EuiFlyoutBody>
         <KnowledgeIndicatorFeatureDetailsContent feature={feature} />
       </EuiFlyoutBody>
@@ -189,6 +214,18 @@ export function FeatureDetailsFlyout({
     </EuiFlyout>
   );
 }
+
+const CONFIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {
+  defaultMessage: 'Confidence',
+});
+
+const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
+  defaultMessage: 'Type',
+});
+
+const STREAM_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.streamLabel', {
+  defaultMessage: 'Stream',
+});
 
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.featureDetailsFlyout.actionsButtonAriaLabel',
