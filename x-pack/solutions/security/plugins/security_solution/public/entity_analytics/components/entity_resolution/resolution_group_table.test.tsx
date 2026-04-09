@@ -32,17 +32,28 @@ const mockGroup: ResolutionGroup = {
 };
 
 describe('ResolutionGroupTable', () => {
-  it('renders table with target and alias rows', () => {
-    const { getByTestId, getByText, getAllByText } = render(
+  it('renders table with target and alias rows (no summary row)', () => {
+    const { getByTestId, getByText } = render(
       <TestProviders>
         <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
       </TestProviders>
     );
 
     expect(getByTestId(RESOLUTION_GROUP_TABLE_TEST_ID)).toBeInTheDocument();
-    // 'alice' appears in both entity row and summary row, so use getAllByText
-    expect(getAllByText('alice').length).toBeGreaterThanOrEqual(1);
+    expect(getByText('alice')).toBeInTheDocument();
     expect(getByText('alice-azure')).toBeInTheDocument();
+  });
+
+  it('shows target entity icon next to target entity name', () => {
+    const { container } = render(
+      <TestProviders>
+        <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
+      </TestProviders>
+    );
+
+    // The target entity row should have the aggregate icon
+    const aggregateIcon = container.querySelector('[data-euiicon-type="aggregate"]');
+    expect(aggregateIcon).toBeInTheDocument();
   });
 
   it('shows empty state when group is null', () => {
@@ -80,8 +91,7 @@ describe('ResolutionGroupTable', () => {
     );
 
     const removeButtons = getAllByLabelText(/remove from resolution group/i);
-    // 2 entity rows + 1 summary row (summary renders null for actions, but we get buttons for the 2 entity rows)
-    expect(removeButtons.length).toBeGreaterThanOrEqual(2);
+    expect(removeButtons).toHaveLength(2);
   });
 
   it('calls onRemoveEntity when remove button clicked on alias', () => {
@@ -99,10 +109,53 @@ describe('ResolutionGroupTable', () => {
     );
 
     const removeButtons = getAllByLabelText(/remove from resolution group/i);
-    // The second button is for the alias row (first is target, which is disabled)
     const aliasButton = removeButtons.find((btn) => !btn.hasAttribute('disabled'));
     expect(aliasButton).toBeDefined();
     fireEvent.click(aliasButton!);
     expect(onRemove).toHaveBeenCalledWith('alice-azure-id');
+  });
+
+  it('renders entity names as links when onEntityNameClick is provided', () => {
+    const onClick = jest.fn();
+    const { getByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable
+          group={mockGroup}
+          isLoading={false}
+          targetEntityId="alice-id"
+          onEntityNameClick={onClick}
+        />
+      </TestProviders>
+    );
+
+    const aliceLink = getByText('alice');
+    expect(aliceLink.closest('a, button, [role="link"]') ?? aliceLink).toBeInTheDocument();
+    fireEvent.click(aliceLink);
+    expect(onClick).toHaveBeenCalledWith(mockGroup.target);
+  });
+
+  it('renders risk scores as badges', () => {
+    const { container } = render(
+      <TestProviders>
+        <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
+      </TestProviders>
+    );
+
+    // RiskScoreCell renders EuiBadge elements
+    const badges = container.querySelectorAll('.euiBadge');
+    expect(badges.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows column headers with updated names', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
+      </TestProviders>
+    );
+
+    expect(getByText('Entity name')).toBeInTheDocument();
+    expect(getByText('Entity id')).toBeInTheDocument();
+    expect(getByText('Data source')).toBeInTheDocument();
+    expect(getByText('Risk score')).toBeInTheDocument();
   });
 });

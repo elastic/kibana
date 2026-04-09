@@ -72,7 +72,12 @@ export const ServicePanelContent = ({
       )}
       {entityStoreEntityId && hasEntityResolutionLicense && (
         <>
-          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            entityType={EntityType.service}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
           <EuiHorizontalRule />
         </>
       )}

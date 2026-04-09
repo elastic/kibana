@@ -11,11 +11,11 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
+  EuiIcon,
+  EuiLink,
   EuiText,
   EuiToolTip,
   EuiLoadingSpinner,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -25,7 +25,6 @@ import {
   getEntityId,
   getEntitySource,
   getEntityRiskScore,
-  getResolutionRiskScore,
   truncatedCellCss,
   type TableEntityRow,
 } from './helpers';
@@ -42,6 +41,7 @@ import {
   RESOLUTION_FETCH_ERROR,
 } from './translations';
 import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
+import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
 
 export interface ResolutionGroupTableProps {
   group: ResolutionGroup | null;
@@ -51,6 +51,8 @@ export interface ResolutionGroupTableProps {
   onRemoveEntity?: (entityId: string) => void;
   targetEntityId?: string;
   removingEntityId?: string;
+  onEntityNameClick?: (entity: Record<string, unknown>) => void;
+  currentEntityId?: string;
 }
 
 export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
@@ -61,31 +63,44 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   onRemoveEntity,
   targetEntityId,
   removingEntityId,
+  onEntityNameClick,
+  currentEntityId,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const hasGroup = group && group.group_size > 1;
 
   const items: TableEntityRow[] = useMemo(() => {
     if (!hasGroup) return [];
 
-    const entityRows: TableEntityRow[] = [
+    return [
       { entity: group.target, isSummary: false },
       ...group.aliases.map((alias) => ({ entity: alias, isSummary: false })),
     ];
-
-    // Add summary footer row
-    entityRows.push({ entity: group.target, isSummary: true });
-
-    return entityRows;
   }, [group, hasGroup]);
 
   const columns: Array<EuiBasicTableColumn<TableEntityRow>> = useMemo(() => {
     const cols: Array<EuiBasicTableColumn<TableEntityRow>> = [
       {
         name: ENTITY_NAME_COLUMN,
-        render: ({ entity, isSummary }: TableEntityRow) => {
+        render: ({ entity }: TableEntityRow) => {
           const name = getEntityName(entity);
-          if (isSummary) {
+          const entityId = getEntityId(entity);
+          const isTarget = entityId === targetEntityId;
+
+          const isCurrentEntity = currentEntityId === entityId;
+          const nameContent =
+            onEntityNameClick && !isCurrentEntity ? (
+              <EuiText size="xs" css={truncatedCellCss}>
+                <EuiLink onClick={() => onEntityNameClick(entity)} title={name}>
+                  {name}
+                </EuiLink>
+              </EuiText>
+            ) : (
+              <EuiText size="xs" css={truncatedCellCss}>
+                {name}
+              </EuiText>
+            );
+
+          if (isTarget) {
             return (
               <EuiFlexGroup
                 gutterSize="xs"
@@ -94,29 +109,25 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                 css={truncatedCellCss}
               >
                 <EuiFlexItem grow={false} css={truncatedCellCss}>
-                  <EuiText size="s" css={truncatedCellCss}>
-                    <strong>{name}</strong>
-                  </EuiText>
+                  {nameContent}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIconTip content={TARGET_ENTITY_TOOLTIP} type="info" />
+                  <EuiToolTip content={TARGET_ENTITY_TOOLTIP}>
+                    <EuiIcon type="aggregate" size="s" />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             );
           }
-          return (
-            <EuiText size="s" css={truncatedCellCss}>
-              {name}
-            </EuiText>
-          );
+
+          return nameContent;
         },
       },
       {
         name: ENTITY_ID_COLUMN,
-        render: ({ entity, isSummary }: TableEntityRow) => {
-          if (isSummary) return null;
+        render: ({ entity }: TableEntityRow) => {
           return (
-            <EuiText size="s" css={truncatedCellCss} title={getEntityId(entity)}>
+            <EuiText size="xs" css={truncatedCellCss} title={getEntityId(entity)}>
               {getEntityId(entity)}
             </EuiText>
           );
@@ -124,10 +135,9 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
       },
       {
         name: SOURCE_COLUMN,
-        render: ({ entity, isSummary }: TableEntityRow) => {
-          if (isSummary) return null;
+        render: ({ entity }: TableEntityRow) => {
           return (
-            <EuiText size="s" css={truncatedCellCss} title={getEntitySource(entity)}>
+            <EuiText size="xs" css={truncatedCellCss} title={getEntitySource(entity)}>
               {getEntitySource(entity)}
             </EuiText>
           );
@@ -136,17 +146,9 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
       {
         name: RISK_SCORE_COLUMN,
         width: '100px',
-        render: ({ entity, isSummary }: TableEntityRow) => {
-          if (isSummary) {
-            const resolutionScore = getResolutionRiskScore(entity);
-            return (
-              <EuiText size="s">
-                <strong>{resolutionScore != null ? Math.round(resolutionScore) : '-'}</strong>
-              </EuiText>
-            );
-          }
+        render: ({ entity }: TableEntityRow) => {
           const score = getEntityRiskScore(entity);
-          return <EuiText size="s">{score != null ? Math.round(score) : '-'}</EuiText>;
+          return <RiskScoreCell riskScore={score} />;
         },
       },
     ];
@@ -155,8 +157,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
       cols.push({
         name: ACTIONS_COLUMN,
         width: '60px',
-        render: ({ entity, isSummary }: TableEntityRow) => {
-          if (isSummary) return null;
+        render: ({ entity }: TableEntityRow) => {
           const entityId = getEntityId(entity);
           const isTarget = entityId === targetEntityId;
           const isThisEntityRemoving = removingEntityId === entityId;
@@ -179,23 +180,24 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
     }
 
     return cols;
-  }, [showActions, targetEntityId, onRemoveEntity, removingEntityId]);
+  }, [
+    showActions,
+    targetEntityId,
+    onRemoveEntity,
+    removingEntityId,
+    onEntityNameClick,
+    currentEntityId,
+  ]);
 
   const getRowProps = useCallback(
-    (item: TableEntityRow) => {
-      if (item.isSummary) {
-        return {
-          css: css`
-            & > td {
-              border-bottom: none;
-              ${!showActions ? `background-color: ${euiTheme.colors.backgroundBaseSubdued};` : ''}
-            }
-          `,
-        };
-      }
-      return {};
-    },
-    [showActions, euiTheme]
+    (_item: TableEntityRow) => ({
+      css: css`
+        & > td {
+          border-bottom: none;
+        }
+      `,
+    }),
+    []
   );
 
   if (isLoading) {
@@ -204,7 +206,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
   if (isError) {
     return (
-      <EuiText size="s" color="danger">
+      <EuiText size="xs" color="danger">
         {RESOLUTION_FETCH_ERROR}
       </EuiText>
     );
@@ -212,7 +214,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
   if (!hasGroup) {
     return (
-      <EuiText size="s" color="subdued" data-test-subj={RESOLUTION_EMPTY_STATE_TEST_ID}>
+      <EuiText size="xs" color="subdued" data-test-subj={RESOLUTION_EMPTY_STATE_TEST_ID}>
         {RESOLUTION_EMPTY_STATE}
       </EuiText>
     );

@@ -34,12 +34,12 @@ export const ENTITY_NAME_COLUMN = i18n.translate(
 
 export const ENTITY_ID_COLUMN = i18n.translate(
   'xpack.securitySolution.entityResolution.columns.entityId',
-  { defaultMessage: 'Entity ID' }
+  { defaultMessage: 'Entity id' }
 );
 
 export const SOURCE_COLUMN = i18n.translate(
   'xpack.securitySolution.entityResolution.columns.source',
-  { defaultMessage: 'Source' }
+  { defaultMessage: 'Data source' }
 );
 
 export const RISK_SCORE_COLUMN = i18n.translate(
