@@ -45,6 +45,10 @@ export function validateSigEventsTuningConfig(parsed: Record<string, unknown>): 
       errors.push(`"${key}" must be a number, got ${typeof value}`);
       continue;
     }
+    if (Number.isNaN(value)) {
+      errors.push(`"${key}" must be a number, got NaN`);
+      continue;
+    }
     if (bounds.integer && !Number.isInteger(value)) {
       errors.push(`"${key}" must be an integer`);
     }
