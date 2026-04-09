@@ -243,6 +243,12 @@ const getServerlessDefault = () => {
         runOnRoles: ['ui'],
       },
     },
+    xpack: {
+      spaces: {
+        allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
+      },
+    },
     logging: {
       loggers: [
         {
