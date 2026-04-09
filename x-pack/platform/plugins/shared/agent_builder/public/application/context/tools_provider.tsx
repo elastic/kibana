@@ -128,6 +128,10 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
     deleteTool,
     confirmDelete,
     cancelDelete,
+    usedByAgents,
+    isForceConfirmModalOpen,
+    confirmForceDelete,
+    cancelForceDelete,
   } = useDeleteTool();
 
   const {
@@ -145,6 +149,10 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const bulkDeleteEsqlToolsTitleId = useGeneratedHtmlId({
     prefix: 'bulkDeleteEsqlToolsTitle',
+  });
+
+  const deleteToolUsedByAgentsTitleId = useGeneratedHtmlId({
+    prefix: 'deleteToolUsedByAgentsTitle',
   });
 
   return (
@@ -177,6 +185,31 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
           buttonColor="danger"
         >
           <EuiText>{labels.tools.deleteEsqlToolConfirmationText}</EuiText>
+        </EuiConfirmModal>
+      )}
+      {isForceConfirmModalOpen && usedByAgents && (
+        <EuiConfirmModal
+          title={labels.tools.deleteToolUsedByAgentsTitle(usedByAgents.toolId)}
+          aria-labelledby={deleteToolUsedByAgentsTitleId}
+          titleProps={{ id: deleteToolUsedByAgentsTitleId }}
+          onCancel={cancelForceDelete}
+          onConfirm={confirmForceDelete}
+          isLoading={isDeletingTool}
+          cancelButtonText={labels.tools.deleteToolUsedByAgentsCancelButton}
+          confirmButtonText={labels.tools.deleteToolUsedByAgentsConfirmButton}
+          buttonColor="danger"
+        >
+          <EuiText>
+            <p>{labels.tools.deleteToolUsedByAgentsDescription}</p>
+            {usedByAgents.agents.length > 0 && (
+              <p>
+                <strong>{labels.tools.deleteToolUsedByAgentsAgentListLabel}:</strong>{' '}
+                {labels.tools.deleteToolUsedByAgentsAgentList(
+                  usedByAgents.agents.map((a) => a.name)
+                )}
+              </p>
+            )}
+          </EuiText>
         </EuiConfirmModal>
       )}
       {isBulkDeleteToolsModalOpen && (

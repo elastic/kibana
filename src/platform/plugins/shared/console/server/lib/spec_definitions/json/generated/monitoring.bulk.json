@@ -20,6 +20,7 @@
       "_monitoring/bulk"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch",
     "availability": {
       "stack": false,
       "serverless": false

@@ -8,8 +8,15 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -20,16 +27,19 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem;
   disabled: boolean;
+  esHitRecord?: EsHitRecord;
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
@@ -51,6 +61,7 @@ const RowActionComponent = ({
   controlColumn,
   data,
   disabled,
+  esHitRecord,
   index,
   isEventViewer,
   loadingEventIds,
@@ -68,8 +79,19 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-  const { telemetry } = useKibana().services;
+  const hit: DataTableRecord | undefined = useMemo(
+    () => esHitRecord && buildDataTableRecord(esHitRecord),
+    [esHitRecord]
+  );
+
+  const { services } = useKibana();
+  const { telemetry, overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+
   const { openFlyout } = useExpandableFlyoutApi();
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const columnValues = useMemo(
     () =>
@@ -92,22 +114,59 @@ const RowActionComponent = ({
   } = useUserPrivileges();
   const showNotes = canReadNotes;
 
+  const handleAlertUpdated = useCallback(() => {
+    refetch?.();
+  }, [refetch]);
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
+    if (newFlyoutSystemEnabled && hit) {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={eventId}
+              indexName={indexName ?? undefined}
+              renderCellActions={cellActionRenderer}
+              onAlertUpdated={handleAlertUpdated}
+            />
+          ),
+        }),
+        { ...defaultFlyoutProperties }
+      );
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
-      },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: tableId,
-      panel: 'right',
-    });
-  }, [eventId, indexName, tableId, openFlyout, telemetry]);
+      });
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+        location: tableId,
+        panel: 'right',
+      });
+    }
+  }, [
+    defaultFlyoutProperties,
+    newFlyoutSystemEnabled,
+    hit,
+    overlays,
+    services,
+    store,
+    history,
+    eventId,
+    indexName,
+    handleAlertUpdated,
+    openFlyout,
+    tableId,
+    telemetry,
+  ]);
 
   const toggleShowNotes = useCallback(() => {
     openFlyout({
@@ -159,6 +218,7 @@ const RowActionComponent = ({
           disableTimelineAction={!canReadTimelines}
           ecsData={ecsData}
           eventId={eventId}
+          hit={hit}
           index={index}
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}

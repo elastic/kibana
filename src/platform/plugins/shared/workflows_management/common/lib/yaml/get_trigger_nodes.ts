@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Pair, YAMLMap } from 'yaml';
+import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar, visit } from 'yaml';
 
 /**
@@ -38,11 +38,11 @@ export function getTriggersPair(yamlDocument: Document): Pair | null {
  */
 export function getTriggerNodes(
   yamlDocument: Document
-): Array<{ node: YAMLMap; triggerType: string; typePair: Pair }> {
+): Array<{ node: YAMLMap; triggerType: string; typePair: Pair<Scalar, Scalar> }> {
   const triggerNodes: Array<{
     node: YAMLMap;
     triggerType: string;
-    typePair: Pair;
+    typePair: Pair<Scalar, Scalar>;
   }> = [];
 
   if (!yamlDocument?.contents) {
@@ -76,7 +76,7 @@ export function getTriggerNodes(
           triggerNodes.push({
             node: triggerMapNode,
             triggerType,
-            typePair: pair, // Store the actual type pair for precise positioning
+            typePair: pair as Pair<Scalar, Scalar>,
           });
         }
       }

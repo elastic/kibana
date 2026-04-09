@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-form-components'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-form-components'
+  title: '@kbn/security-form-components'
   description: Moon project for @kbn/security-form-components
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/security/form_components
+  sourceRoot: x-pack/platform/packages/shared/security/form_components
 dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
@@ -34,16 +33,6 @@ fileGroups:
     - '**/*.tsx'
     - .storybook/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

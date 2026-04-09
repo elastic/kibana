@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
@@ -208,7 +209,9 @@ export const MonitorListComponent: ({
                 <EuiButtonIcon
                   aria-label={labels.getExpandDrawerLabel(id)}
                   data-test-subj={`xpack.synthetics.monitorList.${id}.expandMonitorDetail`}
-                  iconType={expandedDrawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
+                  iconType={
+                    expandedDrawerIds.includes(id) ? 'chevronSingleUp' : 'chevronSingleDown'
+                  }
                   onClick={() => toggleDrawer(id)}
                 />
               );
@@ -224,6 +227,9 @@ export const MonitorListComponent: ({
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
+        tableCaption={i18n.translate('xpack.uptime.monitorList.monitorListCaption', {
+          defaultMessage: 'Monitors list',
+        })}
         error={error?.body?.message || error?.message}
         loading={loading || isPending}
         itemId="monitor_id"

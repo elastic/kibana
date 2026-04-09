@@ -6,11 +6,12 @@
  */
 
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ConversationRound } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { ConversationRound, ToolCallStep, ReasoningStep } from '@kbn/agent-builder-common';
+import { isReasoningStep } from '@kbn/agent-builder-common';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import type { ResearchAgentAction } from '../default/actions';
 import { toolCallAction, executeToolAction } from '../default/actions';
+import { groupToolCallSteps } from './to_langchain_messages';
 
 export const roundToActions = ({
   round,
@@ -20,32 +21,91 @@ export const roundToActions = ({
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];
+  const groups = groupToolCallSteps(round.steps);
+  const reasoningSteps = round.steps.filter(isReasoningStep);
 
-  const toolCalls = round.steps.filter(isToolCallStep);
-  toolCalls.forEach((toolCall, index) => {
-    const toolName = toolIdMapping.get(toolCall.tool_id) ?? toolCall.tool_id;
-    actions.push(
-      toolCallAction([
-        {
-          toolName,
-          toolCallId: toolCall.tool_call_id,
-          args: toolCall.params,
-        },
-      ])
-    );
-    // interrupted tool call won't have results
-    if (index < toolCalls.length - 1 || toolCall.results.length) {
+  for (const group of groups) {
+    const { completed, pending } = partitionGroupByCompletion(group);
+    const groupId = group[0].tool_call_group_id;
+    const groupMessage = getGroupReasoning(reasoningSteps, groupId);
+
+    if (completed.length > 0) {
       actions.push(
-        executeToolAction([
-          {
-            toolCallId: toolCall.tool_call_id,
-            content: JSON.stringify({ results: toolCall.results }),
-            artifact: { results: toolCall.results },
-          },
-        ])
+        toolCallAction(
+          completed.map((step) => ({
+            toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
+            toolCallId: step.tool_call_id,
+            args: step.params,
+            reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
+          })),
+          groupMessage
+        )
+      );
+      actions.push(
+        executeToolAction(
+          completed.map((step) => ({
+            toolCallId: step.tool_call_id,
+            content: JSON.stringify({ results: step.results }),
+            artifact: { results: step.results },
+          }))
+        )
       );
     }
-  });
+
+    if (pending.length > 0) {
+      actions.push(
+        toolCallAction(
+          pending.map((step) => ({
+            toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
+            toolCallId: step.tool_call_id,
+            args: step.params,
+            reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
+          })),
+          groupMessage
+        )
+      );
+    }
+  }
 
   return actions;
+};
+
+const getGroupReasoning = (
+  reasoningSteps: ReasoningStep[],
+  groupId: string | undefined
+): string | undefined => {
+  if (!groupId) {
+    return undefined;
+  }
+  const text = reasoningSteps
+    .filter((s) => s.tool_call_group_id === groupId && !s.tool_call_id)
+    .map((s) => s.reasoning)
+    .join('\n');
+  return text || undefined;
+};
+
+const getStepReasoning = (
+  reasoningSteps: ReasoningStep[],
+  toolCallId: string
+): string | undefined => {
+  const text = reasoningSteps
+    .filter((s) => s.tool_call_id === toolCallId)
+    .map((s) => s.reasoning)
+    .join('\n');
+  return text || undefined;
+};
+
+const partitionGroupByCompletion = (
+  group: ToolCallStep[]
+): { completed: ToolCallStep[]; pending: ToolCallStep[] } => {
+  const completed: ToolCallStep[] = [];
+  const pending: ToolCallStep[] = [];
+  for (const step of group) {
+    if (step.results.length > 0) {
+      completed.push(step);
+    } else {
+      pending.push(step);
+    }
+  }
+  return { completed, pending };
 };

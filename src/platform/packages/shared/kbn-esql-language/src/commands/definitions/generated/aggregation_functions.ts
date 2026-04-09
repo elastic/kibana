@@ -1429,6 +1429,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1440,6 +1457,142 @@ const firstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'The search field',
@@ -1464,6 +1617,23 @@ const firstDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1515,6 +1685,23 @@ const firstDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1566,6 +1753,23 @@ const firstDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1617,6 +1821,23 @@ const firstDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1668,6 +1889,23 @@ const firstDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1719,6 +1957,23 @@ const firstDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1804,6 +2059,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1815,6 +2087,142 @@ const lastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'The search field',
@@ -1839,6 +2247,23 @@ const lastDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1890,6 +2315,23 @@ const lastDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1941,6 +2383,23 @@ const lastDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1992,6 +2451,23 @@ const lastDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -2043,6 +2519,23 @@ const lastDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -2094,6 +2587,23 @@ const lastDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -2345,6 +2855,17 @@ const medianDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'long',
+          optional: false,
+          description: 'Expression that outputs values to calculate the median of.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'tdigest',
           optional: false,
           description: 'Expression that outputs values to calculate the median of.',
         },
@@ -3467,11 +3988,142 @@ const sampleDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const sparklineDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.AGG,
+  name: EsqlFunctionNames.SPARKLINE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.sparkline', {
+    defaultMessage:
+      'The values representing the y-axis values of a sparkline graph for a given aggregation over a period of time.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description:
+            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description:
+            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description:
+            'Expression that calculates the y-axis value of the sparkline graph for each datapoint.',
+        },
+        {
+          name: 'key',
+          type: 'date',
+          optional: false,
+          description: 'Date expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          description: 'Start of the range. Can be a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          description: 'End of the range. Can be a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [Location.STATS],
+  examples: [
+    'FROM employees\n| STATS sparkline = SPARKLINE(COUNT(*), hire_date, 20, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z")',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const stCentroidAggDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.ST_CENTROID_AGG,
   description: i18n.translate('kbn-esql-language.esql.definitions.st_centroid_agg', {
-    defaultMessage: 'Calculate the spatial centroid over a field with spatial point geometry type.',
+    defaultMessage:
+      'Calculate the spatial centroid over a field with spatial geometry type.\nSupports `geo_point` and `cartesian_point`, as well as `geo_shape` and `cartesian_shape`.',
   }),
   preview: true,
   alias: undefined,
@@ -3491,11 +4143,35 @@ const stCentroidAggDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+          description: '',
+        },
+      ],
+      license: 'platinum',
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description: '',
         },
       ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+          description: '',
+        },
+      ],
+      license: 'platinum',
       returnType: 'geo_point',
     },
   ],
@@ -3636,6 +4312,17 @@ const sumDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'dense_vector',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -4627,9 +5314,9 @@ const valuesDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.VALUES,
   description: i18n.translate('kbn-esql-language.esql.definitions.values', {
     defaultMessage:
-      'Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
+      'Returns unique (deduplicated) values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5068,6 +5755,7 @@ export const aggFunctionDefinitions = [
   percentileDefinition,
   presentDefinition,
   sampleDefinition,
+  sparklineDefinition,
   stCentroidAggDefinition,
   stExtentAggDefinition,
   stdDevDefinition,

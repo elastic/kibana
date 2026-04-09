@@ -3,37 +3,153 @@
     {
       "id": "agent-builder",
       "name": "Agent Builder",
+      "slackChannel": "#agent-builder-alerts",
       "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts",
-      "tags": ["platform", "agent-builder"],
-      "ciLabels": ["evals:agent-builder"]
+      "tags": [
+        "platform",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:agent-builder"
+      ]
+    },
+    {
+      "id": "esql-generation",
+      "name": "ES|QL Generation Evaluations",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/esql.playwright.config.ts",
+      "tags": [
+        "platform",
+        "esql"
+      ],
+      "ciLabels": [
+        "evals:esql-generation"
+      ]
     },
     {
       "id": "streams",
       "name": "Streams",
+      "slackChannel": "#observability-streams-dev",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts",
-      "tags": ["platform", "streams"],
-      "ciLabels": ["evals:streams"]
+      "tags": [
+        "platform",
+        "streams"
+      ],
+      "ciLabels": [
+        "evals:streams"
+      ]
+    },
+    {
+      "id": "significant-events",
+      "name": "Significant Events",
+      "slackChannel": "#significant-events-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events/playwright.config.ts",
+      "tags": [
+        "platform",
+        "significant-events"
+      ],
+      "ciLabels": [
+        "evals:significant-events"
+      ]
     },
     {
       "id": "llm-tasks",
       "name": "LLM Tasks",
+      "slackChannel": "#appex-ai-infra-alerts",
       "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",
-      "tags": ["ai-infra"],
-      "ciLabels": ["evals:llm-tasks"]
+      "tags": [
+        "ai-infra"
+      ],
+      "ciLabels": [
+        "evals:llm-tasks"
+      ]
     },
     {
       "id": "obs-ai-assistant",
       "name": "Observability AI Assistant",
+      "slackChannel": "#obs-ai-assistant-alerts",
       "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts",
-      "tags": ["observability", "ai-assistant"],
-      "ciLabels": ["evals:obs-ai-assistant"]
+      "tags": [
+        "observability",
+        "ai-assistant"
+      ],
+      "ciLabels": [
+        "evals:obs-ai-assistant"
+      ]
     },
     {
-      "id": "obs-ai-assistant/ai_insights",
-      "name": "Observability AI Assistant (AI Insights)",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/ai_insights/playwright.config.ts",
-      "tags": ["observability", "ai-assistant"],
-      "ciLabels": ["evals:obs-ai-assistant-ai-insights"]
+      "id": "observability-ai",
+      "name": "Observability AI",
+      "slackChannel": "#obs-ai-assistant-alerts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/playwright.config.ts",
+      "tags": [
+        "observability",
+        "observability-ai"
+      ],
+      "ciLabels": [
+        "evals:observability-ai"
+      ]
+    },
+    {
+      "id": "security-ai-rules",
+      "name": "Security AI Rules",
+      "slackChannel": "#security-detection-engine-alerts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts",
+      "tags": ["security", "ai-rules"],
+      "ciLabels": ["evals:security-ai-rules"]
+    },
+    {
+      "id": "endpoint",
+      "name": "Endpoint (Elastic Defend)",
+      "slackChannel": "#security-defend-workflows-tests",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.config.ts",
+      "tags": [
+        "security",
+        "defend-workflows"
+      ],
+      "ciLabels": [
+        "evals:endpoint"
+      ],
+      "serverConfigSet": "evals_endpoint"
+    },
+    {
+      "id": "entity-analytics",
+      "name": "Security Entity Analytics",
+      "slackChannel": "#security-entity-analytics-alerts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts",
+      "tags": [
+        "security",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:entity-analytics"
+      ],
+      "serverConfigSet": "evals_entity_analytics"
+    },
+    {
+      "id": "entity-analytics-v2",
+      "name": "Security Entity Analytics V2",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.v2.config.ts",
+      "tags": [
+        "security",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:entity-analytics-v2"
+      ],
+      "serverConfigSet": "evals_entity_analytics_v2"
+    },
+    {
+      "id": "attack-discovery",
+      "name": "Attack Discovery",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:attack-discovery"
+      ]
     }
   ]
 }

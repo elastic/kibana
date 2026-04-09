@@ -11,11 +11,7 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type {
-  ChatAgentEvent,
-  ConversationRound,
-  ToolResultEvent,
-} from '@kbn/agent-builder-common/chat';
+import type { ChatAgentEvent, ConversationRound } from '@kbn/agent-builder-common/chat';
 import { isToolCallStep } from '@kbn/agent-builder-common/chat';
 import {
   createBrowserToolCallEvent,
@@ -109,24 +105,25 @@ export const convertGraphEvents = ({
           const nextAction = addedActions[addedActions.length - 1];
 
           if (isToolCallAction(nextAction)) {
-            const { tool_calls: toolCalls, message: messageText } = nextAction;
+            const { tool_calls: toolCalls, message: messageText = '' } = nextAction;
             if (toolCalls.length > 0) {
-              let hasReasoningEvent = false;
+              const toolCallGroupId = uuidv4();
+
+              if (messageText.trim().length > 0) {
+                events.push(createReasoningEvent(messageText, { toolCallGroupId }));
+              }
 
               for (const toolCall of toolCalls) {
                 const toolId = toolIdentifierFromToolCall(toolCall, toolManager.getToolIdMapping());
-                const { toolCallId, args } = toolCall;
+                const { toolCallId, args: toolCallArgs, reasoning } = toolCall;
 
-                const { _reasoning, ...toolCallArgs } = args;
-                if (_reasoning) {
-                  events.push(createReasoningEvent(_reasoning));
-                  hasReasoningEvent = true;
+                if (reasoning && reasoning.trim().length > 0) {
+                  events.push(createReasoningEvent(reasoning, { toolCallId, toolCallGroupId }));
                 }
 
                 toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
 
                 const isBrowserTool = toolId.startsWith(BROWSER_TOOL_PREFIX);
-
                 if (isBrowserTool) {
                   events.push(
                     createBrowserToolCallEvent({
@@ -141,12 +138,10 @@ export const convertGraphEvents = ({
                       toolId,
                       toolCallId,
                       params: toolCallArgs,
+                      toolCallGroupId,
                     })
                   );
                 }
-              }
-              if (messageText && !hasReasoningEvent) {
-                events.push(createReasoningEvent(messageText));
               }
             }
           }
@@ -177,38 +172,43 @@ export const convertGraphEvents = ({
           return of(...events);
         }
 
-        // emit tool result events
+        // emit tool result events and/or prompt request events
         if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
           const addedActions = (event.data.output as StateType).mainActions;
-          const nextAction = addedActions[addedActions.length - 1];
+          const resultEvents: ConvertedEvents[] = [];
 
-          if (isExecuteToolAction(nextAction)) {
-            const toolResultEvents: ToolResultEvent[] = [];
-            for (const toolResult of nextAction.tool_results) {
-              const toolId = toolCallIdToIdMap.get(toolResult.toolCallId);
-              const toolReturn = extractToolReturn(toolResult);
-              toolResultEvents.push(
-                createToolResultEvent({
-                  toolCallId: toolResult.toolCallId,
-                  toolId: toolId ?? 'unknown',
-                  results: toolReturn.results ?? [],
-                })
-              );
+          for (const action of addedActions) {
+            if (isExecuteToolAction(action)) {
+              for (const toolResult of action.tool_results) {
+                const toolId = toolCallIdToIdMap.get(toolResult.toolCallId);
+                const toolReturn = extractToolReturn(toolResult);
+                resultEvents.push(
+                  createToolResultEvent({
+                    toolCallId: toolResult.toolCallId,
+                    toolId: toolId ?? 'unknown',
+                    results: toolReturn.results ?? [],
+                  })
+                );
+              }
             }
 
-            return of(...toolResultEvents);
+            if (isToolPromptAction(action)) {
+              for (const { prompt, tool_call_id } of action.prompts) {
+                resultEvents.push(
+                  createPromptRequestEvent({
+                    prompt,
+                    source: {
+                      type: AgentPromptRequestSourceType.toolCall,
+                      tool_call_id,
+                    },
+                  })
+                );
+              }
+            }
           }
 
-          if (isToolPromptAction(nextAction)) {
-            return of(
-              createPromptRequestEvent({
-                prompt: nextAction.prompt,
-                source: {
-                  type: AgentPromptRequestSourceType.toolCall,
-                  tool_call_id: nextAction.tool_call_id,
-                },
-              })
-            );
+          if (resultEvents.length > 0) {
+            return of(...resultEvents);
           }
         }
 

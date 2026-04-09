@@ -10,16 +10,21 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { Status } from './status';
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { Assignees } from './assignees';
+import { Notes } from '../../../flyout_v2/shared/components/notes';
+import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
+  HEADER_ASSIGNEES_BLOCK_TEST_ID,
   HEADER_BADGE_TEST_ID,
   HEADER_TITLE_TEST_ID,
 } from '../constants/test_ids';
 import { useHeaderData } from '../hooks/use_header_data';
+import { useAttackDetailsContext } from '../context';
+import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -38,6 +43,8 @@ const ATTACK_HEADER_BADGE = i18n.translate(
  */
 export const HeaderTitle = memo(() => {
   const { title, timestamp, alertsCount } = useHeaderData();
+  const { attackId } = useAttackDetailsContext();
+  const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
 
   return (
     <>
@@ -77,6 +84,23 @@ export const HeaderTitle = memo(() => {
               >
                 {alertsCount}
               </AlertHeaderBlock>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AlertHeaderBlock
+                hasBorder
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.attackDetailsFlyout.header.assigneesTitle"
+                    defaultMessage="Assignees"
+                  />
+                }
+                data-test-subj={HEADER_ASSIGNEES_BLOCK_TEST_ID}
+              >
+                <Assignees />
+              </AlertHeaderBlock>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Notes documentId={attackId} onShowNotes={openNotesTab} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

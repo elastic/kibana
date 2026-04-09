@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/global-search-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/global-search-plugin'
+  title: '@kbn/global-search-plugin'
   description: Moon project for @kbn/global-search-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/global_search
+  sourceRoot: x-pack/platform/plugins/shared/global_search
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -26,6 +25,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -37,17 +37,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

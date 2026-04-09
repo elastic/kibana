@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/advanced-settings-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/advanced-settings-plugin'
+  title: '@kbn/advanced-settings-plugin'
   description: Moon project for @kbn/advanced-settings-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/private/advanced_settings
+  sourceRoot: src/platform/plugins/private/advanced_settings
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'
@@ -29,6 +28,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/management-settings-application'
   - '@kbn/spaces-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -38,5 +38,6 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
 tasks: {}

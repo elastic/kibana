@@ -116,6 +116,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
+    uiamApiKey: {
+      type: 'binary',
+    },
+    // NO NEED TO BE INDEXED
     // NEED TO CHECK WITH KIBANA SECURITY
     // apiKey: {
     //   type: 'binary',

@@ -7,35 +7,45 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import type { Entity } from '../../../../common/api/entity_analytics';
+import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
-import type { HostItem } from '../../../../common/search_strategy';
-import { ObservedEntity } from '../shared/components/observed_entity';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
-import { useObservedHostFields } from './hooks/use_observed_host_fields';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import type { IdentityFields } from '../../document_details/shared/utils';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { HostItem } from '../../../../common/search_strategy';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+
+type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
 interface HostPanelContentProps {
-  observedHost: ObservedEntityData<HostItem>;
+  observedHost: ObservedHostData;
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  hostName: string;
+  identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
+  /** When using Entity Store v2: entity record for asset criticality upsert. */
+  entityRecord?: Entity;
+  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
+  skipRiskAndCriticality?: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const HostPanelContent = ({
-  hostName,
+  identityFields,
   observedHost,
   riskScoreState,
   recalculatingScore,
@@ -44,48 +54,77 @@ export const HostPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
+  entityRecord,
+  skipRiskAndCriticality = false,
+  entityStoreEntityId,
 }: HostPanelContentProps) => {
-  const observedFields = useObservedHostFields(observedHost);
-
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
+  // Extract hostName from identityFields for components that need a string
+  // Priority: identityFields['host.name'] > identityFields[first key]
+  const hostName =
+    identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '';
 
   return (
-    <FlyoutBody>
-      {isEntityDetailsHighlightsAIEnabled && (
+    <>
+      {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
       )}
-      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
+      {!skipRiskAndCriticality &&
+        riskScoreState.hasEngineBeenInstalled &&
+        (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
+          <>
+            <FlyoutRiskSummary
+              entityType={EntityType.host}
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              entityId={entityRecord?.entity.id}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
+      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
-          <FlyoutRiskSummary
-            entityType={EntityType.host}
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-          />
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion
-        entity={{ name: hostName, type: EntityType.host }}
-        onChange={onAssetCriticalityChange}
-      />
+      {!skipRiskAndCriticality && !entityRecord && (
+        <AssetCriticalityAccordion
+          entity={{ name: hostName, type: EntityType.host }}
+          onChange={onAssetCriticalityChange}
+        />
+      )}
       <EntityInsight
-        value={hostName}
-        field={EntityIdentifierFields.hostName}
+        identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
+        entityType={EntityType.host}
       />
-      <ObservedEntity
-        observedData={observedHost}
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
+      <ObservedDataSection
+        observedHost={observedHost}
         contextID={contextID}
+        identityFields={identityFields}
         scopeId={scopeId}
-        observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
-    </FlyoutBody>
+    </>
   );
 };

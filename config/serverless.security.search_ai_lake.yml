@@ -116,6 +116,22 @@ xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations
 xpack.fleet.prereleaseEnabledByDefault: true
 xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
 
+# Experimental Security Solution features
+
+# Since array configurations here completely override the values from "serverless.security.yml",
+# we must duplicate all disabled experimental features from the base config
+# in addition to any features specifically disabled in EASE.
+xpack.securitySolution.enableExperimental:
+  [
+    riskScoreAssistantToolDisabled,
+    disable:enableRiskScorePrivmonModifier,
+    disable:kubernetesEnabled,
+    trialCompanionEnabled,
+
+    # Alerts and Attacks alignment feature is disabled in EASE
+    disable:enableAlertsAndAttacksAlignment,
+  ]
+
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
   Anthropic-Claude-Sonnet-3-7:
@@ -158,6 +174,26 @@ xpack.actions.preconfigured:
       inferenceId: ".anthropic-claude-4.6-opus-chat_completion"
       providerConfig:
         model_id: "anthropic-claude-4.6-opus"
+  Anthropic-Claude-Sonnet-4-6:
+    name: Anthropic Claude Sonnet 4.6
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.6-sonnet-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.6-sonnet"
+  Anthropic-Claude-Haiku-4-5:
+    name: Anthropic Claude Haiku 4.5
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.5-haiku-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.5-haiku"
   OpenAI-GPT-OSS-120B:
     name: OpenAI GPT-OSS 120B
     actionTypeId: .inference
@@ -248,6 +284,16 @@ xpack.actions.preconfigured:
       inferenceId: ".google-gemini-2.5-flash-chat_completion"
       providerConfig:
         model_id: "google-gemini-2.5-flash"
+  Google-Gemini-2-5-Flash-Lite:
+    name: Google Gemini 2.5 Flash Lite
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".google-gemini-2.5-flash-lite-chat_completion"
+      providerConfig:
+        model_id: "google-gemini-2.5-flash-lite"
   Google-Gemini-3-0-Pro:
     name: Google Gemini 3.0 Pro
     actionTypeId: .inference

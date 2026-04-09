@@ -10,19 +10,56 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
-export const markdownEditorSchema = schema.object({
-  content: schema.string(),
+// Markdown by-value state schema (contains content)
+const markdownByValueStateSchema = schema.object({
+  content: schema.string({
+    defaultValue: '',
+  }),
+  settings: schema.maybe(
+    schema.object({
+      open_links_in_new_tab: schema.boolean({ defaultValue: true }),
+    })
+  ),
 });
 
-export const markdownEmbeddableSchema = schema.allOf(
-  [markdownEditorSchema, serializedTitlesSchema],
+// Markdown by-reference state schema (contains savedObjectId)
+const markdownByReferenceStateSchema = schema.object({
+  ref_id: schema.string({
+    meta: { description: 'The unique identifier of the markdown library item.' },
+  }),
+});
+
+// Markdown by-value embeddable schema (by-value state + titles)
+export const markdownByValueEmbeddableSchema = schema.allOf(
+  [markdownByValueStateSchema, serializedTitlesSchema],
   {
+    meta: BY_VALUE_SCHEMA_META,
+  }
+);
+
+// Markdown by-reference embeddable schema (by-reference state + titles)
+const markdownByReferenceEmbeddableSchema = schema.allOf(
+  [markdownByReferenceStateSchema, serializedTitlesSchema],
+  {
+    meta: BY_REF_SCHEMA_META,
+  }
+);
+
+// Complete markdown embeddable schema (union of by-value and by-reference embeddables)
+export const markdownEmbeddableSchema = schema.oneOf(
+  [markdownByValueEmbeddableSchema, markdownByReferenceEmbeddableSchema],
+  {
+    defaultValue: { content: '', settings: { open_links_in_new_tab: true } },
     meta: {
-      description: 'Markdown embeddable schema',
+      description: 'Markdown panel config',
     },
   }
 );
 
-export type MarkdownEditorState = TypeOf<typeof markdownEditorSchema>;
+export type MarkdownByValueState = TypeOf<typeof markdownByValueStateSchema>;
+export type MarkdownByReferenceState = TypeOf<typeof markdownByReferenceStateSchema>;
 export type MarkdownEmbeddableState = TypeOf<typeof markdownEmbeddableSchema>;
+
+export type MarkdownSettingsState = MarkdownByValueState['settings'];

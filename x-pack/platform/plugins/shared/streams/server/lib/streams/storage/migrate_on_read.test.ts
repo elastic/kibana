@@ -33,10 +33,12 @@ const mockStreamsAsserts = Streams.all.Definition.asserts as jest.MockedFunction
   typeof Streams.all.Definition.asserts
 >;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createCompleteWiredStreamDefinition(overrides: any = {}) {
   return {
     name: 'test-stream',
     description: 'Test stream',
+    type: 'wired' as const,
     updated_at: new Date().toISOString(),
     query_streams: [],
     ingest: {
@@ -53,10 +55,12 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createCompleteClassicStreamDefinition(overrides: any = {}) {
   return {
     name: 'test-classic-stream',
     description: 'Test classic stream',
+    type: 'classic' as const,
     updated_at: new Date().toISOString(),
     query_streams: [],
     ingest: {
@@ -72,10 +76,13 @@ function createCompleteClassicStreamDefinition(overrides: any = {}) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getRoutingFromResult(result: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (result as any).ingest?.wired?.routing;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createRoutingRule(overrides: any = {}) {
   return {
     destination: 'test.childstream',
@@ -258,6 +265,7 @@ describe('migrateOnRead', () => {
       };
 
       const result = migrateOnRead(definition);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.settings).toEqual({});
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
@@ -279,6 +287,7 @@ describe('migrateOnRead', () => {
 
       const result = migrateOnRead(definition);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.failure_store).toEqual({ inherit: {} });
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
@@ -300,6 +309,7 @@ describe('migrateOnRead', () => {
 
       const result = migrateOnRead(definition);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.failure_store).toEqual({
         lifecycle: { enabled: { data_retention: '30d' } },
       });
@@ -321,7 +331,9 @@ describe('migrateOnRead', () => {
       };
 
       const result = migrateOnRead(definition);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.classic).toEqual({ someConfig: 'value' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.unwired).toBeUndefined();
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
@@ -376,6 +388,7 @@ describe('migrateOnRead', () => {
   describe('ingest.processing.updated_at migration', () => {
     describe('Should add updated_at if missing', () => {
       it('for wired stream', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const definition = createCompleteWiredStreamDefinition() as any;
         delete definition.ingest?.processing?.updated_at;
 
@@ -385,6 +398,7 @@ describe('migrateOnRead', () => {
       });
 
       it('for classic stream', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const definition = createCompleteClassicStreamDefinition() as any;
         delete definition.ingest?.processing?.updated_at;
 
@@ -423,6 +437,60 @@ describe('migrateOnRead', () => {
       };
 
       expect(() => migrateOnRead(groupStreamDefinition)).not.toThrow();
+    });
+  });
+
+  describe('type discriminator migration', () => {
+    it('should add type: wired for definitions with ingest.wired', () => {
+      const { type: _omitted, ...definition } = createCompleteWiredStreamDefinition();
+
+      const result = migrateOnRead(definition);
+      expect(result.type).toBe('wired');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add type: classic for definitions with ingest.classic', () => {
+      const { type: _omitted, ...definition } = createCompleteClassicStreamDefinition();
+
+      const result = migrateOnRead(definition);
+      expect(result.type).toBe('classic');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add type: query for definitions without an ingest key', () => {
+      const definition = {
+        name: 'my-query-stream',
+        description: 'A query stream',
+        updated_at: new Date().toISOString(),
+        query_streams: [],
+        query: { view: 'my-view', esql: 'FROM logs | LIMIT 10' },
+      };
+
+      const result = migrateOnRead(definition);
+      expect(result.type).toBe('query');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should throw for documents that have ingest but neither wired nor classic', () => {
+      const definition = {
+        name: 'corrupted-stream',
+        description: 'Corrupted',
+        updated_at: new Date().toISOString(),
+        query_streams: [],
+        ingest: { lifecycle: { dsl: {} } },
+      };
+
+      expect(() => migrateOnRead(definition)).toThrow(
+        "Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired' or 'classic'"
+      );
+    });
+
+    it('should not modify type if already present', () => {
+      const definition = createCompleteWiredStreamDefinition();
+      definition.type = 'wired';
+
+      migrateOnRead(definition);
+      expect(mockStreamsAsserts).not.toHaveBeenCalled();
     });
   });
 });

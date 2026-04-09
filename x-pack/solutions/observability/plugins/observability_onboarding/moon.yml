@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-onboarding-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-onboarding-plugin'
+  title: '@kbn/observability-onboarding-plugin'
   description: Moon project for @kbn/observability-onboarding-plugin
   channel: ''
   owner: '@elastic/obs-onboarding-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_onboarding
+  sourceRoot: x-pack/solutions/observability/plugins/observability_onboarding
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -53,6 +52,15 @@ dependsOn:
   - '@kbn/apm-plugin'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
+  - '@kbn/core-security-server'
+  - '@kbn/scout-oblt'
+  - '@kbn/scout-synthtrace'
+  - '@kbn/synthtrace-client'
+  - '@kbn/streams-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/ingest-hub-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
@@ -66,17 +74,8 @@ fileGroups:
     - public/**/*.json
     - server/**/*
     - e2e/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

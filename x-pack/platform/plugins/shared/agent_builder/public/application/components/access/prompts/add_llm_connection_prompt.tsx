@@ -60,7 +60,7 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
   );
 
   const secondaryButton = (
-    <EuiButtonEmpty href={llmDocsHref} target="_blank" iconType="popout" iconSide="right">
+    <EuiButtonEmpty href={llmDocsHref} target="_blank" iconType="external" iconSide="right">
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.addLlm.actions.docsLink"
         defaultMessage="Read the docs"

@@ -49,6 +49,9 @@ jest.mock('@kbn/elastic-assistant', () => ({
       latestAlerts: 20,
     },
   }),
+}));
+
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(() => ({
     isFetched: true,
     data: mockConnectors,

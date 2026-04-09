@@ -138,7 +138,7 @@ const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProp
                       {(copy) => (
                         <EuiButtonIcon
                           onClick={copy}
-                          iconType="copyClipboard"
+                          iconType="copy"
                           color="text"
                           disabled={!hasAllSettings}
                           aria-label={i18n.translate(

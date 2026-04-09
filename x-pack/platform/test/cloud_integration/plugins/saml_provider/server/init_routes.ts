@@ -14,8 +14,14 @@ export function initRoutes(core: CoreSetup) {
     {
       path: '/saml_provider/login',
       validate: false,
-      options: { authRequired: false },
-      security: { authz: { enabled: false, reason: '' } },
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates a cloud SAML provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
     },
     async (context, request, response) => {
       const samlResponse = await getSAMLResponse({
@@ -43,8 +49,14 @@ export function initRoutes(core: CoreSetup) {
     {
       path: '/saml_provider/login/submit.js',
       validate: false,
-      options: { authRequired: false },
-      security: { authz: { enabled: false, reason: '' } },
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates a cloud SAML provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
     },
     (context, request, response) => {
       return response.renderJs({ body: 'document.getElementById("loginForm").submit();' });
@@ -55,8 +67,14 @@ export function initRoutes(core: CoreSetup) {
     {
       path: '/saml_provider/logout',
       validate: false,
-      options: { authRequired: false },
-      security: { authz: { enabled: false, reason: '' } },
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates a cloud SAML provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
     },
     async (context, request, response) => {
       return response.redirected({ headers: { location: '/logout?SAMLResponse=something' } });

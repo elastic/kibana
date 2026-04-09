@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import type { PanelPackage, PresentationContainer } from '@kbn/presentation-containers';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,
@@ -19,6 +18,8 @@ import type {
   HasTypeDisplayName,
   HasUniqueId,
   PublishesTitle,
+  PanelPackage,
+  PresentationContainer,
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,

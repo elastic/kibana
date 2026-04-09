@@ -20,7 +20,7 @@ export const LogEntryCountSparkline: React.FunctionComponent<{
   const metric = useMemo(
     () =>
       histograms
-        .find((histogram) => histogram.histogramId === 'history')
+        ?.find((histogram) => histogram.histogramId === 'history')
         ?.buckets?.map(({ startTime: timestamp, logEntryCount: value }) => ({
           timestamp,
           value,
@@ -29,7 +29,7 @@ export const LogEntryCountSparkline: React.FunctionComponent<{
   );
   const referenceCount = useMemo(
     () =>
-      histograms.find((histogram) => histogram.histogramId === 'reference')?.buckets?.[0]
+      histograms?.find((histogram) => histogram.histogramId === 'reference')?.buckets?.[0]
         ?.logEntryCount ?? 0,
     [histograms]
   );

@@ -47,6 +47,7 @@ export const transformRuleDomainToRuleAttributes = ({
     updatedAt: rule.updatedAt.toISOString(),
     apiKey: rule.apiKey,
     apiKeyOwner: rule.apiKeyOwner,
+    ...(rule.uiamApiKey !== undefined ? { uiamApiKey: rule.uiamApiKey } : {}),
     ...(rule.apiKeyCreatedByUser !== undefined
       ? { apiKeyCreatedByUser: rule.apiKeyCreatedByUser }
       : {}),
@@ -82,6 +83,7 @@ export const transformRuleDomainToRuleAttributes = ({
     revision: rule.revision,
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
+    ...(rule.lastEnabledAt ? { lastEnabledAt: rule.lastEnabledAt.toISOString() } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
     artifacts: artifactsWithRefs,
   } as RawRule;

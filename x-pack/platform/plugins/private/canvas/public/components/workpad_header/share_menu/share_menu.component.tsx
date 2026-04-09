@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PDF, JSON } from '../../../../i18n/constants';
@@ -62,7 +61,7 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
     items: [
       {
         name: strings.getShareDownloadJSONTitle(),
-        icon: <EuiIcon type="exportAction" size="m" />,
+        icon: <EuiIcon type="upload" size="m" />,
         onClick: () => {
           onExport('json');
           closePopover();
@@ -106,8 +105,4 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
       </Popover>
     </div>
   );
-};
-
-ShareMenu.propTypes = {
-  onExport: PropTypes.func.isRequired,
 };

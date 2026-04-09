@@ -83,6 +83,9 @@ const StreamsAlertRequired = rt.type({
 });
 // prettier-ignore
 const StreamsAlertOptional = rt.partial({
+  'data_stream.dataset': schemaString,
+  'data_stream.namespace': schemaString,
+  'data_stream.type': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
   'event.original': schemaString,

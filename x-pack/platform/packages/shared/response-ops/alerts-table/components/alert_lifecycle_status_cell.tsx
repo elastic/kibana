@@ -6,7 +6,7 @@
  */
 
 import type { AlertStatus } from '@kbn/rule-data-utils';
-import { ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_FLAPPING, ALERT_STATUS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,8 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
   const { euiTheme } = useEuiTheme();
   const { alert, showAlertStatusWithFlapping } = props;
   const { isMuted } = useAlertMutedState(alert);
+  const workflowStatus = alert?.[ALERT_WORKFLOW_STATUS]?.[0] as string | undefined;
+  const isAcknowledged = workflowStatus === 'acknowledged';
 
   if (!showAlertStatusWithFlapping) {
     return null;
@@ -44,6 +46,24 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
           >
             <EuiBadge
               iconType="bellSlash"
+              tabIndex={0}
+              css={css`
+                padding-inline: ${euiTheme.size.xs};
+              `}
+            />
+          </EuiToolTip>
+        )}
+        {isAcknowledged && (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.triggersActionsUI.sections.alertsTable.alertAcknowledged',
+              { defaultMessage: 'Alert acknowledged' }
+            )}
+          >
+            <EuiBadge
+              data-test-subj="alertAcknowledgedBadge"
+              iconType="check"
+              color="hollow"
               tabIndex={0}
               css={css`
                 padding-inline: ${euiTheme.size.xs};

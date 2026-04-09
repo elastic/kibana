@@ -10,6 +10,8 @@
 import type { TabItem } from '@kbn/unified-tabs';
 import { TabInitializationStatus, type TabState } from './types';
 
+export const DEFAULT_EXPANDED_DOC_OWNER = 'discover_main_grid';
+
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   initializationState: { initializationStatus: TabInitializationStatus.NotStarted },
   globalState: {},
@@ -26,20 +28,22 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   attributes: {
     visContext: undefined,
     controlGroupState: undefined,
+    timeRestore: false,
   },
   overriddenVisContextAfterInvalidation: undefined,
   cascadedDocumentsState: {
     availableCascadeGroups: [],
     selectedCascadeGroups: [],
+    cascadedDocumentsMap: {},
   },
   esqlVariables: [],
-  resetDefaultProfileState: {
+  defaultProfileState: {
     resetId: '',
-    columns: false,
-    rowHeight: false,
-    breakdownField: false,
-    hideChart: false,
+    fieldsToReset: 'none',
+    snapshotsByProfileId: {},
   },
   expandedDoc: undefined,
+  expandedDocOwner: undefined,
+  renderDocumentViewMeta: undefined,
   uiState: {},
 };

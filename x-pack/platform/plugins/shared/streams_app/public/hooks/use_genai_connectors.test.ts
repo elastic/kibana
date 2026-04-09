@@ -6,9 +6,10 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useGenAIConnectors, type Connector } from './use_genai_connectors';
+import { useGenAIConnectors } from './use_genai_connectors';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -17,10 +18,14 @@ import {
 const STREAMS_CONNECTOR_STORAGE_KEY = 'xpack.streamsApp.lastUsedConnector';
 const OLD_STORAGE_KEY = 'xpack.observabilityAiAssistant.lastUsedConnector';
 
-const createMockConnector = (id: string, name: string): Connector => ({
-  id,
+const createMockConnector = (connectorId: string, name: string) => ({
+  connectorId,
   name,
-  actionTypeId: '.gen-ai',
+  type: InferenceConnectorType.OpenAI,
+  config: {},
+  capabilities: {},
+  isPreconfigured: false,
+  isInferenceEndpoint: false,
 });
 
 describe('useGenAIConnectors', () => {

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
@@ -44,8 +44,8 @@ export const DefendInsightEvent = z.object({
 export type DefendInsightType = z.infer<typeof DefendInsightType>;
 export const DefendInsightType = z.enum([
   'incompatible_antivirus',
-  'noisy_process_tree',
   'policy_response_failure',
+  'custom',
 ]);
 export type DefendInsightTypeEnum = typeof DefendInsightType.enum;
 export const DefendInsightTypeEnum = DefendInsightType.enum;

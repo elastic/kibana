@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { EuiTableRowProps } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
@@ -74,6 +75,9 @@ export const MonitorsTable = ({
       rowProps={getRowProps}
       data-test-subj="syntheticsCompactViewTable"
       tableLayout="auto"
+      tableCaption={i18n.translate('xpack.synthetics.monitorsTable.tableCaption', {
+        defaultMessage: 'Compact monitors list',
+      })}
     />
   );
 };

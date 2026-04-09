@@ -7,20 +7,21 @@
 
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
-import type { ToolCallStep, ToolCallWithResult } from '@kbn/agent-builder-common';
+import type {
+  ConversationRoundStep,
+  ReasoningStep,
+  ToolCallStep,
+  ToolCallWithResult,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { convertPreviousRounds } from './to_langchain_messages';
+import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type {
-  ProcessedAttachment,
-  ProcessedConversation,
-  ProcessedConversationRound,
-  ProcessedRoundInput,
-} from './prepare_conversation';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 
 describe('convertPreviousRounds', () => {
   const now = new Date().toISOString();
@@ -524,5 +525,367 @@ describe('convertPreviousRounds', () => {
         toolId: 'search',
       });
     });
+  });
+
+  describe('parallel tool calls (tool_call_group_id)', () => {
+    it('groups parallel tool calls into a single AIMessage with multiple tool_calls', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+      const toolCall2 = makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
+        { tool_result_id: 'r2', type: ToolResultType.other, data: { result: 'b' } },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find things'),
+          steps: [step1, step2],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      // 1 user + 1 AI (with 2 tool_calls) + 2 ToolMessages + 1 assistant + 1 user
+      expect(result).toHaveLength(6);
+      const [humanMsg, aiMsg, toolMsg1, toolMsg2, assistantMsg, nextHumanMsg] = result;
+
+      expect(isHumanMessage(humanMsg)).toBe(true);
+      expect(isAIMessage(aiMsg)).toBe(true);
+      expect((aiMsg as AIMessage).tool_calls).toHaveLength(2);
+      expect((aiMsg as AIMessage).tool_calls![0].id).toBe('call-1');
+      expect((aiMsg as AIMessage).tool_calls![1].id).toBe('call-2');
+      expect((toolMsg1 as ToolMessage).tool_call_id).toBe('call-1');
+      expect((toolMsg2 as ToolMessage).tool_call_id).toBe('call-2');
+      expect(isAIMessage(assistantMsg)).toBe(true);
+      expect(assistantMsg.content).toBe('done!');
+      expect(isHumanMessage(nextHumanMsg)).toBe(true);
+    });
+
+    it('keeps sequential calls (no group id) as separate AIMessages', async () => {
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+      const toolCall2 = makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
+        { tool_result_id: 'r2', type: ToolResultType.other, data: { result: 'b' } },
+      ]);
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find things'),
+          steps: [makeToolCallStep(toolCall1), makeToolCallStep(toolCall2)],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      // 1 user + 2 * (1 AI + 1 Tool) + 1 assistant + 1 user = 7
+      expect(result).toHaveLength(7);
+      const aiMsg1 = result[1] as AIMessage;
+      const aiMsg2 = result[3] as AIMessage;
+      expect(aiMsg1.tool_calls).toHaveLength(1);
+      expect(aiMsg2.tool_calls).toHaveLength(1);
+    });
+
+    it('handles mixed parallel and sequential calls in the same round', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { q: 'a' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: {} },
+      ]);
+      const toolCall2 = makeToolCallWithResult('call-2', 'search', { q: 'b' }, [
+        { tool_result_id: 'r2', type: ToolResultType.other, data: {} },
+      ]);
+      const toolCall3 = makeToolCallWithResult('call-3', 'lookup', { id: 1 }, [
+        { tool_result_id: 'r3', type: ToolResultType.other, data: {} },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
+      const step3 = makeToolCallStep(toolCall3);
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('mixed calls'),
+          steps: [step1, step2, step3],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      // 1 user + (1 AI[2 calls] + 2 Tools) + (1 AI[1 call] + 1 Tool) + 1 assistant + 1 user = 8
+      expect(result).toHaveLength(8);
+
+      const parallelAi = result[1] as AIMessage;
+      expect(parallelAi.tool_calls).toHaveLength(2);
+
+      const sequentialAi = result[4] as AIMessage;
+      expect(sequentialAi.tool_calls).toHaveLength(1);
+      expect(sequentialAi.tool_calls![0].id).toBe('call-3');
+    });
+
+    it('sets group-level reasoning as AIMessage content', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const reasoningStep: ReasoningStep = {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'I need to search for foo',
+        tool_call_group_id: groupId,
+      };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find foo'),
+          steps: [reasoningStep, step1],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      const aiMsg = result[1] as AIMessage;
+      expect(isAIMessage(aiMsg)).toBe(true);
+      expect(aiMsg.content).toBe('I need to search for foo');
+    });
+
+    it('injects per-tool reasoning as _reasoning in tool call args', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const reasoningStep: ReasoningStep = {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'searching for foo specifically',
+        tool_call_id: 'call-1',
+        tool_call_group_id: groupId,
+      };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find foo'),
+          steps: [reasoningStep, step1],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      const aiMsg = result[1] as AIMessage;
+      expect(aiMsg.tool_calls![0].args).toEqual({
+        _reasoning: 'searching for foo specifically',
+        query: 'foo',
+      });
+    });
+
+    it('sets both group reasoning and per-tool reasoning', async () => {
+      const groupId = 'group-1';
+      const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        { tool_result_id: 'r1', type: ToolResultType.other, data: { result: 'a' } },
+      ]);
+      const toolCall2 = makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
+        { tool_result_id: 'r2', type: ToolResultType.other, data: { result: 'b' } },
+      ]);
+
+      const step1: ToolCallStep = { ...makeToolCallStep(toolCall1), tool_call_group_id: groupId };
+      const step2: ToolCallStep = { ...makeToolCallStep(toolCall2), tool_call_group_id: groupId };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find things'),
+          steps: [
+            {
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'group level thought',
+              tool_call_group_id: groupId,
+            } as ReasoningStep,
+            {
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'reason for call-1',
+              tool_call_id: 'call-1',
+              tool_call_group_id: groupId,
+            } as ReasoningStep,
+            step1,
+            {
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'reason for call-2',
+              tool_call_id: 'call-2',
+              tool_call_group_id: groupId,
+            } as ReasoningStep,
+            step2,
+          ],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds, nextInput }),
+      });
+
+      const aiMsg = result[1] as AIMessage;
+      expect(aiMsg.content).toBe('group level thought');
+      expect(aiMsg.tool_calls![0].args).toEqual({
+        _reasoning: 'reason for call-1',
+        query: 'foo',
+      });
+      expect(aiMsg.tool_calls![1].args).toEqual({
+        _reasoning: 'reason for call-2',
+        id: 42,
+      });
+    });
+  });
+});
+
+describe('groupToolCallSteps', () => {
+  const makeStep = (toolCallId: string, toolId: string, groupId?: string): ToolCallStep => ({
+    type: ConversationRoundStepType.toolCall,
+    tool_call_id: toolCallId,
+    tool_id: toolId,
+    params: {},
+    results: [],
+    ...(groupId ? { tool_call_group_id: groupId } : {}),
+  });
+
+  const makeReasoningStep = (
+    reasoning: string,
+    { toolCallId, toolCallGroupId }: { toolCallId?: string; toolCallGroupId?: string } = {}
+  ): ReasoningStep => ({
+    type: ConversationRoundStepType.reasoning,
+    reasoning,
+    ...(toolCallId ? { tool_call_id: toolCallId } : {}),
+    ...(toolCallGroupId ? { tool_call_group_id: toolCallGroupId } : {}),
+  });
+
+  it('groups steps with the same group id', () => {
+    const steps: ConversationRoundStep[] = [
+      makeStep('c1', 'search', 'g1'),
+      makeStep('c2', 'lookup', 'g1'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toHaveLength(2);
+  });
+
+  it('separates steps with different group ids', () => {
+    const steps: ConversationRoundStep[] = [
+      makeStep('c1', 'search', 'g1'),
+      makeStep('c2', 'lookup', 'g2'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveLength(1);
+    expect(groups[1]).toHaveLength(1);
+  });
+
+  it('treats steps without group id as individual groups', () => {
+    const steps: ConversationRoundStep[] = [makeStep('c1', 'search'), makeStep('c2', 'lookup')];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(2);
+  });
+
+  it('handles reasoning steps between groups', () => {
+    const steps: ConversationRoundStep[] = [
+      makeStep('c1', 'search', 'g1'),
+      makeStep('c2', 'lookup', 'g1'),
+      makeReasoningStep('thinking...'),
+      makeStep('c3', 'search', 'g2'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveLength(2);
+    expect(groups[1]).toHaveLength(1);
+  });
+
+  it('returns empty array for no tool call steps', () => {
+    const steps: ConversationRoundStep[] = [makeReasoningStep('thinking...')];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(0);
+  });
+
+  it('keeps tool calls in the same group when reasoning steps appear between them', () => {
+    const steps: ConversationRoundStep[] = [
+      makeReasoningStep('reasoning for c1'),
+      makeStep('c1', 'get_index_mapping', 'g1'),
+      makeReasoningStep('reasoning for c2'),
+      makeStep('c2', 'get_index_mapping', 'g1'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toHaveLength(2);
+    expect(groups[0][0].tool_call_id).toBe('c1');
+    expect(groups[0][1].tool_call_id).toBe('c2');
+  });
+
+  it('keeps tool calls in the same group with multiple interleaved reasoning steps', () => {
+    const steps: ConversationRoundStep[] = [
+      makeReasoningStep('reasoning for c1'),
+      makeStep('c1', 'search', 'g1'),
+      makeReasoningStep('reasoning for c2'),
+      makeStep('c2', 'lookup', 'g1'),
+      makeReasoningStep('reasoning for c3'),
+      makeStep('c3', 'fetch', 'g1'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toHaveLength(3);
+  });
+
+  it('breaks group on reasoning steps between tool calls without group id', () => {
+    const steps: ConversationRoundStep[] = [
+      makeStep('c1', 'search'),
+      makeReasoningStep('thinking...'),
+      makeStep('c2', 'lookup'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveLength(1);
+    expect(groups[1]).toHaveLength(1);
+  });
+
+  it('handles reasoning steps between different group ids', () => {
+    const steps: ConversationRoundStep[] = [
+      makeStep('c1', 'search', 'g1'),
+      makeStep('c2', 'lookup', 'g1'),
+      makeReasoningStep('new cycle'),
+      makeStep('c3', 'search', 'g2'),
+      makeReasoningStep('reasoning for c4'),
+      makeStep('c4', 'lookup', 'g2'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveLength(2);
+    expect(groups[1]).toHaveLength(2);
   });
 });

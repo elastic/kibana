@@ -7,15 +7,24 @@
 
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
 import { getToolCallEntryPath } from '../../../runner/store/volumes/tool_results/utils';
+import type { ProcessedConversation } from './prepare_conversation';
 
 /**
- * Token threshold for file reference substitution.
- * Tool results exceeding this threshold will be replaced with a file reference.
+ * Conversation token threshold for file reference substitution.
+ * Filestore substitution will only be enabled if the token count from previous rounds exceeds this threshold.
  */
-export const FILE_REFERENCE_TOKEN_THRESHOLD = 500;
+export const FS_CONTEXT_TOKEN_THRESHOLD = 50_000;
+
+/**
+ * Per tool-result token threshold for file reference substitution.
+ * Only tool results exceeding this threshold will be substituted with file references.
+ */
+export const FS_TOOL_CALL_TOKEN_THRESHOLD = 1_000;
 
 /**
  * Marker to identify cleaned/transformed tool results.
@@ -74,9 +83,21 @@ export type ToolCallResultTransformer = (toolCall: ToolCallWithResult) => Promis
 
 export interface CreateResultTransformerOptions {
   /**
+   * Conversation processed for the round.
+   */
+  processedConversation: ProcessedConversation;
+  /**
    * Tool registry to look up tool-specific summarization functions.
+   * Used as a fallback when the tool is not found in the tool manager
+   * (e.g. for evicted dynamic tools from previous rounds).
    */
   toolRegistry: ToolRegistry;
+  /**
+   * Tool manager to look up tool-specific summarization functions.
+   * Checked first, as it contains all active tools including internal ones
+   * (filestore tools, attachment tools) that may not be in the registry.
+   */
+  toolManager: ToolManager;
   /**
    * Filestore to check token counts for file reference substitution.
    */
@@ -89,8 +110,23 @@ export interface CreateResultTransformerOptions {
    * Token count threshold above which results are substituted with file references.
    * Defaults to FILE_REFERENCE_TOKEN_THRESHOLD.
    */
-  tokenThreshold?: number;
+  toolCallTokenThreshold?: number;
+  /**
+   * Token count threshold above which results are substituted with file references.
+   * Defaults to CONVERSATION_TOKEN_THRESHOLD.
+   */
+  conversationTokenThreshold?: number;
 }
+
+const estimateConversationTokens = (conversation: ProcessedConversation): number => {
+  return estimateTokens(
+    JSON.stringify(
+      conversation.previousRounds.map((round) => {
+        return { input: round.input, response: round.response, steps: round.steps };
+      })
+    )
+  );
+};
 
 /**
  * Creates a unified result transformer that:
@@ -101,11 +137,18 @@ export interface CreateResultTransformerOptions {
  * into a single transformation pipeline.
  */
 export const createResultTransformer = ({
+  processedConversation,
   toolRegistry,
+  toolManager,
   filestore,
   filestoreEnabled,
-  tokenThreshold = FILE_REFERENCE_TOKEN_THRESHOLD,
+  toolCallTokenThreshold = FS_TOOL_CALL_TOKEN_THRESHOLD,
+  conversationTokenThreshold = FS_CONTEXT_TOKEN_THRESHOLD,
 }: CreateResultTransformerOptions): ToolCallResultTransformer => {
+  // check if we should perform filestore substitution based on the current token usage
+  const conversationTokenEstimate = estimateConversationTokens(processedConversation);
+  const filestoreSubstitutionEnabled = conversationTokenEstimate > conversationTokenThreshold;
+
   return async (toolCall: ToolCallWithResult): Promise<ToolResult[]> => {
     // Skip if no results or all already cleaned
     if (toolCall.results.length === 0 || areAllResultsCleaned(toolCall.results)) {
@@ -113,13 +156,13 @@ export const createResultTransformer = ({
     }
 
     // Step 1: Try tool-specific summarization
-    const summarized = await tryToolSummarization(toolCall, toolRegistry);
+    const summarized = await tryToolSummarization(toolCall, toolManager, toolRegistry);
     if (summarized) {
       return summarized.map(markResultAsCleaned);
     }
 
     // Step 2: Apply file reference substitution if enabled
-    if (filestoreEnabled) {
+    if (filestoreEnabled && filestoreSubstitutionEnabled) {
       const transformed = await Promise.all(
         toolCall.results.map((result) =>
           tryFilestoreSubstitution({
@@ -127,7 +170,7 @@ export const createResultTransformer = ({
             toolId: toolCall.tool_id,
             toolCallId: toolCall.tool_call_id,
             filestore,
-            threshold: tokenThreshold,
+            threshold: toolCallTokenThreshold,
           })
         )
       );
@@ -141,12 +184,21 @@ export const createResultTransformer = ({
 
 /**
  * Attempts to apply tool-specific summarization using the tool's `summarizeToolReturn` function.
+ * Checks the tool manager first (has all active tools including internal ones like filestore tools),
+ * then falls back to the tool registry (for evicted dynamic tools from previous rounds).
  * Returns the summarized results, or undefined if no summarization is available/applicable.
  */
 const tryToolSummarization = async (
   toolCall: ToolCallWithResult,
+  toolManager: ToolManager,
   toolRegistry: ToolRegistry
 ): Promise<ToolResult[] | undefined> => {
+  const managerSummarizer = toolManager.getSummarizer(toolCall.tool_id);
+  if (managerSummarizer) {
+    const summarizedResults = managerSummarizer(toolCall);
+    return summarizedResults ?? undefined;
+  }
+
   try {
     const tool = await toolRegistry.get(toolCall.tool_id);
     if (!tool?.summarizeToolReturn) {

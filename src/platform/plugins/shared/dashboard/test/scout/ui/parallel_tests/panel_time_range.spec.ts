@@ -19,7 +19,6 @@ import {
 const DASHBOARD_NAME_PREFIX = 'Panel time range';
 
 const createDashboard = async (pageObjects: PageObjects, dashboardName: string) => {
-  await pageObjects.dashboard.goto();
   await pageObjects.dashboard.openNewDashboard();
   await pageObjects.dashboard.saveDashboard(dashboardName);
 };
@@ -44,7 +43,7 @@ const removeCustomTimeRange = async (pageObjects: PageObjects) => {
   await pageObjects.dashboard.saveCustomizePanel();
 };
 
-spaceTest.describe('Panel time range (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Panel time range (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);

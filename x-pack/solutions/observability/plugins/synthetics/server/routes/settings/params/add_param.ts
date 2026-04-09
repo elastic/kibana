@@ -57,6 +57,8 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         savedObjectsData
       );
 
+      const modifiedParamKeys = savedObjectsData.map((obj) => obj.attributes.key);
+
       await asyncGlobalParamsPropagation({
         server,
         paramsSpacesToSync: Array.from(
@@ -67,6 +69,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
             )
           )
         ),
+        modifiedParamKeys,
       });
 
       if (savedObjectsData.length > 1) {

@@ -34,4 +34,45 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-export const apmTelemetryEventBasedTypes = [searchQuerySubmittedEventType];
+const sloOverviewFlyoutViewedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
+  schema: {},
+};
+
+const sloOverviewFlyoutSearchQueriedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED,
+  schema: {
+    searchQuery: {
+      type: 'keyword',
+      _meta: { description: 'The search query entered by the user' },
+    },
+  },
+};
+
+const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED,
+  schema: {
+    statuses: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'A status filter value (e.g., VIOLATED, DEGRADING, HEALTHY, NO_DATA)',
+        },
+      },
+    },
+  },
+};
+
+const sloInfoShownEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_INFO_SHOWN,
+  schema: {},
+};
+
+export const apmTelemetryEventBasedTypes = [
+  searchQuerySubmittedEventType,
+  sloOverviewFlyoutViewedEventType,
+  sloOverviewFlyoutSearchQueriedEventType,
+  sloOverviewFlyoutStatusFilteredEventType,
+  sloInfoShownEventType,
+];

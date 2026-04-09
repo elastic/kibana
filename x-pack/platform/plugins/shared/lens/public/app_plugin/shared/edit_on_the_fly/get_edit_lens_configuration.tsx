@@ -24,6 +24,9 @@ import type {
   LensAppServices,
   LensStoreDeps,
   LensDocument,
+  LensSerializedState,
+  LensByRefSerializedState,
+  LensByValueSerializedState,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -40,7 +43,6 @@ import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import { LensDocumentService } from '../../../persistence';
-import { DOC_TYPE } from '../../../../common/constants';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 
 export type EditLensConfigurationProps = Omit<
@@ -190,7 +192,6 @@ const EditLensConfiguration: FC<
       await lensDocumentService.save({
         ...attrs,
         savedObjectId,
-        type: DOC_TYPE,
       });
     },
     [lensServices.http, savedObjectId]
@@ -221,12 +222,26 @@ const EditLensConfiguration: FC<
     undefined,
     updatingMiddleware(updatePanelState)
   );
+
+  let initialInput: LensSerializedState;
+  const id = panelId ?? generateId();
+  if (savedObjectId) {
+    initialInput = {
+      id,
+      ref_id: savedObjectId,
+      // @ts-ignore: intentionally include attributes here to avoid triggering loadFromLibrary
+      attributes: currentAttributes,
+    } satisfies LensByRefSerializedState;
+  } else {
+    initialInput = {
+      id,
+      attributes: currentAttributes,
+    } satisfies LensByValueSerializedState;
+  }
+
   lensStore.dispatch(
     loadInitial({
-      initialInput: {
-        attributes: currentAttributes,
-        id: panelId ?? generateId(),
-      },
+      initialInput,
       inlineEditing: true,
       hideTextBasedEditor,
     })
@@ -244,7 +259,7 @@ const EditLensConfiguration: FC<
     saveByRef,
     savedObjectId,
     updateByRefInput,
-    navigateToLensEditor,
+    navigateToLensEditor: currentDatasourceId === 'textBased' ? undefined : navigateToLensEditor,
     displayFlyoutHeader,
     hidesSuggestions,
     setCurrentAttributes,

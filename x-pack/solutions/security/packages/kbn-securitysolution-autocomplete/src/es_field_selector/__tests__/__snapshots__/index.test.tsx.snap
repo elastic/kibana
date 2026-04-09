@@ -60,7 +60,7 @@ exports[`FieldComponent should allow user to clear values if isClearable is true
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </button>
           </div>
@@ -163,7 +163,7 @@ exports[`FieldComponent should render the component enabled and displays the sel
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </button>
           </div>

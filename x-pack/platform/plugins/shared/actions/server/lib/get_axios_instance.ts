@@ -8,15 +8,14 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { GetTokenOpts } from '@kbn/connector-specs';
+import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
-import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
-import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
+import { getAxiosAuthStrategy } from './axios_auth_strategies';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -33,6 +32,9 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
+  signal?: AbortSignal;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -47,6 +49,9 @@ export const getAxiosInstanceWithAuth = ({
     connectorId,
     secrets,
     connectorTokenClient,
+    signal,
+    authMode,
+    profileUid,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -63,6 +68,7 @@ export const getAxiosInstanceWithAuth = ({
         // should we allow a way for a connector type to specify a timeout override?
         timeout: settingsTimeout,
         beforeRedirect: getBeforeRedirectFn(configurationUtilities),
+        signal,
       });
 
       // add any additional headers that should be included in every request
@@ -89,36 +95,24 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
-      // add a response interceptor to clean up saved tokens if necessary
+      const strategy = getAxiosAuthStrategy(authTypeId);
+      const strategyDeps = {
+        connectorId,
+        secrets,
+        connectorTokenClient,
+        logger,
+        configurationUtilities,
+        authMode,
+        profileUid,
+      };
+
       if (connectorTokenClient) {
-        const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
-          connectorTokenClient,
-          connectorId,
-        });
-        axiosInstance.interceptors.response.use(onFulfilled, onRejected);
+        strategy.installResponseInterceptor(axiosInstance, strategyDeps);
       }
 
       const configureCtx = {
         getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
-        getToken: async (opts: GetTokenOpts) => {
-          return await getOAuthClientCredentialsAccessToken({
-            connectorId,
-            logger,
-            tokenUrl: opts.tokenUrl,
-            oAuthScope: opts.scope,
-            configurationUtilities,
-            credentials: {
-              config: {
-                clientId: opts.clientId,
-                ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
-              },
-              secrets: {
-                clientSecret: opts.clientSecret,
-              },
-            },
-            connectorTokenClient,
-          });
-        },
+        getToken: (opts: GetTokenOpts) => strategy.getToken(opts, strategyDeps),
         logger,
         proxySettings: configurationUtilities.getProxySettings(),
         sslSettings: configurationUtilities.getSSLSettings(),

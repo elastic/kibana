@@ -33,10 +33,10 @@ import { EXTERNAL_LINK_TYPE, DASHBOARD_LINK_TYPE } from '../../../common/content
 import { LinksStrings } from '../links_strings';
 import { LinkInfo } from './constants';
 import { LinkOptionsComponent } from './link_options';
-import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
 import type { LinkOptions } from '../../../server';
 import { getOptions } from '../../../common/embeddable/transforms/get_options';
+import type { ResolvedLink } from '../../types';
 
 export const LinkEditor = ({
   link,
@@ -46,8 +46,8 @@ export const LinkEditor = ({
 }: {
   onClose: () => void;
   parentDashboardId?: string;
-  link?: UnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
-  onSave: (newLink: UnorderedLink) => void;
+  link?: ResolvedLink; // will only be defined if **editing** a link; otherwise, creating a new link
+  onSave: (newLink: ResolvedLink) => void;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
@@ -65,7 +65,7 @@ export const LinkEditor = ({
         label: (
           <EuiFlexGroup gutterSize="s" alignItems="center" aria-label={LinkInfo[type].description}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={LinkInfo[type].icon} color="text" />
+              <EuiIcon type={LinkInfo[type].icon} color="text" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>{LinkInfo[type].displayName}</EuiFlexItem>
           </EuiFlexGroup>
@@ -95,7 +95,7 @@ export const LinkEditor = ({
           className="linkEditorBackButton"
           flush="left"
           color="text"
-          iconType={'arrowLeft'}
+          iconType={'chevronSingleLeft'}
           onClick={() => onClose()}
         >
           <EuiTitle size="s" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
@@ -174,7 +174,7 @@ export const LinkEditor = ({
                     options: getOptions(selectedLinkType, linkOptions),
                     title: defaultLinkLabel ?? '',
                     description: linkDescription,
-                  });
+                  } as ResolvedLink);
 
                   onClose();
                 }

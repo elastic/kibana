@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { timerange } from '@kbn/synthtrace-client';
+import { orderBy } from 'lodash';
 import {
   type ApmSynthtraceEsClient,
   generateTraceMetricsData,
@@ -218,6 +219,92 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(notificationService).to.be.ok();
         // Configured at 30% failure rate: 3 failures / 10 total = 0.3
         expect(notificationService!.failureRate).to.be(0.3);
+      });
+
+      it('returns values sorted by latency descending by default', () => {
+        expect(resultData.items).to.eql(orderBy(resultData.items, 'latency', 'desc'));
+      });
+
+      describe('when sorting by metrics', () => {
+        const parameters = [
+          { sortBy: 'latency', latencyType: 'avg' },
+          { sortBy: 'latency', latencyType: 'p95' },
+          { sortBy: 'latency', latencyType: 'p99' },
+          { sortBy: 'throughput' },
+          { sortBy: 'failureRate' },
+        ];
+
+        for (const params of parameters) {
+          it(`returns values sorted by ${params.sortBy} descending when sortBy=${params.sortBy} and latencyType=${params.latencyType}`, async () => {
+            const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+              id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+              params: {
+                start: START,
+                end: END,
+                sortBy: params.sortBy,
+                latencyType: params.latencyType,
+              },
+            });
+            const { items } = results[0].data;
+            expect(items.length).to.be.greaterThan(0);
+            expect(items).to.eql(orderBy(items, params.sortBy, 'desc'));
+          });
+        }
+
+        describe('when sorting across different metric sets (document sources)', () => {
+          const metricSetFilters = [
+            {
+              name: 'raw transaction events (processor.event: transaction)',
+              kqlFilter: 'transaction.duration.us : *',
+            },
+            {
+              name: 'transaction metrics (metricset.name: transaction)',
+              kqlFilter: 'metricset.name: "transaction"',
+            },
+            {
+              name: 'service transaction metrics (metricset.name: service_transaction)',
+              kqlFilter: 'metricset.name: "service_transaction"',
+            },
+          ] as const;
+
+          const toItemsByGroup = (items: TraceMetricsItem[]) =>
+            new Map(items.map((item) => [item.group, item] as const));
+
+          for (const params of parameters) {
+            describe(`with sortBy=${params.sortBy} and latencyType=${params.latencyType}`, () => {
+              let rawEvents: TraceMetricsItem[];
+              let transactionMetrics: TraceMetricsItem[];
+              let serviceTransactionMetrics: TraceMetricsItem[];
+              before(async () => {
+                [rawEvents, transactionMetrics, serviceTransactionMetrics] = await Promise.all(
+                  metricSetFilters.map(async ({ name, kqlFilter }) => {
+                    const results =
+                      await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+                        id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+                        params: {
+                          start: START,
+                          end: END,
+                          kqlFilter,
+                          sortBy: params.sortBy,
+                          latencyType: params.latencyType,
+                        },
+                      });
+
+                    return results[0].data.items;
+                  })
+                );
+              });
+
+              it(`returns the same number of items across all metric sets when sortBy=${params.sortBy} and latencyType=${params.latencyType}`, () => {
+                expect(rawEvents.length).to.be(transactionMetrics.length);
+                expect(rawEvents.length).to.be(serviceTransactionMetrics.length);
+
+                expect(toItemsByGroup(rawEvents)).to.eql(toItemsByGroup(transactionMetrics));
+                expect(toItemsByGroup(rawEvents)).to.eql(toItemsByGroup(serviceTransactionMetrics));
+              });
+            });
+          }
+        });
       });
     });
 

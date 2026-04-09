@@ -13,8 +13,12 @@ import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
-import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
-import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
+import {
+  getAlertAiInsight,
+  type AlertDocForInsight,
+} from './alert_ai_insights/generate_alert_ai_insight';
+import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
+import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -38,7 +42,15 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
+
       const inferenceClient = inference.getClient({ request });
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
@@ -50,6 +62,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         alertDoc,
         inferenceClient,
         connectorId,
+        connector,
         dataRegistry,
         request,
         logger,
@@ -89,7 +102,15 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
+
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
 
       const result = await generateErrorAiInsight({
@@ -100,6 +121,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         start,
         end,
         environment,
+        connector,
         dataRegistry,
         request,
         inferenceClient,
@@ -126,27 +148,50 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       },
     },
     params: t.type({
-      body: t.type({
+      body: t.partial({
         index: t.string,
         id: t.string,
+        fields: t.record(t.string, t.unknown),
       }),
     }),
-    handler: async ({ request, core, dataRegistry, params, response, logger, plugins }) => {
-      const { index, id } = params.body;
+    handler: async ({ request, core, params, response, logger, plugins }) => {
+      const { index, id, fields } = params.body;
+
+      const hasDocIdentity = typeof index === 'string' && typeof id === 'string';
+      // if a user is in ESQL mode, there is currently no id or index metadata
+      // unless a user specifically queries for it, so pass fields directly
+      const hasFields = fields && Object.keys(fields).length > 0;
+
+      if (!hasDocIdentity && !hasFields) {
+        return response.badRequest({
+          body: 'Must provide either {index, id} or {fields}',
+        });
+      }
 
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
+
       const inferenceClient = inference.getClient({ request });
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
       const result = await getLogAiInsights({
         core,
+        plugins,
         index,
         id,
+        fields,
         inferenceClient,
         connectorId,
+        connector,
         request,
         esClient,
         logger,

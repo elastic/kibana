@@ -6,7 +6,10 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  Attachment,
+  VersionedAttachmentWithOrigin,
+} from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
@@ -31,18 +34,26 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
     context: AttachmentFormatContext
   ) => MaybePromise<AgentFormattedAttachment>;
   /**
-   * Optional hook to resolve additional data on-demand when an attachment is read.
+   * Receives origin (a saved object ID string) and returns resolved content.
+   * Only called once at add time — not on every read.
    *
-   * This is primarily intended for "by-reference" attachment types, where the stored data is a
-   * reference to another entity (e.g. a saved object), and the actual content is resolved at read time.
-   *
-   * The return value is intentionally generic and will be exposed under a `resolved` key by
-   * `attachment_read` (and related server APIs).
+   * When defined, the type supports by-reference creation:
+   * consumer provides origin string → `resolve()` called → content stored as `data`.
    */
   resolve?: (
-    attachment: Attachment<TType, TContent>,
+    origin: string,
     context: AttachmentResolveContext
-  ) => MaybePromise<unknown>;
+  ) => MaybePromise<TContent | undefined>;
+  /**
+   * Optional hook to determine if the attachment's data is behind the referenced origin.
+   * Staleness is supported only when this function is provided; there is no automatic fallback.
+   * It is invoked only for attachments that have a populated `origin` — the attachment argument is
+   * Return true if the attachment is stale (i.e. behind the origin).
+   */
+  isStale?: (
+    attachment: VersionedAttachmentWithOrigin<TType, TContent>,
+    context: AttachmentResolveContext
+  ) => MaybePromise<boolean>;
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.
@@ -59,7 +70,7 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    */
   getAgentDescription?: () => string;
   /**
-   * Whether attachments of this type are read-only. Defaults to true.
+   * Whether attachments of this type are read-only. Defaults to false.
    */
   isReadonly?: boolean;
 }
@@ -85,7 +96,7 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
 
 /**
  * Return type for attachment's validation handlers.
- * Refer to {@link InlineAttachmentTypeDefinition.validate}
+ * Refer to {@link AttachmentTypeDefinition.validate}
  */
 export type AttachmentValidationResult<TValidatedData = unknown> =
   /** valid attachment */

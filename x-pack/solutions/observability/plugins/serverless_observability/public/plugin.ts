@@ -59,11 +59,11 @@ export class ServerlessObservabilityPlugin
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
         });
       })
     );
-    serverless.setProjectHome('/app/observability/landing');
-    serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
+    serverless.initNavigation('oblt', navigationTree$);
 
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
     const roleManagementEnabled = security.authz.isRoleManagementEnabled();

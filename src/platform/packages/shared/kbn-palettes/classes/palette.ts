@@ -18,7 +18,7 @@ export type KbnBasePaletteConfig = Optional<
 export abstract class KbnBasePalette implements IKbnPalette {
   public abstract type: KbnPaletteType;
 
-  public readonly id: string;
+  public readonly id: IKbnPalette['id'];
   public readonly name: string;
   public readonly tag?: string;
   public readonly colorCount: number;

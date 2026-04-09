@@ -15,9 +15,14 @@ import type {
   IngestStreamLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
-import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import {
+  isIlmLifecycle,
+  isInheritLifecycle,
+  Streams,
+  validateStreamName,
+} from '@kbn/streams-schema';
 import { validateStreamlang } from '@kbn/streamlang';
-import { isMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
@@ -39,8 +44,42 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
-import { formatSettings, settingsUpdateRequiresRollover, validateQueryStreams } from './helpers';
+import {
+  computeChange,
+  formatSettings,
+  settingsUpdateRequiresRollover,
+  validateQueryStreams,
+} from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
+
+function getClassicFieldOverrideMappings(
+  fieldOverrides: unknown
+): StreamsMappingProperties | undefined {
+  if (!fieldOverrides || typeof fieldOverrides !== 'object') {
+    return undefined;
+  }
+
+  const mappings: StreamsMappingProperties = {};
+
+  for (const [fieldName, config] of Object.entries(fieldOverrides)) {
+    if (!config || typeof config !== 'object') {
+      continue;
+    }
+
+    const { description: _description, type, ...rest } = config as Record<string, unknown>;
+
+    // Skip system fields (not actual ES mappings)
+    if (type === 'system') {
+      continue;
+    }
+
+    // Classic streams require a type for all field overrides (enforced by schema),
+    // so we can safely build the mapping. We filter out `description` since ES doesn't understand it.
+    mappings[fieldName] = { type, ...rest } as unknown as StreamsMappingProperties[string];
+  }
+
+  return Object.keys(mappings).length > 0 ? mappings : undefined;
+}
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -62,9 +101,27 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   };
 
   private _effectiveSettings?: IngestStreamSettings;
+  private _dataStream?: IndicesDataStream | null;
 
   constructor(definition: Streams.ClassicStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
+  }
+
+  private async fetchDataStream(): Promise<IndicesDataStream | null> {
+    if (this._dataStream === undefined) {
+      try {
+        this._dataStream = await this.dependencies.streamsClient.getDataStream(
+          this._definition.name
+        );
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          this._dataStream = null;
+        } else {
+          throw error;
+        }
+      }
+    }
+    return this._dataStream;
   }
 
   protected doClone(): StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -95,34 +152,58 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._changes.processing =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        _.omit(this._definition.ingest.processing, ['updated_at']),
-        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
-      );
+    const isExistingStream = !!startingStateStreamDefinition;
 
-    this._changes.lifecycle =
-      !startingStateStreamDefinition ||
-      !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+    this._changes.processing = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          _.omit(this._definition.ingest.processing, ['updated_at']),
+          _.omit(startingStateStreamDefinition!.ingest.processing, ['updated_at'])
+        ),
+    });
 
-    this._changes.settings =
-      !startingStateStreamDefinition ||
-      !_.isEqual(await this.getEffectiveSettings(), this._definition.ingest.settings);
+    this._changes.lifecycle = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritLifecycle(this._definition.ingest.lifecycle),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.lifecycle,
+          startingStateStreamDefinition!.ingest.lifecycle
+        ),
+    });
 
-    this._changes.field_overrides =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.classic.field_overrides,
-        startingStateStreamDefinition.ingest.classic.field_overrides
-      );
+    // Prefetch effective settings for existing streams to allow sync comparison
+    const effectiveSettings = isExistingStream ? await this.getEffectiveSettings() : undefined;
+    this._changes.settings = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: Object.keys(this._definition.ingest.settings || {}).length > 0,
+      hasChanged: () => !_.isEqual(effectiveSettings, this._definition.ingest.settings),
+    });
 
-    this._changes.failure_store =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.failure_store,
-        startingStateStreamDefinition.ingest.failure_store
-      );
+    this._changes.field_overrides = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !!(
+        this._definition.ingest.classic.field_overrides &&
+        Object.keys(this._definition.ingest.classic.field_overrides).length > 0
+      ),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.classic.field_overrides,
+          startingStateStreamDefinition!.ingest.classic.field_overrides
+        ),
+    });
+
+    this._changes.failure_store = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritFailureStore(this._definition.ingest.failure_store),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.failure_store,
+          startingStateStreamDefinition!.ingest.failure_store
+        ),
+    });
 
     this._changes.query_streams =
       !startingStateStreamDefinition ||
@@ -168,6 +249,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    // Validate the stream's name
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
+    }
+
     if (this.dependencies.isServerless) {
       if (isIlmLifecycle(this.getLifecycle())) {
         return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
@@ -184,10 +274,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     // Check for conflicts
     if (this._changes.lifecycle || this._changes.processing) {
       try {
-        const dataStreamResult =
-          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-            name: this._definition.name,
-          });
+        const dataStreamResult = await this.dependencies.esClient.indices.getDataStream({
+          name: this._definition.name,
+        });
 
         if (dataStreamResult.data_streams.length === 0) {
           // There is an index but no data stream
@@ -216,37 +305,40 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     if (this._changes.field_overrides) {
-      const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request(
-        {
+      const mappings = getClassicFieldOverrideMappings(
+        this._definition.ingest.classic.field_overrides
+      );
+      if (mappings) {
+        const response = (await this.dependencies.esClient.transport.request({
           method: 'PUT',
           path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
           body: {
-            properties: this._definition.ingest.classic.field_overrides,
+            properties: mappings,
             _meta: {
               managed_by: 'streams',
             },
           },
+        })) as DataStreamMappingsUpdateResponse;
+        if (response.data_streams.length === 0) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot create Classic stream ${this.definition.name} due to existing Data Stream mappings`
+              ),
+            ],
+          };
         }
-      )) as DataStreamMappingsUpdateResponse;
-      if (response.data_streams.length === 0) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              `Cannot create Classic stream ${this.definition.name} due to existing Data Stream mappings`
-            ),
-          ],
-        };
-      }
-      if (response.data_streams[0].error) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              `Cannot create Classic stream ${this.definition.name} due to error in Data Stream mappings: ${response.data_streams[0].error}`
-            ),
-          ],
-        };
+        if (response.data_streams[0].error) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot create Classic stream ${this.definition.name} due to error in Data Stream mappings: ${response.data_streams[0].error}`
+              ),
+            ],
+          };
+        }
       }
     }
 
@@ -281,12 +373,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     await Promise.all([
       validateSettingsWithDryRun({
-        scopedClusterClient: this.dependencies.scopedClusterClient,
+        esClient: this.dependencies.esClient,
         streamName: this._definition.name,
         settings: this._definition.ingest.settings,
         isServerless: this.dependencies.isServerless,
       }),
-      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+      validateSimulation(this._definition, this.dependencies.esClient),
     ]);
 
     const queryStreamsValidation = validateQueryStreams({
@@ -358,15 +450,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       });
     }
 
-    if (
-      this._definition.ingest.classic.field_overrides &&
-      isMappingProperties(this._definition.ingest.classic.field_overrides)
-    ) {
+    const mappings = getClassicFieldOverrideMappings(
+      this._definition.ingest.classic.field_overrides
+    );
+    if (mappings) {
       actions.push({
         type: 'update_data_stream_mappings',
         request: {
           name: this._definition.name,
-          mappings: this._definition.ingest.classic.field_overrides,
+          mappings,
         },
       });
     }
@@ -471,17 +563,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     if (this._changes.field_overrides) {
-      const mappings = this._definition.ingest.classic.field_overrides || {};
-      if (!isMappingProperties(mappings)) {
-        throw new Error('Field overrides must be a valid mapping properties object');
+      const mappings = getClassicFieldOverrideMappings(
+        this._definition.ingest.classic.field_overrides
+      );
+      if (mappings) {
+        actions.push({
+          type: 'update_data_stream_mappings',
+          request: {
+            name: this._definition.name,
+            mappings,
+          },
+        });
       }
-      actions.push({
-        type: 'update_data_stream_mappings',
-        request: {
-          name: this._definition.name,
-          mappings,
-        },
-      });
     }
 
     actions.push({
@@ -500,7 +593,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       stream: this._definition.name,
       request: {
         id: getProcessingPipelineName(this._definition.name),
-        ...generateClassicIngestPipelineBody(this._definition),
+        ...(await generateClassicIngestPipelineBody(this._definition, this.dependencies.esClient)),
       },
     });
 
@@ -549,7 +642,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       {
         type: 'delete_queries',
         request: {
-          name: this._definition.name,
+          definition: this._definition,
         },
       },
       {
@@ -599,18 +692,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   }
 
   private async getPipelineTargets({ useFallbackName }: { useFallbackName: boolean }) {
-    let dataStream: IndicesDataStream;
-    try {
-      dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
+    const dataStream = await this.fetchDataStream();
+    if (!dataStream) {
+      return undefined;
     }
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
-      scopedClusterClient: this.dependencies.scopedClusterClient,
+      esClient: this.dependencies.esClient,
     });
 
     // For deletion operations, only return if there's an actual pipeline configured
@@ -634,8 +722,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
+      // Replicated data streams have no local index template and the
+      // getDataStreamSettings ES API returns HTTP 400, so return empty settings.
+      const dataStream = await this.fetchDataStream();
+      if (dataStream?.replicated) {
+        this._effectiveSettings = {};
+        return this._effectiveSettings;
+      }
       this._effectiveSettings = getDataStreamSettings(
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices
+        await this.dependencies.esClient.indices
           .getDataStreamSettings({ name: this._definition.name })
           .then((res) => res.data_streams[0])
       );

@@ -8,6 +8,8 @@
  */
 
 import type { SortingConfig } from './sorting';
+import type { PaginationConfig } from './pagination';
+import type { SearchConfig } from './search';
 
 /**
  * Feature configuration for enabling/customizing content list capabilities.
@@ -15,15 +17,55 @@ import type { SortingConfig } from './sorting';
 export interface ContentListFeatures {
   /** Sorting configuration. */
   sorting?: SortingConfig | boolean;
+  /** Pagination configuration. Set to `false` to disable pagination entirely. */
+  pagination?: PaginationConfig | boolean;
+  /** Search configuration. */
+  search?: SearchConfig | boolean;
+  /**
+   * Selection configuration.
+   * When `true` (default), row selection checkboxes are shown and bulk
+   * actions are enabled. Set to `false` to disable selection entirely.
+   * Selection is automatically disabled when `isReadOnly` is `true`.
+   */
+  selection?: boolean;
+  /**
+   * Tags feature configuration.
+   *
+   * - `true` or `undefined`: Auto-enabled when `services.tags` is provided.
+   * - `false`: Explicitly disables tags even if `services.tags` is present.
+   */
+  tags?: boolean;
+
+  /**
+   * Starred feature configuration.
+   *
+   * - `true` or `undefined`: Auto-enabled when `services.favorites` is provided.
+   * - `false`: Explicitly disables starring even if `services.favorites` is present.
+   */
+  starred?: boolean;
 }
 
 /**
- * Type guard to check if sorting config is a `SortingConfig` object (not boolean).
+ * Type guard to check if sorting config is a {@link SortingConfig} object (not boolean).
  */
-export const isSortingConfig = (
-  sorting: ContentListFeatures['sorting']
-): sorting is SortingConfig => {
+export const isSortingConfig = (sorting?: SortingConfig | boolean): sorting is SortingConfig => {
   return typeof sorting === 'object' && sorting !== null;
+};
+
+/**
+ * Type guard to check if pagination config is a {@link PaginationConfig} object (not boolean).
+ */
+export const isPaginationConfig = (
+  pagination?: PaginationConfig | boolean
+): pagination is PaginationConfig => {
+  return typeof pagination === 'object' && pagination !== null;
+};
+
+/**
+ * Type guard to check if search config is a {@link SearchConfig} object (not boolean).
+ */
+export const isSearchConfig = (search: ContentListFeatures['search']): search is SearchConfig => {
+  return typeof search === 'object' && search !== null;
 };
 
 /**
@@ -45,6 +87,7 @@ export const isSortingConfig = (
  * return (
  *   <div>
  *     {supports.sorting && <SortDropdown />}
+ *     {supports.tags && <TagFilter />}
  *   </div>
  * );
  * ```
@@ -52,4 +95,14 @@ export const isSortingConfig = (
 export interface ContentListSupports {
   /** Whether sorting is supported. */
   sorting: boolean;
+  /** Whether pagination is supported. */
+  pagination: boolean;
+  /** Whether search is supported. */
+  search: boolean;
+  /** Whether item selection and bulk actions are supported. */
+  selection: boolean;
+  /** Whether tags filtering and display is supported. */
+  tags: boolean;
+  /** Whether starring items is supported. */
+  starred: boolean;
 }

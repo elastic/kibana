@@ -39,7 +39,7 @@ const TEST_SCRIPT_REQUEST = `POST _scripts/painless/_execute
   }
 }`;
 
-test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
+test.describe('Painless Lab', { tag: tags.stateful.all }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.painlessLab.goto();

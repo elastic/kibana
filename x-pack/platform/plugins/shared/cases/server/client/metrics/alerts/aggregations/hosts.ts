@@ -34,32 +34,28 @@ const hostId = 'host.id';
 export class AlertHosts implements AggregationBuilder<SingleCaseMetricsResponse> {
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 
-  build() {
-    const topHits: estypes.AggregationsAggregationContainer = {
-      aggs: {
-        top_fields: {
-          top_hits: {
-            docvalue_fields: [hostName],
-            sort: [
-              {
-                '@timestamp': {
-                  order: 'desc',
-                },
-              },
-            ],
-            size: 1,
-          },
-        },
-      },
-    };
-
+  build(): Record<string, estypes.AggregationsAggregationContainer> {
     return {
       hosts_frequency: {
         terms: {
           field: hostId,
           size: this.uniqueValuesLimit,
         },
-        ...topHits,
+        aggs: {
+          top_fields: {
+            top_hits: {
+              docvalue_fields: [hostName],
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              size: 1,
+            },
+          },
+        },
       },
       hosts_total: {
         cardinality: {

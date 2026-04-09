@@ -24,7 +24,16 @@ export interface StepInfo {
 export interface StepPropInfo {
   path: string[];
   keyNode: YAML.Scalar<unknown>;
+  /** Value node: always a scalar (leaf property). Intermediate map nodes are not recorded in propInfos. */
   valueNode: YAML.Scalar<unknown>;
+}
+
+/**
+ * Get plain JavaScript value from a step property value node (scalar).
+ */
+export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
+  if (!valueNode) return undefined;
+  return (valueNode as { value?: unknown }).value;
 }
 
 /**
@@ -37,6 +46,8 @@ export interface StepPropInfo {
 export interface WorkflowLookup {
   /** Map of step IDs to their corresponding step information and metadata */
   steps: Record<string, StepInfo>;
+  /** Line number where the triggers section starts in the YAML document */
+  triggersLineStart?: number;
 }
 
 /**
@@ -84,12 +95,19 @@ export function buildWorkflowLookup(
     );
   }
 
+  let triggersLineStart: number | undefined;
+  const triggersNode = (yamlDocument.contents as any).get('triggers');
+  if (triggersNode?.range) {
+    triggersLineStart = lineCounter.linePos(triggersNode.range[0]).line;
+  }
+
   return {
     steps,
+    triggersLineStart,
   };
 }
 
-const NESTED_STEP_KEYS = ['steps', 'else', 'fallback'];
+const NESTED_STEP_KEYS = ['steps', 'else', 'on-failure', 'iteration-on-failure', 'fallback'];
 
 export function inspectStep(
   node: any,
@@ -124,17 +142,17 @@ export function inspectStep(
       }
     });
 
-    // Second pass: handle nested step keys (steps, else, fallback) with stepId as parentStepId
-    if (stepId) {
-      node.items.forEach((item) => {
-        if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-          const keyValue = item.key.value as string;
-          if (NESTED_STEP_KEYS.includes(keyValue)) {
-            Object.assign(result, inspectStep(item.value, lineCounter, stepId));
-          }
+    // Second pass: handle nested step keys with the closest enclosing step as parent.
+    // This also handles intermediate non-step maps like on-failure that contain
+    // fallback arrays — they have no stepId of their own, so parentStepId passes through.
+    node.items.forEach((item) => {
+      if (YAML.isPair(item) && YAML.isScalar(item.key)) {
+        const keyValue = item.key.value as string;
+        if (NESTED_STEP_KEYS.includes(keyValue)) {
+          Object.assign(result, inspectStep(item.value, lineCounter, stepId ?? parentStepId));
         }
-      });
-    }
+      }
+    });
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
       Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
@@ -166,6 +184,14 @@ export function inspectStep(
   return result;
 }
 
+/**
+ * Collects step property metadata for leaf values only.
+ * Intermediate map nodes (e.g. `with.inputs` when it is a mapping) are not
+ * recorded; only scalar leaves (e.g. `with.inputs.field1`) appear in the result.
+ * So e.g. propInfos['with.inputs'] exists only when the value is a scalar (e.g.
+ * a liquid template string), not when it is a map. Consumers can assume every
+ * propInfo.valueNode is a Scalar.
+ */
 function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
   const result: Record<string, StepPropInfo> = {};
   if (YAML.isMap(node.value)) {

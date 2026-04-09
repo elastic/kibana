@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLMessage, EditorError } from '@kbn/esql-language';
+import type { ESQLMessage, EditorError } from '@elastic/esql/types';
 import { validateQuery } from '@kbn/esql-language';
 import Fs from 'fs/promises';
 import Path from 'path';

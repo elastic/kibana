@@ -6,11 +6,11 @@
  */
 
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
-import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
 import type { Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { stableStringify } from '@kbn/std';
 
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
@@ -648,7 +648,7 @@ export class EncryptedSavedObjectsService {
     }
 
     // Always add the descriptor to the AAD.
-    return stringify([...descriptorToArray(descriptor), attributesAAD]);
+    return stableStringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 
   /**
@@ -671,5 +671,43 @@ export class EncryptedSavedObjectsService {
       ...(this.options.primaryCrypto ? [this.options.primaryCrypto] : []),
       ...(this.options.decryptionOnlyCryptos ?? []),
     ];
+  }
+
+  public __dangerousClone(
+    typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
+  ): EncryptedSavedObjectsService {
+    const dangerouslyExposeAttributes = (
+      registration: EncryptedSavedObjectTypeRegistration
+    ): EncryptedSavedObjectTypeRegistration => {
+      const attributesToEncrypt = new Set<string | AttributeToEncrypt>(
+        [...registration.attributesToEncrypt].map((attr) => {
+          const key = typeof attr === 'string' ? attr : attr.key;
+          return { key, dangerouslyExposeValue: true };
+        })
+      );
+      return { ...registration, attributesToEncrypt };
+    };
+
+    const clone = new EncryptedSavedObjectsService(this.options);
+
+    for (const registration of typeRegistrationOverrides ?? []) {
+      clone.registerType(dangerouslyExposeAttributes(registration));
+    }
+
+    for (const [type, { attributesToEncrypt, attributesToIncludeInAAD, enforceRandomId }] of this
+      .typeDefinitions) {
+      if (!clone.isRegistered(type)) {
+        clone.registerType(
+          dangerouslyExposeAttributes({
+            type,
+            attributesToEncrypt,
+            attributesToIncludeInAAD,
+            enforceRandomId,
+          })
+        );
+      }
+    }
+
+    return clone;
   }
 }

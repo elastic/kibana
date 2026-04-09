@@ -7,7 +7,6 @@
 
 import { toByteArray } from 'base64-js';
 import fileSaver from 'file-saver';
-import PropTypes from 'prop-types';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { parseDataUrl } from '../../lib';
@@ -19,12 +18,6 @@ interface Props {
 }
 
 export class Download extends React.PureComponent<Props> {
-  public static propTypes = {
-    children: PropTypes.element.isRequired,
-    fileName: PropTypes.string.isRequired,
-    content: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  };
-
   public onClick = () => {
     const { fileName, content } = this.props;
     const asset = parseDataUrl(content, true);

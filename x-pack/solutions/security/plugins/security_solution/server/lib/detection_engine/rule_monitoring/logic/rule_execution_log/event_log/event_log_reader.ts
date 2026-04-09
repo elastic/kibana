@@ -11,7 +11,9 @@ import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
+  ReadRuleExecutionResultsResponse,
   RuleExecutionEvent,
+  UnifiedExecutionResultSortField,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   RuleRunTypeEnum,
@@ -20,6 +22,7 @@ import {
   RuleExecutionEventType,
   RuleExecutionEventTypeEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import {
   RUN_TYPE_FILTERS,
   STATUS_FILTERS,
@@ -27,7 +30,6 @@ import {
 
 import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
 
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import { kqlAnd, kqlOr } from '../../utils/kql';
@@ -35,6 +37,7 @@ import { kqlAnd, kqlOr } from '../../utils/kql';
 import type {
   GetExecutionEventsArgs,
   GetExecutionResultsArgs,
+  GetUnifiedExecutionResultsArgs,
 } from '../client_for_routes/client_interface';
 import {
   formatExecutionEventResponse,
@@ -48,10 +51,15 @@ import {
   RULE_SAVED_OBJECT_TYPE,
 } from '../../event_log/event_log_constants';
 import * as f from '../../event_log/event_log_fields';
+import { constructUnifiedExecutionEventKqlFilter } from './construct_unified_execution_event_kql_filter';
+import { mapEventToUnifiedResult } from './map_event_to_unified_result';
 
 export interface IEventLogReader {
   getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
   getExecutionResults(args: GetExecutionResultsArgs): Promise<GetRuleExecutionResultsResponse>;
+  getUnifiedExecutionResults(
+    args: GetUnifiedExecutionResultsArgs
+  ): Promise<ReadRuleExecutionResultsResponse>;
 }
 
 export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader => {
@@ -208,6 +216,33 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
 
       return formatExecutionEventResponse(results, totalExecutions);
     },
+
+    async getUnifiedExecutionResults(
+      args: GetUnifiedExecutionResultsArgs
+    ): Promise<ReadRuleExecutionResultsResponse> {
+      const { ruleId, filter: filterParams, sort, page, perPage } = args;
+      const { from, to, outcome, run_type: runType } = filterParams ?? {};
+      const sortField = sort?.field ?? 'execution_start';
+      const sortOrder = sort?.order ?? 'desc';
+
+      const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
+        return eventLog.findEventsBySavedObjectIds(RULE_SAVED_OBJECT_TYPE, [ruleId], {
+          filter: constructUnifiedExecutionEventKqlFilter({ outcome, runType }),
+          sort: [{ sort_field: mapUnifiedSortField(sortField), sort_order: sortOrder }],
+          page,
+          per_page: perPage,
+          start: from,
+          end: to,
+        });
+      });
+
+      return {
+        data: findResult.data.map(mapEventToUnifiedResult),
+        total: findResult.total,
+        page: findResult.page,
+        per_page: findResult.per_page,
+      };
+    },
   };
 };
 
@@ -219,9 +254,10 @@ const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {
   const level = normalizeLogLevel(rawEvent);
   const type = normalizeEventType(rawEvent);
   const executionId = normalizeExecutionId(rawEvent);
-  const message = normalizeEventMessage(rawEvent, type);
+  const message = rawEvent.message || '';
+  const details = normalizeEventDetails(rawEvent, type);
 
-  return { timestamp, sequence, level, type, message, execution_id: executionId };
+  return { timestamp, sequence, level, type, message, details, execution_id: executionId };
 };
 
 type RawEvent = NonNullable<IValidatedEvent>;
@@ -260,21 +296,16 @@ const normalizeEventType = (event: RawEvent): RuleExecutionEventType => {
   return result.success ? result.data : RuleExecutionEventTypeEnum.message;
 };
 
-const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): string => {
-  if (type === RuleExecutionEventTypeEnum.message) {
-    return event.message || '';
-  }
-
+const normalizeEventDetails = (
+  event: RawEvent,
+  type: RuleExecutionEventType
+): Record<string, unknown> | undefined => {
   if (type === RuleExecutionEventTypeEnum['status-change']) {
     invariant(
       event.kibana?.alert?.rule?.execution?.status,
       'Required "kibana.alert.rule.execution.status" field is not found'
     );
-
-    const status = event.kibana?.alert?.rule?.execution?.status;
-    const message = event.message || '';
-
-    return `Rule changed status to "${status}". ${message}`;
+    return { status: event.kibana.alert.rule.execution.status };
   }
 
   if (type === RuleExecutionEventTypeEnum['execution-metrics']) {
@@ -282,12 +313,8 @@ const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): s
       event.kibana?.alert?.rule?.execution?.metrics,
       'Required "kibana.alert.rule.execution.metrics" field is not found'
     );
-
-    return JSON.stringify(event.kibana.alert.rule.execution.metrics);
+    return { metrics: event.kibana.alert.rule.execution.metrics };
   }
-
-  assertUnreachable(type);
-  return '';
 };
 
 const normalizeExecutionId = (event: RawEvent): string => {
@@ -338,6 +365,17 @@ const buildEventLogKqlFilter = ({
   }
 
   return kqlAnd(filters);
+};
+
+const mapUnifiedSortField = (sortField: UnifiedExecutionResultSortField): string => {
+  switch (sortField) {
+    case 'execution_start':
+      return 'event.start';
+    case 'execution_duration_ms':
+      return 'event.duration';
+    default:
+      return assertUnreachable(sortField);
+  }
 };
 
 const findRuleExecutionIds = async ({

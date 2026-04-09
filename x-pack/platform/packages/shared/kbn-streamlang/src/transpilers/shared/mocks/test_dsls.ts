@@ -22,11 +22,18 @@ import type {
   TrimProcessor,
   JoinProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'network_direction',
+      source_ip: 'source_ip',
+      destination_ip: 'destination_ip',
+      internal_networks: ['private'],
+    } as NetworkDirectionProcessor,
     {
       action: 'join',
       from: ['field1', 'field2', 'field3'],

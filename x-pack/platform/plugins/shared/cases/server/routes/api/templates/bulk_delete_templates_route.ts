@@ -10,8 +10,6 @@ import { INTERNAL_BULK_DELETE_TEMPLATES_URL } from '../../../../common/constants
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 
 /**
  * POST /internal/cases/templates/_bulk_delete
@@ -23,7 +21,7 @@ export const bulkDeleteTemplatesRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     body: schema.object({
-      ids: schema.arrayOf(schema.string()),
+      ids: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     }),
   },
   routerOptions: {
@@ -33,7 +31,7 @@ export const bulkDeleteTemplatesRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
       const { ids } = request.body as { ids: string[] };
 
@@ -43,28 +41,28 @@ export const bulkDeleteTemplatesRoute = createCasesRoute({
         });
       }
 
-      const deletedAt = new Date().toISOString();
       const notFound: string[] = [];
 
-      for (const templateId of ids) {
-        const templateVersions = mockTemplates.filter(
-          (t) => t.templateId === templateId && t.deletedAt === null
-        );
+      const templates = await Promise.all(
+        ids.map(async (templateId) => ({
+          templateId,
+          template: await casesClient.templates.getTemplate(templateId),
+        }))
+      );
 
-        if (templateVersions.length === 0) {
+      templates.forEach(({ templateId, template }) => {
+        if (!template) {
           notFound.push(templateId);
-        } else {
-          templateVersions.forEach((template) => {
-            template.deletedAt = deletedAt;
-          });
         }
-      }
+      });
 
       if (notFound.length > 0) {
         return response.notFound({
           body: { message: `Templates not found: ${notFound.join(', ')}` },
         });
       }
+
+      await Promise.all(ids.map((templateId) => casesClient.templates.deleteTemplate(templateId)));
 
       return response.noContent();
     } catch (error) {

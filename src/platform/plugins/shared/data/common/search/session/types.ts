@@ -120,6 +120,14 @@ export interface SearchSessionStatusResponse {
 
 export interface SearchSessionStatusesResponse {
   /**
+   * When a session enters a completed state (success or error), we show a notification in the cliend side, but we need
+   * to know the minimal information to display the notification.
+   */
+  sessions: Record<
+    string,
+    Pick<SearchSessionSavedObjectAttributes, 'name' | 'restoreState' | 'locatorId' | 'appId'>
+  >;
+  /**
    * Map containing calculated statuses of search sessions
    */
   statuses: Record<string, SearchSessionStatusResponse>;
@@ -129,4 +137,6 @@ export interface SearchSessionStatusesResponse {
  * List of search session objects with on-the-fly calculated search session statuses
  */
 export type SearchSessionsFindResponse =
-  SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> & SearchSessionStatusesResponse;
+  SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> & {
+    statuses: Record<string, SearchSessionStatusResponse>;
+  };

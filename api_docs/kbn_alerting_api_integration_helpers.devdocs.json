@@ -497,7 +497,7 @@
           "(kbnTestServerConfig: any) => number"
         ],
         "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
-        "lineNumber": 31,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -513,7 +513,7 @@
               "any"
             ],
             "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
-            "lineNumber": 31,
+            "lineNumber": 41,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,

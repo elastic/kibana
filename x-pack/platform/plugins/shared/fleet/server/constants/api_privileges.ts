@@ -24,6 +24,9 @@ export const FLEET_API_PRIVILEGES = {
     READ: `${PLUGIN_ID}-settings-read`,
     ALL: `${PLUGIN_ID}-settings-all`,
   },
+  GENERATE_REPORTS: {
+    ALL: `${PLUGIN_ID}-generate-report`,
+  },
   INTEGRATIONS: {
     READ: `${INTEGRATIONS_PLUGIN_ID}-read`,
     ALL: `${INTEGRATIONS_PLUGIN_ID}-all`,

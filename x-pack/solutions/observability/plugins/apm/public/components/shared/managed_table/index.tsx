@@ -6,15 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiButtonIcon,
-  EuiContextMenu,
-  useEuiTheme,
+  RIGHT_ALIGNMENT,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
@@ -22,12 +20,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
+import type { EuiTableRowCellProps, EuiTableActionsColumnType } from '@elastic/eui';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
   getItemsFilteredBySearchQuery,
   TableSearchBar,
 } from '../table_search_bar/table_search_bar';
+import type { ActionGroups } from '../actions_context_menu';
+import { ActionsContextMenu } from '../actions_context_menu';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -45,13 +46,16 @@ export interface TableOptions<T> {
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T extends object> {
   name: ReactNode;
-  actions?: Array<Record<string, unknown>>;
+  actions?: EuiTableActionsColumnType<T>['actions'];
   field?: string;
   dataType?: string;
   align?: string;
+  className?: string;
   width?: string;
+  minWidth?: string;
+  maxWidth?: string;
   sortable?: boolean;
-  truncateText?: boolean;
+  truncateText?: EuiTableRowCellProps['truncateText'];
   nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
 }
@@ -84,11 +88,32 @@ export interface TableAction<T> {
 
 export interface TableActionGroup<T> {
   id: string;
-  groupLabel: string;
+  groupLabel?: string;
   actions: Array<TableAction<T>>;
 }
 
 export type TableActions<T> = Array<TableActionGroup<T>>;
+
+function resolveTableActions<T>(actions: TableActions<T>, item: T): ActionGroups {
+  return actions.map((group) => ({
+    id: group.id,
+    groupLabel: group.groupLabel,
+    actions: group.actions.map((action) => ({
+      id: action.id,
+      name: action.name,
+      icon: action.icon,
+      onClick: action.onClick ? () => action.onClick!(item) : undefined,
+      href: action.href ? action.href(item) : undefined,
+      items: action.items?.map((subItem) => ({
+        id: subItem.id,
+        name: subItem.name,
+        icon: subItem.icon,
+        onClick: subItem.onClick ? () => subItem.onClick!(item) : undefined,
+        href: subItem.href ? subItem.href(item) : undefined,
+      })),
+    })),
+  }));
+}
 
 function ActionsCell<T extends object>({
   item,
@@ -99,94 +124,13 @@ function ActionsCell<T extends object>({
   actions: TableActions<T>;
   disabled?: boolean;
 }) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [activePanelId, setActivePanelId] = useState(0);
-  const { euiTheme } = useEuiTheme();
-
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen((prev) => !prev);
-  }, []);
-
-  const closePopover = useCallback(() => {
-    setIsPopoverOpen(false);
-    setActivePanelId(0);
-  }, []);
-
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
-    const mainPanelItems: EuiContextMenuPanelDescriptor['items'] = [];
-    const subPanels: EuiContextMenuPanelDescriptor[] = [];
-    let subPanelId = 1;
-
-    for (const [groupIndex, group] of actions.entries()) {
-      // Add group header
-      mainPanelItems.push({
-        name: group.groupLabel,
-        disabled: true,
-        css: {
-          fontWeight: 700,
-          color: euiTheme.colors.text,
-          borderBottom: euiTheme.border.thin,
-          marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
-        },
-        'data-test-subj': `apmManagedTableActionsMenuGroup-${group.id}`,
-      });
-
-      // Add action items
-      for (const action of group.actions) {
-        const hasSubItems = action.items && action.items.length > 0;
-
-        if (hasSubItems) {
-          const panelId = subPanelId++;
-
-          mainPanelItems.push({
-            name: action.name,
-            icon: action.icon,
-            panel: panelId,
-            'data-test-subj': `apmManagedTableActionsMenuItem-${action.id}`,
-          });
-
-          subPanels.push({
-            id: panelId,
-            title: action.name,
-            items: action.items!.map((subItem) => ({
-              name: subItem.name,
-              icon: subItem.icon,
-              ...(subItem.href
-                ? { href: subItem.href(item), target: '_self' }
-                : {
-                    onClick: () => {
-                      subItem.onClick?.(item);
-                      closePopover();
-                    },
-                  }),
-              'data-test-subj': `apmManagedTableActionsMenuItem-${subItem.id}`,
-            })),
-          });
-        } else {
-          mainPanelItems.push({
-            name: action.name,
-            icon: action.icon,
-            ...(action.href
-              ? { href: action.href(item), target: '_self' }
-              : {
-                  onClick: action.onClick
-                    ? () => {
-                        action.onClick!(item);
-                        closePopover();
-                      }
-                    : undefined,
-                }),
-            'data-test-subj': `apmManagedTableActionsMenuItem-${action.id}`,
-          });
-        }
-      }
-    }
-
-    return [{ id: 0, items: mainPanelItems }, ...subPanels];
-  }, [actions, item, closePopover, euiTheme]);
+  const resolvedActions = useMemo(() => resolveTableActions(actions, item), [actions, item]);
 
   return (
-    <EuiPopover
+    <ActionsContextMenu
+      id="managed-table-actions"
+      actions={resolvedActions}
+      dataTestSubjPrefix="apmManagedTableActionsMenu"
       button={
         <EuiButtonIcon
           data-test-subj="apmManagedTableActionsCellButton"
@@ -194,18 +138,11 @@ function ActionsCell<T extends object>({
             defaultMessage: 'Actions',
           })}
           iconType="boxesVertical"
-          onClick={togglePopover}
           color="text"
           isDisabled={disabled}
         />
       }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downRight"
-    >
-      <EuiContextMenu initialPanelId={activePanelId} panels={panels} />
-    </EuiPopover>
+    />
   );
 }
 
@@ -323,8 +260,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
       name: i18n.translate('xpack.apm.managedTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      width: '80px',
-      align: 'center',
+      width: '4.5em',
+      minWidth: '4.5em',
+      align: RIGHT_ALIGNMENT,
       render: (item: T) => (
         <ActionsCell
           item={item}
@@ -528,6 +466,8 @@ function UnoptimizedManagedTable<T extends object>(props: {
           onChange={onTableChange}
           tableCaption={props.tableCaption}
           rowProps={props.rowProps}
+          scrollableInline
+          responsiveBreakpoint={false}
           {...(paginationProps ? { pagination: paginationProps } : {})}
         />
       </EuiFlexItem>

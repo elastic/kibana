@@ -6,12 +6,14 @@
  */
 
 import type React from 'react';
-import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
+import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
+  UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
-import type { CaseUI } from '../../containers/types';
+import type { CaseUI, CaseUser } from '../../containers/types';
 
 export enum AttachmentActionType {
   BUTTON = 'button',
@@ -45,10 +47,12 @@ export interface AttachmentViewObject<Props = {}> {
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
+  className?: string;
+  css?: EuiCommentProps['css'];
 }
 
 export interface CommonAttachmentViewProps {
-  attachmentId: string;
+  savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
 }
 
@@ -62,6 +66,34 @@ export interface PersistableStateAttachmentViewProps extends CommonAttachmentVie
   persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
+export interface RowContext {
+  manageMarkdownEditIds: string[];
+  selectedOutlineCommentId: string;
+  loadingCommentIds: string[];
+  appId: string;
+  euiTheme: EuiThemeComputed<{}>;
+}
+
+/**
+ * View props for reference-based unified attachments (e.g., alerts, events)
+ * These attachments reference external entities by ID
+ */
+export interface UnifiedReferenceAttachmentViewProps extends CommonAttachmentViewProps {
+  attachmentId: string;
+  metadata?: UnifiedReferenceAttachmentPayload['metadata'];
+}
+
+/**
+ * View props for value-based unified attachments (e.g., lens, user comments)
+ * These attachments contain data/content directly
+ */
+export interface UnifiedValueAttachmentViewProps extends CommonAttachmentViewProps {
+  data: UnifiedValueAttachmentPayload['data'];
+  createdBy: CaseUser;
+  version: string;
+  rowContext: RowContext;
+}
+
 export interface AttachmentType<Props> {
   id: string;
   icon: IconType;
@@ -72,12 +104,16 @@ export interface AttachmentType<Props> {
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
-
+export type UnifiedReferenceAttachmentType = AttachmentType<UnifiedReferenceAttachmentViewProps>;
+export type UnifiedValueAttachmentType = AttachmentType<UnifiedValueAttachmentViewProps>;
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
   ) => void;
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
+  ) => void;
+  registerUnified: (
+    unifiedAttachmentType: UnifiedReferenceAttachmentType | UnifiedValueAttachmentType
   ) => void;
 }

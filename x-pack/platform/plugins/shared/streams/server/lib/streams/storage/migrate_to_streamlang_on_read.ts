@@ -45,7 +45,7 @@ export const migrateOldProcessingArrayToStreamlang = (definition: Record<string,
 
   // Arrays to collect manual_ingest_pipeline processors and others
   const manualIngestPipelineProcessors: ManualIngestPipelineProcessor[] = [];
-  const otherProcessors: any[] = [];
+  const otherProcessors: Array<Record<string, unknown>> = [];
 
   if (Array.isArray(oldProcessing)) {
     oldProcessing.forEach((proc) => {
@@ -53,16 +53,33 @@ export const migrateOldProcessingArrayToStreamlang = (definition: Record<string,
         proc &&
         typeof proc === 'object' &&
         'manual_ingest_pipeline' in proc &&
-        Array.isArray((proc as any).manual_ingest_pipeline?.processors)
+        Array.isArray(
+          (proc as { manual_ingest_pipeline?: { processors?: unknown[] } }).manual_ingest_pipeline
+            ?.processors
+        )
       ) {
+        const mip = (
+          proc as unknown as {
+            manual_ingest_pipeline: {
+              processors: ManualIngestPipelineProcessor['processors'];
+              description?: string;
+              ignore_failure?: boolean;
+              if: OldCondition;
+              tag?: string;
+            };
+            on_failure?: ManualIngestPipelineProcessor['on_failure'];
+          }
+        ).manual_ingest_pipeline;
         const streamlangManualIngestPipeline: ManualIngestPipelineProcessor = {
           action: 'manual_ingest_pipeline',
-          processors: (proc as any).manual_ingest_pipeline.processors,
-          description: (proc as any).manual_ingest_pipeline.description,
-          ignore_failure: (proc as any).manual_ingest_pipeline.ignore_failure,
-          where: recursivelyConvertCondition((proc as any).manual_ingest_pipeline.if),
-          tag: (proc as any).manual_ingest_pipeline.tag,
-          on_failure: (proc as any).on_failure,
+          processors: mip.processors,
+          description: mip.description,
+          ignore_failure: mip.ignore_failure,
+          where: recursivelyConvertCondition(mip.if),
+          tag: mip.tag,
+          on_failure: (
+            proc as unknown as { on_failure?: ManualIngestPipelineProcessor['on_failure'] }
+          ).on_failure,
         };
         // Use manual_ingest_pipeline processor as is once converted to Streamlang
         manualIngestPipelineProcessors.push(streamlangManualIngestPipeline);
@@ -230,7 +247,7 @@ function isLegacyWhereBlock(step: unknown): step is LegacyWhereBlock {
     !('action' in step) &&
     isObject(step.where) &&
     'steps' in step.where &&
-    Array.isArray((step.where as any).steps)
+    Array.isArray((step.where as { steps?: unknown[] }).steps)
   );
 }
 
@@ -264,7 +281,8 @@ export function migrateWhereBlocksToCondition(steps: unknown[]): {
 
       // Preserve customIdentifier if it exists
       if (customIdentifier) {
-        (migratedBlock as any).customIdentifier = customIdentifier;
+        (migratedBlock as StreamlangStep & { customIdentifier?: string }).customIdentifier =
+          customIdentifier;
       }
 
       return migratedBlock;

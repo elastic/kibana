@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCommandOption, ESQLCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
+import { isColumn, isOptionNode, isSubQuery } from '@elastic/esql';
 import { esqlCommandRegistry } from '../../../..';
-import type { ESQLCommandOption, ESQLCommand, ESQLAstQueryExpression } from '../../../types';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
-import { isColumn, isOptionNode, isSubQuery } from '../../../ast';
 
 function aggregateSummary(source: ESQLCommandSummary, target: ESQLCommandSummary) {
   source.newColumns?.forEach((col) => target.newColumns?.add(col));

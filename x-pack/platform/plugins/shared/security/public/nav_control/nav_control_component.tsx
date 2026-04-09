@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent, ReactNode } from 'react';
+import type { FunctionComponent, MouseEvent, ReactNode } from 'react';
 import React, { Fragment, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -28,8 +28,9 @@ import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-compon
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 
-type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & {
+type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content' | 'onClick'> & {
   content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
+  onClick?: (event: MouseEvent<Element>) => void;
 };
 
 interface ContextMenuProps {
@@ -55,6 +56,7 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
               icon={item.icon}
               size="s"
               href={item.href}
+              onClick={item.onClick}
               data-test-subj={item['data-test-subj']}
             >
               {item.name}
@@ -87,7 +89,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
 
   const button = (
     <EuiHeaderSectionItemButton
-      aria-controls="headerUserMenu"
       aria-expanded={isPopoverOpen}
       aria-haspopup="true"
       aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
@@ -116,10 +117,11 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, content }: UserMenuLink) => ({
+      .map(({ label, iconType, href, onClick, content }: UserMenuLink) => ({
         name: label,
         icon: <EuiIcon type={iconType} size="m" />,
         href,
+        onClick,
         'data-test-subj': `userMenuLink__${label}`,
         content,
       }));
@@ -161,14 +163,13 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
         defaultMessage="Log out"
       />
     ),
-    icon: <EuiIcon type="exit" size="m" />,
+    icon: <EuiIcon type="logOut" size="m" />,
     href: logoutUrl,
     'data-test-subj': 'logoutLink',
   });
 
   return (
     <EuiPopover
-      id="headerUserMenu"
       ownFocus
       button={button}
       isOpen={isPopoverOpen}

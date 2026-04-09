@@ -13,6 +13,7 @@ import type {
   ConstructorDeclaration,
   MethodSignature,
   ConstructSignatureDeclaration,
+  CallSignatureDeclaration,
 } from 'ts-morph';
 
 import { buildApiDecsForParameters } from './build_parameter_decs';
@@ -31,7 +32,8 @@ export function buildFunctionDec(
     | FunctionDeclaration
     | MethodDeclaration
     | ConstructorDeclaration
-    | MethodSignature,
+    | MethodSignature
+    | CallSignatureDeclaration,
   opts: BuildApiDecOpts
 ): ApiDeclaration {
   const fn = {

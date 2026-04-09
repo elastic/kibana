@@ -10,11 +10,10 @@ import type {
   ListId,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import { asyncForEach } from '@kbn/std';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
+import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
 
 interface DeleteExceptionListItemByListOptions {
   listId: ListId;
@@ -28,7 +27,7 @@ export const deleteExceptionListItemByList = async ({
   namespaceType,
 }: DeleteExceptionListItemByListOptions): Promise<void> => {
   const ids = await getExceptionListItemIds({ listId, namespaceType, savedObjectsClient });
-  await deleteFoundExceptionListItems({ ids, namespaceType, savedObjectsClient });
+  await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
 };
 
 export const getExceptionListItemIds = async ({
@@ -55,31 +54,4 @@ export const getExceptionListItemIds = async ({
     sortOrder: 'desc',
   });
   return ids;
-};
-
-/**
- * NOTE: This is slow and terrible as we are deleting everything one at a time.
- * TODO: Replace this with a bulk call or a delete by query would be more useful
- */
-export const deleteFoundExceptionListItems = async ({
-  ids,
-  savedObjectsClient,
-  namespaceType,
-}: {
-  ids: string[];
-  savedObjectsClient: SavedObjectsClientContract;
-  namespaceType: NamespaceType;
-}): Promise<void> => {
-  const savedObjectType = getSavedObjectType({ namespaceType });
-  await asyncForEach(ids, async (id) => {
-    try {
-      await savedObjectsClient.delete(savedObjectType, id);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      // This can happen from race conditions or networking issues so deleting the id's
-      // like this is considered "best effort" and it is possible to get dangling pieces
-      // of data sitting around in which case the user has to manually clean up the data
-      // I am very hopeful this does not happen often or at all.
-    }
-  });
 };

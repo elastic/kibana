@@ -63,7 +63,7 @@ export function LensWrapper({
       box-shadow: none;
     }
 
-    & .echLegend .echLegendList {
+    & .echLegend .echLegendGridList {
       padding-right: ${euiTheme.size.s};
     }
 

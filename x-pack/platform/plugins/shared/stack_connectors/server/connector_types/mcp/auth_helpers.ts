@@ -6,14 +6,14 @@
  */
 
 import type { MCPConnectorSecrets, MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
-import { MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { API_KEY_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 
 /**
  * Builds HTTP headers from MCP connector config and secrets based on the authentication type.
  *
  * @param secrets - The MCP connector secrets (flat structure)
- * @param config - The MCP connector config (contains hasAuth, authType, and optional apiKeyHeaderName)
+ * @param config - The MCP connector config (hasAuth, authType, apiKeyHeaderName, apiKeyHeaderValue)
  * @returns Record of HTTP headers to use for authentication
  */
 export function buildHeadersFromSecrets(
@@ -38,8 +38,10 @@ export function buildHeadersFromSecrets(
 
     case MCPAuthType.ApiKey:
       if (secrets.apiKey) {
-        const headerName = config.apiKeyHeaderName || 'X-API-Key';
-        headers[headerName] = secrets.apiKey;
+        const headerName = config.apiKeyHeaderName ?? 'X-API-Key';
+        headers[headerName] = config.apiKeyHeaderValue
+          ? config.apiKeyHeaderValue.split(API_KEY_PLACEHOLDER).join(secrets.apiKey ?? '')
+          : secrets.apiKey ?? '';
       }
       break;
 

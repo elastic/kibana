@@ -43,6 +43,7 @@ import type {
   LogsSharedClientStartExports,
 } from '@kbn/logs-shared-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -51,6 +52,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type { InventoryViewsServiceStart } from './services/inventory_views';
 import type { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -84,6 +86,7 @@ export interface InfraClientSetupDeps {
 }
 
 export interface InfraClientStartDeps {
+  agentBuilder?: AgentBuilderPluginStart;
   cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -91,6 +94,7 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   dashboard: DashboardStart;
   embeddable: EmbeddableStart;
+  inspector: InspectorPluginStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   logsDataAccess: LogsDataAccessPluginStart;

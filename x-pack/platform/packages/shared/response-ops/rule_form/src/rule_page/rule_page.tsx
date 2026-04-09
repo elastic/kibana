@@ -104,7 +104,7 @@ export const RulePage = (props: RulePageProps) => {
                 data-test-subj="rulePageReturnButton"
                 onClick={onCancelInternal}
                 style={{ padding: 0 }}
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 iconSide="left"
                 aria-label="Return link"
               >
@@ -146,7 +146,7 @@ export const RulePage = (props: RulePageProps) => {
         <ConfirmRuleClose onCancel={() => setIsCancelModalOpen(false)} onConfirm={onCancel} />
       )}
       {isConnectorsScreenVisible && <RuleActionsConnectorsModal />}
-      {isShowRequestScreenVisible && <RulePageShowRequestModal isEdit={isEdit} />}
+      {isShowRequestScreenVisible && <RulePageShowRequestModal />}
     </>
   );
 };

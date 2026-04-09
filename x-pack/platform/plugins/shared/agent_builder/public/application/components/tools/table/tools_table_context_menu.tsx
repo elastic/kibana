@@ -31,7 +31,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   const editMenuItem = (
     <EuiContextMenuItem
-      icon="documentEdit"
+      icon="pencil"
       key="edit"
       size="s"
       onClick={() => {
@@ -113,7 +113,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       panelPaddingSize="s"
       button={
         <EuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setIsOpen((openState) => !openState)}
           aria-label={labels.tools.toolContextMenuButtonLabel}
         />

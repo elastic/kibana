@@ -27,9 +27,9 @@ import {
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LegendItem } from './models';
 import { CUSTOM_LEGEND_VIS_TYPES } from './models';
 import { VisLegendItem } from './legend_item';
@@ -211,7 +211,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
     const filters = this.props.hasCompatibleActions
       ? await this.props.hasCompatibleActions({
-          name: VALUE_CLICK_TRIGGER,
+          name: ON_CLICK_VALUE,
           data: item.values,
         })
       : false;
@@ -390,7 +390,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
             open && visLegendStyles.openToggle,
           ]}
         >
-          <EuiIcon color="text" type="list" />
+          <EuiIcon color="text" type="listBullet" />
         </button>
         {open && this.renderLegend(anchorPosition)}
       </div>

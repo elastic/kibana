@@ -23,7 +23,13 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  columnsMetaOverridingBytesType,
+  createFormatFieldValueSpy,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
@@ -64,6 +70,7 @@ const getSummaryProps = (
   rowHeight: 1,
   onFilter: jest.fn(),
   shouldShowFieldHandler: () => true,
+  columnsMeta: undefined,
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
   isTracesSummary: false,
@@ -272,5 +279,61 @@ describe('SummaryCellPopover', () => {
     const message = JSON.stringify(json);
     render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
     expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
+  });
+});
+
+describe('SummaryColumn with columnsMeta', () => {
+  it('should use data view field type when columnsMeta is undefined', () => {
+    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          bytes: [100],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          columnsMeta: undefined,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
+    formatFieldValueSpy.mockRestore();
+  });
+
+  it('should use columnsMeta type instead of data view field type when provided', () => {
+    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          bytes: ['100'],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          columnsMeta: columnsMetaOverridingBytesType,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
+    formatFieldValueSpy.mockRestore();
   });
 });

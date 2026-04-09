@@ -12,17 +12,20 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { RuleAlertsTableProps } from './rule_alerts_table';
 import { RuleAlertsTable } from './rule_alerts_table';
 import type { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
 
 const mockGetAppUrl = jest.fn();
+const mockNavigateTo = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
   const original = jest.requireActual('../../../../common/lib/kibana/hooks');
   return {
     ...original,
     useNavigation: () => ({
       getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
     }),
   };
 });
@@ -53,6 +56,7 @@ const mockUseRuleAlertsItemsReturn = (param: Partial<UseRuleAlertsItemsReturn>) 
 jest.mock('./use_rule_alerts_items', () => ({
   useRuleAlertsItems: () => mockUseRuleAlertsItems(),
 }));
+jest.mock('../../../../common/components/user_privileges');
 
 const defaultProps: RuleAlertsTableProps = {
   signalIndexName: '',
@@ -140,7 +144,7 @@ describe('RuleAlertsTable', () => {
     expect(result.getByTestId('severityRuleAlertsTable-severity')).toHaveTextContent('High');
   });
 
-  it('should generate the table items links', () => {
+  it('generates a disabled rule link when the user does not have read rule permissions', () => {
     const linkUrl = '/fake/link';
     mockGetAppUrl.mockReturnValue(linkUrl);
     mockUseRuleAlertsItemsReturn({ items });
@@ -156,7 +160,33 @@ describe('RuleAlertsTable', () => {
       path: `id/${items[0].id}`,
     });
 
-    expect(result.getByTestId('severityRuleAlertsTable-name')).toHaveAttribute('href', linkUrl);
+    expect(result.getByTestId('severityRuleAlertsTable-name')).toBeDisabled();
+  });
+
+  it('generates a rule link when the user can read rules', () => {
+    const linkUrl = '/fake/link';
+    mockGetAppUrl.mockReturnValue(linkUrl);
+    mockUseRuleAlertsItemsReturn({ items });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      rulesPrivileges: {
+        rules: { read: true },
+      },
+    });
+
+    const result = render(
+      <TestProviders>
+        <RuleAlertsTable {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(mockGetAppUrl).toBeCalledWith({
+      deepLinkId: SecurityPageName.rules,
+      path: `id/${items[0].id}`,
+    });
+
+    fireEvent.click(result.getByTestId('severityRuleAlertsTable-name'));
+
+    expect(mockNavigateTo).toHaveBeenCalledWith({ url: linkUrl });
   });
 
   it('should open timeline with filters when total alerts is clicked', () => {
@@ -170,8 +200,8 @@ describe('RuleAlertsTable', () => {
     fireEvent.click(getByTestId('severityRuleAlertsTable-alertCountLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
-      fieldName: 'kibana.alert.rule.name',
-      selectedOptions: ['ruleName'],
+      field_name: 'kibana.alert.rule.name',
+      selected_options: ['ruleName'],
       title: 'Rule name',
     });
   });
@@ -190,9 +220,9 @@ describe('RuleAlertsTable', () => {
 
     await waitFor(() => {
       expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
-        fieldName: 'kibana.alert.workflow_status',
+        field_name: 'kibana.alert.workflow_status',
         title: 'Status',
-        selectedOptions: ['open'],
+        selected_options: ['open'],
       });
     });
   });

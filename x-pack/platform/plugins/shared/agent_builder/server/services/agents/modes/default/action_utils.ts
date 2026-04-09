@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
-import { extractTextContent, extractToolCalls } from '@kbn/agent-builder-genai-utils/langchain';
+import {
+  extractTextContent,
+  extractToolCalls,
+  extractToolCallsWithReasoning,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
@@ -34,10 +38,13 @@ import {
 export const processResearchResponse = (
   message: AIMessageChunk
 ): ToolCallAction | HandoverAction | AgentErrorAction => {
+  const textContent = extractTextContent(message);
   if (message.tool_calls?.length) {
-    return toolCallAction(extractToolCalls(message));
+    return toolCallAction(
+      extractToolCallsWithReasoning(message),
+      textContent.trim().length ? textContent : undefined
+    );
   } else {
-    const textContent = extractTextContent(message);
     if (textContent) {
       return handoverAction(textContent);
     } else {
@@ -53,35 +60,75 @@ export const processResearchResponse = (
 };
 
 /**
- * Create execute tool action based on the tool node result.
+ * Create execute tool action(s) based on the tool node result.
+ *
+ * When parallel tool calls are used and tools trigger HITL interrupts:
+ * - Completed tools are returned as an `ExecuteToolAction`
+ * - All interrupted tools are returned as a single `ToolPromptAction` containing all prompts
  */
 export const processToolNodeResponse = (
   toolNodeResult: BaseMessage[]
-): ExecuteToolAction | ToolPromptAction => {
+): (ExecuteToolAction | ToolPromptAction)[] => {
   const toolMessages = toolNodeResult.filter(isToolMessage);
 
-  const interruptMessage = toolMessages.find((message) => {
-    const result: ToolHandlerReturn | undefined = message.artifact;
-    return result && isToolHandlerInterruptReturn(result);
-  });
+  const completedMessages: ToolMessage[] = [];
+  const interruptMessages: ToolMessage[] = [];
 
-  if (interruptMessage) {
-    const toolResult: ToolHandlerPromptReturn = interruptMessage.artifact;
-    return toolPromptAction(interruptMessage.tool_call_id, toolResult.prompt);
+  for (const msg of toolMessages) {
+    const result: ToolHandlerReturn | undefined = msg.artifact;
+    if (result && isToolHandlerInterruptReturn(result)) {
+      interruptMessages.push(msg);
+    } else {
+      completedMessages.push(msg);
+    }
   }
 
-  return executeToolAction(
-    toolMessages.map((msg) => {
-      return {
-        toolCallId: msg.tool_call_id,
-        content: extractTextContent(msg),
-        artifact: msg.artifact,
-      };
-    })
-  );
+  const actions: (ExecuteToolAction | ToolPromptAction)[] = [];
+
+  if (completedMessages.length > 0) {
+    actions.push(
+      executeToolAction(
+        completedMessages.map((msg) => ({
+          toolCallId: msg.tool_call_id,
+          content: extractTextContent(msg),
+          artifact: msg.artifact,
+        }))
+      )
+    );
+  }
+
+  if (interruptMessages.length > 0) {
+    actions.push(
+      toolPromptAction(
+        interruptMessages.map((msg) => ({
+          tool_call_id: msg.tool_call_id,
+          prompt: (msg.artifact as ToolHandlerPromptReturn).prompt,
+        }))
+      )
+    );
+  }
+
+  return actions;
 };
 
 export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | AgentErrorAction => {
+  // The answering agent should not call tools. Some models/providers can still emit tool calls
+  // unexpectedly, so we treat that as a recoverable error and retry with an explicit tool-result
+  // error message in the prompt history.
+  if (message.tool_calls?.length) {
+    const [firstToolCall] = extractToolCalls(message);
+    const toolName = firstToolCall?.toolName ?? 'unknown';
+    const toolArgs = firstToolCall?.args ?? {};
+
+    return errorAction(
+      createAgentExecutionError(
+        `Answer agent attempted to call tool "${toolName}"`,
+        AgentExecutionErrorCode.toolNotFound,
+        { toolName, toolArgs }
+      )
+    );
+  }
+
   const textContent = extractTextContent(message);
   if (textContent) {
     return answerAction(extractTextContent(message));

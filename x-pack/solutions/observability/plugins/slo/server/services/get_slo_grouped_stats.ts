@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
+  ALL_VALUE,
   SLO_STATUS,
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -15,16 +16,36 @@ import {
   type GetSLOGroupedStatsResponse,
   type GroupedStatsResult,
 } from '@kbn/slo-schema';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termsQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { SLOSettings } from '../domain/models';
 import { typedSearch } from '../utils/queries';
 import { getSummaryIndices } from './utils/get_summary_indices';
 import { excludeStaleSummaryFilter } from './utils/summary_stale_filter';
+import { getElasticsearchQueryOrThrow } from './transform_generators/common';
 import { IllegalArgumentError } from '../errors/errors';
 
 interface SloTypeConfig {
   groupByField: string;
   getFilters: (params: GetSLOGroupedStatsParams) => estypes.QueryDslQueryContainer[];
+}
+
+function environmentFilter(environment?: string): QueryDslQueryContainer[] {
+  if (!environment) {
+    return [];
+  }
+  return [
+    {
+      bool: {
+        should: [
+          { term: { 'service.environment': environment } },
+          { term: { 'service.environment': ALL_VALUE } },
+          { bool: { must_not: { exists: { field: 'service.environment' } } } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
 }
 
 const SLO_TYPE_CONFIG: Record<string, SloTypeConfig> = {
@@ -37,7 +58,7 @@ const SLO_TYPE_CONFIG: Record<string, SloTypeConfig> = {
         apmTransactionErrorRateIndicatorTypeSchema.value
       ),
       ...termsQuery('service.name', ...(params.serviceNames ?? [])),
-      ...termQuery('service.environment', params.environment),
+      ...environmentFilter(params.environment),
     ],
   },
 };
@@ -79,7 +100,15 @@ export class GetSLOGroupedStats {
           filter: [
             ...termQuery('spaceId', this.spaceId),
             ...config.getFilters(params),
-            ...excludeStaleSummaryFilter({ settings: this.settings, forceExclude: true }),
+            ...excludeStaleSummaryFilter({
+              settings: this.settings,
+              kqlFilter: params.kqlQuery,
+              forceExclude: true,
+            }),
+            ...(params.kqlQuery ? [getElasticsearchQueryOrThrow(params.kqlQuery)] : []),
+            ...(params.statusFilters && params.statusFilters.length > 0
+              ? termsQuery('status', ...params.statusFilters)
+              : []),
           ],
         },
       },

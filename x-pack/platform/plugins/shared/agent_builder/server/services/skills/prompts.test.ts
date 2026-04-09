@@ -85,12 +85,12 @@ describe('getSkillsInstructions', () => {
     it('returns formatted skills list', async () => {
       const filesystem = createMockFileStore();
       const skill1 = createSkillFileEntry(
-        'skills/platform/core/test-skill/SKILL.md',
+        '/skills/platform/core/test-skill/SKILL.md',
         'test-skill',
         'A test skill'
       );
       const skill2 = createSkillFileEntry(
-        'skills/security/alerts/alert-skill/SKILL.md',
+        '/skills/security/alerts/alert-skill/SKILL.md',
         'alert-skill',
         'An alert skill'
       );
@@ -100,19 +100,14 @@ describe('getSkillsInstructions', () => {
 
       expect(result).toContain('## SKILLS');
       expect(result).toContain(
-        'Load a skill using filestore tools to get detailed instructions for a specific task'
+        'Always check the skill list above before acting on a user request.'
       );
-      expect(result).toContain(
-        'Skills provide specialized knowledge and best practices for specific tasks'
-      );
-      expect(result).toContain('<available_skills>');
-      expect(result).toContain('</available_skills>');
     });
 
-    it('includes skill entries in XML format', async () => {
+    it('includes skill entries in markdown list format', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
-        'skills/platform/core/test-skill/SKILL.md',
+        '/skills/platform/core/test-skill/SKILL.md',
         'test-skill',
         'A test skill description'
       );
@@ -120,26 +115,25 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<skill path="skills/platform/core/test-skill/SKILL.md">');
-      expect(result).toContain('<name>test-skill</name>');
-      expect(result).toContain('<description>A test skill description</description>');
-      expect(result).toContain('</skill>');
+      expect(result).toContain(
+        '- test-skill (/skills/platform/core/test-skill/SKILL.md): A test skill description'
+      );
     });
 
     it('sorts skills by path', async () => {
       const filesystem = createMockFileStore();
       const skill1 = createSkillFileEntry(
-        'skills/platform/core/z-skill/SKILL.md',
+        '/skills/platform/core/z-skill/SKILL.md',
         'z-skill',
         'Z skill'
       );
       const skill2 = createSkillFileEntry(
-        'skills/platform/core/a-skill/SKILL.md',
+        '/skills/platform/core/a-skill/SKILL.md',
         'a-skill',
         'A skill'
       );
       const skill3 = createSkillFileEntry(
-        'skills/platform/core/m-skill/SKILL.md',
+        '/skills/platform/core/m-skill/SKILL.md',
         'm-skill',
         'M skill'
       );
@@ -158,7 +152,7 @@ describe('getSkillsInstructions', () => {
     it('filters out non-skill file entries', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
-        'skills/platform/core/test-skill/SKILL.md',
+        '/skills/platform/core/test-skill/SKILL.md',
         'test-skill',
         'A test skill'
       );
@@ -174,17 +168,17 @@ describe('getSkillsInstructions', () => {
     it('handles multiple skills with different paths', async () => {
       const filesystem = createMockFileStore();
       const skill1 = createSkillFileEntry(
-        'skills/platform/core/core-skill/SKILL.md',
+        '/skills/platform/core/core-skill/SKILL.md',
         'core-skill',
         'Core skill'
       );
       const skill2 = createSkillFileEntry(
-        'skills/security/alerts/alert-skill/SKILL.md',
+        '/skills/security/alerts/alert-skill/SKILL.md',
         'alert-skill',
         'Alert skill'
       );
       const skill3 = createSkillFileEntry(
-        'skills/observability/monitoring/monitor-skill/SKILL.md',
+        '/skills/observability/monitoring/monitor-skill/SKILL.md',
         'monitor-skill',
         'Monitor skill'
       );
@@ -197,10 +191,10 @@ describe('getSkillsInstructions', () => {
       expect(result).toContain('monitor-skill');
     });
 
-    it('includes all skill metadata in XML format', async () => {
+    it('includes all skill metadata in the list entry', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
-        'skills/platform/core/complex-skill/SKILL.md',
+        '/skills/platform/core/complex-skill/SKILL.md',
         'complex-skill',
         'A complex skill with a longer description that explains what it does'
       );
@@ -208,13 +202,30 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      const skillBlock = result.match(/<skill[^>]*>[\s\S]*?<\/skill>/)?.[0];
-      expect(skillBlock).toBeDefined();
-      expect(skillBlock).toContain('path="skills/platform/core/complex-skill/SKILL.md"');
-      expect(skillBlock).toContain('<name>complex-skill</name>');
-      expect(skillBlock).toContain(
-        '<description>A complex skill with a longer description that explains what it does</description>'
+      expect(result).toContain(
+        '- complex-skill (/skills/platform/core/complex-skill/SKILL.md): A complex skill with a longer description that explains what it does'
       );
+    });
+
+    it('does not distinguish between user-created and builtin skills', async () => {
+      const filesystem = createMockFileStore();
+      const userSkill = createSkillFileEntry(
+        '/skills/incident-triage/SKILL.md',
+        'incident-triage',
+        'Triage security incidents'
+      );
+      const builtinSkill = createSkillFileEntry(
+        '/skills/platform/core/data-exploration/SKILL.md',
+        'data-exploration',
+        'Explore data'
+      );
+      filesystem.glob.mockResolvedValue([userSkill, builtinSkill]);
+
+      const result = await getSkillsInstructions({ filesystem });
+
+      expect(result).toContain('incident-triage');
+      expect(result).toContain('data-exploration');
+      expect(result).not.toContain('HIGHEST PRIORITY');
     });
   });
 
@@ -230,7 +241,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<description></description>');
+      expect(result).toContain('- empty-desc (skills/platform/core/empty-desc/SKILL.md): ');
     });
 
     it('handles skills with special characters in description', async () => {
@@ -244,9 +255,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain(
-        'Description with &quot;quotes&quot; and &lt;tags&gt; and &amp;ampersands'
-      );
+      expect(result).toContain('Description with "quotes" and <tags> and &ampersands');
     });
 
     it('handles very long skill descriptions', async () => {

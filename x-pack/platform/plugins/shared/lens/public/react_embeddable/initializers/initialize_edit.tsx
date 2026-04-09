@@ -28,9 +28,13 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
-import { extractInheritedViewModeObservable } from '../helper';
+import {
+  extractInheritedViewModeObservable,
+  saveUpdatedLinkedAnnotationsToLibrary,
+} from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
@@ -46,11 +50,15 @@ function getSupportedTriggers(
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return [
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
+      ];
     }
-    return [];
+    return panelTriggers;
   };
 }
 
@@ -119,7 +127,7 @@ export function initializeEditApi(
       const parentApiContext = parentApi.getAppContext();
       const currentState = getState();
       await stateTransfer.navigateToEditor(APP_ID, {
-        path: getEditPath(currentState.savedObjectId),
+        path: getEditPath(currentState.ref_id),
         state: {
           embeddableId: uuid,
           valueInput: currentState,
@@ -138,9 +146,9 @@ export function initializeEditApi(
     canEdit: () => isEditMode(viewMode$),
   });
 
-  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => {
+  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'ref_id'>) => {
     stateApi.updateAttributes(newState.attributes);
-    stateApi.updateSavedObjectId(newState.savedObjectId);
+    stateApi.updateRefId(newState.ref_id);
   };
 
   /**
@@ -214,7 +222,7 @@ export function initializeEditApi(
     }
     return (
       Boolean(capabilities.visualize_v2.save) ||
-      (!getState().savedObjectId &&
+      (!getState().ref_id &&
         Boolean(capabilities.dashboard_v2?.showWriteControls) &&
         Boolean(capabilities.visualize_v2.show))
     );
@@ -225,25 +233,37 @@ export function initializeEditApi(
   };
 
   const getEditPanel = async (
-    { showOnly, closeFlyout }: { showOnly?: boolean; closeFlyout?: () => void } = {
+    { closeFlyout }: { closeFlyout?: () => void } = {
       closeFlyout: noop,
     }
   ) => {
-    // save the initial state in case it needs to revert later on
+    if (canEdit()) {
+      // prevent serializing incomplete state during editing
+      internalApi.updateEditingState(true);
+    }
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
-      // restore the first state found when the panel opened
       onCancel: () => {
         internalApi.updateEditingState(false);
         updateState({ ...firstState });
       },
-      // the getState() here contains the wrong filters references but the input attributes
-      // are correct as getInlineEditor() handler is using the getModifiedState() function
-      onApply: showOnly
-        ? noop
-        : (attributes: LensRuntimeState['attributes']) => {
+      onApply: !canEdit()
+        ? undefined
+        : async (attributes) => {
+            let appliedAttributes = attributes;
+            if (attributes.visualizationType === 'lnsXY') {
+              const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+                attributes.state.visualization,
+                startDependencies.eventAnnotationService
+              );
+              appliedAttributes = {
+                ...attributes,
+                state: { ...attributes.state, visualization: updatedVizState },
+              };
+            }
             internalApi.updateEditingState(false);
-            updateState({ ...getState(), attributes });
+            updateState({ ...getState(), attributes: appliedAttributes });
+            return appliedAttributes;
           },
       closeFlyout: () => {
         internalApi.updateEditingState(false);
@@ -291,8 +311,6 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        internalApi.updateEditingState(true);
-
         mountInlinePanel({
           core: startDependencies.coreStart,
           api: parentApi,
@@ -336,7 +354,6 @@ export function initializeEditApi(
           api: parentApi,
           loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
             return getEditPanel({
-              showOnly: true,
               closeFlyout,
             });
           },
@@ -349,8 +366,8 @@ export function initializeEditApi(
         }
         const currentState = getState();
         return getEditPath(
-          currentState.savedObjectId,
-          currentState.timeRange,
+          currentState.ref_id,
+          currentState.time_range,
           currentState.filters,
           data.query.timefilter.timefilter.getRefreshInterval()
         );

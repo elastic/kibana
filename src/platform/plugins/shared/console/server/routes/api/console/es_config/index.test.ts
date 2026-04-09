@@ -69,8 +69,8 @@ describe('ES Config Route', () => {
       expect(mockReadLegacyESConfig).toHaveBeenCalled();
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
-        host: 'https://cloud.elastic.co:443',
-        allHosts: ['http://localhost:9200', 'http://localhost:9201'],
+        host: 'https://cloud.elastic.co/',
+        allHosts: ['http://localhost:9200/', 'http://localhost:9201/'],
       });
     });
   });
@@ -91,8 +91,34 @@ describe('ES Config Route', () => {
       expect(mockReadLegacyESConfig).toHaveBeenCalled();
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
-        host: 'http://localhost:9200',
-        allHosts: ['http://localhost:9200', 'http://localhost:9201'],
+        host: 'http://localhost:9200/',
+        allHosts: ['http://localhost:9200/', 'http://localhost:9201/'],
+      });
+    });
+  });
+
+  describe('when hosts contain credentials', () => {
+    beforeEach(() => {
+      mockReadLegacyESConfig.mockResolvedValue({
+        requestTimeout: duration(30000),
+        customHeaders: {},
+        requestHeadersWhitelist: [],
+        hosts: ['https://kibana_system:SECRET@elasticsearch:9200'],
+      });
+      (mockEsLegacyConfigService.getCloudUrl as jest.Mock).mockReturnValue(undefined);
+    });
+
+    it('should strip credentials from host URLs', async () => {
+      const [[, handler]] = mockRouter.get.mock.calls;
+      const mockRequest = {} as any;
+      const mockResponse = kibanaResponseFactory;
+      const mockContext = {};
+
+      const response = await handler(mockContext, mockRequest, mockResponse);
+
+      expect(response.payload).toEqual({
+        host: 'https://elasticsearch:9200/',
+        allHosts: ['https://elasticsearch:9200/'],
       });
     });
   });
@@ -120,8 +146,8 @@ describe('ES Config Route', () => {
       const response = await handler(mockContext, mockRequest, mockResponse);
 
       expect(response.payload).toEqual({
-        host: 'https://cloud.elastic.co:443',
-        allHosts: ['http://es-node-1:9200', 'http://es-node-2:9200', 'http://es-node-3:9200'],
+        host: 'https://cloud.elastic.co/',
+        allHosts: ['http://es-node-1:9200/', 'http://es-node-2:9200/', 'http://es-node-3:9200/'],
       });
     });
   });

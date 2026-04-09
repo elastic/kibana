@@ -15,18 +15,17 @@ import type { InfraDocument, Instance, ApmFields } from '@kbn/synthtrace-client'
 import { apm, infra } from '@kbn/synthtrace-client';
 import { random, times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
+import { getNumberOpt } from './helpers/scenario_opts_helpers';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<InfraDocument | ApmFields> = async ({
-  logger,
-  scenarioOpts = { numInstances: 10 },
-}) => {
+const scenario: Scenario<InfraDocument | ApmFields> = async ({ logger, scenarioOpts }) => {
+  const numInstances = getNumberOpt(scenarioOpts, 'numInstances', 10);
+
   return {
     generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
-      const { numInstances } = scenarioOpts;
       const transactionName = 'GET /host/{id}';
 
       // Only half of the hosts will have system metrics
@@ -50,7 +49,7 @@ const scenario: Scenario<InfraDocument | ApmFields> = async ({
       const instances = times(numInstances).map((index) => {
         return apm
           .service({
-            name: `synth-node-${index % 3}`,
+            name: `synth-node-${index}`,
             environment: ENVIRONMENT,
             agentName: 'node-js',
           })

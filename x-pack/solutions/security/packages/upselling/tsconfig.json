@@ -6,7 +6,6 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
       "@testing-library/react",
       "@kbn/ambient-ui-types"
@@ -21,6 +20,7 @@
     "@kbn/security-solution-navigation",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/ai-assistant-icon",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*"

@@ -8,12 +8,34 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { MOCK_DASHBOARDS, type DashboardMockItem } from './dashboards';
 import { MOCK_MAPS, type MapMockItem } from './maps';
 import { MOCK_FILES, type FileMockItem } from './files';
 import { MOCK_VISUALIZATIONS, type VisualizationMockItem } from './visualizations';
 import { MOCK_USER_PROFILES } from './user_profiles';
 import { mockFavoritesClient } from './services';
+
+/** Shape compatible with `ActiveFilters` from `@kbn/content-list-provider`. Defined locally to avoid circular dependency. */
+interface MockFindItemsFilters {
+  search?: string;
+  tag?: { include?: string[]; exclude?: string[] };
+  starredOnly?: boolean;
+  users?: string[];
+}
+
+/**
+ * Extracts tag IDs from a `UserContentCommonSchema` item's `references` array.
+ *
+ * Mock items store tags as `{ type: 'tag', id: 'tag-id' }` references. This
+ * helper converts them into a flat `string[]` suitable for `ContentListItem.tags`.
+ */
+export const extractTagIds = (
+  references: UserContentCommonSchema['references']
+): string[] | undefined => {
+  const tagIds = references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id);
+  return tagIds && tagIds.length > 0 ? tagIds : undefined;
+};
 
 /**
  * Generic mock item type
@@ -28,12 +50,21 @@ export type MockContentItem =
  * Configuration for creating a mock findItems function
  */
 export interface MockFindItemsConfig<T extends UserContentCommonSchema> {
-  /** The source array of mock items */
+  /** The source array of mock items. */
   items: T[];
-  /** Optional delay in milliseconds to simulate network latency */
+  /** Optional delay in milliseconds to simulate network latency. */
   delay?: number;
-  /** Optional function to handle status field sorting */
+  /** Optional function to handle status field sorting. */
   statusSortFn?: (a: T, b: T, direction: 'asc' | 'desc') => number;
+  /**
+   * Favorites client instance used to resolve starred-item filtering.
+   *
+   * Defaults to the module-level {@link mockFavoritesClient} singleton.
+   * Pass a story-specific client to ensure the same instance is shared
+   * between the provider (`services.favorites`) and `findItems`, so that
+   * starred items are immediately visible when `starredOnly` is toggled.
+   */
+  favoritesClient?: FavoritesClientPublic;
 }
 
 /**
@@ -42,7 +73,12 @@ export interface MockFindItemsConfig<T extends UserContentCommonSchema> {
 export function createMockFindItems<T extends UserContentCommonSchema>(
   config: MockFindItemsConfig<T>
 ) {
-  const { items: sourceItems, delay = 0, statusSortFn: customStatusSortFn } = config;
+  const {
+    items: sourceItems,
+    delay = 0,
+    statusSortFn: customStatusSortFn,
+    favoritesClient: configFavoritesClient,
+  } = config;
 
   return async ({
     searchQuery,
@@ -51,7 +87,7 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     page,
   }: {
     searchQuery?: string;
-    filters: { tags?: { include?: string[]; exclude?: string[] }; favoritesOnly?: boolean };
+    filters: MockFindItemsFilters;
     sort: { field: string; direction: 'asc' | 'desc' };
     page: { index: number; size: number };
   }) => {
@@ -73,7 +109,8 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     }
 
     // Apply tag include filters
-    const includeTags = filters.tags?.include;
+    const tagFilter = filters.tag;
+    const includeTags = tagFilter?.include;
     if (includeTags && includeTags.length > 0) {
       items = items.filter((item) =>
         includeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
@@ -81,16 +118,17 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     }
 
     // Apply tag exclude filters
-    const excludeTags = filters.tags?.exclude;
+    const excludeTags = tagFilter?.exclude;
     if (excludeTags && excludeTags.length > 0) {
       items = items.filter(
         (item) => !excludeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
       );
     }
 
-    // Apply favorites filter
-    if (filters.favoritesOnly) {
-      const favorites = await mockFavoritesClient.getFavorites();
+    // Apply starred filter.
+    if (filters.starredOnly) {
+      const client = configFavoritesClient ?? mockFavoritesClient;
+      const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
 
@@ -122,7 +160,19 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Apply pagination
+    // Compute per-tag item counts from the full (pre-paginated) result set.
+    // Key by id (or name) to match TagFilterRenderer lookup.
+    const tagCounts: Record<string, number> = {};
+    items.forEach((item) => {
+      item.references?.forEach((ref) => {
+        if (ref.type === 'tag') {
+          const key = ref.id ?? ref.name;
+          tagCounts[key] = (tagCounts[key] || 0) + 1;
+        }
+      });
+    });
+
+    // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
     const end = start + page.size;
@@ -131,6 +181,7 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     return {
       items: paginatedItems,
       total,
+      counts: { tag: tagCounts },
     };
   };
 }
@@ -379,9 +430,15 @@ function matchesUserFilter(itemCreatedBy: string | undefined, filterValues: stri
  *
  * This function uses inline mock data with pre-assigned status values.
  *
- * @param delay - Optional delay in milliseconds to simulate network latency
+ * @param delay - Optional delay in milliseconds to simulate network latency.
+ * @param favoritesClient - Optional favorites client. Defaults to the module-level
+ *   {@link mockFavoritesClient} singleton. Pass a story-specific instance to ensure
+ *   the same client is shared with the provider's `services.favorites`.
  */
-export const createSimpleMockFindItems = (delay: number = 0) => {
+export const createSimpleMockFindItems = (
+  delay: number = 0,
+  favoritesClient?: FavoritesClientPublic
+) => {
   return async ({
     searchQuery,
     filters,
@@ -389,11 +446,7 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     page,
   }: {
     searchQuery?: string;
-    filters: {
-      tags?: { include?: string[]; exclude?: string[] };
-      users?: string[];
-      favoritesOnly?: boolean;
-    };
+    filters: MockFindItemsFilters;
     sort: { field: string; direction: 'asc' | 'desc' };
     page: { index: number; size: number };
   }) => {
@@ -416,7 +469,8 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     }
 
     // Apply tag include filters
-    const includeTags = filters.tags?.include;
+    const tagFilter = filters.tag;
+    const includeTags = tagFilter?.include;
     if (includeTags && includeTags.length > 0) {
       items = items.filter((item) =>
         includeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
@@ -424,7 +478,7 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     }
 
     // Apply tag exclude filters
-    const excludeTags = filters.tags?.exclude;
+    const excludeTags = tagFilter?.exclude;
     if (excludeTags && excludeTags.length > 0) {
       items = items.filter(
         (item) => !excludeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
@@ -432,13 +486,15 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     }
 
     // Apply user filters (createdBy) - supports both email and uid filter values
-    if (filters.users && filters.users.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, filters.users!));
+    const usersFilter = (filters as { users?: string[] }).users;
+    if (usersFilter && usersFilter.length > 0) {
+      items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
     }
 
-    // Apply favorites filter
-    if (filters.favoritesOnly) {
-      const favorites = await mockFavoritesClient.getFavorites();
+    // Apply starred filter.
+    if (filters.starredOnly) {
+      const client = favoritesClient ?? mockFavoritesClient;
+      const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
 
@@ -465,7 +521,19 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Apply pagination
+    // Compute per-tag item counts from the full (pre-paginated) result set.
+    // Key by id (or name) to match TagFilterRenderer lookup.
+    const tagCounts: Record<string, number> = {};
+    items.forEach((item) => {
+      item.references?.forEach((ref) => {
+        if (ref.type === 'tag') {
+          const key = ref.id ?? ref.name;
+          tagCounts[key] = (tagCounts[key] || 0) + 1;
+        }
+      });
+    });
+
+    // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
     const end = start + page.size;
@@ -474,6 +542,7 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     return {
       items: paginatedItems,
       total,
+      counts: { tag: tagCounts },
     };
   };
 };

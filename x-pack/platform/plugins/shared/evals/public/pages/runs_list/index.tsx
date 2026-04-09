@@ -1,0 +1,217 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState, useMemo } from 'react';
+import {
+  EuiBasicTable,
+  EuiBadge,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+  EuiPageSection,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+  type EuiBasicTableColumn,
+  type CriteriaWithPagination,
+} from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import type { EvaluationRunSummary } from '@kbn/evals-common';
+import { useEvaluationRuns } from '../../hooks/use_evals_api';
+import { resolvePrUrl } from '../../utils/pr_url';
+import * as i18n from './translations';
+
+export const RunsListPage: React.FC = () => {
+  const history = useHistory();
+  const { euiTheme } = useEuiTheme();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [searchText, setSearchText] = useState('');
+  const [suiteIdFilter, setSuiteIdFilter] = useState('');
+
+  const { data, isLoading, error } = useEvaluationRuns({
+    page: pageIndex + 1,
+    perPage: pageSize,
+    branch: searchText || undefined,
+    suiteId: suiteIdFilter || undefined,
+  });
+
+  const { data: suiteFilterData } = useEvaluationRuns({
+    page: 1,
+    perPage: 100,
+    branch: searchText || undefined,
+  });
+
+  const suiteOptions = useMemo(() => {
+    const options = [{ value: '', text: i18n.SUITE_FILTER_ALL_OPTION }];
+    const suiteSet = new Set<string>();
+
+    for (const run of suiteFilterData?.runs ?? []) {
+      if (run.suite_id) {
+        suiteSet.add(run.suite_id);
+      }
+    }
+
+    for (const id of Array.from(suiteSet).sort()) {
+      options.push({ value: id, text: id });
+    }
+
+    return options;
+  }, [suiteFilterData?.runs]);
+
+  const columns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
+    () => [
+      {
+        field: 'run_id',
+        name: i18n.COLUMN_RUN_ID,
+        sortable: true,
+        truncateText: true,
+        width: '200px',
+        render: (runId: string) => (
+          <EuiLink onClick={() => history.push(`/runs/${runId}`)}>{runId.slice(0, 12)}...</EuiLink>
+        ),
+      },
+      {
+        field: 'timestamp',
+        name: i18n.COLUMN_TIMESTAMP,
+        sortable: true,
+        render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
+      },
+      {
+        field: 'suite_id',
+        name: i18n.COLUMN_SUITE,
+        render: (suiteId: string | undefined) =>
+          suiteId ? <EuiBadge color="hollow">{suiteId}</EuiBadge> : '-',
+      },
+      {
+        field: 'task_model',
+        name: i18n.COLUMN_TASK_MODEL,
+        render: (model: EvaluationRunSummary['task_model']) =>
+          model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
+      },
+      {
+        field: 'evaluator_model',
+        name: i18n.COLUMN_EVALUATOR_MODEL,
+        render: (model: EvaluationRunSummary['evaluator_model']) =>
+          model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
+      },
+      {
+        field: 'git_branch',
+        name: i18n.COLUMN_BRANCH,
+        render: (branch: string | null) => branch ?? '-',
+      },
+      {
+        field: 'total_repetitions',
+        name: i18n.COLUMN_REPS,
+        width: '60px',
+      },
+      {
+        field: 'ci',
+        name: i18n.COLUMN_CI,
+        render: (ci: EvaluationRunSummary['ci']) =>
+          ci?.build_url ? (
+            <EuiLink
+              href={ci.build_url}
+              target="_blank"
+              external
+              onClick={(event) => event.stopPropagation()}
+            >
+              {i18n.CI_BUILD_LINK}
+            </EuiLink>
+          ) : (
+            '-'
+          ),
+      },
+      {
+        field: 'ci',
+        name: i18n.COLUMN_PULL_REQUEST,
+        render: (ci: EvaluationRunSummary['ci']) => {
+          const prRaw = ci?.pull_request;
+          if (!prRaw) return '-';
+          const prUrl = resolvePrUrl(prRaw);
+          if (!prUrl) return '-';
+          return (
+            <EuiLink
+              href={prUrl}
+              target="_blank"
+              external
+              onClick={(event) => event.stopPropagation()}
+            >
+              {i18n.PR_LINK}
+            </EuiLink>
+          );
+        },
+      },
+    ],
+    [history]
+  );
+
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount: data?.total ?? 0,
+    pageSizeOptions: [10, 25, 50],
+  };
+
+  const onTableChange = ({ page }: CriteriaWithPagination<EvaluationRunSummary>) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+  };
+
+  return (
+    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            placeholder={i18n.SEARCH_PLACEHOLDER}
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setPageIndex(0);
+            }}
+            isClearable
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
+          <EuiSelect
+            aria-label={i18n.SUITE_FILTER_ARIA_LABEL}
+            options={suiteOptions}
+            value={suiteIdFilter}
+            onChange={(event) => {
+              setSuiteIdFilter(event.target.value);
+              setPageIndex(0);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {error ? (
+        <>
+          <EuiText color="danger" size="s">
+            <p>{String(error)}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+      <EuiBasicTable<EvaluationRunSummary>
+        items={data?.runs ?? []}
+        columns={columns}
+        loading={isLoading}
+        pagination={pagination}
+        onChange={onTableChange}
+        rowProps={(item) => ({
+          onClick: () => history.push(`/runs/${item.run_id}`),
+          style: { cursor: 'pointer' },
+        })}
+      />
+    </EuiPageSection>
+  );
+};

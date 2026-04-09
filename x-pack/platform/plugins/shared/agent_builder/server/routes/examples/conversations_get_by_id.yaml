@@ -21,3 +21,12 @@ responses:
                 steps: []
                 response:
                   message: "Since this is a general greeting that doesn't require any organizational or product-specific information, I can respond without using tools.\n\nHello! I'm doing well, thank you for asking. I'm here to help you with any questions you may have. How can I assist you today?"
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn://api/agent_builder/conversations/{conversation_id}

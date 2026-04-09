@@ -66,15 +66,18 @@ export const getGridAttrs = async (
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
-    return adHoc.name === indexPattern;
+    return adHoc.title === indexPattern;
   });
 
-  const dataView = dataViewSpec
+  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
+  // which detects the time field via HTTP (with a promise cache to avoid
+  // redundant requests).
+  const dataView = dataViewSpec?.timeFieldName
     ? await data.dataViews.create(dataViewSpec)
     : await getESQLAdHocDataview({
         dataViewsService: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true },
+        options: { skipFetchFields: true, id: dataViewSpec?.id },
         http,
       });
 
@@ -178,7 +181,10 @@ export const getSuggestions = async (
     const attrs = getLensAttributesFromSuggestion({
       filters: [],
       query,
-      suggestion: firstSuggestion,
+      suggestion: {
+        ...firstSuggestion,
+        title: '',
+      },
       dataView,
     }) as TypedLensSerializedState['attributes'];
     return {

@@ -7,10 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
+import { AgentVisibility } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
-import { apiPrivileges } from '../../common/features';
+import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
   GetAgentResponse,
   CreateAgentResponse,
@@ -38,6 +39,26 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   )
 );
 
+const SKILLS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Skill ID to be available to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of skill IDs to be available to the agent.' },
+  }
+);
+
+const PLUGINS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Plugin ID to assign to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of plugin IDs to assign to the agent.' },
+  }
+);
+
 export function registerAgentRoutes({
   router,
   getInternalServices,
@@ -50,9 +71,7 @@ export function registerAgentRoutes({
   router.versioned
     .get({
       path: `${publicApiPath}/agents`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List agents',
       description:
@@ -84,9 +103,7 @@ export function registerAgentRoutes({
   router.versioned
     .get({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get an agent by ID',
       description:
@@ -127,9 +144,7 @@ export function registerAgentRoutes({
   router.versioned
     .post({
       path: `${publicApiPath}/agents`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create an agent',
       description:
@@ -178,6 +193,21 @@ export function registerAgentRoutes({
                   }
                 )
               ),
+              visibility: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
+              ),
               configuration: schema.object(
                 {
                   instructions: schema.maybe(
@@ -188,6 +218,27 @@ export function registerAgentRoutes({
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
+                  skill_ids: schema.maybe(SKILLS_SCHEMA),
+                  enable_elastic_capabilities: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'When true, enables built-in Elastic capabilities for the agent.',
+                      },
+                    })
+                  ),
+                  workflow_ids: schema.maybe(
+                    schema.arrayOf(
+                      schema.string({
+                        meta: {
+                          description:
+                            'Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.',
+                        },
+                      }),
+                      { maxSize: 100 }
+                    )
+                  ),
+                  plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -230,9 +281,7 @@ export function registerAgentRoutes({
   router.versioned
     .put({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update an agent',
       description:
@@ -285,6 +334,21 @@ export function registerAgentRoutes({
                   }
                 )
               ),
+              visibility: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
+              ),
               configuration: schema.maybe(
                 schema.object(
                   {
@@ -297,6 +361,27 @@ export function registerAgentRoutes({
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                    skill_ids: schema.maybe(SKILLS_SCHEMA),
+                    enable_elastic_capabilities: schema.maybe(
+                      schema.boolean({
+                        meta: {
+                          description:
+                            'When true, enables built-in Elastic capabilities for the agent.',
+                        },
+                      })
+                    ),
+                    workflow_ids: schema.maybe(
+                      schema.arrayOf(
+                        schema.string({
+                          meta: {
+                            description:
+                              'Updated list of workflow IDs. When set, these workflows run every agent execution, in order.',
+                          },
+                        }),
+                        { maxSize: 100 }
+                      )
+                    ),
+                    plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -339,9 +424,7 @@ export function registerAgentRoutes({
   router.versioned
     .delete({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete an agent',
       description:

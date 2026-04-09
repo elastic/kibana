@@ -11,9 +11,10 @@ import { getTemplateRoute } from './get_template_route';
 import { postTemplateRoute } from './post_template_route';
 import { putTemplateRoute } from './put_template_route';
 import { patchTemplateRoute } from './patch_template_route';
-import { deleteTemplateRoute } from './delete_template_route';
 import { bulkDeleteTemplatesRoute } from './bulk_delete_templates_route';
 import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
+import { getTemplateTagsRoute } from './get_template_tags_route';
+import { getTemplateCreatorsRoute } from './get_template_creators_route';
 
 /**
  * Register template routes conditionally, based on feature flag
@@ -29,8 +30,9 @@ export const getTemplateRoutes = (config: ConfigType) => {
     postTemplateRoute,
     putTemplateRoute,
     patchTemplateRoute,
-    deleteTemplateRoute,
     bulkDeleteTemplatesRoute,
     bulkExportTemplatesRoute,
+    getTemplateTagsRoute,
+    getTemplateCreatorsRoute,
   ];
 };

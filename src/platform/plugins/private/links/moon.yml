@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/links-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/links-plugin'
+  title: '@kbn/links-plugin'
   description: Moon project for @kbn/links-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/plugins/private/links
+  sourceRoot: src/platform/plugins/private/links
 dependsOn:
   - '@kbn/core'
   - '@kbn/i18n'
@@ -32,20 +31,19 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/saved-objects-plugin'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/ui-actions-enhanced-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/logging'
   - '@kbn/core-plugins-server'
   - '@kbn/analytics'
   - '@kbn/usage-collection-plugin'
   - '@kbn/visualizations-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/react-kibana-context-render'
   - '@kbn/share-plugin'
   - '@kbn/es-query'
   - '@kbn/presentation-util'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod
@@ -60,16 +58,6 @@ fileGroups:
     - server/**/*
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

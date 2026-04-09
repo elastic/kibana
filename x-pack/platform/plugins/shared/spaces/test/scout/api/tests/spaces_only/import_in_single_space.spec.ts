@@ -33,7 +33,7 @@ import { prepareImportFormData } from '../../helpers';
 TEST_SPACES.forEach((space) => {
   const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
 
-  apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
+  apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.stateful.all }, () => {
     let savedObjectsManagementCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {

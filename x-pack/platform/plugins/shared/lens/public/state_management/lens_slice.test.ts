@@ -21,9 +21,16 @@ import {
   selectChangesApplied,
   removeDimension,
   setLayerDefaultDimension,
+  setDimensionAndUpdateDatasource,
 } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
+import {
+  makeLensStore,
+  defaultState,
+  mockStoreDeps,
+  createMockDatasource,
+  createMockVisualization,
+} from '../mocks';
 import type {
   Datasource,
   DatasourceMap,
@@ -124,6 +131,73 @@ describe('lensSlice', () => {
       );
       expect(store.getState().lens.datasourceStates.formBased.state).toStrictEqual(
         newDatasourceState
+      );
+    });
+    it('should orchestrate setDimension and datasource update in reducer', () => {
+      const newOperation = {
+        dataType: 'date',
+        scale: 'interval',
+        isBucketed: true,
+        label: 'Date Histogram',
+      };
+      const datasource = createMockDatasource('formBased');
+      datasource.getLayers.mockReturnValue(['first']);
+      datasource.getPublicAPI.mockImplementation(({ state }) => ({
+        ...datasource.publicAPIMock,
+        datasourceId: 'formBased',
+        getOperationForColumnId: jest
+          .fn()
+          .mockReturnValue(state === 'new-datasource-state' ? newOperation : undefined),
+      }));
+
+      let operationSeenBySetDimension: unknown;
+      const visualization = createMockVisualization('testVis', ['first']);
+      visualization.setDimension.mockImplementation(({ frame, layerId, columnId, prevState }) => {
+        operationSeenBySetDimension =
+          frame.datasourceLayers[layerId]?.getOperationForColumnId(columnId);
+        return prevState;
+      });
+
+      const { store: localStore } = makeLensStore({
+        preloadedState: {
+          activeDatasourceId: 'formBased',
+          datasourceStates: {
+            formBased: {
+              isLoading: false,
+              state: 'old-datasource-state',
+            },
+          },
+          visualization: {
+            activeId: 'testVis',
+            state: {},
+            selectedLayerId: null,
+          },
+        },
+        storeDeps: mockStoreDeps({
+          datasourceMap: {
+            formBased: datasource,
+          } as unknown as DatasourceMap,
+          visualizationMap: {
+            testVis: visualization,
+          } as unknown as VisualizationMap,
+        }),
+      });
+
+      localStore.dispatch(
+        setDimensionAndUpdateDatasource({
+          visualizationId: 'testVis',
+          datasourceId: 'formBased',
+          newDatasourceState: 'new-datasource-state',
+          layerId: 'first',
+          groupId: 'x',
+          columnId: 'date_column',
+        })
+      );
+
+      expect(visualization.setDimension).toHaveBeenCalled();
+      expect(operationSeenBySetDimension).toEqual(newOperation);
+      expect(localStore.getState().lens.datasourceStates.formBased.state).toBe(
+        'new-datasource-state'
       );
     });
     it('should should switch active visualization', () => {

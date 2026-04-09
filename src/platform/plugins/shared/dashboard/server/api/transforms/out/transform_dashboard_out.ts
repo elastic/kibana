@@ -11,17 +11,25 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
-import { transformControlGroupOut } from './transform_control_group_out';
+import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
+import type { Warnings } from '../../types';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references?: SavedObjectReference[]
-): DashboardState | Partial<DashboardState> {
+  references?: SavedObjectReference[],
+  isDashboardAppRequest: boolean = false
+): {
+  dashboardState: Partial<
+    Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }
+  >;
+  warnings: Warnings;
+} {
   const {
-    controlGroupInput,
+    pinned_panels,
+    controlGroupInput: legacyControls,
     description,
     kibanaSavedObjectMeta,
     optionsJSON,
@@ -40,14 +48,15 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
-  let pinnedControlsOut;
-  if (controlGroupInput) {
-    pinnedControlsOut = transformControlGroupOut(
-      controlGroupInput,
-      references ?? [],
-      controlGroupInput?.ignoreParentSettingsJSON // legacy for controls prior to v9.2.0
-    );
-  }
+  const { panels, warnings } = transformPanelsOut(
+    panelsJSON,
+    sections,
+    references,
+    isDashboardAppRequest
+  );
+
+  const pinnedPanels = transformPinnedPanelsOut(legacyControls, pinned_panels, references ?? []);
+
   const timeRange =
     timeRestore && timeFrom && timeTo
       ? {
@@ -56,24 +65,27 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const options = transformOptionsOut(optionsJSON ?? '{}', controlGroupInput?.showApplySelections);
+  const options = transformOptionsOut(optionsJSON ?? '{}', legacyControls?.showApplySelections);
+
+  const { filters, query } = transformSearchSourceOut(kibanaSavedObjectMeta, references);
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(description && { description }),
-    ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
-    ...(Object.keys(options).length && { options }),
-    ...((panelsJSON || sections) && {
-      panels: transformPanelsOut(panelsJSON, sections, references),
-    }),
-
-    ...(pinnedControlsOut && { pinned_panels: pinnedControlsOut }),
-    ...(projectRouting !== undefined && { project_routing: projectRouting }),
-    ...(refreshInterval && {
-      refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
-    }),
-    ...(tags && tags.length && { tags }),
-    ...(timeRange && { time_range: timeRange }),
-    title: title ?? '',
+    dashboardState: {
+      ...(description && { description }),
+      ...(filters && { filters }),
+      ...(Object.keys(options).length && { options }),
+      panels,
+      pinned_panels: pinnedPanels,
+      ...(projectRouting !== undefined && { project_routing: projectRouting }),
+      ...(query && { query }),
+      ...(refreshInterval && {
+        refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
+      }),
+      ...(tags && tags.length && { tags }),
+      ...(timeRange && { time_range: timeRange }),
+      title: title ?? '',
+    },
+    warnings,
   };
 }

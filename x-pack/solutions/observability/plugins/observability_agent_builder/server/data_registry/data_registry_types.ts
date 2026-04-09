@@ -7,6 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
+import type { Transaction } from '@kbn/apm-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
 
@@ -36,16 +39,6 @@ interface ServiceSummary {
   anomalies: unknown;
   alerts: Array<{ type?: string; started: string }>;
   deployments: Array<{ '@timestamp': string }>;
-}
-
-export interface APMDownstreamDependency {
-  'service.name'?: string;
-  'span.destination.service.resource': string;
-  'span.type'?: string;
-  'span.subtype'?: string;
-  errorRate?: number;
-  latencyMs?: number;
-  throughputPerMin?: number;
 }
 
 interface APMErrorSample {
@@ -132,6 +125,64 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
+export interface ExitSpanSample {
+  serviceName: string;
+  spanDestinationServiceResource: string;
+  spanType: string;
+  spanSubtype: string;
+  destinationService?: {
+    serviceName: string;
+  };
+}
+
+export interface ConnectionStatsItem {
+  from: { serviceName: string };
+  to: {
+    dependencyName: string;
+    spanType: string;
+    spanSubtype: string;
+  };
+  value: {
+    latency_count: number;
+    latency_sum: number;
+    error_count: number;
+    success_count: number;
+  };
+}
+
+export interface TraceMetrics {
+  latencyUs: number | null;
+  throughputPerMin: number | null;
+  errorRate: number | null;
+}
+
+export type ApmConnectionStatsEntry =
+  | { type: 'service'; serviceName: string; metrics: TraceMetrics }
+  | {
+      type: 'dependency';
+      dependencyName: string;
+      spanType: string;
+      spanSubtype: string;
+      metrics: TraceMetrics;
+    };
+
+export interface ApmTransactionDetailsResponse {
+  transaction?: Transaction;
+  transactionId?: string;
+  traceId?: string;
+}
+
+export interface SyntheticsMonitorDetailsResponse {
+  id: string;
+  name: string;
+  type: string;
+  enabled: boolean;
+  schedule: { number: string; unit: string };
+  locations: Array<{ id: string; label: string }>;
+  tags?: string[];
+  [key: string]: unknown;
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
     request: KibanaRequest;
@@ -151,14 +202,6 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     end: string;
     transactionType?: string;
   }) => Promise<ServiceSummary>;
-
-  apmDownstreamDependencies: (params: {
-    request: KibanaRequest;
-    serviceName: string;
-    serviceEnvironment: string;
-    start: string;
-    end: string;
-  }) => Promise<APMDownstreamDependency[]>;
 
   apmExitSpanChangePoints: (params: {
     request: KibanaRequest;
@@ -195,4 +238,54 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  sloDetails: (params: {
+    request: KibanaRequest;
+    sloId: string;
+    sloInstanceId?: GetSLOParams['instanceId'];
+    remoteName?: GetSLOParams['remoteName'];
+  }) => Promise<GetSLOResponse>;
+
+  apmTraceSampleIds: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    start: number;
+    end: number;
+  }) => Promise<{ traceIds: string[] }>;
+
+  apmExitSpanSamples: (params: {
+    request: KibanaRequest;
+    traceIds: string[];
+    start: number;
+    end: number;
+  }) => Promise<ExitSpanSample[]>;
+
+  apmConnectionStatsItems: (params: {
+    request: KibanaRequest;
+    start: number;
+    end: number;
+    filter: QueryDslQueryContainer[];
+  }) => Promise<ConnectionStatsItem[]>;
+
+  apmConnectionStats: (params: {
+    request: KibanaRequest;
+    start: number;
+    end: number;
+    filter: QueryDslQueryContainer[];
+  }) => Promise<ApmConnectionStatsEntry[]>;
+
+  apmTransactionDetails: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    transactionName: string;
+    transactionId?: string;
+    traceId?: string;
+    start: string;
+    end: string;
+  }) => Promise<ApmTransactionDetailsResponse>;
+
+  syntheticsMonitorDetails: (params: {
+    request: KibanaRequest;
+    configId: string;
+  }) => Promise<SyntheticsMonitorDetailsResponse>;
 }

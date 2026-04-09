@@ -29,7 +29,11 @@ import {
 } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
 
-import { deleteDownloadSourceSecrets, deleteSecrets, isSecretStorageEnabled } from './secrets';
+import {
+  deleteDownloadSourceSecrets,
+  deleteSecrets,
+  isDownloadSourceAuthSecretStorageEnabled,
+} from './secrets';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
@@ -42,12 +46,32 @@ import {
 import { isSSLSecretStorageEnabled } from './secrets';
 
 function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
-  const { ssl, source_id: sourceId, ...attributes } = so.attributes;
+  const { ssl, auth, source_id: sourceId, secrets, ...attributes } = so.attributes;
+
+  // Clean up null values from secrets (they may be set during updates to force removal)
+  let cleanedSecrets: typeof secrets | undefined;
+  if (secrets) {
+    const cleanedAuth = secrets.auth
+      ? Object.fromEntries(Object.entries(secrets.auth).filter(([_, v]) => v != null))
+      : undefined;
+    const cleanedSsl = secrets.ssl
+      ? Object.fromEntries(Object.entries(secrets.ssl).filter(([_, v]) => v != null))
+      : undefined;
+    cleanedSecrets = {
+      ...(cleanedSsl && Object.keys(cleanedSsl).length > 0 ? { ssl: cleanedSsl } : {}),
+      ...(cleanedAuth && Object.keys(cleanedAuth).length > 0 ? { auth: cleanedAuth } : {}),
+    } as typeof secrets;
+    if (Object.keys(cleanedSecrets).length === 0) {
+      cleanedSecrets = undefined;
+    }
+  }
 
   return {
     id: sourceId ?? so.id,
     ...attributes,
+    ...(cleanedSecrets ? { secrets: cleanedSecrets } : {}),
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
+    ...(auth ? { auth: JSON.parse(auth as string) } : {}),
   };
 }
 
@@ -117,7 +141,9 @@ class DownloadSourceService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
 
-    const data: DownloadSourceSOAttributes = { ...omit(downloadSource, ['ssl', 'secrets']) };
+    const data: DownloadSourceSOAttributes = {
+      ...omit(downloadSource, ['ssl', 'auth', 'secrets']),
+    };
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
@@ -148,19 +174,55 @@ class DownloadSourceService {
     if (downloadSource.ssl) {
       data.ssl = JSON.stringify(downloadSource.ssl);
     }
+
+    const sslSecretStorageEnabled = await isSSLSecretStorageEnabled(esClient, soClient);
+    const authSecretStorageEnabled = await isDownloadSourceAuthSecretStorageEnabled(
+      esClient,
+      soClient
+    );
+
     // Store secret values if enabled; if not, store plain text values
-    if (await isSSLSecretStorageEnabled(esClient, soClient)) {
+    if (sslSecretStorageEnabled || authSecretStorageEnabled) {
       const { downloadSource: downloadSourceWithSecrets } =
         await extractAndWriteDownloadSourcesSecrets({
           downloadSource,
           esClient,
+          includeSSLSecrets: sslSecretStorageEnabled,
+          includeAuthSecrets: authSecretStorageEnabled,
         });
 
-      if (downloadSourceWithSecrets.secrets)
+      if (downloadSourceWithSecrets.secrets) {
         data.secrets = downloadSourceWithSecrets.secrets as DownloadSourceSOAttributes['secrets'];
-    } else {
+      }
+    }
+
+    // Handle auth field: when secret storage is enabled, remove sensitive values from plain text
+    if (downloadSource.auth) {
+      const authToStore = { ...downloadSource.auth };
+      if (authSecretStorageEnabled) {
+        delete authToStore.password;
+        delete authToStore.api_key;
+      }
+      if (Object.keys(authToStore).length > 0) {
+        data.auth = JSON.stringify(authToStore);
+      }
+    }
+
+    if (!sslSecretStorageEnabled) {
       if (!downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
         data.ssl = JSON.stringify({ ...downloadSource.ssl, ...downloadSource.secrets.ssl });
+      }
+    }
+
+    if (!authSecretStorageEnabled) {
+      if (downloadSource.secrets?.auth) {
+        const plainTextAuth = {
+          ...downloadSource.auth,
+          ...downloadSource.secrets.auth,
+        };
+        data.auth = JSON.stringify(plainTextAuth);
+      } else if (downloadSource.auth) {
+        data.auth = JSON.stringify(downloadSource.auth);
       }
     }
 
@@ -186,7 +248,7 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    newData: Partial<DownloadSource>
+    newData: Partial<DownloadSource> & { auth?: DownloadSource['auth'] | null }
   ) {
     let secretsToDelete: SecretReference[] = [];
 
@@ -195,7 +257,7 @@ class DownloadSourceService {
 
     const originalItem = await this.get(id);
     const updateData: Partial<DownloadSourceSOAttributes> = {
-      ...omit(newData, ['ssl', 'secrets']),
+      ...omit(newData, ['ssl', 'auth', 'secrets']),
     };
 
     if (updateData.proxy_id) {
@@ -215,6 +277,19 @@ class DownloadSourceService {
       updateData.ssl = null;
     }
 
+    // Handle auth field:
+    // - auth undefined AND no secrets.auth: preserve existing auth
+    // - auth null: clear all auth
+    // - auth object: replace entire auth state
+    const isAuthBeingUpdated = newData.auth !== undefined || newData.secrets?.auth !== undefined;
+
+    let computedAuth: DownloadSourceBase['auth'] | null | undefined;
+    if (newData.auth !== undefined) {
+      computedAuth = newData.auth;
+    } else if (newData.secrets?.auth !== undefined) {
+      computedAuth = null;
+    }
+
     if (updateData.is_default) {
       const defaultDownloadSourceId = await this.getDefaultDownloadSourceId();
 
@@ -222,20 +297,120 @@ class DownloadSourceService {
         await this.update(soClient, esClient, defaultDownloadSourceId, { is_default: false });
       }
     }
+
+    const sslSecretStorageEnabled = await isSSLSecretStorageEnabled(esClient, soClient);
+    const authSecretStorageEnabled = await isDownloadSourceAuthSecretStorageEnabled(
+      esClient,
+      soClient
+    );
+
+    const isSslBeingUpdated = newData.ssl !== undefined || newData.secrets?.ssl !== undefined;
+
+    const getSecretId = (soSecret: unknown): string | undefined => {
+      if (typeof soSecret === 'object' && soSecret !== null && 'id' in soSecret) {
+        return (soSecret as { id: string }).id;
+      }
+      return undefined;
+    };
+
     // Store secret values if enabled; if not, store plain text values
-    if (await isSecretStorageEnabled(esClient, soClient)) {
+    if (sslSecretStorageEnabled || authSecretStorageEnabled) {
       const secretsRes = await extractAndUpdateDownloadSourceSecrets({
         oldDownloadSource: originalItem,
         downloadSourceUpdate: newData,
         esClient,
+        includeSSLSecrets: sslSecretStorageEnabled,
+        includeAuthSecrets: authSecretStorageEnabled,
       });
 
-      updateData.secrets = secretsRes.downloadSourceUpdate
-        .secrets as DownloadSourceSOAttributes['secrets'];
-      secretsToDelete = secretsRes.secretsToDelete;
-    } else {
+      // Filter out secrets for fields that are not being updated
+      secretsToDelete = secretsRes.secretsToDelete.filter((secret) => {
+        const sslKeyId = getSecretId(originalItem.secrets?.ssl?.key);
+        if (sslKeyId === secret.id && !isSslBeingUpdated) {
+          return false;
+        }
+
+        const authPasswordId = getSecretId(originalItem.secrets?.auth?.password);
+        const authApiKeyId = getSecretId(originalItem.secrets?.auth?.api_key);
+        if ((authPasswordId === secret.id || authApiKeyId === secret.id) && !isAuthBeingUpdated) {
+          return false;
+        }
+
+        return true;
+      });
+
+      const oldSecrets = (originalItem.secrets || {}) as DownloadSourceSOAttributes['secrets'];
+      const newSecrets = (secretsRes.downloadSourceUpdate.secrets ||
+        {}) as DownloadSourceSOAttributes['secrets'];
+
+      const mergedSecrets: DownloadSourceSOAttributes['secrets'] = {};
+
+      // SSL secrets: merge old and new, then remove deleted ones
+      // When SSL is NOT being updated, preserve the old SSL secrets
+      if (sslSecretStorageEnabled) {
+        if (isSslBeingUpdated) {
+          mergedSecrets.ssl = { ...oldSecrets?.ssl, ...newSecrets?.ssl };
+          for (const secretToDelete of secretsToDelete) {
+            if (mergedSecrets.ssl?.key?.id === secretToDelete.id) {
+              delete mergedSecrets.ssl.key;
+            }
+          }
+          if (mergedSecrets.ssl && Object.keys(mergedSecrets.ssl).length === 0) {
+            delete mergedSecrets.ssl;
+          }
+        } else {
+          mergedSecrets.ssl = oldSecrets?.ssl;
+        }
+      }
+
+      if (authSecretStorageEnabled) {
+        if (isAuthBeingUpdated) {
+          const newAuthSecrets = newSecrets?.auth;
+          mergedSecrets.auth = {
+            password: newAuthSecrets?.password || null,
+            api_key: newAuthSecrets?.api_key || null,
+          } as NonNullable<DownloadSourceSOAttributes['secrets']>['auth'];
+        } else {
+          mergedSecrets.auth = oldSecrets?.auth;
+        }
+      }
+
+      updateData.secrets = {
+        ssl: mergedSecrets.ssl || null,
+        auth: mergedSecrets.auth,
+      } as DownloadSourceSOAttributes['secrets'];
+    }
+
+    if (!sslSecretStorageEnabled) {
       if (!newData.ssl?.key && newData.secrets?.ssl?.key) {
         updateData.ssl = JSON.stringify({ ...newData.ssl, ...newData.secrets.ssl });
+      }
+    }
+
+    if (authSecretStorageEnabled) {
+      if (computedAuth !== undefined) {
+        if (computedAuth === null) {
+          updateData.auth = null;
+        } else {
+          const authToStore = { ...computedAuth };
+          delete authToStore.password;
+          delete authToStore.api_key;
+          const hasRemainingAuth = Object.keys(authToStore).length > 0;
+          updateData.auth = hasRemainingAuth ? JSON.stringify(authToStore) : null;
+        }
+      }
+    } else {
+      if (newData.secrets?.auth) {
+        const plainTextAuth = {
+          ...computedAuth,
+          ...newData.secrets.auth,
+        };
+        updateData.auth = JSON.stringify(plainTextAuth);
+      } else if (computedAuth !== undefined) {
+        updateData.auth =
+          computedAuth === null || Object.keys(computedAuth).length === 0
+            ? null
+            : JSON.stringify(computedAuth);
       }
     }
 

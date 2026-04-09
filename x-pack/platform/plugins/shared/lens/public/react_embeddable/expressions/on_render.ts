@@ -6,7 +6,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { canTrackContentfulRender } from '@kbn/presentation-containers';
+import { canTrackContentfulRender } from '@kbn/presentation-publishing';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { GetStateType, LensInternalApi, TableInspectorAdapter } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';

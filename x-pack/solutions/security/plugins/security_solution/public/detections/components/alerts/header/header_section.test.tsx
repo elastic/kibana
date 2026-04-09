@@ -14,10 +14,14 @@ import { useSuggestUsers } from '../../../../common/components/user_profiles/use
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
+
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 const currentUser: UserProfileWithAvatar = {
   uid: 'uid1',
@@ -43,9 +47,16 @@ const user: UserProfileWithAvatar = {
 describe('HeaderSection', () => {
   beforeEach(() => {
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    mockUseUserPrivileges.mockReturnValue({
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
+    });
   });
 
-  it('should render correctly', () => {
+  it('should render correctly with manage rules button', () => {
     const { getByTestId } = render(
       <TestProviders>
         <HeaderSection assignees={[]} setAssignees={jest.fn()} />
@@ -54,6 +65,24 @@ describe('HeaderSection', () => {
 
     expect(getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
     expect(getByTestId(GO_TO_RULES_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render manage rules button when showManageRulesButton is false', () => {
+    mockUseUserPrivileges.mockReturnValueOnce({
+      rulesPrivileges: {
+        rules: {
+          read: false,
+        },
+      },
+    });
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <HeaderSection assignees={[]} setAssignees={jest.fn()} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
+    expect(queryByTestId(GO_TO_RULES_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should set assignee', async () => {

@@ -209,7 +209,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       buttonRef={filterButtonRef}
       data-test-subj="filtersDropdown"
@@ -271,7 +271,9 @@ export const PipelineTable: FunctionComponent<Props> = ({
           key="reloadButton"
           iconType="refresh"
           color="success"
-          aria-label="refresh button"
+          aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
+            defaultMessage: 'refresh',
+          })}
           data-test-subj="reloadButton"
           size="m"
           display="base"

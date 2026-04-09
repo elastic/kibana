@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/reporting-export-types-png-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/reporting-export-types-png-common'
+  title: '@kbn/reporting-export-types-png-common'
   description: Moon project for @kbn/reporting-export-types-png-common
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-reporting/export_types/png_common
+  sourceRoot: src/platform/packages/private/kbn-reporting/export_types/png_common
 dependsOn:
   - '@kbn/screenshotting-plugin'
   - '@kbn/reporting-common'

@@ -16,19 +16,20 @@ import type {
 } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-
-interface UserParam {
-  name: string;
-  email: string[];
-}
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  user: UserParam;
+  /** Display / filter user name; may be omitted in serialized flyout state — falls back to `identityFields['user.name']`. */
+  userName?: string;
+  identityFields?: IdentityFields;
+  /** Canonical Entity Store v2 id (`entity.id`) when known. */
+  entityId?: string;
   path?: PanelPath;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasNonClosedAlerts?: boolean;
+  entityStoreEntityId?: string;
 }
 export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'user_details';
@@ -38,30 +39,42 @@ export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'use
 
 export const UserDetailsPanel = ({
   isRiskScoreExist,
-  user,
+  identityFields,
+  userName,
+  entityId,
   path,
   scopeId,
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
+  entityStoreEntityId,
 }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser();
+
+  const resolvedUserName = userName ?? identityFields?.['user.name'] ?? '';
+
   const tabs = useTabs(
     managedUser.data,
-    user.name,
+    resolvedUserName,
     isRiskScoreExist,
     scopeId,
     hasMisconfigurationFindings,
-    hasNonClosedAlerts
+    hasNonClosedAlerts,
+    identityFields,
+    entityId,
+    entityStoreEntityId
   );
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
-    user,
+    identityFields,
+    entityId,
+    resolvedUserName,
     tabs,
     path,
     scopeId,
     hasMisconfigurationFindings,
-    hasNonClosedAlerts
+    hasNonClosedAlerts,
+    entityStoreEntityId
   );
 
   if (!selectedTabId) {
@@ -82,12 +95,15 @@ export const UserDetailsPanel = ({
 
 const useSelectedTab = (
   isRiskScoreExist: boolean,
-  user: UserParam,
+  identityFields: IdentityFields | undefined,
+  entityId: string | undefined,
+  resolvedUserName: string,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
   scopeId: string,
   hasMisconfigurationFindings?: boolean,
-  hasNonClosedAlerts?: boolean
+  hasNonClosedAlerts?: boolean,
+  entityStoreEntityId?: string
 ) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -102,10 +118,13 @@ const useSelectedTab = (
     openLeftPanel({
       id: UserDetailsPanelKey,
       params: {
-        user,
+        userName: resolvedUserName,
+        identityFields,
+        entityId,
         isRiskScoreExist,
         hasMisconfigurationFindings,
         hasNonClosedAlerts,
+        entityStoreEntityId,
         path: {
           tab: tabId,
         },

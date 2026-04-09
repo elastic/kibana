@@ -1187,7 +1187,7 @@
               "level/type of message"
             ],
             "signature": [
-              "\"info\" | \"error\" | \"success\" | \"warning\" | \"write\" | \"debug\" | \"verbose\""
+              "\"info\" | \"error\" | \"write\" | \"success\" | \"warning\" | \"debug\" | \"verbose\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
             "lineNumber": 16,

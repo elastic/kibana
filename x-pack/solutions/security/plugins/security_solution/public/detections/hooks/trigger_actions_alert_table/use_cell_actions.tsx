@@ -9,11 +9,12 @@ import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
-import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
+import { SecurityCellActionType } from '../../../app/actions/constants';
 import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
@@ -103,7 +104,7 @@ export const useCellActionsOptions = (
     tableId === TableId.alertsOnCasePage ? [SecurityCellActionType.FILTER] : undefined;
 
   const cellActions = useDataGridColumnsSecurityCellActions({
-    triggerId: SecurityCellActionsTrigger.DEFAULT,
+    triggerId: SECURITY_CELL_ACTIONS_DEFAULT,
     fields: cellActionsFields,
     getCellValue,
     metadata: cellActionsMetadata,

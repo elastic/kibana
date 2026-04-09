@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import assert from 'node:assert';
+import assert from 'assert';
 
 import type { EntityType } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';

@@ -8,17 +8,15 @@
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import {
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiLink,
-  EuiIcon,
   EuiFlexGroup,
   EuiToolTip,
-  useEuiTheme,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
@@ -31,14 +29,15 @@ export interface DiscoverFlyoutStreamProcessingLinkProps {
   fieldFormats: FieldFormatsStart;
   locator: StreamsAppLocator;
   streamsRepositoryClient: StreamsRepositoryClient;
+  renderCpsWarning?: boolean;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
   doc,
   locator,
   streamsRepositoryClient,
+  renderCpsWarning,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
-  const { euiTheme } = useEuiTheme();
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
@@ -62,24 +61,39 @@ export function DiscoverFlyoutStreamProcessingLink({
   });
 
   return (
-    <EuiLink href={href}>
-      <EuiToolTip content={message} display="block">
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon
-            type="sparkles"
-            size="s"
-            css={css`
-              margin-left: ${euiTheme.size.s};
-            `}
-          />
-          <EuiText size="xs" className="eui-textTruncate">
-            {message}
-          </EuiText>
-        </EuiFlexGroup>
-      </EuiToolTip>
-    </EuiLink>
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiLink href={href}>
+        <EuiToolTip content={message} display="block">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiText size="xs" className="eui-textTruncate">
+              {message}
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      </EuiLink>
+      {renderCpsWarning && (
+        <EuiIconTip
+          content={CPS_WARNING_MESSAGE}
+          type="warning"
+          size="s"
+          color="warning"
+          data-test-subj="cpsStreamsProcessingWarningIcon"
+          anchorProps={{
+            css: { display: 'flex' },
+          }}
+        />
+      )}
+    </EuiFlexGroup>
   );
 }
+
+const CPS_WARNING_MESSAGE = i18n.translate(
+  'xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning',
+  {
+    defaultMessage:
+      'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
+  }
+);
 
 const getTargetDataSource = (doc: DataTableRecord, streamName: string) => {
   const baseDataSource = {

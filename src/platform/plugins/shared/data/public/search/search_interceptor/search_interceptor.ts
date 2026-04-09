@@ -32,7 +32,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AsyncSearchGetResponse,
   ErrorResponseBase,
-  SqlGetAsyncResponse,
+  EsqlAsyncQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -52,6 +52,7 @@ import type {
   UserProfileService,
 } from '@kbn/core/public';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
@@ -65,7 +66,6 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import type { ICPSManager } from '@kbn/cps-utils';
-import { getProjectRouting } from './project_routing';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -79,6 +79,7 @@ import {
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
+  strategyToString,
   UI_SETTINGS,
 } from '../../../common';
 import type { SearchUsageCollector } from '../collectors';
@@ -310,7 +311,7 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
-      const projectRouting = getProjectRouting(options.projectRouting, this.deps.getCPSManager?.());
+      const projectRouting = this.deps.getCPSManager?.()?.getProjectRouting(options.projectRouting);
       return this.runSearch(
         { id, ...request },
         {
@@ -367,7 +368,15 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+      this.deps.http.delete(
+        buildPath('/internal/search/{strategy}/{id}', {
+          strategy: strategyToString(strategy),
+          id: id as string,
+        }),
+        {
+          version: '1',
+        }
+      )
     );
 
     const cancel = async () => {
@@ -487,10 +496,12 @@ export class SearchInterceptor {
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
     // at that point, exclude all params when request.id is defined (polling phase)
     const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
-
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+        buildPath('/internal/search/{strategy}/{id?}', {
+          strategy: strategyToString(strategy),
+          id: request.id,
+        }),
         {
           version: '1',
           signal: abortSignal,
@@ -548,7 +559,7 @@ export class SearchInterceptor {
               ...getTotalLoaded(shimmedResponse),
             };
           case ESQL_ASYNC_SEARCH_STRATEGY:
-            const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+            const esqlResponse = rawResponse.body as unknown as EsqlAsyncQueryResponse;
             return {
               id: esqlResponse.id,
               rawResponse: esqlResponse,

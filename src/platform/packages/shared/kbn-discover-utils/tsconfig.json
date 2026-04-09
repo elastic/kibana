@@ -3,11 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "@kbn/ambient-ui-types",
       "jest",
       "node",
       "react",
-      "@testing-library/jest-dom",
-      "../../../../../typings/emotion.d.ts"
+      "@testing-library/jest-dom"
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
@@ -28,6 +28,8 @@
     "@kbn/data-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/apm-types",
-    "@kbn/core-chrome-app-menu-components"
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/core-http-browser",
+    "@kbn/esql-utils"
   ]
 }

@@ -54,18 +54,14 @@ export const setDataView: InternalStateThunkActionCreator<
   };
 
 /**
- * Assign the next data view to the tab's runtime state, pause the refresh interval, and update the saved search's search source
+ * Assign the next data view to the tab's runtime state and pause the refresh interval
  */
 export const assignNextDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  function assignNextDataViewThunkFn(dispatch, _, { runtimeStateManager }) {
+  function assignNextDataViewThunkFn(dispatch) {
     dispatch(setDataView({ tabId, dataView }));
     dispatch(internalStateActions.pauseAutoRefreshInterval({ tabId, dataView }));
-
-    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const savedSearchState = stateContainer$.getValue()?.savedSearchState.getState();
-    savedSearchState?.searchSource.setField('index', dataView);
   };
 
 /**
@@ -103,16 +99,11 @@ export const changeDataView: InternalStateThunkActionCreator<
     }
 
     if (nextDataView && currentDataView) {
-      // Reset the default profile state if we are switching to a different data view
+      // Mark all profile state fields to reset if we are switching to a different data view
       dispatch(
-        internalStateActions.setResetDefaultProfileState({
+        internalStateActions.setProfileStateFieldsToReset({
           tabId,
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: true,
-            breakdownField: true,
-            hideChart: true,
-          },
+          fieldsToReset: 'all',
         })
       );
 
@@ -129,7 +120,13 @@ export const changeDataView: InternalStateThunkActionCreator<
         currentAppState.query
       );
 
-      dispatch(internalStateActions.updateAppState({ tabId, appState: nextAppState }));
+      dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: nextAppState,
+          isSystemTriggered: true,
+        })
+      );
 
       const currentTab = selectTab(currentState, tabId);
       if (currentTab.expandedDoc) {

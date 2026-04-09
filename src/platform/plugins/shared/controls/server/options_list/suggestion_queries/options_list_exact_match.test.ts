@@ -17,7 +17,7 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
-        allowExpensiveQueries: true,
+
         searchString: 'searchForMe',
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
@@ -49,7 +49,7 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
-        allowExpensiveQueries: true,
+
         searchString: 'searchForMe',
         fieldSpec: {
           type: 'string',
@@ -92,7 +92,7 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
-        allowExpensiveQueries: true,
+
         searchString: '123',
         fieldSpec: { type: 'number' } as unknown as FieldSpec,
       };
@@ -126,7 +126,7 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: 'cool',
-        allowExpensiveQueries: true,
+
         fieldName: 'coolTestField.keyword',
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
@@ -167,7 +167,6 @@ describe('options list exact match search query', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: 'bytes',
-      allowExpensiveQueries: true,
       searchString: '12345',
       fieldSpec: { type: 'number' } as unknown as FieldSpec,
     };

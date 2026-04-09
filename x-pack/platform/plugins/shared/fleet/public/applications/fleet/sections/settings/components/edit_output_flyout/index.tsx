@@ -32,6 +32,7 @@ import {
   EuiAccordion,
   EuiCode,
   useGeneratedHtmlId,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -207,7 +208,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
               title={generateWarningMessage()}
-              iconType="alert"
+              iconType="warning"
               color="warning"
               size="s"
               heading="p"
@@ -319,6 +320,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <EuiSelect
                 fullWidth
                 data-test-subj="settingsOutputsFlyout.typeInput"
+                aria-label={i18n.translate('xpack.fleet.settings.editOutputFlyout.typeInputLabel', {
+                  defaultMessage: 'Type',
+                })}
                 {...inputs.typeInput.props}
                 options={OUTPUT_TYPE_OPTIONS}
               />
@@ -327,7 +331,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           </EuiFormRow>
 
           {renderOutputTypeSection(inputs.typeInput.value)}
-
           {isRemoteESOutput ? null : (
             <EuiFormRow
               fullWidth
@@ -367,6 +370,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               </>
             </EuiFormRow>
           )}
+
           <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
             <EuiSwitch
               {...inputs.defaultOutputInput.props}
@@ -499,6 +503,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     defaultMessage="Allow agents to write to Streams"
                   />
                 }
+                disabled={inputs.writeToStreams.props.disabled}
                 checked={inputs.writeToStreams.value}
                 onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
               />
@@ -514,7 +519,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 <EuiCallOut
                   announceOnMount
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                   size="s"
                   title={
                     <FormattedMessage
@@ -543,8 +548,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 </EuiCallOut>
               </>
             )}
-
-          <EuiSpacer size="l" />
           <EuiFormRow
             label={
               <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
@@ -556,26 +559,81 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             {...inputs.additionalYamlConfigInput.formRowProps}
             fullWidth
           >
-            <YamlCodeEditorWithPlaceholder
-              value={inputs.additionalYamlConfigInput.value}
-              onChange={(value) => {
-                if (outputYmlIncludesReservedPerformanceKey(value, load)) {
-                  inputs.presetInput.setValue('custom');
-                }
+            <div data-test-subj="settingsOutputsFlyout.yamlConfigInput">
+              <YamlCodeEditorWithPlaceholder
+                value={inputs.additionalYamlConfigInput.value}
+                onChange={(value) => {
+                  if (outputYmlIncludesReservedPerformanceKey(value, load)) {
+                    inputs.presetInput.setValue('custom');
+                  }
 
-                inputs.additionalYamlConfigInput.setValue(value);
-              }}
-              disabled={inputs.additionalYamlConfigInput.props.disabled}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
-                {
-                  defaultMessage:
-                    '# YAML settings here will be added to the output section of each agent policy.',
-                }
-              )}
-            />
+                  inputs.additionalYamlConfigInput.setValue(value);
+                }}
+                disabled={inputs.additionalYamlConfigInput.props.disabled}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
+                  {
+                    defaultMessage:
+                      '# YAML settings here will be added to the output section of each agent policy.',
+                  }
+                )}
+              />
+            </div>
           </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
+          {isESOutput && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiAccordion
+                id="FleetEditOutputFlyoutOtelExporterConfigAccordion"
+                buttonContent={
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigTitle"
+                        defaultMessage="OpenTelemetry exporter"
+                      />
+                    </h3>
+                  </EuiTitle>
+                }
+                paddingSize="none"
+              >
+                <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="m">
+                  <EuiFormRow
+                    fullWidth
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigLabel"
+                        defaultMessage="Advanced YAML configuration"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigHelpText"
+                        defaultMessage="Settings added here are merged into the Elasticsearch exporter configuration of any OTel-based agent policy that uses this output."
+                      />
+                    }
+                    {...inputs.otelExporterConfigInput.formRowProps}
+                  >
+                    <YamlCodeEditorWithPlaceholder
+                      value={inputs.otelExporterConfigInput.value}
+                      onChange={(value) => inputs.otelExporterConfigInput.setValue(value)}
+                      disabled={inputs.otelExporterConfigInput.props.disabled}
+                      placeholder={i18n.translate(
+                        'xpack.fleet.settings.editOutputFlyout.otelExporterConfigPlaceholder',
+                        {
+                          defaultMessage:
+                            '# YAML settings defined here will be added to the exporter section of OTel policies.',
+                        }
+                      )}
+                    />
+                  </EuiFormRow>
+                </EuiPanel>
+              </EuiAccordion>
+            </>
+          )}
+
+          <EuiSpacer size="l" />
         </EuiForm>
         {output?.id && output.type === 'remote_elasticsearch' ? (
           <OutputHealth output={output} />

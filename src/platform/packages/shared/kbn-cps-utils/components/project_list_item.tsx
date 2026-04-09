@@ -99,11 +99,15 @@ export const ProjectListItem = ({ project, index, isOriginProject }: ProjectList
                   title={i18n.translate('cpsUtils.projectPicker.tagTooltipTitle', {
                     defaultMessage: 'Custom tags',
                   })}
-                  content={tags.map((tag) => (
+                  content={
                     <EuiThemeProvider colorMode="dark">
-                      <EuiBadge css={{ margin: `${euiTheme.size.xs}` }}>{tag}</EuiBadge>
+                      {tags.map((tag) => (
+                        <EuiBadge key={tag} css={{ margin: `${euiTheme.size.xs}` }}>
+                          {tag}
+                        </EuiBadge>
+                      ))}
                     </EuiThemeProvider>
-                  ))}
+                  }
                 >
                   <EuiBadge iconType="tag" tabIndex={0}>
                     {tags.length}

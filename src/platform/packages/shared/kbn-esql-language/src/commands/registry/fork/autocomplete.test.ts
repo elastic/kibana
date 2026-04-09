@@ -30,7 +30,7 @@ import {
   ESQL_NUMBER_TYPES,
 } from '../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const allEvalFnsForWhere = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -85,6 +85,7 @@ export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
   'integer',
   'long',
   'aggregate_metric_double',
+  'exponential_histogram',
   'tdigest',
 ];
 const ACOS_TYPES = [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'] as const;

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getRunCommand, getRunTarget, stripRunCommand } from './cli_processing';
+import {
+  getRunCommand,
+  getTestTargetFromProcessArguments,
+  stripRunCommand,
+} from './cli_processing';
 
 describe('cli_processing', () => {
   describe('stripRunCommand', () => {
@@ -20,11 +24,11 @@ describe('cli_processing', () => {
         'path/to/config',
         '--project',
         'local',
-        '--grep=@svlSearch',
+        '--grep=@local-serverless-search',
       ];
 
       expect(stripRunCommand(argv)).toBe(
-        'npx playwright test --config path/to/config --project local --grep=@svlSearch'
+        'npx playwright test --config path/to/config --project local --grep=@local-serverless-search'
       );
     });
 
@@ -37,11 +41,11 @@ describe('cli_processing', () => {
         'path/to/config',
         '--project',
         'local',
-        '--grep=@svlSearch',
+        '--grep=serverless-search',
       ];
 
       expect(stripRunCommand(argv)).toBe(
-        'npx playwright test --config path/to/config --project local --grep=@svlSearch'
+        'npx playwright test --config path/to/config --project local --grep=serverless-search'
       );
     });
 
@@ -61,7 +65,7 @@ describe('cli_processing', () => {
         'test',
         '--config',
         'path/to/config',
-        '--grep=@svlSearch',
+        '--grep=@local-serverless-search',
       ];
       expect(() => stripRunCommand(argv)).toThrow(
         /Invalid command structure: Expected "node <playwright_path> test" or "npx playwright test"/
@@ -82,7 +86,7 @@ describe('cli_processing', () => {
 
     it(`should prefer SCOUT_RUN_COMMAND when provided`, () => {
       process.env.SCOUT_RUN_COMMAND =
-        'node scripts/scout.js run-tests --serverless=oblt --config path/to/config';
+        'node scripts/scout.js run-tests --arch serverless --domain observability_complete --config path/to/config';
 
       const argv = [
         'npx',
@@ -106,58 +110,49 @@ describe('cli_processing', () => {
         'path/to/config',
         '--project',
         'local',
-        '--grep=@svlSearch',
+        '--grep=@local-serverless-search',
       ];
       expect(getRunCommand(argv)).toBe(stripRunCommand(argv));
     });
   });
 
-  describe('getRunTarget', () => {
-    const originalEnv = process.env.SCOUT_TARGET_MODE;
+  describe('getTestTargetFromProcessArguments', () => {
+    const originalScoutTargetEnv: Record<string, string | undefined> = {
+      SCOUT_TARGET_LOCATION: process.env.SCOUT_TARGET_LOCATION,
+      SCOUT_TARGET_ARCH: process.env.SCOUT_TARGET_ARCH,
+      SCOUT_TARGET_DOMAIN: process.env.SCOUT_TARGET_DOMAIN,
+    };
+
+    const clearScoutTargetEnv = () => {
+      Object.keys(originalScoutTargetEnv).forEach((k: string) => delete process.env[k]);
+    };
+
+    const restoreScoutTargetEnv = () => {
+      Object.entries(originalScoutTargetEnv).forEach(([k, v]) => {
+        if (v === undefined) delete process.env[k];
+        else process.env[k] = v;
+      });
+    };
 
     afterEach(() => {
-      if (originalEnv === undefined) {
-        delete process.env.SCOUT_TARGET_MODE;
-      } else {
-        process.env.SCOUT_TARGET_MODE = originalEnv;
-      }
+      restoreScoutTargetEnv();
     });
 
-    it(`should return the correct mode from SCOUT_TARGET_MODE environment variable`, () => {
-      process.env.SCOUT_TARGET_MODE = 'stateful';
-      expect(getRunTarget()).toBe('stateful');
-    });
-
-    it(`should convert serverless=oblt to serverless-oblt from environment variable`, () => {
-      process.env.SCOUT_TARGET_MODE = 'serverless=oblt';
-      expect(getRunTarget()).toBe('serverless-oblt');
-    });
-
-    it(`should convert serverless=es to serverless-es from environment variable`, () => {
-      process.env.SCOUT_TARGET_MODE = 'serverless=es';
-      expect(getRunTarget()).toBe('serverless-es');
-    });
-
-    it(`should convert serverless=oblt-logs-essentials to serverless-oblt-logs-essentials from environment variable`, () => {
-      process.env.SCOUT_TARGET_MODE = 'serverless=oblt-logs-essentials';
-      expect(getRunTarget()).toBe('serverless-oblt-logs-essentials');
-    });
-
-    it(`should return the correct mode for '--grep=@svlSearch' when env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
+    it(`should return the correct mode for '--grep=@local-serverless-search' when env var is not set`, () => {
+      clearScoutTargetEnv();
       const argv = [
         'node',
         'scripts/scout.js',
         'run-tests',
         '--config',
         'path/to/config',
-        '--grep=@svlSearch',
+        '--grep=@local-serverless-search',
       ];
-      expect(getRunTarget(argv)).toBe('serverless-search');
+      expect(getTestTargetFromProcessArguments(argv)?.tag).toBe('local-serverless-search');
     });
 
-    it(`should return the correct mode for '--grep @svlSearch' when env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
+    it(`should return the correct mode for '--grep @cloud-serverless-search' when env var is not set`, () => {
+      clearScoutTargetEnv();
       const argv = [
         'node',
         'scripts/scout.js',
@@ -165,42 +160,30 @@ describe('cli_processing', () => {
         '--config',
         'path/to/config',
         '--grep',
-        '@svlSearch',
+        '@cloud-serverless-search',
       ];
-      expect(getRunTarget(argv)).toBe('serverless-search');
+      expect(getTestTargetFromProcessArguments(argv)?.tag).toBe('cloud-serverless-search');
     });
 
-    it(`should return the correct mode for '--grep=@svlSecurity' when env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
+    it('returns correct arch and domain when grep is a full tag', () => {
+      clearScoutTargetEnv();
       const argv = [
-        'node_modules/.bin/playwright',
-        'test',
-        '--project',
-        'local',
-        '--grep=@svlSecurity',
+        'node',
+        'scripts/scout.js',
+        'run-tests',
         '--config',
         'path/to/config',
+        '--grep=@local-stateful-classic',
       ];
-      expect(getRunTarget(argv)).toBe('serverless-security');
+      const target = getTestTargetFromProcessArguments(argv);
+      expect(target).toBeDefined();
+      expect(target?.arch).toBe('stateful');
+      expect(target?.domain).toBe('classic');
+      expect(target?.tag).toBe('local-stateful-classic');
     });
 
-    it(`should return the correct mode for '--grep @svlSecurity' when env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
-      const argv = [
-        'node_modules/.bin/playwright',
-        'test',
-        '--project',
-        'local',
-        '--grep',
-        '@svlSecurity',
-        '--config',
-        'path/to/config',
-      ];
-      expect(getRunTarget(argv)).toBe('serverless-security');
-    });
-
-    it(`should return 'undefined' for an invalid --grep tag when env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
+    it(`should return undefined for an invalid --grep tag when env var is not set`, () => {
+      clearScoutTargetEnv();
       const argv = [
         'node',
         'scripts/scout.js',
@@ -209,25 +192,53 @@ describe('cli_processing', () => {
         'path/to/config',
         '--grep=@invalidTag',
       ];
-      expect(getRunTarget(argv)).toBe('undefined');
+      expect(getTestTargetFromProcessArguments(argv)).toBeUndefined();
     });
 
-    it(`should return 'undefined' if --grep argument is not provided and env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
+    it(`should return undefined if --grep argument is not provided and env var is not set`, () => {
+      clearScoutTargetEnv();
       const argv = ['node', 'scripts/scout.js'];
-      expect(getRunTarget(argv)).toBe('undefined');
+      expect(getTestTargetFromProcessArguments(argv)).toBeUndefined();
     });
 
-    it(`should return 'undefined' for '--grep=' when env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
+    it(`should return undefined for '--grep=' when env var is not set`, () => {
+      clearScoutTargetEnv();
       const argv = ['node', 'scripts/scout.js', '--grep='];
-      expect(getRunTarget(argv)).toBe('undefined');
+      expect(getTestTargetFromProcessArguments(argv)).toBeUndefined();
     });
 
-    it(`should return 'undefined' if '--grep' argument is without value when env var is not set`, () => {
-      delete process.env.SCOUT_TARGET_MODE;
+    it(`should return undefined if '--grep' argument is without value when env var is not set`, () => {
+      clearScoutTargetEnv();
       const argv = ['node', 'scripts/scout.js', '--grep'];
-      expect(getRunTarget(argv)).toBe('undefined');
+      expect(getTestTargetFromProcessArguments(argv)).toBeUndefined();
+    });
+
+    describe('when grep is a regex or partial tag (Playwright grep accepts regex)', () => {
+      it('returns undefined when grep value is partial tag (arch-domain only, e.g. serverless-search)', () => {
+        clearScoutTargetEnv();
+        const argv = [
+          'node',
+          'scripts/scout.js',
+          'run-tests',
+          '--config',
+          'path/to/config',
+          '--grep=serverless-search',
+        ];
+        expect(getTestTargetFromProcessArguments(argv)).toBeUndefined();
+      });
+
+      it('returns undefined when grep value is a regex pattern', () => {
+        clearScoutTargetEnv();
+        const argv = [
+          'node',
+          'scripts/scout.js',
+          'run-tests',
+          '--config',
+          'path/to/config',
+          '--grep=@(local|cloud)-stateful-classic',
+        ];
+        expect(getTestTargetFromProcessArguments(argv)).toBeUndefined();
+      });
     });
   });
 });

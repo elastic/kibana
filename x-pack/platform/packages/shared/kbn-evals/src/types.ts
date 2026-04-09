@@ -36,7 +36,12 @@ export interface Example<
   TExpected = any,
   TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null
 > {
-  input: TInput;
+  /**
+   * Stable identifier for this example, typically a content hash.
+   * Optional because inline datasets may not have persisted IDs.
+   */
+  id?: string;
+  input?: TInput;
   /**
    * Expected output/ground truth for the example.
    *
@@ -60,6 +65,10 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
 /**
  * Evaluation output returned by evaluators.
  *
+ * Follows the trace-first evaluator contract (vision Section 5.2.1): evaluators produce
+ * standardized score/label/explanation outputs. The `metadata` field can carry trace
+ * references and evaluator-specific details for explainability.
+ *
  * This shape is intentionally compatible with the existing evaluator implementations and
  * the Phoenix client types:
  * - `score` may be omitted or `null` for "unavailable"/"error" cases
@@ -78,6 +87,17 @@ type EvaluatorCallback<TExample extends Example, TTaskOutput extends TaskOutput>
   params: EvaluatorParams<TExample, TTaskOutput>
 ) => Promise<EvaluationResult>;
 
+/**
+ * Core evaluator interface.
+ *
+ * All evaluators — whether CODE-kind (deterministic) or LLM-kind (model-scored) — implement
+ * this interface. Per the @kbn/evals vision (Section 5.2.1), evaluators should progressively
+ * migrate to deriving signals from OTel traces stored in Elasticsearch rather than only
+ * operating on in-memory task output. Use {@link createTraceBasedEvaluator} for trace-native
+ * evaluators.
+ *
+ * @see TraceBasedEvaluatorConfig for the trace-first evaluator factory configuration
+ */
 export interface Evaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
@@ -188,14 +208,16 @@ export interface EvaluationReport {
 
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
+  evaluationsKbnClient: ScoutWorkerFixtures['kbnClient'];
   /**
-   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   * Whether the target Kibana has the evals plugin enabled (xpack.evals.enabled: true).
+   * Determined once per worker by probing the plugin's enabled endpoint.
+   */
+  evaluationsPluginEnabled: boolean;
+  /**
+   * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;
-  /**
-   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
-   */
-  phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
   connector: AvailableConnectorWithId;
@@ -204,18 +226,15 @@ export interface EvaluationSpecificWorkerFixtures {
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
+  evaluationsEsClient: EsClient;
 }
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   /**
-   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;
-  /**
-   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
-   */
-  phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
   connector: AvailableConnectorWithId;

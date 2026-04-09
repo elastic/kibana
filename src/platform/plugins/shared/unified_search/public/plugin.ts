@@ -11,8 +11,10 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
+import {
+  ON_APPLY_FILTER,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { setCoreStart, setIndexPatterns } from './services';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -40,8 +42,6 @@ export class UnifiedSearchPublicPlugin
     core: CoreSetup<UnifiedSearchStartDependencies, UnifiedSearchPublicPluginStart>,
     { uiActions, data, usageCollection }: UnifiedSearchSetupDependencies
   ): UnifiedSearchPluginSetup {
-    uiActions.registerTrigger(updateFilterReferencesTrigger);
-
     this.usageCollection = usageCollection;
 
     return {};
@@ -85,7 +85,7 @@ export class UnifiedSearchPublicPlugin
 
     const SearchBar = getCustomSearchBar();
 
-    uiActions.addTriggerActionAsync(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER, async () => {
+    uiActions.addTriggerActionAsync(ON_APPLY_FILTER, ACTION_GLOBAL_APPLY_FILTER, async () => {
       const { createFilterAction } = await import('./actions/actions_module');
       return createFilterAction(data.query.filterManager, data.query.timefilter.timefilter, core);
     });

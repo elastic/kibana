@@ -89,17 +89,19 @@ export const printViewportVisStyles = ({ euiTheme }: UseEuiTheme) =>
         paddingLeft: visPadding,
         paddingRight: visPadding,
 
-        // Last vis on the page
-        [`&:nth-child(${visualisationsPerPage}n)`]: {
+        // Padding for all visualizations
+        paddingTop: visPadding,
+        paddingBottom: visPadding,
+
+        // Last vis on the page, but not if it's the last vis overall
+        [`&:nth-child(${visualisationsPerPage}n):not(:last-child)`]: {
           pageBreakAfter: 'always',
-          paddingTop: visPadding,
-          paddingBottom: visPadding,
         },
 
         '&:last-child': {
           pageBreakAfter: 'avoid',
         },
-        height: `calc(${a4PageContentHeight} / ${visualisationsPerPage})`,
+        height: `calc((${a4PageContentHeight} / ${visualisationsPerPage}) - (${visPadding} * 2))`,
         width: a4PageContentWidth,
         '& .embPanel__header button': {
           display: 'none',

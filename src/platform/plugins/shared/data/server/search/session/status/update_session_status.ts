@@ -13,12 +13,21 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { SearchSessionRequestInfo } from '../../../../common';
-import { SEARCH_SESSION_TYPE, type SearchSessionSavedObjectAttributes } from '../../../../common';
+import {
+  SEARCH_SESSION_TYPE,
+  SearchSessionStatus,
+  type SearchSessionSavedObjectAttributes,
+} from '../../../../common';
 import { getSessionStatus } from './get_session_status';
 import type { SessionStatus } from '../types';
+import type { ISearchSessionEBTManager } from '../ebt_manager';
 
 export async function updateSessionStatus(
-  deps: { esClient: ElasticsearchClient; savedObjectsClient: SavedObjectsClientContract },
+  deps: {
+    esClient: ElasticsearchClient;
+    savedObjectsClient: SavedObjectsClientContract;
+    searchSessionEBTManager?: ISearchSessionEBTManager;
+  },
   session: SavedObject<SearchSessionSavedObjectAttributes>
 ): Promise<SessionStatus> {
   const sessionStatus = await getSessionStatus(deps, session.attributes);
@@ -29,6 +38,20 @@ export async function updateSessionStatus(
 
   const needsUpdate = !!updatedIdMapping || session.attributes.status !== sessionStatus.status;
   if (!needsUpdate) return sessionStatus;
+
+  if (session.attributes.status !== sessionStatus.status) {
+    if (sessionStatus.status === SearchSessionStatus.COMPLETE) {
+      deps.searchSessionEBTManager?.trackBgsCompleted({
+        session,
+        searchStatuses: sessionStatus.searchStatuses ?? [],
+      });
+    } else if (sessionStatus.status === SearchSessionStatus.ERROR) {
+      deps.searchSessionEBTManager?.trackBgsError({
+        session,
+        searchStatuses: sessionStatus.searchStatuses ?? [],
+      });
+    }
+  }
 
   const updatedSession: SavedObject<SearchSessionSavedObjectAttributes> = {
     ...session,

@@ -43,13 +43,6 @@ export const RULE_UPDATES_TAB = i18n.translate(
   }
 );
 
-export const SELECTED_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.selectedRules',
-  {
-    defaultMessage: 'Selected rules',
-  }
-);
-
 // Gap status column
 export const GAP_STATUS_HEADER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.header',
@@ -76,6 +69,13 @@ export const GAP_STATUS_FILLED_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.filled',
   {
     defaultMessage: 'Filled',
+  }
+);
+
+export const GAP_STATUS_ERROR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.error',
+  {
+    defaultMessage: 'Error',
   }
 );
 

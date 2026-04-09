@@ -99,7 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('preserves edits on cancel', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/254532
+    describe.skip('preserves edits on cancel', function () {
       it('when time changed is stored with dashboard', async function () {
         await dashboard.loadDashboardInEditMode(dashboardName);
         await timePicker.setAbsoluteRange(

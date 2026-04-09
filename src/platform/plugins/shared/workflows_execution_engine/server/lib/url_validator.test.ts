@@ -90,9 +90,25 @@ describe('UrlValidator', () => {
       expect(validator.isUrlAllowed('')).toBe(false);
     });
 
-    it('should throw for malformed URLs', () => {
-      expect(() => validator.ensureUrlAllowed('not-a-url')).toThrow();
-      expect(() => validator.ensureUrlAllowed('')).toThrow();
+    it('should throw with protocol hint when URL is missing a protocol', () => {
+      expect(() => validator.ensureUrlAllowed('example.com/api/endpoint')).toThrow(
+        'Invalid URL "example.com/api/endpoint". URLs must include a protocol (e.g., https://example.com/api/endpoint).'
+      );
+      expect(() => validator.ensureUrlAllowed('api.github.com/users')).toThrow(
+        'Invalid URL "api.github.com/users". URLs must include a protocol (e.g., https://api.github.com/users).'
+      );
+    });
+
+    it('should throw with generic invalid URL message when protocol is present but URL is still malformed', () => {
+      expect(() => validator.ensureUrlAllowed('http://')).toThrow(
+        'Invalid URL "http://". Ensure the URL is well-formed.'
+      );
+    });
+
+    it('should throw for empty URLs', () => {
+      expect(() => validator.ensureUrlAllowed('')).toThrow(
+        'Invalid URL "". URLs must include a protocol'
+      );
     });
   });
 
@@ -112,6 +128,12 @@ describe('UrlValidator', () => {
     it('should reject protocol-relative URLs', () => {
       expect(validator.isUrlAllowed('//example.com/test')).toBe(false);
       expect(validator.isUrlAllowed('//malicious.com/test')).toBe(false);
+    });
+
+    it('should throw with protocol hint for protocol-relative URLs', () => {
+      expect(() => validator.ensureUrlAllowed('//example.com/test')).toThrow(
+        'URLs must include a protocol'
+      );
     });
   });
 });

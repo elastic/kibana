@@ -10,8 +10,15 @@
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
-import type { TaskContext } from './types';
-import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
+import type { MigrationAlgorithm, TaskContext } from './types';
+import {
+  automatedRollbackTests,
+  checkRemovedTypes,
+  getSnapshots,
+  validateNewTypes,
+  validateUpdatedTypes,
+} from './tasks';
+import { getTestSnapshots, TEST_TYPES } from './test';
 
 export function runCheckSavedObjectsCli() {
   let globalTask: Listr<TaskContext, 'default', 'simple'>;
@@ -20,10 +27,23 @@ export function runCheckSavedObjectsCli() {
     async ({ log, flagsReader }) => {
       let exitCode = 0;
       const gitRev = flagsReader.string('gitRev');
+      const serverlessGitRev = flagsReader.string('serverlessGitRev');
       const fix = flagsReader.boolean('fix');
       const server = flagsReader.boolean('server');
       const client = flagsReader.boolean('client');
       const test = flagsReader.boolean('test');
+      const algorithmFlag = flagsReader.string('algorithm') ?? 'v2';
+
+      let migrationAlgorithms: MigrationAlgorithm[];
+      if (algorithmFlag === 'both') {
+        migrationAlgorithms = ['v2', 'zdt'];
+      } else if (['v2', 'zdt'].includes(algorithmFlag)) {
+        migrationAlgorithms = [algorithmFlag as MigrationAlgorithm];
+      } else {
+        throw new Error(
+          `Invalid --algorithm value '${algorithmFlag}'. Must be one of: v2, zdt, both`
+        );
+      }
 
       if (!server && !test && !gitRev) {
         throw new Error(
@@ -33,6 +53,7 @@ export function runCheckSavedObjectsCli() {
 
       const context: TaskContext = {
         gitRev: gitRev!,
+        serverlessGitRev,
         updatedTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
@@ -42,6 +63,7 @@ export function runCheckSavedObjectsCli() {
         },
         test,
         fix,
+        migrationAlgorithms,
       };
 
       globalTask = new Listr(
@@ -73,6 +95,7 @@ export function runCheckSavedObjectsCli() {
               ctx.kibanaServer = await setupKibana();
               const coreStart = await ctx.kibanaServer.start();
               ctx.registeredTypes = coreStart!.savedObjects.getTypeRegistry().getAllTypes();
+              ctx.encryptedSavedObjects = coreStart._plugins?.get('encryptedSavedObjects');
             },
             enabled: !server && !test,
           },
@@ -83,38 +106,41 @@ export function runCheckSavedObjectsCli() {
           },
           /**
            * ==================================================================
-           * Validate SO changes.
+           * The following tasks only run in "--test mode".
            *
-           * Checks for removed types, new types, and updated types.
+           * Instead of starting Kibana and getting the actual typeRegistry
+           * we use a test registry with a bunch of fake SO types.
            * ==================================================================
            */
           {
-            title: 'Validate SO changes',
-            task: validateSOChanges,
-            enabled: !server && !test,
-            skip: test,
+            title: 'Obtain type registry (test mode)',
+            task: async (ctx) => (ctx.registeredTypes = TEST_TYPES),
+            enabled: !server && test,
           },
           {
-            title: 'Fallback to test mode (no updated types detected)',
-            task: (ctx) => {
-              ctx.test = true;
-            },
-            enabled: !server && !test,
-            skip: (ctx) => ctx.updatedTypes.length > 0,
+            title: 'Get type registry snapshots (test mode)',
+            task: getTestSnapshots,
+            enabled: !server && test,
           },
           /**
            * ==================================================================
-           * Validate test flow (runs in test mode or after fallback).
-           *
-           * Sets up a test type registry and test snapshots, then runs
-           * the same validation pipeline with test data.
+           * The following tasks run systematically
            * ==================================================================
            */
           {
-            title: 'Validate test flow',
-            task: validateTestFlow,
+            title: 'Check removed SO types',
+            task: checkRemovedTypes,
             enabled: !server,
-            skip: (ctx) => !ctx.test,
+          },
+          {
+            title: 'Validate new SO types',
+            task: validateNewTypes,
+            enabled: !server,
+          },
+          {
+            title: 'Validate existing SO types',
+            task: validateUpdatedTypes,
+            enabled: !server,
           },
           {
             title: 'Automated rollback tests',
@@ -161,7 +187,7 @@ export function runCheckSavedObjectsCli() {
       }
       if (exitCode) {
         log.warning(
-          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects#troubleshooting'
+          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/validate#troubleshooting'
         );
       }
       process.exit(exitCode);
@@ -170,24 +196,27 @@ export function runCheckSavedObjectsCli() {
       description: `
       Determine if the changes performed to the Saved Objects mappings are following our standards.
 
-      Usage: node scripts/check_saved_objects --baseline <gitRev> --fix
+      Usage: node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|both>] --fix
     `,
       flags: {
         alias: {
           baseline: 'gitRev',
+          'serverless-baseline': 'serverlessGitRev',
         },
         boolean: ['fix', 'server', 'client', 'test'],
-        string: ['gitRev'],
+        string: ['gitRev', 'serverlessGitRev', 'algorithm'],
         default: {
           verify: true,
           mappings: true,
         },
         help: `
         --baseline <SHA>   Provide a commit SHA, to use as a baseline for comparing SO changes against
+        --serverless-baseline <SHA>  Optional commit SHA for current Serverless release baseline
         --fix              Generate templates for missing fixture files, and update outdated JSON files
         --server           Start ES in order to repeatedly execute the 'check_saved_objects' script
         --client           Do not start ES server (requires running the command above on a separate term)
         --test             Use a sample type registry with dummy types and hardcoded snapshots (no longer starts Kibana)
+        --algorithm <v2|zdt|both>  Migration algorithm to use for rollback tests (default: v2)
       `,
       },
     }

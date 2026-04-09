@@ -15,7 +15,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xPackAPITestsConfig.getAll(),
-    testFiles: [resolve(__dirname, './routes'), resolve(__dirname, './telemetry')],
+    testFiles: [
+      resolve(__dirname, './routes'),
+      resolve(__dirname, './es_queries'),
+      resolve(__dirname, './telemetry'),
+    ],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',
     },
@@ -47,8 +51,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
         `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
-        // Enables /internal/cloud_security_posture/graph API
-        `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
       ],
     },
   };

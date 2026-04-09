@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
@@ -17,57 +14,92 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 export class ConnectorExecutor {
   constructor(private actionsClient: ActionsClient) {}
 
-  public async execute(
-    connectorType: string,
-    connectorName: string,
-    inputs: Record<string, any>,
-    spaceId: string,
-    abortController: AbortController
-  ): Promise<ActionTypeExecutorResult<unknown>> {
+  // Execute a regular connector with a saved object. It will resolve the connector ID from saved objects.
+  public async execute(params: {
+    connectorType: string;
+    connectorNameOrId: string;
+    input: Record<string, unknown>;
+    abortController: AbortController;
+  }): Promise<ActionTypeExecutorResult<unknown>> {
+    const { connectorType, connectorNameOrId, input, abortController } = params;
     if (!connectorType) {
       throw new Error('Connector type is required');
     }
 
-    const runConnectorPromise = this.runConnector(connectorName, inputs, spaceId);
-    const abortPromise = new Promise<void>((resolve, reject) => {
-      abortController.signal.addEventListener('abort', () =>
-        reject(new Error(`"${connectorName}" with type "${connectorType}" was aborted`))
+    const actionId = await this.resolveConnectorId(connectorNameOrId);
+
+    return this.runConnector({ actionTypeId: connectorType, actionId, input, abortController });
+  }
+
+  // Execute a system connector. It will use the provided connector ID directly.
+  public async executeSystemConnector(params: {
+    connectorType: string;
+    input: Record<string, unknown>;
+    abortController: AbortController;
+  }): Promise<ActionTypeExecutorResult<unknown>> {
+    const { connectorType, input, abortController } = params;
+    if (!connectorType) {
+      throw new Error('Connector type is required');
+    }
+    // The InMemoryConnector with prefixed "system-connector-" is created by the actions framework
+    const actionId = `system-connector-${connectorType}`;
+
+    return this.runConnector({ actionTypeId: connectorType, actionId, input, abortController });
+  }
+
+  // Execute a connector. It listens for the abort signal and rejects the promise if it is triggered.
+  private async runConnector(params: {
+    actionTypeId: string;
+    actionId: string;
+    input: Record<string, unknown>;
+    abortController: AbortController;
+  }): Promise<ActionTypeExecutorResult<unknown>> {
+    const { actionTypeId, actionId, input, abortController } = params;
+
+    const executeActionPromise = this.actionsClient.execute({
+      actionId,
+      params: input,
+      signal: abortController.signal,
+    });
+
+    const abortPromise = new Promise<ActionTypeExecutorResult<unknown>>((_resolve, reject) => {
+      abortController.signal.addEventListener(
+        'abort',
+        () => reject(this.createAbortError(actionTypeId, actionId)),
+        { once: true }
       );
     });
 
     // If the abort signal is triggered, the abortPromise will reject first
-    // Otherwise, the runConnectorPromise will resolve first
+    // Otherwise, the executeActionPromise will resolve first
     // This ensures that we handle cancellation properly.
-    // This is a workaround for the fact that connectors do not natively support cancellation.
-    // In the future, if connectors support cancellation, we can remove this logic.
-    await Promise.race([abortPromise, runConnectorPromise]);
-    return runConnectorPromise;
+    // In the future, if all connectors support cancellation, we can remove this logic.
+    return Promise.race([abortPromise, executeActionPromise]);
   }
 
-  private async runConnector(
-    connectorName: string,
-    connectorParams: Record<string, any>,
-    spaceId: string
-  ): Promise<ActionTypeExecutorResult<unknown>> {
-    const connectorId = await this.resolveConnectorId(connectorName, spaceId);
-
-    return (this.actionsClient as ActionsClient).execute({
-      actionId: connectorId,
-      params: connectorParams,
-    });
+  private createAbortError(actionTypeId: string, actionId: string): Error {
+    return new Error(`Action type "${actionTypeId}" with ID "${actionId}" execution was aborted`);
   }
 
-  private async resolveConnectorId(connectorName: string, spaceId: string): Promise<string> {
-    const allConnectors = await (this.actionsClient as ActionsClient).getAll();
-
-    const connector = allConnectors.find(
-      (c: ConnectorWithExtraFindData) => c.name === connectorName || c.id === connectorName
-    );
-
-    if (!connector) {
-      throw new Error(`Connector ${connectorName} not found`);
+  private async resolveConnectorId(connectorNameOrId: string): Promise<string> {
+    // Prefer direct ID lookup: try to fetch by ID first, which is unambiguous
+    try {
+      const connector = await this.actionsClient.get({ id: connectorNameOrId });
+      return connector.id;
+    } catch {
+      // Not found by ID -- fall through to name-based lookup
     }
 
-    return connector.id;
+    const allConnectors = await this.actionsClient.getAll();
+    const connectors = allConnectors.filter(
+      (c: ConnectorWithExtraFindData) => c.name === connectorNameOrId
+    );
+
+    if (connectors.length === 0) {
+      throw new Error(`Connector ${connectorNameOrId} not found`);
+    }
+    // Do not throw if multiple connectors are found. We will use the first one.
+
+    return connectors[0].id;
   }
 }

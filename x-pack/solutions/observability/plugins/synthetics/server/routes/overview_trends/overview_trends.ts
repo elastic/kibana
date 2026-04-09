@@ -63,7 +63,8 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
         configId: schema.string(),
         locationId: schema.string(),
         schedule: schema.string(),
-      })
+      }),
+      { maxSize: 500 }
     ) as unknown as ObjectType,
   },
   handler: async (routeContext): Promise<TrendTable> => {

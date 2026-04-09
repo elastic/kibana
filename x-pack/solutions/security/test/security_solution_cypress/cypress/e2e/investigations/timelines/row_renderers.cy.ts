@@ -33,7 +33,8 @@ import {
 
 import { hostsUrl } from '../../../urls/navigation';
 
-describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/250924
+describe.skip('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
   });

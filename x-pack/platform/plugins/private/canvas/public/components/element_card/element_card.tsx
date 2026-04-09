@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { TagList } from '../tag_list';
 
@@ -48,10 +47,3 @@ export const ElementCard = ({ title, description, image, tags = [], onClick, ...
     {...rest}
   />
 );
-
-ElementCard.propTypes = {
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  image: PropTypes.string,
-  onClick: PropTypes.func,
-};

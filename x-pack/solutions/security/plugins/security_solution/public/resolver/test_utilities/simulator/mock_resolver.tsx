@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
-import type { Store, AnyAction } from 'redux';
+import type { AnyAction, Store } from 'redux';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { enableMapSet } from 'immer';
-import type { SideEffectSimulator, ResolverProps } from '../../types';
+import type { ResolverProps, SideEffectSimulator } from '../../types';
 import { ResolverWithoutProviders } from '../../view/resolver_without_providers';
+import { DetailsPanel } from '../../view/details_panel';
 import { SideEffectContext } from '../../view/side_effect_context';
 import type { State } from '../../../common/store/types';
 import { TestProviders } from '../../../common/mock';
@@ -98,20 +100,27 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
       <I18nProvider>
         <Router history={props.history}>
           <KibanaContextProvider services={props.coreStart}>
-            <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
-              <Provider store={props.store}>
-                <ResolverWithoutProviders
-                  ref={resolverRef}
-                  databaseDocumentID={props.databaseDocumentID}
-                  resolverComponentInstanceID={props.resolverComponentInstanceID}
-                  indices={props.indices}
-                  shouldUpdate={props.shouldUpdate}
-                  filters={props.filters}
-                  isSplitPanel={props.isSplitPanel}
-                  showPanelOnClick={props.showPanelOnClick}
-                />
-              </Provider>
-            </SideEffectContext.Provider>
+            <ExpandableFlyoutProvider>
+              <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
+                <Provider store={props.store}>
+                  <>
+                    <ResolverWithoutProviders
+                      ref={resolverRef}
+                      databaseDocumentID={props.databaseDocumentID}
+                      resolverComponentInstanceID={props.resolverComponentInstanceID}
+                      indices={props.indices}
+                      shouldUpdate={props.shouldUpdate}
+                      filters={props.filters}
+                      renderCellActions={props.renderCellActions}
+                    />
+                    <DetailsPanel
+                      renderCellActions={props.renderCellActions}
+                      resolverComponentInstanceID={props.resolverComponentInstanceID}
+                    />
+                  </>
+                </Provider>
+              </SideEffectContext.Provider>
+            </ExpandableFlyoutProvider>
           </KibanaContextProvider>
         </Router>
       </I18nProvider>

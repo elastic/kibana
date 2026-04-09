@@ -12,16 +12,18 @@ import { monarch } from '@elastic/monaco-esql';
 import {
   getSignatureHelp,
   getHoverItem,
+  getDocumentHighlightItems,
   inlineSuggest,
   suggest,
   validateQuery,
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
+import { PromQLLang } from '../promql';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
-import { wrapAsMonacoMessages } from './lib/converters/positions';
+import { offsetToRowColumn, wrapAsMonacoMessages } from './lib/converters/positions';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import {
   getDecorationHoveredMessages,
@@ -46,11 +48,23 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
+    /**
+     * Optional resolver to provide model-specific dependencies.
+     *
+     * Monaco language providers are global per language, but Kibana can render multiple ES|QL
+     * editors on the same page (e.g. Discover top bar + flyout). This allows the provider to
+     * pick the correct callbacks for the specific editor model requesting suggestions.
+     */
+    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLCallbacks | undefined;
   }>;
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
+    // PromQL can be embedded in ES|QL querys.
+    // We need to manually trigger its language loading for it to work.
+    await PromQLLang.onLanguage?.();
+
     const language = monarch.create({
       ...monarchDefinitions,
       functions: esqlFunctionNames,
@@ -157,21 +171,36 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
+        // Avoid returning suggestions for unfocused editors sharing the same model.
+        const editors = monaco.editor.getEditors().filter((editor) => editor.getModel() === model);
+        const modelHasTextFocus =
+          editors.length === 0 || editors.some((editor) => editor.hasTextFocus());
+
+        if (!modelHasTextFocus) {
+          return { suggestions: [] };
+        }
+
+        const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
+        const resolvedDeps = resolvedCallbacks
+          ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
+          : deps;
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
 
         const computeStart = performance.now();
-        const suggestions = await suggest(fullText, offset, deps);
+        const suggestions = await suggest(fullText, offset, resolvedDeps);
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {
-          deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
+          resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
+            suggestionsWithCustomCommands
+          );
         }
 
         const result = wrapAsMonacoSuggestions(suggestions, fullText);
         const computeEnd = performance.now();
 
-        deps?.telemetry?.onSuggestionsReady?.(
+        resolvedDeps?.telemetry?.onSuggestionsReady?.(
           computeStart,
           computeEnd,
           model.getValueLength(),
@@ -253,6 +282,32 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           },
           dispose: () => {},
         };
+      },
+    };
+  },
+  getDocumentHighlightProvider: (): monaco.languages.DocumentHighlightProvider => {
+    return {
+      provideDocumentHighlights(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position
+      ): monaco.languages.DocumentHighlight[] {
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        const items = getDocumentHighlightItems(fullText, offset);
+
+        return items.map((item) => {
+          const startPosition = offsetToRowColumn(fullText, item.start);
+          const endPosition = offsetToRowColumn(fullText, item.end);
+          return {
+            range: new monaco.Range(
+              startPosition.lineNumber,
+              startPosition.column,
+              endPosition.lineNumber,
+              endPosition.column + 1
+            ),
+            kind: monaco.languages.DocumentHighlightKind.Read,
+          };
+        });
       },
     };
   },

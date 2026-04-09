@@ -52,8 +52,8 @@ export const getDefaultBody = (config?: Config) => {
     return config.defaultModel ? DEFAULT_BODY_OTHER(config.defaultModel) : DEFAULT_BODY;
   }
   if (config?.apiProvider === OpenAiProviderType.AzureAi) {
-    // update sample data if AzureAi
-    return DEFAULT_BODY_AZURE;
+    // update sample data if AzureAi; include model when defaultModel is configured (e.g. for APIM endpoints)
+    return config.defaultModel ? DEFAULT_BODY_OTHER(config.defaultModel) : DEFAULT_BODY_AZURE;
   }
   // default to OpenAiProviderType.OpenAi sample data
   return DEFAULT_BODY;
@@ -152,6 +152,18 @@ export const azureAiConfig: ConfigFieldSchema[] = [
             </EuiLink>
           ),
         }}
+      />
+    ),
+  },
+  {
+    id: 'defaultModel',
+    label: i18n.DEFAULT_MODEL_LABEL,
+    isRequired: false,
+    labelAppend: OptionalFieldLabel,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Required for Azure API Management (APIM) or proxy endpoints that do not infer the model from the deployment URL."
+        id="xpack.stackConnectors.components.genAi.azureAiDefaultModel"
       />
     ),
   },

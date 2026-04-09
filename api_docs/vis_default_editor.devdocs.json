@@ -978,7 +978,7 @@
             "label": "error",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
             "lineNumber": 16,
@@ -1010,7 +1010,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
             "lineNumber": 18,

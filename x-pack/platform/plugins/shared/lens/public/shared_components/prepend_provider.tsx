@@ -8,8 +8,8 @@
 import {
   type EuiResizeObserverProps,
   useEuiTheme,
-  EuiFormLabel,
   useResizeObserver,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
@@ -53,10 +53,13 @@ export const Prepend = ({ children }: { children: React.ReactNode }) => {
   }, [width, onResize]);
 
   return (
-    <EuiFormLabel css={{ minWidth: Math.round(minWidth) + paddingAffordance }}>
-      <span style={{ display: 'inline-block' }} ref={setResizeRef}>
-        {children}
-      </span>
-    </EuiFormLabel>
+    <EuiFormPrepend
+      css={{ minWidth: Math.round(minWidth) + paddingAffordance }}
+      label={
+        <span style={{ display: 'inline-block' }} ref={setResizeRef}>
+          {children}
+        </span>
+      }
+    />
   );
 };

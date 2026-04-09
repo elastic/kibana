@@ -34,6 +34,11 @@ import {
   getSAMLRequestId,
 } from './utils';
 
+jest.mock('./cosmos_db_seeder', () => ({
+  seedTestApiKey: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+  seedTestUser: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+}));
+
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {
     it('should generate valid XML metadata with correct entity ID', async () => {

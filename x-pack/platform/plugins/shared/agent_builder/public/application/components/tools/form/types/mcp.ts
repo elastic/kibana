@@ -16,9 +16,9 @@ export enum McpToolHealthStatus {
 export type McpToolUnhealthyStatus = Exclude<McpToolHealthStatus, McpToolHealthStatus.Healthy>;
 
 export const mcpUnhealthyStatusIconMap: Record<McpToolUnhealthyStatus, string> = {
-  [McpToolHealthStatus.ToolNotFound]: 'magnifyWithExclamation',
-  [McpToolHealthStatus.ConnectorNotFound]: 'unlink',
-  [McpToolHealthStatus.ListToolsFailed]: 'unlink',
+  [McpToolHealthStatus.ToolNotFound]: 'magnifyExclamation',
+  [McpToolHealthStatus.ConnectorNotFound]: 'linkSlash',
+  [McpToolHealthStatus.ListToolsFailed]: 'linkSlash',
   [McpToolHealthStatus.ToolUnhealthy]: 'warning',
 };
 

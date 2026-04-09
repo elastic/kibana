@@ -20,6 +20,8 @@ export const bulkErrorErrorSchema = t.exact(
   })
 );
 
+export type BulkErrorErrorSchema = t.TypeOf<typeof bulkErrorErrorSchema>;
+
 export const bulkErrorSchema = t.intersection([
   t.exact(
     t.type({

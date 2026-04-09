@@ -22,7 +22,12 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
-import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+import {
+  createSAMLResponse,
+  MOCK_IDP_LOGIN_PATH,
+  MOCK_IDP_LOGOUT_PATH,
+  projectTypeToAlias,
+} from '@kbn/mock-idp-utils';
 import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
 
 import type { ConfigType } from './config';
@@ -39,14 +44,6 @@ const createSAMLResponseSchema = schema.object({
   url: schema.string(),
 });
 
-// BOOKMARK - List of Kibana project types
-const projectToAlias = new Map<string, string>([
-  ['observability', 'oblt'],
-  ['security', 'security'],
-  ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
-]);
-
 const tierSpecificRolesFileExists = (filePath: string): boolean => {
   try {
     return existsSync(filePath);
@@ -56,8 +53,8 @@ const tierSpecificRolesFileExists = (filePath: string): boolean => {
 };
 
 const readServerlessRoles = (projectType: string, productTier?: ServerlessProductTier) => {
-  if (projectToAlias.has(projectType)) {
-    const alias = projectToAlias.get(projectType)!;
+  if (projectTypeToAlias.has(projectType)) {
+    const alias = projectTypeToAlias.get(projectType)!;
 
     const tierSpecificRolesResourcePath =
       productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml');
@@ -92,8 +89,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         {
           path: MOCK_IDP_LOGIN_PATH,
           validate: false,
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         async (context, request, response) => {
           return response.renderAnonymousCoreApp();
@@ -107,8 +110,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         {
           path: '/mock_idp/supported_roles',
           validate: false,
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         (context, request, response) => {
           try {
@@ -138,8 +147,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           validate: {
             body: createSAMLResponseSchema,
           },
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         async (context, request, response) => {
           const { protocol, hostname, port } = core.http.getServerInfo();
@@ -185,8 +200,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         {
           path: MOCK_IDP_LOGOUT_PATH,
           validate: false,
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         async (context, request, response) => {
           return response.redirected({ headers: { location: '/' } });
@@ -262,20 +283,18 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             }),
           },
           security: {
-            authc: { enabled: 'optional' },
+            authc: { enabled: 'optional', reason: 'Mock IDP plugin for testing' },
             authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
           },
         },
         async (context, request, response) => {
           try {
-            const { apiKey } = request.body;
-            const [
-              {
-                security: { authc },
-              },
-            ] = await core.getStartServices();
+            const [{ elasticsearch }] = await core.getStartServices();
+
             // Get scoped client with UIAM headers
-            const scopedClient = authc.apiKeys.uiam?.getScopedClusterClientWithApiKey(apiKey);
+            const scopedClient = elasticsearch.client.asScoped({
+              headers: { authorization: `ApiKey ${request.body.apiKey}` },
+            });
 
             if (!scopedClient) {
               return response.badRequest({
@@ -314,8 +333,13 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               credential: schema.string(),
             }),
           },
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason: 'Mock IDP plugin for testing UIAM operations',
+            },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
         },
         async (context, request, response) => {
           try {
@@ -352,6 +376,52 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             });
           } catch (err) {
             logger.error(`Failed to invalidate API key via UIAM: ${err}`, err);
+            return response.customError({
+              statusCode: 500,
+              body: { message: err.message },
+            });
+          }
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/uiam/convert_api_keys',
+          validate: {
+            body: schema.object({
+              keys: schema.arrayOf(schema.string(), { minSize: 1 }),
+            }),
+          },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason: 'Mock IDP plugin for testing UIAM operations',
+            },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
+        },
+        async (context, request, response) => {
+          try {
+            const { keys } = request.body;
+            const [
+              {
+                security: { authc },
+              },
+            ] = await core.getStartServices();
+
+            const result = await authc.apiKeys.uiam?.convert(keys);
+
+            if (!result) {
+              return response.badRequest({
+                body: { message: 'Failed to convert API keys' },
+              });
+            }
+
+            return response.ok({
+              body: result,
+            });
+          } catch (err) {
+            logger.error(`Failed to convert API keys via UIAM: ${err}`, err);
             return response.customError({
               statusCode: 500,
               body: { message: err.message },

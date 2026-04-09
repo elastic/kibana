@@ -19,7 +19,8 @@ const bodySchema = schema.object({
       name: schema.string(),
       isLegacy: schema.maybe(schema.boolean()),
       type: schema.maybe(schema.string()),
-    })
+    }),
+    { maxSize: 1000 }
   ),
 });
 

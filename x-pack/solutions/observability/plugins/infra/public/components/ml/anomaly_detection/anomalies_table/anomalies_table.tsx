@@ -160,7 +160,7 @@ const AnomalyActionMenu = ({
   const items = [
     <EuiContextMenuItem
       key="openInAnomalyExplorer"
-      icon="popout"
+      icon="external"
       data-test-subj="infraAnomalyFlyoutOpenInAnomalyExplorer"
       {...anomaliesUrl}
     >
@@ -186,7 +186,7 @@ const AnomalyActionMenu = ({
     const showInHostsItem = !hostName ? (
       <EuiContextMenuItem
         key="showAffectedHosts"
-        icon="search"
+        icon="magnify"
         data-test-subj="infraAnomalyFlyoutShowAffectedHosts"
         href={hostsLocator?.getRedirectUrl({
           dateRange: {
@@ -210,7 +210,7 @@ const AnomalyActionMenu = ({
         showInHostsItem
       ) : (
         <EuiContextMenuItem
-          icon="search"
+          icon="magnify"
           data-test-subj="infraAnomalyFlyoutShowInInventory"
           onClick={showInInventory}
         >
@@ -230,7 +230,7 @@ const AnomalyActionMenu = ({
       button={
         <EuiButtonIcon
           data-test-subj="infraAnomalyActionMenuButton"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={handleToggleMenu}
           aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
             defaultMessage: 'Open',
@@ -253,7 +253,7 @@ export const NoAnomaliesFound = () => {
       `}
     >
       <EuiEmptyPrompt
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         iconColor={euiTheme.euiTheme.colors.mediumShade}
         title={
           <h3 data-test-subj="noAnomaliesFoundMsg">
@@ -618,6 +618,9 @@ export const AnomaliesTable = ({
           sorting={{ sort: sorting }}
           onChange={onTableChange}
           loading={isLoading}
+          tableCaption={i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesCaption', {
+            defaultMessage: 'Anomaly detection results',
+          })}
           noItemsMessage={
             isLoading ? (
               <FormattedMessage

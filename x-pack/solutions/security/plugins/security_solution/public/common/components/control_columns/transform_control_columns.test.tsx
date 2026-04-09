@@ -28,6 +28,7 @@ describe('transformControlColumns', () => {
     sort: [],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     theme: {} as any,
+    rawEvents: [],
   };
   test('displays loader when id is included on loadingEventIds', () => {
     const res = transformControlColumns(defaultProps);

@@ -12,29 +12,30 @@ import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
-import type { Dimension, MetricField, UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
-  allMetricFields: MetricField[];
-  dimensions: Dimension[];
+  allDimensions: Dimension[];
+  onDimensionsChange?: (dimensions: Dimension[]) => void;
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
   isLoading?: boolean;
 }
 
 export const useToolbarActions = ({
-  allMetricFields,
-  dimensions,
+  allDimensions,
   renderToggleActions,
+  onDimensionsChange: onDimensionsChangeProp,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
   isLoading = false,
 }: UseToolbarActionsProps) => {
   const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
     useMetricsExperienceState();
+  const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
   const { euiTheme } = useEuiTheme();
 
@@ -49,9 +50,8 @@ export const useToolbarActions = ({
     () => [
       hideDimensionsSelector ? null : (
         <DimensionsSelector
-          fields={allMetricFields}
-          dimensions={dimensions}
-          onChange={onDimensionsChange}
+          dimensions={allDimensions}
+          onChange={onDimensionsSelectionChange}
           selectedDimensions={selectedDimensions}
           singleSelection={MAX_DIMENSIONS_SELECTIONS <= 1}
           fullWidth={isSmallScreen}
@@ -62,9 +62,8 @@ export const useToolbarActions = ({
     [
       isSmallScreen,
       selectedDimensions,
-      allMetricFields,
-      dimensions,
-      onDimensionsChange,
+      allDimensions,
+      onDimensionsSelectionChange,
       hideDimensionsSelector,
       isLoading,
     ]

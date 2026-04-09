@@ -6,93 +6,19 @@
  */
 
 import {
-  AttachmentAttributesBasicWithoutOwnerRt,
   UnifiedAttachmentPayloadRt,
   UnifiedAttachmentAttributesRt,
   UnifiedAttachmentRt,
-  CombinedAttachmentRt,
+  AttachmentRtV2,
 } from './v2';
 import { AttachmentType } from './v1';
 
 describe('Unified Attachments', () => {
-  describe('AttachmentAttributesBasicWithoutOwnerRt', () => {
-    const defaultRequest = {
-      created_at: '2019-11-25T22:32:30.608Z',
-      created_by: {
-        full_name: 'elastic',
-        email: 'testemail@elastic.co',
-        username: 'elastic',
-      },
-      updated_at: null,
-      updated_by: null,
-      pushed_at: null,
-      pushed_by: null,
-    };
-
-    it('has expected attributes in request', () => {
-      const query = AttachmentAttributesBasicWithoutOwnerRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = AttachmentAttributesBasicWithoutOwnerRt.decode({
-        ...defaultRequest,
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('accepts pushed_at and pushed_by as strings', () => {
-      const requestWithPushed = {
-        ...defaultRequest,
-        pushed_at: '2019-11-26T22:32:30.608Z',
-        pushed_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
-        },
-      };
-
-      const query = AttachmentAttributesBasicWithoutOwnerRt.decode(requestWithPushed);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithPushed,
-      });
-    });
-
-    it('accepts updated_at and updated_by as strings', () => {
-      const requestWithUpdated = {
-        ...defaultRequest,
-        updated_at: '2019-11-26T22:32:30.608Z',
-        updated_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
-        },
-      };
-
-      const query = AttachmentAttributesBasicWithoutOwnerRt.decode(requestWithUpdated);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithUpdated,
-      });
-    });
-  });
-
   describe('UnifiedAttachmentPayloadRt', () => {
     const defaultRequest = {
       type: 'lens',
       attachmentId: 'attachment-123',
+      owner: 'securitySolution',
       data: {
         attributes: {
           title: 'My Visualization',
@@ -130,6 +56,7 @@ describe('Unified Attachments', () => {
       const requestWithNullData = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'securitySolution',
         data: null,
         metadata: null,
       };
@@ -145,6 +72,7 @@ describe('Unified Attachments', () => {
     it('accepts request with only data', () => {
       const requestWithoutAttachmentId = {
         type: 'user',
+        owner: 'securitySolution',
         data: {
           content: 'My comment',
         },
@@ -161,6 +89,7 @@ describe('Unified Attachments', () => {
       const requestWithOnlyAttachmentId = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'securitySolution',
       };
 
       const query = UnifiedAttachmentPayloadRt.decode(requestWithOnlyAttachmentId);
@@ -176,6 +105,7 @@ describe('Unified Attachments', () => {
       const requestWithAttachmentIdAndMetadata = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'securitySolution',
         metadata: {
           description: 'A test visualization',
         },
@@ -192,6 +122,7 @@ describe('Unified Attachments', () => {
       const requestWithoutMetadata = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'securitySolution',
         data: {
           attributes: {
             title: 'My Visualization',
@@ -206,6 +137,7 @@ describe('Unified Attachments', () => {
         expect(query.right).toMatchObject({
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'securitySolution',
           data: {
             attributes: {
               title: 'My Visualization',
@@ -220,6 +152,7 @@ describe('Unified Attachments', () => {
     it('rejects request with neither attachmentId nor data', () => {
       const requestWithOnlyType = {
         type: 'lens',
+        owner: 'securitySolution',
       };
 
       const query = UnifiedAttachmentPayloadRt.decode(requestWithOnlyType);
@@ -232,6 +165,7 @@ describe('Unified Attachments', () => {
     const defaultRequest = {
       type: 'lens',
       attachmentId: 'attachment-123',
+      owner: 'securitySolution',
       data: {
         attributes: {
           title: 'My Visualization',
@@ -274,6 +208,7 @@ describe('Unified Attachments', () => {
       const requestWithOnlyAttachmentId = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'securitySolution',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -300,6 +235,7 @@ describe('Unified Attachments', () => {
         data: {
           content: 'My comment',
         },
+        owner: 'securitySolution',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -323,6 +259,7 @@ describe('Unified Attachments', () => {
     it('rejects request with neither attachmentId nor data', () => {
       const requestWithoutRequired = {
         type: 'lens',
+        owner: 'securitySolution',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -353,6 +290,7 @@ describe('Unified Attachments', () => {
       metadata: {
         description: 'A test visualization',
       },
+      owner: 'securitySolution',
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
@@ -389,6 +327,7 @@ describe('Unified Attachments', () => {
       const requestWithOnlyAttachmentId = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'securitySolution',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -417,6 +356,7 @@ describe('Unified Attachments', () => {
         data: {
           content: 'My comment',
         },
+        owner: 'securitySolution',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -442,6 +382,7 @@ describe('Unified Attachments', () => {
     it('rejects request with neither attachmentId nor data', () => {
       const requestWithoutRequired = {
         type: 'lens',
+        owner: 'securitySolution',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -462,11 +403,12 @@ describe('Unified Attachments', () => {
     });
   });
 
-  describe('CombinedAttachmentRt', () => {
+  describe('AttachmentRtV2', () => {
     it('accepts UnifiedAttachmentRt', () => {
       const unifiedAttachment = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'securitySolution',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -481,7 +423,7 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = CombinedAttachmentRt.decode(unifiedAttachment);
+      const query = AttachmentRtV2.decode(unifiedAttachment);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -508,7 +450,7 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = CombinedAttachmentRt.decode(v1Attachment);
+      const query = AttachmentRtV2.decode(v1Attachment);
 
       expect(query).toStrictEqual({
         _tag: 'Right',

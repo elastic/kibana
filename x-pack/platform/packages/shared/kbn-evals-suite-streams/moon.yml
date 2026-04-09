@@ -4,37 +4,30 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-streams'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+  defaultOwner: '@elastic/obs-onboarding-team'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-streams'
+  title: '@kbn/evals-suite-streams'
   description: Moon project for @kbn/evals-suite-streams
   channel: ''
-  owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-streams
+  owner: '@elastic/obs-onboarding-team'
+  sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-streams
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/evals-phoenix-executor'
   - '@kbn/object-utils'
-  - '@kbn/grok-heuristics'
-  - '@kbn/tooling-log'
-  - '@kbn/sample-log-parser'
   - '@kbn/repo-info'
-  - '@kbn/streams-ai'
   - '@kbn/datemath'
   - '@kbn/scout'
-  - '@kbn/ai-tools'
   - '@kbn/streamlang'
   - '@kbn/streams-schema'
   - '@kbn/kibana-api-cli'
   - '@kbn/dev-cli-runner'
   - '@kbn/core'
-  - '@kbn/dissect-heuristics'
-  - '@kbn/es-query'
 tags:
   - functional-tests
   - package
@@ -46,16 +39,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

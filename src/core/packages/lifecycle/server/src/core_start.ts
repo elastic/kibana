@@ -25,6 +25,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { PricingServiceStart } from '@kbn/core-pricing-server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 
 /**
  * Context passed to the plugins `start` method.
@@ -56,6 +57,8 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
+  /** {@link UserActivityServiceStart} */
+  userActivity: UserActivityServiceStart;
   /** {@link PluginsServiceStart} */
   plugins: PluginsServiceStart;
   /** {@link PricingServiceStart} */

@@ -18,6 +18,8 @@ import type {
   PublishesWritableDescription,
   PublishesWritableTitle,
   PublishesUnifiedSearch,
+  IsCustomizable,
+  PublishesWritableHideBorder,
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
@@ -25,12 +27,11 @@ import {
   apiPublishesUnifiedSearch,
   apiPublishesTitle,
   getInheritedViewMode,
+  apiCanBeCustomized,
 } from '@kbn/presentation-publishing';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { IsCustomizable } from '@kbn/presentation-containers';
-import { apiCanBeCustomized } from '@kbn/presentation-containers';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 import { ACTION_CUSTOMIZE_PANEL } from './constants';
 
@@ -41,6 +42,7 @@ export type CustomizePanelActionApi = CanAccessViewMode &
       PublishesWritableUnifiedSearch &
       PublishesWritableDescription &
       PublishesWritableTitle &
+      PublishesWritableHideBorder &
       HasParentApi<Partial<PublishesUnifiedSearch & TracksOverlays>>
   >;
 

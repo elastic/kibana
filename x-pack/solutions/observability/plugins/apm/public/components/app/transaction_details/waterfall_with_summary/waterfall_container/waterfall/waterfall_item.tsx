@@ -6,6 +6,7 @@
  */
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
@@ -81,6 +82,7 @@ const ItemText = styled.span`
   align-items: center;
   height: ${({ theme }) => theme.euiTheme.size.l};
   max-width: 100%;
+  overflow-x: auto;
 
   /* add margin to all direct descendants */
   & > * {
@@ -142,7 +144,7 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
       // icon for database spans
       const isDbType = spanType.startsWith('db');
       if (isDbType) {
-        return <EuiIcon type="database" />;
+        return <EuiIcon type="database" aria-hidden={true} />;
       }
 
       // omit icon for other spans
@@ -151,11 +153,11 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
     case 'transaction': {
       // icon for RUM agent transactions
       if (isRumAgentName(item.doc.agent.name)) {
-        return <EuiIcon type="globe" />;
+        return <EuiIcon type="globe" aria-hidden={true} />;
       }
 
       // icon for other transactions
-      return <EuiIcon type="merge" />;
+      return <EuiIcon type="merge" aria-hidden={true} />;
     }
     default:
       return null;
@@ -200,14 +202,23 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
   return <EuiText size="xs">{httpStatusCode}</EuiText>;
 }
 
-function ServiceNameBadge({ item }: { item: IWaterfallSpanOrTransaction }) {
+function ServiceNameBadge({ item, color }: { item: IWaterfallSpanOrTransaction; color: string }) {
   const serviceName = item.doc.service.name;
-  if (!serviceName) {
-    return null;
-  }
+
+  if (!serviceName) return null;
 
   return (
-    <EuiBadge color="hollow" iconType="dot">
+    <EuiBadge
+      color="hollow"
+      iconType="dot"
+      css={css`
+        max-width: 30%;
+        flex-shrink: 0;
+        & .euiBadge__icon {
+          color: ${color};
+        }
+      `}
+    >
       {serviceName}
     </EuiBadge>
   );
@@ -344,7 +355,7 @@ export function WaterfallItem({
         {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
-        <ServiceNameBadge item={item} />
+        <ServiceNameBadge item={item} color={color} />
         <Duration item={item} />
         {isEmbeddable ? (
           <EmbeddableRelatedErrors
@@ -396,7 +407,7 @@ function EmbeddableRelatedErrors({
       // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiBadge
         color={euiTheme.colors.danger}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         href={getRelatedErrorsHref(item.id) as any}
         onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
           e.stopPropagation();
@@ -477,7 +488,7 @@ function RelatedErrors({
     return (
       <EuiBadge
         color={euiTheme.colors.danger}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         onClick={onClick}
         tabIndex={0}
         role="button"
