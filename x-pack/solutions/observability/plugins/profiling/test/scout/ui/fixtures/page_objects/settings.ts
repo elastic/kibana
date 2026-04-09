@@ -12,7 +12,7 @@ export class ProfilingSettingsPage {
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
-    await this.page.goto(`${this.kbnUrl.app('profiling')} `);
+    await this.page.goto(`${this.kbnUrl.app('profiling')}/settings`);
     await this.page.testSubj
       .locator('profilingNormalizationMenuButton')
       .waitFor({ timeout: EXTENDED_TIMEOUT });
