@@ -429,11 +429,13 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     if (isAiRuleUpdateRef.current) {
       const session = aiRuleCreation.getSession();
       telemetry.reportEvent(AiRuleCreationEventTypes.RuleEdited, {
+        sessionId: session?.sessionId ?? '',
         ruleType: updatedRule.type,
         enabled: updatedRule.enabled,
         numberOfEdits: session?.applyCount ?? 0,
         durationSinceSessionStartMs: session ? Date.now() - session.startTimestamp : 0,
       });
+      aiRuleCreation.clearSession();
     }
 
     addSuccess(i18n.SUCCESSFULLY_SAVED_RULE(updatedRule?.name ?? ''));

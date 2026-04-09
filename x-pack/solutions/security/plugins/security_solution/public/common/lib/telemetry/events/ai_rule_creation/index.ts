@@ -106,6 +106,13 @@ const ruleCreatedEvent: AiRuleCreationTelemetryEvent = {
 const ruleEditedEvent: AiRuleCreationTelemetryEvent = {
   eventType: AiRuleCreationEventTypes.RuleEdited,
   schema: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique session ID correlating all events in an AI rule creation session',
+        optional: false,
+      },
+    },
     ruleType: {
       type: 'keyword',
       _meta: {

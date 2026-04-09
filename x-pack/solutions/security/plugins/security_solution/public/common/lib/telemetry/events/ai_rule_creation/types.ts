@@ -36,6 +36,7 @@ export interface ReportRuleCreatedParams {
 }
 
 export interface ReportRuleEditedParams {
+  sessionId: string;
   ruleType: string;
   enabled: boolean;
   numberOfEdits: number;

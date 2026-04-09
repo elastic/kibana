@@ -541,6 +541,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
             numberOfEdits: session.applyCount,
             durationSinceSessionStartMs: Date.now() - session.startTimestamp,
           });
+          aiRuleCreation.clearSession();
         }
         throw error;
       }
