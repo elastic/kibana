@@ -17,6 +17,8 @@ import {
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
+const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+
 interface RootSpanSource {
   trace_id?: string;
   name?: string;
@@ -71,13 +73,14 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
           }
 
           if (nameFilter) {
+            const escaped = escapeWildcard(nameFilter);
             filters.push({
               bool: {
                 should: [
                   {
                     wildcard: {
                       'attributes.input.value': {
-                        value: `*${nameFilter}*`,
+                        value: `*${escaped}*`,
                         case_insensitive: true,
                       },
                     },
@@ -85,7 +88,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                   {
                     wildcard: {
                       'attributes.output.value': {
-                        value: `*${nameFilter}*`,
+                        value: `*${escaped}*`,
                         case_insensitive: true,
                       },
                     },
@@ -93,7 +96,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                   {
                     wildcard: {
                       'attributes.gen_ai.prompt.id': {
-                        value: `*${nameFilter}*`,
+                        value: `*${escaped}*`,
                         case_insensitive: true,
                       },
                     },
@@ -113,8 +116,16 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
 
           const rootSpanQuery = {
             bool: {
-              must_not: [{ exists: { field: 'parent_span_id' } }],
-              filter: filters,
+              must_not: [
+                { exists: { field: 'parent_span_id' } },
+                { exists: { field: 'attributes.evaluator.name' } },
+              ],
+              filter: [
+                ...filters,
+                {
+                  terms: { 'scope.name': ['@kbn/evals', 'inference'] },
+                },
+              ],
             },
           };
 
@@ -135,7 +146,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
               : (totalHits as { value: number })?.value ?? 0;
 
           const traceIds = hits
-            .map((hit) => hit._source?.trace_id)
+            .map((hit) => hit._source?.trace_id ?? hit._id)
             .filter((id): id is string => !!id);
 
           const spanCountMap: Record<string, number> = {};
@@ -314,7 +325,9 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
             },
           });
         } catch (error) {
-          logger.error(`Failed to get project traces: ${error}`);
+          logger.error(
+            `Failed to get project traces: ${error instanceof Error ? error.message : error}`
+          );
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to get project traces' },

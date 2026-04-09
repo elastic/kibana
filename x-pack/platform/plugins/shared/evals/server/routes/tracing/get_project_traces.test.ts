@@ -67,9 +67,15 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
     );
 
     const searchCall = esClient.search.mock.calls[0][0] as any;
-    expect(searchCall.query.bool.must_not).toEqual([{ exists: { field: 'parent_span_id' } }]);
+    expect(searchCall.query.bool.must_not).toEqual([
+      { exists: { field: 'parent_span_id' } },
+      { exists: { field: 'attributes.evaluator.name' } },
+    ]);
     expect(searchCall.query.bool.filter).toEqual(
-      expect.arrayContaining([{ term: { name: 'my-project' } }])
+      expect.arrayContaining([
+        { term: { name: 'my-project' } },
+        { terms: { 'scope.name': ['@kbn/evals', 'inference'] } },
+      ])
     );
   });
 

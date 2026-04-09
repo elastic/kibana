@@ -291,6 +291,12 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
       });
     },
     keepPreviousData: true,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
   });
 };
 
@@ -368,7 +374,8 @@ export const useTrace = (traceId: string | null) => {
   return useQuery({
     queryKey: queryKeys.traces.detail(traceId ?? ''),
     queryFn: async (): Promise<GetTraceResponse> => {
-      const url = EVALS_TRACE_URL.replace('{traceId}', traceId!);
+      if (!traceId) throw new Error('traceId is required');
+      const url = EVALS_TRACE_URL.replace('{traceId}', traceId);
       return services.http!.get<GetTraceResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -380,6 +387,7 @@ export const useTrace = (traceId: string | null) => {
 interface TracingProjectsFilters {
   from?: string;
   to?: string;
+  name?: string;
   page?: number;
   perPage?: number;
 }
@@ -400,6 +408,7 @@ export const useTracingProjects = (
       const query: Record<string, string | number> = {};
       if (filters.from) query.from = filters.from;
       if (filters.to) query.to = filters.to;
+      if (filters.name) query.name = filters.name;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 

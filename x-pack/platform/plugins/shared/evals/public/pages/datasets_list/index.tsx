@@ -10,6 +10,7 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlyout,
   EuiFlyoutBody,
@@ -44,7 +45,7 @@ export const DatasetsListPage: React.FC = () => {
 
   const createDataset = useCreateDataset();
 
-  const { data, isLoading } = useDatasets({
+  const { data, isLoading, error, refetch } = useDatasets({
     page: pageIndex + 1,
     perPage: pageSize,
   });
@@ -123,8 +124,8 @@ export const DatasetsListPage: React.FC = () => {
       });
       setPageIndex(0);
       closeCreateFlyout();
-    } catch (error) {
-      setCreateError(error instanceof Error ? error.message : String(error));
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -139,18 +140,32 @@ export const DatasetsListPage: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiBasicTable<DatasetSummary>
-          tableCaption={i18n.TABLE_CAPTION}
-          items={data?.datasets ?? []}
-          columns={columns}
-          loading={isLoading}
-          pagination={pagination}
-          onChange={onTableChange}
-          rowProps={(item) => ({
-            onClick: () => history.push(`/datasets/${item.id}`),
-            style: { cursor: 'pointer' },
-          })}
-        />
+        {error ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="warning"
+            title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+            body={<p>{i18n.getLoadErrorBody(String(error))}</p>}
+            actions={[
+              <EuiButton onClick={() => refetch()} iconType="refresh">
+                {i18n.RETRY_BUTTON}
+              </EuiButton>,
+            ]}
+          />
+        ) : (
+          <EuiBasicTable<DatasetSummary>
+            tableCaption={i18n.TABLE_CAPTION}
+            items={data?.datasets ?? []}
+            columns={columns}
+            loading={isLoading}
+            pagination={pagination}
+            onChange={onTableChange}
+            rowProps={(item) => ({
+              onClick: () => history.push(`/datasets/${item.id}`),
+              style: { cursor: 'pointer' },
+            })}
+          />
+        )}
       </EuiPageSection>
       {isCreateFlyoutOpen ? (
         <EuiFlyout onClose={closeCreateFlyout} size="s" aria-labelledby="createDatasetFlyoutTitle">

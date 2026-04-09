@@ -354,3 +354,15 @@ export const getExamplesCountTitle = (count: number) =>
     defaultMessage: 'Examples ({count})',
     values: { count },
   });
+
+export const getJsonObjectRequiredError = (fieldLabel: string) =>
+  i18n.translate('xpack.evals.datasetDetail.jsonObjectRequiredError', {
+    defaultMessage: '{fieldLabel} must be a JSON object.',
+    values: { fieldLabel },
+  });
+
+export const getRepetitionLabel = (index: number) =>
+  i18n.translate('xpack.evals.datasetDetail.repetitionLabel', {
+    defaultMessage: ' (r{index})',
+    values: { index },
+  });

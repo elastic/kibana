@@ -21,6 +21,7 @@ const buildProjectBucket = ({
   p99 = 2_000_000_000,
   traceIds = [] as string[],
   errorDocCount = 1,
+  distinctErrorTraces = 1,
 }: {
   name: string;
   docCount?: number;
@@ -30,6 +31,7 @@ const buildProjectBucket = ({
   p99?: number;
   traceIds?: string[];
   errorDocCount?: number;
+  distinctErrorTraces?: number;
 }) => ({
   key: name,
   doc_count: docCount,
@@ -37,7 +39,7 @@ const buildProjectBucket = ({
   last_trace: { value_as_string: lastTrace },
   latency_percentiles: { values: { '50.0': p50, '99.0': p99 } },
   trace_ids: { buckets: traceIds.map((id) => ({ key: id, doc_count: 1 })) },
-  error_count: { doc_count: errorDocCount },
+  error_count: { doc_count: errorDocCount, distinct_traces: { value: distinctErrorTraces } },
 });
 
 const buildTokenResponse = (
@@ -157,6 +159,7 @@ describe('GET /internal/evals/tracing/projects', () => {
               p99: 3_000_000_000,
               traceIds,
               errorDocCount: 2,
+              distinctErrorTraces: 2,
             }),
           ],
         },
@@ -252,13 +255,19 @@ describe('GET /internal/evals/tracing/projects', () => {
     expect(response.payload.projects).toEqual([]);
   });
 
-  it('handles zero trace count without dividing by zero for error_rate', async () => {
+  it('handles zero doc_count without dividing by zero for error_rate', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
         project_count: { value: 1 },
         projects: {
-          buckets: [buildProjectBucket({ name: 'empty-project', distinctTraces: 0 })],
+          buckets: [
+            buildProjectBucket({
+              name: 'empty-project',
+              distinctTraces: 0,
+              distinctErrorTraces: 0,
+            }),
+          ],
         },
       },
     } as any);

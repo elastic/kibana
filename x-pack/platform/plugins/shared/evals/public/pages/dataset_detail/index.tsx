@@ -76,7 +76,7 @@ const parseJsonObject = (value: string, fieldLabel: string): JsonObject => {
   try {
     const parsed = JSON.parse(value) as unknown;
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      throw new Error(`${fieldLabel} must be a JSON object.`);
+      throw new Error(i18n.getJsonObjectRequiredError(fieldLabel));
     }
     return parsed as JsonObject;
   } catch (error) {
@@ -280,7 +280,9 @@ export const DatasetDetailPage: React.FC = () => {
         name: i18n.COLUMN_EXAMPLE_ID,
         width: '160px',
         render: (value: string) => (
-          <EuiLink className={truncatedCellStyles}>{value.slice(0, 16)}...</EuiLink>
+          <EuiText size="xs" className={truncatedCellStyles}>
+            {truncate(value, 16)}
+          </EuiText>
         ),
       },
       {
@@ -364,7 +366,7 @@ export const DatasetDetailPage: React.FC = () => {
               history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
             }
           >
-            {runId.slice(0, 12)}...
+            {truncate(runId, 12)}
           </EuiLink>
         ),
       },
@@ -459,7 +461,7 @@ export const DatasetDetailPage: React.FC = () => {
               history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
             }
           >
-            {runId.slice(0, 12)}...
+            {truncate(runId, 12)}
           </EuiLink>
         ),
       },
@@ -494,7 +496,7 @@ export const DatasetDetailPage: React.FC = () => {
               {sortedScores.map((score) => {
                 const includeRepetition = (evaluatorCounts[score.evaluator.name] ?? 0) > 1;
                 const repetitionLabel = includeRepetition
-                  ? ` (r${score.task.repetition_index + 1})`
+                  ? i18n.getRepetitionLabel(score.task.repetition_index + 1)
                   : '';
                 return (
                   <EuiFlexItem
@@ -532,7 +534,7 @@ export const DatasetDetailPage: React.FC = () => {
                     iconType="apmTrace"
                     onClick={() => setSelectedTraceId(traceId)}
                   >
-                    {traceId.slice(0, 12)}...
+                    {truncate(traceId, 12)}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               ))}
@@ -969,6 +971,14 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
+            {formError && isMetadataModalOpen ? (
+              <>
+                <EuiText color="danger" size="s">
+                  <p>{formError}</p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
             <EuiForm component="form">
               <EuiFormRow label={i18n.METADATA_DESCRIPTION_LABEL}>
                 <EuiTextArea

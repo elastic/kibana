@@ -79,3 +79,17 @@ export const COLUMN_EXAMPLES = i18n.translate('xpack.evals.datasetsList.columns.
 export const COLUMN_LAST_UPDATED = i18n.translate('xpack.evals.datasetsList.columns.lastUpdated', {
   defaultMessage: 'Last Updated',
 });
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.datasetsList.loadErrorTitle', {
+  defaultMessage: 'Unable to load datasets',
+});
+
+export const getLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.datasetsList.loadErrorBody', {
+    defaultMessage: 'An error occurred while loading datasets: {errorMessage}',
+    values: { errorMessage },
+  });
+
+export const RETRY_BUTTON = i18n.translate('xpack.evals.datasetsList.retryButton', {
+  defaultMessage: 'Retry',
+});

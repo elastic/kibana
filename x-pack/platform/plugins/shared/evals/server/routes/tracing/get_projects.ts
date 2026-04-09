@@ -16,6 +16,8 @@ import {
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
+const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+
 export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
     .get({
@@ -37,19 +39,26 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
       },
       async (context, request, response) => {
         try {
-          const { from, to, page, per_page: perPage } = request.query;
+          const { from, to, page, per_page: perPage, name: nameFilter } = request.query;
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
           const ES_MAX_TERMS_COUNT = 60_000;
           const maxTraceIdsPerProject = Math.min(10_000, Math.floor(ES_MAX_TERMS_COUNT / perPage));
 
-          const rangeFilter: Array<Record<string, unknown>> = [];
+          const extraFilters: Array<Record<string, unknown>> = [];
           if (from || to) {
             const range: Record<string, string> = {};
             if (from) range.gte = from;
             if (to) range.lte = to;
-            rangeFilter.push({ range: { '@timestamp': range } });
+            extraFilters.push({ range: { '@timestamp': range } });
+          }
+          if (nameFilter) {
+            extraFilters.push({
+              wildcard: {
+                name: { value: `*${escapeWildcard(nameFilter)}*`, case_insensitive: true },
+              },
+            });
           }
 
           const searchResponse = await esClient.search({
@@ -62,7 +71,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                   { exists: { field: 'attributes.evaluator.name' } },
                 ],
                 filter: [
-                  ...rangeFilter,
+                  ...extraFilters,
                   {
                     terms: { 'scope.name': ['@kbn/evals', 'inference'] },
                   },
@@ -98,6 +107,11 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                   error_count: {
                     filter: {
                       term: { 'status.code': 'ERROR' },
+                    },
+                    aggs: {
+                      distinct_traces: {
+                        cardinality: { field: 'trace_id' },
+                      },
                     },
                   },
                 },
@@ -179,8 +193,12 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             };
             const p50Ns = latencyPercentiles?.values?.['50.0'] ?? 0;
             const p99Ns = latencyPercentiles?.values?.['99.0'] ?? 0;
-            const errorCount = bucket.error_count as { doc_count: number };
-            const errorRate = traceCount > 0 ? (errorCount?.doc_count ?? 0) / traceCount : 0;
+            const errorCount = bucket.error_count as {
+              doc_count: number;
+              distinct_traces: { value: number };
+            };
+            const distinctErrorTraces = errorCount?.distinct_traces?.value ?? 0;
+            const errorRate = traceCount > 0 ? distinctErrorTraces / traceCount : 0;
 
             return {
               name,
