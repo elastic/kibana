@@ -42,7 +42,7 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
       data-test-subj="syntheticsStepNavStepStepIndexOfTotalStepsButton"
       size="s"
       flush="left"
-      iconType={hasMoreThanOneStep ? 'arrowDown' : undefined}
+      iconType={hasMoreThanOneStep ? 'chevronSingleDown' : undefined}
       iconSide="right"
       onClick={onButtonClick}
       style={{ height: 20 }}

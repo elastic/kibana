@@ -3792,7 +3792,7 @@
         "label": "IdentifyFeaturesResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
-        "lineNumber": 10,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3816,7 +3816,66 @@
               " | undefined; meta?: Record<string, unknown> | undefined; }[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
-            "lineNumber": 11,
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IdentifyFeaturesResult.durationMs",
+            "type": "number",
+            "tags": [],
+            "label": "durationMs",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IdentifyFeaturesResult.iterations",
+            "type": "Array",
+            "tags": [],
+            "label": "iterations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IterationResult",
+                "text": "IterationResult"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IdentifyFeaturesResult.totalTokensUsed",
+            "type": "Object",
+            "tags": [],
+            "label": "totalTokensUsed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompletionTokenCount",
+                "text": "ChatCompletionTokenCount"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4725,6 +4784,118 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
             "lineNumber": 192,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IterationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IterationResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IterationResult.iteration",
+            "type": "number",
+            "tags": [],
+            "label": "iteration",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IterationResult.durationMs",
+            "type": "number",
+            "tags": [],
+            "label": "durationMs",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IterationResult.state",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "\"success\" | \"failure\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IterationResult.tokensUsed",
+            "type": "Object",
+            "tags": [],
+            "label": "tokensUsed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompletionTokenCount",
+                "text": "ChatCompletionTokenCount"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IterationResult.newFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "newFeatures",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IterationResult.updatedFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "updatedFeatures",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/features/index.ts",
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8249,7 +8420,7 @@
             "section": "def-common.TaskStatus",
             "text": "TaskStatus"
           },
-          ".Canceled; } | { status: ",
+          ".Canceled; } | ({ status: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -8257,7 +8428,7 @@
             "section": "def-common.TaskStatus",
             "text": "TaskStatus"
           },
-          ".Failed; error: string; } | ({ status: ",
+          ".Failed; error: string; } & Partial<TPayload>) | ({ status: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
