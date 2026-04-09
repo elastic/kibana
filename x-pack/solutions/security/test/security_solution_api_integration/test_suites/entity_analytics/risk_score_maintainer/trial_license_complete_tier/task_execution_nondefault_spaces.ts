@@ -132,14 +132,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const scores = await readRiskScores(es, [index]);
         const normalized = normalizeScores(scores);
-        expect(normalized.length).to.eql(10);
 
-        const idValues = normalized.map(({ id_value: idValue }) => idValue).sort();
+        // there's a chance that the risk-score calculation happens twice;
+        // once on the schedule, and once because we explicitly trigger it using
+        // runSoon. therefore, we're going to make sure that unique set of ids is 10
+        const uniqueIds = [...new Set(normalized.map(({ id_value: idValue }) => idValue))];
+        expect(uniqueIds.length).to.eql(10);
+
         const expectedEuids = Array(10)
           .fill(0)
           .map((_, _index) => `host:host-${_index}`)
           .sort();
-        expect(idValues).to.eql(expectedEuids);
+        expect(uniqueIds.sort()).to.eql(expectedEuids);
       });
     });
   });
