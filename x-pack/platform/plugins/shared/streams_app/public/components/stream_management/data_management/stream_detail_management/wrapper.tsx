@@ -31,7 +31,6 @@ import {
 } from '../../../../hooks/use_streams_doc_counts_fetch';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../../util/calculate_data_quality';
-import { FeedbackButton } from '../../../feedback_button';
 import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
@@ -215,23 +214,14 @@ export function Wrapper({
                 ))}
               </EuiFlexGroup>
             </EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {Streams.ingest.all.GetResponse.is(definition) && (
-                    <DiscoverBadgeButton
-                      stream={definition.stream}
-                      hasDataStream={definition.data_stream_exists}
-                      indexMode={definition.index_mode ?? 'standard'}
-                      spellOut
-                    />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <FeedbackButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {Streams.ingest.all.GetResponse.is(definition) && (
+              <DiscoverBadgeButton
+                stream={definition.stream}
+                hasDataStream={definition.data_stream_exists}
+                indexMode={definition.index_mode ?? 'standard'}
+                spellOut
+              />
+            )}
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
