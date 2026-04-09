@@ -50,6 +50,8 @@ describe('AlertFlyoutFooter', () => {
     upselling: {},
   } as unknown as StartServices;
 
+  const mockOnAlertUpdated = jest.fn();
+
   it('does not render before promises resolve', () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     const unresolvedServicesPromise = new Promise<StartServices>(() => undefined);
@@ -60,6 +62,7 @@ describe('AlertFlyoutFooter', () => {
         hit={hit}
         servicesPromise={unresolvedServicesPromise}
         storePromise={unresolvedStorePromise as never}
+        onAlertUpdated={mockOnAlertUpdated}
       />
     );
 
@@ -76,6 +79,7 @@ describe('AlertFlyoutFooter', () => {
         hit={hit}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={storePromise}
+        onAlertUpdated={mockOnAlertUpdated}
       />
     );
 
@@ -83,7 +87,9 @@ describe('AlertFlyoutFooter', () => {
       expect(screen.getByText('MockDocumentFooter')).toBeInTheDocument();
     });
 
-    expect(mockDocumentFooter).toHaveBeenCalledWith(expect.objectContaining({ hit }));
+    expect(mockDocumentFooter).toHaveBeenCalledWith(
+      expect.objectContaining({ hit, onAlertUpdated: mockOnAlertUpdated })
+    );
     expect(mockFlyoutProviders).toHaveBeenCalledWith(
       expect.objectContaining({
         services: servicesMock,
@@ -101,6 +107,7 @@ describe('AlertFlyoutFooter', () => {
         hit={hit}
         servicesPromise={Promise.reject(new Error('services failed'))}
         storePromise={Promise.resolve(store as never)}
+        onAlertUpdated={mockOnAlertUpdated}
       />
     );
 
