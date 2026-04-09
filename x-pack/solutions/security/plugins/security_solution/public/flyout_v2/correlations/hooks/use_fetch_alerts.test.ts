@@ -6,14 +6,14 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useKibana } from '../../../common/lib/kibana';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { createFindAlerts } from '../services/find_alerts';
 import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';
-import { createReactQueryWrapper } from '../../../../common/mock';
+import { createReactQueryWrapper } from '../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../services/find_alerts');
 
 const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
@@ -59,6 +59,22 @@ describe('useFetchAlerts', () => {
     expect(result.current.error).toBe(false);
     expect(result.current.totalItemCount).toBe(10);
     expect(result.current.data).toEqual(['alert1', 'alert2', 'alert3']);
+  });
+
+  it('returns loading false immediately when alertIds is empty', () => {
+    const params: UseAlertsQueryParams = {
+      alertIds: [],
+      from: 0,
+      size: 10,
+      sort: [{ '@timestamp': 'desc' }],
+    };
+
+    const { result } = renderHook(() => useFetchAlerts(params), {
+      wrapper: createReactQueryWrapper(),
+    });
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.data).toEqual([]);
   });
 
   it('handles error state', async () => {

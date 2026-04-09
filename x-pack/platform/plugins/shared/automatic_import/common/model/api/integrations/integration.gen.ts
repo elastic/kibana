@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { NonEmptyString } from '../../primitive.gen';
+import { NonEmptyString, SafeIdentifier, SemVer } from '../../primitive.gen';
 import {
   LangSmithOptions,
   DataStream,
@@ -31,7 +31,7 @@ export const ApproveIntegrationRequest = z
     /**
      * The version of the integration
      */
-    version: NonEmptyString,
+    version: SemVer,
     /**
      * The categories of the integration
      */
@@ -50,7 +50,7 @@ export const ApproveAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type ApproveAutoImportIntegrationRequestParamsInput = z.input<
   typeof ApproveAutoImportIntegrationRequestParams
@@ -76,7 +76,7 @@ export const CreateAutoImportIntegrationRequestBody = z
     /**
      * The integration id
      */
-    integrationId: NonEmptyString,
+    integrationId: SafeIdentifier,
     /**
      * The title of the integration
      */
@@ -122,7 +122,7 @@ export const DeleteAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
@@ -135,7 +135,7 @@ export const DownloadAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
   typeof DownloadAutoImportIntegrationRequestParams
@@ -153,7 +153,7 @@ export const GetAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type GetAutoImportIntegrationRequestParamsInput = z.input<
   typeof GetAutoImportIntegrationRequestParams
@@ -173,7 +173,7 @@ export const UpdateAutoImportIntegrationRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
 });
 export type UpdateAutoImportIntegrationRequestParamsInput = z.input<
   typeof UpdateAutoImportIntegrationRequestParams
