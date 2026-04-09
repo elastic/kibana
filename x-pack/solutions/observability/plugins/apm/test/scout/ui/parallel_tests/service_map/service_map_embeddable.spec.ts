@@ -27,14 +27,13 @@ test.describe(
       });
 
       await test.step('add Service map panel', async () => {
-        const actionAsButton = page.getByRole('button', { name: 'Service map' });
-        const actionAsLink = page.getByRole('link', { name: 'Service map' });
-
-        if ((await actionAsButton.count()) > 0) {
-          await actionAsButton.first().click();
-        } else {
-          await actionAsLink.first().click();
-        }
+        await expect(page.getByRole('heading', { name: 'Add panel' })).toBeVisible();
+        const serviceMapMenuItem = page.getByRole('menuitem', {
+          name: 'Service map',
+          exact: true,
+        });
+        await expect(serviceMapMenuItem).toBeVisible();
+        await serviceMapMenuItem.click();
       });
 
       await test.step('verify embeddable panel is rendered', async () => {
