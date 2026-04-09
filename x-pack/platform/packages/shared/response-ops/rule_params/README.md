@@ -8,28 +8,27 @@ When adding a new rule type, you must register its params schema in the `rulePar
 
 ### Steps
 
-1. **Create the params schema** in a new subdirectory (e.g. `my_rule_type/v1.ts`). Export a `schema.object()` with a `meta` block containing `title` and `description`:
+1. **Create the params schema** in a new subdirectory (e.g. `my_rule_type/v1.ts`):
 
    ```typescript
    export const myRuleTypeParamsSchema = schema.object(
      { /* ...your params... */ },
      {
        meta: {
-         title: 'My Rule Type Rule Params',
-         description: 'The parameters for my rule type. Appropriate when `rule_type_id` is `my.rule_type`.',
+         description: 'The parameters for my rule type.',
        },
      }
    );
    ```
 
-2. **Register it** in `ruleParamsSchemasWithRuleTypeId` in `v1.ts`:
+2. **Register it** in `ruleParamsSchemasWithRuleTypeId` in `v1.ts`, providing a human-readable `title` that matches how the rule type appears in the Kibana UI:
 
    ```typescript
    import { myRuleTypeParamsSchema } from './my_rule_type';
 
-   const ruleParamsSchemasWithRuleTypeId: Record<string, Type<unknown>> = {
+   const ruleParamsSchemasWithRuleTypeId: Record<string, { title: string; params: Type<unknown> }> = {
      // ...existing entries...
-     'my.rule_type': myRuleTypeParamsSchema,
+     'my.rule_type': { title: 'My rule type', params: myRuleTypeParamsSchema },
    };
    ```
 
