@@ -64,6 +64,7 @@ export const WatchlistsFlyoutPanel = ({
     <WatchlistsFlyoutContent
       title={title}
       watchlist={watchlist}
+      watchlistId={normalizedWatchlistId}
       isEditMode={isEditMode}
       isNameInvalid={isNameInvalid}
       onFieldChange={setWatchlistField}
