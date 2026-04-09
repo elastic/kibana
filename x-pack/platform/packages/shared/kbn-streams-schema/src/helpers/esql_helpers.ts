@@ -56,9 +56,10 @@ interface TimeBucketInfo {
 function findBucketFunction(commands: WalkerAstNode): ESQLFunction | null {
   let found: ESQLFunction | null = null;
   walk(commands, {
-    visitFunction: (node) => {
+    visitFunction: (node, _ctx, walker) => {
       if (!found && (node.name === 'bucket' || node.name === 'tbucket')) {
         found = node;
+        walker.abort();
       }
     },
   });
@@ -292,8 +293,11 @@ function checkSampleSizeFloor(
 function containsFunction(node: WalkerAstNode, fnName: string): boolean {
   let found = false;
   walk(node, {
-    visitFunction: (fn) => {
-      if (fn.name === fnName) found = true;
+    visitFunction: (fn, _ctx, walker) => {
+      if (fn.name === fnName) {
+        found = true;
+        walker.abort();
+      }
     },
   });
   return found;
