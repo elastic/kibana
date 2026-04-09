@@ -187,7 +187,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   };
 
                   return (
-                    <EuiFlexItem key={registryEffectiveName}>
+                    <EuiFlexItem key={getInputEffectiveName(packageInput)}>
                       <PackagePolicyInputPanel
                         isSingleInputAndStreams={isSingleInputAndStreams}
                         packageInput={packageInput}

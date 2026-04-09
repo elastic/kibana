@@ -440,13 +440,13 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
         data_streams: ['access', 'stubstatus'],
         inputs: [
           {
-            id: 'filelog_otel',
+            name: 'filelog_otel',
             type: 'otelcol',
             title: 'Collect Nginx access logs via filelog OTel receiver',
             description: 'Tail Nginx access log files',
           },
           {
-            id: 'nginx_otel',
+            name: 'nginx_otel',
             type: 'otelcol',
             title: 'Collect Nginx stub status metrics via OTel receiver',
             description: 'Scrape Nginx stub_status metrics',
