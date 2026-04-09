@@ -20,6 +20,7 @@ import type {
   AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, roundsToTimelineEvents } from '@kbn/agent-builder-common';
+import { isTimelineConversation } from '@kbn/agent-builder-common/chat';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -34,7 +35,7 @@ import {
   prepareConversation,
   selectSkills,
   selectTools,
-  getPendingAgentResponse,
+  getPendingExecution,
   evictInternalEvents,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
@@ -106,16 +107,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } = context;
 
   // Convert to timeline events at entry — the canonical format for the pipeline
-  const timelineEvents =
-    conversation && 'timeline' in conversation
+  const timelineEvents = conversation
+    ? isTimelineConversation(conversation)
       ? conversation.timeline
-      : conversation
-      ? roundsToTimelineEvents(conversation.rounds, conversation.user, conversation.agent_id)
-      : [];
+      : roundsToTimelineEvents(conversation.rounds, conversation.user, conversation.agent_id)
+    : [];
 
   ensureValidInput({ input: nextInput, timelineEvents, action });
 
-  const pendingExecution = getPendingAgentResponse(timelineEvents);
+  const pendingExecution = getPendingExecution(timelineEvents);
   const conversationTimestamp = pendingExecution?.started_at ?? startTime.toISOString();
 
   // Only clear access tracking for a brand new round; keep it when resuming (HITL).
@@ -294,8 +294,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   // Use provided overrides, or fall back to pending agent response's overrides (for HITL resume)
-  const effectiveOverrides =
-    configurationOverrides ?? pendingExecution?.configuration_overrides;
+  const effectiveOverrides = configurationOverrides ?? pendingExecution?.configuration_overrides;
   const effectiveAgentId = agentId ?? conversation?.agent_id ?? 'default';
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(

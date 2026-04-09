@@ -394,6 +394,11 @@ export type TimelineConversation = Omit<Conversation, 'rounds'> & {
   timeline: TimelineEvent[];
 };
 
+export const isTimelineConversation = (
+  conversation: Conversation | TimelineConversation
+): conversation is TimelineConversation => {
+  return 'timeline' in conversation;
+};
 // Compaction summary types
 
 /** Compact representation of a tool call in a compaction summary */

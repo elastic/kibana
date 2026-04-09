@@ -11,7 +11,7 @@ export { convertPreviousEvents } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
-export { getPendingAgentResponse } from './prompts';
+export { getPendingExecution } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
 export {
   prepareAttachmentPresentation,

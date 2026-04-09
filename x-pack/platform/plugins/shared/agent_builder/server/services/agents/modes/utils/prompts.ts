@@ -13,7 +13,7 @@ import { isProcessedAgentExecutionEvent } from './prepare_conversation';
 /**
  * Find the last AgentExecutionEvent with `awaiting_prompt` status from timeline events.
  */
-export const getPendingAgentResponse = (
+export const getPendingExecution = (
   events: TimelineEvent[] | ProcessedTimelineEvent[]
 ): AgentExecutionEvent | undefined => {
   for (let i = events.length - 1; i >= 0; i--) {

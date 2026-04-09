@@ -13,7 +13,7 @@ import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
 import { createRound } from '../../../../test_utils/conversations';
 
 import { runDefaultAgentMode } from './run_chat_agent';
-import { prepareConversation, selectTools, extractRound, getPendingAgentResponse } from '../utils';
+import { prepareConversation, selectTools, extractRound, getPendingExecution } from '../utils';
 import { createAgentGraph } from './graph';
 
 jest.mock('../utils', () => ({
@@ -46,8 +46,8 @@ jest.mock('./convert_graph_events', () => ({
 const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const getPendingAgentResponseMock = getPendingAgentResponse as jest.MockedFn<
-  typeof getPendingAgentResponse
+const getPendingAgentResponseMock = getPendingExecution as jest.MockedFn<
+  typeof getPendingExecution
 >;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
 
