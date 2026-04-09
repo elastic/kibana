@@ -114,7 +114,7 @@ export class FeatureSettingsPage {
   // --- Add Model Popover Options ---
 
   public get addModelOptions(): Locator {
-    return this.page.locator('li[role="option"]');
+    return this.page.testSubj.locator('add-model-selectable').getByRole('option');
   }
 
   // --- Route Mocking ---
