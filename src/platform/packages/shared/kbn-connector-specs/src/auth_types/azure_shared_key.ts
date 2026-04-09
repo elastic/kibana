@@ -145,7 +145,7 @@ function formatMsDate(): string {
 export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'azure_shared_key',
   schema: authSchema,
-  configure: async (
+  configure: (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
@@ -183,6 +183,6 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
       return config;
     });
 
-    return axiosInstance;
+    return Promise.resolve(axiosInstance);
   },
 };
