@@ -91,7 +91,7 @@ export const UserFieldFilterRenderer = ({
         .map(({ key, label, count, data }) => ({
           key,
           label,
-          value: data?.email || label || key,
+          value: data?.email || key,
           count,
           data,
         }))

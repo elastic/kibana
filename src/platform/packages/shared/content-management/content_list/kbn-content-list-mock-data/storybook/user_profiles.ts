@@ -91,8 +91,7 @@ const toEntry = (p: UserProfile): UserProfileEntry => ({
 /**
  * Mock `ContentListUserProfilesServices` for content list provider.
  *
- * Provides `bulkResolve` and `suggest` backed by the static
- * `MOCK_USER_PROFILES` data.
+ * Provides `bulkResolve` backed by the static `MOCK_USER_PROFILES` data.
  */
 export const mockContentListUserProfilesServices: ContentListUserProfilesServices = {
   bulkResolve: async (uids) =>
@@ -100,13 +99,4 @@ export const mockContentListUserProfilesServices: ContentListUserProfilesService
       .map((uid) => MOCK_USER_PROFILES_MAP[uid])
       .filter((p): p is UserProfile => !!p)
       .map(toEntry),
-  suggest: async (query) => {
-    const lower = query.toLowerCase();
-    return MOCK_USER_PROFILES.filter(
-      (p) =>
-        (p.user.email ?? '').toLowerCase().includes(lower) ||
-        (p.user.full_name ?? '').toLowerCase().includes(lower) ||
-        p.user.username.toLowerCase().includes(lower)
-    ).map(toEntry);
-  },
 };

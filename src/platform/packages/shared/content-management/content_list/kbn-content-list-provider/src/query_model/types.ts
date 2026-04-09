@@ -53,6 +53,18 @@ export interface ContentListQueryModel {
    * (e.g. profile priming) that must fire before resolution can succeed.
    */
   referencedFields: ReadonlySet<string>;
+  /**
+   * Field names whose clause values fell through to the raw display-value
+   * fallback in `resolveDisplayValue` — meaning `resolveDisplayToId` returned
+   * `undefined` and no fuzzy match was found.
+   *
+   * Only fields with lazy/async resolution (e.g. user-profile fields whose
+   * backing store is populated asynchronously) should be treated as a
+   * transient "resolving" state. Fields with synchronous resolution (e.g.
+   * tags) appear here when the display value simply doesn't exist — that is
+   * a valid empty result, not a loading condition.
+   */
+  unresolvedFields: ReadonlySet<string>;
 }
 
 const EMPTY_SET: ReadonlySet<string> = new Set();
@@ -63,6 +75,7 @@ export const EMPTY_MODEL: ContentListQueryModel = {
   filters: {},
   flags: {},
   referencedFields: EMPTY_SET,
+  unresolvedFields: EMPTY_SET,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

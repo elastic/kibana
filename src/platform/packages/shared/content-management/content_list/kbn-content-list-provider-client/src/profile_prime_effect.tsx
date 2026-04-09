@@ -50,7 +50,7 @@ interface ProfilePrimeEffectProps {
  *    universe when the parsed query model references a user-profile field
  *    (e.g. `createdBy:alice`). This ensures fuzzy resolution via
  *    `resolveFuzzyDisplayToIds` over `store.getAll()` has the profiles it
- *    needs without depending on a global `suggest` API.
+ *    needs without an additional network call.
  *
  * Uses {@link ContentListQueryModel.referencedFields} as the trigger rather
  * than raw string matching. `referencedFields` records which fields had a
@@ -74,18 +74,20 @@ export const ProfilePrimeEffect = ({
   // Keep the ref bridge in sync so `getFacets` can always read the current store.
   storeRef.current = store;
 
-  const hasUserFieldClause = USER_FIELD_NAMES.some((n) => model.referencedFields.has(n));
+  const needsPriming = USER_FIELD_NAMES.some((n) => model.unresolvedFields.has(n));
 
-  // Prime when the query references a user-profile field.
+  // Prime when the query references a user-profile field with unresolved values.
   // `state.items` is included as a reactive trigger — it changes after
   // each fetch, signalling that `getDatasetVersion()` may have bumped.
   // Without it, the effect fires before the fetch completes and the stale
   // version causes the version guard to skip.
-  // The `hasUserFieldClause` gate ensures this doesn't fire for normal
-  // free-text searches.
+  // The `needsPriming` gate ensures this doesn't fire for normal
+  // free-text searches or when all field values are already resolved
+  // (e.g. clicking an avatar writes a UID that `resolveDisplayToId` already
+  // handles via the per-page seeding cache).
   const { items } = state;
   useEffect(() => {
-    if (!store || !hasUserFieldClause) {
+    if (!store || !needsPriming) {
       return;
     }
 
@@ -96,7 +98,7 @@ export const ProfilePrimeEffect = ({
     }
 
     primeRelevantProfiles(allItems, getDatasetVersion(), store, primingState);
-  }, [hasUserFieldClause, items, store, getItems, getDatasetVersion, primingState]);
+  }, [needsPriming, items, store, getItems, getDatasetVersion, primingState]);
 
   return null;
 };

@@ -170,7 +170,7 @@ const profile = MOCK_USER_PROFILES_MAP['u_jane_doe'];
 
 | Export | Description |
 |--------|-------------|
-| `mockContentListUserProfilesServices` | `ContentListUserProfilesServices` with `bulkResolve` and `suggest` backed by static mock data. |
+| `mockContentListUserProfilesServices` | `ContentListUserProfilesServices` with `bulkResolve` backed by static mock data. |
 
 ### Types
 

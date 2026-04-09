@@ -23,6 +23,14 @@ const makeUserFieldDefinition = (fieldName: string, store: UserProfileStore): Fi
     return user?.email || user?.fullName || uid;
   },
   resolveDisplayToId: (display: string) => {
+    // Check for a direct UID match first — handles the case where
+    // `resolveIdToDisplay` fell back to the raw UID (profile not yet cached)
+    // and the UID was written into queryText. Once the profile is later
+    // loaded, this avoids marking the field as "unresolved."
+    const byUid = store.resolve(display);
+    if (byUid) {
+      return byUid.uid;
+    }
     const lower = display.toLowerCase();
     return store
       .getAll()

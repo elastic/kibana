@@ -32,7 +32,6 @@ const createMockStore = (): jest.Mocked<UserProfileStore> => ({
   resolve: jest.fn().mockReturnValue(undefined),
   ensureLoaded: jest.fn().mockResolvedValue(undefined),
   merge: jest.fn(),
-  resolveDisplayValues: jest.fn().mockResolvedValue(undefined),
 });
 
 describe('collectRealUids', () => {

@@ -176,6 +176,16 @@ describe('parseQueryText', () => {
         exclude: [],
       });
       expect(result.referencedFields).toEqual(new Set(['createdBy']));
+      expect(result.unresolvedFields).toEqual(new Set(['createdBy']));
+    });
+
+    it('sets unresolvedFields to empty when all values resolve.', () => {
+      const result = parseQueryText('createdBy:jane@example.com', fields, flags, schema);
+      expect(result.filters.createdBy).toEqual({
+        include: ['u_jane'],
+        exclude: [],
+      });
+      expect(result.unresolvedFields.size).toBe(0);
     });
   });
 

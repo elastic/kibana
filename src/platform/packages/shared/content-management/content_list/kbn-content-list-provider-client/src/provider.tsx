@@ -65,25 +65,40 @@ const tagKeys = (item: UserContentCommonSchema): string[] =>
 const createdByKeys = (item: UserContentCommonSchema): string[] => [getCreatorKey(item)];
 
 /**
- * Monitors the `FavoritesContext` query data and calls `refresh()` whenever
- * the favorites list changes (star/unstar). This keeps the strategy's
- * `decoratedItems` in sync without a full server refetch.
+ * Bridges React Query's `useFavorites()` data into the strategy's decorator
+ * via a shared ref, then calls `refresh()` so the decorator re-runs with the
+ * updated favorite IDs — without an additional HTTP call.
+ *
+ * This is the **single source of truth** for `getFavorites()`. The decorator
+ * never calls the favorites API directly; it reads from the ref. On mount,
+ * the ref starts empty (items render without `starred`). Once React Query
+ * fetches, this effect seeds the ref and triggers a refresh so items pick up
+ * the correct starred state.
  *
  * Renders nothing — exists only for side-effects. Rendered as a child of
  * `ContentListProvider` so both `useFavorites()` and `useContentListState()`
  * are available in the React tree.
  */
-const FavoritesSyncEffect = () => {
+const FavoritesSyncEffect = ({
+  favoriteIdsRef,
+}: {
+  favoriteIdsRef: React.MutableRefObject<Set<string> | undefined>;
+}) => {
   const { refresh } = useContentListState();
-  const { dataUpdatedAt } = useFavorites();
-  const prevUpdatedAtRef = useRef(dataUpdatedAt);
+  const { data, dataUpdatedAt } = useFavorites();
+  // Initialize to 0 so the first data arrival always triggers a refresh —
+  // even when React Query has warm cached data from a prior mount.
+  const prevUpdatedAtRef = useRef(0);
 
   useEffect(() => {
+    if (data) {
+      favoriteIdsRef.current = new Set(data.favoriteIds);
+    }
     if (dataUpdatedAt && dataUpdatedAt !== prevUpdatedAtRef.current) {
       prevUpdatedAtRef.current = dataUpdatedAt;
       refresh();
     }
-  }, [dataUpdatedAt, refresh]);
+  }, [data, dataUpdatedAt, favoriteIdsRef, refresh]);
 
   return null;
 };
@@ -150,20 +165,22 @@ export const ContentListClientProvider = ({
   const favoritesClient = services?.favorites;
   const starredEnabled = featuresProp.starred !== false && !!favoritesClient;
 
+  // Shared ref bridging React Query's `useFavorites()` data into the
+  // synchronous decorator. `FavoritesSyncEffect` writes here whenever the
+  // favorites query updates; the decorator reads without an HTTP call.
+  // On mount the ref is empty — items render without `starred`, then
+  // `FavoritesSyncEffect` triggers a refresh once React Query delivers data.
+  const favoriteIdsRef = useRef<Set<string> | undefined>(undefined);
+
   const decorate: ItemDecorator | undefined = useCallback(
     async (items: UserContentCommonSchema[]) => {
-      if (!favoritesClient) {
+      const favoriteSet = favoriteIdsRef.current;
+      if (!favoriteSet) {
         return items;
       }
-      try {
-        const { favoriteIds } = await favoritesClient.getFavorites();
-        const favoriteSet = new Set(favoriteIds);
-        return items.map((item) => ({ ...item, starred: favoriteSet.has(item.id) }));
-      } catch {
-        return items;
-      }
+      return items.map((item) => ({ ...item, starred: favoriteSet.has(item.id) }));
     },
-    [favoritesClient]
+    []
   );
 
   const { findItems, onInvalidate, onRefresh, getItems, getDatasetVersion } = useMemo(
@@ -341,7 +358,7 @@ export const ContentListClientProvider = ({
       services={services}
       {...rest}
     >
-      {starredEnabled && <FavoritesSyncEffect />}
+      {starredEnabled && <FavoritesSyncEffect favoriteIdsRef={favoriteIdsRef} />}
       {userProfilesService && (
         <ProfilePrimeEffect
           getItems={getItems}

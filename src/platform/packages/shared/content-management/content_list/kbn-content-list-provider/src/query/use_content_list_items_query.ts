@@ -17,7 +17,6 @@ import { useUserProfileStoreContext } from '../services';
 import { useQueryModel, toFindItemsFilters } from '../query_model';
 import { DEFAULT_DEBOUNCE_MS } from '../datasource/types';
 import { contentListKeys } from './keys';
-import { useResolveQueryDisplayValues } from './use_resolve_query_display_values';
 
 const DEFAULT_PAGE = { index: 0, size: 20 };
 
@@ -105,8 +104,6 @@ export const useContentListItemsQuery = (
       userProfileStore.ensureLoaded(Array.from(uids));
     }
   }, [items, query.dataUpdatedAt, userProfileStore]);
-
-  useResolveQueryDisplayValues(clientState.queryText);
 
   // Clear any data-source-level cache before re-executing the query.
   const refetch = useCallback(async () => {

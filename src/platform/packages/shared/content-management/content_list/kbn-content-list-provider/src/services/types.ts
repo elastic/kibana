@@ -50,18 +50,6 @@ export interface UserProfileEntry {
 export interface ContentListUserProfilesServices {
   /** Resolve specific UIDs to profiles (for on-demand loading). */
   bulkResolve: (uids: string[]) => Promise<UserProfileEntry[]>;
-  /**
-   * Search for user profiles by name, email, or username.
-   *
-   * Called when the query bar contains a `createdBy:` value that can't be
-   * resolved from the local cache (e.g. a typed or URL-driven email).
-   * The store merges results into its cache so subsequent resolution
-   * succeeds synchronously.
-   *
-   * Optional — when absent, unresolved display values remain unresolved
-   * until the profile is loaded by another path (item fetch, popover open).
-   */
-  suggest?: (query: string) => Promise<UserProfileEntry[]>;
 }
 
 /**
@@ -82,17 +70,9 @@ export interface UserProfileStore {
    *
    * Useful when profiles have been fetched through a different path (e.g.
    * `FilterFacetConfig.getFacets`) and should be available for synchronous
-   * lookups via `resolve`/`getAll` and for `resolveDisplayValues` cache checks.
+   * lookups via `resolve`/`getAll`.
    */
   merge: (entries: UserProfileEntry[]) => void;
-  /**
-   * Resolve display values (emails, names) that aren't in the cache.
-   *
-   * Uses the `suggest` service method to search for profiles by the given
-   * display strings. Results are merged into the cache. No-op when the
-   * `suggest` service method is not available.
-   */
-  resolveDisplayValues: (displayValues: string[]) => Promise<void>;
 }
 
 /**

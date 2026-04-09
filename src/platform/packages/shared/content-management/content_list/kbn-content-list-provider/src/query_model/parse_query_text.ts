@@ -57,38 +57,57 @@ const hasFieldClause = (query: InstanceType<typeof Query>, fieldName: string): b
   return !!excludeOr && toStringArray(excludeOr.value).some((v) => v.length > 0);
 };
 
-/** Resolve a display value to IDs: exact match first, then fuzzy fallback. */
-const resolveDisplayValue = (displayValue: string, field: FieldDefinition): string[] => {
+/**
+ * Resolve a display value to IDs: exact match first, then fuzzy fallback.
+ *
+ * Returns `{ ids, resolved }` — `resolved` is `false` when the value fell
+ * through to the raw fallback (no exact or fuzzy match).
+ */
+const resolveDisplayValue = (
+  displayValue: string,
+  field: FieldDefinition
+): { ids: string[]; resolved: boolean } => {
   const exactId = field.resolveDisplayToId(displayValue);
   if (exactId !== undefined) {
-    return [exactId];
+    return { ids: [exactId], resolved: true };
   }
   if (field.resolveFuzzyDisplayToIds) {
     const fuzzyIds = field.resolveFuzzyDisplayToIds(displayValue);
     if (fuzzyIds.length > 0) {
-      return fuzzyIds;
+      return { ids: fuzzyIds, resolved: true };
     }
   }
-  return [displayValue];
+  return { ids: [displayValue], resolved: false };
 };
 
 /** Extract include/exclude IDs for a field from the parsed query. */
 const extractFieldFilter = (
   query: InstanceType<typeof Query>,
   field: FieldDefinition
-): QueryFilterValue | undefined => {
+): { filter: QueryFilterValue | undefined; hasUnresolved: boolean } => {
   const includeIds: string[] = [];
   const excludeIds: string[] = [];
+  let hasUnresolved = false;
+
+  const collectResolved = (displayValues: string[], target: string[]) => {
+    for (const dv of displayValues) {
+      const result = resolveDisplayValue(dv, field);
+      target.push(...result.ids);
+      if (!result.resolved) {
+        hasUnresolved = true;
+      }
+    }
+  };
 
   // Simple field clauses: `field:value` or `-field:value`.
   const simpleClauses = query.ast.getFieldClauses(field.fieldName);
   if (simpleClauses) {
     for (const clause of simpleClauses) {
-      const ids = toStringArray(clause.value).flatMap((dv) => resolveDisplayValue(dv, field));
+      const values = toStringArray(clause.value);
       if (clause.match === 'must') {
-        includeIds.push(...ids);
+        collectResolved(values, includeIds);
       } else if (clause.match === 'must_not') {
-        excludeIds.push(...ids);
+        collectResolved(values, excludeIds);
       }
     }
   }
@@ -96,24 +115,20 @@ const extractFieldFilter = (
   // OR-field clauses: `field:(A or B)`.
   const includeOr = query.ast.getOrFieldClause(field.fieldName, undefined, true, 'eq');
   if (includeOr) {
-    includeIds.push(
-      ...toStringArray(includeOr.value).flatMap((dv) => resolveDisplayValue(dv, field))
-    );
+    collectResolved(toStringArray(includeOr.value), includeIds);
   }
   const excludeOr = query.ast.getOrFieldClause(field.fieldName, undefined, false, 'eq');
   if (excludeOr) {
-    excludeIds.push(
-      ...toStringArray(excludeOr.value).flatMap((dv) => resolveDisplayValue(dv, field))
-    );
+    collectResolved(toStringArray(excludeOr.value), excludeIds);
   }
 
   const include = [...new Set(includeIds)];
   const exclude = [...new Set(excludeIds)];
 
   if (include.length === 0 && exclude.length === 0) {
-    return undefined;
+    return { filter: undefined, hasUnresolved };
   }
-  return { include, exclude };
+  return { filter: { include, exclude }, hasUnresolved };
 };
 
 /**
@@ -166,13 +181,17 @@ export const parseQueryText = (
   // Field filters and referenced-field tracking.
   const filters: Record<string, QueryFilterValue> = {};
   const referencedFields = new Set<string>();
+  const unresolvedFields = new Set<string>();
   for (const field of fields) {
     if (hasFieldClause(query, field.fieldName)) {
       referencedFields.add(field.fieldName);
     }
-    const filter = extractFieldFilter(query, field);
+    const { filter, hasUnresolved } = extractFieldFilter(query, field);
     if (filter) {
       filters[field.fieldName] = filter;
+    }
+    if (hasUnresolved) {
+      unresolvedFields.add(field.fieldName);
     }
   }
 
@@ -189,5 +208,5 @@ export const parseQueryText = (
   const knownFlagNames = new Set(flags.map((f) => f.flagName));
   const search = extractSearchText(query, knownFieldNames, knownFlagNames);
 
-  return { search, filters, flags: parsedFlags, referencedFields };
+  return { search, filters, flags: parsedFlags, referencedFields, unresolvedFields };
 };

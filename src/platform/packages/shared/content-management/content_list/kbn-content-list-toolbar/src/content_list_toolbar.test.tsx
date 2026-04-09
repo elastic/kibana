@@ -446,7 +446,7 @@ describe('ContentListToolbar', () => {
       });
     });
 
-    it('strips unresolvable tag clauses from search text without leaking tag syntax', async () => {
+    it('passes unresolvable tag values through as raw filter values', async () => {
       const Wrapper = createWrapper({ tagsService: mockTagsService });
       render(
         <Wrapper>
@@ -459,13 +459,14 @@ describe('ContentListToolbar', () => {
       // Set a tag name that doesn't match any known tag.
       fireEvent.change(searchBox, { target: { value: 'tag:Unknown my query' } });
 
-      // The unresolvable tag clause should be stripped from search text (not
-      // leaked to findItems as raw `tag:Unknown`), and no tag filter should
-      // be applied since the name couldn't be resolved to an ID.
+      // The tag clause is still extracted from search text (not leaked as
+      // raw `tag:Unknown`). The unresolvable display value is passed through
+      // as a raw filter value — it won't match any item but prevents the
+      // field syntax from appearing in the free-text search.
       await waitFor(() => {
         const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
         expect(lastCall[0].searchQuery).toBe('my query');
-        expect(lastCall[0].filters.tag).toBeUndefined();
+        expect(lastCall[0].filters.tag).toEqual({ include: ['Unknown'], exclude: [] });
       });
     });
   });

@@ -47,7 +47,6 @@ const createMockStore = (): jest.Mocked<UserProfileStore> => ({
   resolve: jest.fn().mockReturnValue(undefined),
   ensureLoaded: jest.fn().mockResolvedValue(undefined),
   merge: jest.fn(),
-  resolveDisplayValues: jest.fn().mockResolvedValue(undefined),
 });
 
 const createRenderedItems = (...ids: string[]): ContentListItem[] =>
@@ -66,11 +65,15 @@ const createRawItems = (...ids: string[]): UserContentCommonSchema[] =>
     createdBy: `user-${id}`,
   }));
 
-const createQueryModel = (referencedFields: string[]): ContentListQueryModel => ({
+const createQueryModel = (
+  referencedFields: string[],
+  unresolvedFields?: string[]
+): ContentListQueryModel => ({
   search: '',
   filters: {},
   flags: {},
   referencedFields: new Set(referencedFields),
+  unresolvedFields: new Set(unresolvedFields ?? referencedFields),
 });
 
 const setMockContentListState = (queryText: string, items: ContentListItem[]) => {
@@ -243,5 +246,28 @@ describe('ProfilePrimeEffect', () => {
         primingState
       );
     });
+  });
+
+  it('skips priming when user field values are already resolved', () => {
+    const store = createMockStore();
+    const storeRef = { current: undefined as UserProfileStore | undefined };
+    const primingState = createPrimingState();
+
+    setMockContentListState('createdBy:jane@example.com', createRenderedItems('visible-1'));
+    // No unresolved fields — the email resolved to a UID via the store.
+    mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy'], []));
+    mockedUseUserProfileStoreContext.mockReturnValue(store);
+
+    render(
+      <ProfilePrimeEffect
+        getItems={jest.fn(() => createRawItems('1'))}
+        getDatasetVersion={jest.fn(() => 3)}
+        primingState={primingState}
+        storeRef={storeRef}
+      />
+    );
+
+    expect(storeRef.current).toBe(store);
+    expect(mockedPrimeRelevantProfiles).not.toHaveBeenCalled();
   });
 });

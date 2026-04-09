@@ -72,10 +72,10 @@ const useUserProfileStore = (
   const [cache, setCache] = useState<Map<string, UserProfileEntry>>(new Map());
 
   // Ref mirror of the cache for read-only operations in stable callbacks.
-  // `ensureLoaded` and `resolveDisplayValues` only read the cache for
-  // diffing (checking which UIDs are missing). Using a ref prevents them
-  // from recreating on every cache update, which would cascade a new
-  // context value and re-render the entire content list tree.
+  // `ensureLoaded` only reads the cache for diffing (checking which UIDs
+  // are missing). Using a ref prevents it from recreating on every cache
+  // update, which would cascade a new context value and re-render the
+  // entire content list tree.
   const cacheRef = useRef(cache);
   cacheRef.current = cache;
 
@@ -137,34 +137,10 @@ const useUserProfileStore = (
     [service, mergeEntries]
   );
 
-  const resolveDisplayValues = useCallback(
-    async (displayValues: string[]): Promise<void> => {
-      if (!service?.suggest || displayValues.length === 0) {
-        return;
-      }
-      // Build a O(1) lookup set from cached display fields so we avoid
-      // an O(displayValues × cacheSize) scan on every call.
-      const knownKeys = new Set<string>();
-      for (const entry of cacheRef.current.values()) {
-        knownKeys.add(entry.uid.toLowerCase());
-        knownKeys.add(entry.email.toLowerCase());
-        knownKeys.add(entry.fullName.toLowerCase());
-        knownKeys.add(entry.user.username.toLowerCase());
-      }
-      const unresolved = displayValues.filter((dv) => !knownKeys.has(dv.toLowerCase()));
-      if (unresolved.length === 0) {
-        return;
-      }
-      const results = await Promise.all(unresolved.map((v) => service.suggest!(v)));
-      mergeEntries(results.flat());
-    },
-    [service, mergeEntries]
-  );
-
   return useMemo(() => {
     if (!service) {
       return undefined;
     }
-    return { getAll, resolve, ensureLoaded, merge: mergeEntries, resolveDisplayValues };
-  }, [service, getAll, resolve, ensureLoaded, mergeEntries, resolveDisplayValues]);
+    return { getAll, resolve, ensureLoaded, merge: mergeEntries };
+  }, [service, getAll, resolve, ensureLoaded, mergeEntries]);
 };
