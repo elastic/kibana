@@ -9,6 +9,7 @@ echo "Creating branch '$BRANCH' from main"
 git config --global user.name kibanamachine
 git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
+git fetch origin main
 git checkout main
 git checkout -b "$BRANCH"
 git push origin "$BRANCH"

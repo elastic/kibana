@@ -25,14 +25,15 @@ notify:
     if: build.state == "passed"
 
 steps:
-  - command: .buildkite/scripts/version_bump/bump.sh
+  - command: .buildkite/scripts/steps/version_bump/bump.sh
+    key: bump-version
     label: Bump version
 
   - wait
 
   - label: 'Fetch DRA Artifacts'
     key: fetch-dra-artifacts
-    depends_on: block-get-dra-artifacts
+    depends_on: bump-version
     agents:
       image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
       cpu: 250m
