@@ -118,9 +118,7 @@ export async function invalidateTsBuildInfoFiles(
  * were created against different node_modules (e.g. after a yarn.lock update)
  * and therefore can no longer be trusted for incremental tsc correctness.
  */
-export async function getChangedInvalidationFiles(
-  fromSha: string
-): Promise<string[] | undefined> {
+export async function getChangedInvalidationFiles(fromSha: string): Promise<string[] | undefined> {
   try {
     const { stdout } = await execa(
       'git',
