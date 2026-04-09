@@ -33,7 +33,7 @@
       "searchInferenceEndpoints"
     ],
     "optionalPlugins": ["cloud", "agentBuilder"],
-    "requiredBundles": ["kibanaReact", "esqlDataGrid"],
+    "requiredBundles": ["kibanaReact", "esqlDataGrid", "esUiShared"],
     "extraPublicDirs": []
   }
 }
