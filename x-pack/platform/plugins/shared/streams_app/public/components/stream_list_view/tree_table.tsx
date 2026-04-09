@@ -27,6 +27,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { css as cssReact } from '@emotion/react';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import {
@@ -84,7 +85,11 @@ import {
   POOR_QUALITY_FILTER,
   TYPE_FILTER,
   QUERY_BADGE_LABEL,
+  QUERY_BADGE_TOOLTIP_TITLE,
+  QUERY_BADGE_TOOLTIP_CONTENT,
   DRAFT_BADGE_LABEL,
+  DRAFT_BADGE_TOOLTIP_TITLE,
+  DRAFT_BADGE_TOOLTIP_CONTENT,
 } from './translations';
 import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -629,16 +634,48 @@ export function StreamsTreeTable({
                 >
                   {item.type === 'query' && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge iconType="code" color="accent">
-                        {QUERY_BADGE_LABEL}
-                      </EuiBadge>
+                      <EuiToolTip
+                        position="top"
+                        title={QUERY_BADGE_TOOLTIP_TITLE}
+                        content={QUERY_BADGE_TOOLTIP_CONTENT}
+                        anchorProps={{
+                          css: cssReact`
+                            display: inline-flex;
+                          `,
+                        }}
+                      >
+                        <EuiBadge
+                          iconType="code"
+                          color="accent"
+                          tabIndex={0}
+                          data-test-subj="streamsListQueryBadge"
+                        >
+                          {QUERY_BADGE_LABEL}
+                        </EuiBadge>
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                   {item.isDraft && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge iconType="dashedCircle" color="default">
-                        {DRAFT_BADGE_LABEL}
-                      </EuiBadge>
+                      <EuiToolTip
+                        position="top"
+                        title={DRAFT_BADGE_TOOLTIP_TITLE}
+                        content={DRAFT_BADGE_TOOLTIP_CONTENT}
+                        anchorProps={{
+                          css: cssReact`
+                            display: inline-flex;
+                          `,
+                        }}
+                      >
+                        <EuiBadge
+                          iconType="dashedCircle"
+                          color="default"
+                          tabIndex={0}
+                          data-test-subj="streamsListDraftBadge"
+                        >
+                          {DRAFT_BADGE_LABEL}
+                        </EuiBadge>
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false} className={nameTextTruncationStyle}>

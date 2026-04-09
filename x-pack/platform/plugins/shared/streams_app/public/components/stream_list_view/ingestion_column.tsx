@@ -48,7 +48,7 @@ export function IngestionColumn({
     >
       <FormattedMessage
         id="xpack.streams.ingestionColumn.cellValue"
-        defaultMessage="{rate} dps"
+        defaultMessage="{rate} docs/s"
         values={{ rate: <EuiI18nNumber value={ingestionRate} /> }}
       />
     </span>

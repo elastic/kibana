@@ -28,7 +28,6 @@ const SORTABLE_FIELDS = [
   'dataQuality',
   'ingestionRate',
   'storageBytes',
-  'suggestionsCount',
 ] as const;
 
 export type SortableField = (typeof SORTABLE_FIELDS)[number];
@@ -41,7 +40,6 @@ export interface EnrichedStream extends ListStreamDetail {
   retentionMs: number;
   ingestionRate: number;
   storageBytes: number | undefined;
-  suggestionsCount: number;
   type: StreamType;
   isDraft: boolean;
   children?: EnrichedStream[];
@@ -54,7 +52,6 @@ export type TableRow = EnrichedStream & {
   rootRetentionMs: number;
   rootIngestionRate: number;
   rootStorageBytes: number | undefined;
-  rootSuggestionsCount: number;
   dataQuality: QualityIndicators;
 };
 export interface StreamTree extends ListStreamDetail {
@@ -136,8 +133,6 @@ export function buildStreamRows(
         return node.ingestionRate;
       case 'storageBytes':
         return node.storageBytes ?? -1;
-      case 'suggestionsCount':
-        return node.suggestionsCount;
       default:
         return undefined;
     }
@@ -165,7 +160,6 @@ export function buildStreamRows(
       | 'rootRetentionMs'
       | 'rootIngestionRate'
       | 'rootStorageBytes'
-      | 'rootSuggestionsCount'
     >
   ) => {
     result.push({
@@ -186,7 +180,6 @@ export function buildStreamRows(
       rootRetentionMs: root.retentionMs,
       rootIngestionRate: root.ingestionRate,
       rootStorageBytes: root.storageBytes,
-      rootSuggestionsCount: root.suggestionsCount,
     } as const;
     pushNode(root, 0, rootMeta);
   });
@@ -223,7 +216,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
 // STREAMS LIST — DUMMY / DEMO DATA ONLY
 // -----------------------------------------------------------------------------
 // Hardcoded row presentation for local UI work. Search: STREAMS_LIST_DUMMY
-// Remove this block when real query/draft/suggestion APIs drive the table.
+// Remove this block when real query/draft APIs drive the table.
 // =============================================================================
 
 /** Stream names forced to `type: 'query'` for list UI (badge, filters, hidden quality/retention). */
@@ -232,15 +225,10 @@ const STREAMS_LIST_DUMMY_QUERY_STREAM_NAMES = new Set<string>([LOGS_ECS_STREAM_N
 /** Stream names shown with Draft badge + `isDraft` row flags. */
 const STREAMS_LIST_DUMMY_DRAFT_STREAM_NAMES = new Set<string>(['logs.otel.child']);
 
-/** Demo suggestion counts by stream name (table Suggestions column). */
-const STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM: Record<string, number> = {
-  'logs-synth-default': 2,
-  'logs.otel.child': 1,
-};
-
-/** Demo document count, ingestion (dps), and optional storage (bytes) for list cells + sorting. */
+/** Demo document count, ingestion (docs/s), and optional storage (bytes) for list cells + sorting. */
 export interface StreamsListDummyStreamMetrics {
   documents: number;
+  /** Ingestion rate in documents per second (displayed as docs/s in the list). */
   ingestionRateDps: number;
   /** Omit to show no storage in the list (em dash), overriding API stats when this stream is in the map. */
   storageBytes?: number;
@@ -309,7 +297,6 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     documentsCount: dummyMetrics?.documents ?? 0,
     ingestionRate: dummyMetrics?.ingestionRateDps ?? 0,
     storageBytes: dummyMetrics === undefined ? 0 : dummyMetrics.storageBytes,
-    suggestionsCount: STREAMS_LIST_DUMMY_SUGGESTIONS_BY_STREAM[node.stream.name] ?? 0,
     retentionMs,
     type,
     isDraft: STREAMS_LIST_DUMMY_DRAFT_STREAM_NAMES.has(node.stream.name),

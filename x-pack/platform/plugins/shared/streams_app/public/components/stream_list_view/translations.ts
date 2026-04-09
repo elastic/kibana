@@ -103,11 +103,6 @@ export const STORAGE_COLUMN_HEADER = i18n.translate(
   { defaultMessage: 'Storage' }
 );
 
-export const SUGGESTIONS_COLUMN_HEADER = i18n.translate(
-  'xpack.streams.streamsTreeTable.suggestionsColumnHeader',
-  { defaultMessage: 'Suggestions' }
-);
-
 export const DATA_QUALITY_FILTER = i18n.translate(
   'xpack.streams.streamsTreeTable.dataQualityFilter',
   { defaultMessage: 'Data quality' }
@@ -136,6 +131,30 @@ export const QUERY_BADGE_LABEL = i18n.translate('xpack.streams.streamsTreeTable.
   defaultMessage: 'Query',
 });
 
+export const QUERY_BADGE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.streams.streamsTreeTable.queryBadgeTooltipTitle',
+  { defaultMessage: 'Query stream' }
+);
+
+export const QUERY_BADGE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.streams.streamsTreeTable.queryBadgeTooltipContent',
+  {
+    defaultMessage: 'This stream is defined by an ES|QL query over existing data.',
+  }
+);
+
 export const DRAFT_BADGE_LABEL = i18n.translate('xpack.streams.streamsTreeTable.draftBadgeLabel', {
   defaultMessage: 'Draft',
 });
+
+export const DRAFT_BADGE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.streams.streamsTreeTable.draftBadgeTooltipTitle',
+  { defaultMessage: 'Draft stream' }
+);
+
+export const DRAFT_BADGE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.streams.streamsTreeTable.draftBadgeTooltipContent',
+  {
+    defaultMessage: 'Publish or materialize this stream to make it available at ingest time.',
+  }
+);
