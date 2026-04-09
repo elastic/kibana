@@ -64,8 +64,8 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body[SERVICE_KEY].fields.foo_scripted).toBeUndefined();
       createdDataViewId = response.body[SERVICE_KEY].id;
+      expect(response.body[SERVICE_KEY].fields.foo_scripted).toBeUndefined();
     });
   }
 );
