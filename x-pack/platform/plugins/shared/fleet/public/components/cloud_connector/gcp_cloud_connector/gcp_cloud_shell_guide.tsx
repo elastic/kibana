@@ -127,7 +127,7 @@ export const GoogleCloudShellCloudCredentialsGuide: React.FC<
               values={{
                 targetServiceAccount: <strong>Target Service Account</strong>,
                 audience: <strong>Audience</strong>,
-                cloudConnectorId: <strong>Cloud Connector ID</strong>,
+                cloudConnectorId: <strong>Federated Identity ID</strong>,
               }}
             />
           </li>

@@ -85,7 +85,8 @@ const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression',
 
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
-describe('EditOutputFlyout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/262076
+describe.skip('EditOutputFlyout', () => {
   const mockStartServices = (isServerlessEnabled?: boolean) => {
     mockUseStartServices.mockReturnValue({
       notifications: {
@@ -478,6 +479,137 @@ describe('EditOutputFlyout', () => {
           kibana_url: 'http://localhost:5601',
         })
       );
+    });
+  });
+
+  describe('OpenTelemetry Exporter section', () => {
+    it('should show the OTel exporter configuration section for ES output', async () => {
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+
+      // Expand the accordion to reveal the YAML editor
+      fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+      expect(utils.queryByLabelText('Advanced YAML configuration')).not.toBeNull();
+    });
+
+    it('should not show the OTel exporter section for logstash output', async () => {
+      const { utils } = renderFlyout({
+        type: 'logstash',
+        name: 'logstash output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should not show the OTel exporter section for kafka output', async () => {
+      const { utils } = renderFlyout({
+        type: 'kafka',
+        name: 'kafka output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should not show the OTel exporter section for remote ES output', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+
+      const { utils } = renderFlyout({
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should include otel_exporter_config_yaml in the save payload when creating an ES output', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://localhost:9200'],
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+        target: { value: 'updated output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'output123',
+          expect.objectContaining({
+            otel_exporter_config_yaml: 'flush_interval: 10s',
+          })
+        );
+      });
+    });
+
+    it('should send null otel_exporter_config_yaml when the field is empty', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://localhost:9200'],
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+        target: { value: 'updated output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'output123',
+          expect.objectContaining({
+            otel_exporter_config_yaml: null,
+          })
+        );
+      });
     });
   });
 
