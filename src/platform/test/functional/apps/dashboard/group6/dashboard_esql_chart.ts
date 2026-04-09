@@ -31,10 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await dashboard.navigateToApp();
-      await dashboard.clickNewDashboard();
-      await timePicker.setDefaultDataRange();
-      await dashboard.switchToEditMode();
     });
 
     after(async () => {
@@ -46,6 +42,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultDataRange();
+      await dashboard.switchToEditMode();
       await dashboard.waitForRenderComplete();
       await header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.openAddPanelFlyout();
@@ -109,11 +109,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('cancelFlyoutButton');
       const panels = await dashboard.getDashboardPanels();
       await dashboardPanelActions.removePanel(panels[0]);
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      const panelsAfterDelete = await dashboard.getDashboardPanels();
+      expect(panelsAfterDelete.length).to.eql(0);
     });
 
     it('should be able to edit the query and render another chart', async () => {
-      await dashboard.waitForRenderComplete();
-      await header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.openAddPanelFlyout();
       log.debug('After openAddPanelFlyout');
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
