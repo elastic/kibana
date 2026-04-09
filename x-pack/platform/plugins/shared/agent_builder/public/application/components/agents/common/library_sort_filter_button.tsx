@@ -76,27 +76,20 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
   filterCounts,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const popoverTitleId = useGeneratedHtmlId();
-
+  const sortTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
 
-  const renderSectionTitle = (title: string) => (
-    <EuiPopoverTitle
-      paddingSize="none"
+  const SectionTitle = ({ id, title }: { id?: string; title: string }) => (
+    <EuiText
+      id={id}
+      size="xs"
       css={css`
         padding: ${euiTheme.size.m};
+        font-weight: ${euiTheme.font.weight.semiBold};
       `}
     >
-      <EuiText
-        id={popoverTitleId}
-        size="xs"
-        css={css`
-          font-weight: ${euiTheme.font.weight.semiBold};
-        `}
-      >
-        {title}
-      </EuiText>
-    </EuiPopoverTitle>
+      {title}
+    </EuiText>
   );
 
   return (
@@ -104,7 +97,7 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
       panelPaddingSize="none"
       panelStyle={{ width: POPOVER_WIDTH }}
       anchorPosition="downRight"
-      aria-labelledby={popoverTitleId}
+      aria-labelledby={sortTitleId}
       button={
         <EuiButtonIcon
           display="base"
@@ -118,7 +111,9 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
     >
-      {renderSectionTitle(labels.sortSectionTitle)}
+      <EuiPopoverTitle paddingSize="none">
+        <SectionTitle id={sortTitleId} title={labels.sortSectionTitle} />
+      </EuiPopoverTitle>
       <EuiContextMenuPanel
         size="s"
         items={[
@@ -139,7 +134,8 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
         ]}
       />
       <EuiHorizontalRule margin="none" />
-      {renderSectionTitle(labels.filterSectionTitle)}
+      <SectionTitle title={labels.filterSectionTitle} />
+      <EuiHorizontalRule margin="none" />
       <EuiContextMenuPanel
         size="s"
         items={[
