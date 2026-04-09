@@ -14,6 +14,11 @@ import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
 import { cascadeEventType } from '../application/main/components/layout/cascaded_documents/telemetry/event_definition';
 
+export enum DiscoverInDashboardEventName {
+  savedSession = 'savedSession',
+  tabSwitched = 'tabSwitched',
+}
+
 /**
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
  */
@@ -33,6 +38,13 @@ export const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 export const CONTEXTUAL_PROFILE_ID = 'profileId';
 
 export const TABS_EVENT_TYPE = 'discover_tabs';
+
+export const DISCOVER_IN_DASHBOARD_EVENT_TYPE = 'discover_in_dashboard';
+export const DISCOVER_IN_DASHBOARD_EVENT_NAME = 'eventName';
+export const DISCOVER_IN_DASHBOARD_DASHBOARD_ID = 'dashboardId';
+export const DISCOVER_IN_DASHBOARD_SAVED_SESSION_ID = 'savedSessionId';
+export const DISCOVER_IN_DASHBOARD_TAB_SWITCHED_ID_FROM = 'tabSwitchedIdFrom';
+export const DISCOVER_IN_DASHBOARD_TAB_SWITCHED_ID_TO = 'tabSwitchedIdTo';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -194,4 +206,44 @@ export const registerDiscoverEBTManagerAnalytics = (
   });
 
   core.analytics.registerEventType(cascadeEventType);
+
+  core.analytics.registerEventType({
+    eventType: DISCOVER_IN_DASHBOARD_EVENT_TYPE,
+    schema: {
+      [DISCOVER_IN_DASHBOARD_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The event name. Expected values: savedSession, tabSwitched',
+        },
+      },
+      [DISCOVER_IN_DASHBOARD_DASHBOARD_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The unique dashboard identifier',
+          optional: true,
+        },
+      },
+      [DISCOVER_IN_DASHBOARD_SAVED_SESSION_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The discover session identifier (present for savedSession)',
+          optional: true,
+        },
+      },
+      [DISCOVER_IN_DASHBOARD_TAB_SWITCHED_ID_FROM]: {
+        type: 'keyword',
+        _meta: {
+          description: 'Tab identifier switched from (present for tabSwitched)',
+          optional: true,
+        },
+      },
+      [DISCOVER_IN_DASHBOARD_TAB_SWITCHED_ID_TO]: {
+        type: 'keyword',
+        _meta: {
+          description: 'Tab identifier switched to (present for tabSwitched)',
+          optional: true,
+        },
+      },
+    },
+  });
 };
