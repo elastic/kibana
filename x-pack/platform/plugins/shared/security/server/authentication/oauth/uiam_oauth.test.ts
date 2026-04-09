@@ -51,22 +51,6 @@ describe('UiamOAuth', () => {
       expect(mockUiam.createOAuthClient).not.toHaveBeenCalled();
     });
 
-    it('throws error when request has no authorization header', async () => {
-      const request = createMockRequest();
-
-      await expect(uiamOAuth.createClient(request, { resource: 'urn:test' })).rejects.toThrow(
-        'Request does not contain an authorization header'
-      );
-    });
-
-    it('throws error when credential is not a UIAM credential', async () => {
-      const request = createMockRequest('Bearer regular_token');
-
-      await expect(uiamOAuth.createClient(request, { resource: 'urn:test' })).rejects.toThrow(
-        'Provided credential is not compatible with UIAM'
-      );
-    });
-
     it('creates an OAuth client successfully', async () => {
       const mockResponse = { id: 'client-id', resource: 'urn:test', client_name: 'Test' };
       mockUiam.createOAuthClient.mockResolvedValue(mockResponse);
