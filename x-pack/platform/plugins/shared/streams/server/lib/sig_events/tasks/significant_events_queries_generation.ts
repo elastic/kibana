@@ -28,6 +28,7 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   end: number;
   sampleDocsSize?: number;
   streamName: string;
+  connectorId?: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
@@ -49,7 +50,14 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               }
               const { fakeRequest } = runContext;
 
-              const { start, end, sampleDocsSize, streamName, _task } = runContext.taskInstance
+              const {
+                start,
+                end,
+                sampleDocsSize,
+                streamName,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance
                 .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
               const {
@@ -64,12 +72,14 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               });
 
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
-              const connectorId = await resolveConnectorForFeature({
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-                featureName: 'query generation',
-                request: fakeRequest,
-              });
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                  featureName: 'query generation',
+                  request: fakeRequest,
+                }));
               taskLogger.debug(`Using connector ${connectorId} for rule generation`);
 
               try {
@@ -113,7 +123,11 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >(_task, { start, end, sampleDocsSize, streamName }, result);
+                >(
+                  _task,
+                  { start, end, sampleDocsSize, streamName, connectorId: connectorIdOverride },
+                  result
+                );
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
                   taskContext.logger.debug(
@@ -146,7 +160,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { start, end, sampleDocsSize, streamName },
+                  {
+                    start,
+                    end,
+                    sampleDocsSize,
+                    streamName,
+                    connectorId: connectorIdOverride,
+                  },
                   errorMessage
                 );
 

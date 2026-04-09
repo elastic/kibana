@@ -50,7 +50,7 @@ export const App = (props: {
   const [lensConfig, setLensConfig] = useState<LensApiState>({
     type: 'metric',
     title: 'Total Sales',
-    dataset: {
+    data_source: {
       type: 'esql',
       query: 'from kibana_sample_data_logs | stats totalBytes = sum(bytes)',
     },
